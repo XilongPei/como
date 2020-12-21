@@ -1,0 +1,122 @@
+//=========================================================================
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+namespace como {
+namespace test {
+namespace rpc {
+
+[
+    uuid(74cdacd5-2834-4096-9b7f-33f0953f61a3),
+    version(0.1.0)
+]
+interface ITestInterface
+{
+    TestMethod1(
+        [in] Integer arg1,
+        [out] Integer& result1);
+
+    GetValue(
+        [out] Integer& value);
+}
+
+[
+    uuid(afa187cf-8193-4786-8de7-b576c0bdb162),
+    version(0.1.0)
+]
+interface IService
+{
+    TestMethod1(
+        [in] Integer arg1,
+        [out] Integer& result1);
+
+    TestMethod2(
+        [in] Integer arg1,
+        [in] Long arg2,
+        [in] Boolean arg3,
+        [in] Char arg4,
+        [in] Short arg5,
+        [in] Double arg6,
+        [in] Float arg7,
+        [in] Integer arg8,
+        [in] Float arg9,
+        [in] Double arg10,
+        [in] Double arg11,
+        [in] Float arg12,
+        [in] Float arg13,
+        [in] Double arg14,
+        [in] Double arg15,
+        [in] Float arg16,
+        [out] Integer& result1,
+        [out] Long& result2,
+        [out] Boolean& result3,
+        [out] Char& result4,
+        [out] Short& result5,
+        [out] Double& result6,
+        [out] Float& result7,
+        [out] Integer& result8,
+        [out] Float& result9,
+        [out] Double& result10,
+        [out] Double& result11,
+        [out] Float& result12,
+        [out] Float& result13,
+        [out] Double& result14,
+        [out] Double& result15,
+        [out] Float& result16);
+
+    TestMethod3(
+        [in] Integer arg1,
+        [in] String arg2,
+        [out] Integer& result1,
+        [out] String& result2);
+
+    TestMethod4(
+        [out] ITestInterface&& obj);
+
+    TestMethod5(
+        [out] ITestInterface&& obj);
+}
+
+[
+    uuid(7db0959e-d5a3-4441-9d09-6c7a71ba695e),
+    version(0.1.0)
+]
+coclass CService
+{
+    interface IService;
+}
+
+[
+    uuid(459f54ea-c347-461c-b89d-389575c12abd),
+    version(0.1.0)
+]
+coclass CTestObject
+{
+    interface ITestInterface;
+}
+
+[
+    uuid(2369bfe8-739f-4e30-8810-d53c9775436e),
+    version(0.1.0)
+]
+coclass CParcelableTestObject
+{
+    interface ITestInterface;
+    interface IParcelable;
+}
+
+}
+}
+}

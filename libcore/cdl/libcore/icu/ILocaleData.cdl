@@ -1,0 +1,134 @@
+//=========================================================================
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+interface como::core::IInteger;
+
+namespace libcore {
+namespace icu {
+
+[
+    uuid(b3ead832-20d3-43cd-9246-7654f4626ae4),
+    version(0.1.0)
+]
+interface ILocaleData
+{
+    GetAmPm(
+        [out, callee] Array<String>* ampm);
+
+    GetCurrencyPattern(
+        [out] String* pattern);
+
+    GetCurrencySymbol(
+        [out] String* currencySymbol);
+
+    GetDateFormat(
+        [in] Integer style,
+        [out] String* dateFormat);
+
+    GetDecimalSeparator(
+        [out] Char* decSeparator);
+
+    GetEras(
+        [out, callee] Array<String>* eras);
+
+    GetExponentSeparator(
+        [out] String* expSeparator);
+
+    GetGroupingSeparator(
+        [out] Char* grpSeparator);
+
+    GetFirstDayOfWeek(
+        [out] IInteger** day);
+
+    GetInfinity(
+        [out] String* infinity);
+
+    GetIntegerPattern(
+        [out] String* pattern);
+
+    GetInternationalCurrencySymbol(
+        [out] String* intlCurrencySymbol);
+
+    GetLongMonthNames(
+        [out, callee] Array<String>* longMonthNames);
+
+    GetLongStandAloneMonthNames(
+        [out, callee] Array<String>* longStandAloneMonthNames);
+
+    GetLongStandAloneWeekdayNames(
+        [out, callee] Array<String>* longStandAloneWeekdayNames);
+
+    GetLongWeekdayNames(
+        [out, callee] Array<String>* longWeekdayNames);
+
+    GetMinimalDaysInFirstWeek(
+        [out] IInteger** days);
+
+    GetMinusSign(
+        [out] String* sign);
+
+    GetNaN(
+        [out] String* nan);
+
+    GetNumberPattern(
+        [out] String* pattern);
+
+    GetPatternSeparator(
+        [out] Char* patSeparator);
+
+    GetPercent(
+        [out] String* percent);
+
+    GetPercentPattern(
+        [out] String* pattern);
+
+    GetPerMill(
+        [out] Char* perMill);
+
+    GetShortMonthNames(
+        [out, callee] Array<String>* shortMonthNames);
+
+    GetShortStandAloneMonthNames(
+        [out, callee] Array<String>* shortStandAloneMonthNames);
+
+    GetShortStandAloneWeekdayNames(
+        [out, callee] Array<String>* shortStandAloneWeekdayNames);
+
+    GetShortWeekdayNames(
+        [out, callee] Array<String>* shortWeekdayNames);
+
+    GetTimeFormat(
+        [in] Integer style,
+        [out] String* timeFormat);
+
+    GetTinyMonthNames(
+        [out, callee] Array<String>* tinyMonthNames);
+
+    GetTinyStandAloneMonthNames(
+        [out, callee] Array<String>* tinyStandAloneMonthNames);
+
+    GetTinyStandAloneWeekdayNames(
+        [out, callee] Array<String>* tinyStandAloneWeekdayNames);
+
+    GetTinyWeekdayNames(
+        [out, callee] Array<String>* tinyWeekdayNames);
+
+    GetZeroDigit(
+        [out] Char* zeroDigit);
+}
+
+}
+}

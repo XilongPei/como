@@ -1,0 +1,69 @@
+#=========================================================================
+# Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#=========================================================================
+
+project(NestedInterfaceTest CXX)
+
+set(NESTEDINTERFACE_SRC_DIR ${RUNTIME_SRC_DIR}/nestedinterface)
+set(NESTEDINTERFACE_OBJ_DIR ${RUNTIME_OBJ_DIR}/nestedinterface)
+
+include_directories(
+    ./
+    ${INC_DIR}
+    ${NESTEDINTERFACE_OBJ_DIR})
+
+set(SOURCES
+    CFooBar.cpp
+    main.cpp)
+
+set(GENERATED_SOURCES
+    ${NESTEDINTERFACE_OBJ_DIR}/_como_test_CFooBar.cpp
+    ${NESTEDINTERFACE_OBJ_DIR}/NestedInterfaceTestPub.cpp
+    ${NESTEDINTERFACE_OBJ_DIR}/MetadataWrapper.cpp)
+
+IMPORT_LIBRARY(comort.so)
+IMPORT_GTEST()
+
+add_executable(testNestedInterface
+    ${SOURCES}
+    ${GENERATED_SOURCES})
+target_link_libraries(testNestedInterface comort.so ${GTEST_LIBS})
+add_dependencies(testNestedInterface comort gtest gtest_main)
+
+add_custom_command(
+    OUTPUT
+        ${GENERATED_SOURCES}
+    COMMAND
+        "$ENV{CDLC}"
+        -gen
+        -mode-component
+        -split
+        -d ${NESTEDINTERFACE_OBJ_DIR}
+        -c "${NESTEDINTERFACE_SRC_DIR}/nestedinterface.cdl")
+
+COPY(testNestedInterface ${NESTEDINTERFACE_OBJ_DIR}/testNestedInterface ${BIN_DIR})
+
+install(FILES
+    ${NESTEDINTERFACE_OBJ_DIR}/testNestedInterface
+    DESTINATION ${BIN_DIR}
+    PERMISSIONS
+        OWNER_READ
+        OWNER_WRITE
+        OWNER_EXECUTE
+        GROUP_READ
+        GROUP_WRITE
+        GROUP_EXECUTE
+        WORLD_READ
+        WORLD_EXECUTE)

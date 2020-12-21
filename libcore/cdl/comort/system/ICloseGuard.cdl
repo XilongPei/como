@@ -1,0 +1,61 @@
+//=========================================================================
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+interface como::core::IStackTrace;
+
+namespace comort {
+namespace system {
+
+[
+    uuid(c2d11c90-b701-4375-81aa-87a5d7c6d3d8),
+    version(0.1.0)
+]
+interface ICloseGuardReporter
+{
+    Report(
+        [in] String message,
+        [in] IStackTrace* allocationSite);
+}
+
+[
+    uuid(34ef05c4-3333-4275-848c-f33b0d7d0a56),
+    version(0.1.0)
+]
+interface ICloseGuardTracker
+{
+    Open(
+        [in] IStackTrace* allocationSite);
+
+    Close(
+        [in] IStackTrace* allocationSite);
+}
+
+[
+    uuid(40008bce-3e40-4fe0-bfc7-fe3be7585246),
+    version(0.1.0)
+]
+interface ICloseGuard
+{
+    Close();
+
+    Open(
+        [in] String closer);
+
+    WarnIfOpen();
+}
+
+}
+}

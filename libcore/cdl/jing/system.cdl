@@ -1,0 +1,62 @@
+//=========================================================================
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+include "jing/system/Exceptions.cdl"
+include "jing/system/IStructAddrinfo.cdl"
+include "jing/system/IStructCapUserData.cdl"
+include "jing/system/IStructCapUserHeader.cdl"
+include "jing/system/IStructFlock.cdl"
+include "jing/system/IStructGroupReq.cdl"
+include "jing/system/IStructGroupSourceReq.cdl"
+include "jing/system/IStructIfaddrs.cdl"
+include "jing/system/IStructLinger.cdl"
+include "jing/system/IStructPasswd.cdl"
+include "jing/system/IStructPollfd.cdl"
+include "jing/system/IStructStat.cdl"
+include "jing/system/IStructStatVfs.cdl"
+include "jing/system/IStructTimeval.cdl"
+include "jing/system/IStructUcred.cdl"
+include "jing/system/IStructUtsname.cdl"
+
+namespace jing {
+namespace system {
+
+[
+    uuid(37213cfe-2bfc-4572-b06e-e2fba3837c36),
+    version(0.1.0)
+]
+coclass CStructStat
+{
+    Constructor(
+        [in] Long st_dev,
+        [in] Long st_ino,
+        [in] Integer st_mode,
+        [in] Long st_nlink,
+        [in] Integer st_uid,
+        [in] Integer st_gid,
+        [in] Long st_rdev,
+        [in] Long st_size,
+        [in] Long st_atime,
+        [in] Long st_mtime,
+        [in] Long st_ctime,
+        [in] Long st_blksize,
+        [in] Long st_blocks);
+
+    interface IStructStat;
+}
+
+}
+}
