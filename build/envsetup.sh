@@ -3,6 +3,7 @@
 function help()
 {
 cat <<EOF
+- help:                 this screen.
 - comotools:            Switch to build como tools.
 - como_linux_x64:       Switch to build como for linux x64.
 - como_android_aarch64: Switch to build como for android aarch64.
@@ -330,3 +331,5 @@ fi
 if [ -z "$VERSION" ]; then
     export VERSION=rls
 fi
+
+help
