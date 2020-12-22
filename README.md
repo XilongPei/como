@@ -64,6 +64,14 @@ sudo apt-get install libunwind8-dev
 ###### openEuler
 ```shell
 sudo yum install libicu-devel
+
+安装 icu4c 最新版
+wget https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.tgz
+tar -xf icu4c-68_2-src.tgz
+cd icu/source
+./configure --prefix=/usr
+gmake
+gmake install
 ```
 ###### Ubuntu
 ```shell
