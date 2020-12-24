@@ -23,6 +23,10 @@
 #include "como.core.IFloat.h"
 #include "como.text.IFormatField.h"
 #include "libcore/icu/NativeDecimalFormat.h"
+
+#include <unicode/uversion.h>
+U_NAMESPACE_USE;
+
 #include <unicode/decimfmt.h>
 #include <vector>
 

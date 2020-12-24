@@ -17,6 +17,9 @@
 #ifndef __LIBCORE_ICU_USTRINGENUMERATION_H__
 #define __LIBCORE_ICU_USTRINGENUMERATION_H__
 
+#include <unicode/uversion.h>
+U_NAMESPACE_USE;
+
 #include <unicode/uenum.h>
 #include <unicode/strenum.h>
 
