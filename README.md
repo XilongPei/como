@@ -53,7 +53,12 @@ $ locate dbus-arch-deps.h
 ### Install Unwind
 ###### openEuler
 ```shell
-
+wget http://mirror.yongbok.net/nongnu/libunwind/libunwind-1.5.0.tar.gz
+tar zxvf libunwind-1.5.0.tar.gz
+cd libunwind-1.5.0/
+CFLAGS=-fPIC ./configure
+make CFLAGS=-fPIC
+make CFLAGS=-fPIC install
 ```
 ###### Ubuntu
 ```shell
