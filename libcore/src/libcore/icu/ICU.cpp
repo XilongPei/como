@@ -241,7 +241,7 @@ static String ICU_getCurrencyCode(
     }
 
     int32_t charCount;
-    const char* chars = ures_getUTF8String(currencyId.get(), nullptr, &charCount, FALSE, &status);
+    const char* chars = ures_getUTF8String(currencyId.get(), nullptr, &charCount, false, &status);
     return (charCount == 0) ? String("XXX") : String(chars, charCount);
 }
 
