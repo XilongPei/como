@@ -23,10 +23,6 @@
 #include "como.core.IFloat.h"
 #include "como.text.IFormatField.h"
 #include "libcore/icu/NativeDecimalFormat.h"
-
-#include <unicode/uversion.h>
-U_NAMESPACE_USE;
-
 #include <unicode/decimfmt.h>
 #include <vector>
 
@@ -51,7 +47,7 @@ extern ECode MaybeThrowIcuException(
     /* [in] */ UErrorCode errorCode);
 
 extern String ToUTF8String(
-    /* [in] */ const ::icu::UnicodeString& value);
+    /* [in] */ const U_ICU_NAMESPACE::UnicodeString& value);
 
 AutoPtr<NativeDecimalFormat::FieldPositionIterator>
 NativeDecimalFormat::FieldPositionIterator::ForFieldPosition(
@@ -672,67 +668,67 @@ static U_ICU_NAMESPACE::DecimalFormatSymbols* MakeDecimalFormatSymbols(
     U_ICU_NAMESPACE::DecimalFormatSymbols* result = new U_ICU_NAMESPACE::DecimalFormatSymbols(status);
 
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kCurrencySymbol,
-            UnicodeString::fromUTF8(currencySymbol.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(currencySymbol.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kDecimalSeparatorSymbol,
-            UnicodeString((UChar32)decimalSeparator));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)decimalSeparator));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kDigitSymbol,
-            UnicodeString((UChar32)digit));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)digit));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kExponentialSymbol,
-            UnicodeString::fromUTF8(exponentSeparator.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(exponentSeparator.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kGroupingSeparatorSymbol,
-            UnicodeString((UChar32)groupingSeparator));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)groupingSeparator));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kMonetaryGroupingSeparatorSymbol,
-            UnicodeString((UChar32)groupingSeparator));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)groupingSeparator));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kInfinitySymbol,
-            UnicodeString::fromUTF8(infinity.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(infinity.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kIntlCurrencySymbol,
-            UnicodeString::fromUTF8(internationalCurrencySymbol.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(internationalCurrencySymbol.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kMinusSignSymbol,
-            UnicodeString::fromUTF8(minusSign.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(minusSign.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kMonetarySeparatorSymbol,
-            UnicodeString((UChar32)monetaryDecimalSeparator));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)monetaryDecimalSeparator));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kNaNSymbol,
-            UnicodeString::fromUTF8(nan.string()));
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(nan.string()));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kPatternSeparatorSymbol,
-            UnicodeString((UChar32)patternSeparator));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)patternSeparator));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kPercentSymbol,
-            UnicodeString((UChar32)percent));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)percent));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kPerMillSymbol,
-            UnicodeString((UChar32)perMill));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)perMill));
 
     // como.text.DecimalFormatSymbols just uses a zero digit,
     // but ICU >= 4.6 has a field for each decimal digit.
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kZeroDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 0)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 0)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kOneDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 1)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 1)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kTwoDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 2)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 2)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kThreeDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 3)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 3)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kFourDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 4)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 4)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kFiveDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 5)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 5)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kSixDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 6)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 6)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kSevenDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 7)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 7)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kEightDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 8)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 8)));
     result->setSymbol(U_ICU_NAMESPACE::DecimalFormatSymbols::kNineDigitSymbol,
-            UnicodeString((UChar32)(zeroDigit + 9)));
+            U_ICU_NAMESPACE::UnicodeString((UChar32)(zeroDigit + 9)));
     return result;
 }
 
 static Array<Char> FormatResult(
-    /* [in] */ const UnicodeString& s,
+    /* [in] */ const U_ICU_NAMESPACE::UnicodeString& s,
     /* [in] */ U_ICU_NAMESPACE::FieldPositionIterator* fpi,
     /* [in] */ NativeDecimalFormat::FieldPositionIterator* fieldPositionIterator)
 {
     if (fpi != nullptr) {
         std::vector<Integer> data;
-        FieldPosition fp;
+        U_ICU_NAMESPACE::FieldPosition fp;
         while (fpi->next(fp)) {
             data.push_back(fp.getField());
             data.push_back(fp.getBeginIndex());
@@ -760,7 +756,7 @@ static ECode Format(
     /* [out, callee] */ Array<Char>* result)
 {
     UErrorCode status = U_ZERO_ERROR;
-    UnicodeString s;
+    U_ICU_NAMESPACE::UnicodeString s;
     U_ICU_NAMESPACE::DecimalFormat* fmt = ToDecimalFormat(addr);
     U_ICU_NAMESPACE::FieldPositionIterator nativeFieldPositionIterator;
     U_ICU_NAMESPACE::FieldPositionIterator* fpi = fieldPositionIterator ? &nativeFieldPositionIterator : nullptr;
@@ -784,12 +780,12 @@ ECode NativeDecimalFormat::ApplyPatternImpl(
     if (localized) {
         function = "DecimalFormat::applyLocalizedPattern";
         fmt->applyLocalizedPattern(
-                UnicodeString::fromUTF8(pattern.string()), status);
+                U_ICU_NAMESPACE::UnicodeString::fromUTF8(pattern.string()), status);
     }
     else {
         function = "DecimalFormat::applyPattern";
         fmt->applyPattern(
-                UnicodeString::fromUTF8(pattern.string()), status);
+                U_ICU_NAMESPACE::UnicodeString::fromUTF8(pattern.string()), status);
     }
     return MaybeThrowIcuException(function, status);
 }
@@ -822,7 +818,7 @@ ECode NativeDecimalFormat::FormatDigitList(
         *result = Array<Char>::Null();
         return NOERROR;
     }
-    StringPiece sp(value.string());
+    U_ICU_NAMESPACE::StringPiece sp(value.string());
     return Format(addr, fieldPositionIterator, sp, result);
 }
 
@@ -833,8 +829,8 @@ static AutoPtr<INumber> NewBigDecimal(
     // this is painful...
     // value is a UTF-8 string of invariant characters, but isn't guaranteed to be
     // null-terminated.  NewStringUTF requires a terminated UTF-8 string.  So we copy the
-    // data to jchars using UnicodeString, and call NewString instead.
-    UnicodeString tmp(value, len, UnicodeString::kInvariant);
+    // data to jchars using U_ICU_NAMESPACE::UnicodeString, and call NewString instead.
+    U_ICU_NAMESPACE::UnicodeString tmp(value, len, U_ICU_NAMESPACE::UnicodeString::kInvariant);
     AutoPtr<INumber> num;
     CBigDecimal::New(ToUTF8String(tmp), IID_INumber, (IInterface**)&num);
     return num;
@@ -870,7 +866,7 @@ ECode NativeDecimalFormat::GetTextAttribute(
         chars = new UChar[charCount];
         charCount = unum_getTextAttribute(fmt, attr, chars, charCount, &status);
     }
-    *textAttr = ToUTF8String(UnicodeString(chars, charCount));
+    *textAttr = ToUTF8String(U_ICU_NAMESPACE::UnicodeString(chars, charCount));
     delete[] chars;
     return MaybeThrowIcuException("unum_getTextAttribute", status);
 }
@@ -905,7 +901,7 @@ ECode NativeDecimalFormat::Open(
             monetaryDecimalSeparator, nan, patternSeparator, percent, perMill,
             zeroDigit);
     U_ICU_NAMESPACE::DecimalFormat* fmt = new U_ICU_NAMESPACE::DecimalFormat(
-            UnicodeString::fromUTF8(pattern.string()), symbols, parseError, status);
+            U_ICU_NAMESPACE::UnicodeString::fromUTF8(pattern.string()), symbols, parseError, status);
     if (fmt == nullptr) {
         delete symbols;
     }
@@ -933,9 +929,9 @@ AutoPtr<INumber> NativeDecimalFormat::Parse(
     }
 
     U_ICU_NAMESPACE::Formattable res;
-    ParsePosition pp(parsePos);
+    U_ICU_NAMESPACE::ParsePosition pp(parsePos);
     U_ICU_NAMESPACE::DecimalFormat* fmt = ToDecimalFormat(addr);
-    fmt->parse(UnicodeString::fromUTF8(text.string()), res, pp);
+    fmt->parse(U_ICU_NAMESPACE::UnicodeString::fromUTF8(text.string()), res, pp);
 
     if (pp.getErrorIndex() == -1) {
         position->SetIndex(pp.getIndex());
@@ -1024,8 +1020,8 @@ ECode NativeDecimalFormat::SetSymbol(
     if (str.IsNull()) {
         return NOERROR;
     }
-    UnicodeString _s = UnicodeString::fromUTF8(str.string());
-    UnicodeString& s(_s);
+    U_ICU_NAMESPACE::UnicodeString _s = U_ICU_NAMESPACE::UnicodeString::fromUTF8(str.string());
+    U_ICU_NAMESPACE::UnicodeString& s(_s);
     UErrorCode status = U_ZERO_ERROR;
     UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(_symbol);
     unum_setSymbol(ToUNumberFormat(addr), symbol, s.getBuffer(), s.length(), &status);
@@ -1059,8 +1055,8 @@ ECode NativeDecimalFormat::SetTextAttribute(
     if (str.IsNull()) {
         return NOERROR;
     }
-    UnicodeString _s = UnicodeString::fromUTF8(str.string());
-    UnicodeString& s(_s);
+    U_ICU_NAMESPACE::UnicodeString _s = U_ICU_NAMESPACE::UnicodeString::fromUTF8(str.string());
+    U_ICU_NAMESPACE::UnicodeString& s(_s);
     UErrorCode status = U_ZERO_ERROR;
     UNumberFormatTextAttribute attr = static_cast<UNumberFormatTextAttribute>(symbol);
     unum_setTextAttribute(ToUNumberFormat(addr), attr, s.getBuffer(), s.length(), &status);
@@ -1072,7 +1068,7 @@ String NativeDecimalFormat::ToPatternImpl(
     /* [in] */ Boolean localized)
 {
     U_ICU_NAMESPACE::DecimalFormat* fmt = ToDecimalFormat(addr);
-    UnicodeString pattern;
+    U_ICU_NAMESPACE::UnicodeString pattern;
     if (localized) {
         fmt->toLocalizedPattern(pattern);
     }

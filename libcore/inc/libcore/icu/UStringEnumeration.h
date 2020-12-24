@@ -17,9 +17,6 @@
 #ifndef __LIBCORE_ICU_USTRINGENUMERATION_H__
 #define __LIBCORE_ICU_USTRINGENUMERATION_H__
 
-#include <unicode/uversion.h>
-U_NAMESPACE_USE;
-
 #include <unicode/uenum.h>
 #include <unicode/strenum.h>
 
@@ -30,7 +27,7 @@ namespace icu {
  * A wrapper to make a UEnumeration into a StringEnumeration.  The
  * wrapper adopts the UEnumeration is wraps.
  */
-class UStringEnumeration : public StringEnumeration {
+class UStringEnumeration : public U_ICU_NAMESPACE::StringEnumeration {
 
 public:
     /**
@@ -64,7 +61,7 @@ public:
      * @param status the error code.
      * @return a pointer to the string, or NULL.
      */
-    virtual const UnicodeString* snext(UErrorCode& status);
+    virtual const U_ICU_NAMESPACE::UnicodeString* snext(UErrorCode& status);
 
     /**
      * Resets the iterator.

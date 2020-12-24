@@ -60,7 +60,7 @@ const char* UStringEnumeration::next(
     return uenum_next(uenum, resultLength, &status);
 }
 
-const UnicodeString* UStringEnumeration::snext(
+const U_ICU_NAMESPACE::UnicodeString* UStringEnumeration::snext(
     UErrorCode& status)
 {
     int32_t length;
