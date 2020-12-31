@@ -138,6 +138,14 @@ add_custom_target(build_libcore
         deploy_libcore_headers
         ${GENERATED_SOURCES})
 
+if($ENV{COMO_WITH_ICU} STREQUAL "icu")
+    set(COMO_WITH_ICU_libcore_icu, "libcore_icu")
+    set(aaaq, "libcore_icu")
+    message(STATUS aaa [ ${aaaq} ])
+else()
+    set(COMO_WITH_ICU_libcore_icu, "")
+endif()
+
 set(LIBCORE_LINK_LIBS
     -Wl,--whole-archive
     como_core
@@ -154,6 +162,7 @@ set(LIBCORE_LINK_LIBS
     como_util_locale
     como_util_regex
     comort_system
+    #${COMO_WITH_ICU_libcore_icu}
     libcore_icu
     libcore_io
     libcore_math
