@@ -161,7 +161,6 @@ set(LIBCORE_LINK_LIBS
     como_util_regex
     comort_system
     ${COMO_WITH_ICU_libcore_icu}
-    libcore_icu
     libcore_io
     libcore_math
     libcore_util
