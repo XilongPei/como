@@ -1,3 +1,4 @@
+SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 macro(COPY target file dest)
     add_custom_command(
