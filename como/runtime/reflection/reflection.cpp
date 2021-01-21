@@ -30,6 +30,18 @@ namespace como {
 const char* NAMESPACE_GLOBAL = "__global__";
 
 ECode CoGetComponentMetadata(
+    /* [in] */ const String& path,
+    /* [in] */ IClassLoader* loader,
+    /* [out] */ AutoPtr<IMetaComponent>& mc)
+{
+    if (loader == nullptr) {
+        loader = CBootClassLoader::GetSystemClassLoader();
+    }
+
+    return loader->LoadComponent(path, mc);
+}
+
+ECode CoGetComponentMetadata(
     /* [in] */ const ComponentID& cid,
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
