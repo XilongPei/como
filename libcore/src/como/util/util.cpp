@@ -73,7 +73,7 @@ ECode CArrayList::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CArrayList"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -101,7 +101,7 @@ ECode CDate::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CDate"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -131,7 +131,7 @@ ECode CGregorianCalendar::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -165,7 +165,7 @@ ECode CGregorianCalendar::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -195,7 +195,7 @@ ECode CGregorianCalendar::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -223,7 +223,7 @@ ECode CGregorianCalendar::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -251,7 +251,7 @@ ECode CHashMap::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -279,7 +279,7 @@ ECode CHashSet::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -307,7 +307,7 @@ ECode CHashtable::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashtable"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -335,7 +335,7 @@ ECode CLinkedHashMap::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedHashMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -363,7 +363,7 @@ ECode CLinkedHashSet::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedHashSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -391,7 +391,7 @@ ECode CLinkedList::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedList"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -419,7 +419,7 @@ ECode CLocale::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLocale"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -440,7 +440,7 @@ ECode CLocale::New(
     CLocale* _obj = new(addr) CLocale();
 
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CLocale"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -467,7 +467,7 @@ ECode CLocale::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CLocale"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -497,7 +497,7 @@ ECode CProperties::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CProperties"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -530,7 +530,7 @@ ECode CSimpleTimeZone::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CSimpleTimeZone"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -551,7 +551,7 @@ ECode CSimpleTimeZone::New(
     CSimpleTimeZone* _obj = new(addr) CSimpleTimeZone();
 
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CSimpleTimeZone"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -581,7 +581,7 @@ ECode CTreeMap::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CTreeMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -609,7 +609,7 @@ ECode CTreeSet::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CTreeSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -635,7 +635,7 @@ ECode CTreeSet::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CTreeSet"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -663,7 +663,7 @@ ECode CVector::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CVector"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);

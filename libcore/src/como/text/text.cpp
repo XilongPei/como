@@ -51,7 +51,7 @@ ECode CAttributedCharacterIteratorAttribute::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::text::CAttributedCharacterIteratorAttribute"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -80,7 +80,7 @@ ECode CAttributedString::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::text::CAttributedString"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -108,7 +108,7 @@ ECode CChoiceFormat::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     cfObj->AttachMetadata(comp, String("como::text::CChoiceFormat"));
     *obj = cfObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -136,7 +136,7 @@ ECode CDateFormatField::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::text::CDateFormatField"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -164,7 +164,7 @@ ECode CDateFormatSymbols::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     dfsObj->AttachMetadata(comp, String("como::text::CDateFormatSymbols"));
     *obj = dfsObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -192,7 +192,7 @@ ECode CDecimalFormat::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     dfObj->AttachMetadata(comp, String("como::text::CDecimalFormat"));
     *obj = dfObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -220,7 +220,7 @@ ECode CDecimalFormatSymbols::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     dfsObj->AttachMetadata(comp, String("como::text::CDecimalFormatSymbols"));
     *obj = dfsObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -250,7 +250,7 @@ ECode CMessageFormat::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     mfObj->AttachMetadata(comp, String("como::text::CMessageFormat"));
     *obj = mfObj->Probe(iid);
     REFCOUNT_ADD(*obj);
@@ -281,7 +281,7 @@ ECode CSimpleDateFormat::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     sdfObj->AttachMetadata(comp, String("como::text::CSimpleDateFormat"));
     *object = sdfObj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -308,7 +308,7 @@ ECode CSimpleDateFormat::Clone(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     sdfObj->AttachMetadata(comp, String("como::text::CSimpleDateFormat"));
     *obj = sdfObj->Probe(iid);
     REFCOUNT_ADD(*obj);

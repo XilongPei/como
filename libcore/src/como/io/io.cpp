@@ -56,7 +56,7 @@ ECode CDirectByteBuffer::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -85,7 +85,7 @@ ECode CDirectByteBuffer::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -118,7 +118,7 @@ ECode CDirectByteBuffer::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
@@ -152,7 +152,7 @@ ECode CDirectByteBuffer::New(
         return ec;
     }
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);

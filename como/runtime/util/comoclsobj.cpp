@@ -27,7 +27,7 @@ ECode ClassObject::AttachMetadata(
     return NOERROR;
 }
 
-ECode ClassObject::GetMetadate(
+ECode ClassObject::GetMetadata(
     /* [out] */ AutoPtr<IMetaComponent>& component)
 {
     component = mComponent;

@@ -31,7 +31,7 @@ public:
     ECode AttachMetadata(
         /* [in] */ IMetaComponent* component) override;
 
-    ECode GetMetadate(
+    ECode GetMetadata(
         /* [out] */ AutoPtr<IMetaComponent>& component) override;
 
 protected:

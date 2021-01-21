@@ -29,7 +29,7 @@ interface IClassObject
     AttachMetadata(
         [in] IMetaComponent* component);
 
-    GetMetadate(
+    GetMetadata(
         [out] IMetaComponent&& component);
 
     CreateObject(

@@ -47,7 +47,7 @@ ECode CSecureRandom::New(
     }
 
     AutoPtr<IMetaComponent> comp;
-    clsObject->GetMetadate(comp);
+    clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::security::CSecureRandom"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
