@@ -1,5 +1,5 @@
 //=========================================================================
-// Copyright (C) 2018 The C++ Component Model(CCM) Open Source Project
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ CodeGenerator::CodeGenerator()
     : mSparseMode(false)
 {
     mLicense = String("//=========================================================================\n"
-           "// Copyright (C) 2018 The C++ Component Model(CCM) Open Source Project\n"
+           "// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project\n"
            "//\n"
            "// Licensed under the Apache License, Version 2.0 (the \"License\");\n"
            "// you may not use this file except in compliance with the License.\n"
