@@ -21,7 +21,7 @@
 
 namespace como {
 
-EXTERN_C COM_PUBLIC ECode CoGetComponentMetadata(
+EXTERN_C COM_PUBLIC ECode CoGetComponentMetadataWithPath(
     /* [in] */ const String& path,
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc);

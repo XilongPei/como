@@ -29,7 +29,7 @@ namespace como {
 
 const char* NAMESPACE_GLOBAL = "__global__";
 
-ECode CoGetComponentMetadata(
+ECode CoGetComponentMetadataWithPath(
     /* [in] */ const String& path,
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
