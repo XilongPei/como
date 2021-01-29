@@ -7,6 +7,7 @@ cat <<EOF
 - comotools:            Switch to build como tools.
 - como_linux_x64:       Switch to build como for linux x64.
 - como_android_aarch64: Switch to build como for android aarch64.
+- como_openEuler_riscv: Switch to build como for openEuler RISC-V.
 - debug:                Switch to build debug version.
 - release:              Switch to build release version.
 - build:                Build source codes.
@@ -152,6 +153,50 @@ function como_android_aarch64()
     export COMO_ROOT=
     export CDLC=$ROOT/tools/cdlc
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin
+
+    if [ ! -d "$ROOT/out/target" ]; then
+        mkdir $ROOT/out/target
+    fi
+
+    if [ ! -d "$OUT_PATH" ]; then
+        mkdir $OUT_PATH
+    fi
+
+    if [ ! -d "$ROOT/bin/target" ]; then
+        mkdir $ROOT/bin/target
+    fi
+
+    if [ ! -d "$BIN_PATH" ]; then
+        mkdir $BIN_PATH
+    fi
+
+    cd $OUT_PATH
+
+    if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH.cmake"
+        if [ "$VERSION" == "rls" ]; then
+            BUILD_TYPE=Release
+        else
+            BUILD_TYPE=Debug
+        fi
+        cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ROOT
+    fi
+}
+
+function como_openEuler_riscv()
+{
+    export PRODUCT=como
+    export PLATFORM=openEuler
+    export ARCH=riscv
+    export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
+    export OUT_PATH=$ROOT/out/target/$BUILD
+    export BIN_PATH=$ROOT/bin/target/$BUILD
+    export DATA_PATH=
+    export COMORT_PATH=$BIN_PATH/comort.so
+    export CLASS_PATH=
+    export COMO_ROOT=
+    export CDLC=$ROOT/tools/cdlc
+    export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin
 
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target

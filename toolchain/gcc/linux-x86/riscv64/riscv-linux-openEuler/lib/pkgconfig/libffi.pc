@@ -1,0 +1,11 @@
+prefix=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+toolexeclibdir=${libdir}/../lib
+includedir=${prefix}/include
+
+Name: libffi
+Description: Library supporting Foreign Function Interfaces
+Version: 3.3
+Libs: -L${toolexeclibdir} -lffi
+Cflags: -I${includedir}

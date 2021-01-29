@@ -1,0 +1,11 @@
+prefix=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: libpkgconf
+Description: a library for accessing and manipulating development framework configuration
+URL: http://github.com/pkgconf/pkgconf
+Version: 1.6.1
+CFlags: -I${includedir}/pkgconf
+Libs: -L${libdir} -lpkgconf

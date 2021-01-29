@@ -1,0 +1,7 @@
+/* Generated automatically. */
+static const char configuration_arguments[] = "./configure --prefix=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1 --sysconfdir=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1/etc --enable-static --target=riscv64-buildroot-linux-gnu --with-sysroot=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1/riscv64-buildroot-linux-gnu/sysroot --enable-__cxa_atexit --with-gnu-ld --disable-libssp --disable-multilib --disable-decimal-float --with-gmp=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1 --with-mpc=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1 --with-mpfr=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1 --with-pkgversion='Buildroot 2020.08-14-ge5a2a90' --with-bugurl=http://bugs.buildroot.net/ --without-zstd --disable-libquadmath --disable-libquadmath-support --enable-tls --enable-threads --without-isl --without-cloog --with-arch=rv64imafd --with-abi=lp64 --enable-languages=c,c++,fortran --with-build-time-tools=/home/xilong/openEuler/openEuler-riscv/riscv64--glibc--bleeding-edge-2020.08-1/riscv64-buildroot-linux-gnu/bin --enable-shared --disable-libgomp";
+static const char thread_model[] = "posix";
+
+static const struct {
+  const char *name, *value;
+} configure_default_options[] = { { "abi", "lp64" }, { "arch", "rv64imafd" } };
