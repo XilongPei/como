@@ -58,6 +58,7 @@ if($ENV{PLATFORM} STREQUAL "linux")
             ${SOURCES}
             invoke_x64.s)
         set_source_files_properties(invoke_x64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
+    endif()
 elseif($ENV{PLATFORM} STREQUAL "android")
     set(SOURCES
         ${SOURCES}

@@ -6,8 +6,8 @@ cat <<EOF
 - help:                 this screen.
 - comotools:            Switch to build como tools.
 - como_linux_x64:       Switch to build como for linux x64.
-- como_linux_aarch64    Switch to build como for linux aarch64.
-- como_linux_riscv64    Switch to build como for linux riscv64.
+- como_linux_aarch64:   Switch to build como for linux aarch64.
+- como_linux_riscv64:   Switch to build como for linux riscv64.
 - como_android_aarch64: Switch to build como for android aarch64.
 - como_openEuler_riscv: Switch to build como for openEuler RISC-V.
 - debug:                Switch to build debug version.
