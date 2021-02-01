@@ -6,6 +6,8 @@ cat <<EOF
 - help:                 this screen.
 - comotools:            Switch to build como tools.
 - como_linux_x64:       Switch to build como for linux x64.
+- como_linux_aarch64    Switch to build como for linux aarch64.
+- como_linux_riscv64    Switch to build como for linux riscv64.
 - como_android_aarch64: Switch to build como for android aarch64.
 - como_openEuler_riscv: Switch to build como for openEuler RISC-V.
 - debug:                Switch to build debug version.
@@ -99,6 +101,96 @@ function como_linux_x64()
     export PRODUCT=como
     export PLATFORM=linux
     export ARCH=x64
+    export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
+    export OUT_PATH=$ROOT/out/target/$BUILD
+    export BIN_PATH=$ROOT/bin/target/$BUILD
+    export DATA_PATH=$ROOT/data
+    export LIB_PATH=$BIN_PATH
+    export COMORT_PATH=$BIN_PATH/comort.so
+    export CLASS_PATH=$BIN_PATH/libcore.so
+    export COMO_ROOT=
+    export CDLC=$ROOT/tools/cdlc
+    export COMO_WITH_ICU=icu
+
+    if [ ! -d "$ROOT/out/target" ]; then
+        mkdir $ROOT/out/target
+    fi
+
+    if [ ! -d "$OUT_PATH" ]; then
+        mkdir $OUT_PATH
+    fi
+
+    if [ ! -d "$ROOT/bin/target" ]; then
+        mkdir $ROOT/bin/target
+    fi
+
+    if [ ! -d "$BIN_PATH" ]; then
+        mkdir $BIN_PATH
+    fi
+
+    cd $OUT_PATH
+
+    if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH".cmake
+        if [ "$VERSION" == "rls" ]; then
+            BUILD_TYPE=Release
+        else
+            BUILD_TYPE=Debug
+        fi
+        cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ROOT
+    fi
+}
+
+function como_linux_aarch64()
+{
+    export PRODUCT=como
+    export PLATFORM=linux
+    export ARCH=aarch64
+    export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
+    export OUT_PATH=$ROOT/out/target/$BUILD
+    export BIN_PATH=$ROOT/bin/target/$BUILD
+    export DATA_PATH=$ROOT/data
+    export LIB_PATH=$BIN_PATH
+    export COMORT_PATH=$BIN_PATH/comort.so
+    export CLASS_PATH=$BIN_PATH/libcore.so
+    export COMO_ROOT=
+    export CDLC=$ROOT/tools/cdlc
+    export COMO_WITH_ICU=icu
+
+    if [ ! -d "$ROOT/out/target" ]; then
+        mkdir $ROOT/out/target
+    fi
+
+    if [ ! -d "$OUT_PATH" ]; then
+        mkdir $OUT_PATH
+    fi
+
+    if [ ! -d "$ROOT/bin/target" ]; then
+        mkdir $ROOT/bin/target
+    fi
+
+    if [ ! -d "$BIN_PATH" ]; then
+        mkdir $BIN_PATH
+    fi
+
+    cd $OUT_PATH
+
+    if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH".cmake
+        if [ "$VERSION" == "rls" ]; then
+            BUILD_TYPE=Release
+        else
+            BUILD_TYPE=Debug
+        fi
+        cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ROOT
+    fi
+}
+
+function como_linux_riscv64()
+{
+    export PRODUCT=como
+    export PLATFORM=linux
+    export ARCH=riscv64
     export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
     export OUT_PATH=$ROOT/out/target/$BUILD
     export BIN_PATH=$ROOT/bin/target/$BUILD
