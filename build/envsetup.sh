@@ -187,7 +187,7 @@ function como_openEuler_riscv()
 {
     export PRODUCT=como
     export PLATFORM=openEuler
-    export ARCH=riscv
+    export ARCH=riscv64
     export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
     export OUT_PATH=$ROOT/out/target/$BUILD
     export BIN_PATH=$ROOT/bin/target/$BUILD
