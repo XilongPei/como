@@ -208,8 +208,8 @@ __asm__(
         #if (__riscv_xlen == 64)
 
 #define GET_REG(reg, var)           \
-__asm__(
-    "nop;"
+__asm__(                            \
+    "nop;"                          \
 );
 
 /*
@@ -220,8 +220,8 @@ __asm__(
 */
 
 #define GET_STACK_INTEGER(rbp, off, var)    \
-__asm__(
-    "nop;"
+__asm__(                            \
+    "nop;"                          \
 );
 
 /*
@@ -237,8 +237,8 @@ __asm__(
 */
 
 #define GET_STACK_LONG(rbp, off, var)       \
-__asm__(
-    "nop;"
+__asm__(                            \
+    "nop;"                          \
 );
 
 /*
@@ -254,8 +254,8 @@ __asm__(
 */
 
 #define GET_STACK_FLOAT(rbp, off, var)      \
-__asm__(
-    "nop;"
+__asm__(                            \
+    "nop;"                          \
 );
 
 /*
@@ -271,8 +271,8 @@ __asm__(
 */
 
 #define GET_STACK_DOUBLE(rbp, off, var)     \
-__asm__(
-    "nop;"
+__asm__(                            \
+    "nop;"                          \
 );
 
 /*

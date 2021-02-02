@@ -113,6 +113,43 @@ private:
         SSEReg xmm6;
         SSEReg xmm7;
 
+#else
+    #if defined(__riscv)
+        #if (__riscv_xlen == 64)
+
+        union IREG {
+            Reg_t   reg;
+            Long    lVal;
+            Integer iVal;
+        };
+
+        union FPREG {
+            Reg_t   reg;
+            Double  dVal;
+            Float   fVal;
+        };
+
+        IREG x0;
+        IREG x1;
+        IREG x2;
+        IREG x3;
+        IREG x4;
+        IREG x5;
+        IREG x6;
+        IREG x7;
+        IREG sp;
+
+        FPREG d0;
+        FPREG d1;
+        FPREG d2;
+        FPREG d3;
+        FPREG d4;
+        FPREG d5;
+        FPREG d6;
+        FPREG d7;
+
+        #endif
+    #endif
 #endif
 
         Integer paramStartOffset;

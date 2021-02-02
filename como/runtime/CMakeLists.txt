@@ -23,7 +23,7 @@ add_subdirectory(cdl)
 add_subdirectory(component)
 add_subdirectory(metadata)
 add_subdirectory(reflection)
-add_subdirectory(rpc)
+#add_subdirectory(rpc)
 add_subdirectory(type)
 add_subdirectory(util)
 
