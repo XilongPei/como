@@ -27,14 +27,19 @@ static CONS_PROI_1
 void RTInitialize()
 {
     Init_EMPTY_STRING();
+#ifdef COMO_WITH_RPC
     Init_Proxy_Entry();
+#endif
 }
 
 static DEST_PROI_10
 void RTUninitialize()
 {
     Uninit_EMPTY_STRING();
+
+#ifdef COMO_WITH_RPC
     Uninit_Proxy_Entry();
+#endif
 }
 
 } // namespace como

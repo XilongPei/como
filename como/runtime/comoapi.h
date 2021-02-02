@@ -22,7 +22,10 @@
 #include "comointfs.h"
 #include "comoobjapi.h"
 #include "comoreflapi.h"
+
+#ifdef COMO_WITH_RPC
 #include "comorpc.h"
+#endif
 
 using namespace como;
 

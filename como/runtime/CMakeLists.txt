@@ -28,6 +28,7 @@ add_subdirectory(util)
 
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
     add_subdirectory(rpc)
+    add_definitions(-DCOMO_WITH_RPC)
 endif()
 
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
