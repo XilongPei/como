@@ -32,6 +32,8 @@ set(SOURCES
 
 IMPORT_LIBRARY(comort.so)
 
+add_definitions(-DCOMO_WITH_RPC)
+
 add_executable(servicemanager
     ${SOURCES})
 target_link_libraries(servicemanager

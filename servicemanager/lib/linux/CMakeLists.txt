@@ -31,6 +31,8 @@ set(SOURCES
 
 IMPORT_LIBRARY(comort.so)
 
+add_definitions(-DCOMO_WITH_RPC)
+
 add_library(libservicemanager
     SHARED
     ${SOURCES})
