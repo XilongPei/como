@@ -34,7 +34,18 @@ public:
     void Unlock();
 
 private:
+
+#if defined(__aarch64__)
     std::atomic<Boolean> mLocked{false};
+#elif defined(__x86_64__)
+    std::atomic<Boolean> mLocked{false};
+#else
+    #if defined(__riscv)
+        #if ((__riscv_xlen == 32) || (__riscv_xlen == 64))
+            std::atomic<int> mLocked{false};
+        #endif
+    #endif
+#endif
 };
 
 } // namespace como
