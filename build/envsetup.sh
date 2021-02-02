@@ -145,6 +145,7 @@ function como_linux_x64()
 {
     export ARCH=x64
     como_linux_common
+    export COMO_WITH_RPC=rpc
 }
 
 function como_linux_aarch64()
