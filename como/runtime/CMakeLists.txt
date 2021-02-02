@@ -23,40 +23,72 @@ add_subdirectory(cdl)
 add_subdirectory(component)
 add_subdirectory(metadata)
 add_subdirectory(reflection)
-#add_subdirectory(rpc)
 add_subdirectory(type)
 add_subdirectory(util)
 
-include_directories(
-    ./
-    component
-    reflection
-    rpc
-    type
-    util
-    ${INC_DIR})
+if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+    add_subdirectory(rpc)
+endif()
+
+if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+    include_directories(
+        ./
+        component
+        reflection
+        rpc
+        type
+        util
+        ${INC_DIR})
+else()
+    include_directories(
+        ./
+        component
+        reflection
+        type
+        util
+        ${INC_DIR})
+endif()
 
 set(SOURCES
     comoids.cpp
     runtime.cpp)
 
-set(COMORT_LINK_LIBS
-    -Wl,--whole-archive
-    cdl
-    component
-    metadata
-    reflection
-    rpc
-    type
-    util
-    -Wl,--no-whole-archive)
+if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+    set(COMORT_LINK_LIBS
+        -Wl,--whole-archive
+        cdl
+        component
+        metadata
+        reflection
+        rpc
+        type
+        util
+        -Wl,--no-whole-archive)
+else()
+    set(COMORT_LINK_LIBS
+        -Wl,--whole-archive
+        cdl
+        component
+        metadata
+        reflection
+        type
+        util
+        -Wl,--no-whole-archive)
+endif()
 
 if($ENV{PLATFORM} STREQUAL "linux")
-    set(COMORT_LINK_LIBS
-        ${COMORT_LINK_LIBS}
-        -Wl,--whole-archive
-        rpc-dbus
-        -Wl,--no-whole-archive)
+    if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
+            rpc-dbus
+            -Wl,--no-whole-archive)
+    else()
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
+            -Wl,--no-whole-archive)
+    endif()
 elseif($ENV{PLATFORM} STREQUAL "android")
     set(COMORT_LINK_LIBS
         ${COMORT_LINK_LIBS}
@@ -72,9 +104,14 @@ target_link_libraries(comort
     ${COMORT_LINK_LIBS}
     dl)
 if($ENV{PLATFORM} STREQUAL "linux")
-    target_link_libraries(comort
-        pthread
-        dbus-1)
+    if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+        target_link_libraries(comort
+            pthread
+            dbus-1)
+    else()
+        target_link_libraries(comort
+            pthread)
+    endif()
 elseif($ENV{PLATFORM} STREQUAL "android")
     target_link_libraries(comort
         binder

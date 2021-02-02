@@ -110,6 +110,7 @@ function como_linux_common()
     export COMO_ROOT=
     export CDLC=$ROOT/tools/cdlc
     export COMO_WITH_ICU=icu
+    export COMO_WITH_RPC=norpc
 
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target
