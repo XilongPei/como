@@ -215,6 +215,14 @@ static constexpr Integer PROXY_INDEX_OFFSET = 2;
 static constexpr Integer PROXY_ENTRY_SIZE = 32;
 static constexpr Integer PROXY_ENTRY_SHIFT = 5;
 static constexpr Integer PROXY_INDEX_OFFSET = 9;
+#else
+    #if defined(__riscv)
+        #if (__riscv_xlen == 64)
+            static constexpr Integer PROXY_ENTRY_SIZE = 64;
+            static constexpr Integer PROXY_ENTRY_SHIFT = 6;
+            static constexpr Integer PROXY_INDEX_OFFSET = 2;
+        #endif
+    #endif
 #endif
 static constexpr Integer PROXY_ENTRY_NUMBER = 240;
 static constexpr Integer METHOD_MAX_NUMBER = PROXY_ENTRY_NUMBER + 4;
