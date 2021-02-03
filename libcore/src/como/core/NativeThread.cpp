@@ -30,7 +30,7 @@
 #if defined(__android__)
 #include <cutils/sched_policy.h>
 #include <utils/threads.h>
-#elif defined(__linux__)
+#elif (defined(__linux__) && defined(__x86_64__))
 #include <asm/prctl.h>
 #endif
 #include <sys/mman.h>
