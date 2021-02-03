@@ -183,8 +183,8 @@ target_link_libraries(libcore
     unwind
     icuuc
     icui18n
-    ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
-    #${OUT_PATH}/external/fdlibm/libfdlibm.a)
+#   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
+    $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
 add_dependencies(libcore deploy_boringssl_libraries)
 elseif($ENV{PLATFORM} STREQUAL "android")
 target_link_libraries(libcore
