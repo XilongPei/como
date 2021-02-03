@@ -1,14 +1,14 @@
-
+/*
 #ifndef lint
-static  char sccsid[] = "@(#)e_pow.c 1.5 04/04/22 SMI"; 
+static  char sccsid[] = "@(#)e_pow.c 1.5 04/04/22 SMI";
 #endif
-
+*/
 /*
  * ====================================================
  * Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this
- * software is freely granted, provided that this notice 
+ * software is freely granted, provided that this notice
  * is preserved.
  * ====================================================
  */
@@ -20,7 +20,7 @@ static  char sccsid[] = "@(#)e_pow.c 1.5 04/04/22 SMI";
  *	1. Compute and return log2(x) in two pieces:
  *		log2(x) = w1 + w2,
  *	   where w1 has 53-24 = 29 bit trailing zeros.
- *	2. Perform y*log2(x) = n+y' by simulating muti-precision 
+ *	2. Perform y*log2(x) = n+y' by simulating muti-precision
  *	   arithmetic, where |y'|<=0.5.
  *	3. Return x**y = 2**n*exp(y'*log2)
  *
@@ -48,22 +48,22 @@ static  char sccsid[] = "@(#)e_pow.c 1.5 04/04/22 SMI";
  * Accuracy:
  *	pow(x,y) returns x**y nearly rounded. In particular
  *			pow(integer,integer)
- *	always returns the correct integer provided it is 
+ *	always returns the correct integer provided it is
  *	representable.
  *
  * Constants :
- * The hexadecimal values are the intended ones for the following 
- * constants. The decimal values may be used, provided that the 
- * compiler will convert from decimal to binary accurately enough 
+ * The hexadecimal values are the intended ones for the following
+ * constants. The decimal values may be used, provided that the
+ * compiler will convert from decimal to binary accurately enough
  * to produce the hexadecimal values shown.
  */
 
 #include "fdlibm.h"
 
 #ifdef __STDC__
-static const double 
+static const double
 #else
-static double 
+static double
 #endif
 bp[] = {1.0, 1.5,},
 dp_h[] = { 0.0, 5.84962487220764160156e-01,}, /* 0x3FE2B803, 0x40000000 */
@@ -106,22 +106,22 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 {
 	double z,ax,z_h,z_l,p_h,p_l;
 	double y1,t1,t2,r,s,t,u,v,w;
-	int i0,i1,i,j,k,yisint,n;
+	int /*i0,i1,*/i,j,k,yisint,n;
 	int hx,hy,ix,iy;
 	unsigned lx,ly;
 
-	i0 = ((*(int*)&one)>>29)^1; i1=1-i0;
+	//i0 = ((*(int*)&one)>>29)^1; i1=1-i0;
 	hx = __HI(x); lx = __LO(x);
 	hy = __HI(y); ly = __LO(y);
 	ix = hx&0x7fffffff;  iy = hy&0x7fffffff;
 
     /* y==zero: x**0 = 1 */
-	if((iy|ly)==0) return one; 	
+	if((iy|ly)==0) return one;
 
     /* +-NaN return x+y */
 	if(ix > 0x7ff00000 || ((ix==0x7ff00000)&&(lx!=0)) ||
-	   iy > 0x7ff00000 || ((iy==0x7ff00000)&&(ly!=0))) 
-		return x+y;	
+	   iy > 0x7ff00000 || ((iy==0x7ff00000)&&(ly!=0)))
+		return x+y;
 
     /* determine if y is an odd int when x < 0
      * yisint = 0	... y is not an integer
@@ -129,22 +129,22 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
      * yisint = 2	... y is an even int
      */
 	yisint  = 0;
-	if(hx<0) {	
+	if(hx<0) {
 	    if(iy>=0x43400000) yisint = 2; /* even integer y */
 	    else if(iy>=0x3ff00000) {
 		k = (iy>>20)-0x3ff;	   /* exponent */
 		if(k>20) {
 		    j = ly>>(52-k);
-		    if((j<<(52-k))==ly) yisint = 2-(j&1);
+		    if((j<<(52-k))==(int)ly) yisint = 2-(j&1);
 		} else if(ly==0) {
 		    j = iy>>(20-k);
 		    if((j<<(20-k))==iy) yisint = 2-(j&1);
 		}
-	    }		
-	} 
+	    }
+	}
 
     /* special value of y */
-	if(ly==0) { 	
+	if(ly==0) {
 	    if (iy==0x7ff00000) {	/* y is +-inf */
 	        if(((ix-0x3ff00000)|lx)==0)
 		    return  y - y;	/* inf**+-1 is NaN */
@@ -152,14 +152,14 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 		    return (hy>=0)? y: zero;
 	        else			/* (|x|<1)**-,+inf = inf,0 */
 		    return (hy<0)?-y: zero;
-	    } 
+	    }
 	    if(iy==0x3ff00000) {	/* y is  +-1 */
 		if(hy<0) return one/x; else return x;
 	    }
 	    if(hy==0x40000000) return x*x; /* y is  2 */
 	    if(hy==0x3fe00000) {	/* y is  0.5 */
 		if(hx>=0)	/* x >= +0 */
-		return sqrt(x);	
+		return sqrt(x);
 	    }
 	}
 
@@ -172,13 +172,13 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 		if(hx<0) {
 		    if(((ix-0x3ff00000)|yisint)==0) {
 			z = (z-z)/(z-z); /* (-1)**non-int is NaN */
-		    } else if(yisint==1) 
+		    } else if(yisint==1)
 			z = -z;		/* (x<0)**odd = -(|x|**odd) */
 		}
 		return z;
 	    }
 	}
-    
+
 	n = (hx>>31)+1;
 
     /* (x<0)**(non-int) is NaN */
@@ -196,7 +196,7 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 	/* over/underflow if x is not close to one */
 	    if(ix<0x3fefffff) return (hy<0)? s*huge*huge:s*tiny*tiny;
 	    if(ix>0x3ff00000) return (hy>0)? s*huge*huge:s*tiny*tiny;
-	/* now |1-x| is tiny <= 2**-20, suffice to compute 
+	/* now |1-x| is tiny <= 2**-20, suffice to compute
 	   log(x) by x-x^2/2+x^3/3-x^4/4 */
 	    t = ax-one;		/* t has 20 trailing zeros */
 	    w = (t*t)*(0.5-t*(0.3333333333333333333333-t*0.25));
@@ -228,7 +228,7 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 	    __LO(s_h) = 0;
 	/* t_h=ax+bp[k] High */
 	    t_h = zero;
-	    __HI(t_h)=((ix>>1)|0x20000000)+0x00080000+(k<<18); 
+	    __HI(t_h)=((ix>>1)|0x20000000)+0x00080000+(k<<18);
 	    t_l = ax - (t_h-bp[k]);
 	    s_l = v*((u-s_h*t_h)-s_h*t_l);
 	/* compute log(ax) */
@@ -290,7 +290,7 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 	    n = ((n&0x000fffff)|0x00100000)>>(20-k);
 	    if(j<0) n = -n;
 	    p_h -= t;
-	} 
+	}
 	t = p_l+p_h;
 	__LO(t) = 0;
 	u = t*lg2_h;

@@ -6,7 +6,7 @@
  *
  * Developed at SunSoft, a Sun Microsystems, Inc. business.
  * Permission to use, copy, modify, and distribute this
- * software is freely granted, provided that this notice 
+ * software is freely granted, provided that this notice
  * is preserved.
  * ====================================================
  */
@@ -30,20 +30,20 @@
  * 	   (To avoid cancellation, use
  *		sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
  * 	    to compute the worse one.)
- *	   
+ *
  *	3 Special cases
  *		j0(nan)= nan
  *		j0(0) = 1
  *		j0(inf) = 0
- *		
+ *
  * Method -- y0(x):
  *	1. For x<2.
- *	   Since 
+ *	   Since
  *		y0(x) = 2/pi*(j0(x)*(ln(x/2)+Euler) + x^2/4 - ...)
  *	   therefore y0(x)-2/pi*j0(x)*ln(x) is an even function.
  *	   We use the following function to approximate y0,
  *		y0(x) = U(z)/V(z) + (2/pi)*(j0(x)*ln(x)), z= x^2
- *	   where 
+ *	   where
  *		U(z) = u00 + u01*z + ... + u06*z^6
  *		V(z) = 1  + v01*z + ... + v04*z^4
  *	   with absolute approximation error bounded by 2**-72.
@@ -65,9 +65,9 @@ static double pzero(), qzero();
 #endif
 
 #ifdef __STDC__
-static const double 
+static const double
 #else
-static double 
+static double
 #endif
 huge 	= 1e300,
 one	= 1.0,
@@ -86,9 +86,9 @@ S04  =  1.16614003333790000205e-09; /* 0x3E1408BC, 0xF4745D8F */
 static double zero = 0.0;
 
 #ifdef __STDC__
-	double __ieee754_j0(double x) 
+	double __ieee754_j0(double x)
 #else
-	double __ieee754_j0(x) 
+	double __ieee754_j0(x)
 	double x;
 #endif
 {
@@ -155,9 +155,9 @@ v03  =  2.59150851840457805467e-07, /* 0x3E91642D, 0x7FF202FD */
 v04  =  4.41110311332675467403e-10; /* 0x3DFE5018, 0x3BD6D9EF */
 
 #ifdef __STDC__
-	double __ieee754_y0(double x) 
+	double __ieee754_y0(double x)
 #else
-	double __ieee754_y0(x) 
+	double __ieee754_y0(x)
 	double x;
 #endif
 {
@@ -168,7 +168,7 @@ v04  =  4.41110311332675467403e-10; /* 0x3DFE5018, 0x3BD6D9EF */
         ix = 0x7fffffff&hx;
         lx = __LO(x);
     /* Y0(NaN) is NaN, y0(-inf) is Nan, y0(inf) is 0  */
-	if(ix>=0x7ff00000) return  one/(x+x*x); 
+	if(ix>=0x7ff00000) return  one/(x+x*x);
         if((ix|lx)==0) return -one/zero;
         if(hx<0) return zero/zero;
         if(ix >= 0x40000000) {  /* |x| >= 2.0 */
@@ -325,9 +325,9 @@ static double pS2[5] = {
 #endif
 {
 #ifdef __STDC__
-	const double *p,*q;
+	const double *p=0,*q=0;
 #else
-	double *p,*q;
+	double *p=0,*q=0;
 #endif
 	double z,r,s;
 	int ix;
@@ -341,7 +341,7 @@ static double pS2[5] = {
 	s = one+z*(q[0]+z*(q[1]+z*(q[2]+z*(q[3]+z*q[4]))));
 	return one+ r/s;
 }
-		
+
 
 /* For x >= 8, the asymptotic expansions of qzero is
  *	-1/8 s + 75/1024 s^3 - ..., where s = 1/x.
@@ -460,9 +460,9 @@ static double qS2[6] = {
 #endif
 {
 #ifdef __STDC__
-	const double *p,*q;
+	const double *p=0,*q=0;
 #else
-	double *p,*q;
+	double *p=0,*q=0;
 #endif
 	double s,r,z;
 	int ix;
