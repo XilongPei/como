@@ -33,20 +33,27 @@ include_directories(
     ${LIBCORE_OBJ_DIR})
 endif()
 
+if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
+    set(MATH_BIG_NUMBER_SRCS
+        BigDecimal.cpp
+        BigDecimalFactory.cpp
+        BigInt.cpp
+        BigInteger.cpp
+        BigIntegerFactory.cpp
+        math.cpp)
+else()
+    set(MATH_BIG_NUMBER_SRCS )
+endif()
+
 set(SOURCES
-    BigDecimal.cpp
-    BigDecimalFactory.cpp
-    BigInt.cpp
-    BigInteger.cpp
-    BigIntegerFactory.cpp
+    ${MATH_BIG_NUMBER_SRCS}
     BitLevel.cpp
     Conversion.cpp
     Division.cpp
     Logical.cpp
     MathContext.cpp
     Multiplication.cpp
-    Primality.cpp
-    math.cpp)
+    Primality.cpp)
 
 add_library(como_math STATIC
     ${SOURCES})

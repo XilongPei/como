@@ -173,11 +173,19 @@ IMPORT_LIBRARY(libcrypto.so)
 add_library(libcore
     SHARED
     ${GENERATED_SOURCES})
+
+if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
+    set(MATH_BIG_NUMBER_LIB
+        libcrypto.so)
+else()
+    set(MATH_BIG_NUMBER_LIB )
+endif()
+
 if($ENV{PLATFORM} STREQUAL "linux")
 target_link_libraries(libcore
     ${LIBCORE_LINK_LIBS}
     comort.so
-    libcrypto.so
+    ${MATH_BIG_NUMBER_LIB}
     dl
     pthread
 ##    unwind

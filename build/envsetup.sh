@@ -109,8 +109,12 @@ function como_linux_common()
     export CLASS_PATH=$BIN_PATH/libcore.so
     export COMO_ROOT=
     export CDLC=$ROOT/tools/cdlc
+
+    # to disable some config
+    # export xxx=no_......
     export COMO_WITH_ICU=icu
-    export COMO_WITH_RPC=norpc
+    export COMO_WITH_RPC=rpc
+    export COMO_WITH_MATH_BIG_NUMBER=bn
 
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target
