@@ -27,13 +27,13 @@ namespace core {
 Double StrictMath::Log(
     /* [in] */ Double a)
 {
-    return (Double)ieee_log((double)a);
+    return (Double)log((double)a);
 }
 
 Double StrictMath::Sqrt(
     /* [in] */ Double a)
 {
-    return (Double)ieee_sqrt((double)a);
+    return (Double)sqrt((double)a);
 }
 
 }

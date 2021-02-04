@@ -21,7 +21,8 @@ include_directories(
     ./
     ../
     ../../../inc
-    ${EXTERNAL_DIR}/fdlibm53/inc
+#    ${EXTERNAL_DIR}/fdlibm53/inc
+    ${EXTERNAL_DIR}/fdlibm/src
     ${INC_DIR}
     ${LIBCORE_OBJ_DIR})
 elseif($ENV{PLATFORM} STREQUAL "android")
