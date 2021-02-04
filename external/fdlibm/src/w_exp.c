@@ -5,17 +5,18 @@
  * Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this
- * software is freely granted, provided that this notice 
+ * software is freely granted, provided that this notice
  * is preserved.
  * ====================================================
  */
 
-/* 
+/*
  * wrapper exp(x)
  */
 
 #include "fdlibm.h"
 
+#ifndef _IEEE_LIBM
 #ifdef __STDC__
 static const double
 #else
@@ -23,6 +24,7 @@ static double
 #endif
 o_threshold=  7.09782712893383973096e+02,  /* 0x40862E42, 0xFEFA39EF */
 u_threshold= -7.45133219101941108420e+02;  /* 0xc0874910, 0xD52D3051 */
+#endif
 
 #ifdef __STDC__
 	double exp(double x)		/* wrapper exp */
@@ -42,7 +44,7 @@ u_threshold= -7.45133219101941108420e+02;  /* 0xc0874910, 0xD52D3051 */
 	        return __kernel_standard(x,x,6); /* exp overflow */
 	    else if(x<u_threshold)
 	        return __kernel_standard(x,x,7); /* exp underflow */
-	} 
+	}
 	return z;
 #endif
 }
