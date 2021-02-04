@@ -180,9 +180,10 @@ target_link_libraries(libcore
     libcrypto.so
     dl
     pthread
-    unwind
+##    unwind
     icuuc
     icui18n
+#    $ENV{OUT_PATH}/external/boringssl_bn/libboringssl_bn.a
 #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
     $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
 add_dependencies(libcore deploy_boringssl_libraries)
