@@ -185,13 +185,12 @@ if($ENV{PLATFORM} STREQUAL "linux")
 target_link_libraries(libcore
     ${LIBCORE_LINK_LIBS}
     comort.so
-#    ${MATH_BIG_NUMBER_LIB}
+    ${MATH_BIG_NUMBER_LIB}
     dl
     pthread
 ##    unwind
     icuuc
     icui18n
-#    $ENV{OUT_PATH}/external/boringssl_bn/libboringssl_bn.a
 #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
     $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
 add_dependencies(libcore deploy_boringssl_libraries)

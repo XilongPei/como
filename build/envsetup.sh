@@ -108,7 +108,7 @@ function como_linux_common()
     export COMORT_PATH=$BIN_PATH/comort.so
     export CLASS_PATH=$BIN_PATH/libcore.so
     export COMO_ROOT=
-    export CDLC=$ROOT/tools/cdlc
+    export CDLC=$ROOT/tools/"$ARCH"/cdlc
 
     # to disable some config
     # export xxx=no_......
