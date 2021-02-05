@@ -176,7 +176,7 @@ add_library(libcore
 
 if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
     set(MATH_BIG_NUMBER_LIB
-        libcrypto.so)
+        ${EXTERNAL_DIR}/boringssl/lib/$ENV{ARCH}/libcrypto.a)
 else()
     set(MATH_BIG_NUMBER_LIB )
 endif()
@@ -185,7 +185,7 @@ if($ENV{PLATFORM} STREQUAL "linux")
 target_link_libraries(libcore
     ${LIBCORE_LINK_LIBS}
     comort.so
-    ${MATH_BIG_NUMBER_LIB}
+#    ${MATH_BIG_NUMBER_LIB}
     dl
     pthread
 ##    unwind
