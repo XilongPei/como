@@ -176,7 +176,7 @@ add_library(libcore
 
 if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
     set(MATH_BIG_NUMBER_LIB
-        ${EXTERNAL_DIR}/boringssl/lib/$ENV{ARCH}/libcrypto.a)
+        ${EXTERNAL_DIR}/boringssl/lib/$ENV{ARCH}/libcrypto.so)
 else()
     set(MATH_BIG_NUMBER_LIB )
 endif()
