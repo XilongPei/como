@@ -353,21 +353,21 @@ TEST(FormatterTest, TestGroupingSizeZero)
     AutoPtr<ILocale> localeWithoutGrouping;
     CLocale::New(String("en"), String("US"), String("POSIX"), IID_ILocale, (IInterface**)&localeWithoutGrouping);
     AutoPtr<INumberFormat> nf;
-    NumberFormatFactory::GetInstance(localeWithoutGrouping, &nf);
+    NumberFormatFactory::GetInstance(localeWithoutGrouping, nf);
     IDecimalFormat* decimalFormat = IDecimalFormat::Probe(nf);
 
     // Confirm the locale is still a good example: it has a group separator, but no grouping in
     // the default decimal format.
     Integer groupingSize;
-    decimalFormat->GetGroupingSize(&groupingSize);
+    decimalFormat->GetGroupingSize(groupingSize);
     EXPECT_EQ(0, groupingSize);
     Boolean groupingUsed;
-    decimalFormat->IsGroupingUsed(&groupingUsed);
+    decimalFormat->IsGroupingUsed(groupingUsed);
     EXPECT_FALSE(groupingUsed);
     AutoPtr<IDecimalFormatSymbols> symbols;
-    decimalFormat->GetDecimalFormatSymbols(&symbols);
+    decimalFormat->GetDecimalFormatSymbols(symbols);
     Char separator;
-    symbols->GetGroupingSeparator(&separator);
+    symbols->GetGroupingSeparator(separator);
     EXPECT_TRUE(separator != U'\0');
 #endif
 }
