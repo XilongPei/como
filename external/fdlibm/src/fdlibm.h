@@ -39,11 +39,13 @@ extern "C" {
 #define __LOp(x) *(1+(int*)x)
 #endif
 
-#ifdef __STDC__
+#ifndef __P
 #define __FDLIBM_P_DEFINED
-#define	__P(p)	p
+#ifdef __STDC__
+#define __P(p)  p
 #else
-#define	__P(p)	()
+#define __P(p)  ()
+#endif
 #endif
 
 /*
