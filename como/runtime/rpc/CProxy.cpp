@@ -374,6 +374,16 @@ void Init_Proxy_Entry()
         p[PROXY_INDEX_OFFSET] = i;
         p += PROXY_ENTRY_SIZE;
     }
+#elif defined(__riscv)
+    #if (__riscv_xlen == 64)
+        Byte* p = (Byte*)PROXY_ENTRY;
+        for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+            memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
+            Integer* codes = reinterpret_cast<Integer*>(p);
+            codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
+            p += PROXY_ENTRY_SIZE;
+        }
+    #endif
 #endif
 
     sProxyVtable[0] = reinterpret_cast<HANDLE>(&InterfaceProxy::S_AddRef);

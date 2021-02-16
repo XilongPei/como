@@ -375,6 +375,12 @@ Boolean NativeThread::Init(
 void NativeThread::InitCpu()
 {
 }
+#elif defined(__riscv)
+    #if (__riscv_xlen == 64)
+        void NativeThread::InitCpu()
+        {
+        }
+    #endif
 #elif defined(__x86_64__)
 static void arch_prctl(int code, void* val)
 {
