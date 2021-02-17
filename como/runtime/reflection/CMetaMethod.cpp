@@ -51,6 +51,7 @@ CMetaMethod::CMetaMethod(
     , mSignature(mm->mSignature)
     , mParameters(mMetadata->mParameterNumber)
     , mHasOutArguments(false)
+    , mMethodAddr(0)
 {
     mReturnType = new CMetaType(mc,
             mc->mTypes[mm->mReturnTypeIndex]);
@@ -195,10 +196,16 @@ ECode CMetaMethod::Invoke(
         #endif
     #endif
 #endif
-    VObject* vobj = reinterpret_cast<VObject*>(thisObject->Probe(mOwner->mIid));
-    reinterpret_cast<HANDLE*>(params)[0] = reinterpret_cast<HANDLE>(vobj);
-    HANDLE methodAddr = vobj->mVtab->mMethods[mIndex];
-    return invoke(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+
+    if (mMethodAddr == 0) {
+        VObject* vobj = reinterpret_cast<VObject*>(thisObject->Probe(mOwner->mIid));
+        mVobj = reinterpret_cast<HANDLE>(vobj);
+        reinterpret_cast<HANDLE*>(params)[0] = mVobj;
+        mMethodAddr = vobj->mVtab->mMethods[mIndex];
+    } else {
+        reinterpret_cast<HANDLE*>(params)[0] = mVobj;
+    }
+    return invoke(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
 }
 
 void CMetaMethod::BuildAllParameters()
