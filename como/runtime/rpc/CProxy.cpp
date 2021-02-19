@@ -1136,21 +1136,21 @@ Long InterfaceProxy::GetLongValue(
 
     switch (intParamIndex) {
         case 0:
-            return regs.x0.lVal;
+            return regs.x10.lVal;
         case 1:
-            return regs.x1.lVal;
+            return regs.x11.lVal;
         case 2:
-            return regs.x2.lVal;
+            return regs.x12.lVal;
         case 3:
-            return regs.x3.lVal;
+            return regs.x13.lVal;
         case 4:
-            return regs.x4.lVal;
+            return regs.x14.lVal;
         case 5:
-            return regs.x5.lVal;
+            return regs.x15.lVal;
         case 6:
-            return regs.x6.lVal;
+            return regs.x16.lVal;
         case 7:
-            return regs.x7.lVal;
+            return regs.x17.lVal;
         default: {
             Integer offset;
             offset = fpParamIndex <= 7
@@ -1243,21 +1243,21 @@ Float InterfaceProxy::GetFloatValue(
 
     switch (fpParamIndex) {
         case 0:
-            return regs.d0.fVal;
+            return regs.f10.fVal;
         case 1:
-            return regs.d1.fVal;
+            return regs.f11.fVal;
         case 2:
-            return regs.d2.fVal;
+            return regs.f12.fVal;
         case 3:
-            return regs.d3.fVal;
+            return regs.f13.fVal;
         case 4:
-            return regs.d4.fVal;
+            return regs.f14.fVal;
         case 5:
-            return regs.d5.fVal;
+            return regs.f15.fVal;
         case 6:
-            return regs.d6.fVal;
+            return regs.f16.fVal;
         case 7:
-            return regs.d7.fVal;
+            return regs.f17.fVal;
         default: {
             Integer offset = intParamIndex <= 7
                     ? fpParamIndex - 8
@@ -1349,21 +1349,21 @@ Double InterfaceProxy::GetDoubleValue(
 
     switch (fpParamIndex) {
         case 0:
-            return regs.d0.dVal;
+            return regs.f10.dVal;
         case 1:
-            return regs.d1.dVal;
+            return regs.f11.dVal;
         case 2:
-            return regs.d2.dVal;
+            return regs.f12.dVal;
         case 3:
-            return regs.d3.dVal;
+            return regs.f13.dVal;
         case 4:
-            return regs.d4.dVal;
+            return regs.f14.dVal;
         case 5:
-            return regs.d5.dVal;
+            return regs.f15.dVal;
         case 6:
-            return regs.d6.dVal;
+            return regs.f16.dVal;
         case 7:
-            return regs.d7.dVal;
+            return regs.f17.dVal;
         default: {
             Integer offset = intParamIndex <= 7
                     ? fpParamIndex - 8
@@ -1450,23 +1450,23 @@ ECode InterfaceProxy::ProxyEntry(
 
     regs.sp.reg = args + 32;
     regs.paramStartOffset = 0;
-    GET_REG(x0, regs.x0.reg);
-    GET_REG(x1, regs.x1.reg);
-    GET_REG(x2, regs.x2.reg);
-    GET_REG(x3, regs.x3.reg);
-    GET_REG(x4, regs.x4.reg);
-    GET_REG(x5, regs.x5.reg);
-    GET_REG(x6, regs.x6.reg);
-    GET_REG(x7, regs.x7.reg);
+    GET_REG(x10, regs.x10.reg);
+    GET_REG(x11, regs.x11.reg);
+    GET_REG(x12, regs.x12.reg);
+    GET_REG(x13, regs.x13.reg);
+    GET_REG(x14, regs.x14.reg);
+    GET_REG(x15, regs.x15.reg);
+    GET_REG(x16, regs.x16.reg);
+    GET_REG(x17, regs.x17.reg);
 
-    GET_REG(d0, regs.d0.reg);
-    GET_REG(d1, regs.d1.reg);
-    GET_REG(d2, regs.d2.reg);
-    GET_REG(d3, regs.d3.reg);
-    GET_REG(d4, regs.d4.reg);
-    GET_REG(d5, regs.d5.reg);
-    GET_REG(d6, regs.d6.reg);
-    GET_REG(d7, regs.d7.reg);
+    GET_REG(f10, regs.f10.reg);
+    GET_REG(f11, regs.f11.reg);
+    GET_REG(f12, regs.f12.reg);
+    GET_REG(f13, regs.f13.reg);
+    GET_REG(f14, regs.f14.reg);
+    GET_REG(f15, regs.f15.reg);
+    GET_REG(f16, regs.f16.reg);
+    GET_REG(f17, regs.f17.reg);
 
         #endif
     #endif
