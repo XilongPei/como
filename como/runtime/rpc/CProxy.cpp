@@ -1033,21 +1033,21 @@ Integer InterfaceProxy::GetIntegerValue(
 
     switch (intParamIndex) {
         case 0:
-            return regs.x0.iVal;
+            return regs.x10.iVal;
         case 1:
-            return regs.x1.iVal;
+            return regs.x11.iVal;
         case 2:
-            return regs.x2.iVal;
+            return regs.x12.iVal;
         case 3:
-            return regs.x3.iVal;
+            return regs.x13.iVal;
         case 4:
-            return regs.x4.iVal;
+            return regs.x14.iVal;
         case 5:
-            return regs.x5.iVal;
+            return regs.x15.iVal;
         case 6:
-            return regs.x6.iVal;
+            return regs.x16.iVal;
         case 7:
-            return regs.x7.iVal;
+            return regs.x17.iVal;
         default: {
             Integer value, offset;
             offset = fpParamIndex <= 7

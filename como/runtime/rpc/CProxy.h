@@ -129,24 +129,24 @@ private:
             Float   fVal;
         };
 
-        IREG x0;
-        IREG x1;
-        IREG x2;
-        IREG x3;
-        IREG x4;
-        IREG x5;
-        IREG x6;
-        IREG x7;
+        IREG x10;
+        IREG x11;
+        IREG x12;
+        IREG x13;
+        IREG x14;
+        IREG x15;
+        IREG x16;
+        IREG x17;
         IREG sp;
 
-        FPREG d0;
-        FPREG d1;
-        FPREG d2;
-        FPREG d3;
-        FPREG d4;
-        FPREG d5;
-        FPREG d6;
-        FPREG d7;
+        FPREG f10;
+        FPREG f11;
+        FPREG f12;
+        FPREG f13;
+        FPREG f14;
+        FPREG f15;
+        FPREG f16;
+        FPREG f17;
 
         #endif
     #endif
