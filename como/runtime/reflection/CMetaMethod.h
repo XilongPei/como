@@ -87,6 +87,9 @@ public:
     Mutex mParametersLock;
     Boolean mHasOutArguments;
     AutoPtr<IMetaType> mReturnType;
+
+    HANDLE mMethodAddr;
+    HANDLE mVobj;
 };
 
 } // namespace como
