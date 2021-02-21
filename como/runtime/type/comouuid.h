@@ -34,7 +34,13 @@ inline bool operator==(
     /* [in] */ const UUID& id1,
     /* [in] */ const UUID& id2)
 {
+#ifdef __SIZEOF_INT128__
+    if (*(__int128 *)&id1 == *(__int128 *)&id2)
+        return true;
+    return false;
+#else
     return !memcmp(&id1, &id2, sizeof(UUID));
+#endif
 }
 
 extern const UUID UUID_ZERO;

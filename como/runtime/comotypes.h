@@ -70,14 +70,26 @@ inline bool operator==(
     /* [in] */ const InterfaceID& iid1,
     /* [in] */ const InterfaceID& iid2)
 {
+#ifdef __SIZEOF_INT128__
+    if (*(__int128 *)&iid1.mUuid == *(__int128 *)&iid2.mUuid)
+        return true;
+    return false;
+#else
     return !memcmp(&iid1.mUuid, &iid2.mUuid, sizeof(UUID));
+#endif
 }
 
 inline bool operator!=(
     /* [in] */ const InterfaceID& iid1,
     /* [in] */ const InterfaceID& iid2)
 {
+#ifdef __SIZEOF_INT128__
+    if (*(__int128 *)&iid1.mUuid != *(__int128 *)&iid2.mUuid)
+        return true;
+    return false;
+#else
     return memcmp(&iid1.mUuid, &iid2.mUuid, sizeof(UUID));
+#endif
 }
 
 struct ComponentID
@@ -90,14 +102,26 @@ inline bool operator==(
     /* [in] */ const ComponentID& cid1,
     /* [in] */ const ComponentID& cid2)
 {
+#ifdef __SIZEOF_INT128__
+    if (*(__int128 *)&cid1.mUuid == *(__int128 *)&cid2.mUuid)
+        return true;
+    return false;
+#else
     return !memcmp(&cid1.mUuid, &cid2.mUuid, sizeof(UUID));
+#endif
 }
 
 inline bool operator!=(
     /* [in] */ const ComponentID& cid1,
     /* [in] */ const ComponentID& cid2)
 {
+#ifdef __SIZEOF_INT128__
+    if (*(__int128 *)&cid1.mUuid != *(__int128 *)&cid2.mUuid)
+        return true;
+    return false;
+#else
     return memcmp(&cid1.mUuid, &cid2.mUuid, sizeof(UUID));
+#endif
 }
 
 } // namespace como
