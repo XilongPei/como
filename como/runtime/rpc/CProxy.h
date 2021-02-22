@@ -222,7 +222,7 @@ private:
     friend class CProxy;
 
     static constexpr Boolean DEBUG = false;
-    HANDLE* mVtable;    // must be the first member
+    HANDLE* mVtable;     // must be the first member
     HANDLE mProxyEntry;  // must be the second member
     Integer mIndex;
     InterfaceID mIid;
