@@ -346,6 +346,38 @@ static constexpr Integer PROXY_INDEX_OFFSET = 9;
 static constexpr Integer PROXY_ENTRY_NUMBER = 240;
 static constexpr Integer METHOD_MAX_NUMBER = PROXY_ENTRY_NUMBER + 4;
 
+/********
+A COMO object can implemented at most METHOD_MAX_NUMBER Interfaces, COMO object
+treats Interface as their inheritted class,
+When call the Interface's method, C++ will do 'this pointer adjust'.
+
+Map in memory:
++---                 sProxyVtable
+|
+|    ...         --> virtual table ...
+|    Interface2  --> virtual table 3
+|    Interface1  --> virtual table 2
+|    IObject     --> virtual table 1
+|COMO-Object
+
+--------
+‘this’ pointer in C++ https://www.geeksforgeeks.org/this-pointer-in-c/
+
+To understand ‘this’ pointer, it is important to know how objects look at
+functions and data members of a class.
+Each object gets its own copy of the data member.
+All-access the same function definition as present in the code segment.
+Meaning each object gets its own copy of data members and all objects share a
+single copy of member functions.
+Then now question is that if only one copy of each member function exists and is
+used by multiple objects, how are the proper data members are accessed and updated?
+The compiler supplies an implicit pointer along with the names of the functions
+as ‘this’.
+The ‘this’ pointer is passed as a hidden argument to all nonstatic member
+function calls and is available as a local variable within the body of all
+nonstatic functions. ‘this’ pointer is not available in static member functions
+as static member functions can be called without any object (with class name).
+********/
 static HANDLE sProxyVtable[METHOD_MAX_NUMBER];
 
 void Init_Proxy_Entry()
