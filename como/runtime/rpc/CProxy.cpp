@@ -202,7 +202,20 @@ __asm__(
     "popq   %rbp;"
     "ret;"
 );
-
+/*
+0000000000400848 <__entry>:
+  400848:   55                      push   %rbp
+  400849:   57                      push   %rdi
+  40084a:   48 83 ec 08             sub    $0x8,%rsp
+  40084e:   c7 04 24 ff 00 00 00    movl   $0xff,(%rsp)  # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;
+  400855:   48 89 f8                mov    %rdi,%rax
+  400858:   48 89 e7                mov    %rsp,%rdi
+  40085b:   ff 50 08                callq  *0x8(%rax)
+  40085e:   48 83 c4 08             add    $0x8,%rsp
+  400862:   5f                      pop    %rdi
+  400863:   5d                      pop    %rbp
+  400864:   c3                      retq
+*/
 #else
     #if defined(__riscv)
         #if (__riscv_xlen == 64)
