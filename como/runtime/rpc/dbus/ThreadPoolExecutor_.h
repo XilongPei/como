@@ -89,9 +89,9 @@ class ThreadPool
     : public LightRefBase
 {
 private:
-    static ArrayList<ThreadPoolExecutor::Worker*> m_vecTaskList;   // task list
+    static ArrayList<ThreadPoolExecutor::Worker*> m_vecTaskList;    // task list
     static bool shutdown;
-    int mThreadNum;                            // most thread number
+    int mThreadNum;                                                 // most thread number
     pthread_t *pthread_id;
 
     static pthread_mutex_t m_pthreadMutex;
@@ -99,8 +99,6 @@ private:
 
 protected:
     static void *threadFunc(void *threadData);
-    static int moveToIdle(pthread_t tid);
-    static int moveToBusy(pthread_t tid);
 
     int create();
 
