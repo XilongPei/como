@@ -55,9 +55,9 @@ ECode ThreadPoolExecutor::Worker::Run()
 
 //-------------------------------------------------------------------------
 
-AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::sInstance;
+AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::sInstance = nullptr;
 Mutex ThreadPoolExecutor::sInstanceLock;
-AutoPtr<ThreadPool> ThreadPoolExecutor::threadPool;
+AutoPtr<ThreadPool> ThreadPoolExecutor::threadPool = nullptr;
 
 AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 {

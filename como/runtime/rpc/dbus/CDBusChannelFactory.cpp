@@ -32,7 +32,10 @@ COMO_INTERFACE_IMPL_LIGHT_1(CDBusChannelFactory, LightRefBase, IRPCChannelFactor
 CDBusChannelFactory::CDBusChannelFactory(
     /* [in] */ RPCType type)
     : mType(type)
-{}
+{
+    // initial the ThreadPool environment, to avoid the delay of first RPC call
+    ThreadPoolExecutor::GetInstance();
+}
 
 ECode CDBusChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)

@@ -31,6 +31,7 @@ set(SOURCES
     CDBusChannelFactory.cpp
     CDBusParcel.cpp
     InterfacePack.cpp
+    ThreadPoolExecutor_.cpp
     threadpoolexecutor.cpp)
 
 add_library(rpc-dbus STATIC
