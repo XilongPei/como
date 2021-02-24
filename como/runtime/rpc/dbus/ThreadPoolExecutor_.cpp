@@ -44,8 +44,7 @@ namespace como {
 ThreadPoolExecutor::Worker::Worker(
     /* [in] */ Runnable* task,
     /* [in] */ ThreadPoolExecutor* owner)
-    : mThread(0)
-    , mTask(task)
+    : mTask(task)
     , mOwner(owner)
 {}
 
@@ -100,7 +99,6 @@ void *ThreadPool::threadFunc(void *threadData)
         ThreadPoolExecutor::Worker* w = m_vecTaskList.Get(i);
         m_vecTaskList.Remove(i);
 
-        w->mThread = pthread_self();
         ec = w->Run();
 
         pthread_mutex_unlock(&m_pthreadMutex);

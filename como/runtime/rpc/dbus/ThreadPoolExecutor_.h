@@ -67,7 +67,6 @@ public:
         ECode Run();
 
     public:
-        pthread_t mThread;
         AutoPtr<Runnable> mTask;
         ThreadPoolExecutor* mOwner;
         Mutex mLock;
