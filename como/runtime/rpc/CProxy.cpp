@@ -208,6 +208,11 @@ __asm__(
   400849:   57                      push   %rdi
   40084a:   48 83 ec 08             sub    $0x8,%rsp
   40084e:   c7 04 24 ff 00 00 00    movl   $0xff,(%rsp)  # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;
+                                function in this source file, InterfaceProxy::ProxyEntry() {
+                                    offset = 0;
+                                    GET_STACK_INTEGER(args, offset, methodIndex);
+                                }
+                                the `methodIndex` correspond to ths `$0xff`
   400855:   48 89 f8                mov    %rdi,%rax
   400858:   48 89 e7                mov    %rsp,%rdi
   40085b:   ff 50 08                callq  *0x8(%rax)
