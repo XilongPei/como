@@ -30,8 +30,9 @@
 // limitations under the License.
 //=========================================================================
 
-#include "ThreadPoolExecutor_.h"
+#include "ThreadPoolExecutor.h"
 #include "util/comolog.h"
+#include "ComoConfig.h"
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
@@ -65,7 +66,7 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
         Mutex::AutoLock lock(sInstanceLock);
         if (sInstance == nullptr) {
             sInstance = new ThreadPoolExecutor();
-            threadPool = new ThreadPool(ThreadPool_MAX_THREAD_NUM);
+            threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
         }
     }
     return sInstance;

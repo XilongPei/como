@@ -38,8 +38,6 @@
 #include "util/arraylist.h"
 #include "util/mutex.h"
 
-#define ThreadPool_MAX_THREAD_NUM   2
-
 namespace como {
 
 class ThreadPool;
