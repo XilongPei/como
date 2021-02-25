@@ -21,8 +21,9 @@ namespace como {
 
 class ComoConfig
 {
+public:
     static int ThreadPool_MAX_THREAD_NUM;
-}
+};
 
 } // namespace como
 

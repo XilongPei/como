@@ -52,6 +52,7 @@ endif()
 
 set(SOURCES
     comoids.cpp
+    ComoConfig.cpp
     runtime.cpp)
 
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
