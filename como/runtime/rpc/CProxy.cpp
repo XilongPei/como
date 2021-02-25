@@ -215,6 +215,7 @@ __asm__(
                                 the `methodIndex` correspond to ths `$0xff`
   400855:   48 89 f8                mov    %rdi,%rax
   400858:   48 89 e7                mov    %rsp,%rdi
+                                x64 ABI: %rdi, the first parameter
   40085b:   ff 50 08                callq  *0x8(%rax)
   40085e:   48 83 c4 08             add    $0x8,%rsp
   400862:   5f                      pop    %rdi
