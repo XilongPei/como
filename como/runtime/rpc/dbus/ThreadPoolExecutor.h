@@ -86,7 +86,7 @@ class ThreadPool
     : public LightRefBase
 {
 private:
-    static ArrayList<ThreadPoolExecutor::Worker*> m_vecTaskList;    // task list
+    static ArrayList<ThreadPoolExecutor::Worker*> mWorkerList;      // task list
     static bool shutdown;
     int mThreadNum;                                                 // most thread number
     pthread_t *pthread_id;

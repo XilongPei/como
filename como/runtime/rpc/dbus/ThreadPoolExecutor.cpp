@@ -75,8 +75,8 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 ECode ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
-    AutoPtr<Worker> w = new Worker(task, this);
-    ThreadPool::addTask(w);
+    Worker *w = new Worker(task, this);
+    threadPool->addTask(w);
     return NOERROR;
 }
 
@@ -87,7 +87,7 @@ void *ThreadPool::threadFunc(void *threadData)
     while (true) {
         pthread_mutex_lock(&m_pthreadMutex);
 
-        while ((m_vecTaskList.GetSize() == 0) && !shutdown) {
+        while ((mWorkerList.GetSize() == 0) && !shutdown) {
             pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
         }
 
@@ -96,13 +96,13 @@ void *ThreadPool::threadFunc(void *threadData)
             pthread_exit(nullptr);
         }
 
-        Long i = m_vecTaskList.GetSize() - 1;
-        ThreadPoolExecutor::Worker* w = m_vecTaskList.Get(i);
-        m_vecTaskList.Remove(i);
-
-        ec = w->Run();
+        Long i = mWorkerList.GetSize() - 1;
+        ThreadPoolExecutor::Worker* w = mWorkerList.Get(i);
+        mWorkerList.Remove(i);
 
         pthread_mutex_unlock(&m_pthreadMutex);
+
+        ec = w->Run();
     }
 
     return reinterpret_cast<void*>(ec);
@@ -113,7 +113,7 @@ void *ThreadPool::threadFunc(void *threadData)
 //
 
 bool ThreadPool::shutdown = false;
-ArrayList<ThreadPoolExecutor::Worker*> ThreadPool::m_vecTaskList;      // task list
+ArrayList<ThreadPoolExecutor::Worker*> ThreadPool::mWorkerList;      // task list
 
 pthread_mutex_t ThreadPool::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
@@ -127,7 +127,7 @@ ThreadPool::ThreadPool(int threadNum)
 int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 {
     pthread_mutex_lock(&m_pthreadMutex);
-    m_vecTaskList.Add(task);
+    mWorkerList.Add(task);
     pthread_mutex_unlock(&m_pthreadMutex);
     pthread_cond_signal(&m_pthreadCond);
     return 0;
@@ -175,7 +175,7 @@ int ThreadPool::stopAll()
 
 int ThreadPool::getTaskSize()
 {
-    return m_vecTaskList.GetSize();
+    return mWorkerList.GetSize();
 }
 
 } // namespace como
