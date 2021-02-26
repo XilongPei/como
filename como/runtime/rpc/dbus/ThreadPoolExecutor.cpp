@@ -37,6 +37,7 @@
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
+#include <stdio.h>
 
 namespace como {
 
@@ -75,8 +76,9 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 ECode ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
-    Worker *w = new Worker(task, this);
+    AutoPtr<Worker> w = new Worker(task, this);
     threadPool->addTask(w);
+    //printf("waiting ............\n");
     return NOERROR;
 }
 
@@ -97,7 +99,7 @@ void *ThreadPool::threadFunc(void *threadData)
         }
 
         Long i = mWorkerList.GetSize() - 1;
-        ThreadPoolExecutor::Worker* w = mWorkerList.Get(i);
+        AutoPtr<ThreadPoolExecutor::Worker> w = mWorkerList.Get(i);
         mWorkerList.Remove(i);
 
         pthread_mutex_unlock(&m_pthreadMutex);
