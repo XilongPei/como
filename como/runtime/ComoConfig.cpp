@@ -20,4 +20,11 @@ namespace como {
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
 
+/*
+ * /como/como/como/runtime/util/comolog.h
+ * int Logger::sLevel = DEBUG;
+ */
+int Logger_sLevel = 0;
+
+
 } // namespace como

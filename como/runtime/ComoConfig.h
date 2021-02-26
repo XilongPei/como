@@ -23,6 +23,7 @@ class ComoConfig
 {
 public:
     static int ThreadPool_MAX_THREAD_NUM;
+    static int Logger_sLevel;
 };
 
 } // namespace como
