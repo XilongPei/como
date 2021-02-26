@@ -37,7 +37,6 @@
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
-#include <stdio.h>
 
 namespace como {
 
@@ -78,7 +77,6 @@ ECode ThreadPoolExecutor::RunTask(
 {
     AutoPtr<Worker> w = new Worker(task, this);
     threadPool->addTask(w);
-    //printf("waiting ............\n");
     return NOERROR;
 }
 
