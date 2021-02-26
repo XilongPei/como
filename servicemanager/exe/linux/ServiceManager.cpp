@@ -93,6 +93,8 @@ DBusHandlerResult ServiceManager::HandleMessage(
         InterfacePack ipack;
         ECode ec = NOERROR;
 
+        Logger::D("ServiceManager", "ServiceManager::HandleMessage AddService.");
+
         if (!dbus_message_iter_init(msg, &args)) {
             Logger::E("ServiceManager", "\"AddService\" message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;

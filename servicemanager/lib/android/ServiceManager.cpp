@@ -68,6 +68,8 @@ ECode ServiceManager::AddService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    Logger::D("ServiceManager", "client: AddService.");
+
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Local, ipack);
     if (FAILED(ec)) {

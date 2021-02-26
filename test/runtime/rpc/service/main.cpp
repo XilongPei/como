@@ -29,7 +29,12 @@ using jing::ServiceManager;
 int main(int argv, char** argc)
 {
     AutoPtr<IService> srv;
-    CService::New(IID_IService, (IInterface**)&srv);
+
+    ECode ec = CService::New(IID_IService, (IInterface**)&srv);
+    if (FAILED(ec)) {
+        printf("Failed, CService::New\n");
+        return 1;
+    }
 
     ServiceManager::GetInstance()->AddService(String("rpcservice"), srv);
 

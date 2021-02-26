@@ -26,6 +26,8 @@ int main(int argv, char** argc)
 {
     DBusError err;
 
+    Logger::D("ServiceManager", "starting ...");
+
     dbus_error_init(&err);
 
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
@@ -60,6 +62,9 @@ int main(int argv, char** argc)
 
         do {
             dbus_connection_read_write_dispatch(conn, -1);
+
+            Logger::D("ServiceManager", "dbus_connection_read_write_dispatch");
+
         } while ((status = dbus_connection_get_dispatch_status(conn))
                 == DBUS_DISPATCH_DATA_REMAINS);
 
