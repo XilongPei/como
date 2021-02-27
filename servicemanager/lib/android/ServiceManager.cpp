@@ -40,7 +40,7 @@ static android::sp<android::IBinder> get_service_manager()
         return sBinder;
     }
 
-    Logger::D("ServiceManager", "jing servicemanager try getting...\n");
+    Logger_D("ServiceManager", "jing servicemanager try getting...\n");
 
     Mutex::AutoLock lock(sBinderLock);
     if (sBinder != nullptr) {
@@ -55,7 +55,7 @@ static android::sp<android::IBinder> get_service_manager()
         usleep(500000);
     } while (true);
 
-    Logger::D("ServiceManager", "jing servicemanager gotten.\n");
+    Logger_D("ServiceManager", "jing servicemanager gotten.\n");
 
     return sBinder;
 }
@@ -68,12 +68,12 @@ ECode ServiceManager::AddService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    Logger::D("ServiceManager", "client: AddService.");
+    Logger_D("ServiceManager", "client: AddService.");
 
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Local, ipack);
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
+        Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
                 name.string());
         return ec;
     }
@@ -88,13 +88,13 @@ ECode ServiceManager::AddService(
     android::Parcel reply;
     if (get_service_manager()->transact(ADD_SERVICE,
             *reinterpret_cast<android::Parcel*>(data), &reply) != android::NO_ERROR) {
-        Logger::E("ServiceManager", "AddService failed.");
+        Logger_E("ServiceManager", "AddService failed.");
         return E_REMOTE_EXCEPTION;
     }
 
     ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
         return ec;
     }
 
@@ -114,13 +114,13 @@ ECode ServiceManager::GetService(
     data.writeInt32(TAG_NOT_NULL);
     data.writeCString(name.string());
     if (get_service_manager()->transact(GET_SERVICE, data, &reply) != android::NO_ERROR) {
-        Logger::E("ServiceManager", "GetService failed.");
+        Logger_E("ServiceManager", "GetService failed.");
         return E_REMOTE_EXCEPTION;
     }
 
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
         return ec;
     }
 
@@ -146,13 +146,13 @@ ECode ServiceManager::RemoveService(
     data.writeInt32(TAG_NOT_NULL);
     data.writeCString(name.string());
     if (get_service_manager()->transact(REMOVE_SERVICE, data, &reply) != android::NO_ERROR) {
-        Logger::E("ServiceManager", "RemoveService failed.");
+        Logger_E("ServiceManager", "RemoveService failed.");
         return E_REMOTE_EXCEPTION;
     }
 
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
         return ec;
     }
 

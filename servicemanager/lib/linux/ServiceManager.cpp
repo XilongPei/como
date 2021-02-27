@@ -38,7 +38,7 @@ ECode ServiceManager::AddService(
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Local, ipack);
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
+        Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
                 name.string());
         return ec;
     }
@@ -62,7 +62,7 @@ ECode ServiceManager::AddService(
 
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
+        Logger_E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
                 err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -72,7 +72,7 @@ ECode ServiceManager::AddService(
             DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
             "AddService");
     if (msg == nullptr) {
-        Logger::E("ServiceManager", "Fail to create dbus message.");
+        Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -88,19 +88,19 @@ ECode ServiceManager::AddService(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
+        Logger_E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (!dbus_message_iter_init(reply, &args)) {
-        Logger::E("ServiceManager", "Reply has no results.");
+        Logger_E("ServiceManager", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
-        Logger::E("ServiceManager", "The first result is not Integer.");
+        Logger_E("ServiceManager", "The first result is not Integer.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -108,7 +108,7 @@ ECode ServiceManager::AddService(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
     }
 
 Exit:
@@ -150,7 +150,7 @@ ECode ServiceManager::GetService(
 
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
+        Logger_E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
                 err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -159,7 +159,7 @@ ECode ServiceManager::GetService(
     msg = dbus_message_new_method_call(
             DBUS_NAME, OBJECT_PATH, INTERFACE_PATH, "GetService");
     if (msg == nullptr) {
-        Logger::E("ServiceManager", "Fail to create dbus message.");
+        Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -170,19 +170,19 @@ ECode ServiceManager::GetService(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
+        Logger_E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (!dbus_message_iter_init(reply, &args)) {
-        Logger::E("ServiceManager", "Reply has no results.");
+        Logger_E("ServiceManager", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
-        Logger::E("ServiceManager", "The first result is not Integer.");
+        Logger_E("ServiceManager", "The first result is not Integer.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -191,12 +191,12 @@ ECode ServiceManager::GetService(
 
     if (SUCCEEDED(ec)) {
         if (!dbus_message_iter_next(&args)) {
-            Logger::E("ServiceManager", "Reply has no out arguments.");
+            Logger_E("ServiceManager", "Reply has no out arguments.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("ServiceManager", "Reply arguments is not array.");
+            Logger_E("ServiceManager", "Reply arguments is not array.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
@@ -218,7 +218,7 @@ ECode ServiceManager::GetService(
         }
     }
     else {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
     }
 
 Exit:
@@ -257,7 +257,7 @@ ECode ServiceManager::RemoveService(
 
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
+        Logger_E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
                 err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -266,7 +266,7 @@ ECode ServiceManager::RemoveService(
     msg = dbus_message_new_method_call(
             DBUS_NAME, OBJECT_PATH, INTERFACE_PATH, "RemoveService");
     if (msg == nullptr) {
-        Logger::E("ServiceManager", "Fail to create dbus message.");
+        Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -277,19 +277,19 @@ ECode ServiceManager::RemoveService(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
+        Logger_E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (!dbus_message_iter_init(reply, &args)) {
-        Logger::E("ServiceManager", "Reply has no results.");
+        Logger_E("ServiceManager", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
-        Logger::E("ServiceManager", "The first result is not Integer.");
+        Logger_E("ServiceManager", "The first result is not Integer.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -297,7 +297,7 @@ ECode ServiceManager::RemoveService(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (FAILED(ec)) {
-        Logger::E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
     }
 
 Exit:

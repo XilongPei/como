@@ -26,13 +26,13 @@ int main(int argv, char** argc)
 {
     DBusError err;
 
-    Logger::D("ServiceManager", "starting ...");
+    Logger_D("ServiceManager", "starting ...");
 
     dbus_error_init(&err);
 
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("servicemanager", "Connect to bus daemon failed, error is \"%s\".",
+        Logger_E("servicemanager", "Connect to bus daemon failed, error is \"%s\".",
                 err.message);
         dbus_error_free(&err);
         return -1;
@@ -41,7 +41,7 @@ int main(int argv, char** argc)
     dbus_bus_request_name(conn, ServiceManager::DBUS_NAME,
             DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("servicemanager", "Request servicemanager dbus name failed, error is \"%s\".",
+        Logger_E("servicemanager", "Request servicemanager dbus name failed, error is \"%s\".",
                 err.message);
         dbus_error_free(&err);
         dbus_connection_close(conn);
@@ -63,13 +63,13 @@ int main(int argv, char** argc)
         do {
             dbus_connection_read_write_dispatch(conn, -1);
 
-            Logger::D("ServiceManager", "dbus_connection_read_write_dispatch");
+            Logger_D("ServiceManager", "dbus_connection_read_write_dispatch");
 
         } while ((status = dbus_connection_get_dispatch_status(conn))
                 == DBUS_DISPATCH_DATA_REMAINS);
 
         if (status == DBUS_DISPATCH_NEED_MEMORY) {
-            Logger::E("CDBusChannel", "DBus dispatching needs more memory.");
+            Logger_E("CDBusChannel", "DBus dispatching needs more memory.");
             break;
         }
     }

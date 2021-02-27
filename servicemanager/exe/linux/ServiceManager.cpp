@@ -93,15 +93,15 @@ DBusHandlerResult ServiceManager::HandleMessage(
         InterfacePack ipack;
         ECode ec = NOERROR;
 
-        Logger::D("ServiceManager", "ServiceManager::HandleMessage AddService.");
+        Logger_D("ServiceManager", "ServiceManager::HandleMessage AddService.");
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger::E("ServiceManager", "\"AddService\" message has no arguments.");
+            Logger_E("ServiceManager", "\"AddService\" message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("ServiceManager", "\"AddService\" message has no string arguments.");
+            Logger_E("ServiceManager", "\"AddService\" message has no string arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
@@ -109,7 +109,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_get_basic(&args, &str);
         dbus_message_iter_next(&args);
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("ServiceManager", "\"AddService\" message has no array arguments.");
+            Logger_E("ServiceManager", "\"AddService\" message has no array arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
@@ -130,7 +130,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
         if (!dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("ServiceManager", "Send reply message failed.");
+            Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
         dbus_message_unref(reply);
@@ -144,12 +144,12 @@ DBusHandlerResult ServiceManager::HandleMessage(
         ECode ec = NOERROR;
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger::E("ServiceManager", "\"GetService\" message has no arguments.");
+            Logger_E("ServiceManager", "\"GetService\" message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto GetServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("ServiceManager", "\"GetService\" message has no string arguments.");
+            Logger_E("ServiceManager", "\"GetService\" message has no string arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto GetServiceExit;
         }
@@ -183,7 +183,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
 
         dbus_uint32_t serial = 0;
         if (!dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("ServiceManager", "Send reply message failed.");
+            Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
         dbus_message_unref(reply);
@@ -196,11 +196,11 @@ DBusHandlerResult ServiceManager::HandleMessage(
         ECode ec = NOERROR;
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger::E("ServiceManager", "\"RemoveService\" message has no arguments.");
+            Logger_E("ServiceManager", "\"RemoveService\" message has no arguments.");
             goto RemoveServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("ServiceManager", "\"RemoveService\" message has no string arguments.");
+            Logger_E("ServiceManager", "\"RemoveService\" message has no string arguments.");
             goto RemoveServiceExit;
         }
 
@@ -214,7 +214,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
         if (!dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("ServiceManager", "Send reply message failed.");
+            Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
         dbus_message_unref(reply);
@@ -222,7 +222,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
     else {
         const char* name = dbus_message_get_member(msg);
         if (name != nullptr) {
-            Logger::D("servicemanager",
+            Logger_D("servicemanager",
                     "The message which name is \"%s\" does not be handled.", name);
         }
     }
