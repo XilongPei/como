@@ -60,4 +60,24 @@ private:
 
 } // namespace como
 
+/*
+statement:
+    #define Logger::D   do () while(0);
+cause:
+    warning: ISO C++11 requires whitespace after the macro name
+*/
+#ifdef DISABLE_LOGGER
+#define Logger_D(format, ...)
+#define Logger_E(format, ...)
+#define Logger_V(format, ...)
+#define Logger_W(format, ...)
+#define Logger_Log(format, ...)
+#else
+#define Logger_D Logger::D
+#define Logger_E Logger::E
+#define Logger_V Logger::V
+#define Logger_W Logger::W
+#define Logger_Log Logger::Log
+#endif
+
 #endif // __COMO_LOGGER_H__
