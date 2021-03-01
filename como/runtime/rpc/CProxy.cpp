@@ -308,11 +308,37 @@ __asm__(                            \
 
 EXTERN_C void __entry();
 __asm__(
-    ".text;"
-    ".align 8;"
-    ".global __entry;"
-    "__entry:"
-    "nop;"
+    ".text;\n"
+    ".align 8;\n"
+    ".global __entry;\n"
+    "__entry:\n"
+    "addi   sp,sp,-40;\n"
+    "sd     ra,32(sp);       # ra, Return address\n"
+    "sd     s0,24(sp);       # ra, Return address\n"
+    "addi   s0,sp,32;        # s0/fp， Saved register/frame pointer\n"
+
+    "sd     a0,-24(s0);      # save double word\n"
+    "ld     a5,-24(s0);      # \n"
+
+    "addi   a5,a5,8;         # \n"
+    "li     a4,0xff;         # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;\n"
+    "              ;         #    function in this source file, InterfaceProxy::ProxyEntry() {\n"
+    "              ;         #        offset = 0;\n"
+    "              ;         #        GET_STACK_INTEGER(args, offset, methodIndex);\n"
+    "              ;         #    }\n"
+    "              ;         #    the `methodIndex` correspond to ths `$0xff`\n"
+    "sw     a4,0(a5);        # save word"
+
+    "mv     a0,a5;           # riscv64 ABI: x10/a0, the first parameter\n"
+    "            ;           # ECode InterfaceProxy::ProxyEntry(HANDLE args)\n"
+
+    "ld      a5,16(sp);      # load double word, restore s0\n"
+    "jalr    a5;"
+
+    "ld     s0,24(sp);       # load double word, restore s0\n"
+    "ld     ra,32(sp);       # load double word, restore ra \n"
+    "addi   sp,sp,40;        # \n"
+    "ret;"
 );
 /*
 __asm__(
