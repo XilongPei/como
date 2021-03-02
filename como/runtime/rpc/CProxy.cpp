@@ -232,6 +232,13 @@ __asm__(
         : "=m"(var)                 \
     )
 
+#define GET_F_REG(reg, var)         \
+    __asm__ __volatile__(           \
+        "fld   "#reg", %0;"         \
+        : "=m"(var)                 \
+    )
+
+
 #define GET_STACK_INTEGER(rbp, off, var)    \
     __asm__ __volatile__(                   \
         "ld    a5, %1;"                     \
@@ -1510,14 +1517,14 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(x16, regs.x16.reg);
     GET_REG(x17, regs.x17.reg);
 
-    GET_REG(f10, regs.f10.reg);
-    GET_REG(f11, regs.f11.reg);
-    GET_REG(f12, regs.f12.reg);
-    GET_REG(f13, regs.f13.reg);
-    GET_REG(f14, regs.f14.reg);
-    GET_REG(f15, regs.f15.reg);
-    GET_REG(f16, regs.f16.reg);
-    GET_REG(f17, regs.f17.reg);
+    GET_F_REG(f10, regs.f10.reg);
+    GET_F_REG(f11, regs.f11.reg);
+    GET_F_REG(f12, regs.f12.reg);
+    GET_F_REG(f13, regs.f13.reg);
+    GET_F_REG(f14, regs.f14.reg);
+    GET_F_REG(f15, regs.f15.reg);
+    GET_F_REG(f16, regs.f16.reg);
+    GET_F_REG(f17, regs.f17.reg);
 
         #endif
     #endif
