@@ -227,84 +227,58 @@ __asm__(
         #if (__riscv_xlen == 64)
 
 #define GET_REG(reg, var)           \
-__asm__(                            \
-    "nop;"                          \
-);
-
-/*
     __asm__ __volatile__(           \
-        "str   "#reg", %0;"         \
+        "ld   "#reg", %0;"          \
         : "=m"(var)                 \
     )
-*/
 
 #define GET_STACK_INTEGER(rbp, off, var)    \
-__asm__(                            \
-    "nop;"                          \
-);
-
-/*
     __asm__ __volatile__(                   \
-        "ldr   x9, %1;"                     \
-        "ldr   w10, %2;"                    \
-        "ldr   w9, [x9, x10];"              \
-        "str   w9, %0;"                     \
+        "ld    a5, %1;"                     \
+        "ld    a4, %2;"                     \
+        "add   a5, a4, a5;"                 \
+        "ld    a5, 0(a5);"                  \
+        "sd    a5, %0;"                     \
         : "=m"(var)                         \
         : "m"(rbp), "m"(off)                \
         : "x9", "x10"                       \
     )
-*/
 
 #define GET_STACK_LONG(rbp, off, var)       \
-__asm__(                            \
-    "nop;"                          \
-);
-
-/*
     __asm__ __volatile__(                   \
-        "ldr   x9, %1;"                     \
-        "ldr   w10, %2;"                    \
-        "ldr   x9, [x9, x10];"              \
-        "str   x9, %0;"                     \
+        "ld    a5, %1;"                     \
+        "ld    a4, %2;"                     \
+        "add   a5, a4, a5;"                 \
+        "ld    a5, 0(a5);"                  \
+        "sd    a5, %0;"                     \
         : "=m"(var)                         \
         : "m"(rbp), "m"(off)                \
         : "x9", "x10"                       \
     )
-*/
 
 #define GET_STACK_FLOAT(rbp, off, var)      \
-__asm__(                            \
-    "nop;"                          \
-);
-
-/*
     __asm__ __volatile__(                   \
-        "ldr   x9, %1;"                     \
-        "ldr   w10, %2;"                    \
-        "ldr   w9, [x9, x10];"              \
-        "str   w9, %0;"                     \
+        "ld    a5, %1;"                     \
+        "ld    a4, %2;"                     \
+        "add   a5, a4, a5;"                 \
+        "lw    a5, 0(a5);"                  \
+        "sw    a5, %0;"                     \
         : "=m"(var)                         \
         : "m"(rbp), "m"(off)                \
         : "x9", "x10"                       \
     )
-*/
 
 #define GET_STACK_DOUBLE(rbp, off, var)     \
-__asm__(                            \
-    "nop;"                          \
-);
-
-/*
     __asm__ __volatile__(                   \
-        "ldr   x9, %1;"                     \
-        "ldr   w10, %2;"                    \
-        "ldr   x9, [x9, x10];"              \
-        "str   x9, %0;"                     \
+        "ld    a5, %1;"                     \
+        "ld    a4, %2;"                     \
+        "add   a5, a4, a5;"                 \
+        "ld    a5, 0(a5);"                  \
+        "sd    a5, %0;"                     \
         : "=m"(var)                         \
         : "m"(rbp), "m"(off)                \
         : "x9", "x10"                       \
     )
-*/
 
 EXTERN_C void __entry();
 __asm__(
