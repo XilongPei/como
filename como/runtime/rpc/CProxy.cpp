@@ -319,32 +319,27 @@ __asm__(
     "ld     s0,24(sp);       # load double word, restore s0\n"
     "ld     ra,32(sp);       # load double word, restore ra \n"
     "addi   sp,sp,40;        # \n"
-    "ret;"
+    "ret;\n"
+    "nop;\n"
 );
 /*
-__asm__(
-    ".text;"
-    ".align 8;"
-    ".global __entry;"
-    "__entry:"
-    "sub    sp, sp, #32;"
-    "stp    lr, x9, [sp, #16];"
-    "mov    x9, #0x0;"
-    "stp    x9, x0, [sp];"
-    "ldr    x9, [x0, #8];"
-    "mov    x0, sp;"
-    "adr    lr, return_from_func;"
-    "br     x9;"
-    "return_from_func:"
-    "ldp    lr, x9, [sp, #16];"
-    "add    sp, sp, #32;"
-    "ret;"
-    "nop;"
-    "nop;"
-    "nop;"
-    "nop;"
-    "nop;"
-);
+0000000000010700 <__entry>:
+   10700:       fd810113                addi    sp,sp,-40
+   10704:       02113023                sd      ra,32(sp)
+   10708:       00813c23                sd      s0,24(sp)
+   1070c:       02010413                addi    s0,sp,32
+   10710:       fea43423                sd      a0,-24(s0)
+   10714:       fe843783                ld      a5,-24(s0)
+   10718:       00878793                addi    a5,a5,8
+   1071c:       0ff00713                li      a4,255
+   10720:       00e7a023                sw      a4,0(a5)
+   10724:       01013783                ld      a5,16(sp)
+   10728:       000780e7                jalr    a5
+   1072c:       01813403                ld      s0,24(sp)
+   10730:       02013083                ld      ra,32(sp)
+   10734:       02810113                addi    sp,sp,40
+   10738:       00008067                ret
+   1073c:       00000013                nop
 */
         #endif
     #endif
@@ -365,7 +360,7 @@ static constexpr Integer PROXY_INDEX_OFFSET = 9;
         #if (__riscv_xlen == 64)
             static constexpr Integer PROXY_ENTRY_SIZE = 64;
             static constexpr Integer PROXY_ENTRY_SHIFT = 6;
-            static constexpr Integer PROXY_INDEX_OFFSET = 2;
+            static constexpr Integer PROXY_INDEX_OFFSET = 28;
         #endif
     #endif
 #endif
