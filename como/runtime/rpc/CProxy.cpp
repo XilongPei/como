@@ -125,6 +125,33 @@ __asm__(
     "nop;"
     "nop;"
 );
+/*
+0000000000400a00 <__entry>:
+  400a00:       d10083ff        sub     sp, sp, #0x20
+  400a04:       a90127fe        stp     x30, x9, [sp, #16]
+  400a08:       d2800009        mov     x9, #0x0        # modify value #0x0 by statement: p[PROXY_INDEX_OFFSET] = i;
+                                function in this source file, InterfaceProxy::ProxyEntry() {
+                                    offset = 0;
+                                    GET_STACK_INTEGER(args, offset, methodIndex);
+                                }
+                                the `methodIndex` correspond to ths `#0x0`
+  400a0c:       a90003e9        stp     x9, x0, [sp]
+  400a10:       f9400409        ldr     x9, [x0, #8]
+  400a14:       910003e0        mov     x0, sp
+                                aarch64 ABI: x0, the first parameter
+  400a18:       1000005e        adr     x30, 400a20 <return_from_func>
+  400a1c:       d61f0120        br      x9
+
+0000000000400a20 <return_from_func>:
+  400a20:       a94127fe        ldp     x30, x9, [sp, #16]
+  400a24:       910083ff        add     sp, sp, #0x20
+  400a28:       d65f03c0        ret
+  400a2c:       d503201f        nop
+  400a30:       d503201f        nop
+  400a34:       d503201f        nop
+  400a38:       d503201f        nop
+  400a3c:       d503201f        nop
+*/
 
 #elif defined(__x86_64__)
 
