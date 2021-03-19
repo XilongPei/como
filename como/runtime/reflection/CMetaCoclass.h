@@ -72,6 +72,10 @@ public:
         /* [in] */ const String& fullName,
         /* [out] */ AutoPtr<IMetaInterface>& intf) override;
 
+    ECode GetInterface(
+        /* [in] */ const InterfaceID& iid,
+        /* [out] */ AutoPtr<IMetaInterface>& intf) override;
+
     ECode ContainsInterface(
         /* [in] */ const String& fullName,
         /* [out] */ Boolean& result) override;

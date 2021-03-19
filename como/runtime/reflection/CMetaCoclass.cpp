@@ -174,6 +174,25 @@ ECode CMetaCoclass::GetInterface(
     return NOERROR;
 }
 
+ECode CMetaCoclass::GetInterface(
+    /* [in] */ const InterfaceID& iid,
+    /* [out] */ AutoPtr<IMetaInterface>& intf)
+{
+    BuildAllInterfaces();
+
+    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+        IMetaInterface* miObj = mInterfaces[i];
+        InterfaceID iidTmp;
+        miObj->GetInterfaceID(iidTmp);
+        if (iid == iidTmp) {
+            intf = miObj;
+            return NOERROR;
+        }
+    }
+    intf = nullptr;
+    return NOERROR;
+}
+
 ECode CMetaCoclass::ContainsInterface(
     /* [in] */ const String& fullName,
     /* [out] */ Boolean& result)
