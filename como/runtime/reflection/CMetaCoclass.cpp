@@ -261,18 +261,46 @@ ECode CMetaCoclass::GetAllMethods(
 }
 
 ECode CMetaCoclass::GetMethod(
-    /* [in] */ const String& name,
+    /* [in] */ const String& fullName,
     /* [in] */ const String& signature,
     /* [out] */ AutoPtr<IMetaMethod>& method)
 {
+    if (fullName.IsEmpty() || mInterfaces.IsEmpty()) {
+        method = nullptr;
+        return NOERROR;
+    }
+
     BuildAllMethods();
 
-    for (Integer i = 0; i < mMethods.GetLength(); i++) {
+    // fullName style: nameSpace.methodName
+    Integer pos = fullName.IndexOf('.');
+    Integer i;
+    if (pos != -1) {
+        IMetaInterface* miObj = nullptr;
+        String nameSpace = fullName.Substring(0, pos-1);
+        String methodName = fullName.Substring(pos+1);
+        for (i = 0; i < mInterfaces.GetLength(); i++) {
+            miObj = mInterfaces[i];
+            String name, ns;
+            miObj->GetName(name);
+            miObj->GetNamespace(ns);
+            if (nameSpace.Equals(ns + "::" + name))
+                break;
+        }
+
+        if (i < mInterfaces.GetLength())
+            return miObj->GetMethod(methodName, signature, method);
+
+        method = nullptr;
+        return NOERROR;
+    }
+
+    for (i = 0; i < mMethods.GetLength(); i++) {
         IMetaMethod* mmObj = mMethods[i];
         String mmName, mmSignature;
         mmObj->GetName(mmName);
         mmObj->GetSignature(mmSignature);
-        if (mmName.Equals(name) && mmSignature.Equals(signature)) {
+        if (mmName.Equals(fullName) && mmSignature.Equals(signature)) {
             method = mmObj;
             return NOERROR;
         }

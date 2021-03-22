@@ -182,7 +182,7 @@ interface IMetaCoclass
         [out] Array<IMetaMethod*>& methods);
 
     GetMethod(
-        [in] String name,
+        [in] String fullName,
         [in] String signature,
         [out] IMetaMethod&& method);
 

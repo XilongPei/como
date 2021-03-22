@@ -87,7 +87,7 @@ public:
         /* [out] */ Array<IMetaMethod*>& methods) override;
 
     ECode GetMethod(
-        /* [in] */ const String& name,
+        /* [in] */ const String& fullName,
         /* [in] */ const String& signature,
         /* [out] */ AutoPtr<IMetaMethod>& method) override;
 
