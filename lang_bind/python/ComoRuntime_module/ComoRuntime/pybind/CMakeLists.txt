@@ -16,9 +16,23 @@
 
 project(comoPybind CXX)
 
+execute_process(COMMAND python3 -m pybind11 --includes OUTPUT_VARIABLE PYTHON_DEV_includes OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+set(PYTHON_DEV_incs "${PYTHON_DEV_includes};")
+
+STRING(REPLACE "-I" "" PYTHON_DEV_INCLUDE "${PYTHON_DEV_incs}")
+
+set(PYTHON_DEV_INCLUDE /home/xilong/anaconda3/envs/py36/include/python3.6m
+  /home/xilong/anaconda3/envs/py36/include
+)
+
+#message(FATAL_ERROR "=== ${PYTHON_DEV_INCLUDE} ===")
+
 include_directories(
     ./
-    ${INC_DIR})
+    ${INC_DIR}
+    "${PYTHON_DEV_INCLUDE}"
+    )
 
 set(SOURCES
     como_pybind.cpp)
