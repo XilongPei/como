@@ -19,16 +19,21 @@
 #include <pybind11/stl.h>
 #include <comoapi.h>
 
+using namespace pybind11::literals;
+namespace py = pybind11;
+
+using namespace como;
+
 PYBIND11_MODULE(como_pybind, m) {
 
     // functions in comoreflapi.h
-    .def(
+    m.def(
         "CoGetComponentMetadataWithPath",
-        [](como::ComoRuntime& m, std::string s) {
+        [](std::string s) {
             String path(s.c_str());
             AutoPtr<IMetaComponent> mc;
             CoGetComponentMetadataWithPath(path, nullptr, mc);
             return mc;
         },
-        pybind11::return_value_policy::reference)
+        pybind11::return_value_policy::reference);
 }

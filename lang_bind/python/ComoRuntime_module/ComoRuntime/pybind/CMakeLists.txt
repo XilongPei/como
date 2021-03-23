@@ -16,12 +16,17 @@
 
 project(comoPybind CXX)
 
+#
+# g++ -O3 -Wall -shared -std=c++11 -fPIC `python3 -m pybind11 --includes` test_me.cpp -o test_me`python3-config --extension-suffix`
+#
+
 execute_process(COMMAND python3 -m pybind11 --includes OUTPUT_VARIABLE PYTHON_DEV_includes OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 STRING(REPLACE "-I" "" PYTHON_DEV_incs "${PYTHON_DEV_includes}")
 STRING(REGEX REPLACE  "[ \t\r\n]+" ";" PYTHON_DEV_INCLUDE "${PYTHON_DEV_incs}" )
+#message(FATAL_ERROR "=1== ${PYTHON_DEV_INCLUDE} ===")
 
-#message(FATAL_ERROR "=== ${PYTHON_DEV_INCLUDE} ===")
+add_compile_options(-fexceptions -frtti -std=gnu++11)
 
 include_directories(
     ./
@@ -36,7 +41,17 @@ set(SOURCES
 IMPORT_LIBRARY(comort.so)
 #IMPORT_GTEST()
 
-add_executable(como_pybind
+
+execute_process(COMMAND python3-config --extension-suffix OUTPUT_VARIABLE PYTHON_EXT_suffix OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+STRING(REPLACE "-I" "" PYTHON_EXT_suf "${PYTHON_EXT_suffix}")
+STRING(REGEX REPLACE  "[ \t\r\n]+" "" PYTHON_EXT_SUFFIX "${PYTHON_EXT_suf}" )
+set(COMO_PYBIND "como_pybind${PYTHON_EXT_SUFFIX}")
+#message(FATAL_ERROR "=2== ${COMO_PYBIND} ===")
+
+add_executable(${COMO_PYBIND}
     ${SOURCES})
-target_link_libraries(comort.so ${GTEST_LIBS})
+
+target_link_libraries(${COMO_PYBIND} comort.so ${GTEST_LIBS})
+
 add_dependencies(gtest gtest_main)
