@@ -26,7 +26,7 @@ STRING(REPLACE "-I" "" PYTHON_DEV_incs "${PYTHON_DEV_includes}")
 STRING(REGEX REPLACE  "[ \t\r\n]+" ";" PYTHON_DEV_INCLUDE "${PYTHON_DEV_incs}" )
 #message(FATAL_ERROR "=1== ${PYTHON_DEV_INCLUDE} ===")
 
-add_compile_options(-fexceptions -frtti -std=gnu++11)
+add_compile_options(-fexceptions -frtti -std=c++14 -fPIC -shared)
 
 include_directories(
     ./
@@ -49,7 +49,8 @@ STRING(REGEX REPLACE  "[ \t\r\n]+" "" PYTHON_EXT_SUFFIX "${PYTHON_EXT_suf}" )
 set(COMO_PYBIND "como_pybind${PYTHON_EXT_SUFFIX}")
 #message(FATAL_ERROR "=2== ${COMO_PYBIND} ===")
 
-add_executable(${COMO_PYBIND}
+add_library(${COMO_PYBIND}
+    SHARED
     ${SOURCES})
 
 target_link_libraries(${COMO_PYBIND} comort.so ${GTEST_LIBS})
