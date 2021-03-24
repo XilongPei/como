@@ -24,16 +24,21 @@ namespace py = pybind11;
 
 using namespace como;
 
+HANDLE myCoGetComponentMetadataWithPath(std::string s) {
+    String path(s.c_str());
+    AutoPtr<IMetaComponent> mc;
+    CoGetComponentMetadataWithPath(path, nullptr, mc);
+    return reinterpret_cast<HANDLE>((IMetaComponent *)mc);
+}
+
 PYBIND11_MODULE(como_pybind, m) {
 
     // functions in comoreflapi.h
     m.def(
         "CoGetComponentMetadataWithPath",
         [](std::string s) {
-            String path(s.c_str());
-            AutoPtr<IMetaComponent> mc;
-            CoGetComponentMetadataWithPath(path, nullptr, mc);
-            return mc;
+            HANDLE handle = myCoGetComponentMetadataWithPath(s);
+            return handle;
         },
         pybind11::return_value_policy::reference);
 }
