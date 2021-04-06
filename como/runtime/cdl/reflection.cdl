@@ -187,6 +187,9 @@ interface IMetaCoclass
         [out] IMetaMethod&& method);
 
     CreateObject(
+        [out] IInterface** object);
+
+    CreateObject(
         [in] InterfaceID iid,
         [out] IInterface** object);
 }

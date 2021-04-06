@@ -92,6 +92,9 @@ public:
         /* [out] */ AutoPtr<IMetaMethod>& method) override;
 
     ECode CreateObject(
+        /* [out] */ IInterface** object) override;
+
+    ECode CreateObject(
         /* [in] */ const InterfaceID& iid,
         /* [out] */ IInterface** object) override;
 

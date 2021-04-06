@@ -310,6 +310,12 @@ ECode CMetaCoclass::GetMethod(
 }
 
 ECode CMetaCoclass::CreateObject(
+    /* [out] */ IInterface** object)
+{
+    return CreateObject(IID_IInterface, object);
+}
+
+ECode CMetaCoclass::CreateObject(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ IInterface** object)
 {
