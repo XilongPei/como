@@ -770,9 +770,10 @@ String String::Replace(
     String newStr(nullptr);
     char* p = mString;
     Integer step = strlen(target);
+    Integer replacementSize = strlen(replacement);
     while (index != nullptr) {
-        newStr.AppendBytes(p, index - p - 1);
-        newStr.AppendBytes(replacement, step);
+        newStr.AppendBytes(p, index - p);
+        newStr.AppendBytes(replacement, replacementSize);
         p = index + step;
         index = strstr(p, target);
     }
