@@ -777,6 +777,10 @@ String String::Replace(
         p = index + step;
         index = strstr(p, target);
     }
+
+    if (*p != '\0')
+        newStr.AppendBytes(p, strlen(p));
+
     return newStr;
 }
 

@@ -14,19 +14,38 @@
 # limitations under the License.
 #=========================================================================
 
-set(RUNTIME_SRC_DIR ${TEST_SRC_DIR}/runtime)
-set(RUNTIME_OBJ_DIR ${TEST_OBJ_DIR}/runtime)
+project(StringTest CXX)
 
-add_subdirectory(array)
-add_subdirectory(autoptr)
-add_subdirectory(char)
-add_subdirectory(comostring)
-add_subdirectory(localstaticvariable)
-add_subdirectory(macro)
-# testMutex tests mutex in comort, so running testMutex needs export
-# mutex.h and related methods from comort.so
-#add_subdirectory(mutex)
-add_subdirectory(nestedinterface)
-add_subdirectory(outreferencetype)
-add_subdirectory(reflection)
-add_subdirectory(rpc)
+set(STRING_SRC_DIR ${RUNTIME_SRC_DIR}/comostring)
+set(STRING_OBJ_DIR ${RUNTIME_OBJ_DIR}/comostring)
+
+include_directories(
+    ./
+    ${INC_DIR}
+    ${STRING_OBJ_DIR})
+
+set(SOURCES
+    main.cpp)
+
+IMPORT_LIBRARY(comort.so)
+IMPORT_GTEST()
+
+add_executable(testString
+    ${SOURCES})
+target_link_libraries(testString comort.so ${GTEST_LIBS})
+add_dependencies(testString comort gtest gtest_main)
+
+COPY(testString ${STRING_OBJ_DIR}/testString ${BIN_DIR})
+
+install(FILES
+    ${STRING_OBJ_DIR}/testString
+    DESTINATION ${BIN_DIR}
+    PERMISSIONS
+        OWNER_READ
+        OWNER_WRITE
+        OWNER_EXECUTE
+        GROUP_READ
+        GROUP_WRITE
+        GROUP_EXECUTE
+        WORLD_READ
+        WORLD_EXECUTE)
