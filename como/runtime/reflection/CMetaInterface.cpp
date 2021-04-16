@@ -265,6 +265,10 @@ void CMetaInterface::BuildAllMethods()
 Integer CMetaInterface::BuildInterfaceMethod(
     /* [in] */ MetaInterface* mi)
 {
+    // there is no metadata in this component for external method
+    if (mi->mProperties & TYPE_EXTERNAL)
+        return 0;
+
     Integer startIndex = 0;
     if (mi->mBaseInterfaceIndex != -1) {
         startIndex = BuildInterfaceMethod(mOwner->mMetadata->mInterfaces[
