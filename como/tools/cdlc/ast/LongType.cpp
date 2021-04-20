@@ -37,7 +37,7 @@ bool LongType::IsBuildinType()
 
 String LongType::GetSignature()
 {
-    return "L";
+    return "J";
 }
 
 AutoPtr<Node> LongType::Clone(

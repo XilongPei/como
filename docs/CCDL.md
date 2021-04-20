@@ -228,7 +228,7 @@ There are two ways to add comments. One is using syntax "/* <*comment_literal*> 
 | Byte        |     B     |
 | Short       |     S     |
 | Integer     |     I     |
-| Long        |     L     |
+| Long        |     J     |
 | Float       |     F     |
 | Double      |     D     |
 | Char        |     C     |
