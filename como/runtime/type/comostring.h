@@ -37,7 +37,7 @@
 
 namespace como {
 
-template<class T> class Array;
+template<typename T> class Array;
 
 class COM_PUBLIC String
 {

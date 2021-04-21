@@ -23,7 +23,7 @@
 
 namespace como {
 
-template<class T>
+template<typename T>
 class ArrayList
 {
 public:
@@ -52,7 +52,7 @@ private:
     T* mData;
 };
 
-template<class T>
+template<typename T>
 ArrayList<T>::ArrayList(
     /* [in] */ Long initCap)
     : mCapacity(initCap)
@@ -65,7 +65,7 @@ ArrayList<T>::ArrayList(
     mData = (T*)calloc(sizeof(T), mCapacity);
 }
 
-template<class T>
+template<typename T>
 ArrayList<T>::~ArrayList()
 {
     DeleteFunc<T> deleteF;
@@ -75,7 +75,7 @@ ArrayList<T>::~ArrayList()
     free(mData);
 }
 
-template<class T>
+template<typename T>
 Boolean ArrayList<T>::Add(
     /* [in] */ const T& data)
 {
@@ -89,7 +89,7 @@ Boolean ArrayList<T>::Add(
     return true;
 }
 
-template<class T>
+template<typename T>
 T ArrayList<T>::Get(
     /* [in] */ Long index)
 {
@@ -99,7 +99,7 @@ T ArrayList<T>::Get(
     return mData[index];
 }
 
-template<class T>
+template<typename T>
 void ArrayList<T>::Remove(
     /* [in] */ Long index)
 {
@@ -115,13 +115,13 @@ void ArrayList<T>::Remove(
     mIndex--;
 }
 
-template<class T>
+template<typename T>
 Long ArrayList<T>::GetSize()
 {
     return mIndex;
 }
 
-template<class T>
+template<typename T>
 Boolean ArrayList<T>::EnsureCapacity()
 {
     if (mIndex < mCapacity) {

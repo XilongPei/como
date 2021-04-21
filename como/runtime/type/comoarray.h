@@ -23,7 +23,7 @@
 
 namespace como {
 
-template<class T>
+template<typename T>
 class Array : public Triple
 {
 public:
@@ -142,7 +142,7 @@ private:
         /* [in] */ Long size);
 };
 
-template<class T>
+template<typename T>
 Boolean Array<T>::Alloc(
     /* [in] */ Long size)
 {
@@ -169,7 +169,7 @@ Boolean Array<T>::Alloc(
     return true;
 }
 
-template<class T>
+template<typename T>
 Array<T>::Array()
 {
     mData = nullptr;
@@ -177,7 +177,7 @@ Array<T>::Array()
     mType = Type2Kind<T>::Kind();
 }
 
-template<class T>
+template<typename T>
 Array<T>::Array(
     /* [in] */ Long size)
 {
@@ -185,7 +185,7 @@ Array<T>::Array(
     Alloc(size);
 }
 
-template<class T>
+template<typename T>
 Array<T>::Array(
     /* [in] */ const Array<T>& other)
 {
@@ -196,7 +196,7 @@ Array<T>::Array(
     mSize = other.mSize;
 }
 
-template<class T>
+template<typename T>
 Array<T>::Array(
     /* [in] */ Array<T>&& other)
 {
@@ -206,7 +206,7 @@ Array<T>::Array(
     other.mSize = 0;
 }
 
-template<class T>
+template<typename T>
 Array<T>::Array(
     /* [in] */ std::initializer_list<T> list)
     : Array(list.size())
@@ -221,7 +221,7 @@ Array<T>::Array(
     }
 }
 
-template<class T>
+template<typename T>
 Array<T>::~Array()
 {
     if (mData != nullptr) {
@@ -238,31 +238,31 @@ Array<T>::~Array()
     mSize = 0;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::GetLength() const
 {
     return mSize;
 }
 
-template<class T>
+template<typename T>
 T* Array<T>::GetPayload() const
 {
     return static_cast<T*>(mData);
 }
 
-template<class T>
+template<typename T>
 Boolean Array<T>::IsNull() const
 {
     return mData == nullptr;
 }
 
-template<class T>
+template<typename T>
 Boolean Array<T>::IsEmpty() const
 {
     return mSize == 0;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ T const* srcData,
     /* [in] */ Long length)
@@ -281,7 +281,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ T const* srcData,
@@ -309,7 +309,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ T const* srcData,
@@ -339,7 +339,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray)
 {
@@ -360,7 +360,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long length)
@@ -382,7 +382,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long srcPos,
@@ -405,7 +405,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ const Array<T>& srcArray)
@@ -435,7 +435,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ const Array<T>& srcArray,
@@ -466,7 +466,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ const Array<T>& srcArray,
@@ -498,7 +498,7 @@ Long Array<T>::Copy(
     return N;
 }
 
-template<class T>
+template<typename T>
 void Array<T>::Set(
     /* [in] */ Long index,
     /* [in] */ T value)
@@ -508,7 +508,7 @@ void Array<T>::Set(
     assignF(&array[index], value, mData);
 }
 
-template<class T>
+template<typename T>
 Boolean Array<T>::Equals(
     /* [in] */ const Array<T>& other) const
 {
@@ -516,7 +516,7 @@ Boolean Array<T>::Equals(
             mType == other.mType;
 }
 
-template<class T>
+template<typename T>
 Boolean Array<T>::operator==(
     /* [in] */ const Array<T>& other) const
 {
@@ -524,7 +524,7 @@ Boolean Array<T>::operator==(
             mType == other.mType;
 }
 
-template<class T>
+template<typename T>
 Array<T>& Array<T>::operator=(
     /* [in] */ const Array<T>& other)
 {
@@ -550,7 +550,7 @@ Array<T>& Array<T>::operator=(
     return *this;
 }
 
-template<class T>
+template<typename T>
 Array<T>& Array<T>::operator=(
     /* [in] */ Array<T>&& other)
 {
@@ -571,7 +571,7 @@ Array<T>& Array<T>::operator=(
     return *this;
 }
 
-template<class T>
+template<typename T>
 Array<T>& Array<T>::operator=(
     /* [in] */ std::initializer_list<T> list)
 {
@@ -598,7 +598,7 @@ Array<T>& Array<T>::operator=(
     return *this;
 }
 
-template<class T>
+template<typename T>
 T& Array<T>::operator[](
     /* [in] */ Long index)
 {
@@ -606,7 +606,7 @@ T& Array<T>::operator[](
     return array[index];
 }
 
-template<class T>
+template<typename T>
 const T& Array<T>::operator[](
     /* [in] */ Long index) const
 {
@@ -614,31 +614,31 @@ const T& Array<T>::operator[](
     return array[index];
 }
 
-template<class T>
+template<typename T>
 T* Array<T>::begin()
 {
     return static_cast<T*>(mData);
 }
 
-template<class T>
+template<typename T>
 const T* Array<T>::begin() const
 {
     return static_cast<T*>(mData);
 }
 
-template<class T>
+template<typename T>
 T* Array<T>::end()
 {
     return static_cast<T*>(mData) + mSize;
 }
 
-template<class T>
+template<typename T>
 const T* Array<T>::end() const
 {
     return static_cast<T*>(mData) + mSize;
 }
 
-template<class T>
+template<typename T>
 void Array<T>::Clear()
 {
     if (mData != nullptr) {
@@ -655,7 +655,7 @@ void Array<T>::Clear()
     mSize = 0;
 }
 
-template<class T>
+template<typename T>
 Array<T> Array<T>::Clone() const
 {
     Array<T> newArray;
@@ -674,20 +674,20 @@ Array<T> Array<T>::Clone() const
     return newArray;
 }
 
-template<class T>
+template<typename T>
 Array<T> Array<T>::Allocate(
     /* [in] */ Long size)
 {
     return Array<T>(size);
 }
 
-template<class T>
+template<typename T>
 Array<T> Array<T>::Null()
 {
     return Array<T>();
 }
 
-template<class T, Boolean isIInterfaceSubclass>
+template<typename T, Boolean isIInterfaceSubclass>
 struct ConvertImpl
 {
     Array<IInterface*> operator()(
@@ -697,7 +697,7 @@ struct ConvertImpl
     }
 };
 
-template<class T>
+template<typename T>
 struct ConvertImpl<T, true>
 {
     Array<IInterface*> operator()(
@@ -707,7 +707,7 @@ struct ConvertImpl<T, true>
     }
 };
 
-template<class T>
+template<typename T>
 Array<T>::operator Array<IInterface*>()
 {
     typedef typename TypeTraits<T>::BareType BareType;

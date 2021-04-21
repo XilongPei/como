@@ -22,7 +22,7 @@
 
 namespace como {
 
-template<class T>
+template<typename T>
 class AutoPtr
 {
 public:
@@ -39,15 +39,15 @@ public:
     AutoPtr(
         /* [in] */ AutoPtr<T>&& other);
 
-    template<class U>
+    template<typename U>
     AutoPtr(
         /* [in] */ U* other);
 
-    template<class U>
+    template<typename U>
     AutoPtr(
         /* [in] */ const AutoPtr<U>& other);
 
-    template<class U>
+    template<typename U>
     AutoPtr(
         /* [in] */ AutoPtr<U>&& other);
 
@@ -62,22 +62,22 @@ public:
     AutoPtr& operator=(
         /* [in] */ AutoPtr<T>&& other);
 
-    template<class U>
+    template<typename U>
     AutoPtr& operator=(
         /* [in] */ U* other);
 
-    template<class U>
+    template<typename U>
     AutoPtr& operator=(
         /* [in] */ const AutoPtr<U>& other);
 
-    template<class U>
+    template<typename U>
     AutoPtr& operator=(
         /* [in] */ AutoPtr<U>&& other);
 
     void MoveTo(
         /* [out] */ T** other);
 
-    template<class U>
+    template<typename U>
     void MoveTo(
         /* [out] */ U** other);
 
@@ -99,11 +99,11 @@ public:
     inline Boolean operator==(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator==(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator==(
         /* [in] */ const AutoPtr<U>& other) const;
 
@@ -113,11 +113,11 @@ public:
     inline Boolean operator!=(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator!=(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator!=(
         /* [in] */ const AutoPtr<U>& other) const;
 
@@ -127,11 +127,11 @@ public:
     inline Boolean operator>(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator>(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator>(
         /* [in] */ const AutoPtr<U>& other) const;
 
@@ -141,11 +141,11 @@ public:
     inline Boolean operator<(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator<(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator<(
         /* [in] */ const AutoPtr<U>& other) const;
 
@@ -155,11 +155,11 @@ public:
     inline Boolean operator>=(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator>=(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator>=(
         /* [in] */ const AutoPtr<U>& other) const;
 
@@ -169,30 +169,30 @@ public:
     inline Boolean operator<=(
         /* [in] */ const AutoPtr<T>& other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator<=(
         /* [in] */ U* other) const;
 
-    template<class U>
+    template<typename U>
     inline Boolean operator<=(
         /* [in] */ const AutoPtr<U>& other) const;
 
 private:
-    template<class U, class Y, Boolean isSuperSubclass> friend struct CopyConstructorImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct MoveAssignImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct MoveToImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct EqualImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct NotEqualImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct GreaterImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct LessImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct GreaterEqualImpl;
-    template<class U, class Y, Boolean isSuperSubclass> friend struct LessEqualImpl;
-    template<class U, Boolean isIInterfaceSubclass> friend struct AutoPtrConvertImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct CopyConstructorImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct MoveAssignImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct MoveToImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct EqualImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct NotEqualImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct GreaterImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct LessImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct GreaterEqualImpl;
+    template<typename U, typename Y, Boolean isSuperSubclass> friend struct LessEqualImpl;
+    template<typename U, Boolean isIInterfaceSubclass> friend struct AutoPtrConvertImpl;
 
     T* mPtr;
 };
 
-template<class U, class Y, Boolean isSuperSubclass>
+template<typename U, typename Y, Boolean isSuperSubclass>
 struct CopyConstructorImpl
 {
     void operator()(
@@ -229,7 +229,7 @@ struct CopyConstructorImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct CopyConstructorImpl<U, Y, true>
 {
     void operator()(
@@ -257,7 +257,7 @@ struct CopyConstructorImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSuperSubclass>
+template<typename U, typename Y, Boolean isSuperSubclass>
 struct MoveAssignImpl
 {
     AutoPtr<U>& operator()(
@@ -306,7 +306,7 @@ struct MoveAssignImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct MoveAssignImpl<U, Y, true>
 {
     AutoPtr<U>& operator()(
@@ -346,7 +346,7 @@ struct MoveAssignImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct MoveToImpl
 {
     void operator()(
@@ -363,7 +363,7 @@ struct MoveToImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct MoveToImpl<U, Y, true>
 {
     void operator()(
@@ -377,7 +377,7 @@ struct MoveToImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct EqualImpl
 {
     Boolean operator()(
@@ -397,7 +397,7 @@ struct EqualImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct EqualImpl<U, Y, true>
 {
     Boolean operator()(
@@ -415,7 +415,7 @@ struct EqualImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct NotEqualImpl
 {
     Boolean operator()(
@@ -435,7 +435,7 @@ struct NotEqualImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct NotEqualImpl<U, Y, true>
 {
     Boolean operator()(
@@ -453,7 +453,7 @@ struct NotEqualImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct GreaterImpl
 {
     Boolean operator()(
@@ -473,7 +473,7 @@ struct GreaterImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct GreaterImpl<U, Y, true>
 {
     Boolean operator()(
@@ -491,7 +491,7 @@ struct GreaterImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct LessImpl
 {
     Boolean operator()(
@@ -511,7 +511,7 @@ struct LessImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct LessImpl<U, Y, true>
 {
     Boolean operator()(
@@ -529,7 +529,7 @@ struct LessImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct GreaterEqualImpl
 {
     Boolean operator()(
@@ -549,7 +549,7 @@ struct GreaterEqualImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct GreaterEqualImpl<U, Y, true>
 {
     Boolean operator()(
@@ -567,7 +567,7 @@ struct GreaterEqualImpl<U, Y, true>
     }
 };
 
-template<class U, class Y, Boolean isSubSuperclass>
+template<typename U, typename Y, Boolean isSubSuperclass>
 struct LessEqualImpl
 {
     Boolean operator()(
@@ -587,7 +587,7 @@ struct LessEqualImpl
     }
 };
 
-template<class U, class Y>
+template<typename U, typename Y>
 struct LessEqualImpl<U, Y, true>
 {
     Boolean operator()(
@@ -605,7 +605,7 @@ struct LessEqualImpl<U, Y, true>
     }
 };
 
-template<class U, Boolean isIInterfaceSubclass>
+template<typename U, Boolean isIInterfaceSubclass>
 struct AutoPtrConvertImpl
 {
     AutoPtr<IInterface>& operator()(
@@ -615,7 +615,7 @@ struct AutoPtrConvertImpl
     }
 };
 
-template<class U>
+template<typename U>
 struct AutoPtrConvertImpl<U, true>
 {
     AutoPtr<IInterface>& operator()(
@@ -625,7 +625,7 @@ struct AutoPtrConvertImpl<U, true>
     }
 };
 
-template<class T>
+template<typename T>
 AutoPtr<T>::AutoPtr(
     /* [in] */ T* other)
     : mPtr(other)
@@ -635,7 +635,7 @@ AutoPtr<T>::AutoPtr(
     }
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>::AutoPtr(
     /* [in] */ const AutoPtr<T>& other)
     : mPtr(other.mPtr)
@@ -645,7 +645,7 @@ AutoPtr<T>::AutoPtr(
     }
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>::AutoPtr(
     /* [in] */ AutoPtr<T>&& other)
     : mPtr(other.mPtr)
@@ -653,7 +653,7 @@ AutoPtr<T>::AutoPtr(
     other.mPtr = nullptr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>::AutoPtr(
     /* [in] */ U* other)
 {
@@ -661,7 +661,7 @@ AutoPtr<T>::AutoPtr(
     impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>::AutoPtr(
     /* [in] */ const AutoPtr<U>& other)
 {
@@ -669,7 +669,7 @@ AutoPtr<T>::AutoPtr(
     impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>::AutoPtr(
     /* [in] */ AutoPtr<U>&& other)
 {
@@ -677,7 +677,7 @@ AutoPtr<T>::AutoPtr(
     impl(this, std::move(other));
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>::~AutoPtr()
 {
     if (mPtr != nullptr) {
@@ -685,7 +685,7 @@ AutoPtr<T>::~AutoPtr()
     }
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ T* other)
 {
@@ -701,7 +701,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return *this;
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ const AutoPtr<T>& other)
 {
@@ -717,7 +717,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return *this;
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ AutoPtr<T>&& other)
 {
@@ -729,7 +729,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return *this;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ U* other)
 {
@@ -737,7 +737,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ const AutoPtr<U>& other)
 {
@@ -745,7 +745,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ AutoPtr<U>&& other)
 {
@@ -753,7 +753,7 @@ AutoPtr<T>& AutoPtr<T>::operator=(
     return impl(this, std::move(other));
 }
 
-template<class T>
+template<typename T>
 void AutoPtr<T>::MoveTo(
     /* [out] */ T** other)
 {
@@ -763,7 +763,7 @@ void AutoPtr<T>::MoveTo(
     }
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 void AutoPtr<T>::MoveTo(
     /* [out] */ U** other)
 {
@@ -771,58 +771,58 @@ void AutoPtr<T>::MoveTo(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>::operator T*() const
 {
     return mPtr;
 }
 
-template<class T>
+template<typename T>
 AutoPtr<T>::operator AutoPtr<IInterface>&() const
 {
     AutoPtrConvertImpl<T, SUPERSUBCLASS(IInterface, T)> impl;
     return impl(this);
 }
 
-template<class T>
+template<typename T>
 T** AutoPtr<T>::operator&()
 {
     return &mPtr;
 }
 
-template<class T>
+template<typename T>
 T* AutoPtr<T>::operator->() const
 {
     return mPtr;
 }
 
-template<class T>
+template<typename T>
 T& AutoPtr<T>::operator*() const
 {
     return *mPtr;
 }
 
-template<class T>
+template<typename T>
 T* AutoPtr<T>::Get() const
 {
     return mPtr;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator==(
     /* [in] */ T* other) const
 {
     return mPtr == other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator==(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr == other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator==(
     /* [in] */ U* other) const
 {
@@ -830,7 +830,7 @@ Boolean AutoPtr<T>::operator==(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator==(
     /* [in] */ const AutoPtr<U>& other) const
 {
@@ -838,21 +838,21 @@ Boolean AutoPtr<T>::operator==(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator!=(
     /* [in] */ T* other) const
 {
     return mPtr != other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator!=(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr != other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator!=(
     /* [in] */ U* other) const
 {
@@ -860,7 +860,7 @@ Boolean AutoPtr<T>::operator!=(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator!=(
     /* [in] */ const AutoPtr<U>& other) const
 {
@@ -868,21 +868,21 @@ Boolean AutoPtr<T>::operator!=(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator>(
     /* [in] */ T* other) const
 {
     return mPtr > other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator>(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr > other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator>(
     /* [in] */ U* other) const
 {
@@ -890,7 +890,7 @@ Boolean AutoPtr<T>::operator>(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator>(
     /* [in] */ const AutoPtr<U>& other) const
 {
@@ -898,21 +898,21 @@ Boolean AutoPtr<T>::operator>(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator<(
     /* [in] */ T* other) const
 {
     return mPtr < other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator<(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr < other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator<(
     /* [in] */ U* other) const
 {
@@ -920,7 +920,7 @@ Boolean AutoPtr<T>::operator<(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator<(
     /* [in] */ const AutoPtr<U>& other) const
 {
@@ -928,21 +928,21 @@ Boolean AutoPtr<T>::operator<(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator>=(
     /* [in] */ T* other) const
 {
     return mPtr >= other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator>=(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr >= other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator>=(
     /* [in] */ U* other) const
 {
@@ -950,7 +950,7 @@ Boolean AutoPtr<T>::operator>=(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator>=(
     /* [in] */ const AutoPtr<U>& other) const
 {
@@ -958,21 +958,21 @@ Boolean AutoPtr<T>::operator>=(
     return impl(this, other);
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator<=(
     /* [in] */ T* other) const
 {
     return mPtr <= other;
 }
 
-template<class T>
+template<typename T>
 Boolean AutoPtr<T>::operator<=(
     /* [in] */ const AutoPtr<T>& other) const
 {
     return mPtr <= other.mPtr;
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator<=(
     /* [in] */ U* other) const
 {
@@ -980,7 +980,7 @@ Boolean AutoPtr<T>::operator<=(
     return impl(this, other);
 }
 
-template<class T> template<class U>
+template<typename T> template<typename U>
 Boolean AutoPtr<T>::operator<=(
     /* [in] */ const AutoPtr<U>& other) const
 {

@@ -202,11 +202,11 @@ private:
     ECode ContinueWrite(
         /* [in] */ Long desired);
 
-    template<class T>
+    template<typename T>
     ECode ReadAligned(
         /* [out] */ T* value) const;
 
-    template<class T>
+    template<typename T>
     ECode WriteAligned(
         /* [in] */ T value);
 

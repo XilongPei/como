@@ -48,7 +48,7 @@ inline int get_next_prime(int n)
     return get_lower_bound(&prime_list[0], &prime_list[10], n);
 }
 
-template<class Key, class Val>
+template<typename Key, typename Val>
 class HashMap
 {
 private:

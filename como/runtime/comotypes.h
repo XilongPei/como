@@ -234,7 +234,7 @@ struct COM_PUBLIC Triple
     TypeKind mType;
 };
 
-template<class T>
+template<typename T>
 struct Type2Kind
 {
     static TypeKind Kind()
@@ -274,7 +274,7 @@ TYPE2KIND_SPEC(InterfaceID, TypeKind::InterfaceID, true);
 TYPE2KIND_SPEC(IInterface*, TypeKind::Interface, false);
 TYPE2KIND_SPEC(UUID, TypeKind::Unknown, true);
 
-template<class T, class U>
+template<typename T, typename U>
 class Conversion
 {
     typedef char Small;
@@ -288,7 +288,7 @@ public:
     enum { sameType = false };
 };
 
-template<class T>
+template<typename T>
 class Conversion<T, T>
 {
 public:
@@ -303,7 +303,7 @@ public:
     (SUPERSUBCLASS(T,U) &&                          \
      !Conversion<const T, const U>::sameType)
 
-template<class T>
+template<typename T>
 class TypeTraits
 {
 public:
@@ -312,7 +312,7 @@ public:
     enum { isArray = SUPERSUBCLASS_STRICT(Triple, T) };
 };
 
-template<class T>
+template<typename T>
 class TypeTraits<T*>
 {
 public:
@@ -321,7 +321,7 @@ public:
     enum { isArray = 0 };
 };
 
-template<class T>
+template<typename T>
 class TypeTraits<const T*>
 {
 public:
@@ -331,19 +331,19 @@ public:
 };
 
 #define CREATE_MEMBER_DETECTOR(X)                                                   \
-template<class T>                                                                   \
+template<typename T>                                                                \
 class Detect_##X                                                                    \
 {                                                                                   \
     struct Fallback { int X; };                                                     \
     struct Derived : T, Fallback { };                                               \
                                                                                     \
-    template<class U, U> struct Check;                                              \
+    template<typename U, U> struct Check;                                           \
                                                                                     \
     typedef char ArrayOfOne[1];                                                     \
     typedef char ArrayOfTwo[2];                                                     \
                                                                                     \
-    template<class U> static ArrayOfOne & func(Check<int Fallback::*, &U::X> *);    \
-    template<class U> static ArrayOfTwo & func(...);                                \
+    template<typename U> static ArrayOfOne & func(Check<int Fallback::*, &U::X> *); \
+    template<typename U> static ArrayOfTwo & func(...);                             \
 public:                                                                             \
     typedef Detect_##X type;                                                        \
     enum { exists = sizeof(func<Derived>(0)) == 2 };                                \
@@ -357,7 +357,7 @@ CREATE_MEMBER_DETECTOR(Release);
 
 //-----------------------------------------------------------------
 
-template<class T, Boolean = Type2Kind<T>::isPrimitiveType>
+template<typename T, Boolean = Type2Kind<T>::isPrimitiveType>
 struct InitFunc
 {
     void operator()(
@@ -368,7 +368,7 @@ struct InitFunc
     }
 };
 
-template<class T>
+template<typename T>
 struct InitFunc<T, true>
 {
     void operator()(
@@ -392,7 +392,7 @@ struct InitFunc<UUID, true>
 
 //-----------------------------------------------------------------
 
-template<class T, Boolean hasAddRefAndRelease>
+template<typename T, Boolean hasAddRefAndRelease>
 struct AssignImpl
 {
     void operator()(
@@ -404,7 +404,7 @@ struct AssignImpl
     }
 };
 
-template<class T>
+template<typename T>
 struct AssignImpl<T, true>
 {
     void operator()(
@@ -422,7 +422,7 @@ struct AssignImpl<T, true>
     }
 };
 
-template<class T, Boolean = Type2Kind<T>::isPrimitiveType>
+template<typename T, Boolean = Type2Kind<T>::isPrimitiveType>
 struct AssignFunc
 {
     void operator()(
@@ -436,7 +436,7 @@ struct AssignFunc
     }
 };
 
-template<class T>
+template<typename T>
 struct AssignFunc<T, true>
 {
     void operator()(
@@ -450,7 +450,7 @@ struct AssignFunc<T, true>
 
 //-----------------------------------------------------------------
 
-template<class T, Boolean = TypeTraits<T>::isArray>
+template<typename T, Boolean = TypeTraits<T>::isArray>
 struct DeleteTriple
 {
     void operator()(
@@ -459,7 +459,7 @@ struct DeleteTriple
     {}
 };
 
-template<class T>
+template<typename T>
 struct DeleteTriple<Array<T>, true>
 {
     void operator()(
@@ -487,7 +487,7 @@ struct DeleteTriple<Array<T>, true>
     }
 };
 
-template<class T, Boolean hasAddRefAndRelease>
+template<typename T, Boolean hasAddRefAndRelease>
 struct DeleteImpl
 {
     void operator()(
@@ -501,7 +501,7 @@ struct DeleteImpl
     }
 };
 
-template<class T>
+template<typename T>
 struct DeleteImpl<T, true>
 {
     void operator()(
@@ -515,7 +515,7 @@ struct DeleteImpl<T, true>
     }
 };
 
-template<class T, Boolean = Type2Kind<T>::isPrimitiveType>
+template<typename T, Boolean = Type2Kind<T>::isPrimitiveType>
 struct DeleteFunc
 {
     void operator()(
@@ -528,7 +528,7 @@ struct DeleteFunc
     }
 };
 
-template<class T>
+template<typename T>
 struct DeleteFunc<T, true>
 {
     void operator()(
@@ -550,7 +550,7 @@ struct DeleteFunc<String, true>
 
 //-----------------------------------------------------------------
 
-template<class T>
+template<typename T>
 struct CompareFunc
 {
     Integer operator()(
@@ -587,7 +587,7 @@ struct CompareFunc<UUID>
 
 //-----------------------------------------------------------------
 
-template<class T>
+template<typename T>
 struct HashFunc
 {
     Integer operator()(

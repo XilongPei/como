@@ -1030,7 +1030,7 @@ ECode CDBusParcel::ContinueWrite(
     return NOERROR;
 }
 
-template<class T>
+template<typename T>
 ECode CDBusParcel::ReadAligned(
     /* [out] */ T* value) const
 {
@@ -1050,7 +1050,7 @@ ECode CDBusParcel::ReadAligned(
     }
 }
 
-template<class T>
+template<typename T>
 ECode CDBusParcel::WriteAligned(
     /* [in] */ T value)
 {
