@@ -260,6 +260,19 @@ ECode CMetaCoclass::GetAllMethods(
     return NOERROR;
 }
 
+ECode CMetaCoclass::GetAllMethodsOverrideInfo(
+    /* [out] */ Array<Boolean>& overridesInfo)
+{
+   BuildAllMethods();
+
+   Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
+    for (Integer i = 0; i < N; i++) {
+        overridesInfo.Set(i, mOverridesInfo[i]);
+    }
+
+    return NOERROR;
+}
+
 ECode CMetaCoclass::GetMethod(
     /* [in] */ const String& fullName,
     /* [in] */ const String& signature,
@@ -384,6 +397,40 @@ void CMetaCoclass::BuildAllMethods()
                 }
                 BuildInterfaceMethodLocked(miObj, index);
             }
+
+            Integer methodNumber = mMethods.GetLength();
+            mOverridesInfo = Array<Boolean>(methodNumber);
+
+            for (Integer i = 0;  i < methodNumber;  i++)
+                mOverridesInfo[i] = false;
+
+            for (Integer idxMethod = 0;  idxMethod < methodNumber;  idxMethod++) {
+                if (mOverridesInfo[idxMethod])
+                    continue;
+
+                String strMethodName;
+                mMethods[idxMethod]->GetName(strMethodName);
+                String str_;
+                for (Integer i = 0;  i < methodNumber;  i++) {
+                    if (i < idxMethod) {
+                        if (mOverridesInfo[i]) {
+                            mMethods[i]->GetName(str_);
+                            if (strMethodName.Equals(str_)) {
+                                mOverridesInfo[idxMethod] = true;
+                                break;
+                            }
+                        }
+                    }
+                    else if (i > idxMethod) {
+                        mMethods[i]->GetName(str_);
+                        if (strMethodName.Equals(str_)) {
+                            mOverridesInfo[idxMethod] = true;
+                            mOverridesInfo[i] = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -394,7 +441,7 @@ void CMetaCoclass::BuildInterfaceMethodLocked(
 {
     Integer N;
     miObj->GetMethodNumber(N);
-    for (Integer i = miObj == mOwner->mIInterface ? 0 : 4; i < N; i++) {
+    for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4); i < N; i++) {
         AutoPtr<IMetaMethod> mmObj;
         miObj->GetMethod(i, mmObj);
         mMethods.Set(index, mmObj);

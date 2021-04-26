@@ -181,6 +181,9 @@ interface IMetaCoclass
     GetAllMethods(
         [out] Array<IMetaMethod*>& methods);
 
+    GetAllMethodsOverrideInfo(
+        [out] Array<Boolean>& overidesInfo);
+
     GetMethod(
         [in] String fullName,
         [in] String signature,

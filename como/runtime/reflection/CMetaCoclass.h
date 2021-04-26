@@ -86,6 +86,9 @@ public:
     ECode GetAllMethods(
         /* [out] */ Array<IMetaMethod*>& methods) override;
 
+    ECode GetAllMethodsOverrideInfo(
+        /* [out] */ Array<Boolean>& overridesInfo) override;
+
     ECode GetMethod(
         /* [in] */ const String& fullName,
         /* [in] */ const String& signature,
@@ -118,6 +121,7 @@ public:
     Array<IMetaConstructor*> mConstructors;
     Mutex mConstructorsLock;
     Array<IMetaMethod*> mMethods;
+    Array<Boolean> mOverridesInfo;
     Mutex mMethodsLock { true };
     Array<IMetaInterface*> mInterfaces;
     Mutex mInterfacesLock;
