@@ -312,10 +312,25 @@ ECode CMetaCoclass::GetMethod(
         IMetaMethod* mmObj = mMethods[i];
         String mmName, mmSignature;
         mmObj->GetName(mmName);
-        mmObj->GetSignature(mmSignature);
-        if (mmName.Equals(fullName) && mmSignature.Equals(signature)) {
-            method = mmObj;
-            return NOERROR;
+        if (mmName.Equals(fullName)) {
+            if (! mOverridesInfo[i]) {
+                if (signature.IsEmpty()) {
+                    method = mmObj;
+                    return NOERROR;
+                }
+                mmObj->GetSignature(mmSignature);
+                if (mmSignature.Equals(signature)) {
+                    method = mmObj;
+                    return NOERROR;
+                }
+                break;
+            }
+
+            mmObj->GetSignature(mmSignature);
+            if (mmSignature.Equals(signature)) {
+                method = mmObj;
+                return NOERROR;
+            }
         }
     }
     method = nullptr;
