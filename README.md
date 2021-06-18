@@ -10,6 +10,16 @@ COMO is a C++ Component Model. It can:
 
 **libcore** is the core library.
 
+### Install build-essential
+###### openEuler
+```shell
+sudo yum groupinstall 'Development Tools'
+```
+###### Ubuntu
+```shell
+1. sudo apt install build-essential
+```
+
 ### Install cmake
 ###### openEuler
 ```shell
