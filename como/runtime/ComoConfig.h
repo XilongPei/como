@@ -17,13 +17,27 @@
 #ifndef __COMO_CONFIG_H__
 #define __COMO_CONFIG_H__
 
+#include "comotypes.h"
+
 namespace como {
+
+// CPU, DSA(Domain Specific Architecture)
+using CpuInvokeDsa = ECode(*)(
+    /* [in] */ HANDLE func,
+    /* [in] */ Byte* params,
+    /* [in] */ Integer paramNum,
+    /* [in] */ Integer stackParamNum,
+    /* [in] */ struct ParameterInfo* paramInfos);
+
+#define MAX_DSA_IN_ONE_SYSTEM   2
 
 class ComoConfig
 {
 public:
     static int ThreadPool_MAX_THREAD_NUM;
     static int Logger_sLevel;
+
+    static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
 };
 
 } // namespace como
