@@ -200,6 +200,12 @@ ECode CMetaConstructor::Invoke(
     /* [in] */ IInterface* thisObject,
     /* [in] */ IArgumentList* argList)
 {
+#ifdef ENABLE_RUNTIME_LOGGER
+    String methodName;
+    GetName(methodName);
+    Logger::V("CMetaMethod::Invoke", "%s", methodName);
+#endif
+
     return InvokeImpl(thisObject, argList, nullptr);
 }
 
@@ -211,6 +217,12 @@ ECode CMetaConstructor::InvokeDsa(
     /* [in] */ Integer idxDsa,
     /* [in] */ IArgumentList* argList)
 {
+#ifdef ENABLE_RUNTIME_LOGGER
+    String methodName;
+    GetName(methodName);
+    Logger::V("CMetaMethod::InvokeDsa", "%s", methodName);
+#endif
+
     return InvokeImpl(thisObject, argList, ComoConfig::cpuInvokeDsa[idxDsa]);
 }
 
@@ -221,6 +233,12 @@ ECode CMetaConstructor::InvokeVm(
     /* [in] */ IInterface* thisObject,
     /* [in] */ IArgumentList* argList)
 {
+#ifdef ENABLE_RUNTIME_LOGGER
+    String methodName;
+    GetName(methodName);
+    Logger::V("CMetaMethod::InvokeVm", "%s", methodName);
+#endif
+
     // check object
     ECode ec = 0;
     if (FAILED(ec)) {

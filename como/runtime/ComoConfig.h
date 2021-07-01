@@ -30,6 +30,7 @@ using CpuInvokeDsa = ECode(*)(
     /* [in] */ struct ParameterInfo* paramInfos);
 
 #define MAX_DSA_IN_ONE_SYSTEM   2
+#define ENABLE_RUNTIME_LOGGER   1
 
 class ComoConfig
 {
