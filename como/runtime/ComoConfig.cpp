@@ -19,7 +19,7 @@
 namespace como {
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
-CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
+CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 
 /*
  * /como/como/como/runtime/util/comolog.h

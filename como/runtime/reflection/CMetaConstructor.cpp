@@ -142,9 +142,10 @@ ECode CMetaConstructor::CreateArgumentList(
     return NOERROR;
 }
 
-ECode CMetaConstructor::Invoke(
+ECode CMetaConstructor::InvokeImpl(
     /* [in] */ IInterface* thisObject,
-    /* [in] */ IArgumentList* argList)
+    /* [in] */ IArgumentList* argList,
+    /* [in] */ CpuInvokeDsa invokeImpl)
 {
     struct VTable
     {
@@ -188,7 +189,45 @@ ECode CMetaConstructor::Invoke(
             *reinterpret_cast<InterfaceID*>(&mClassObjectInterface->mUuid)));
     reinterpret_cast<HANDLE*>(params)[0] = reinterpret_cast<HANDLE>(vobj);
     HANDLE methodAddr = vobj->mVtab->mMethods[mIndex];
-    return invoke(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+
+    if (invokeImpl == nullptr)
+        return invoke(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+
+    return invokeImpl(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+}
+
+ECode CMetaConstructor::Invoke(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ IArgumentList* argList)
+{
+    return InvokeImpl(thisObject, argList, nullptr);
+}
+
+/*
+ * call method from DSA(Domain Specific Architecture)
+ */
+ECode CMetaConstructor::InvokeDsa(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ Integer idxDsa,
+    /* [in] */ IArgumentList* argList)
+{
+    return InvokeImpl(thisObject, argList, ComoConfig::cpuInvokeDsa[idxDsa]);
+}
+
+/*
+ * check object, then call a method
+ */
+ECode CMetaConstructor::InvokeVm(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ IArgumentList* argList)
+{
+    // check object
+    ECode ec = 0;
+    if (FAILED(ec)) {
+        return ec;
+    }
+
+    return InvokeImpl(thisObject, argList, nullptr);
 }
 
 ECode CMetaConstructor::GetCoclass(

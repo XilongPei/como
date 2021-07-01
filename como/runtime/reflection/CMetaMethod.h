@@ -21,6 +21,7 @@
 #include "metadata/Component.h"
 #include "util/comoref.h"
 #include "util/mutex.h"
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -74,8 +75,22 @@ public:
         /* [in] */ IInterface* thisObject,
         /* [in] */ IArgumentList* argList) override;
 
+    ECode InvokeDsa(
+        /* [in] */ IInterface* thisObject,
+        /* [in] */ Integer idxDsa,
+        /* [in] */ IArgumentList* argList) override;
+
+    ECode InvokeVm(
+        /* [in] */ IInterface* thisObject,
+        /* [in] */ IArgumentList* argList) override;
+
 private:
     void BuildAllParameters();
+
+    ECode InvokeImpl(
+        /* [in] */ IInterface* thisObject,
+        /* [in] */ IArgumentList* argList,
+        /* [in] */ CpuInvokeDsa invokeImpl);
 
 public:
     MetaMethod* mMetadata;

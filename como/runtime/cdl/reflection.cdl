@@ -353,6 +353,15 @@ interface IMetaMethod
     Invoke(
         [in] IInterface* thisObject,
         [in] IArgumentList* argList);
+
+    InvokeDsa(
+        [in] IInterface* thisObject,
+        [in] Integer idxDsa,
+        [in] IArgumentList* argList);
+
+    InvokeVm(
+        [in] IInterface* thisObject,
+        [in] IArgumentList* argList);
 }
 
 [

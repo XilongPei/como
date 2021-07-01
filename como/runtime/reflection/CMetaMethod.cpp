@@ -158,9 +158,10 @@ ECode CMetaMethod::CreateArgumentList(
     return NOERROR;
 }
 
-ECode CMetaMethod::Invoke(
+ECode CMetaMethod::InvokeImpl(
     /* [in] */ IInterface* thisObject,
-    /* [in] */ IArgumentList* argList)
+    /* [in] */ IArgumentList* argList,
+    /* [in] */ CpuInvokeDsa invokeImpl)
 {
     struct VTable
     {
@@ -209,7 +210,45 @@ ECode CMetaMethod::Invoke(
     } else {
         reinterpret_cast<HANDLE*>(params)[0] = mVobj;
     }
-    return invoke(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+
+    if (invokeImpl == nullptr)
+        return invoke(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+
+    return invokeImpl(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+}
+
+ECode CMetaMethod::Invoke(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ IArgumentList* argList)
+{
+    return InvokeImpl(thisObject, argList, nullptr);
+}
+
+/*
+ * call method from DSA(Domain Specific Architecture)
+ */
+ECode CMetaMethod::InvokeDsa(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ Integer idxDsa,
+    /* [in] */ IArgumentList* argList)
+{
+    return InvokeImpl(thisObject, argList, ComoConfig::cpuInvokeDsa[idxDsa]);
+}
+
+/*
+ * check object, then call a method
+ */
+ECode CMetaMethod::InvokeVm(
+    /* [in] */ IInterface* thisObject,
+    /* [in] */ IArgumentList* argList)
+{
+    // check object
+    ECode ec = 0;
+    if (FAILED(ec)) {
+        return ec;
+    }
+
+    return InvokeImpl(thisObject, argList, nullptr);
 }
 
 void CMetaMethod::BuildAllParameters()
