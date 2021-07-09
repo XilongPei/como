@@ -21,10 +21,15 @@
 #elif defined(__linux__)
 #include <cstdio>
 #endif
+#include <time.h>
+#include <string.h>
+#include <sys/time.h>
 
 namespace como {
 
 int Logger::sLevel = DEBUG;
+
+static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
 void Logger::D(
     /* [in] */ const char* tag,
@@ -41,7 +46,10 @@ void Logger::D(
     __android_log_vprint(ANDROID_LOG_DEBUG, tag, format, argList);
     va_end(argList);
 #elif defined(__linux__)
-    printf("[%s]: ", tag);
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    printf("[%s DEBUG %s]: ", currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -64,7 +72,10 @@ void Logger::E(
     __android_log_vprint(ANDROID_LOG_ERROR, tag, format, argList);
     va_end(argList);
 #elif defined(__linux__)
-    printf("[%s]: ", tag);
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    printf("[%s ERROR %s]: ", currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -87,7 +98,10 @@ void Logger::V(
     __android_log_vprint(ANDROID_LOG_VERBOSE, tag, format, argList);
     va_end(argList);
 #elif defined(__linux__)
-    printf("[%s]: ", tag);
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    printf("[%s VERBOSE %s]: ", currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -110,7 +124,10 @@ void Logger::W(
     __android_log_vprint(ANDROID_LOG_WARN, tag, format, argList);
     va_end(argList);
 #elif defined(__linux__)
-    printf("[%s]: ", tag);
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    printf("[%s WARNING %s]: ", currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -153,7 +170,10 @@ void Logger::Log(
     __android_log_vprint(ToAndroidLogPriority(level), tag, format, argList);
     va_end(argList);
 #elif defined(__linux__)
-    printf("[%s]: ", tag);
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    printf("[%s LOG %s]: ", currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -165,6 +185,27 @@ void Logger::SetLevel(
     /* [in] */ int level)
 {
     sLevel = level;
+}
+
+/*
+ * get current time in this format: "2021-07-09 11:02:58.361 +0800"
+ */
+static void GetLocalTimeWithMs(char *currentTime, size_t maxChars)
+{
+    struct timeval curTime;
+    gettimeofday(&curTime, NULL);
+    int milli = curTime.tv_usec / 1000;
+
+    // 2021-11-30 12:34:56
+    char ymdhms[20];
+    // The +hhmm or -hhmm numeric timezone
+    char timezone[8];
+    struct tm nowTime;
+    localtime_r(&curTime.tv_sec, &nowTime);
+    strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
+    strftime(timezone, sizeof(timezone), "%z", &nowTime);
+
+    snprintf(currentTime, maxChars, "%s.%03d %s", ymdhms, milli, timezone);
 }
 
 } // namespace como
