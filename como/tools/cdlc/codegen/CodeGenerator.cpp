@@ -604,6 +604,8 @@ String CodeGenerator::ComponentModeEmitter::EmitClassObjectGetterArray()
     }
     builder.Append("};\n");
     builder.Append("\n");
+    builder.Append(EmitSoGetComoVersion());
+    builder.Append("\n");
     builder.Append(EmitSoGetAllClassObjects());
 
     return builder.ToString();
@@ -627,6 +629,18 @@ String CodeGenerator::ComponentModeEmitter::EmitGetClassObjectFuncRecursively(
     for (int i = 0; i < mn->mNamespaceNumber; i++) {
         builder.Append(EmitGetClassObjectFuncRecursively(mn->mNamespaces[i]));
     }
+
+    return builder.ToString();
+}
+
+String CodeGenerator::ComponentModeEmitter::EmitSoGetComoVersion()
+{
+    StringBuilder builder;
+
+    builder.AppendFormat("EXTERN_C COM_PUBLIC const char* soGetComoVersion()\n");
+    builder.AppendFormat("{\n");
+    builder.Append(Properties::INDENT).Append("return \"1.0.0\";\n");
+    builder.Append("}\n");
 
     return builder.ToString();
 }

@@ -183,6 +183,8 @@ private:
         String EmitGetClassObjectFuncRecursively(
             /* [in] */ como::MetaNamespace* mn);
 
+        String EmitSoGetComoVersion();
+
         String EmitSoGetAllClassObjects();
 
         String EmitSoGetClassObject();
