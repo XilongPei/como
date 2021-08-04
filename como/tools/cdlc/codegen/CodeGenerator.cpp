@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "ComoConfig.h"
 #include "codegen/CodeGenerator.h"
 #include "ast/Namespace.h"
 #include "util/AutoPtr.h"
@@ -639,7 +640,7 @@ String CodeGenerator::ComponentModeEmitter::EmitSoGetComoVersion()
 
     builder.AppendFormat("EXTERN_C COM_PUBLIC const char* soGetComoVersion()\n");
     builder.AppendFormat("{\n");
-    builder.Append(Properties::INDENT).Append("return \"1.0.0\";\n");
+    builder.Append(Properties::INDENT).AppendFormat("return \"%s\";\n", como::szComoVersion);
     builder.Append("}\n");
 
     return builder.ToString();
