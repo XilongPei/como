@@ -16,7 +16,7 @@ set(COMMON_C_FLAGS
     "-fPIC -ffunction-sections -fdata-sections")
 
 set(COMMON_CXX_FLAGS
-    "${COMMON_C_FLAGS} -std=c++14 -fno-exceptions -fno-rtti -std=gnu++11")
+    "${COMMON_C_FLAGS} -fno-exceptions -fno-rtti -std=gnu++11")
 
 set(COMMON_SHARED_LINKER_FLAGS
     "-shared -fPIC ${CMAKE_SHARED_LINKER_FLAGS} -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version -Wl,--hash-style=gnu")
