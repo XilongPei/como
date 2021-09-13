@@ -58,6 +58,10 @@ ECode CoGetComponentMetadataFromFile(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
 {
+    if (loader == nullptr) {
+        loader = CBootClassLoader::GetSystemClassLoader();
+    }
+
     mc = nullptr;
 
     void* handle = reinterpret_cast<void*>(fd);
