@@ -203,7 +203,7 @@ ECode CMetaConstructor::Invoke(
 #ifdef ENABLE_RUNTIME_LOGGER
     String methodName;
     GetName(methodName);
-    Logger::V("CMetaMethod::Invoke", "%s", methodName);
+    Logger::V("CMetaMethod::Invoke", "%s", (const char*)methodName);
 #endif
 
     return InvokeImpl(thisObject, argList, nullptr);
@@ -220,7 +220,7 @@ ECode CMetaConstructor::InvokeDsa(
 #ifdef ENABLE_RUNTIME_LOGGER
     String methodName;
     GetName(methodName);
-    Logger::V("CMetaMethod::InvokeDsa", "%s", methodName);
+    Logger::V("CMetaMethod::InvokeDsa", "%s", (const char*)methodName);
 #endif
 
     return InvokeImpl(thisObject, argList, ComoConfig::cpuInvokeDsa[idxDsa]);
@@ -236,7 +236,7 @@ ECode CMetaConstructor::InvokeVm(
 #ifdef ENABLE_RUNTIME_LOGGER
     String methodName;
     GetName(methodName);
-    Logger::V("CMetaMethod::InvokeVm", "%s", methodName);
+    Logger::V("CMetaMethod::InvokeVm", "%s", (const char*)methodName);
 #endif
 
     // check object
