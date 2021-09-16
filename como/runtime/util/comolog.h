@@ -48,6 +48,9 @@ public:
     static void SetLevel(
         /* [in] */ int level);
 
+    static void SetSamplingTag(
+        /* [in] */ const char *szSamplingTag_);
+
 public:
     static constexpr int VERBOSE = 0;
     static constexpr int DEBUG = 1;
@@ -56,6 +59,7 @@ public:
 
 private:
     COM_LOCAL static int sLevel;
+    COM_LOCAL static char szSamplingTag[32];
 };
 
 } // namespace como

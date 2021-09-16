@@ -28,6 +28,7 @@
 namespace como {
 
 int Logger::sLevel = DEBUG;
+char Logger::szSamplingTag[32] = {'\0'};
 
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
@@ -49,7 +50,7 @@ void Logger::D(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s DEBUG %s]: ", currentTime, tag);
+    printf("[%s %s DEBUG %s]: ", szSamplingTag, currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -75,7 +76,7 @@ void Logger::E(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s ERROR %s]: ", currentTime, tag);
+    printf("[%s %s ERROR %s]: ", szSamplingTag, currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -101,7 +102,7 @@ void Logger::V(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s VERBOSE %s]: ", currentTime, tag);
+    printf("[%s %s VERBOSE %s]: ", szSamplingTag, currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -127,7 +128,7 @@ void Logger::W(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s WARNING %s]: ", currentTime, tag);
+    printf("[%s %s WARNING %s]: ", szSamplingTag, currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -173,7 +174,7 @@ void Logger::Log(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s LOG %s]: ", currentTime, tag);
+    printf("[%s %s LOG %s]: ", szSamplingTag, currentTime, tag);
     va_start(argList, format);
     vprintf(format, argList);
     va_end(argList);
@@ -185,6 +186,13 @@ void Logger::SetLevel(
     /* [in] */ int level)
 {
     sLevel = level;
+}
+
+void Logger::SetSamplingTag(
+    /* [in] */ const char *szSamplingTag_)
+{
+    strncpy(szSamplingTag, szSamplingTag_, 32);
+    szSamplingTag[31] = '\0';
 }
 
 /*
