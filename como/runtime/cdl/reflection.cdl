@@ -356,8 +356,8 @@ interface IMetaMethod
         [in] Integer index,
         [out] IMetaParameter&& param);
 
-    HasOutArguments(
-        [out] Boolean& outArgs);
+    GetOutArgumentsNumber(
+        [out] Integer& outArgs);
 
     CreateArgumentList(
         [out] IArgumentList&& argList);

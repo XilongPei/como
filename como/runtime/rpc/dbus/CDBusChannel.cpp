@@ -577,8 +577,8 @@ ECode CDBusChannel::Invoke(
     if (SUCCEEDED(ec)) {
         resParcel = new CDBusParcel();
 
-        Boolean hasOutArgs;
-        method->HasOutArguments(hasOutArgs);
+        Integer hasOutArgs;
+        method->GetOutArgumentsNumber(hasOutArgs);
         if (hasOutArgs) {
             if (!dbus_message_iter_next(&args)) {
                 Logger::E("CDBusChannel", "Reply has no out arguments.");

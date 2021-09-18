@@ -36,7 +36,7 @@ CMetaMethod::CMetaMethod()
     : mMetadata(nullptr)
     , mOwner(nullptr)
     , mIndex(0)
-    , mHasOutArguments(false)
+    , mHasOutArguments(0)
     , mOpaque(0)
 {}
 
@@ -51,7 +51,7 @@ CMetaMethod::CMetaMethod(
     , mName(mm->mName)
     , mSignature(mm->mSignature)
     , mParameters(mMetadata->mParameterNumber)
-    , mHasOutArguments(false)
+    , mHasOutArguments(0)
     , mMethodAddr(0)
 {
     // there is no metadata in this component for external method
@@ -141,8 +141,8 @@ ECode CMetaMethod::GetParameter(
     return NOERROR;
 }
 
-ECode CMetaMethod::HasOutArguments(
-    /* [out] */ Boolean& outArgs)
+ECode CMetaMethod::GetOutArgumentsNumber(
+    /* [out] */ Integer& outArgs)
 {
     BuildAllParameters();
 
@@ -294,9 +294,9 @@ void CMetaMethod::BuildAllParameters()
                         mOwner->mOwner->mMetadata, this,
                         mMetadata->mParameters[i], i);
                 mParameters.Set(i, mpObj);
-                if (!mHasOutArguments && (mpObj->mIOAttr == IOAttribute::OUT ||
-                        mpObj->mIOAttr == IOAttribute::IN_OUT)) {
-                    mHasOutArguments = true;
+                if ((mpObj->mIOAttr == IOAttribute::OUT) ||
+                                      (mpObj->mIOAttr == IOAttribute::IN_OUT)) {
+                    mHasOutArguments++;
                 }
             }
         }

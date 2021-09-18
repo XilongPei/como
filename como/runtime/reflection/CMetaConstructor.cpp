@@ -127,10 +127,10 @@ ECode CMetaConstructor::GetParameter(
     return NOERROR;
 }
 
-ECode CMetaConstructor::HasOutArguments(
-    /* [out] */ Boolean& outArgs)
+ECode CMetaConstructor::GetOutArgumentsNumber(
+    /* [out] */ Integer& outArgs)
 {
-    outArgs = false;
+    outArgs = 0;
     return NOERROR;
 }
 

@@ -65,8 +65,8 @@ public:
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IMetaParameter>& param) override;
 
-    ECode HasOutArguments(
-        /* [out] */ Boolean& outArgs) override;
+    ECode GetOutArgumentsNumber(
+        /* [out] */ Integer& outArgs) override;
 
     ECode CreateArgumentList(
         /* [out] */ AutoPtr<IArgumentList>& argList) override;
@@ -108,7 +108,7 @@ public:
     String mSignature;
     Array<IMetaParameter*> mParameters;
     Mutex mParametersLock;
-    Boolean mHasOutArguments;
+    Integer mHasOutArguments;
     AutoPtr<IMetaType> mReturnType;
 
     HANDLE mMethodAddr;
