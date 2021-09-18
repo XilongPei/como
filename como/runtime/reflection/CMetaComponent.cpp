@@ -57,6 +57,7 @@ CMetaComponent::CMetaComponent(
     , mInterfaceIdMap(mMetadata->mInterfaceNumber -
             mMetadata->mExternalInterfaceNumber)
     , mInterfacesAlreadyBuilt(false)
+    , mOpaque(0)
 {
     mCid.mUuid = metadata->mUuid;
     mCid.mUri = mUri.string();
@@ -671,6 +672,20 @@ void CMetaComponent::ReleaseResources()
     mInterfaceNameMap.Clear();
     mInterfaceIdMap.Clear();
     mInterfacesAlreadyBuilt = false;
+}
+
+ECode CMetaComponent::SetOpaque(
+    /* [in] */ HANDLE opaque)
+{
+    mOpaque = opaque;
+    return NOERROR;
+}
+
+ECode CMetaComponent::GetOpaque(
+    /* [out] */ HANDLE &opaque)
+{
+    opaque = mOpaque;
+    return NOERROR;
 }
 
 } // namespace como

@@ -46,6 +46,7 @@ CMetaConstructor::CMetaConstructor(
     , mSignature(mm->mSignature)
     , mIsDefault(mcObj->mMetadata->mProperties & COCLASS_CONSTRUCTOR_DEFAULT)
     , mParameters(mm->mParameterNumber)
+    , mOpaque(0)
 {}
 
 ECode CMetaConstructor::GetInterface(
@@ -278,6 +279,20 @@ ECode CMetaConstructor::CreateObject(
     argList->SetOutputArgumentOfInterface(
             mParameters.GetLength() + 1, reinterpret_cast<HANDLE>(&object));
     return Invoke(clsObj, argList);
+}
+
+ECode CMetaConstructor::SetOpaque(
+    /* [in] */ HANDLE opaque)
+{
+    mOpaque = opaque;
+    return NOERROR;
+}
+
+ECode CMetaConstructor::GetOpaque(
+    /* [out] */ HANDLE &opaque)
+{
+    opaque = mOpaque;
+    return NOERROR;
 }
 
 void CMetaConstructor::BuildAllParameters()

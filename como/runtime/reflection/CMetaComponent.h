@@ -114,6 +114,12 @@ public:
         /* [in] */ const CoclassID& cid,
         /* [out] */ AutoPtr<IClassObject>& object);
 
+    ECode SetOpaque(
+        /* [in] */ HANDLE opaque) override;
+
+    ECode GetOpaque(
+        /* [out] */ HANDLE &opaque) override;
+
     void BuildAllConstants();
 
     void BuildAllCoclasses();
@@ -134,6 +140,8 @@ private:
     void BuildIInterface();
 
     void ReleaseResources();
+
+    HANDLE mOpaque;
 
 public:
     IClassLoader* mLoader;

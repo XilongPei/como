@@ -37,6 +37,7 @@ CMetaMethod::CMetaMethod()
     , mOwner(nullptr)
     , mIndex(0)
     , mHasOutArguments(false)
+    , mOpaque(0)
 {}
 
 CMetaMethod::CMetaMethod(
@@ -261,12 +262,26 @@ ECode CMetaMethod::InvokeVm(
 #endif
 
     // check object
-    ECode ec = 0;
+    ECode ec = NOERROR;
     if (FAILED(ec)) {
         return ec;
     }
 
     return InvokeImpl(thisObject, argList, nullptr);
+}
+
+ECode CMetaMethod::SetOpaque(
+    /* [in] */ HANDLE opaque)
+{
+    mOpaque = opaque;
+    return NOERROR;
+}
+
+ECode CMetaMethod::GetOpaque(
+    /* [out] */ HANDLE &opaque)
+{
+    opaque = mOpaque;
+    return NOERROR;
 }
 
 void CMetaMethod::BuildAllParameters()

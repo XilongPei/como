@@ -33,6 +33,7 @@ CMetaCoclass::CMetaCoclass(
     , mName(mk->mName)
     , mNamespace(mk->mNamespace)
     , mInterfaces(mk->mInterfaceNumber - 1)
+    , mOpaque(0)
 {
     mCid.mUuid = mk->mUuid;
     mCid.mCid = &mcObj->mCid;
@@ -462,6 +463,20 @@ void CMetaCoclass::BuildInterfaceMethodLocked(
         mMethods.Set(index, mmObj);
         index++;
     }
+}
+
+ECode CMetaCoclass::SetOpaque(
+    /* [in] */ HANDLE opaque)
+{
+    mOpaque = opaque;
+    return NOERROR;
+}
+
+ECode CMetaCoclass::GetOpaque(
+    /* [out] */ HANDLE &opaque)
+{
+    opaque = mOpaque;
+    return NOERROR;
 }
 
 } // namespace como

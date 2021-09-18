@@ -101,6 +101,12 @@ public:
         /* [in] */ const InterfaceID& iid,
         /* [out] */ IInterface** object) override;
 
+    ECode SetOpaque(
+        /* [in] */ HANDLE opaque) override;
+
+    ECode GetOpaque(
+        /* [out] */ HANDLE &opaque) override;
+
 private:
     void BuildAllConstructors();
 
@@ -111,6 +117,8 @@ private:
     void BuildInterfaceMethodLocked(
         /* [in] */ IMetaInterface* miObj,
         /* [in, out] */ Integer& index);
+
+    HANDLE mOpaque;
 
 public:
     MetaCoclass* mMetadata;

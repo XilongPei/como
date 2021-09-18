@@ -124,6 +124,12 @@ interface IMetaComponent
         [out] Boolean& unload);
 
     Unload();
+
+    SetOpaque(
+        [in] HANDLE value);
+
+    GetOpaque(
+        [out] HANDLE& value);
 }
 
 [
@@ -195,6 +201,12 @@ interface IMetaCoclass
     CreateObject(
         [in] InterfaceID iid,
         [out] IInterface** object);
+
+    SetOpaque(
+        [in] HANDLE value);
+
+    GetOpaque(
+        [out] HANDLE& value);
 }
 
 [
@@ -362,6 +374,12 @@ interface IMetaMethod
     InvokeVm(
         [in] IInterface* thisObject,
         [in] IArgumentList* argList);
+
+    SetOpaque(
+        [in] HANDLE value);
+
+    GetOpaque(
+        [out] HANDLE& value);
 }
 
 [

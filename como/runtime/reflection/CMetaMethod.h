@@ -84,6 +84,12 @@ public:
         /* [in] */ IInterface* thisObject,
         /* [in] */ IArgumentList* argList) override;
 
+    ECode SetOpaque(
+        /* [in] */ HANDLE opaque) override;
+
+    ECode GetOpaque(
+        /* [out] */ HANDLE &opaque) override;
+
 private:
     void BuildAllParameters();
 
@@ -91,6 +97,8 @@ private:
         /* [in] */ IInterface* thisObject,
         /* [in] */ IArgumentList* argList,
         /* [in] */ CpuInvokeDsa invokeImpl);
+
+    HANDLE mOpaque;
 
 public:
     MetaMethod* mMetadata;
