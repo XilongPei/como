@@ -38,21 +38,11 @@ set(SOURCES
     reflection.cpp)
 
 if($ENV{PLATFORM} STREQUAL "linux")
-    if($ENV{ARCH} STREQUAL "x64")
+    if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)|(x32)|(aarch32)|(riscv32)")
         set(SOURCES
             ${SOURCES}
-            invoke_x64.s)
-        set_source_files_properties(invoke_x64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
-    elseif($ENV{ARCH} STREQUAL "aarch64")
-        set(SOURCES
-            ${SOURCES}
-            invoke_aarch64.s)
-        set_source_files_properties(invoke_aarch64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
-    elseif($ENV{ARCH} STREQUAL "riscv64")
-        set(SOURCES
-            ${SOURCES}
-            invoke_riscv64.s)
-        set_source_files_properties(invoke_riscv64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
+            invoke_$ENV{ARCH}.s)
+        set_source_files_properties(invoke_$ENV{ARCH}.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
     else()
         set(SOURCES
             ${SOURCES}
