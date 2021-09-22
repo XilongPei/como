@@ -135,7 +135,7 @@ function como_linux_common()
     cd $OUT_PATH
 
     if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
-        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH".cmake
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM".cmake
         if [ "$VERSION" == "rls" ]; then
             BUILD_TYPE=Release
         else

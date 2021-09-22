@@ -12,8 +12,16 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_SHARED_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 set(CMAKE_STATIC_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 
-set(COMMON_C_FLAGS
-    "-fPIC -ffunction-sections -fdata-sections")
+if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)")
+    set(COMMON_C_FLAGS
+        "-fPIC -ffunction-sections -fdata-sections")
+elseif($ENV{ARCH} MATCHES "(x32)|(aarch32)|(riscv32)")
+    set(COMMON_C_FLAGS
+        "-m32 -fPIC -ffunction-sections -fdata-sections")
+else()
+    set(COMMON_C_FLAGS
+        "-fPIC -ffunction-sections -fdata-sections")
+endif()
 
 set(COMMON_CXX_FLAGS
     "${COMMON_C_FLAGS} -fno-exceptions -fno-rtti -std=gnu++11")
