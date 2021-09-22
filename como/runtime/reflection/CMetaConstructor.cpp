@@ -175,16 +175,22 @@ ECode CMetaConstructor::InvokeImpl(
 #if defined(__aarch64__)
     Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);
+#elif defined(__arm__)
+    Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
+                            (fpParamNum > 8 ? fpParamNum - 8 : 0);
 #elif defined(__x86_64__)
     Integer stackParamNum = (intParamNum > 6 ? intParamNum - 6 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);
-#else
-    #if defined(__riscv)
-        #if (__riscv_xlen == 64)
-            Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
-                                    (fpParamNum > 8 ? fpParamNum - 8 : 0);
-        #endif
+#elif defined(__i386__)
+    Integer stackParamNum = (intParamNum > 6 ? intParamNum - 6 : 0) +
+                            (fpParamNum > 8 ? fpParamNum - 8 : 0);
+#elif defined(__riscv)
+    #if (__riscv_xlen == 64)
+        Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
+                                (fpParamNum > 8 ? fpParamNum - 8 : 0);
     #endif
+#else
+    #error Unknown Architecture
 #endif
     VObject* vobj = reinterpret_cast<VObject*>(thisObject->Probe(
             *reinterpret_cast<InterfaceID*>(&mClassObjectInterface->mUuid)));
