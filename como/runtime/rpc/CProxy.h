@@ -49,6 +49,9 @@ private:
     {
         typedef Long Reg_t;
 
+//
+//------------------------------------------------------------------------------
+//
 #if defined(__aarch64__)
 
         union IREG {
@@ -73,6 +76,7 @@ private:
         IREG x7;
         IREG sp;
 
+#if defined(ARM_FP_SUPPORT)
         FPREG d0;
         FPREG d1;
         FPREG d2;
@@ -81,9 +85,49 @@ private:
         FPREG d5;
         FPREG d6;
         FPREG d7;
+#endif
 
+//
+//------------------------------------------------------------------------------
+//
 #elif defined(__arm__)
 
+        union IREG {
+            Reg_t   reg;
+            Long    lVal;
+            Integer iVal;
+        };
+
+        union FPREG {
+            Reg_t   reg;
+            Double  dVal;
+            Float   fVal;
+        };
+
+        IREG r0;
+        IREG r1;
+        IREG r2;
+        IREG r3;
+        IREG r4;
+        IREG r5;
+        IREG r6;
+        IREG r7;
+        IREG sp;
+
+#if defined(ARM_FP_SUPPORT)
+        FPREG d0;
+        FPREG d1;
+        FPREG d2;
+        FPREG d3;
+        FPREG d4;
+        FPREG d5;
+        FPREG d6;
+        FPREG d7;
+#endif
+
+//
+//------------------------------------------------------------------------------
+//
 #elif defined(__x86_64__)
 
         union GPReg {
@@ -115,6 +159,9 @@ private:
         SSEReg xmm6;
         SSEReg xmm7;
 
+//
+//------------------------------------------------------------------------------
+//
 #elif defined(__i386__)
         union GPReg {
             Reg_t   reg;
@@ -143,6 +190,9 @@ private:
         SSEReg xmm6;
         SSEReg xmm7;
 
+//
+//------------------------------------------------------------------------------
+//
 #else
     #if defined(__riscv)
         #if (__riscv_xlen == 64)

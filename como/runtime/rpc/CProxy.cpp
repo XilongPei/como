@@ -1631,6 +1631,7 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(x6, regs.x6.reg);
     GET_REG(x7, regs.x7.reg);
 
+#if defined(ARM_FP_SUPPORT)
     GET_REG(d0, regs.d0.reg);
     GET_REG(d1, regs.d1.reg);
     GET_REG(d2, regs.d2.reg);
@@ -1639,6 +1640,7 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(d5, regs.d5.reg);
     GET_REG(d6, regs.d6.reg);
     GET_REG(d7, regs.d7.reg);
+#endif
 
 #elif defined(__arm__)
 
