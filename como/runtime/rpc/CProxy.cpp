@@ -48,6 +48,9 @@ namespace como {
 #define PAGE_ALIGN(va) (((va) + PAGE_SIZE - 1) & PAGE_MASK)
 #endif
 
+//
+//------------------------------------------------------------------------------
+//
 #if defined(__aarch64__)
 
 #define GET_REG(reg, var)           \
@@ -153,6 +156,9 @@ __asm__(
   400a3c:       d503201f        nop
 */
 
+//
+//------------------------------------------------------------------------------
+//
 #elif defined(__x86_64__)
 
 #define GET_REG(reg, var)           \
@@ -249,6 +255,111 @@ __asm__(
   400863:   5d                      pop    %rbp
   400864:   c3                      retq
 */
+
+//
+//------------------------------------------------------------------------------
+//
+#elif defined(__i386__)
+
+#define GET_REG(reg, var)           \
+    __asm__ __volatile__(           \
+        "movq   %%"#reg", %0;"      \
+        : "=m"(var)                 \
+    )
+
+#define GET_STACK_INTEGER(rbp, off, var)    \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movl   (%%rax), %%eax;"            \
+        "movl   %%eax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_LONG(rbp, off, var)       \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movq   (%%rax), %%rax;"            \
+        "movq   %%rax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp)                          \
+        , "m"(off)                          \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_FLOAT(rbp, off, var)      \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movl   (%%rax), %%eax;"            \
+        "movl   %%eax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_DOUBLE(rbp, off, var)     \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movq   (%%rax), %%rax;"            \
+        "movq   %%rax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
+    )
+
+EXTERN_C void __entry();
+
+__asm__(
+    ".text;"
+    ".align 8;"
+    ".global __entry;"
+    "__entry:"
+    "pushq  %rbp;"
+    "pushq  %rdi;"
+    "subq   $8, %rsp;"
+    "movl    $0xff, (%rsp);"
+    "movq   %rdi, %rax;"
+    "movq   %rsp, %rdi;"
+    "call   *8(%rax);"
+    "addq   $8, %rsp;"
+    "popq   %rdi;"
+    "popq   %rbp;"
+    "ret;"
+);
+/*
+0000000000400848 <__entry>:
+  400848:   55                      push   %rbp
+  400849:   57                      push   %rdi
+  40084a:   48 83 ec 08             sub    $0x8,%rsp
+  40084e:   c7 04 24 ff 00 00 00    movl   $0xff,(%rsp)  # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;
+                                function in this source file, InterfaceProxy::ProxyEntry() {
+                                    offset = 0;
+                                    GET_STACK_INTEGER(args, offset, methodIndex);
+                                }
+                                the `methodIndex` correspond to ths `$0xff`
+  400855:   48 89 f8                mov    %rdi,%rax
+  400858:   48 89 e7                mov    %rsp,%rdi
+                                x64 ABI: %rdi, the first parameter
+  40085b:   ff 50 08                callq  *0x8(%rax)
+  40085e:   48 83 c4 08             add    $0x8,%rsp
+  400862:   5f                      pop    %rdi
+  400863:   5d                      pop    %rbp
+  400864:   c3                      retq
+*/
+
+
+//
+//------------------------------------------------------------------------------
+//
 #else
     #if defined(__riscv)
         #if (__riscv_xlen == 64)
@@ -378,7 +489,15 @@ HANDLE PROXY_ENTRY = 0;
 static constexpr Integer PROXY_ENTRY_SIZE = 64;
 static constexpr Integer PROXY_ENTRY_SHIFT = 6;
 static constexpr Integer PROXY_INDEX_OFFSET = 2;
+#elif defined(__arm__)
+static constexpr Integer PROXY_ENTRY_SIZE = 64;
+static constexpr Integer PROXY_ENTRY_SHIFT = 6;
+static constexpr Integer PROXY_INDEX_OFFSET = 2;
 #elif defined(__x86_64__)
+static constexpr Integer PROXY_ENTRY_SIZE = 32;
+static constexpr Integer PROXY_ENTRY_SHIFT = 5;
+static constexpr Integer PROXY_INDEX_OFFSET = 9;
+#elif defined(__i386__)
 static constexpr Integer PROXY_ENTRY_SIZE = 32;
 static constexpr Integer PROXY_ENTRY_SHIFT = 5;
 static constexpr Integer PROXY_INDEX_OFFSET = 9;
@@ -447,6 +566,8 @@ void Init_Proxy_Entry()
         codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
         p += PROXY_ENTRY_SIZE;
     }
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
     Byte* p = (Byte*)PROXY_ENTRY;
     for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
@@ -454,6 +575,8 @@ void Init_Proxy_Entry()
         p[PROXY_INDEX_OFFSET] = i;
         p += PROXY_ENTRY_SIZE;
     }
+#elif defined(__i386__)
+
 #elif defined(__riscv)
     #if (__riscv_xlen == 64)
         Byte* p = (Byte*)PROXY_ENTRY;
@@ -1080,6 +1203,8 @@ Integer InterfaceProxy::GetIntegerValue(
         }
     }
 
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
 
     switch (intParamIndex) {
@@ -1106,6 +1231,8 @@ Integer InterfaceProxy::GetIntegerValue(
             return value;
         }
     }
+
+#elif defined(__i386__)
 
 #else
     #if defined(__riscv)
@@ -1182,6 +1309,8 @@ Long InterfaceProxy::GetLongValue(
         }
     }
 
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
 
     switch (intParamIndex) {
@@ -1209,6 +1338,8 @@ Long InterfaceProxy::GetLongValue(
             return value;
         }
     }
+
+#elif defined(__i386__)
 
 #else
     #if defined(__riscv)
@@ -1392,6 +1523,8 @@ Double InterfaceProxy::GetDoubleValue(
         }
     }
 
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
 
     switch (fpParamIndex) {
@@ -1422,6 +1555,8 @@ Double InterfaceProxy::GetDoubleValue(
             return value;
         }
     }
+
+#elif defined(__i386__)
 
 #else
     #if defined(__riscv)
@@ -1505,6 +1640,8 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(d6, regs.d6.reg);
     GET_REG(d7, regs.d7.reg);
 
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
     regs.rbp.reg = args + 16;
     regs.paramStartOffset = 2;
@@ -1523,6 +1660,8 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(xmm5, regs.xmm5.reg);
     GET_REG(xmm6, regs.xmm6.reg);
     GET_REG(xmm7, regs.xmm7.reg);
+
+#elif defined(__i386__)
 
 #else
     #if defined(__riscv)

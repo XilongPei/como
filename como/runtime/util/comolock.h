@@ -37,7 +37,11 @@ private:
 
 #if defined(__aarch64__)
     std::atomic<Boolean> mLocked{false};
+#elif defined(__arm__)
+    std::atomic<Boolean> mLocked{false};
 #elif defined(__x86_64__)
+    std::atomic<Boolean> mLocked{false};
+#elif defined(__i386__)
     std::atomic<Boolean> mLocked{false};
 #else
     #if defined(__riscv)

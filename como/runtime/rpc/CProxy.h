@@ -82,6 +82,8 @@ private:
         FPREG d6;
         FPREG d7;
 
+#elif defined(__arm__)
+
 #elif defined(__x86_64__)
 
         union GPReg {
@@ -103,6 +105,34 @@ private:
         GPReg rcx;
         GPReg r8;
         GPReg r9;
+
+        SSEReg xmm0;
+        SSEReg xmm1;
+        SSEReg xmm2;
+        SSEReg xmm3;
+        SSEReg xmm4;
+        SSEReg xmm5;
+        SSEReg xmm6;
+        SSEReg xmm7;
+
+#elif defined(__i386__)
+        union GPReg {
+            Reg_t   reg;
+            Long    lVal;
+            Integer iVal;
+        };
+
+        union SSEReg {
+            Reg_t   reg;
+            Double  dVal;
+            Float   fVal;
+        };
+
+        GPReg ebp;
+        GPReg edi;
+        GPReg esi;
+        GPReg edx;
+        GPReg ecx;
 
         SSEReg xmm0;
         SSEReg xmm1;
