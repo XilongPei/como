@@ -232,6 +232,9 @@ private:
     #endif
 #endif
 
+        // COMO stipulates that 8 parameters are in registers. If the current
+        // computer CPU is not 8 general registers, it can be adjusted through
+        // this parameter.
         Integer paramStartOffset;
     };
 

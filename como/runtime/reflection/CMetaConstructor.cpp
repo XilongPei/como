@@ -173,11 +173,23 @@ ECode CMetaConstructor::InvokeImpl(
         }
     }
 #if defined(__aarch64__)
+
+#if defined(ARM_FP_SUPPORT)
     Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);
+#else
+    Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) + fpParamNum;
+#endif
+
 #elif defined(__arm__)
+
+#if defined(ARM_FP_SUPPORT)
     Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);
+#else
+    Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) + fpParamNum;
+#endif
+
 #elif defined(__x86_64__)
     Integer stackParamNum = (intParamNum > 6 ? intParamNum - 6 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);

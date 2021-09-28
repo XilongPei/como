@@ -567,7 +567,13 @@ void Init_Proxy_Entry()
         p += PROXY_ENTRY_SIZE;
     }
 #elif defined(__arm__)
-
+    Byte* p = (Byte*)PROXY_ENTRY;
+    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+        memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
+        Integer* codes = reinterpret_cast<Integer*>(p);
+        codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
+        p += PROXY_ENTRY_SIZE;
+    }
 #elif defined(__x86_64__)
     Byte* p = (Byte*)PROXY_ENTRY;
     for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
@@ -576,7 +582,12 @@ void Init_Proxy_Entry()
         p += PROXY_ENTRY_SIZE;
     }
 #elif defined(__i386__)
-
+    Byte* p = (Byte*)PROXY_ENTRY;
+    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+        memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
+        p[PROXY_INDEX_OFFSET] = i;
+        p += PROXY_ENTRY_SIZE;
+    }
 #elif defined(__riscv)
     #if (__riscv_xlen == 64)
         Byte* p = (Byte*)PROXY_ENTRY;
@@ -1193,9 +1204,15 @@ Integer InterfaceProxy::GetIntegerValue(
             return regs.x7.iVal;
         default: {
             Integer value, offset;
+#if defined(ARM_FP_SUPPORT)
             offset = fpParamIndex <= 7
                     ? intParamIndex - 8
                     : intParamIndex - 8 + fpParamIndex - 8;
+#else
+            offset = fpParamIndex <= 7
+                    ? intParamIndex - 8
+                    : intParamIndex - 8 + fpParamIndex;
+#endif
             offset += regs.paramStartOffset;
             offset *= 8;
             GET_STACK_INTEGER(regs.sp, offset, value);
@@ -1204,6 +1221,41 @@ Integer InterfaceProxy::GetIntegerValue(
     }
 
 #elif defined(__arm__)
+
+    switch (intParamIndex) {
+        case 0:
+            return regs.r0.iVal;
+        case 1:
+            return regs.r1.iVal;
+        case 2:
+            return regs.r2.iVal;
+        case 3:
+            return regs.r3.iVal;
+        case 4:
+            return regs.r4.iVal;
+        case 5:
+            return regs.r5.iVal;
+        case 6:
+            return regs.r6.iVal;
+        case 7:
+            return regs.r7.iVal;
+        default: {
+            Integer value, offset;
+#if defined(ARM_FP_SUPPORT)
+            offset = fpParamIndex <= 7
+                    ? intParamIndex - 8
+                    : intParamIndex - 8 + fpParamIndex - 8;
+#else
+            offset = fpParamIndex <= 7
+                    ? intParamIndex - 8
+                    : intParamIndex - 8 + fpParamIndex;
+#endif
+            offset += regs.paramStartOffset;
+            offset *= 8;
+            GET_STACK_INTEGER(regs.sp, offset, value);
+            return value;
+        }
+    }
 
 #elif defined(__x86_64__)
 
@@ -1388,6 +1440,7 @@ Float InterfaceProxy::GetFloatValue(
 {
 #if defined(__aarch64__)
 
+#if defined(ARM_FP_SUPPORT)
     switch (fpParamIndex) {
         case 0:
             return regs.d0.fVal;
@@ -1416,6 +1469,16 @@ Float InterfaceProxy::GetFloatValue(
             return value;
         }
     }
+#else
+    Integer offset = intParamIndex <= 7
+            ? fpParamIndex
+            : fpParamIndex + intParamIndex - 8;
+    offset += regs.paramStartOffset;
+    offset *= 8;
+    Float value;
+    GET_STACK_FLOAT(regs.sp, offset, value);
+    return value;
+#endif
 
 #elif defined(__x86_64__)
 
@@ -1494,6 +1557,7 @@ Double InterfaceProxy::GetDoubleValue(
 {
 #if defined(__aarch64__)
 
+#if defined(ARM_FP_SUPPORT)
     switch (fpParamIndex) {
         case 0:
             return regs.d0.dVal;
@@ -1522,6 +1586,16 @@ Double InterfaceProxy::GetDoubleValue(
             return value;
         }
     }
+#else
+    Integer offset = intParamIndex <= 7
+            ? fpParamIndex
+            : fpParamIndex + intParamIndex - 8;
+    offset += regs.paramStartOffset;
+    offset *= 8;
+    Double value;
+    GET_STACK_DOUBLE(regs.sp, offset, value);
+    return value;
+#endif
 
 #elif defined(__arm__)
 
