@@ -108,10 +108,6 @@ private:
         IREG r1;
         IREG r2;
         IREG r3;
-        IREG r4;
-        IREG r5;
-        IREG r6;
-        IREG r7;
         IREG sp;
 
 #if defined(ARM_FP_SUPPORT)
