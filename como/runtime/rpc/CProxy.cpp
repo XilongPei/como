@@ -201,19 +201,27 @@ EXTERN_C void __entry();
 
 __asm__(
     ".text;"
-    ".align 8;"
+    ".align 4;"
     ".global __entry;"
     "__entry:"
     "sub    sp, sp, #32;"
-    "stp    lr, x9, [sp, #16];"
-    "mov    x9, #0x0;"
-    "stp    x9, x0, [sp];"
-    "ldr    x9, [x0, #8];"
-    "mov    x0, sp;"
+
+    //"stp    lr, x9, [sp, #16];"
+    "add    sp, sp, #16;"
+    "stmdb  sp!, {lr, r9};"
+
+    "mov    r9, #0x0;"
+    "stp    r9, r0, [sp];"
+    "ldr    r9, [r0, #8];"
+    "mov    r0, sp;"
     "adr    lr, return_from_func;"
-    "br     x9;"
+    "br     r9;"
     "return_from_func:"
-    "ldp    lr, x9, [sp, #16];"
+
+    //"ldp    lr, r9, [sp, #16];"
+    "sub    sp, sp, #16;"
+    "ldr    lr, [sp, #16];"
+
     "add    sp, sp, #32;"
     "ret;"
     "nop;"
