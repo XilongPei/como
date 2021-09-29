@@ -48,17 +48,28 @@ namespace como {
 #define PAGE_ALIGN(va) (((va) + PAGE_SIZE - 1) & PAGE_MASK)
 #endif
 
-#define GET_STACK_INTEGER(rbp, off, var)    \
-    var = *(Integer *)((char *)&rbp + (int)off);
+#if defined(__i386__) || defined(__arm__) || (defined(__riscv) && (__riscv_xlen == 32))
+    #define GET_STACK_INTEGER(rbp, off, var)    \
+        var = *(Integer *)(*(Integer *)&rbp + (int)off);
+    #define GET_STACK_LONG(rbp, off, var)       \
+        var = *(Long *)(*(Integer *)&rbp + (int)off);
+    #define GET_STACK_FLOAT(rbp, off, var)      \
+        var = *(Float *)(*(Integer *)&rbp + (int)off);
+    #define GET_STACK_DOUBLE(rbp, off, var)     \
+        var = *(Double *)(*(Integer *)&rbp + (int)off);
+#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__riscv) && (__riscv_xlen == 64))
+    #define GET_STACK_INTEGER(rbp, off, var)    \
+        var = *(Integer *)(*(Long *)&rbp + (int)off);
+    #define GET_STACK_LONG(rbp, off, var)       \
+        var = *(Long *)(*(Long *)&rbp + (int)off);
+    #define GET_STACK_FLOAT(rbp, off, var)      \
+        var = *(Float *)(*(Long *)&rbp + (int)off);
+    #define GET_STACK_DOUBLE(rbp, off, var)     \
+        var = *(Double *)(*(Long *)&rbp + (int)off);
+#else
+    #error Unknown Architecture
+#endif
 
-#define GET_STACK_LONG(rbp, off, var)       \
-    var = *(Long *)((char *)&rbp + (int)off);
-
-#define GET_STACK_FLOAT(rbp, off, var)      \
-    var = *(Float *)((char *)&rbp + (int)off);
-
-#define GET_STACK_DOUBLE(rbp, off, var)     \
-    var = *(Double *)((char *)&rbp + (int)off);
 
 //
 //----__aarch64__--------__aarch64__--------__aarch64__--------__aarch64__------
