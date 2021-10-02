@@ -164,6 +164,9 @@ __asm__(
     "popq   %rdi;"
     "popq   %rbp;"
     "ret;"
+    "nop;"
+    "nop;"
+    "nop;"
 );
 /*
 0000000000400848 <__entry>:
@@ -184,6 +187,9 @@ __asm__(
   400862:   5f                      pop    %rdi
   400863:   5d                      pop    %rbp
   400864:   c3                      retq
+  400865:   90                      nop
+  400866:   90                      nop
+  400867:   90                      nop
 */
 
 //
@@ -238,7 +244,7 @@ __asm__(
 
 #define GET_REG(reg, var)           \
     __asm__ __volatile__(           \
-        "movq   %%"#reg", %0;"      \
+        "mov   %%"#reg", %0;"       \
         : "=m"(var)                 \
     )
 
@@ -246,40 +252,48 @@ EXTERN_C void __entry();
 
 __asm__(
     ".text;"
-    ".align 8;"
+    ".align 4;"
     ".global __entry;"
     "__entry:"
-    "pushq  %rbp;"
-    "pushq  %rdi;"
-    "subq   $8, %rsp;"
-    "movl    $0xff, (%rsp);"
-    "movq   %rdi, %rax;"
-    "movq   %rsp, %rdi;"
-    "call   *8(%rax);"
-    "addq   $8, %rsp;"
-    "popq   %rdi;"
-    "popq   %rbp;"
+    "endbr32;"
+    "push  %ebp;"
+    "push  %edi;"
+    "sub   $4, %esp;"
+    "movl  $0xff, (%esp);"
+    "mov   %edi, %eax;"
+    "mov   %esp, %edi;"
+    "call  *4(%eax);"
+    "add   $4, %esp;"
+    "pop   %edi;"
+    "pop   %ebp;"
     "ret;"
+    "nop;"
+    "nop;"
+    "nop;"
 );
 /*
-0000000000400848 <__entry>:
-  400848:   55                      push   %rbp
-  400849:   57                      push   %rdi
-  40084a:   48 83 ec 08             sub    $0x8,%rsp
-  40084e:   c7 04 24 ff 00 00 00    movl   $0xff,(%rsp)  # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;
+00001270 <__entry>:
+    1270:   f3 0f 1e fb             endbr32
+    1274:   55                      push   %ebp
+    1275:   57                      push   %edi
+    1276:   83 ec 04                sub    $0x4,%esp
+    1279:   c7 04 24 ff 00 00 00    movl   $0xff,(%esp)  # modify value ff by statement: p[PROXY_INDEX_OFFSET] = i;
                                 function in this source file, InterfaceProxy::ProxyEntry() {
                                     offset = 0;
                                     GET_STACK_INTEGER(args, offset, methodIndex);
                                 }
                                 the `methodIndex` correspond to ths `$0xff`
-  400855:   48 89 f8                mov    %rdi,%rax
-  400858:   48 89 e7                mov    %rsp,%rdi
-                                x64 ABI: %rdi, the first parameter
-  40085b:   ff 50 08                callq  *0x8(%rax)
-  40085e:   48 83 c4 08             add    $0x8,%rsp
-  400862:   5f                      pop    %rdi
-  400863:   5d                      pop    %rbp
-  400864:   c3                      retq
+    1280:   89 f8                   mov    %edi,%eax
+    1282:   89 e7                   mov    %esp,%edi
+                                    x32 ABI: %edi, the first parameter
+    1284:   ff 50 04                call   *0x4(%eax)
+    1287:   83 c4 04                add    $0x4,%esp
+    128a:   5f                      pop    %edi
+    128b:   5d                      pop    %ebp
+    128c:   c3                      ret
+    128d:   90                      nop
+    128e:   90                      nop
+    128f:   90                      nop
 */
 
 
@@ -377,7 +391,7 @@ static constexpr Integer PROXY_INDEX_OFFSET = 9;
 #elif defined(__i386__)
 static constexpr Integer PROXY_ENTRY_SIZE = 32;
 static constexpr Integer PROXY_ENTRY_SHIFT = 5;
-static constexpr Integer PROXY_INDEX_OFFSET = 9;
+static constexpr Integer PROXY_INDEX_OFFSET = 13;
 #else
     #if defined(__riscv)
         #if (__riscv_xlen == 64)
