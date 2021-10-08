@@ -22,18 +22,15 @@
 //     /* [in] */ struct ParameterInfo* paramInfos);
 
     .text
-    .align 8;
+    .align 4;
     .global invoke;
 
 invoke:
-    pushq   %r10;
-    pushq   %r11;
-    pushq   %r12;
-    pushq   %rbx;
-    pushq   %rbp;
-    movq    %rsp, %rbp;
+    push    %ebp;
+    movl    %esp, %ebp;
     jmp     main;
 
+/*
 get_next_param:
     addq    $20, %r10;              // jump to next paramInfos, sizeof(struct ParameterInfo) is #20
     movl    (%r10), %r11d;          // paramInfos->mSize
@@ -49,34 +46,41 @@ eight_bytes_alignment:
 do_not_adjust:
     jmp     set_params;
 
+*/
 main:
-    subq    $64, %rsp;
-    movq    %rdi, -8(%rbp);         // push "func" value
-    movq    %rsi, -16(%rbp);        // push "params" value
-    movl    %edx, -20(%rbp);        // push "paramNum" value
-    movq    %r8, -32(%rbp);         // push "paramInfos" value
-    movl    $0, -40(%rbp);          // integral paramNum
-    movl    $0, -44(%rbp);          // floating point paramNum
-    movl    %ecx, -48(%rbp);        // push "stackParamNum" value
+    // -4(%esp);    %ebp
+    // -8(%esp);    "func" value
+    // -12(%ebp);   "params" value
+    // -16(%ebp);   "paramNum" value
+    // -20(%ebp);   "paramInfos" value
+    // -24(%ebp);   "stackParamNum" value
 
+    .cfi_startproc
+    pushl %ebp;
+    movl %esp, %ebp;
+    push $0;                        // integral paramNum
+    push $0;                        // floating point paramNum
+
+    movl    -24(%ebp), %ecx;        // get "stackParamNum" value into %ecx
 alloc_stack:
     cmpl    $0, %ecx;
     je      set_this;
-    movq    $16, %rax;
-    mulq    %rcx;
-    subq    %rax, %rsp;
-    movq    %rsp, %r12;
+    movl    $16, %eax;
+    mull    %ecx;
+    subl    %eax, %esp;
+//    movl    %esp, %r12;
 
 set_this:
-    movq    -16(%rbp), %rax;        // "params"
-    movl    -20(%rbp), %ebx;        // "paramNum"
-    movq    -32(%rbp), %r10;        // "paramInfos"
-    movq    (%rax), %rdi;           // "params[0]"
-    addq    $8, %rax;               // "params + 8"
-    movl    $1, -40(%rbp);          // next integral paramNum = 1
+    movl    -12(%ebp), %eax;        // "params"
+    movl    -16(%ebp), %ebx;        // "paramNum"
+//    movq    -20(%ebp), %r10;        // "paramInfos"
+    movl    (%eax), %edi;           // "params[0]"
+    addl    $8, %eax;               // "params + 8"
+    movl    $1, 0(%esp);            // next integral paramNum = 1
     subl    $1, %ebx;               // paramNum -= 1
 
 set_params:
+/*
     testl   %ebx, %ebx;             // paramNum == 0 ?
     jz      call_func;
     movl    4(%r10), %r11d;         // paramInfos->mNumberType
@@ -344,15 +348,12 @@ stack_eight_bytes:
     subl    $1, %ebx;
     jmp     get_next_param;
 
+*/
 call_func:
-    movq    -8(%rbp), %rax;
-    call    *%rax;
+    movl    -8(%ebp), %eax;
+    call    *%eax;
 
 return:
-    movq    %rbp, %rsp;
-    popq    %rbp;
-    popq    %rbx;
-    popq    %r12;
-    popq    %r11;
-    popq    %r10;
+    leave
     ret
+    .cfi_endproc
