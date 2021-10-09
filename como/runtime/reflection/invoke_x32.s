@@ -28,41 +28,33 @@
 invoke:
     push    %ebp;
     movl    %esp, %ebp;
-    jmp     main;
+    push    $0;                     // integral paramNum
+    push    $0;                     // floating point paramNum
 
-get_next_param:
-    addl    $20, %esi;              // jump to next paramInfos, sizeof(struct ParameterInfo) is #20
-    movl    (%esi), %eax;           // paramInfos->mSize
-    cmpl    $8, %eax;               // paramInfos->mSize == 8 ?
-    je      eight_bytes_alignment;
-    jmp     set_params;
-eight_bytes_alignment:
-    movl    %eax, %edx;             // %edx, temp, for test it
-    andl    $7, %edx;
-    cmpl    $0, %edx;
-    je      do_not_adjust
-    addl    $4, %eax;
-do_not_adjust:
-    jmp     set_params;
+/* map of current memory and registers
 
-main:
-    // -4(%esp);    %ebp
-    // -8(%esp);    "func" value
-    // -12(%ebp);   "params" value,         %eax
-    // -16(%ebp);   "paramNum" value,       %ebx
-    // -20(%ebp);   "paramInfos" value,     %esi
-    // -24(%ebp);   "stackParamNum" value,  %ecx
-    //              current stack esp,      %edi
-    //              temp,                   %edx
+    kernel space
+       +--------+ high address, stack  |
+       |        |                      \/
+       |        |
+       |        | parameter#4, paramInfos    24(%ebp);  %esi
+       |        | parameter#3, stackParamNum 20(%ebp);  %ecx
+       |        | parameter#2, paramNum      16(%ebp);  %ebx
+       |        | parameter#1, params        12(%ebp);  %eax
+       |        | parameter#0, func           8(%ebp);
+       |        | ret address                 4(%ebp);
+%ebp-> +--------+ old %ebp                    0(%ebp);
+       |   0    | local#0, integral paramNum          -4(%ebp);
+       |   0    | local#1, floating point paramNum    -8(%ebp);
+       |        |
+%esp-> +--------+ low address
+        ......
 
-    .cfi_startproc
-    pushl %ebp;
-    movl %esp, %ebp;
-    push $0;                        // integral paramNum
-    push $0;                        // floating point paramNum
+                current stack esp,                      %edi
+                temp,                                   %edx
+*/
 
-    movl    -24(%ebp), %ecx;        // get "stackParamNum" value into %ecx
-alloc_stack:
+    // alloc_stack
     cmpl    $0, %ecx;
     je      set_this;
     movl    $16, %eax;
@@ -71,9 +63,10 @@ alloc_stack:
     movl    %esp, %edi;
 
 set_this:
-    movl    -12(%ebp), %eax;        // "params"
-    movl    -16(%ebp), %ebx;        // "paramNum"
-    movl    -20(%ebp), %esi;        // "paramInfos"
+    movl    12(%ebp), %eax;        // "params"
+    movl    16(%ebp), %ebx;        // "paramNum"
+    movl    24(%ebp), %esi;        // "paramInfos"
+    movl    20(%ebp), %ecx;        // get "stackParamNum" value into %ecx
     movl    (%eax), %edi;           // "params[0]"
     addl    $8, %eax;               // "params + 8"
     movl    $1, 0(%esp);            // next integral paramNum = 1
@@ -82,7 +75,7 @@ set_this:
 set_params:
     testl   %ebx, %ebx;             // paramNum == 0 ?
     jz      call_func;
-    movl    4(%esi), %eax;          // paramInfos->mNumberType
+    movl    4(%esi), %eax;         // paramInfos->mNumberType
     cmpl    $0, %eax;               // paramInfos->mNumberType == NUMBER_TYPE_INTEGER ?
     je      set_integral_param;
     jmp     set_float_point_param;
@@ -92,7 +85,7 @@ set_integral_param:
     jmp     save_param_to_stack;
 
 set_float_point_param:
-    movl    4(%ebp), %eax;          // floating point paramNum
+    movl    4(%ebp), %eax;         // floating point paramNum
     jmp     save_param_to_stack;
 
 save_param_to_stack:
@@ -111,11 +104,25 @@ stack_eight_bytes:
     subl    $1, %ebx;               // paramNum -= 1
     jmp     get_next_param;
 
+get_next_param:
+    addl    $20, %esi;              // jump to next paramInfos, sizeof(struct ParameterInfo) is #20
+    movl    (%esi), %eax;           // paramInfos->mSize
+    cmpl    $8, %eax;               // paramInfos->mSize == 8 ?
+    je      eight_bytes_alignment;
+    jmp     set_params;
+eight_bytes_alignment:
+    movl    %eax, %edx;             // %edx, temp, for test it
+    andl    $7, %edx;
+    cmpl    $0, %edx;
+    je      do_not_adjust
+    addl    $4, %eax;
+do_not_adjust:
+    jmp     set_params;
+
 call_func:
-    movl    -8(%ebp), %eax;
+    movl    8(%ebp), %eax;
     call    *%eax;
 
 return:
     leave
     ret
-    .cfi_endproc
