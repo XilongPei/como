@@ -34,6 +34,8 @@ invoke:
 /* map of current memory and registers
 
     kernel space
+    .
+    user space
        +--------+ high address, stack  |
        |        |                      \/
        |        |
@@ -63,19 +65,19 @@ invoke:
     movl    %esp, %edi;
 
 set_this:
-    movl    12(%ebp), %eax;        // "params"
-    movl    16(%ebp), %ebx;        // "paramNum"
-    movl    24(%ebp), %esi;        // "paramInfos"
-    movl    20(%ebp), %ecx;        // get "stackParamNum" value into %ecx
-    movl    (%eax), %edi;           // "params[0]"
-    addl    $8, %eax;               // "params + 8"
+    movl    12(%ebp), %eax;         // params
+    movl    16(%ebp), %ebx;         // paramNum
+    movl    20(%ebp), %ecx;         // get "stackParamNum" value into %ecx
+    movl    24(%ebp), %esi;         // paramInfos
+    movl    (%eax), %edi;           // params[0]
+    addl    $8, %eax;               // params + 8
     movl    $1, 0(%esp);            // next integral paramNum = 1
     subl    $1, %ebx;               // paramNum -= 1
 
 set_params:
     testl   %ebx, %ebx;             // paramNum == 0 ?
     jz      call_func;
-    movl    4(%esi), %eax;         // paramInfos->mNumberType
+    movl    4(%esi), %eax;          // paramInfos->mNumberType
     cmpl    $0, %eax;               // paramInfos->mNumberType == NUMBER_TYPE_INTEGER ?
     je      set_integral_param;
     jmp     set_float_point_param;
@@ -85,7 +87,7 @@ set_integral_param:
     jmp     save_param_to_stack;
 
 set_float_point_param:
-    movl    4(%ebp), %eax;         // floating point paramNum
+    movl    4(%ebp), %eax;          // floating point paramNum
     jmp     save_param_to_stack;
 
 save_param_to_stack:
