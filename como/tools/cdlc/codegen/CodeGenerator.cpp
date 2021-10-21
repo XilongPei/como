@@ -716,10 +716,21 @@ String CodeGenerator::ComponentModeEmitter::EmitComponentObject()
     builder.Append(Properties::INDENT).Append("sComponentObject.AddRef();\n");
     builder.Append("}\n");
     builder.Append("\n");
+
+    builder.Append("#ifdef __GNUC__\n");
+    builder.Append("#pragma GCC diagnostic push\n");
+    builder.Append("#pragma GCC diagnostic ignored \"-Wfree-nonheap-object\"\n");
+    builder.Append("#endif\n");
+
     builder.Append("void ReleaseComponentRefCount()\n");
     builder.Append("{\n");
-    builder.Append(Properties::INDENT).Append("sComponentObject.Release();\n");
+    builder.Append(Properties::INDENT).Append("if (sComponentObject.GetStrongCount() > 1)\n");
+    builder.Append(Properties::INDENT).Append(Properties::INDENT).Append("sComponentObject.Release();\n");
     builder.Append("}\n");
+
+    builder.Append("#ifdef __GNUC__\n");
+    builder.Append("#pragma GCC diagnostic pop\n");
+    builder.Append("#endif\n");
 
     return builder.ToString();
 }
