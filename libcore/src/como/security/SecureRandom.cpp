@@ -255,20 +255,25 @@ String SecureRandom::GetPrngAlgorithm()
 {
     AutoPtr<IProviderList> pl = Providers::GetProviderList();
     AutoPtr<IList> ps;
-    pl->Providers(ps);
-    FOR_EACH(IProvider*, p, IProvider::Probe, ps) {
-        AutoPtr<ISet> ss;
-        p->GetServices(ss);
-        FOR_EACH(IProviderService*, s, IProviderService::Probe, ss) {
-            String type;
-            s->GetType(type);
-            if (type.Equals("CSecureRandom")) {
-                String algorithm;
-                s->GetAlgorithm(algorithm);
-                return algorithm;
-            }
-        } END_FOR_EACH();
-    } END_FOR_EACH();
+
+    if (pl != nullptr) {
+        pl->Providers(ps);
+        if (ps != nullptr) {
+            FOR_EACH(IProvider*, p, IProvider::Probe, ps) {
+                AutoPtr<ISet> ss;
+                p->GetServices(ss);
+                FOR_EACH(IProviderService*, s, IProviderService::Probe, ss) {
+                    String type;
+                    s->GetType(type);
+                    if (type.Equals("CSecureRandom")) {
+                        String algorithm;
+                        s->GetAlgorithm(algorithm);
+                        return algorithm;
+                    }
+                } END_FOR_EACH();
+            } END_FOR_EACH();
+        }
+    }
     return String();
 }
 

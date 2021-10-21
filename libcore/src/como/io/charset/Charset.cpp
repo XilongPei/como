@@ -171,7 +171,9 @@ AutoPtr<IIterator> Charset::GetProviders()
         _Iterator()
         {
             AutoPtr<IServiceLoader> sl = ServiceLoader::Load(IID_ICharsetProvider);
-            IIterable::Probe(sl)->GetIterator(mI);
+            AutoPtr<IIterable> iit = IIterable::Probe(sl);
+            if (iit != nullptr)
+                iit->GetIterator(mI);
         }
 
         Integer AddRef(
@@ -619,9 +621,11 @@ ECode Charset::Decode(
     /* [out] */ AutoPtr<ICharBuffer>& cb)
 {
     AutoPtr<ICharsetDecoder> cd = ThreadLocalCoders::DecoderFor((ICharset*)this);
-    cd->OnMalformedInput(CodingErrorAction::GetREPLACE());
-    cd->OnUnmappableCharacter(CodingErrorAction::GetREPLACE());
-    cd->Decode(bb, cb);
+    if (cd != nullptr) {
+        cd->OnMalformedInput(CodingErrorAction::GetREPLACE());
+        cd->OnUnmappableCharacter(CodingErrorAction::GetREPLACE());
+        cd->Decode(bb, cb);
+    }
     return NOERROR;
 }
 
@@ -630,9 +634,11 @@ ECode Charset::Encode(
     /* [out] */ AutoPtr<IByteBuffer>& bb)
 {
     AutoPtr<ICharsetEncoder> ce = ThreadLocalCoders::EncoderFor((ICharset*)this);
-    ce->OnMalformedInput(CodingErrorAction::GetREPLACE());
-    ce->OnUnmappableCharacter(CodingErrorAction::GetREPLACE());
-    ce->Encode(cb, bb);
+    if (ce != nullptr) {
+        ce->OnMalformedInput(CodingErrorAction::GetREPLACE());
+        ce->OnUnmappableCharacter(CodingErrorAction::GetREPLACE());
+        ce->Encode(cb, bb);
+    }
     return NOERROR;
 }
 
