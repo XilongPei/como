@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <cerrno>
 #include "como/core/nativeapi.h"
 #include "como/core/NativeObject.h"
 #include "como/core/NativeThread.h"
