@@ -1009,8 +1009,12 @@ static void SigAltStack(stack_t* newStack, stack_t* oldStack)
 // handler or do a stack unwind, this is too small.  We allocate 32K
 // instead of the minimum signal stack size.
 // TODO: We shouldn't do logging (with locks) in signal handlers.
-static constexpr int kHostAltSigStackSize =
-        32 * KB < MINSIGSTKSZ ? MINSIGSTKSZ : 32 * KB;
+#if defined(MINSIGSTKSZ)
+    static constexpr int kHostAltSigStackSize =
+            32 * KB < MINSIGSTKSZ ? MINSIGSTKSZ : 32 * KB;
+#else
+    static constexpr int kHostAltSigStackSize = 32 * KB;
+#endif
 
 void NativeThread::SetUpAlternateSignalStack()
 {
