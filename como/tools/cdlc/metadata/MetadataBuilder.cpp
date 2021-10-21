@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdlib.h>
 #include "metadata/MetadataBuilder.h"
 #include "ast/ArrayType.h"
 #include "ast/PointerType.h"

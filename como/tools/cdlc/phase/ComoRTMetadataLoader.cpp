@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdlib.h>
 #include "phase/ComoRTMetadataLoader.h"
 #include "ast/Module.h"
 #include "metadata/Metadata.h"

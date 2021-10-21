@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdlib.h>
 #include "parser/Tokenizer.h"
 #include "util/StringBuilder.h"
 

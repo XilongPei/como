@@ -14,6 +14,8 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdlib.h>
+#include <stdint.h>
 #include "util/Logger.h"
 #include "util/StringPool.h"
 #include <cstring>

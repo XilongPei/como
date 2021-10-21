@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdlib.h>
 #include "ast/Module.h"
 #include "codegen/CodeGenerator.h"
 #include "metadata/Metadata.h"
