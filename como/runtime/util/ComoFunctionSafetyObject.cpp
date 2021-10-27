@@ -22,7 +22,7 @@ namespace como {
 
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
 {
-    clock_gettime(CLOCK_MONOTONIC, &mBirthTime);
+    clock_gettime(CLOCK_REALTIME, &mBirthTime);
 }
 
 Long ComoFunctionSafetyObject::GetExpires()
