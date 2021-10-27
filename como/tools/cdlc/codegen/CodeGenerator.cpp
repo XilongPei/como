@@ -184,6 +184,13 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     builder.Append("\n");
     builder.AppendFormat("#include \"%s.h\"\n", mComponent->mName);
 
+    // if function safety Coclass, include ComoFunctionSafetyObject.h
+    /*
+    if (mk->funcSafetySetting) {
+        builder.AppendFormat("#include \"ComoFunctionSafetyObject.h\"\n");
+    }
+    */
+
     std::set<String, StringCompareFunc> includes;
 
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
@@ -229,6 +236,14 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     builder.AppendFormat("COM_PUBLIC extern const CoclassID CID_%s;\n\n", mk->mName);
     builder.AppendFormat("COCLASS_ID(%s)\n", UUID::Parse(mk->mUuid)->Dump().string());
     builder.AppendFormat("class _%s\n", mk->mName);
+
+    // if function safety Coclass, it should inherit ComoFunctionSafetyObject
+    /*
+    if (mk->funcSafetySetting) {
+        builder.Append(" : ComoFunctionSafetyObject\n");
+    }
+    */
+
     builder.Append("{\n");
     builder.Append("public:\n");
     builder.Append(Properties::INDENT).AppendFormat("_%s();\n", mk->mName);
