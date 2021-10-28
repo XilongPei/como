@@ -234,7 +234,7 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
 
     builder.Append(EmitNamespaceBegin(mk->mNamespace));
     builder.AppendFormat("COM_PUBLIC extern const CoclassID CID_%s;\n\n", mk->mName);
-    builder.AppendFormat("COCLASS_ID(%s)\n", UUID::Parse(mk->mUuid)->Dump().string());
+    builder.AppendFormat("COCLASS_ID(/*CID_%s*/%s)\n", mk->mName, UUID::Parse(mk->mUuid)->Dump().string());
     builder.AppendFormat("class _%s\n", mk->mName);
 
     // if function safety Coclass, it should inherit ComoFunctionSafetyObject
@@ -973,7 +973,7 @@ String CodeGenerator::ClientModeEmitter::EmitCoclassDeclaration(
 
     builder.AppendFormat("COM_PUBLIC extern const CoclassID CID_%s;\n", mk->mName);
     builder.Append("\n");
-    builder.AppendFormat("COCLASS_ID(%s)\n", UUID::Parse(mk->mUuid)->Dump().string());
+    builder.AppendFormat("COCLASS_ID(/*CID_%s*/%s)\n", mk->mName, UUID::Parse(mk->mUuid)->Dump().string());
     builder.AppendFormat("class %s\n", mk->mName);
     builder.Append("{\n");
     builder.Append("public:\n");
