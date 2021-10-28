@@ -76,4 +76,24 @@ String CoclassType::GetSignature()
     return builder.ToString();
 }
 
+AutoPtr<Constant> CoclassType::FindConstant(
+    /* [in] */ const String& name)
+{
+    for (AutoPtr<Constant> constant : mConstants) {
+        if (constant->GetName().Equals(name)) {
+            return constant;
+        }
+    }
+    return nullptr;
 }
+
+AutoPtr<Constant> CoclassType::GetConstant(
+    /* [in] */ int i)
+{
+    if (i >= 0 && i < mConstants.size()) {
+        return mConstants[i];
+    }
+    return nullptr;
+}
+
+} // namespace cdlc

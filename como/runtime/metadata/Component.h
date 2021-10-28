@@ -111,7 +111,9 @@ struct MetaCoclass
     char*               mName;
     char*               mNamespace;
     int                 mInterfaceNumber;
+    int                 mConstantNumber;
     int*                mInterfaceIndexes;
+    MetaConstant**      mConstants;
     unsigned char       mProperties;
 };
 

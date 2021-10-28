@@ -69,12 +69,24 @@ public:
     inline static AutoPtr<CoclassType> CastFrom(
         /* [in] */ Type* type);
 
+    inline void AddConstant(
+        /* [in] */ Constant* constant);
+
+    AutoPtr<Constant> FindConstant(
+        /* [in] */ const String& name);
+
+    AutoPtr<Constant> GetConstant(
+        /* [in] */ int i);
+
+    inline int GetConstantNumber();
+
 private:
     AutoPtr<UUID> mUuid;
     String mVersion;
     String mDescription;
     std::vector<AutoPtr<Method>> mConstructors;
     std::vector<AutoPtr<InterfaceType>> mInterfaces;
+    std::vector<AutoPtr<Constant>> mConstants;
 };
 
 AutoPtr<UUID> CoclassType::GetUUID()
@@ -132,6 +144,19 @@ AutoPtr<CoclassType> CoclassType::CastFrom(
     return static_cast<CoclassType*>(type);
 }
 
+void CoclassType::AddConstant(
+    /* [in] */ Constant* constant)
+{
+    if (constant != nullptr) {
+        mConstants.push_back(constant);
+    }
 }
+
+int CoclassType::GetConstantNumber()
+{
+    return mConstants.size();
+}
+
+} // namespace cdlc
 
 #endif // __CDLC_COCLASSTYPE_H__

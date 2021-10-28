@@ -531,6 +531,7 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
     /* [in] */ CoclassType* klass)
 {
     int IN = klass->GetInterfaceNumber();
+    int CN = klass->GetConstantNumber();
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -539,9 +540,13 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
     mc->mName = WriteString(klass->GetName());
     mc->mNamespace = WriteString(klass->GetNamespace()->ToString());
     mc->mInterfaceNumber = IN;
+    mc->mConstantNumber = CN;
     // mInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass));
     mc->mInterfaceIndexes = IN > 0 ? reinterpret_cast<int*>(mBasePtr) : nullptr;
+    // mConstants address
+    mBasePtr = ALIGN(mBasePtr + sizeof(int) * IN);
+    mc->mConstants = CN > 0 ? reinterpret_cast<como::MetaConstant**>(mBasePtr) : nullptr;
     mc->mProperties = 0;
     if (klass->HasDefaultConstructor()) {
         mc->mProperties |= COCLASS_CONSTRUCTOR_DEFAULT;
@@ -550,10 +555,14 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
         mc->mProperties |= COCLASS_CONSTRUCTOR_DELETED;
     }
     // end address
-    mBasePtr = mBasePtr + sizeof(int) * IN;
+    mBasePtr = mBasePtr + sizeof(int) * CN;
 
     for (int i = 0; i < IN; i++) {
         mc->mInterfaceIndexes[i] = mModule->IndexOf(klass->GetInterface(i));
+    }
+
+    for (int i = 0; i < CN; i++) {
+        mc->mConstants[i] = WriteMetaConstant(klass->GetConstant(i));
     }
 
     return mc;

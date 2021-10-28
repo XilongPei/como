@@ -1909,6 +1909,16 @@ bool Parser::ParseCoclassBody(
                 result = ParseInterface(klass) && result;
                 break;
             }
+            case Token::CONST: {
+                AutoPtr<Constant> constant = ParseConstant();
+                if (constant != nullptr) {
+                    klass->AddConstant(constant);
+                }
+                else {
+                    result = false;
+                }
+                break;
+            }
             default: {
                 LogError(tokenInfo, "Constructors or interfaces are expected.");
                 mTokenizer.GetToken();
