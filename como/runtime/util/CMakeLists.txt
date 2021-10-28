@@ -22,12 +22,19 @@ include_directories(
     ../type
     ${INC_DIR})
 
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
+    set(ComoFunctionSafetyObject ComoFunctionSafetyObject.cpp)
+else()
+    set(ComoFunctionSafetyObject)
+endif()
+
 set(SOURCES
     comoclsobj.cpp
     comolog.cpp
     comoobj.cpp
     comolock.cpp
     comoref.cpp
+    ${ComoFunctionSafetyObject}
     mutex.cpp)
 
 add_library(util STATIC
