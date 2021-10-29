@@ -32,6 +32,7 @@ CMetaCoclass::CMetaCoclass(
     , mOwner(mcObj)
     , mName(mk->mName)
     , mNamespace(mk->mNamespace)
+    , mFuncSafetySetting(mk->mFuncSafetySetting)
     , mInterfaces(mk->mInterfaceNumber - 1)
     , mOpaque(0)
 {
@@ -61,6 +62,13 @@ ECode CMetaCoclass::GetNamespace(
     /* [out] */ String& ns)
 {
     ns = mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace;
+    return NOERROR;
+}
+
+ECode CMetaCoclass::GetFuncSafetySetting(
+    /* [out] */ String& funcSafetySetting)
+{
+    funcSafetySetting = mFuncSafetySetting;
     return NOERROR;
 }
 

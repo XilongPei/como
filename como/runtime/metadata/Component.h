@@ -114,6 +114,7 @@ struct MetaCoclass
     int                 mConstantNumber;
     int*                mInterfaceIndexes;
     MetaConstant**      mConstants;
+    char*               mFuncSafetySetting;
     unsigned char       mProperties;
 };
 

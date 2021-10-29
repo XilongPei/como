@@ -185,11 +185,9 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     builder.AppendFormat("#include \"%s.h\"\n", mComponent->mName);
 
     // if function safety Coclass, include ComoFunctionSafetyObject.h
-    /*
-    if (mk->funcSafetySetting) {
+    if (! String(mk->mFuncSafetySetting).IsEmpty()) {
         builder.AppendFormat("#include \"ComoFunctionSafetyObject.h\"\n");
     }
-    */
 
     std::set<String, StringCompareFunc> includes;
 
@@ -238,11 +236,9 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     builder.AppendFormat("class _%s\n", mk->mName);
 
     // if function safety Coclass, it should inherit ComoFunctionSafetyObject
-    /*
-    if (mk->funcSafetySetting) {
+    if (! String(mk->mFuncSafetySetting).IsEmpty()) {
         builder.Append(" : ComoFunctionSafetyObject\n");
     }
-    */
 
     builder.Append("{\n");
     builder.Append("public:\n");

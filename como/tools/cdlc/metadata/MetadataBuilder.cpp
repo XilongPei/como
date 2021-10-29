@@ -172,6 +172,8 @@ void MetadataBuilder::CalculateMetaCoclass(
     mPool.Add(klass->GetName());
     // add mNamespace to StringPool
     mPool.Add(klass->GetNamespace()->ToString());
+    // add mFuncSafetySetting to StringPool
+    mPool.Add(klass->GetFuncSafetySetting());
     // mInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass));
     // end address
@@ -539,6 +541,7 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
     mc->mUuid = klass->GetUUID()->ToComoUUID();
     mc->mName = WriteString(klass->GetName());
     mc->mNamespace = WriteString(klass->GetNamespace()->ToString());
+    mc->mFuncSafetySetting = WriteString(klass->GetFuncSafetySetting());
     mc->mInterfaceNumber = IN;
     mc->mConstantNumber = CN;
     // mInterfaceIndexes address

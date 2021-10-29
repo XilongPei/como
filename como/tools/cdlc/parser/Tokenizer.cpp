@@ -58,6 +58,7 @@ void Tokenizer::SetupKeywords()
     mKeywords["uri"] = Token::URI;
     mKeywords["uuid"] = Token::UUID;
     mKeywords["version"] = Token::VERSION;
+    mKeywords["FuncSafetySetting"] = Token::FUNCTION_SAFETY_SETTING;
 }
 
 TokenInfo Tokenizer::PeekToken(

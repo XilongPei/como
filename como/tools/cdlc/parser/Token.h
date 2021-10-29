@@ -99,6 +99,8 @@ enum class Token
     STRING_LITERAL,         // 71)
     UUID_NUMBER,            // 72)
     VERSION_NUMBER,         // 73)
+
+    FUNCTION_SAFETY_SETTING,  // FuncSafetySetting
 };
 
 char Token2Char(

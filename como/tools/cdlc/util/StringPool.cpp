@@ -37,9 +37,11 @@ StringPool::~StringPool()
 void StringPool::Add(
     /* [in] */ const String& string)
 {
-    if (string.IsEmpty() || mStringOffsets.find(string) != mStringOffsets.end()) {
+    if (string.IsNull())
         return;
-    }
+
+    if (mStringOffsets.find(string) != mStringOffsets.end())
+        return;
 
     ptrdiff_t offset = AddInternal(string);
     if (offset != -1) {

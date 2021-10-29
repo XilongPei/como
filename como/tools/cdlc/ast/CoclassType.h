@@ -40,6 +40,8 @@ public:
 
     inline String GetVersion();
 
+    inline String GetFuncSafetySetting();
+
     inline void AddConstructor(
         /* [in] */ Method* constructor);
 
@@ -84,6 +86,7 @@ private:
     AutoPtr<UUID> mUuid;
     String mVersion;
     String mDescription;
+    String mFuncSafetySetting;
     std::vector<AutoPtr<Method>> mConstructors;
     std::vector<AutoPtr<InterfaceType>> mInterfaces;
     std::vector<AutoPtr<Constant>> mConstants;
@@ -97,6 +100,11 @@ AutoPtr<UUID> CoclassType::GetUUID()
 String CoclassType::GetVersion()
 {
     return mVersion;
+}
+
+String CoclassType::GetFuncSafetySetting()
+{
+    return mFuncSafetySetting;
 }
 
 void CoclassType::AddConstructor(

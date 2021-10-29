@@ -24,10 +24,15 @@ namespace cdlc {
 class Attributes
 {
 public:
+    Attributes()
+        : mFuncSafetySetting("")
+    {}
+
     String mUuid;
     String mVersion;
     String mDescription;
     String mUri;
+    String mFuncSafetySetting;
 };
 
 }

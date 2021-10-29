@@ -31,6 +31,7 @@ void CoclassType::SetAttributes(
     mUuid = UUID::Parse(attrs.mUuid);
     mVersion = attrs.mVersion;
     mDescription = attrs.mDescription;
+    mFuncSafetySetting = attrs.mFuncSafetySetting;
 }
 
 AutoPtr<Method> CoclassType::FindConstructor(

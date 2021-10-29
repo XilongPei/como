@@ -46,6 +46,9 @@ public:
     ECode GetNamespace(
         /* [out] */ String& ns) override;
 
+    ECode GetFuncSafetySetting(
+        /* [out] */ String& funcSafetySetting) override;
+
     ECode GetCoclassID(
         /* [out] */ CoclassID& cid) override;
 
@@ -126,6 +129,7 @@ public:
     CoclassID mCid;
     String mName;
     String mNamespace;
+    String mFuncSafetySetting;
     Array<IMetaConstructor*> mConstructors;
     Mutex mConstructorsLock;
     Array<IMetaMethod*> mMethods;

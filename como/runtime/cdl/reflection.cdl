@@ -147,6 +147,9 @@ interface IMetaCoclass
     GetNamespace(
         [out] String& ns);
 
+    GetFuncSafetySetting(
+        [out] String& funcSafetySetting);
+
     GetCoclassID(
         [out] CoclassID& cid);
 

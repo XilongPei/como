@@ -242,6 +242,10 @@ bool Parser::ParseAttributes(
                     result = ParseUri(attrs) && result;
                     break;
                 }
+                case Token::FUNCTION_SAFETY_SETTING: {
+                    result = ParseFuncSafetySetting(attrs) && result;
+                    break;
+                }
                 default: {
                     String message = String::Format("\"%s\" is not expected.",
                             TokenInfo::Dump(tokenInfo).string());
@@ -387,6 +391,33 @@ bool Parser::ParseUri(
     }
     mTokenizer.GetToken();
     attrs.mUri = tokenInfo.mStringValue;
+    tokenInfo = mTokenizer.PeekToken();
+    if (tokenInfo.mToken != Token::PARENTHESES_CLOSE) {
+        LogError(tokenInfo, "\")\" is expected.");
+        return false;
+    }
+    mTokenizer.GetToken();
+    return true;
+}
+
+bool Parser::ParseFuncSafetySetting(
+    /* [out] */ Attributes& attrs)
+{
+    // read "FuncSafetySetting"
+    mTokenizer.GetToken();
+    TokenInfo tokenInfo = mTokenizer.PeekToken();
+    if (tokenInfo.mToken != Token::PARENTHESES_OPEN) {
+        LogError(tokenInfo, "\"(\" is expected.");
+        return false;
+    }
+    mTokenizer.GetToken();
+    tokenInfo = mTokenizer.PeekToken();
+    if (tokenInfo.mToken != Token::FUNCTION_SAFETY_SETTING) {
+        LogError(tokenInfo, "string literal is expected.");
+        return false;
+    }
+    mTokenizer.GetToken();
+    attrs.mFuncSafetySetting = tokenInfo.mStringValue;
     tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken != Token::PARENTHESES_CLOSE) {
         LogError(tokenInfo, "\")\" is expected.");

@@ -138,6 +138,9 @@ private:
     bool ParseUri(
         /* [out] */ Attributes& attrs);
 
+    bool ParseFuncSafetySetting(
+        /* [out] */ Attributes& attrs);
+
     bool ParseModule(
         /* [in] */ Attributes& attrs);
 
