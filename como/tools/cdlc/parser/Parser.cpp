@@ -412,7 +412,7 @@ bool Parser::ParseFuncSafetySetting(
     }
     mTokenizer.GetToken();
     tokenInfo = mTokenizer.PeekToken();
-    if (tokenInfo.mToken != Token::FUNCTION_SAFETY_SETTING) {
+    if (tokenInfo.mToken != Token::STRING_LITERAL) {
         LogError(tokenInfo, "string literal is expected.");
         return false;
     }

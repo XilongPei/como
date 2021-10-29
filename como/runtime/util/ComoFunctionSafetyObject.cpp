@@ -14,6 +14,13 @@
 // limitations under the License.
 //=========================================================================
 
+//
+// when building environment has $ENV{COMO_FUNCTION_SAFETY}, it will define
+// -DCOMO_FUNCTION_SAFETY=$ENV{COMO_FUNCTION_SAFETY}
+
+#ifdef COMO_FUNCTION_SAFETY
+#endif
+
 #include <time.h>
 #include "comoobj.h"
 #include "ComoFunctionSafetyObject.h"

@@ -12,15 +12,21 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_SHARED_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 set(CMAKE_STATIC_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
+    set(FUNCTION_SAFETY_C_FLAGS "-DCOMO_FUNCTION_SAFETY=$ENV{COMO_FUNCTION_SAFETY}")
+else()
+    set(FUNCTION_SAFETY_C_FLAGS "")
+endif()
+
 if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)")
     set(COMMON_C_FLAGS
-        "-fPIC -ffunction-sections -fdata-sections")
+        "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 elseif($ENV{ARCH} MATCHES "(x32)|(aarch32)|(riscv32)")
     set(COMMON_C_FLAGS
-        "-m32 -fPIC -ffunction-sections -fdata-sections")
+        "-m32 -fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 else()
     set(COMMON_C_FLAGS
-        "-fPIC -ffunction-sections -fdata-sections")
+        "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 endif()
 
 set(COMMON_CXX_FLAGS
