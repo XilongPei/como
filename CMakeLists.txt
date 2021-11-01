@@ -14,6 +14,8 @@
 # limitations under the License.
 #=========================================================================
 
+project(como)
+
 cmake_minimum_required(VERSION 2.8)
 
 include($ENV{ROOT}/build/common.cmake)
