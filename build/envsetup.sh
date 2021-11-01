@@ -8,9 +8,6 @@ cat <<EOF
 - como_linux_x64:       Switch to build como for linux x64.
 - como_linux_aarch64:   Switch to build como for linux aarch64.
 - como_linux_riscv64:   Switch to build como for linux riscv64.
-- como_linux_x32:       Switch to build como for linux x32.
-- como_linux_aarch32:   Switch to build como for linux aarch32.
-- como_linux_riscv32:   Switch to build como for linux riscv32.
 - como_android_aarch64: Switch to build como for android aarch64.
 - como_openEuler_riscv: Switch to build como for openEuler RISC-V.
 - debug:                Switch to build debug version.
@@ -138,7 +135,7 @@ function como_linux_common()
     cd $OUT_PATH
 
     if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
-        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM".cmake
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH".cmake
         if [ "$VERSION" == "rls" ]; then
             BUILD_TYPE=Release
         else
@@ -164,25 +161,6 @@ function como_linux_aarch64()
 function como_linux_riscv64()
 {
     export ARCH=riscv64
-    como_linux_common
-}
-
-function como_linux_x32()
-{
-    export ARCH=x32
-    como_linux_common
-    export COMO_WITH_RPC=rpc
-}
-
-function como_linux_aarch32()
-{
-    export ARCH=aarch32
-    como_linux_common
-}
-
-function como_linux_riscv32()
-{
-    export ARCH=riscv32
     como_linux_common
 }
 
