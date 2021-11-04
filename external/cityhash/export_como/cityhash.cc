@@ -27,8 +27,9 @@
 // possible hash functions, by using SIMD instructions, or by
 // compromising on hash quality.
 
-#include "config.h"
-#include <city.h>
+//#include "config.h"
+#include <stdio.h>
+#include "cityhash.h"
 
 #include <algorithm>
 #include <string.h>  // for memcpy and memset
@@ -644,3 +645,34 @@ uint128 CityHashCrc128(const char *s, size_t len) {
 }
 
 #endif
+
+char *Uint128ToUuidString(uint128 uuidU128, char *uuidStr) {
+  struct UUID {
+    unsigned int    mData1;
+    unsigned short  mData2;
+    unsigned short  mData3;
+    unsigned short  mData4;
+    unsigned char   mData5[6];
+  } *uuid = (struct UUID *)&uuidU128;
+
+  sprintf(uuidStr, "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+          uuid->mData1, uuid->mData2, uuid->mData3, uuid->mData4,
+          uuid->mData5[0], uuid->mData5[1], uuid->mData5[2], uuid->mData5[3],
+          uuid->mData5[4], uuid->mData5[5]);
+  return uuidStr;
+}
+
+/*
+int main(int argc, char** argv) {
+  const char *str = "Tongji University";
+  uint64_t hash64 = CityHash64(str, strlen(str));
+  printf("hash64: %lx\n", hash64);
+
+  uint128 hash128 = CityHash128(str, strlen(str));
+  printf("hash128: %lx %lx\n", hash128.first, hash128.second);
+
+  char buf[128];
+  printf("uuid: %s\n", Uint128ToUuidString(hash128, buf));
+  return 0;
+}
+*/
