@@ -109,4 +109,6 @@ inline uint64 Hash128to64(const uint128& x) {
   return b;
 }
 
+char *Uint128ToUuidString(uint128 uuidU128, char *uuidStr);
+
 #endif  // CITY_HASH_H_

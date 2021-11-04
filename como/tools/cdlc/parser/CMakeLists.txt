@@ -18,14 +18,16 @@ set(PARSER_SRC_DIR ${CDLC_SRC_DIR}/parser)
 
 include_directories(
     ${CDLC_SRC_DIR}
-    ${COMO_SRC_DIR})
+    ${COMO_SRC_DIR}
+    ${CDLC_SRC_DIR}/../../../external/cityhash/export_como)
 
 set(SOURCES
     Parser.cpp
     Token.cpp
     TokenInfo.cpp
     Tokenizer.cpp
-    World.cpp)
+    World.cpp
+    ${CDLC_SRC_DIR}/../../../external/cityhash/export_como/cityhash.cc)
 
 add_library(cdlc_parser STATIC
     ${SOURCES})

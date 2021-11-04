@@ -29,6 +29,7 @@
 #include "util/MemoryFileReader.h"
 #include "util/Properties.h"
 #include "util/UUID.h"
+#include "cityhash.h"
 #include <cstdlib>
 #include <unistd.h>
 
@@ -439,7 +440,12 @@ bool Parser::ParseModule(
     if (tokenInfo.mToken == Token::IDENTIFIER) {
         mTokenizer.GetToken();
         moduleName = tokenInfo.mStringValue;
-        if (attrs.mUuid.IsEmpty() || attrs.mUri.IsEmpty()) {
+        if (attrs.mUuid.IsEmpty()) {
+            char buf[40];       // 16(byte) * 2 + 4(-) = 36
+            attrs.mUuid = String(Uint128ToUuidString(CityHash128(moduleName, strlen(moduleName)), buf));
+        }
+
+        if (attrs.mUri.IsEmpty()) {
             String message = String::Format("Module %s should have attributes.",
                     moduleName.string());
             LogError(tokenInfo, message);
@@ -700,8 +706,14 @@ bool Parser::ParseInterface(
         interface->SetNamespace(mCurrentNamespace);
     }
 
+    if (attrs.mUuid.IsEmpty()) {
+        char buf[40];       // 16(byte) * 2 + 4(-) = 36
+        String str = mCurrentNamespace->ToString() + "::" + interfaceName;
+        attrs.mUuid = String(Uint128ToUuidString(CityHash128(str, strlen(str)), buf));
+    }
+
     // interface definition
-    if (attrs.mUuid.IsEmpty() || attrs.mVersion.IsEmpty()) {
+    if (attrs.mVersion.IsEmpty()) {
         String message = String::Format("Interface %s should have attributes.", interfaceName.string());
         LogError(tokenInfo, message);
         result = false;
@@ -1891,7 +1903,13 @@ bool Parser::ParseCoclass(
         result = false;
     }
 
-    if (attrs.mUuid.IsEmpty() || attrs.mVersion.IsEmpty()) {
+    if (attrs.mUuid.IsEmpty()) {
+        char buf[40];       // 16(byte) * 2 + 4(-) = 36
+        String str = mCurrentNamespace->ToString() + "::" + className;
+        attrs.mUuid = String(Uint128ToUuidString(CityHash128(str, strlen(str)), buf));
+    }
+
+    if (attrs.mVersion.IsEmpty()) {
         String message = String::Format("Coclass %s should have attributes.", className.string());
         LogError(tokenInfo, message);
         result = false;
