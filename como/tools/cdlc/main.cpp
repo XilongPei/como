@@ -94,7 +94,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (options.DoGenerateCode()) {
+    if (options.DoGenerateCode() || options.DoComoMetadataReader()) {
         if (component == nullptr) {
             void* metadata = MetadataUtils::ReadMetadata(
                     options.DoSaveMetadata()
@@ -115,12 +115,19 @@ int main(int argc, char** argv)
                     reinterpret_cast<como::MetaComponent*>(metadata),
                     [](como::MetaComponent* p){ free(p); });
         }
+    }
 
+    if (options.DoGenerateCode()) {
         CodeGenerator generator;
         generator.SetDirectory(options.GetCodegenDirectory());
         generator.SetMetadata(component.get());
         generator.SetMode(Properties::Get().GetMode());
         generator.Generate();
+    }
+
+    if (options.DoComoMetadataReader()) {
+        MetadataDumper dumper(component.get());
+        printf("%s", dumper.Dump("").string());
     }
 
     return 0;

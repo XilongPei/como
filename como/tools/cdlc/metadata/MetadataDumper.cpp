@@ -39,16 +39,16 @@ String MetadataDumper::DumpMetaComponent(
 
     builder.Append(prefix).Append("{\n");
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mMagic\":\"0x%x\",\n", mc->mMagic);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mSize\":\"%d\",\n", mc->mSize);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mSize\":%d,\n", mc->mSize);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mUuid\":\"%s\",\n", DumpUUID(mc->mUuid).string());
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", mc->mName);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mUri\":\"%s\",\n", mc->mUri);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespaceNumber\":\"%d\",\n", mc->mNamespaceNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":\"%d\",\n", mc->mConstantNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mCoclassNumber\":\"%d\",\n", mc->mCoclassNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumerationNumber\":\"%d\",\n", mc->mEnumerationNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":\"%d\",\n", mc->mInterfaceNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mTypeNumber\":\"%d\"", mc->mTypeNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespaceNumber\":%d,\n", mc->mNamespaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":%d,\n", mc->mConstantNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mCoclassNumber\":%d,\n", mc->mCoclassNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumerationNumber\":%d,\n", mc->mEnumerationNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d,\n", mc->mInterfaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mTypeNumber\":%d", mc->mTypeNumber);
 
     if (mc->mNamespaceNumber > 0) {
         builder.Append(",\n");
@@ -76,11 +76,11 @@ String MetadataDumper::DumpMetaNamespace(
         builder.Append(prefix + Properties::INDENT).AppendFormat("\"InterfaceWrapped\":\"%s\",\n",
                 mComponent->mInterfaces[mn->mInterfaceWrappedIndex]->mName);
     }
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespaceNumber\":\"%d\",\n", mn->mNamespaceNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":\"%d\",\n", mn->mConstantNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mCoclassNumber\":\"%d\",\n", mn->mCoclassNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumerationNumber\":\"%d\",\n", mn->mEnumerationNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":\"%d\"", mn->mInterfaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespaceNumber\":%d,\n", mn->mNamespaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":%d,\n", mn->mConstantNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mCoclassNumber\":%d,\n", mn->mCoclassNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumerationNumber\":%d,\n", mn->mEnumerationNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d", mn->mInterfaceNumber);
 
     if (mn->mConstantNumber > 0) {
         builder.Append(",\n");
@@ -167,11 +167,11 @@ String MetadataDumper::DumpMetaEnumeration(
     builder.Append(prefix).Append("{\n");
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", me->mName);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespace\":\"%s\",\n", me->mNamespace);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumeratorNumber\":\"%d\",\n", me->mEnumeratorNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumeratorNumber\":%d,\n", me->mEnumeratorNumber);
     builder.Append(prefix + Properties::INDENT).Append("\"mEnumerators\":[\n");
     for (int i = 0; i < me->mEnumeratorNumber; i++) {
         builder.Append(prefix + Properties::INDENT + Properties::INDENT);
-        builder.AppendFormat("{ \"%s\":\"%d\" }", me->mEnumerators[i]->mName, me->mEnumerators[i]->mValue);
+        builder.AppendFormat("{ \"%s\":%d }", me->mEnumerators[i]->mName, me->mEnumerators[i]->mValue);
         builder.AppendFormat("%s", i < me->mEnumeratorNumber - 1 ? ",\n" : "\n");
     }
     builder.Append(prefix + Properties::INDENT).Append("]");
@@ -198,7 +198,7 @@ String MetadataDumper::DumpMetaCoclass(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mUuid\":\"%s\",\n", DumpUUID(mk->mUuid).string());
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", mk->mName);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespace\":\"%s\",\n", mk->mNamespace);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":\"%d\"\n", mk->mInterfaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d\n", mk->mInterfaceNumber);
     if (mk->mInterfaceNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mInterfaces\":[\n");
@@ -244,9 +244,9 @@ String MetadataDumper::DumpMetaInterface(
         builder.Append(prefix + Properties::INDENT).AppendFormat("\"OuterInterface\":\"%s\",\n",
                 mComponent->mInterfaces[mi->mOuterInterfaceIndex]->mName);
     }
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNestedInterfaceNumber\":\"%d\",\n", mi->mNestedInterfaceNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":\"%d\",\n", mi->mConstantNumber);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mMethodNumber\":\"%d\"", mi->mMethodNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNestedInterfaceNumber\":%d,\n", mi->mNestedInterfaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mConstantNumber\":%d,\n", mi->mConstantNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mMethodNumber\":%d", mi->mMethodNumber);
 
     if (mi->mConstantNumber > 0) {
         builder.Append(",\n");
@@ -308,7 +308,7 @@ String MetadataDumper::DumpMetaMethod(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mSignature\":\"%s\",\n", mm->mSignature);
     como::MetaType* type = mComponent->mTypes[mm->mReturnTypeIndex];
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"ReturnType\":\"%s\",\n", DumpMetaType(type).string());
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mParameterNumber\":\"%d\"", mm->mParameterNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mParameterNumber\":%d", mm->mParameterNumber);
     if (mm->mProperties & METHOD_DELETED) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mProperties\":");

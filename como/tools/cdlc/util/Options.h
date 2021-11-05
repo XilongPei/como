@@ -50,6 +50,8 @@ public:
 
     inline bool DoShowUsage() const;
 
+    inline bool DoComoMetadataReader() const;
+
     bool HasErrors() const;
 
     void ShowErrors() const;
@@ -77,6 +79,7 @@ private:
     bool mDoSaveMetadata = false;
     bool mShowUsage = false;
     bool mShowVersion = false;
+    bool mComoMetadataReader = false;
 };
 
 Options::Options(
@@ -139,6 +142,11 @@ bool Options::DoSaveMetadata() const
 bool Options::DoShowUsage() const
 {
     return mShowUsage;
+}
+
+bool Options::DoComoMetadataReader() const
+{
+    return mComoMetadataReader;
 }
 
 }

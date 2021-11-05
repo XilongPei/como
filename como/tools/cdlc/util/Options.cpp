@@ -87,6 +87,9 @@ void Options::Parse(
         else if (!option.StartsWith("-")) {
             mSourceFile = option;
         }
+        else if (option.Equals("-ComoMetadataReader")) {
+            mComoMetadataReader = true;
+        }
         else {
             errors.Append(option);
             errors.Append(":");
@@ -149,7 +152,9 @@ void Options::ShowUsage() const
             "                           .cdl files of comort\n"
             "  -save-metadata <file>    Save the metadata into <file>\n"
             "  -split                   Generate interface or class declarations into seperate files when\n"
-            "                           in the \"component\" mode or the \"client\" mode\n");
+            "                           in the \"component\" mode or the \"client\" mode\n"
+            "  -ComoMetadataReader      Read COMO metadata from <.so file> and dump it\n"
+        );
 }
 
 }
