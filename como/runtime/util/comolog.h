@@ -69,6 +69,8 @@ statement:
     #define Logger::D   do () while(0);
 cause:
     warning: ISO C++11 requires whitespace after the macro name
+
+so, we define Logger_D and call it to avoid this warning when Logger::D is empty
 */
 #ifdef DISABLE_LOGGER
 #define Logger_D(format, ...)
