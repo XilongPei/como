@@ -28,25 +28,20 @@ public:
     ~Logger();
 
     static void D(
-        /* [in] */ const char* tag,
-        /* [in] */ const char* format, ...);
+        /* [in] */ const char* tag, ...);
 
     static void E(
-        /* [in] */ const char* tag,
-        /* [in] */ const char* format, ...);
+        /* [in] */ const char* tag, ...);
 
     static void V(
-        /* [in] */ const char* tag,
-        /* [in] */ const char* format, ...);
+        /* [in] */ const char* tag, ...);
 
     static void W(
-        /* [in] */ const char* tag,
-        /* [in] */ const char* format, ...);
+        /* [in] */ const char* tag, ...);
 
     static void Log(
         /* [in] */ int level,
-        /* [in] */ const char* tag,
-        /* [in] */ const char* format, ...);
+        /* [in] */ const char* tag, ...);
 
     static void SetLevel(
         /* [in] */ int level);

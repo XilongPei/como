@@ -42,10 +42,10 @@ Logger::Logger() {
     elog_init();
     /* set EasyLogger log format */
     elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_ALL);
-    elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-    elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-    elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_ALL & ~ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL);
+    elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL);
+    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL);
+    elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_LVL);
     elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_ALL & ~ELOG_FMT_FUNC);
 #ifdef ELOG_COLOR_ENABLE
     elog_set_text_color_enabled(true);
@@ -70,107 +70,75 @@ Logger::~Logger() {
 }
 
 void Logger::D(
-    /* [in] */ const char* tag,
-    /* [in] */ const char* format, ...)
+    /* [in] */ const char* tag, ...)
 {
     if (DEBUG < sLevel) {
         return;
     }
 
     va_list argList;
-
-#if defined(__android__)
-    va_start(argList, format);
-    __android_log_vprint(ANDROID_LOG_DEBUG, tag, format, argList);
-    va_end(argList);
-#elif defined(__linux__)
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s %s DEBUG %s]: ", szSamplingTag, currentTime, tag);
-    va_start(argList, format);
-    vprintf(format, argList);
+    char buf[128];
+    snprintf(buf, sizeof(buf)-1, "[%s %s DEBUG %s]: %%s", szSamplingTag, currentTime, tag);
+    va_start(argList, tag);
+    log_d(buf, argList);
     va_end(argList);
-    printf("\n");
-#endif
 }
 
 void Logger::E(
-    /* [in] */ const char* tag,
-    /* [in] */ const char* format, ...)
+    /* [in] */ const char* tag, ...)
 {
     if (ERROR < sLevel) {
         return;
     }
 
     va_list argList;
-
-#if defined(__android__)
-    va_start(argList, format);
-    __android_log_vprint(ANDROID_LOG_ERROR, tag, format, argList);
-    va_end(argList);
-#elif defined(__linux__)
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s %s ERROR %s]: ", szSamplingTag, currentTime, tag);
-    va_start(argList, format);
-    vprintf(format, argList);
+    char buf[128];
+    snprintf(buf, sizeof(buf)-1, "[%s %s ERROR %s]: %%s", szSamplingTag, currentTime, tag);
+    va_start(argList, tag);
+    log_e(buf, argList);
     va_end(argList);
-    printf("\n");
-#endif
 }
 
 void Logger::V(
-    /* [in] */ const char* tag,
-    /* [in] */ const char* format, ...)
+    /* [in] */ const char* tag, ...)
 {
     if (VERBOSE < sLevel) {
         return;
     }
 
     va_list argList;
-
-#if defined(__android__)
-    va_start(argList, format);
-    __android_log_vprint(ANDROID_LOG_VERBOSE, tag, format, argList);
-    va_end(argList);
-#elif defined(__linux__)
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s %s VERBOSE %s]: ", szSamplingTag, currentTime, tag);
-    va_start(argList, format);
-    vprintf(format, argList);
+    char buf[128];
+    snprintf(buf, sizeof(buf)-1, "[%s %s VERBOSE %s]: %%s", szSamplingTag, currentTime, tag);
+    va_start(argList, tag);
+    log_v(buf, argList);
     va_end(argList);
-    printf("\n");
-#endif
 }
 
 void Logger::W(
-    /* [in] */ const char* tag,
-    /* [in] */ const char* format, ...)
+    /* [in] */ const char* tag, ...)
 {
     if (WARNING < sLevel) {
         return;
     }
 
     va_list argList;
-
-#if defined(__android__)
-    va_start(argList, format);
-    __android_log_vprint(ANDROID_LOG_WARN, tag, format, argList);
-    va_end(argList);
-#elif defined(__linux__)
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s %s WARNING %s]: ", szSamplingTag, currentTime, tag);
-    va_start(argList, format);
-    vprintf(format, argList);
+    char buf[128];
+    snprintf(buf, sizeof(buf)-1, "[%s %s WARNING %s]: %%s", szSamplingTag, currentTime, tag);
+    va_start(argList, tag);
+    log_w(buf, argList);
     va_end(argList);
-    printf("\n");
-#endif
 }
 
 #if defined(__android__)
@@ -194,29 +162,21 @@ static int ToAndroidLogPriority(
 
 void Logger::Log(
     /* [in] */ int level,
-    /* [in] */ const char* tag,
-    /* [in] */ const char* format, ...)
+    /* [in] */ const char* tag, ...)
 {
     if (level < sLevel) {
         return;
     }
 
     va_list argList;
-
-#if defined(__android__)
-    va_start(argList, format);
-    __android_log_vprint(ToAndroidLogPriority(level), tag, format, argList);
-    va_end(argList);
-#elif defined(__linux__)
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    printf("[%s %s LOG %s]: ", szSamplingTag, currentTime, tag);
-    va_start(argList, format);
-    vprintf(format, argList);
+    char buf[128];
+    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %%s", szSamplingTag, currentTime, tag);
+    va_start(argList, tag);
+    log_a(buf, argList);
     va_end(argList);
-    printf("\n");
-#endif
 }
 
 void Logger::SetLevel(
