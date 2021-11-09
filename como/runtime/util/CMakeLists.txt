@@ -20,7 +20,9 @@ include_directories(
     ./
     ../
     ../type
-    ${INC_DIR})
+    ${INC_DIR}
+    ${EXTERNAL_DIR}/EasyLogger/easylogger/inc
+)
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
     set(ComoFunctionSafetyObject ComoFunctionSafetyObject.cpp)
@@ -35,11 +37,15 @@ set(SOURCES
     comolock.cpp
     comoref.cpp
     ${ComoFunctionSafetyObject}
-    mutex.cpp)
+    mutex.cpp
+)
 
 add_library(util STATIC
     ${SOURCES})
 add_dependencies(util cdl)
+
+target_link_libraries(util
+    $ENV{OUT_PATH}/external/EasyLogger/export_como/libEasyLogger.a)
 
 COPY(util ${UTIL_SRC_DIR}/comosp.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comoclsobj.h ${INC_DIR})

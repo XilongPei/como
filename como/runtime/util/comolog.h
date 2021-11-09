@@ -24,6 +24,9 @@ namespace como {
 class COM_PUBLIC Logger
 {
 public:
+    Logger();
+    ~Logger();
+
     static void D(
         /* [in] */ const char* tag,
         /* [in] */ const char* format, ...);
