@@ -501,7 +501,16 @@ TEST(BigDecimalTest, TestCommonOperationsHalfOfEvenLongValue)
     CheckCommonOperations(ILong::MIN_VALUE);
     CheckCommonOperations(1LL << 62LL);
     CheckCommonOperations(-(1LL << 62LL));
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-overflow="
+#endif
     CheckCommonOperations(1LL << (62LL + 1) << (30 + 1) << 10);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
     CheckCommonOperations(ILong::MAX_VALUE - 1);
 }
 
