@@ -70,7 +70,8 @@ Logger::~Logger() {
 }
 
 void Logger::D(
-    /* [in] */ const char* tag, ...)
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format, ...)
 {
     if (DEBUG < sLevel) {
         return;
@@ -80,15 +81,16 @@ void Logger::D(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    char buf[128];
-    snprintf(buf, sizeof(buf)-1, "[%s %s DEBUG %s]: %%s", szSamplingTag, currentTime, tag);
-    va_start(argList, tag);
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s DEBUG %s]: %s", szSamplingTag, currentTime, tag, format);
+    va_start(argList, format);
     log_d(buf, argList);
     va_end(argList);
 }
 
 void Logger::E(
-    /* [in] */ const char* tag, ...)
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format, ...)
 {
     if (ERROR < sLevel) {
         return;
@@ -98,15 +100,16 @@ void Logger::E(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    char buf[128];
-    snprintf(buf, sizeof(buf)-1, "[%s %s ERROR %s]: %%s", szSamplingTag, currentTime, tag);
-    va_start(argList, tag);
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s ERROR %s]: %s", szSamplingTag, currentTime, tag, format);
+    va_start(argList, format);
     log_e(buf, argList);
     va_end(argList);
 }
 
 void Logger::V(
-    /* [in] */ const char* tag, ...)
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format, ...)
 {
     if (VERBOSE < sLevel) {
         return;
@@ -116,15 +119,16 @@ void Logger::V(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    char buf[128];
-    snprintf(buf, sizeof(buf)-1, "[%s %s VERBOSE %s]: %%s", szSamplingTag, currentTime, tag);
-    va_start(argList, tag);
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s VERBOSE %s]: %s", szSamplingTag, currentTime, tag, format);
+    va_start(argList, format);
     log_v(buf, argList);
     va_end(argList);
 }
 
 void Logger::W(
-    /* [in] */ const char* tag, ...)
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format, ...)
 {
     if (WARNING < sLevel) {
         return;
@@ -134,9 +138,9 @@ void Logger::W(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    char buf[128];
-    snprintf(buf, sizeof(buf)-1, "[%s %s WARNING %s]: %%s", szSamplingTag, currentTime, tag);
-    va_start(argList, tag);
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s WARNING %s]: %s", szSamplingTag, currentTime, tag, format);
+    va_start(argList, format);
     log_w(buf, argList);
     va_end(argList);
 }
@@ -162,7 +166,8 @@ static int ToAndroidLogPriority(
 
 void Logger::Log(
     /* [in] */ int level,
-    /* [in] */ const char* tag, ...)
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format, ...)
 {
     if (level < sLevel) {
         return;
@@ -172,9 +177,9 @@ void Logger::Log(
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
 
-    char buf[128];
-    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %%s", szSamplingTag, currentTime, tag);
-    va_start(argList, tag);
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %s", szSamplingTag, currentTime, tag, format);
+    va_start(argList, format);
     log_a(buf, argList);
     va_end(argList);
 }
