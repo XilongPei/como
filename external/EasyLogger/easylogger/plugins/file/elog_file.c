@@ -66,7 +66,6 @@ __exit:
  */
 static bool elog_file_rotate(void)
 {
-#define SUFFIX_LEN                     10
     /* mv xxx.log.n-1 => xxx.log.n, and xxx.log => xxx.log.0 */
     int n, err = 0;
     char oldpath[256], newpath[256];
@@ -80,8 +79,8 @@ static bool elog_file_rotate(void)
     fclose(fp);
 
     for (n = local_cfg.max_rotate - 1; n >= 0; --n) {
-        snprintf(oldpath + base, SUFFIX_LEN, n ? ".%d" : "", n - 1);
-        snprintf(newpath + base, SUFFIX_LEN, ".%d", n);
+        snprintf(oldpath + base, sizeof(oldpath)-1-base, n ? ".%d" : "", n - 1);
+        snprintf(newpath + base, sizeof(newpath)-1-base, ".%d", n);
         /* remove the old file */
         if ((tmp_fp = fopen(newpath , "r")) != NULL) {
             fclose(tmp_fp);
