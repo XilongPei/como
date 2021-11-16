@@ -18,7 +18,10 @@
 #define __ComoFunctionSafetyObject_H__
 
 #include <time.h>
+#include <vector>
 #include "comotypes.h"
+
+using namespace std;
 
 namespace como {
 
@@ -26,6 +29,7 @@ class COM_PUBLIC ComoFunctionSafetyObject
 {
 public:
     ComoFunctionSafetyObject();
+    ~ComoFunctionSafetyObject();
 
     Long GetExpires();
 
@@ -38,6 +42,32 @@ private:
     struct timespec mBirthTime;         // CLOCK_REALTIME
 };
 
+#define CFSO_VECTOR_SizeNullArray   300
+
+class CFSO_VECTOR
+{
+public:
+    CFSO_VECTOR();
+    ~CFSO_VECTOR();
+
+    int cfso_push(ComoFunctionSafetyObject *cfso);
+    int cfso_del(unsigned int index);
+    ComoFunctionSafetyObject *cfso_get(unsigned int index);
+    int cfso_find(ComoFunctionSafetyObject *cfso);
+
+private:
+    void cfso_allocate();
+
+    ComoFunctionSafetyObject *_data;    // the data
+    unsigned int _size;     // number of ComoFunctionSafetyObject *
+    unsigned int _extra;    // how much extra space is left
+    unsigned int extra;     // just how much extra space we should add
+
+    int idxNullArray[CFSO_VECTOR_SizeNullArray];
+    int numNullArray;
+};
+
 } // namespace como
+
 
 #endif // __ComoFunctionSafetyObject_H__
