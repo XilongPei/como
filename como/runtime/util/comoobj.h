@@ -43,6 +43,9 @@ public:
     ECode GetHashCode(
         /* [out] */ Integer& hash) override;
 
+    ECode GetCRC64(
+        /* [out] */ Long& crc64) override;
+
     ECode Equals(
         /* [in] */ IInterface* obj,
         /* [out] */ Boolean& same) override;
@@ -62,6 +65,8 @@ public:
     void OnLastWeakRef(
         /* [in] */ const void* id) override;
 
+    inline void setObjSize(Integer objSize);
+
     static ECode GetCoclassID(
         /* [in] */ IInterface* obj,
         /* [out] */ CoclassID& cid);
@@ -79,6 +84,12 @@ public:
         /* [in] */ IInterface* obj);
 
     static Integer GetHashCode(
+        /* [in] */ Object* obj);
+
+    static Long GetCRC64(
+        /* [in] */ IInterface* obj);
+
+    static Long GetCRC64(
         /* [in] */ Object* obj);
 
     static Boolean Equals(
@@ -103,7 +114,13 @@ private:
     IMetaComponent* mComponent;
     String mCoclassName;
     AutoPtr<IObjectObserver> mObserver;
+    Integer mObjSize;
 };
+
+inline void Object::setObjSize(Integer objSize)
+{
+    mObjSize = objSize;
+}
 
 } // namespace como
 

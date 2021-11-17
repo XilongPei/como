@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include "comoobj.h"
+#include "checksum.h"
 
 namespace como {
 
@@ -92,6 +93,13 @@ ECode Object::GetHashCode(
     /* [out] */ Integer& hash)
 {
     hash = reinterpret_cast<HANDLE>(this);
+    return NOERROR;
+}
+
+ECode Object::GetCRC64(
+    /* [out] */ Long& crc64)
+{
+    crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(this), mObjSize);
     return NOERROR;
 }
 
@@ -210,6 +218,24 @@ Integer Object::GetHashCode(
     Integer hash;
     obj->GetHashCode(hash);
     return hash;
+}
+
+Long Object::GetCRC64(
+    /* [in] */ IInterface* obj)
+{
+    Object* o = (Object*)IObject::Probe(obj);
+    if (o == nullptr) {
+        return reinterpret_cast<uintptr_t>(IInterface::Probe(obj));
+    }
+    return GetCRC64(o);
+}
+
+Long Object::GetCRC64(
+    /* [in] */ Object* obj)
+{
+    Long crc64;
+    obj->GetCRC64(crc64);
+    return crc64;
 }
 
 Boolean Object::Equals(

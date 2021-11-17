@@ -22,6 +22,7 @@ include_directories(
     ../type
     ${INC_DIR}
     ${EXTERNAL_DIR}/EasyLogger/easylogger/inc
+    ${EXTERNAL_DIR}/libcrc/include
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")

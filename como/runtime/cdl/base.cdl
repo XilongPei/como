@@ -58,6 +58,9 @@ interface IObject
     GetHashCode(
         [out] Integer& hash);
 
+    GetCRC64(
+        [out] Long& crc64);
+
     Equals(
         [in] IInterface* obj,
         [out] Boolean& same);
