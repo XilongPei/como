@@ -108,6 +108,7 @@ void MetadataSerializer::SerializeMetaCoclass(
 {
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mc->mNamespace));
+    mc->mFuncSafetySetting = reinterpret_cast<char*>(SerializeAdjust(mc->mFuncSafetySetting));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
 }
 
@@ -290,6 +291,7 @@ void MetadataSerializer::DeserializeMetaCoclass(
 {
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mc->mNamespace));
+    mc->mFuncSafetySetting = reinterpret_cast<char*>(DeserializeAdjust(mc->mFuncSafetySetting));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mc->mInterfaceIndexes));
 }
 
