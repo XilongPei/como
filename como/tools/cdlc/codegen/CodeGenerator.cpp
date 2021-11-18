@@ -450,7 +450,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
             builder.Append(Properties::INDENT).AppendFormat("*object = _obj->Probe(%s);\n",
                     mm->mParameters[mm->mParameterNumber - 2]->mName);
             builder.Append(Properties::INDENT).Append("REFCOUNT_ADD(*object);\n");
-            builder.Append(Properties::INDENT).Append("Object* obj = reinterpret_cast<Object*>(_obj);\n");
+            builder.Append(Properties::INDENT).Append("Object* obj = static_cast<Object*>(_obj);\n");
             builder.Append(Properties::INDENT).AppendFormat("if (obj) { obj->setObjSize(sizeof(%s)); }\n", mk->mName);
         }
         builder.Append(Properties::INDENT).Append("return NOERROR;\n");
