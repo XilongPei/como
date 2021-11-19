@@ -1,6 +1,12 @@
+#
+# 把测试用例的可执行程序，加入到gtest-runner中
+#
+
+CMD="/usr/local/bin/gtest-runner"
 
 # 清空gtest-runner中原有内容
-# gtest-runner -r
+echo "$CMD -r"
+eval "$CMD -r"
 
 # 在工作下的test目录找所有可执行文件，这些是测试用例的可执行程序，把这些加入到gtest-runner中
 # find ./test -executable -type f
@@ -46,9 +52,10 @@ testCases=" \
 ./test/libcore/como/text/attributedstring/testAttributedString \
 ./test/libcore/libcore/util/zoneinfo/testZoneInfo"
 
-CMD="gtest-runner"
+CMD="/usr/local/bin/gtest-runner"
 
 for testcase in $testCases
 do
-    echo "$CMD $testcase"
+    echo "$CMD -a $testcase"
+    eval "$CMD -a $testcase"
 done
