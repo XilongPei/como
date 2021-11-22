@@ -309,9 +309,9 @@ ComponentID ComponentIDfromName(String name)
 {
     ComponentID mid;
 #ifdef __SIZEOF_INT128__
-    *(uint128 *)&mid.mUuid.mData1 = CityHash128(name, strlen(name));
+    *(uint128 *)&mid.mUuid.mData1 = CityHash128(name, name.GetByteLength());
 #else
-    uint128 i128 = CityHash128(name, strlen(name));
+    uint128 i128 = CityHash128(name, name.GetByteLength());
     memcpy((Byte*)&mid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
     return mid;
@@ -321,9 +321,9 @@ CoclassID CoclassIDfromName(String namespaceAndName)
 {
     CoclassID cid;
 #ifdef __SIZEOF_INT128__
-    *(uint128 *)&cid.mUuid.mData1 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    *(uint128 *)&cid.mUuid.mData1 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
 #else
-    uint128 i128 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    uint128 i128 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
     memcpy((Byte*)&cid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
     return cid;
@@ -333,9 +333,9 @@ InterfaceID InterfaceIDfromName(String namespaceAndName)
 {
     InterfaceID iid;
 #ifdef __SIZEOF_INT128__
-    *(uint128 *)&iid.mUuid.mData1 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    *(uint128 *)&iid.mUuid.mData1 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
 #else
-    uint128 i128 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    uint128 i128 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
     memcpy((Byte*)&iid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
     return iid;
