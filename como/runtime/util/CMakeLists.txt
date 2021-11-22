@@ -23,6 +23,7 @@ include_directories(
     ${INC_DIR}
     ${EXTERNAL_DIR}/EasyLogger/easylogger/inc
     ${EXTERNAL_DIR}/libcrc/include
+    ${EXTERNAL_DIR}/cityhash/export_como
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
@@ -39,6 +40,7 @@ set(SOURCES
     comoref.cpp
     ${ComoFunctionSafetyObject}
     mutex.cpp
+    ${EXTERNAL_DIR}/cityhash/export_como/cityhash.cc
 )
 
 add_library(util STATIC
@@ -47,7 +49,7 @@ add_dependencies(util cdl)
 
 target_link_libraries(util
     $ENV{OUT_PATH}/external/EasyLogger/export_como/libEasyLogger.a
-    ${PROJECT_DIR}/external/libcrc/lib/libcrc.a
+    ${EXTERNAL_DIR}/libcrc/lib/libcrc.a
 )
 
 COPY(util ${UTIL_SRC_DIR}/comosp.h ${INC_DIR})

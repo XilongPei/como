@@ -122,6 +122,14 @@ inline void Object::setObjSize(Integer objSize)
     mObjSize = objSize;
 }
 
+// generate a ComponentID from module name or
+// a CoclassID from Coclass namespace::name or
+// an InterfaceID from Interface namespace::name
+COM_PUBLIC ComponentID ComponentIDfromName(String name);
+COM_PUBLIC CoclassID CoclassIDfromName(String namespaceAndName);
+COM_PUBLIC InterfaceID InterfaceIDfromName(String namespaceAndName);
+
 } // namespace como
+
 
 #endif // __COMO_OBJECT_H__

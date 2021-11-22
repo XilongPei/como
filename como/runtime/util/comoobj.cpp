@@ -16,6 +16,7 @@
 
 #include "comoobj.h"
 #include "checksum.h"
+#include "cityhash.h"
 
 namespace como {
 
@@ -304,4 +305,40 @@ Boolean Object::InstanceOf(
     return ocid == cid;
 }
 
+ComponentID ComponentIDfromName(String name)
+{
+    ComponentID mid;
+#ifdef __SIZEOF_INT128__
+    *(uint128 *)&mid.mUuid.mData1 = CityHash128(name, strlen(name));
+#else
+    uint128 i128 = CityHash128(name, strlen(name));
+    memcpy((Byte*)&mid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
+#endif
+    return mid;
 }
+
+CoclassID CoclassIDfromName(String namespaceAndName)
+{
+    CoclassID cid;
+#ifdef __SIZEOF_INT128__
+    *(uint128 *)&cid.mUuid.mData1 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+#else
+    uint128 i128 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    memcpy((Byte*)&cid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
+#endif
+    return cid;
+}
+
+InterfaceID InterfaceIDfromName(String namespaceAndName)
+{
+    InterfaceID iid;
+#ifdef __SIZEOF_INT128__
+    *(uint128 *)&iid.mUuid.mData1 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+#else
+    uint128 i128 = CityHash128(namespaceAndName, strlen(namespaceAndName));
+    memcpy((Byte*)&iid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
+#endif
+    return iid;
+}
+
+} // namespace como
