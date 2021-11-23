@@ -111,12 +111,12 @@ void MetadataSerializer::SerializeMetaCoclass(
     mc->mFuncSafetySetting = reinterpret_cast<char*>(SerializeAdjust(mc->mFuncSafetySetting));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
 
+    mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
     for (int i = 0; i < mc->mConstantNumber; i++) {
         MetaConstant* mconst = mc->mConstants[i];
         SerializeMetaConstant(mconst);
         mc->mConstants[i] = reinterpret_cast<MetaConstant*>(SerializeAdjust(mconst));
     }
-    mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
 }
 
 void MetadataSerializer::SerializeMetaEnumeration(

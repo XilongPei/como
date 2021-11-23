@@ -181,6 +181,10 @@ void MetadataBuilder::CalculateMetaCoclass(
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
     // end address
     mBasePtr = mBasePtr + sizeof(int) * IN;
+
+    for (int i = 0; i < CN; i++) {
+        CalculateMetaConstant(klass->GetConstant(i));
+    }
 }
 
 void MetadataBuilder::CalculateMetaEnumeration(
@@ -561,7 +565,7 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
         mc->mProperties |= COCLASS_CONSTRUCTOR_DELETED;
     }
     // end address
-    mBasePtr = mBasePtr + sizeof(int) * CN;
+    mBasePtr = mBasePtr + sizeof(como::MetaConstant*) * CN;
 
     for (int i = 0; i < IN; i++) {
         mc->mInterfaceIndexes[i] = mModule->IndexOf(klass->GetInterface(i));
