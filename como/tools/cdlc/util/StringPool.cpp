@@ -65,7 +65,7 @@ ptrdiff_t StringPool::FindOffset(
     /* [in] */ const String& string)
 {
     if (string.IsNull())
-        return nullptr;
+        return -1;
 
     auto it = mStringOffsets.find(string);
 
