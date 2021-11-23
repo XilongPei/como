@@ -565,7 +565,7 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
         mc->mProperties |= COCLASS_CONSTRUCTOR_DELETED;
     }
     // end address
-    mBasePtr = mBasePtr + sizeof(como::MetaConstant*) * CN;
+    mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
 
     for (int i = 0; i < IN; i++) {
         mc->mInterfaceIndexes[i] = mModule->IndexOf(klass->GetInterface(i));

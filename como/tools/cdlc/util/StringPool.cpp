@@ -50,6 +50,9 @@ void StringPool::Add(
 char* StringPool::FindAddress(
     /* [in] */ const String& string)
 {
+    if (string.IsNull())
+        return nullptr;
+
     auto it = mStringOffsets.find(string);
 
     if (it != mStringOffsets.end()) {
@@ -61,6 +64,9 @@ char* StringPool::FindAddress(
 ptrdiff_t StringPool::FindOffset(
     /* [in] */ const String& string)
 {
+    if (string.IsNull())
+        return nullptr;
+
     auto it = mStringOffsets.find(string);
 
     if (it != mStringOffsets.end()) {
