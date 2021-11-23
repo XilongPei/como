@@ -165,6 +165,7 @@ void MetadataBuilder::CalculateMetaCoclass(
     /* [in] */ CoclassType* klass)
 {
     int IN = klass->GetInterfaceNumber();
+    int CN = klass->GetConstantNumber();
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -174,8 +175,10 @@ void MetadataBuilder::CalculateMetaCoclass(
     mPool.Add(klass->GetNamespace()->ToString());
     // add mFuncSafetySetting to StringPool
     mPool.Add(klass->GetFuncSafetySetting());
-    // mInterfaceIndexes address
+    // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass));
+    // mInterfaceIndexes address
+    mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
     // end address
     mBasePtr = mBasePtr + sizeof(int) * IN;
 }
@@ -901,4 +904,4 @@ como::TypeKind MetadataBuilder::ToTypeKind(
     return como::TypeKind::Unknown;
 }
 
-}
+} // namespace cdlc

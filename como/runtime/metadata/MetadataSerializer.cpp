@@ -110,6 +110,13 @@ void MetadataSerializer::SerializeMetaCoclass(
     mc->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(SerializeAdjust(mc->mFuncSafetySetting));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
+
+    for (int i = 0; i < mc->mConstantNumber; i++) {
+        MetaConstant* mconst = mc->mConstants[i];
+        SerializeMetaConstant(mconst);
+        mc->mConstants[i] = reinterpret_cast<MetaConstant*>(SerializeAdjust(mconst));
+    }
+    mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
 }
 
 void MetadataSerializer::SerializeMetaEnumeration(
@@ -293,6 +300,12 @@ void MetadataSerializer::DeserializeMetaCoclass(
     mc->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(DeserializeAdjust(mc->mFuncSafetySetting));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mc->mInterfaceIndexes));
+
+    mc->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mc->mConstants));
+    for (int i = 0; i < mc->mConstantNumber; i++) {
+        mc->mConstants[i] = reinterpret_cast<MetaConstant*>(DeserializeAdjust(mc->mConstants[i]));
+        DeserializeMetaConstant(mc->mConstants[i]);
+    }
 }
 
 void MetadataSerializer::DeserializeMetaEnumeration(
@@ -392,4 +405,4 @@ uintptr_t MetadataSerializer::DeserializeAdjust(
     return addr != nullptr ? reinterpret_cast<ptrdiff_t>(addr) + mBasePtr : 0;
 }
 
-}
+} // namespace como
