@@ -18,6 +18,7 @@
 #include "reflection/CMetaCoclass.h"
 #include "reflection/CMetaComponent.h"
 #include "reflection/CMetaConstructor.h"
+#include "reflection/CMetaConstant.h"
 #include "reflection/reflection.h"
 
 namespace como {
@@ -34,6 +35,7 @@ CMetaCoclass::CMetaCoclass(
     , mNamespace(mk->mNamespace)
     , mFuncSafetySetting(mk->mFuncSafetySetting)
     , mInterfaces(mk->mInterfaceNumber - 1)
+    , mConstants(mk->mConstantNumber)
     , mOpaque(0)
 {
     mCid.mUuid = mk->mUuid;
@@ -485,6 +487,77 @@ ECode CMetaCoclass::GetOpaque(
 {
     opaque = mOpaque;
     return NOERROR;
+}
+
+ECode CMetaCoclass::GetConstantNumber(
+    /* [out] */ Integer& number)
+{
+    number = mConstants.GetLength();
+    return NOERROR;
+}
+
+ECode CMetaCoclass::GetAllConstants(
+    /* [out] */ Array<IMetaConstant*>& consts)
+{
+    BuildAllConstants();
+
+    Integer N = MIN(mConstants.GetLength(), consts.GetLength());
+    for (Integer i = 0; i < N; i++) {
+        consts.Set(i, mConstants[i]);
+    }
+    return NOERROR;
+}
+
+ECode CMetaCoclass::GetConstant(
+    /* [in] */ const String& name,
+    /* [out] */ AutoPtr<IMetaConstant>& constt)
+{
+    if (name.IsEmpty() || mConstants.IsEmpty()) {
+        constt = nullptr;
+        return NOERROR;
+    }
+
+    BuildAllConstants();
+
+    for (Integer i = 0; i < mConstants.GetLength(); i++) {
+        String mcName;
+        mConstants[i]->GetName(mcName);
+        if (mcName.Equals(name)) {
+            constt = mConstants[i];
+            return NOERROR;
+        }
+    }
+    constt = nullptr;
+    return NOERROR;
+}
+
+ECode CMetaCoclass::GetConstant(
+    /* [in] */ Integer index,
+    /* [out] */ AutoPtr<IMetaConstant>& constt)
+{
+    if (index < 0 || index >= mConstants.GetLength()) {
+        constt = nullptr;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    BuildAllConstants();
+
+    constt = mConstants[index];
+    return NOERROR;
+}
+
+void CMetaCoclass::BuildAllConstants()
+{
+    if (mConstants[0] == nullptr) {
+        Mutex::AutoLock lock(mConstantsLock);
+        if (mConstants[0] == nullptr) {
+            for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
+                AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
+                        mOwner->mMetadata, mMetadata->mConstants[i]);
+                mConstants.Set(i, mcObj);
+            }
+        }
+    }
 }
 
 } // namespace como

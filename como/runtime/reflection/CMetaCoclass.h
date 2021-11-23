@@ -110,10 +110,26 @@ public:
     ECode GetOpaque(
         /* [out] */ HANDLE &opaque) override;
 
+    ECode GetConstantNumber(
+        /* [out] */ Integer& number) override;
+
+    ECode GetAllConstants(
+        /* [out] */ Array<IMetaConstant*>& consts) override;
+
+    ECode GetConstant(
+        /* [in] */ const String& name,
+        /* [out] */ AutoPtr<IMetaConstant>& constt) override;
+
+    ECode GetConstant(
+        /* [in] */ Integer index,
+        /* [out] */ AutoPtr<IMetaConstant>& constt) override;
+
 private:
     void BuildAllConstructors();
 
     void BuildAllInterfaces();
+
+    void BuildAllConstants();
 
     void BuildAllMethods();
 
@@ -137,6 +153,8 @@ public:
     Mutex mMethodsLock { true };
     Array<IMetaInterface*> mInterfaces;
     Mutex mInterfacesLock;
+    Array<IMetaConstant*> mConstants;
+    Mutex mConstantsLock;
 };
 
 } // namespace como

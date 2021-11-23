@@ -210,6 +210,20 @@ interface IMetaCoclass
 
     GetOpaque(
         [out] HANDLE& value);
+
+    GetConstantNumber(
+        [out] Integer& number);
+
+    GetAllConstants(
+        [out] Array<IMetaConstant*>& consts);
+
+    GetConstant(
+        [in] String name,
+        [out] IMetaConstant&& constt);
+
+    GetConstant(
+        [in] Integer index,
+        [out] IMetaConstant&& constt);
 }
 
 [
