@@ -557,6 +557,15 @@ void elog_raw(const char *format, ...) {
  */
 void elog_output(uint8_t level, const char *tag, const char *file, const char *func,
         const long line, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    elog_output_args(level, tag, file, func, line, format, args);
+    va_end(args);
+}
+
+/* args point to the first variable parameter */
+void elog_output_args(uint8_t level, const char *tag, const char *file, const char *func,
+        const long line, const char *format, va_list args) {
     extern const char *elog_port_get_time(void);
     extern const char *elog_port_get_p_info(void);
     extern const char *elog_port_get_t_info(void);
@@ -564,7 +573,7 @@ void elog_output(uint8_t level, const char *tag, const char *file, const char *f
     size_t tag_len = strlen(tag), log_len = 0, newline_len = strlen(ELOG_NEWLINE_SIGN);
     char line_num[ELOG_LINE_NUM_MAX_LEN + 1] = { 0 };
     char tag_sapce[ELOG_FILTER_TAG_MAX_LEN / 2 + 1] = { 0 };
-    va_list args;
+    // va_list args;
     int fmt_result;
 
     ELOG_ASSERT(level <= ELOG_LVL_VERBOSE);
@@ -580,7 +589,7 @@ void elog_output(uint8_t level, const char *tag, const char *file, const char *f
         return;
     }
     /* args point to the first variable parameter */
-    va_start(args, format);
+    // va_start(args, format);
     /* lock output */
     elog_output_lock();
 
@@ -659,7 +668,7 @@ void elog_output(uint8_t level, const char *tag, const char *file, const char *f
     /* package other log data to buffer. '\0' must be added in the end by vsnprintf. */
     fmt_result = vsnprintf(log_buf + log_len, ELOG_LINE_BUF_SIZE - log_len, format, args);
 
-    va_end(args);
+    // va_end(args);
     /* calculate log length */
     if ((log_len + fmt_result <= ELOG_LINE_BUF_SIZE) && (fmt_result > -1)) {
         log_len += fmt_result;

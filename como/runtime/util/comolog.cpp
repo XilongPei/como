@@ -84,7 +84,7 @@ void Logger::D(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %s DEBUG %s]: %s", szSamplingTag, currentTime, tag, format);
     va_start(argList, format);
-    log_d(buf, argList);
+    elog_output_args(ELOG_LVL_DEBUG, "", "", "", 0, buf, argList);
     va_end(argList);
 }
 
@@ -103,7 +103,7 @@ void Logger::E(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %s ERROR %s]: %s", szSamplingTag, currentTime, tag, format);
     va_start(argList, format);
-    log_e(buf, argList);
+    elog_output_args(ELOG_LVL_ERROR, "", "", "", 0, buf, argList);
     va_end(argList);
 }
 
@@ -122,7 +122,7 @@ void Logger::V(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %s VERBOSE %s]: %s", szSamplingTag, currentTime, tag, format);
     va_start(argList, format);
-    log_v(buf, argList);
+    elog_output_args(ELOG_LVL_VERBOSE, "", "", "", 0, buf, argList);
     va_end(argList);
 }
 
@@ -141,7 +141,7 @@ void Logger::W(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %s WARNING %s]: %s", szSamplingTag, currentTime, tag, format);
     va_start(argList, format);
-    log_w(buf, argList);
+    elog_output_args(ELOG_LVL_WARN, "", "", "", 0, buf, argList);
     va_end(argList);
 }
 
@@ -180,7 +180,7 @@ void Logger::Log(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %s", szSamplingTag, currentTime, tag, format);
     va_start(argList, format);
-    log_a(buf, argList);
+    elog_output_args(level, tag, "", "", 0, buf, argList);
     va_end(argList);
 }
 

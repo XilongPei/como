@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -267,6 +268,10 @@ size_t elog_async_get_line_log(char *log, size_t size);
 size_t elog_strcpy(size_t cur_len, char *dst, const char *src);
 size_t elog_cpyln(char *line, const char *log, size_t len);
 void *elog_memcpy(void *dst, const void *src, size_t count);
+
+void elog_output_args(uint8_t level, const char *tag, const char *file, const char *func,
+        const long line, const char *format, va_list args);
+
 
 #ifdef __cplusplus
 }
