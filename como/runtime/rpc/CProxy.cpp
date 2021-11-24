@@ -1572,8 +1572,15 @@ ECode InterfaceProxy::ProxyEntry(
     offset = 0;
     GET_STACK_INTEGER(args, offset, methodIndex);
 
+#if defined(__i386__) || defined(__arm__) || (defined(__riscv) && (__riscv_xlen == 32))
     offset = sizeof(Integer);
-    GET_STACK_LONG(args, offset, *(Long *)thisObj);
+#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__riscv) && (__riscv_xlen == 64))
+    offset = sizeof(Long);
+#else
+    #error Unknown Architecture
+#endif
+
+    GET_STACK_LONG(args, offset, *(Long *)&thisObj);
 
     Registers regs;
 #if defined(__aarch64__)
