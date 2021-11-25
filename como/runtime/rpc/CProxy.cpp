@@ -1565,24 +1565,9 @@ HANDLE InterfaceProxy::GetHANDLEValue(
 ECode InterfaceProxy::ProxyEntry(
     /* [in] */ HANDLE args)
 {
-    InterfaceProxy* thisObj;
-    Integer methodIndex;
-    Integer offset;
-
-    offset = 0;
-    GET_STACK_INTEGER(args, offset, methodIndex);
-
-#if defined(__i386__) || defined(__arm__) || (defined(__riscv) && (__riscv_xlen == 32))
-    offset = sizeof(Integer);
-#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__riscv) && (__riscv_xlen == 64))
-    offset = sizeof(Long);
-#else
-    #error Unknown Architecture
-#endif
-
-    GET_STACK_LONG(args, offset, *(Long *)&thisObj);
-
+    // collect registers information should be done at the beginning of function
     Registers regs;
+
 #if defined(__aarch64__)
     regs.sp.reg = args + 32;
     regs.paramStartOffset = 0;
@@ -1672,6 +1657,21 @@ ECode InterfaceProxy::ProxyEntry(
     #endif
 
 #endif
+
+    Integer methodIndex;
+    InterfaceProxy* thisObj;
+    Integer offset;
+
+    GET_STACK_INTEGER(args, 0, methodIndex);
+
+#if defined(__i386__) || defined(__arm__) || (defined(__riscv) && (__riscv_xlen == 32))
+    offset = sizeof(Integer);
+#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__riscv) && (__riscv_xlen == 64))
+    offset = sizeof(Long);
+#else
+    #error Unknown Architecture
+#endif
+    GET_STACK_LONG(args, offset, *(Long *)&thisObj);
 
     if (DEBUG) {
         String name, ns;
