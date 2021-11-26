@@ -1554,14 +1554,6 @@ Double InterfaceProxy::GetDoubleValue(
 #endif
 }
 
-HANDLE InterfaceProxy::GetHANDLEValue(
-    /* [in] */ Registers& regs,
-    /* [in] */ Integer intParamIndex,
-    /* [in] */ Integer fpParamIndex)
-{
-    return (HANDLE)GetLongValue(regs, intParamIndex, fpParamIndex);
-}
-
 ECode InterfaceProxy::ProxyEntry(
     /* [in] */ HANDLE args)
 {

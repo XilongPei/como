@@ -289,11 +289,6 @@ private:
         /* [in] */ Integer intParamIndex,
         /* [in] */ Integer fpParamIndex);
 
-    HANDLE GetHANDLEValue(
-        /* [in] */ Registers& regs,
-        /* [in] */ Integer intParamIndex,
-        /* [in] */ Integer fpParamIndex);
-
 private:
     friend class CProxy;
 
@@ -307,6 +302,9 @@ private:
 };
 
 extern const CoclassID CID_CProxy;
+
+// HANDLE is a data structure more like "void *"
+#define GetHANDLEValue GetLongValue
 
 COCLASS_ID(228c4e6a-1df5-4130-b46e-d0322b676976)
 class CProxy
