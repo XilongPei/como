@@ -53,11 +53,17 @@ class Class1 : public Class2
     {
         cout << "call class1->method1, var1: " << var1 << endl;
     };
+
     /*
     void method2(int i1, int i2, int i3, int i4, int i5, int i6, int i7, int i8, int i9, int i10, int i11, int i12)
     {
         cout << "call class1->method2, var2: " << var2 << endl;
     };*/
+
+    void method3(int& i1, int i2, int i3, int i4, int i5, int i6, int i7, int i8, int i9, int i10, int i11, int i12)
+    {
+        cout << "call class1->method3, var1: " << var1 << endl;
+    };
 };
 
 int main()
@@ -66,6 +72,10 @@ int main()
 
     class1->method1(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
     class1->method2(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+
+    // test: parameter is a reference
+    int i = 1;
+    class1->method3(i, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
     return 0;
 }
 
