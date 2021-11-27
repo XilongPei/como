@@ -70,7 +70,7 @@ int main()
 }
 
 /*
-g++ -g cpp_this.cpp
+g++ -g cpp_test.cpp
 objdump -d -S -C a.out
 
 */
