@@ -57,7 +57,7 @@ namespace como {
         var = *(Float *)(*(Integer *)&rbp + (int)off);
     #define GET_STACK_DOUBLE(rbp, off, var)     \
         var = *(Double *)(*(Integer *)&rbp + (int)off);
-#elif defined(__x86_64__) || defined(__aarch64__) || (defined(__riscv) && (__riscv_xlen == 64))
+#elif (defined(__riscv) && (__riscv_xlen == 64))
     #define GET_STACK_INTEGER(rbp, off, var)    \
         var = *(Integer *)(*(Long *)&rbp + (int)off);
     #define GET_STACK_LONG(rbp, off, var)       \
@@ -66,6 +66,8 @@ namespace como {
         var = *(Float *)(*(Long *)&rbp + (int)off);
     #define GET_STACK_DOUBLE(rbp, off, var)     \
         var = *(Double *)(*(Long *)&rbp + (int)off);
+#elif defined(__aarch64__) || defined(__x86_64__)
+    // Assembly language implementation
 #else
     #error Unknown Architecture
 #endif
@@ -80,6 +82,50 @@ namespace como {
     __asm__ __volatile__(           \
         "str   "#reg", %0;"         \
         : "=m"(var)                 \
+    )
+
+#define GET_STACK_INTEGER(rbp, off, var)    \
+    __asm__ __volatile__(                   \
+        "ldr   x9, %1;"                     \
+        "ldr   w10, %2;"                    \
+        "ldr   w9, [x9, x10];"              \
+        "str   w9, %0;"                     \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "x9", "x10"                       \
+    )
+
+#define GET_STACK_LONG(rbp, off, var)       \
+    __asm__ __volatile__(                   \
+        "ldr   x9, %1;"                     \
+        "ldr   w10, %2;"                    \
+        "ldr   x9, [x9, x10];"              \
+        "str   x9, %0;"                     \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "x9", "x10"                       \
+    )
+
+#define GET_STACK_FLOAT(rbp, off, var)      \
+    __asm__ __volatile__(                   \
+        "ldr   x9, %1;"                     \
+        "ldr   w10, %2;"                    \
+        "ldr   w9, [x9, x10];"              \
+        "str   w9, %0;"                     \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "x9", "x10"                       \
+    )
+
+#define GET_STACK_DOUBLE(rbp, off, var)     \
+    __asm__ __volatile__(                   \
+        "ldr   x9, %1;"                     \
+        "ldr   w10, %2;"                    \
+        "ldr   x9, [x9, x10];"              \
+        "str   x9, %0;"                     \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "x9", "x10"                       \
     )
 
 EXTERN_C void __entry();
@@ -144,6 +190,55 @@ __asm__(
     __asm__ __volatile__(           \
         "movq   %%"#reg", %0;"      \
         : "=m"(var)                 \
+    )
+
+#define GET_STACK_INTEGER(rbp, off, var)    \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movl   (%%rax), %%eax;"            \
+        "movl   %%eax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_LONG(rbp, off, var)       \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movq   (%%rax), %%rax;"            \
+        "movq   %%rax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp)                          \
+        , "m"(off)                          \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_FLOAT(rbp, off, var)      \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movl   (%%rax), %%eax;"            \
+        "movl   %%eax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
+    )
+
+#define GET_STACK_DOUBLE(rbp, off, var)     \
+    __asm__ __volatile__(                   \
+        "movq   %1, %%rax;"                 \
+        "movl   %2, %%ebx;"                 \
+        "addq   %%rbx, %%rax;"              \
+        "movq   (%%rax), %%rax;"            \
+        "movq   %%rax, %0;"                 \
+        : "=m"(var)                         \
+        : "m"(rbp), "m"(off)                \
+        : "rax", "rbx"                      \
     )
 
 EXTERN_C void __entry();
@@ -1654,7 +1749,8 @@ ECode InterfaceProxy::ProxyEntry(
     InterfaceProxy* thisObj;
     Integer offset;
 
-    GET_STACK_INTEGER(args, 0, methodIndex);
+    offset = 0;
+    GET_STACK_INTEGER(args, offset, methodIndex);
 
 #if defined(__i386__) || defined(__arm__) || (defined(__riscv) && (__riscv_xlen == 32))
     offset = sizeof(Integer);
