@@ -23,8 +23,9 @@ include_directories(
     ${PREBUILT_INC}/asm-arm64
     ${PREBUILT_INC}/arch-arm64)
 
+#! -march=armv8-a -DARM_FP_SUPPORT, Architecture-related options
 set(COMMON_C_FLAGS "\
-    -D__android__ -target aarch64-linux-android -march=armv8-a \
+    -D__android__ -target aarch64-linux-android -march=armv8-a -DARM_FP_SUPPORT \
     -fPIC -ffunction-sections -fdata-sections -fstack-protector -fno-short-enums -fmessage-length=0 \
     -no-canonical-prefixes -Wno-nullability-completeness -Wno-extern-c-compat")
 

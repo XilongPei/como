@@ -18,7 +18,11 @@ else()
     set(FUNCTION_SAFETY_C_FLAGS "")
 endif()
 
-if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)")
+if($ENV{ARCH} MATCHES "(x64)|(aarch64)")
+    #! -DARM_FP_SUPPORT, Architecture-related options
+    set(COMMON_C_FLAGS
+        "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS} -DARM_FP_SUPPORT")
+elseif($ENV{ARCH} MATCHES "(riscv64)")
     set(COMMON_C_FLAGS
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 elseif($ENV{ARCH} MATCHES "(x32)|(aarch32)|(riscv32)")
