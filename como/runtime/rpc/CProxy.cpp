@@ -1560,9 +1560,8 @@ ECode InterfaceProxy::ProxyEntry(
     // collect registers information should be done at the beginning of function
     Registers regs;
 
+//----__aarch64__--------__aarch64__--------__aarch64__--------__aarch64__------
 #if defined(__aarch64__)
-    regs.sp.reg = args + 32;
-    regs.paramStartOffset = 0;
     GET_REG(x0, regs.x0.reg);
     GET_REG(x1, regs.x1.reg);
     GET_REG(x2, regs.x2.reg);
@@ -1571,6 +1570,7 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(x5, regs.x5.reg);
     GET_REG(x6, regs.x6.reg);
     GET_REG(x7, regs.x7.reg);
+
 #if defined(ARM_FP_SUPPORT)
     GET_REG(d0, regs.d0.reg);
     GET_REG(d1, regs.d1.reg);
@@ -1582,13 +1582,16 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(d7, regs.d7.reg);
 #endif
 
-#elif defined(__arm__)
     regs.sp.reg = args + 32;
     regs.paramStartOffset = 0;
+
+//----__arm__--------__arm__--------__arm__--------__arm__--------__arm__-------
+#elif defined(__arm__)
     GET_REG(x0, regs.r0.reg);
     GET_REG(x1, regs.r1.reg);
     GET_REG(x2, regs.r2.reg);
     GET_REG(x3, regs.r3.reg);
+
 #if defined(ARM_FP_SUPPORT)
     GET_REG(d0, regs.d0.reg);
     GET_REG(d1, regs.d1.reg);
@@ -1600,9 +1603,11 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(d7, regs.d7.reg);
 #endif
 
+    regs.sp.reg = args + 32;
+    regs.paramStartOffset = 0;
+
+//----__x86_64__--------__x86_64__--------__x86_64__--------__x86_64__----------
 #elif defined(__x86_64__)
-    regs.rbp.reg = args + 16;
-    regs.paramStartOffset = 2;
     GET_REG(rdi, regs.rdi.reg);
     GET_REG(rsi, regs.rsi.reg);
     GET_REG(rdx, regs.rdx.reg);
@@ -1619,9 +1624,14 @@ ECode InterfaceProxy::ProxyEntry(
     GET_REG(xmm6, regs.xmm6.reg);
     GET_REG(xmm7, regs.xmm7.reg);
 
+    regs.rbp.reg = args + 16;
+    regs.paramStartOffset = 2;
+
+//----__i386__--------__i386__--------__i386__--------__i386__--------__i386__--
 #elif defined(__i386__)
 
 #else
+//----__riscv--__riscv_xlen == 64--------__riscv--__riscv_xlen == 64------------
     #if defined(__riscv)
         #if (__riscv_xlen == 64)
 
