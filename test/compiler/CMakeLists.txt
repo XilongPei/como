@@ -17,6 +17,8 @@
 set(COMPILER_SRC_DIR ${TEST_SRC_DIR}/compiler)
 set(COMPILER_OBJ_DIR ${TEST_OBJ_DIR}/compiler)
 
+IMPORT_GTEST()
+
 include_directories(
     ./
     ${INC_DIR}
@@ -52,5 +54,5 @@ IMPORT_LIBRARY(comort.so)
 add_executable(testCompiler
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(testCompiler comort.so)
+target_link_libraries(testCompiler comort.so ${GTEST_LIBS})
 add_dependencies(testCompiler comort)

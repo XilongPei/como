@@ -14,7 +14,16 @@
 // limitations under the License.
 //=========================================================================
 
-int main(int argv, char** argc)
+#include <gtest/gtest.h>
+
+// this testcase is for cdlc, if it has been here, everything is right
+TEST(testCompiler, testCompiler)
 {
-    return 0;
+    EXPECT_EQ(0, 0);
+}
+
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
