@@ -109,7 +109,7 @@ ECode AbstractCalendar::GetCalendarDate(
     /* [out] */ AutoPtr<ICalendarDate>& date)
 {
     FAIL_RETURN(NewCalendarDate(zone, date));
-    return GetCalendarDate(millis, date);
+    return GetCalendarDate(millis, (ICalendarDate*)date);
 }
 
 ECode AbstractCalendar::GetCalendarDate(

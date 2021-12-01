@@ -49,7 +49,7 @@ ECode Gregorian::GetCalendarDate(
     /* [out] */ AutoPtr<ICalendarDate>& date)
 {
     NewCalendarDate(date);
-    return GetCalendarDate(millis, date);
+    return GetCalendarDate(millis, (ICalendarDate*)date);
 }
 
 ECode Gregorian::GetCalendarDate(
