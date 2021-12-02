@@ -22,6 +22,6 @@ using namespace como;
 
 ECode Main(Array<String>& args)
 {
-    printf("==== call Main ====\n");
+    printf("call Main from system/entrypoint/entry to enter COMO Runtime ...\n");
     return NOERROR;
 }
