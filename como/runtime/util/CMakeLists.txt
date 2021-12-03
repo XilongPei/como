@@ -27,7 +27,10 @@ include_directories(
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
-    set(ComoFunctionSafetyObject ComoFunctionSafetyObject.cpp)
+    set(ComoFunctionSafetyObject
+        ComoFunctionSafetyObject.cpp
+        FSOGetterSetter.cpp
+    )
 else()
     set(ComoFunctionSafetyObject)
 endif()
@@ -59,6 +62,7 @@ COPY(util ${UTIL_SRC_DIR}/comoobj.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comoref.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comolock.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/ComoFunctionSafetyObject.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/FSOGetterSetter.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comosp.h
