@@ -63,7 +63,7 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 //
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
 {
-    clock_gettime(CLOCK_REALTIME, &mBirthTime);
+    clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
     pthread_mutex_lock(&funSafetyLock);
     objsLifeCycleExpires.cfso_push(this);
     pthread_mutex_unlock(&funSafetyLock);
@@ -99,6 +99,10 @@ ECode ComoFunctionSafetyObject::SetExpires(
     return NOERROR;
 }
 
+ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
+{
+    clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+}
 
 //
 // class CFSO_VECTOR

@@ -36,10 +36,12 @@ public:
     ECode SetExpires(
         /* [in] */ Long expires);
 
+    ECode SetLastModifiedInfo();
+
 private:
     Long mChecksum;
     Long mExpires;
-    struct timespec mBirthTime;         // CLOCK_REALTIME
+    struct timespec mLastModifiedTime;      // CLOCK_REALTIME
 };
 
 #define CFSO_VECTOR_SizeNullArray   300
