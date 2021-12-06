@@ -7,9 +7,7 @@
 # COMORT_PATH=/home/xilong/home/como/bin/target/como.linux.x64.rls/comort.so
 # CLASS_PATH=/home/xilong/home/como/bin/target/como.linux.x64.rls/libcore.so
 
-# -h 帮助
-# n后面有:，表示该选项需要参数，而h后面没有:，表示不需要参数
-while getopts ":n:a:h" optname
+while getopts ":n:h" optname
 do
     case "$optname" in
       "n")
