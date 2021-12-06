@@ -1,5 +1,5 @@
 //=========================================================================
-// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+// Copyright (C) 2021 The C++ Component Model(COMO) Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
 // limitations under the License.
 //=========================================================================
 
+
+namespace como {
+
 [
-    uuid(ffffffff-ffff-ffff-ffff-ffffffffffff),
-    uri("http://como.org/comort.so")
+    uuid(00000000-0000-0000-0000-000000000008),
+    version(0.1.0)
 ]
-module COMORuntime
+interface IComoFunctionSafetyObject
 {
-include "base.cdl"
-include "reflection.cdl"
-include "rpc.cdl"
-include "ComoFunctionSafetyObject.cdl"
+    IsValid(
+        [out] Boolean& isValid);
+
+    InvalidObject(
+        [in] Boolean isValid);
+}
+
 }

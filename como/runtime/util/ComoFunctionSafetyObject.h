@@ -20,12 +20,15 @@
 #include <time.h>
 #include <vector>
 #include "comotypes.h"
+#include "comoref.h"
 
 using namespace std;
 
 namespace como {
 
 class COM_PUBLIC ComoFunctionSafetyObject
+    : public RefBase
+    , public IComoFunctionSafetyObject
 {
 public:
     ComoFunctionSafetyObject();

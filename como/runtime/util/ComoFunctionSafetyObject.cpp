@@ -102,6 +102,8 @@ ECode ComoFunctionSafetyObject::SetExpires(
 ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
 {
     clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+
+    return NOERROR;
 }
 
 //
