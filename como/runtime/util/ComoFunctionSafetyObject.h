@@ -41,10 +41,28 @@ public:
 
     ECode SetLastModifiedInfo();
 
+    /*
+     * default function for checking ComoFunctionSafetyObject
+     */
+    ECode IsValid(
+            /* [out] */ Integer& isValid) override;
+
+    /*
+     * default function for setting property isValid of ComoFunctionSafetyObject
+     * if parameter isValid is 0, means set Object valid
+     */
+    ECode InvalidObject(
+            /* [out] */ Integer isValid) override;
 private:
+    Integer mIsValid;                   // value definition: 0:valid; others:invalid
     Long mChecksum;
     Long mExpires;
-    struct timespec mLastModifiedTime;      // CLOCK_REALTIME
+    struct timespec mLastModifiedTime;  // CLOCK_REALTIME
+};
+
+enum CFSO_Expires {
+    CFSO_ExpireVALID = 0,
+    CFSO_ExpireTime
 };
 
 #define CFSO_VECTOR_SizeNullArray   300

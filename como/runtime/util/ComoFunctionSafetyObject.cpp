@@ -62,6 +62,8 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 // class ComoFunctionSafetyObject
 //
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
+    : mIsValid(0)
+    , mExpires(CFSO_ExpireVALID)
 {
     clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
     pthread_mutex_lock(&funSafetyLock);
@@ -105,6 +107,37 @@ ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
 
     return NOERROR;
 }
+
+/*
+ * default function for checking ComoFunctionSafetyObject
+ */
+ECode ComoFunctionSafetyObject::IsValid(
+        /* [out] */ Integer& isValid)
+{
+    struct timespec time;
+    clock_gettime(CLOCK_REALTIME, &time);
+
+    if ((mLastModifiedTime.tv_sec - time.tv_sec) +
+                1.0e9*(mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {
+        isValid = CFSO_ExpireTime;
+        return NOERROR;
+    }
+
+    isValid = mIsValid;
+    return NOERROR;
+}
+
+/*
+ * default function for setting property isValid of ComoFunctionSafetyObject
+ * if parameter isValid is 0, means set Object valid
+ */
+ECode ComoFunctionSafetyObject::InvalidObject(
+        /* [out] */ Integer isValid)
+{
+    mIsValid = isValid;
+    return NOERROR;
+}
+
 
 //
 // class CFSO_VECTOR
