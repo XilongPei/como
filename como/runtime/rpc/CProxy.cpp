@@ -1744,23 +1744,21 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 #else
-    // id = threadPool->addTask(method, inParcel, outParcel);
-    // wait id untile timeout
-
     struct timespec time_out;
     clock_gettime(CLOCK_REALTIME, &time_out);
     time_out.tv_nsec += lvalue;
 
+    int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel);
 
-    int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel)
-    int ret = pthread_mutex_timedlock(i, &time_out);
+    int ret = pthread_mutex_timedlock(mWorkerList[i]->mLock, &time_out);
     if (ret != TIMEOUT) {
-        ec = retValues[id];
+        ec = mWorkerList[i]->ec;
+        pthread_mutex_unlock(mWorkerList[i]->mLock);
     }
     else {
         ec = FUNCTION_SAFETY_CALL_TIMEOUT;
-        // the pool shoud deal: method, inParcel, outParcel
     }
+
     if (FAILED(ec)) {
         goto ProxyExit;
     }

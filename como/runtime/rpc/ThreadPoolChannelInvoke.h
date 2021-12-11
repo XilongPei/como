@@ -24,9 +24,13 @@
 
 namespace como {
 
+// ns, 30s
+#define TPCI_TASK_EXPIRES   (30*1.0e9)
+#define FUNCTION_SAFETY_CALL_TIMEOUT    1
+
 class ThreadPoolChannelInvoke;
 
-// TPCI : ThreadPoolChannelInvoke
+// TPCI: Thread Pool Channel Invoke
 class TPCI_Executor
     : public LightRefBase
 {
@@ -47,6 +51,8 @@ public:
         AutoPtr<IParcel> mOutParcel;
         TPCI_Executor* mOwner;
         Mutex mLock;
+        struct timespec mCreateTime;
+        ECode ec;
     };
 
 public:
@@ -57,7 +63,6 @@ public:
 private:
     static AutoPtr<TPCI_Executor> sInstance;
     static AutoPtr<ThreadPoolChannelInvoke> threadPool;
-    static pthread_mutex_t *locksThreadPoolECode;
     static Mutex sInstanceLock;
 };
 
@@ -67,7 +72,7 @@ class ThreadPoolChannelInvoke
 private:
     static ArrayList<TPCI_Executor::Worker*> mWorkerList;      // task list
     static bool shutdown;
-    int mThreadNum;                                                 // most thread number
+    int mThreadNum;                                            // most thread number
     pthread_t *pthread_id;
 
     static pthread_mutex_t m_pthreadMutex;

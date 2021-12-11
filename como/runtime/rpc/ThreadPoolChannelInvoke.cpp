@@ -33,7 +33,10 @@ TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, mChannel, AutoPtr<IM
     , mInParcel(inParcel)
     , mOutParcel(outParcel)
     , mOwner(owner)
-{}
+{
+    pthread_mutex_init(&mLock, NULL);
+    clock_gettime(CLOCK_REALTIME, &mCreateTime);
+}
 
 ECode TPCI_Executor::Worker::Invoke()
 {
@@ -45,9 +48,6 @@ ECode TPCI_Executor::Worker::Invoke()
 AutoPtr<TPCI_Executor> TPCI_Executor::sInstance = nullptr;
 Mutex TPCI_Executor::sInstanceLock;
 AutoPtr<ThreadPoolChannelInvoke> TPCI_Executor::threadPool = nullptr;
-AutoPtr<ThreadPoolChannelInvokeECode> TPCI_Executor::threadPoolECode = nullptr;
-pthread_mutex_t *TPCI_Executor::locksThreadPoolECode = nullptr;
-23     pthread_mutex_init(&lock, NULL);
 
 AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 {
@@ -56,12 +56,6 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
         if (sInstance == nullptr) {
             sInstance = new TPCI_Executor();
             threadPool = new ThreadPoolChannelInvoke(ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
-            threadPoolECode = calloc(sizeof(ECode), ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
-
-            locksThreadPoolECode = calloc(sizeof(pthread_mutex_t), ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
-            for (int i = 0;  i < ThreadPoolChannelInvoke_MAX_THREAD_NUM;  i++) {
-                pthread_mutex_init(&locksThreadPoolECode[i], NULL);
-            }
         }
     }
     return sInstance;
@@ -71,7 +65,8 @@ int TPCI_Executor::RunTask(AutoPtr<IMetaMethod> method, AutoPtr<IParcel> inParce
 {
     AutoPtr<Worker> w = new Worker(method, inParcel, outParcel, this);
     int i = threadPool->addTask(w);
-    pthread_mutex_lock(&locksThreadPoolECode[i]);
+    pthread_mutex_lock(&w->mLock);
+    return i;
 }
 
 void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
@@ -96,7 +91,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 
         pthread_mutex_unlock(&m_pthreadMutex);
 
-        ec = w->Invoke();
+        w->ec = w->Invoke();
     }
 
     return reinterpret_cast<void*>(ec);
@@ -121,19 +116,30 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
 {
     pthread_mutex_lock(&m_pthreadMutex);
-    mWorkerList.Add(task);
-    pthread_mutex_unlock(&m_pthreadMutex);
-    pthread_cond_signal(&m_pthreadCond);
 
-    // assign it an ID, return the ID
-    return 0;
+    // search for a position empty
+    int i;
+    clock_gettime(CLOCK_REALTIME, &time);
+
+    pthread_mutex_lock(&m_pthreadMutex);
+    for (i = 0;  i < mWorkerList.GetSize();  i++) {
+        if ((mWorkerList[i]->mCreateTime.tv_sec - time.tv_sec) +
+                    1.0e9*(mWorkerList[i]->mCreateTime.tv_nsec - time.tv_nsec) > TPCI_TASK_EXPIRES) {
+            break;
+    }
+    ECode ec = mWorkerList.Add(i, task);
+    pthread_mutex_unlock(&m_pthreadMutex);
+    if (NOERROR != ec)
+        return -1;
+
+    return i;
 }
 
 int ThreadPoolChannelInvoke::create()
 {
     pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
 
-    for (int i = 0; i < mThreadNum; i++) {
+    for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
