@@ -1694,6 +1694,38 @@ ECode InterfaceProxy::ProxyEntry(
                 name.string(), signature.string());
     }
 
+#ifdef COMO_FUNCTION_SAFETY
+    AutoPtr<IMetaInterface> intf;
+    method->GetInterface(intf);
+    AutoPtr<IMetaConstant> constt;
+    intf->GetConstant("timeout", constt);
+    AutoPtr<IMetaValue> value;
+    constt->GetValue(value);
+
+    AutoPtr<IMetaType> type;
+    constt->GetType(type);
+    TypeKind kind;
+    constt->GetTypeKind(kind);
+
+    Long lvalue = 0;
+    switch (kind) {
+        case TypeKind::Integer: {
+            Integer ivalue;
+            value->GetLongValue(ivalue);
+            lvalue = ivalue;
+            break;
+        }
+        case TypeKind::Long:
+            value->GetIntegerValue(lvalue);
+            break;
+        default: {
+            String name;
+            constt->GetName(name);
+            Logger::E("CProxy", "Wrong timeout datatype\"%s\"", name.string());
+        }
+    }
+#endif
+
     RPCType type;
     thisObj->mOwner->mChannel->GetRPCType(type);
     AutoPtr<IParcel> inParcel, outParcel;
@@ -1706,11 +1738,34 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
+#ifndef COMO_FUNCTION_SAFETY
     ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
     if (FAILED(ec)) {
         goto ProxyExit;
     }
+#else
+    // id = threadPool->addTask(method, inParcel, outParcel);
+    // wait id untile timeout
 
+    struct timespec time_out;
+    clock_gettime(CLOCK_REALTIME, &time_out);
+    time_out.tv_nsec += lvalue;
+
+
+    int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel)
+    int ret = pthread_mutex_timedlock(i, &time_out);
+    if (ret != TIMEOUT) {
+        ec = retValues[id];
+    }
+    else {
+        ec = FUNCTION_SAFETY_CALL_TIMEOUT;
+        // the pool shoud deal: method, inParcel, outParcel
+    }
+    if (FAILED(ec)) {
+        goto ProxyExit;
+    }
+
+#endif
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
 ProxyExit:
