@@ -34,6 +34,7 @@
 #include "rpc/comorpc.h"
 #include "rpc/CProxy.h"
 #include "util/comolog.h"
+#include "reflHelpers.h"
 #include <sys/mman.h>
 
 namespace como {
@@ -1697,31 +1698,15 @@ ECode InterfaceProxy::ProxyEntry(
 #ifdef COMO_FUNCTION_SAFETY
     AutoPtr<IMetaInterface> intf;
     method->GetInterface(intf);
-    AutoPtr<IMetaConstant> constt;
-    intf->GetConstant("timeout", constt);
-    AutoPtr<IMetaValue> value;
-    constt->GetValue(value);
 
-    AutoPtr<IMetaType> type;
-    constt->GetType(type);
-    TypeKind kind;
-    constt->GetTypeKind(kind);
-
-    Long lvalue = 0;
-    switch (kind) {
-        case TypeKind::Integer: {
-            Integer ivalue;
-            value->GetLongValue(ivalue);
-            lvalue = ivalue;
-            break;
-        }
-        case TypeKind::Long:
-            value->GetIntegerValue(lvalue);
-            break;
-        default: {
-            String name;
-            constt->GetName(name);
-            Logger::E("CProxy", "Wrong timeout datatype\"%s\"", name.string());
+    Long lvalue;
+    ECode ec = intfGetConstantLong(intf, String("timeout"), lvalue);
+    if (FAILED(ec)) {
+        if (E_TYPE_MISMATCH_EXCEPTION == ec) {
+            Logger::E("CProxy", "Wrong timeout datatype");
+            goto ProxyExit;
+        } else {
+            lvalue = 0;
         }
     }
 #endif
@@ -1744,23 +1729,31 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 #else
-    struct timespec time_out;
-    clock_gettime(CLOCK_REALTIME, &time_out);
-    time_out.tv_nsec += lvalue;
-
-    int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel);
-
-    int ret = pthread_mutex_timedlock(mWorkerList[i]->mLock, &time_out);
-    if (ret != TIMEOUT) {
-        ec = mWorkerList[i]->ec;
-        pthread_mutex_unlock(mWorkerList[i]->mLock);
+    if (0 == lvalue) {
+        ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
+        if (FAILED(ec)) {
+            goto ProxyExit;
+        }
     }
     else {
-        ec = FUNCTION_SAFETY_CALL_TIMEOUT;
-    }
+        struct timespec time_out;
+        clock_gettime(CLOCK_REALTIME, &time_out);
+        time_out.tv_nsec += lvalue;
 
-    if (FAILED(ec)) {
-        goto ProxyExit;
+        int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel);
+
+        int ret = pthread_mutex_timedlock(mWorkerList[i]->mLock, &time_out);
+        if (ret != TIMEOUT) {
+            ec = mWorkerList[i]->ec;
+            pthread_mutex_unlock(mWorkerList[i]->mLock);
+        }
+        else {
+            ec = FUNCTION_SAFETY_CALL_TIMEOUT;
+        }
+
+        if (FAILED(ec)) {
+            goto ProxyExit;
+        }
     }
 
 #endif

@@ -35,7 +35,9 @@ set(SOURCES
     CMetaParameter.cpp
     CMetaType.cpp
     CMetaValue.cpp
-    reflection.cpp)
+    reflection.cpp
+    reflHelpers.cpp
+)
 
 if($ENV{PLATFORM} STREQUAL "linux")
     if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)|(x32)|(aarch32)|(riscv32)")
@@ -69,7 +71,9 @@ add_dependencies(reflection cdl)
 COPY(reflection ${REFLECTION_SRC_DIR}/comoreflapi.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
-    ${REFLECTION_SRC_DIR}/comoreflapi.h)
+    ${REFLECTION_SRC_DIR}/comoreflapi.h
+    ${REFLECTION_SRC_DIR}/reflHelpers.h
+)
 
 install(FILES
     ${DEPLOY_HEADERS}

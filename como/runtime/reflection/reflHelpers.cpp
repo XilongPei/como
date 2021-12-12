@@ -72,8 +72,12 @@ ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt, String constNa
 
 ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf, String constName, Long& lvalue)
 {
+    ECode ec;
     AutoPtr<IMetaConstant> constt;
-    intf->GetConstant(constName, constt);
+    ec = intf->GetConstant(constName, constt);
+    if (FAILED(ec))
+        return ec;
+
     return constantGetLong(constt, constName, lvalue);
 }
 
