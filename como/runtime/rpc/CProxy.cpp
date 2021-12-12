@@ -34,7 +34,7 @@
 #include "rpc/comorpc.h"
 #include "rpc/CProxy.h"
 #include "util/comolog.h"
-#include "reflHelpers.h"
+#include "reflection/reflHelpers.h"
 #include <sys/mman.h>
 
 namespace como {
