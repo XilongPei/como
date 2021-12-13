@@ -70,7 +70,7 @@ public:
     int RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                                 AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
 
-    int TPCI_Executor::CleanTask(int posWorkerList);
+    int CleanTask(int posWorkerList);
 
 private:
     static AutoPtr<TPCI_Executor> sInstance;
@@ -100,7 +100,7 @@ protected:
 public:
     ThreadPoolChannelInvoke(int threadNum = 10);
     static int addTask(TPCI_Executor::Worker *task);
-    static int ThreadPoolChannelInvoke::cleanTask(int posWorkerList);
+    static int cleanTask(int posWorkerList);
     int stopAll();
     int getTaskListSize();
 };
