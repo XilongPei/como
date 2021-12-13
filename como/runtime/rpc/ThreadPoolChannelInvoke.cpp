@@ -108,7 +108,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 
         w->ec = w->Invoke();
         w->mWorkerStatus = WORKER_TASK_FINISH;
-        pthread_cond_signal(&w->m_mCond);
+        pthread_cond_signal(&(w->mCond));
     }
 
     return reinterpret_cast<void*>(ec);
