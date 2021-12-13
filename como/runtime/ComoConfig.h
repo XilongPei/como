@@ -40,6 +40,9 @@ public:
     static int Logger_sLevel;
 
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
+
+    // TPCI: Thread Pool Channel Invoke
+    static Long TPCI_TASK_EXPIRES;
 };
 
 } // namespace como

@@ -1747,13 +1747,15 @@ ECode InterfaceProxy::ProxyEntry(
         clock_gettime(CLOCK_REALTIME, &time_out);
         time_out.tv_nsec += lvalue;
 
-        int i = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel, method, inParcel, outParcel);
-
-        int ret = pthread_mutex_timedlock(&(ThreadPoolChannelInvoke::mWorkerList[i]->mMutex), &time_out);
+        int posInWorkerList = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
+                                                                            method, inParcel, outParcel);
+        //int ret = pthread_mutex_timedlock(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &time_out);
+        int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mCond),
+                                         &(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &time_out);
         if (ret != 110 /*time out*/) {
-            ec = ThreadPoolChannelInvoke::mWorkerList[i]->ec;
-            ThreadPoolChannelInvoke::mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
-            pthread_mutex_unlock(&(ThreadPoolChannelInvoke::mWorkerList[i]->mMutex));
+            ec = ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->ec;
+            delete ThreadPoolChannelInvoke::mWorkerList[posInWorkerList];
+            TPCI_Executor::GetInstance()->CleanTask(posInWorkerList);
         }
         else {
             ec = FUNCTION_SAFETY_CALL_TIMEOUT;

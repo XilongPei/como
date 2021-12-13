@@ -23,12 +23,11 @@
 #include "comoref.h"
 #include "util/arraylist.h"
 #include "util/mutex.h"
+#include "comoerror.h"
 
 namespace como {
 
-// ns, 30s
-#define TPCI_TASK_EXPIRES   (30*1.0e9)
-#define FUNCTION_SAFETY_CALL_TIMEOUT    1
+constexpr ECode FUNCTION_SAFETY_CALL_TIMEOUT = MAKE_COMORT_ECODE(1, 0x1);
 
 class ThreadPoolChannelInvoke;
 enum WORKER_STATUS {
@@ -59,6 +58,7 @@ public:
         AutoPtr<IParcel> mOutParcel;
         TPCI_Executor* mOwner;
         pthread_mutex_t mMutex;
+        pthread_cond_t mCond;
         struct timespec mCreateTime;
         int mWorkerStatus;
         ECode ec;
@@ -69,6 +69,8 @@ public:
 
     int RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                                 AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+
+    int TPCI_Executor::CleanTask(int posWorkerList);
 
 private:
     static AutoPtr<TPCI_Executor> sInstance;
@@ -98,8 +100,9 @@ protected:
 public:
     ThreadPoolChannelInvoke(int threadNum = 10);
     static int addTask(TPCI_Executor::Worker *task);
+    static int ThreadPoolChannelInvoke::cleanTask(int posWorkerList);
     int stopAll();
-    int getTaskSize();
+    int getTaskListSize();
 };
 
 } // namespace como

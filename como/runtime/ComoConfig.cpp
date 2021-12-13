@@ -28,5 +28,7 @@ CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
  */
 int Logger_sLevel = 0;
 
+// ns, 30s
+Long ComoConfig::TPCI_TASK_EXPIRES = 1000000000l * 30;
 
 } // namespace como
