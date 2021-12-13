@@ -14,33 +14,32 @@
 // limitations under the License.
 //=========================================================================
 
-#include "TPCI_Executor.h"
-#include "util/comolog.h"
-#include "ComoConfig.h"
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
+#include "util/comolog.h"
+#include "ComoConfig.h"
+#include "ThreadPoolChannelInvoke.h"
 
 namespace como {
 
 //-------------------------------------------------------------------------
 // TPCI : ThreadPoolChannelInvoke
-TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, mChannel, AutoPtr<IMetaMethod> method,
+TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                               AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
     : mChannel(channel)
     , mMethod(method)
     , mInParcel(inParcel)
     , mOutParcel(outParcel)
-    , mOwner(owner)
 {
-    pthread_mutex_init(&mLock, NULL);
+    pthread_mutex_init(&mMutex, NULL);
     clock_gettime(CLOCK_REALTIME, &mCreateTime);
 }
 
 ECode TPCI_Executor::Worker::Invoke()
 {
-    return mChannel->Invoke(method, inParcel, outParcel);
+    return mChannel->Invoke(mMethod, mInParcel, mOutParcel);
 }
 
 //-------------------------------------------------------------------------
@@ -61,11 +60,11 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
     return sInstance;
 }
 
-int TPCI_Executor::RunTask(AutoPtr<IMetaMethod> method, AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
+int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method, AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
 {
-    AutoPtr<Worker> w = new Worker(method, inParcel, outParcel, this);
+    AutoPtr<Worker> w = new Worker(channel, method, inParcel, outParcel);
     int i = threadPool->addTask(w);
-    pthread_mutex_lock(&w->mLock);
+    pthread_mutex_lock(&w->mMutex);
     return i;
 }
 
@@ -76,7 +75,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
     while (true) {
         pthread_mutex_lock(&m_pthreadMutex);
 
-        while ((mWorkerList.GetSize() == 0) && !shutdown) {
+        while ((mWorkerList.size() == 0) && !shutdown) {
             pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
         }
 
@@ -85,13 +84,14 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
             pthread_exit(nullptr);
         }
 
-        Long i = mWorkerList.GetSize() - 1;
-        AutoPtr<TPCI_Executor::Worker> w = mWorkerList.Get(i);
-        mWorkerList.Remove(i);
+        Long i = mWorkerList.size() - 1;
+        AutoPtr<TPCI_Executor::Worker> w = mWorkerList[i];
+        w->mWorkerStatus = WORKER_TASK_RUNNING;
 
         pthread_mutex_unlock(&m_pthreadMutex);
 
         w->ec = w->Invoke();
+        w->mWorkerStatus = WORKER_TASK_FINISH;
     }
 
     return reinterpret_cast<void*>(ec);
@@ -102,7 +102,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 //
 
 bool ThreadPoolChannelInvoke::shutdown = false;
-ArrayList<TPCI_Executor::Worker*> ThreadPoolChannelInvoke::mWorkerList;      // task list
+std::vector<TPCI_Executor::Worker*> ThreadPoolChannelInvoke::mWorkerList;   // task list
 
 pthread_mutex_t ThreadPoolChannelInvoke::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPoolChannelInvoke::m_pthreadCond = PTHREAD_COND_INITIALIZER;
@@ -119,23 +119,27 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
 
     // search for a position empty
     int i;
+    struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
 
     pthread_mutex_lock(&m_pthreadMutex);
-    for (i = 0;  i < mWorkerList.GetSize();  i++) {
+    for (i = 0;  i < mWorkerList.size();  i++) {
+        if (WORKER_IDLE == mWorkerList[i]->mWorkerStatus)
+            break;
+
         if ((mWorkerList[i]->mCreateTime.tv_sec - time.tv_sec) +
                     1.0e9*(mWorkerList[i]->mCreateTime.tv_nsec - time.tv_nsec) > TPCI_TASK_EXPIRES) {
             break;
+        }
     }
-    ECode ec = mWorkerList.Add(i, task);
+    mWorkerList.push_back(task);
+    task->mWorkerStatus = WORKER_TASK_READY;
     pthread_mutex_unlock(&m_pthreadMutex);
-    if (NOERROR != ec)
-        return -1;
 
     return i;
 }
 
-int ThreadPoolChannelInvoke::create()
+int ThreadPoolChannelInvoke::create(void)
 {
     pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
 
@@ -177,7 +181,7 @@ int ThreadPoolChannelInvoke::stopAll()
 
 int ThreadPoolChannelInvoke::getTaskSize()
 {
-    return mWorkerList.GetSize();
+    return mWorkerList.size();
 }
 
 } // namespace como

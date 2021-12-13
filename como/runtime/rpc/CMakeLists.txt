@@ -22,6 +22,13 @@ elseif($ENV{PLATFORM} STREQUAL "android")
     add_subdirectory(binder)
 endif()
 
+
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
+    set(ThreadPoolChannelInvoke ThreadPoolChannelInvoke.cpp)
+else()
+    set(ThreadPoolChannelInvoke)
+endif()
+
 include_directories(
     ./
     ../
@@ -33,7 +40,9 @@ set(SOURCES
     CProxy.cpp
     CStub.cpp
     comorpc.cpp
-    registry.cpp)
+    registry.cpp
+    ${ThreadPoolChannelInvoke}
+)
 
 add_library(rpc STATIC
     ${SOURCES})
@@ -42,7 +51,9 @@ add_dependencies(rpc cdl)
 COPY(rpc ${RPC_SRC_DIR}/comorpc.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
-    ${RPC_SRC_DIR}/comorpc.h)
+    ${RPC_SRC_DIR}/comorpc.h
+    ${RPC_SRC_DIR}/ThreadPoolChannelInvoke.h
+)
 
 install(FILES
     ${DEPLOY_HEADERS}

@@ -36,6 +36,11 @@
 #include "util/comolog.h"
 #include "reflection/reflHelpers.h"
 #include <sys/mman.h>
+#ifdef COMO_FUNCTION_SAFETY
+#include <time.h>
+#include <pthread.h>
+#include <ThreadPoolChannelInvoke.h>
+#endif
 
 namespace como {
 
@@ -1695,12 +1700,15 @@ ECode InterfaceProxy::ProxyEntry(
                 name.string(), signature.string());
     }
 
+    ECode ec;
+    AutoPtr<IParcel> inParcel, outParcel;
+
 #ifdef COMO_FUNCTION_SAFETY
     AutoPtr<IMetaInterface> intf;
     method->GetInterface(intf);
 
     Long lvalue;
-    ECode ec = intfGetConstantLong(intf, String("timeout"), lvalue);
+    ec = reflHelpers::intfGetConstantLong(intf, String("timeout"), lvalue);
     if (FAILED(ec)) {
         if (E_TYPE_MISMATCH_EXCEPTION == ec) {
             Logger::E("CProxy", "Wrong timeout datatype");
@@ -1713,12 +1721,11 @@ ECode InterfaceProxy::ProxyEntry(
 
     RPCType type;
     thisObj->mOwner->mChannel->GetRPCType(type);
-    AutoPtr<IParcel> inParcel, outParcel;
     CoCreateParcel(type, inParcel);
     inParcel->WriteInteger(RPC_MAGIC_NUMBER);
     inParcel->WriteInteger(thisObj->mIndex);
     inParcel->WriteInteger(methodIndex + 4);
-    ECode ec = thisObj->MarshalArguments(regs, method, inParcel);
+    ec = thisObj->MarshalArguments(regs, method, inParcel);
     if (FAILED(ec)) {
         goto ProxyExit;
     }
@@ -1740,12 +1747,13 @@ ECode InterfaceProxy::ProxyEntry(
         clock_gettime(CLOCK_REALTIME, &time_out);
         time_out.tv_nsec += lvalue;
 
-        int i = ThreadPoolExecutor::GetInstance()->RunTask(method, inParcel, outParcel);
+        int i = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel, method, inParcel, outParcel);
 
-        int ret = pthread_mutex_timedlock(mWorkerList[i]->mLock, &time_out);
-        if (ret != TIMEOUT) {
-            ec = mWorkerList[i]->ec;
-            pthread_mutex_unlock(mWorkerList[i]->mLock);
+        int ret = pthread_mutex_timedlock(&(ThreadPoolChannelInvoke::mWorkerList[i]->mMutex), &time_out);
+        if (ret != 110 /*time out*/) {
+            ec = ThreadPoolChannelInvoke::mWorkerList[i]->ec;
+            ThreadPoolChannelInvoke::mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
+            pthread_mutex_unlock(&(ThreadPoolChannelInvoke::mWorkerList[i]->mMutex));
         }
         else {
             ec = FUNCTION_SAFETY_CALL_TIMEOUT;

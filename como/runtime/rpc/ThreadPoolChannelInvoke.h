@@ -17,6 +17,8 @@
 #ifndef __COMO_THREADPOOLCHANNELINVOKE_H__
 #define __COMO_THREADPOOLCHANNELINVOKE_H__
 
+#include <vector>
+#include "comoobj.h"
 #include "comotypes.h"
 #include "comoref.h"
 #include "util/arraylist.h"
@@ -29,6 +31,12 @@ namespace como {
 #define FUNCTION_SAFETY_CALL_TIMEOUT    1
 
 class ThreadPoolChannelInvoke;
+enum WORKER_STATUS {
+    WORKER_IDLE = 0,
+    WORKER_TASK_READY,
+    WORKER_TASK_RUNNING,
+    WORKER_TASK_FINISH
+};
 
 // TPCI: Thread Pool Channel Invoke
 class TPCI_Executor
@@ -36,29 +44,31 @@ class TPCI_Executor
 {
 public:
     class Worker
-        : public LightRefBase
+        : public Object
     {
     public:
-        Worker(AutoPtr<IRPCChannel> channel, mChannel, AutoPtr<IMetaMethod> method,
+        Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                               AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
 
         ECode Invoke();
 
     public:
-        AutoPtr<IRPCChannel> mChannel,
+        AutoPtr<IRPCChannel> mChannel;
         AutoPtr<IMetaMethod> mMethod;
         AutoPtr<IParcel> mInParcel;
         AutoPtr<IParcel> mOutParcel;
         TPCI_Executor* mOwner;
-        Mutex mLock;
+        pthread_mutex_t mMutex;
         struct timespec mCreateTime;
+        int mWorkerStatus;
         ECode ec;
     };
 
 public:
     static AutoPtr<TPCI_Executor> GetInstance();
 
-    int RunTask(AutoPtr<IMetaMethod> method, AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+    int RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
+                                AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
 
 private:
     static AutoPtr<TPCI_Executor> sInstance;
@@ -69,10 +79,12 @@ private:
 class ThreadPoolChannelInvoke
     : public LightRefBase
 {
+public:
+    static std::vector<TPCI_Executor::Worker*> mWorkerList;     // task list
+
 private:
-    static ArrayList<TPCI_Executor::Worker*> mWorkerList;      // task list
     static bool shutdown;
-    int mThreadNum;                                            // most thread number
+    int mThreadNum;                                             // most thread number
     pthread_t *pthread_id;
 
     static pthread_mutex_t m_pthreadMutex;

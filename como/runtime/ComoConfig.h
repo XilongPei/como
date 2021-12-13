@@ -36,6 +36,7 @@ class ComoConfig
 {
 public:
     static int ThreadPool_MAX_THREAD_NUM;
+    static int ThreadPoolChannelInvoke_MAX_THREAD_NUM;
     static int Logger_sLevel;
 
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];

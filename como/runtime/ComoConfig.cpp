@@ -19,6 +19,7 @@
 namespace como {
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
+int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;
 CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 
 /*
