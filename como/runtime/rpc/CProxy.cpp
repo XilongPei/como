@@ -1749,7 +1749,6 @@ ECode InterfaceProxy::ProxyEntry(
 
         int posInWorkerList = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
                                                                             method, inParcel, outParcel);
-        //int ret = pthread_mutex_timedlock(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &time_out);
         int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mCond),
                                          &(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &time_out);
         if (ret != 110 /*time out*/) {

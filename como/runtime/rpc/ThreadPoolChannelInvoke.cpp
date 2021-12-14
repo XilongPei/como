@@ -54,7 +54,7 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 {
     {
         Mutex::AutoLock lock(sInstanceLock);
-        if (sInstance == nullptr) {
+        if (nullptr == sInstance) {
             sInstance = new TPCI_Executor();
             threadPool = new ThreadPoolChannelInvoke(ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
         }
@@ -145,8 +145,12 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
         if (nullptr == mWorkerList[i])
             break;
 
+        // COMO Runtime could set mWorkerStatus as WORKER_IDLE
         if (WORKER_IDLE == mWorkerList[i]->mWorkerStatus)
             break;
+
+        if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
+            continue;
 
         if ((mWorkerList[i]->mCreateTime.tv_sec - time.tv_sec) +
                     1000000000L * (mWorkerList[i]->mCreateTime.tv_nsec - time.tv_nsec) >
@@ -155,6 +159,8 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
         }
     }
     if (i < mWorkerList.size()) {
+        if (nullptr != mWorkerList[i])
+            delete mWorkerList[i];
         mWorkerList[i] = task;
     }
     else {
