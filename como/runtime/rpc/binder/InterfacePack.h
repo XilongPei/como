@@ -60,7 +60,7 @@ public:
         /* [out] */ Boolean& parcelable) override;
 
     ECode SetServerName(
-        /* [in] */ String serverName) override;
+        /* [in] */ const String& serverName) override;
 
     ECode GetServerName(
         /* [out] */ String& serverName) override;

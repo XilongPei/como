@@ -52,7 +52,7 @@ ECode InterfacePack::IsParcelable(
 }
 
 ECode InterfacePack::SetServerName(
-    /* [in] */ String serverName)
+    /* [in] */ const String& serverName)
 {
     mServerName = serverName;
     return NOERROR;
