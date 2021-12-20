@@ -275,6 +275,13 @@ ECode CDBusChannel::GetRPCType(
     return NOERROR;
 }
 
+ECode CDBusChannel::GetServerAddress(
+    /* [out] */ String& value)
+{
+    value = nullptr;
+    return NOERROR;
+}
+
 ECode CDBusChannel::IsPeerAlive(
     /* [out] */ Boolean& alive)
 {

@@ -182,6 +182,12 @@ interface IInterfacePack
     IsParcelable(
         [out] Boolean& parcelable);
 
+    SetServerName(
+        [in] String serverName);
+
+    GetServerName(
+        [out] String& serverName);
+
     GetHashCode(
         [out] Integer& hash);
 }
@@ -203,6 +209,9 @@ interface IRPCChannel
 
     GetRPCType(
         [out] RPCType& type);
+
+    GetServerAddress(
+        [out] String& value);
 
     IsPeerAlive(
         [out] Boolean& alive);

@@ -33,6 +33,11 @@ public:
         /* [in] */ const String& name,
         /* [in] */ IInterface* object);
 
+    ECode AddRemoteService(
+        /* [in] */ const String& serverName,
+        /* [in] */ const String& name,
+        /* [in] */ IInterface* object);
+
     ECode GetService(
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IInterface>& object);

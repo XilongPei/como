@@ -112,6 +112,9 @@ public:
     ECode GetRPCType(
         /* [out] */ RPCType& type) override;
 
+    ECode GetServerAddress(
+        /* [out] */ String& value) override;
+
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
 

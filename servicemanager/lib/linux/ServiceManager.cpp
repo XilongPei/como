@@ -31,6 +31,14 @@ ECode ServiceManager::AddService(
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
+    return AddRemoteService(nullptr, name, object);
+}
+
+ECode ServiceManager::AddRemoteService(
+    /* [in] */ const String& serverName,
+    /* [in] */ const String& name,
+    /* [in] */ IInterface* object)
+{
     if (name.IsEmpty() || object == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -41,6 +49,13 @@ ECode ServiceManager::AddService(
         Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
                 name.string());
         return ec;
+    }
+
+    if (serverName.IsEmpty()) {
+        ipack->SetServerName(String(""));
+    }
+    else {
+        ipack->SetServerName(serverName);
     }
 
     AutoPtr<IParcel> parcel;
@@ -214,7 +229,15 @@ ECode ServiceManager::GetService(
             AutoPtr<IInterfacePack> ipack;
             CoCreateInterfacePack(RPCType::Local, ipack);
             IParcelable::Probe(ipack)->ReadFromParcel(parcel);
-            ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
+
+            String str;
+            ec = ipack->GetServerName(str);
+            if (str.IsEmpty()) {
+                ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
+            }
+            else {
+                ec = CoUnmarshalInterface(ipack, RPCType::Remote, object);
+            }
         }
     }
     else {

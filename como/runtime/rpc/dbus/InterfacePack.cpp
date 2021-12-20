@@ -50,6 +50,20 @@ ECode InterfacePack::IsParcelable(
     return NOERROR;
 }
 
+ECode InterfacePack::SetServerName(
+    /* [in] */ String serverName)
+{
+    mServerName = serverName;
+    return NOERROR;
+}
+
+ECode InterfacePack::GetServerName(
+    /* [out] */ String& serverName)
+{
+    serverName = mServerName;
+    return NOERROR;
+}
+
 ECode InterfacePack::GetHashCode(
     /* [out] */ Integer& hash)
 {
@@ -64,6 +78,7 @@ ECode InterfacePack::ReadFromParcel(
     source->ReadCoclassID(mCid);
     source->ReadInterfaceID(mIid);
     source->ReadBoolean(mIsParcelable);
+    source->ReadString(mServerName);
     return NOERROR;
 }
 
@@ -74,6 +89,7 @@ ECode InterfacePack::WriteToParcel(
     dest->WriteCoclassID(mCid);
     dest->WriteInterfaceID(mIid);
     dest->WriteBoolean(mIsParcelable);
+    dest->WriteString(mServerName);
     return NOERROR;
 }
 

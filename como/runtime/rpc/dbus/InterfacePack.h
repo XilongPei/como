@@ -58,6 +58,12 @@ public:
     ECode IsParcelable(
         /* [out] */ Boolean& parcelable) override;
 
+    ECode SetServerName(
+        /* [in] */ String serverName) override;
+
+    ECode GetServerName(
+        /* [out] */ String& serverName) override;
+
     ECode GetHashCode(
         /* [out] */ Integer& hash) override;
 
@@ -89,6 +95,7 @@ private:
     CoclassID mCid;
     InterfaceID mIid;
     Boolean mIsParcelable { false };
+    String mServerName;
 };
 
 InterfacePack* InterfacePack::From(

@@ -190,6 +190,13 @@ ECode CBinderChannel::GetRPCType(
     return NOERROR;
 }
 
+ECode CBinderChannel::GetServerAddress(
+    /* [out] */ String& value)
+{
+    value = nullptr;
+    return NOERROR;
+}
+
 ECode CBinderChannel::IsPeerAlive(
     /* [out] */ Boolean& alive)
 {
