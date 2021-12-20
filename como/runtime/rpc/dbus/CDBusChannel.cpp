@@ -318,7 +318,7 @@ ECode CDBusChannel::IsPeerAlive(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.IsPeerAlive()", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -446,7 +446,7 @@ ECode CDBusChannel::GetComponentMetadata(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.GetComponentMetadata()", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -562,7 +562,7 @@ ECode CDBusChannel::Invoke(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.Invoke()", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
