@@ -70,7 +70,7 @@ ECode CDBusChannelFactory::MarshalInterface(
 
     if (IParcelable::Probe(object) != nullptr) {
         if (IObject::Probe(object) == nullptr) {
-            Logger::E("CDBusChannel", "The Object is not a como object.");
+            Logger::E("CDBusChannelFactory", "The Object is not a como object.");
             ipack = nullptr;
             return E_NOT_COMO_OBJECT_EXCEPTION;
         }
@@ -97,7 +97,7 @@ ECode CDBusChannelFactory::MarshalInterface(
             else {
                 ec = CoCreateStub(object, mType, stub);
                 if (FAILED(ec)) {
-                    Logger::E("CDBusChannel", "Marshal interface failed.");
+                    Logger::E("CDBusChannelFactory", "Marshal interface failed.");
                     ipack = nullptr;
                     return ec;
                 }
@@ -126,7 +126,7 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ipack->GetInterfaceID(iid);
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
-            Logger::E("CDBusChannel", "Create the object in ReadInterface failed.");
+            Logger::E("CDBusChannelFactory", "Create the object in ReadInterface failed.");
             return ec;
         }
     }
@@ -153,7 +153,7 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         AutoPtr<IProxy> proxy;
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
-            Logger::E("CDBusChannel", "Unmarshal the interface in ReadInterface failed.");
+            Logger::E("CDBusChannelFactory", "Unmarshal the interface in ReadInterface failed.");
             object = nullptr;
             return ec;
         }
