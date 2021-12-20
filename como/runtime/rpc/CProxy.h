@@ -299,6 +299,7 @@ private:
     InterfaceID mIid;
     IMetaInterface* mTargetMetadata;
     CProxy* mOwner;
+    String mServerName;
 };
 
 extern const CoclassID CID_CProxy;
@@ -344,6 +345,13 @@ public:
         /* [in] */ IRPCChannel* channel,
         /* [in] */ IClassLoader* loader,
         /* [out] */ AutoPtr<IProxy>& proxy);
+
+    static ECode CreateObjectEx(
+        /* [in] */ const CoclassID& cid,
+        /* [in] */ IRPCChannel* channel,
+        /* [in] */ IClassLoader* loader,
+        /* [out] */ AutoPtr<IProxy>& proxy,
+        /* [in] */ const String& serverName);
 
 private:
     friend class InterfaceProxy;

@@ -1730,6 +1730,10 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
+    if (! thisObj->mServerName.IsEmpty()) {
+        // remote process call
+    }
+
 #ifndef COMO_FUNCTION_SAFETY
     ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
     if (FAILED(ec)) {
@@ -1889,6 +1893,16 @@ ECode CProxy::CreateObject(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IProxy>& proxy)
 {
+    return CreateObjectEx(cid, channel, loader, proxy, nullptr);
+}
+
+ECode CProxy::CreateObjectEx(
+    /* [in] */ const CoclassID& cid,
+    /* [in] */ IRPCChannel* channel,
+    /* [in] */ IClassLoader* loader,
+    /* [out] */ AutoPtr<IProxy>& proxy,
+    /* [in] */ const String& serverName)
+{
     proxy = nullptr;
 
     if (loader == nullptr) {
@@ -1927,6 +1941,7 @@ ECode CProxy::CreateObject(
         iproxy->mTargetMetadata->GetInterfaceID(iproxy->mIid);
         iproxy->mVtable = sProxyVtable;
         iproxy->mProxyEntry = reinterpret_cast<HANDLE>(&InterfaceProxy::ProxyEntry);
+        iproxy->mServerName = serverName;
         proxyObj->mInterfaces[i] = iproxy;
     }
 
