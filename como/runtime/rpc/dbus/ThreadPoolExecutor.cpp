@@ -146,7 +146,7 @@ int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 
 int ThreadPool::create()
 {
-    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
 
     for (int i = 0; i < mThreadNum; i++) {
         pthread_attr_t threadAddr;
@@ -154,7 +154,7 @@ int ThreadPool::create()
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
 
         pthread_t thread;
-        int ret = pthread_create(&pthread_id[i], nullptr, ThreadPool::threadFunc, nullptr);
+        int ret = pthread_create(&pthread_ids[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (ret != 0) {
             return E_RUNTIME_EXCEPTION;
         }
@@ -172,11 +172,11 @@ int ThreadPool::stopAll()
     pthread_cond_broadcast(&m_pthreadCond);
 
     for (int i = 0; i < mThreadNum; i++) {
-        pthread_join(pthread_id[i], nullptr);
+        pthread_join(pthread_ids[i], nullptr);
     }
 
-    free(pthread_id);
-    pthread_id = nullptr;
+    free(pthread_ids);
+    pthread_ids = nullptr;
 
     pthread_mutex_destroy(&m_pthreadMutex);
     pthread_cond_destroy(&m_pthreadCond);
