@@ -132,7 +132,9 @@ pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 ThreadPool::ThreadPool(int threadNum)
 {
     mThreadNum = threadNum;
-    create();
+    if (create() != 0) {
+        Logger::E("ThreadPool", "create thread error");
+    }
 }
 
 int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
@@ -147,6 +149,9 @@ int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 int ThreadPool::create()
 {
     pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    if (nullptr == pthread_ids) {
+        return E_RUNTIME_EXCEPTION;
+    }
 
     for (int i = 0; i < mThreadNum; i++) {
         pthread_attr_t threadAddr;

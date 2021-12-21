@@ -89,7 +89,7 @@ private:
     static ArrayList<ThreadPoolExecutor::Worker*> mWorkerList;      // task list
     static bool shutdown;
     int mThreadNum;                                                 // most thread number
-    pthread_t *pthread_id;
+    pthread_t *pthread_ids;
 
     static pthread_mutex_t m_pthreadMutex;
     static pthread_cond_t m_pthreadCond;
