@@ -193,7 +193,7 @@ ECode CBinderChannel::GetRPCType(
 ECode CBinderChannel::GetServerAddress(
     /* [out] */ String& value)
 {
-    value = nullptr;
+    value = nullptr;    // the same machine, ServerAddress is nullptr
     return NOERROR;
 }
 

@@ -278,7 +278,7 @@ ECode CDBusChannel::GetRPCType(
 ECode CDBusChannel::GetServerAddress(
     /* [out] */ String& value)
 {
-    value = nullptr;
+    value = nullptr;    // the same machine, ServerAddress is nullptr
     return NOERROR;
 }
 
