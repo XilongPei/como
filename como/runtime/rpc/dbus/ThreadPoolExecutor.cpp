@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
+#include <unistd.h>
 #include <pthread.h>
 
 namespace como {
@@ -99,7 +100,17 @@ void *ThreadPool::threadFunc(void *threadData)
         Long i = mWorkerList.GetSize() - 1;
         AutoPtr<ThreadPoolExecutor::Worker> w = mWorkerList.Get(i);
         mWorkerList.Remove(i);
+#ifdef __DEBUG__
+        {
+            pid_t pid;
+            pthread_t tid;
 
+            pid = getpid();
+            tid = pthread_self();
+            Logger::D("ThreadPool", "pid:%u tid:%u (0x%x) mWorkerList.GetSize()=%d",
+                      (unsigned int)pid, (unsigned int)tid, (unsigned int)tid, i);
+        }
+#endif
         pthread_mutex_unlock(&m_pthreadMutex);
 
         ec = w->Run();
