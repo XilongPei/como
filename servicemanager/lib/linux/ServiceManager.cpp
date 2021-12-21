@@ -51,7 +51,7 @@ ECode ServiceManager::AddRemoteService(
         return ec;
     }
 
-    if (serverName.IsEmpty()) {
+    if ((nullptr == serverName) || serverName.IsEmpty()) {
         ipack->SetServerName(String(""));
     }
     else {
@@ -230,9 +230,9 @@ ECode ServiceManager::GetService(
             CoCreateInterfacePack(RPCType::Local, ipack);
             IParcelable::Probe(ipack)->ReadFromParcel(parcel);
 
-            String str;
+            String str = nullptr;
             ec = ipack->GetServerName(str);
-            if (str.IsEmpty()) {
+            if ((nullptr == str) || str.IsEmpty()) {
                 ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
             }
             else {
