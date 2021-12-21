@@ -88,9 +88,7 @@ void *ThreadPool::threadFunc(void *threadData)
         pthread_mutex_lock(&m_pthreadMutex);
 
         while ((mWorkerList.GetSize() == 0) && !shutdown) {
-            pthread_mutex_unlock(&m_pthreadMutex);
             pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-            pthread_mutex_lock(&m_pthreadMutex);
         }
 
         if (shutdown) {
