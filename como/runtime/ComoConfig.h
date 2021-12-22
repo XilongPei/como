@@ -37,6 +37,7 @@ class ComoConfig
 public:
     static int ThreadPool_MAX_THREAD_NUM;
     static int ThreadPool_MAX_DBUS_DISPATCHER;
+    static int DBUS_BUS_CHECK_EXPIRES_PERIOD;
     static int ThreadPoolChannelInvoke_MAX_THREAD_NUM;
     static int Logger_sLevel;
 
