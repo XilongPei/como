@@ -24,6 +24,9 @@
 
 namespace como {
 
+static std::vector<DBusConnection*> conns;
+static int num_DBUS_DISPATCHER = 0;
+
 CDBusChannel::ServiceRunnable::ServiceRunnable(
     /* [in] */ CDBusChannel* owner,
     /* [in] */ IStub* target)
@@ -31,9 +34,6 @@ CDBusChannel::ServiceRunnable::ServiceRunnable(
     , mTarget(target)
     , mRequestToQuit(false)
 {}
-
-static std::vector<DBusConnection*> conns;
-static int num_DBUS_DISPATCHER = 0;
 
 ECode CDBusChannel::ServiceRunnable::Run()
 {
@@ -43,16 +43,15 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".", err.message);
         dbus_error_free(&err);
         return E_RUNTIME_EXCEPTION;
     }
 
     const char* name = dbus_bus_get_unique_name(conn);
-    if (name == nullptr) {
+    if (nullptr == name) {
         Logger::E("CDBusChannel", "Get unique name failed.");
-        if (conn != nullptr) {
+        if (nullptr != conn) {
             dbus_connection_close(conn);
             dbus_connection_unref(conn);
         }
@@ -68,7 +67,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
     opVTable.message_function = CDBusChannel::ServiceRunnable::HandleMessage;
 
     dbus_connection_register_object_path(conn,
-            STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this));
+                                         STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this));
 
     {
         Mutex::AutoLock lock(mOwner->mLock);
@@ -123,8 +122,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
 {
     CDBusChannel::ServiceRunnable* thisObj = static_cast<CDBusChannel::ServiceRunnable*>(arg);
 
-    if (dbus_message_is_method_call(msg,
-            STUB_INTERFACE_PATH, "GetComponentMetadata")) {
+    if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "GetComponentMetadata")) {
         if (CDBusChannel::DEBUG) {
             Logger::D("CDBusChannel", "Handle \"GetComponentMetadata\" message.");
         }

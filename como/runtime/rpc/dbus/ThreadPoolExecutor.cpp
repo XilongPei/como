@@ -38,7 +38,6 @@
 #include <csignal>
 #include <unistd.h>
 #include <pthread.h>
-#include <stdio.h>
 
 namespace como {
 
@@ -146,8 +145,8 @@ ThreadPool::ThreadPool(int threadNum)
 
         pthread_t thread;
         int ret = pthread_create(&pthread_ids[i], nullptr, ThreadPool::threadFunc, nullptr);
-        if (ret != 0) {
-            Logger::E("ThreadPool", "create thread error");
+        if (0 != ret) {
+            Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
         }
     }
 }
