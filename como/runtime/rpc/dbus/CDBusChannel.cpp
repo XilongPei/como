@@ -95,7 +95,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                 }
 
                 do {
-                    dbus_connection_read_write_dispatch(conn_, 1);
+                    dbus_connection_read_write_dispatch(conn_, 0);
                 } while ((status = dbus_connection_get_dispatch_status(conn_))
                         == DBUS_DISPATCH_DATA_REMAINS && !mRequestToQuit);
 
