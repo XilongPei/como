@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include <vector>
+#include <unistd.h>
 #include "comorpc.h"
 #include "CDBusChannel.h"
 #include "CDBusParcel.h"
@@ -104,6 +105,9 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     break;
                 }
             }
+
+            // usleep - suspend execution for microsecond intervals
+            usleep(20);
         }
     }
 
