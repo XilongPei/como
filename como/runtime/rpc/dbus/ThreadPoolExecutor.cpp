@@ -38,6 +38,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdio.h>
 
 namespace como {
 
@@ -52,6 +53,7 @@ ThreadPoolExecutor::Worker::Worker(
 
 ECode ThreadPoolExecutor::Worker::Run()
 {
+    // This run will not return, but wait in the processing mechanism of the message queue
     return mTask->Run();
 }
 
@@ -63,22 +65,20 @@ AutoPtr<ThreadPool> ThreadPoolExecutor::threadPool = nullptr;
 
 AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 {
-    {
-        Mutex::AutoLock lock(sInstanceLock);
-        if (sInstance == nullptr) {
-            sInstance = new ThreadPoolExecutor();
-            threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
-        }
+    Mutex::AutoLock lock(sInstanceLock);
+    if (sInstance == nullptr) {
+        sInstance = new ThreadPoolExecutor();
+        threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
     }
     return sInstance;
 }
 
-ECode ThreadPoolExecutor::RunTask(
+int ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
     AutoPtr<Worker> w = new Worker(task, this);
     threadPool->addTask(w);
-    return NOERROR;
+    return 0;
 }
 
 void *ThreadPool::threadFunc(void *threadData)
@@ -111,8 +111,8 @@ void *ThreadPool::threadFunc(void *threadData)
                       (unsigned int)pid, (unsigned int)tid, (unsigned int)tid, i);
         }
 #endif
+        runingWorkerSize++;
         pthread_mutex_unlock(&m_pthreadMutex);
-
         ec = w->Run();
     }
 
@@ -125,6 +125,7 @@ void *ThreadPool::threadFunc(void *threadData)
 
 bool ThreadPool::shutdown = false;
 ArrayList<ThreadPoolExecutor::Worker*> ThreadPool::mWorkerList;      // task list
+int ThreadPool::runingWorkerSize = 0;
 
 pthread_mutex_t ThreadPool::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
@@ -132,25 +133,10 @@ pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 ThreadPool::ThreadPool(int threadNum)
 {
     mThreadNum = threadNum;
-    if (create() != 0) {
-        Logger::E("ThreadPool", "create thread error");
-    }
-}
 
-int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
-{
-    pthread_mutex_lock(&m_pthreadMutex);
-    mWorkerList.Add(task);
-    pthread_mutex_unlock(&m_pthreadMutex);
-    pthread_cond_signal(&m_pthreadCond);
-    return 0;
-}
-
-int ThreadPool::create()
-{
     pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == pthread_ids) {
-        return E_RUNTIME_EXCEPTION;
+        Logger::E("ThreadPool", "create thread error");
     }
 
     for (int i = 0; i < mThreadNum; i++) {
@@ -161,9 +147,17 @@ int ThreadPool::create()
         pthread_t thread;
         int ret = pthread_create(&pthread_ids[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (ret != 0) {
-            return E_RUNTIME_EXCEPTION;
+            Logger::E("ThreadPool", "create thread error");
         }
     }
+}
+
+int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
+{
+    pthread_mutex_lock(&m_pthreadMutex);
+    mWorkerList.Add(task);
+    pthread_mutex_unlock(&m_pthreadMutex);
+    pthread_cond_signal(&m_pthreadCond);
     return 0;
 }
 
@@ -187,11 +181,6 @@ int ThreadPool::stopAll()
     pthread_cond_destroy(&m_pthreadCond);
 
     return 0;
-}
-
-int ThreadPool::getTaskSize()
-{
-    return mWorkerList.GetSize();
 }
 
 } // namespace como

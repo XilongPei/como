@@ -19,6 +19,10 @@
 namespace como {
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
+
+// ThreadPool_MAX_DBUS_DISPATCHER should less than ThreadPool_MAX_THREAD_NUM
+int ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER = 1;
+
 int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;
 CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 

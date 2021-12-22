@@ -73,7 +73,7 @@ public:
 public:
     static AutoPtr<ThreadPoolExecutor> GetInstance();
 
-    ECode RunTask(
+    int RunTask(
         /* [in] */ Runnable* task);
 
 private:
@@ -97,13 +97,12 @@ private:
 protected:
     static void *threadFunc(void *threadData);
 
-    int create();
-
 public:
+    static int runingWorkerSize;
+
     ThreadPool(int threadNum = 10);
     static int addTask(ThreadPoolExecutor::Worker *task);
     int stopAll();
-    int getTaskSize();
 };
 
 } // namespace como

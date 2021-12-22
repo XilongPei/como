@@ -14,11 +14,13 @@
 // limitations under the License.
 //=========================================================================
 
+#include <vector>
 #include "comorpc.h"
 #include "CDBusChannel.h"
 #include "CDBusParcel.h"
 #include "InterfacePack.h"
 #include "util/comolog.h"
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -29,6 +31,9 @@ CDBusChannel::ServiceRunnable::ServiceRunnable(
     , mTarget(target)
     , mRequestToQuit(false)
 {}
+
+static std::vector<DBusConnection*> conns;
+static int num_DBUS_DISPATCHER = 0;
 
 ECode CDBusChannel::ServiceRunnable::Run()
 {
@@ -71,22 +76,42 @@ ECode CDBusChannel::ServiceRunnable::Run()
     }
     mOwner->mCond.Signal();
 
-    while (true) {
-        DBusDispatchStatus status;
+    Mutex connsLock;
+    {
+        Mutex::AutoLock lock(connsLock);
+        conns.push_back(conn);
+    }
 
-        do {
-            dbus_connection_read_write_dispatch(conn, -1);
-        } while ((status = dbus_connection_get_dispatch_status(conn))
-                == DBUS_DISPATCH_DATA_REMAINS && !mRequestToQuit);
+    if (num_DBUS_DISPATCHER < ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER) {
+        num_DBUS_DISPATCHER++;
 
-        if (status == DBUS_DISPATCH_NEED_MEMORY) {
-            Logger::E("CDBusChannel", "DBus dispatching needs more memory.");
-            break;
+        while (true) {
+            DBusDispatchStatus status;
+            DBusConnection* conn_;
+
+            for (size_t i = 0;  i < conns.size();  i++) {
+                {
+                    Mutex::AutoLock lock(connsLock);
+                    conn_ = conns[i];
+                }
+
+                do {
+                    dbus_connection_read_write_dispatch(conn_, 1);
+                } while ((status = dbus_connection_get_dispatch_status(conn_))
+                        == DBUS_DISPATCH_DATA_REMAINS && !mRequestToQuit);
+
+                if (status == DBUS_DISPATCH_NEED_MEMORY) {
+                    Logger::E("CDBusChannel", "DBus dispatching needs more memory.");
+                    break;
+                }
+            }
         }
     }
 
+    /* the conn should not be closed!
     dbus_connection_close(conn);
     dbus_connection_unref(conn);
+    */
 
     return NOERROR;
 }
@@ -634,19 +659,20 @@ Exit:
 ECode CDBusChannel::StartListening(
     /* [in] */ IStub* stub)
 {
-    ECode ec = NOERROR;
+    int ret = 0;
+
     if (mPeer == RPCPeer::Stub) {
         AutoPtr<ThreadPoolExecutor::Runnable> r = new ServiceRunnable(this, stub);
-        ec = ThreadPoolExecutor::GetInstance()->RunTask(r);
+        ret = ThreadPoolExecutor::GetInstance()->RunTask(r);
     }
 
-    {
+    if (0 == ret) {
         Mutex::AutoLock lock(mLock);
         while (!mStarted) {
             mCond.Wait();
         }
     }
-    return ec;
+    return NOERROR;
 }
 
 ECode CDBusChannel::Match(
