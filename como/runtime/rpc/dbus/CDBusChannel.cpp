@@ -93,8 +93,13 @@ ECode CDBusChannel::ServiceRunnable::Run()
         Mutex::AutoLock lock(connsLock);
         conn_ = (DBusConnectionContainer*)malloc(sizeof(DBusConnectionContainer));
         if (nullptr == conn_) {
-            // clear
-            return NOERROR;
+            Logger::E("CDBusChannel", "malloc failed.");
+            if (nullptr != conn) {
+                dbus_connection_close(conn);
+                dbus_connection_unref(conn);
+            }
+            dbus_error_free(&err);
+            return E_RUNTIME_EXCEPTION;
         }
 
         conn_->conn = conn;
