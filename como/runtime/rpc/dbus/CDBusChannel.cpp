@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <unistd.h>
+#include <time.h>
 #include "comorpc.h"
 #include "CDBusChannel.h"
 #include "CDBusParcel.h"
@@ -25,8 +26,17 @@
 
 namespace como {
 
-static std::vector<DBusConnection*> conns;
+typedef struct tagDBusConnectionContainer {
+    DBusConnection* conn;
+    struct timespec lastAccessTime;
+} DBusConnectionContainer;
+
+static std::vector<DBusConnectionContainer*> conns;
 static int num_DBUS_DISPATCHER = 0;
+struct timespec lastCheckConnExpireTime = {0,0};
+// ThreadPool_MAX_DBUS_DISPATCHER should less than ThreadPool_MAX_THREAD_NUM
+// perhaps it should be 1 always
+static const int ThreadPool_MAX_DBUS_DISPATCHER = 1;
 
 CDBusChannel::ServiceRunnable::ServiceRunnable(
     /* [in] */ CDBusChannel* owner,
@@ -76,29 +86,83 @@ ECode CDBusChannel::ServiceRunnable::Run()
     }
     mOwner->mCond.Signal();
 
+    DBusConnectionContainer *conn_;
     Mutex connsLock;
     {
         Mutex::AutoLock lock(connsLock);
-        conns.push_back(conn);
+        conn_ = (DBusConnectionContainer*)malloc(sizeof(DBusConnectionContainer));
+        if (nullptr == conn_) {
+            // clear
+            return NOERROR;
+        }
+
+        conn_->conn = conn;
+        clock_gettime(CLOCK_REALTIME, &conn_->lastAccessTime);
+        conns.push_back(conn_);
     }
 
-    if (num_DBUS_DISPATCHER < ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER) {
+    if (num_DBUS_DISPATCHER < ThreadPool_MAX_DBUS_DISPATCHER) {
         num_DBUS_DISPATCHER++;
 
         while (true) {
             DBusDispatchStatus status;
-            DBusConnection* conn_;
+            struct timespec currentTime;
+            DBusConnection *conn_dbus;
+
+            clock_gettime(CLOCK_REALTIME, &currentTime);
+
+            {
+                Mutex::AutoLock lock(connsLock);
+
+                // check for free time out connection
+                if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) +
+                            1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec) >
+                                            ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
+                    clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
+
+                    Mutex::AutoLock lock(connsLock);
+
+                    for(std::vector<DBusConnectionContainer*>::iterator it = conns.begin();
+                                                                    it != conns.end(); ) {
+                        if ((currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
+                                    1000000000L * (currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
+                                                    ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+
+                            conn_dbus = (*it)->conn;
+                            dbus_connection_close(conn_dbus);
+                            dbus_connection_unref(conn_dbus);
+
+                            free(*it);
+                            conns.erase(it);
+                        }
+                        else {
+                            it++;
+                        }
+                    }
+                }
+            }
 
             for (size_t i = 0;  i < conns.size();  i++) {
                 {
                     Mutex::AutoLock lock(connsLock);
-                    conn_ = conns[i];
+                    conn_dbus = conns[i]->conn;
                 }
 
                 do {
-                    dbus_connection_read_write_dispatch(conn_, 0);
-                } while ((status = dbus_connection_get_dispatch_status(conn_))
-                        == DBUS_DISPATCH_DATA_REMAINS && !mRequestToQuit);
+                    // dbus_connection_read_write_dispatch() return TRUE if the
+                    // disconnect message has not been processed
+                    if (! dbus_connection_read_write_dispatch(conn_dbus, 0)) {
+                        // release the DBusConnection
+                        conns[i]->lastAccessTime.tv_sec = 0;
+                    }
+
+                    status = dbus_connection_get_dispatch_status(conn_dbus);
+                    if (DBUS_DISPATCH_DATA_REMAINS == status) {
+                        clock_gettime(CLOCK_REALTIME, &(conns[i]->lastAccessTime));
+                    }
+                    else
+                        break;
+                } while (!mRequestToQuit);
 
                 if (status == DBUS_DISPATCH_NEED_MEMORY) {
                     Logger::E("CDBusChannel", "DBus dispatching needs more memory.");

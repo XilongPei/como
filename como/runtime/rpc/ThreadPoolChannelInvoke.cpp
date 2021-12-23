@@ -136,8 +136,8 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
 {
     int i;
-    struct timespec time;
-    clock_gettime(CLOCK_REALTIME, &time);
+    struct timespec currentTime;
+    clock_gettime(CLOCK_REALTIME, &currentTime);
 
     pthread_mutex_lock(&m_pthreadMutex);
 
@@ -152,8 +152,8 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
         if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
             continue;
 
-        if ((mWorkerList[i]->mCreateTime.tv_sec - time.tv_sec) +
-                    1000000000L * (mWorkerList[i]->mCreateTime.tv_nsec - time.tv_nsec) >
+        if ((currentTime.tv_sec - mWorkerList[i]->mCreateTime.tv_sec) +
+                    1000000000L * (currentTime.tv_nsec - mWorkerList[i]->mCreateTime.tv_nsec) >
                     ComoConfig::TPCI_TASK_EXPIRES) {
             break;
         }
