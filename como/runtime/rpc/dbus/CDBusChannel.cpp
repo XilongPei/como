@@ -28,6 +28,7 @@ namespace como {
 
 typedef struct tagDBusConnectionContainer {
     DBusConnection* conn;
+    void* user_data;
     struct timespec lastAccessTime;
 } DBusConnectionContainer;
 
@@ -97,6 +98,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
         }
 
         conn_->conn = conn;
+        conn_->user_data = static_cast<void*>(this);
         clock_gettime(CLOCK_REALTIME, &conn_->lastAccessTime);
         conns.push_back(conn_);
     }
@@ -127,6 +129,9 @@ ECode CDBusChannel::ServiceRunnable::Run()
                         if ((currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
                                     1000000000L * (currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
                                                     ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+
+                            IInterface* intf = reinterpret_cast<IInterface*>((*it)->user_data);
+                            REFCOUNT_RELEASE(intf);
 
                             conn_dbus = (*it)->conn;
                             dbus_connection_close(conn_dbus);
