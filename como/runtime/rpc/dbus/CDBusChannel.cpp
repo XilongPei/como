@@ -35,9 +35,6 @@ typedef struct tagDBusConnectionContainer {
 static std::vector<DBusConnectionContainer*> conns;
 static int num_DBUS_DISPATCHER = 0;
 struct timespec lastCheckConnExpireTime = {0,0};
-// ThreadPool_MAX_DBUS_DISPATCHER should less than ThreadPool_MAX_THREAD_NUM
-// perhaps it should be 1 always
-static const int ThreadPool_MAX_DBUS_DISPATCHER = 1;
 
 CDBusChannel::ServiceRunnable::ServiceRunnable(
     /* [in] */ CDBusChannel* owner,
@@ -108,7 +105,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
         conns.push_back(conn_);
     }
 
-    if (num_DBUS_DISPATCHER < ThreadPool_MAX_DBUS_DISPATCHER) {
+    if (num_DBUS_DISPATCHER < ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER) {
         num_DBUS_DISPATCHER++;
 
         while (true) {

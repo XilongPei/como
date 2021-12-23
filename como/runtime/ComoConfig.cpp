@@ -20,6 +20,9 @@ namespace como {
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
 
+// should less than ThreadPool_MAX_THREAD_NUM
+int ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER = 1;
+
 // The period of detecting whether the object is overdue, in ns
 long ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD = 1000000000L * 60 * 2;
 
