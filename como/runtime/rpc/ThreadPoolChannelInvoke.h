@@ -56,7 +56,6 @@ public:
         AutoPtr<IMetaMethod> mMethod;
         AutoPtr<IParcel> mInParcel;
         AutoPtr<IParcel> mOutParcel;
-        TPCI_Executor* mOwner;
         pthread_mutex_t mMutex;
         pthread_cond_t mCond;
         struct timespec mCreateTime;
