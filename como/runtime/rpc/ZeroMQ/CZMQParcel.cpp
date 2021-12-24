@@ -31,7 +31,7 @@
  */
 
 #include "rpc/comorpc.h"
-#include "rpc/dbus/CZMQParcel.h"
+#include "rpc/ZeroMQ/CZMQParcel.h"
 #include "util/comosp.h"
 #include "util/comolog.h"
 #include <stdlib.h>

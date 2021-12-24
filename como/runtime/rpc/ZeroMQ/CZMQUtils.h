@@ -17,12 +17,10 @@
 #ifndef __CZMQUTILS_H__
 #define __CZMQUTILS_H__
 
-#include "CProxy.h"
-#include "CStub.h"
-#include "ThreadPoolExecutor.h"
-#include "util/comoobj.h"
+#include "comotypes.h"
+#include "comoref.h"
+#include "util/arraylist.h"
 #include "util/mutex.h"
-#include <dbus/dbus.h>
 
 namespace como {
 
@@ -33,6 +31,10 @@ class CZMQUtils {
     void *zmq_getSocket(void *context, char *serverName, int type_);
 
     ECode zmq_SendWithReplyAndBlock();
+
+private:
+    static void *comoZmqContext;
+    static Mutex comoZmqContextLock;
 };
 
 } // namespace como

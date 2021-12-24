@@ -621,12 +621,14 @@ ECode CZMQChannel::Invoke(
     HANDLE data;
     Long size;
 
+
+
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
 
     //TODO
     // send request through ZMQ
-    reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
+    reply = zmq_SendWithReplyAndBlock(conn, msg, -1, &err);
 
     if (SUCCEEDED(ec)) {
         resParcel = new CDBusParcel();
