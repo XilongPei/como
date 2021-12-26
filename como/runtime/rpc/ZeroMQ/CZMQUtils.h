@@ -32,7 +32,7 @@ enum ZmqFunCode {
 };
 
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
-    Integer funCode,
+    Integer eventCode,
     Long crc64,
     Integer msgSize
 } COMO_ZMQ_RPC_MSG_HEAD;
@@ -44,9 +44,11 @@ class CZMQUtils {
     void *CzmqGetSocket(void *context, const char *identity, int identityLen,
                               const char *serverName, const char *endpoint, int type);
 
+    ECode CzmqRecvMsg(Integer& eventCode, void *socket, const void *buf, size_t bufSize);
+
     int CzmqCloseSocket(const char *serverName);
 
-    ECode CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t len);
+    ECode CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t bufSize);
 
 private:
     static void *comoZmqContext;
