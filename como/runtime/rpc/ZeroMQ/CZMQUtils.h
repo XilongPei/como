@@ -24,13 +24,29 @@
 
 namespace como {
 
+enum ZmqFunCode {
+    GetComponentMetadata = 0,
+    Method_Invoke = 1,
+    Actor_IsPeerAlive = 2,
+    Object_Release = 3
+};
+
+typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
+    Integer funCode,
+    Long crc64,
+    Integer msgSize
+} COMO_ZMQ_RPC_MSG_HEAD;
+
 class CZMQUtils {
 
-    void *zmq_getContext();
+    void *CzmqGetContext();
 
-    void *zmq_getSocket(void *context, char *serverName, int type_);
+    void *CzmqGetSocket(void *context, const char *identity, int identityLen,
+                              const char *serverName, const char *endpoint, int type);
 
-    ECode zmq_SendWithReplyAndBlock();
+    int CzmqCloseSocket(const char *serverName);
+
+    ECode CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t len);
 
 private:
     static void *comoZmqContext;
