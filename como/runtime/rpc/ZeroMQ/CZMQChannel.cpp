@@ -357,7 +357,10 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
     , mCond(mLock)
-{}
+{
+    CzmqGetSocket(nullptr, const char *identity, int identityLen,
+                                  const char *serverName, const char *endpoint, ZMQ_REQ);
+}
 
 ECode CZMQChannel::Apply(
     /* [in] */ IInterfacePack* ipack)
@@ -373,7 +376,7 @@ ECode CZMQChannel::GetRPCType(
     return NOERROR;
 }
 
-ECode CZMQChannel::GetServerAddress(
+ECode CZMQChannel::GetServerName(
     /* [out] */ String& value)
 {
     value = nullptr;    // the same machine, ServerAddress is nullptr
@@ -621,14 +624,10 @@ ECode CZMQChannel::Invoke(
     HANDLE data;
     Long size;
 
-
-
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
 
-    //TODO
-    // send request through ZMQ
-    reply = zmq_SendWithReplyAndBlock(conn, msg, -1, &err);
+    CzmqSendWithReplyAndBlock(Method_Invoke, socket, data, size);
 
     if (SUCCEEDED(ec)) {
         resParcel = new CDBusParcel();
@@ -684,22 +683,6 @@ ECode CZMQChannel::StartListening(
             mCond.Wait();
         }
     }
-    return NOERROR;
-}
-
-ECode CZMQChannel::Match(
-    /* [in] */ IInterfacePack* ipack,
-    /* [out] */ Boolean& matched)
-{
-    IDBusInterfacePack* idpack = IDBusInterfacePack::Probe(ipack);
-    if (idpack != nullptr) {
-        InterfacePack* pack = (InterfacePack*)idpack;
-        if (pack->GetDBusName().Equals(mName)) {
-            matched = true;
-            return NOERROR;
-        }
-    }
-    matched = false;
     return NOERROR;
 }
 

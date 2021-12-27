@@ -95,6 +95,7 @@ private:
     private:
         CBinderChannel* mOwner;
         IStub* mTarget;
+        String mServerName; // the same machine, ServerAddress is nullptr
     };
 
 public:
@@ -112,8 +113,11 @@ public:
     ECode GetRPCType(
         /* [out] */ RPCType& type) override;
 
-    ECode GetServerAddress(
-        /* [out] */ String& value) override;
+    ECode GetServerName(
+        /* [out] */ String& serverName) override;
+
+    ECode SetServerName(
+        /* [in] */ const String& serverName) override;
 
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;

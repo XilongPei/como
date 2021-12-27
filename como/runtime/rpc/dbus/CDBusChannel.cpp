@@ -357,6 +357,7 @@ CDBusChannel::CDBusChannel(
     , mPeer(peer)
     , mStarted(false)
     , mCond(mLock)
+    , mServerName(nullptr)
 {}
 
 ECode CDBusChannel::Apply(
@@ -373,10 +374,17 @@ ECode CDBusChannel::GetRPCType(
     return NOERROR;
 }
 
-ECode CDBusChannel::GetServerAddress(
-    /* [out] */ String& value)
+ECode CDBusChannel::GetServerName(
+    /* [out] */ String& serverName)
 {
-    value = nullptr;    // the same machine, ServerAddress is nullptr
+    serverName = mServerName;
+    return NOERROR;
+}
+
+ECode CDBusChannel::SetServerName(
+    /* [in] */ const String& serverName)
+{
+    mServerName = serverName;
     return NOERROR;
 }
 

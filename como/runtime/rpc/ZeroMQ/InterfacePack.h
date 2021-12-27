@@ -41,7 +41,6 @@ interface IDBusInterfacePack : public IInterface
 class InterfacePack
     : public LightRefBase
     , public IInterfacePack
-    , public IDBusInterfacePack
     , public IParcelable
 {
 public:
@@ -73,11 +72,6 @@ public:
     ECode WriteToParcel(
         /* [in] */ IParcel* dest) override;
 
-    String GetDBusName();
-
-    void SetDBusName(
-        /* [in] */ const String& name);
-
     void SetCoclassID(
         /* [in] */ const CoclassID& cid);
 
@@ -91,7 +85,6 @@ public:
         /* [in] */ IInterfacePack* ipack);
 
 private:
-    String mDBusName;
     CoclassID mCid;
     InterfaceID mIid;
     Boolean mIsParcelable { false };

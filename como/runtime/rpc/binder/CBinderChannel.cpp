@@ -174,6 +174,7 @@ CBinderChannel::CBinderChannel(
     : mType(type)
     , mPeer(peer)
     , mOrgue(new DeathRecipientList())
+    , mServerName(nullptr)
 {}
 
 ECode CBinderChannel::Apply(
@@ -190,10 +191,17 @@ ECode CBinderChannel::GetRPCType(
     return NOERROR;
 }
 
-ECode CBinderChannel::GetServerAddress(
-    /* [out] */ String& value)
+ECode CBinderChannel::GetServerName(
+    /* [out] */ String& serverName)
 {
-    value = nullptr;    // the same machine, ServerAddress is nullptr
+    serverName = mServerName;
+    return NOERROR;
+}
+
+ECode CBinderChannel::SetServerName(
+    /* [in] */ const String& serverName)
+{
+    mServerName = serverName;
     return NOERROR;
 }
 

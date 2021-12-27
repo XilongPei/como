@@ -71,8 +71,11 @@ public:
     ECode GetRPCType(
         /* [out] */ RPCType& type) override;
 
-    ECode GetServerAddress(
-        /* [out] */ String& value) override;
+    ECode GetServerName(
+        /* [out] */ String& serverName) override;
+
+    ECode SetServerName(
+        /* [in] */ const String& serverName) override;
 
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
@@ -122,6 +125,7 @@ private:
     RPCType mType;
     RPCPeer mPeer;
     String mName;
+    String mServerName; // the same machine, ServerAddress is nullptr
     Boolean mStarted;
     Mutex mLock;
     Condition mCond;

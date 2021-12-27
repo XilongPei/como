@@ -210,8 +210,11 @@ interface IRPCChannel
     GetRPCType(
         [out] RPCType& type);
 
-    GetServerAddress(
-        [out] String& value);
+    GetServerName(
+        [out] String& serverName);
+
+    SetServerName(
+        [in] String serverName);
 
     IsPeerAlive(
         [out] Boolean& alive);
