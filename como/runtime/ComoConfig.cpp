@@ -18,6 +18,10 @@
 
 namespace como {
 
+ComoConfig::ComoConfig() {
+    ServerNameEndpointMap.emplace(std::string("localhost"), std::string("127.0.0.1:1239"));
+}
+
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
 
 // should less than ThreadPool_MAX_THREAD_NUM
@@ -39,5 +43,8 @@ int Logger_sLevel = 0;
 
 // ns, 30s
 Long ComoConfig::TPCI_TASK_EXPIRES = 1000000000L * 30;
+
+std::unordered_map<std::string, std::string> ComoConfig::ServerNameEndpointMap;
+std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
 
 } // namespace como

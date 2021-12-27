@@ -29,6 +29,19 @@ namespace como {
 
 constexpr ECode FUNCTION_SAFETY_CALL_TIMEOUT = MAKE_COMORT_ECODE(1, 0x1);
 
+/*
++==ThreadPoolZmqActor==+== thread pool
+|                      |
+| TPZA_Executor ^^^^^^^|^^ thread
+|                      |
+| TPZA_Executor (1)  --+----> Worker ... Worker ... Worker ......
+| TPZA_Executor (2)  --+----> Worker ... Worker ... Worker ......
+|                      |
+|       ......         |
+|                      |
++======================+
+*/
+
 class ThreadPoolZmqActor;
 enum WORKER_STATUS {
     WORKER_IDLE = 0,
@@ -46,18 +59,18 @@ public:
         : public Object
     {
     public:
-        Worker(AutoPtr<CZMQChannel::ServiceRunnable> thisServiceRunnable,
-                              AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+        Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub);
 
         ECode Invoke();
 
     public:
-        AutoPtr<IParcel> mInParcel;
-        AutoPtr<IParcel> mOutParcel;
         TPZA_Executor* mOwner;
+        void *mSocket;
+        AutoPtr<CZMQChannel> mChannel;
+        AutoPtr<IStub> mStub;
         pthread_mutex_t mMutex;
         pthread_cond_t mCond;
-        struct timespec mCreateTime;
+        struct timespec lastAccessTime;
         int mWorkerStatus;
         ECode ec;
     };

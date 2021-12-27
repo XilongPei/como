@@ -156,7 +156,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
  * Send an Invoke request through ZeroMQ and wait for the server to return the
  * calculation result
  */
-ECode CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t bufSize)
+Integer CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t bufSize)
 {
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);
 
@@ -175,45 +175,60 @@ ECode CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, cons
         return -1;
     }
 
-    if (numberOfBytes != -1) {
-        //int Czmq_recv (void *s_, void *buf_, size_t len_, int flags_);
-    }
-    else {
+    if (numberOfBytes == -1) {
         Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
         return -1;
     }
 
-    return NOERROR;
+    return numberOfBytes;
 }
 
 /**
  *
  */
-ECode CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, const void *buf, size_t bufSize)
+Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
-    // Block until a message is available to be received from socket
-    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), 0);
+    // Block until a message is available to be received from socket if wait != ZMQ_DONTWAIT
+    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), wait);
     if (numberOfBytes != -1) {
+        if (EAGAIN == errno) {
+            return 0;
+        }
+    }
+    else {
         int more;
         size_t more_size = sizeof (more);
         int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
+
+            // Create an empty 0MQ message
+            zmq_msg_t msg;
+            int rc = zmq_msg_init (&msg);
+            assert (rc == 0);
+
+            // Block until a message is available to be received from socket
+            rc = zmq_msg_recv (&msg, socket, 0);
+            assert (rc != -1);
+
+            // Release message
+            zmq_msg_close (&msg);
+
             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "errno %d", errno);
+                Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", errno);
                 return -1;
             }
             if (numberOfBytes >= bufSize) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "Message is bigger than the buffer");
+                Logger::E("CZMQUtils::CzmqRecvBuf", "Message is bigger than the buffer");
                 return -1;
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), numberOfBytes);
             if ((funCodeAndCRC64.crc64 != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "bad packet");
+                Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 return -1;
             }
             eventCode = funCodeAndCRC64.eventCode;
@@ -227,15 +242,88 @@ ECode CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, const void *buf, 
         return -1;
     }
 
+    if (numberOfBytes == -1) {
+        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
+        return -1;
+    }
+
+    return numberOfBytes;
+}
+
+/**
+ * Release message: zmq_msg_close (&msg);
+ *
+ */
+Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait)
+{
+    int numberOfBytes;
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+
+    // Block until a message is available to be received from socket if wait != ZMQ_DONTWAIT
+    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), wait);
     if (numberOfBytes != -1) {
-        //int Czmq_recv (void *s_, void *buf_, size_t len_, int flags_);
+        if (EAGAIN == errno) {
+            return 0;
+        }
+    }
+    else {
+        int more;
+        size_t more_size = sizeof (more);
+        int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
+        if (more) {
+            numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
+
+            int rc = zmq_msg_init(&msg);
+            assert (rc == 0);
+
+            // Block until a message is available to be received from socket
+            rc = zmq_msg_recv (&msg, socket, 0);
+            assert (rc != -1);
+
+             if (-1 == numberOfBytes) {
+                Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", errno);
+                return -1;
+            }
+            if (numberOfBytes >= bufSize) {
+                Logger::E("CZMQUtils::CzmqRecvBuf", "Message is bigger than the buffer");
+                return -1;
+            }
+
+            Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), numberOfBytes);
+            if ((funCodeAndCRC64.crc64 != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
+                Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
+                return -1;
+            }
+            eventCode = funCodeAndCRC64.eventCode;
+        }
+        else {
+            numberOfBytes = 0;
+        }
     }
     else {
         Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
         return -1;
     }
 
-    return NOERROR;
+    if (numberOfBytes == -1) {
+        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
+        return -1;
+    }
+
+    return numberOfBytes;
+}
+
+
+void *CZMQUtils::CzmqFindSocket(const char *serverName)
+{
+    EndpointSocket *endpointSocket;
+
+    endpointSocket = Czmq_sockets.find(serverName);
+    if (endpointSocket != Czmq_sockets.end()) {
+        return endpointSocket->socket;
+    }
+
+    return nullptr;
 }
 
 } // namespace como

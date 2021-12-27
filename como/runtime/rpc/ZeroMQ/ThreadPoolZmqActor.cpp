@@ -24,24 +24,57 @@
 
 namespace como {
 
+static struct timespec lastCheckConnExpireTime = {0,0};
+
 //-------------------------------------------------------------------------
 // TPZA : ThreadPoolZmqActor
-TPZA_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
-                              AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
+TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
     : mChannel(channel)
-    , mMethod(method)
-    , mInParcel(inParcel)
-    , mOutParcel(outParcel)
+    , mStub(stub)
     , mWorkerStatus(WORKER_TASK_READY)
     , mCond(PTHREAD_COND_INITIALIZER)
 {
+    String serverName;
+    channel->GetServerName(serverName);
+
+    void *mSocket = CzmqFindSocket(serverName);
+    if (nullptr == mSocket) {
+        Logger::E("TPZA_Executor::Worker", "CzmqFindSocket: %s", serverName.string());
+    }
+
     pthread_mutex_init(&mMutex, NULL);
-    clock_gettime(CLOCK_REALTIME, &mCreateTime);
+    clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 }
 
 ECode TPZA_Executor::Worker::Invoke()
 {
-    return mChannel->Invoke(mMethod, mInParcel, mOutParcel);
+    Integer eventCode;
+    const char buf[4096];
+
+    if (CzmqRecvBuf(eventCode, mSocket, buf, sizeof(buf), ZMQ_DONTWAIT) != 0) {
+        clock_gettime(CLOCK_REALTIME, &lastAccessTime);
+        switch (eventCode) {
+            case ZmqFunCode.Method_Invoke:
+                return mStub->Invoke(mInParcel, mOutParcel);
+
+            case ZmqFunCode.GetComponentMetadata: {
+                AutoPtr<IParcel> argParcel = new CDBusParcel();
+                argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
+                CoclassID cid;
+                argParcel->ReadCoclassID(cid);
+                AutoPtr<IMetaComponent> mc;
+                CoGetComponentMetadata(*cid.mCid, nullptr, mc);
+                Array<Byte> metadata;
+                ECode ec = mc->GetSerializedMetadata(metadata);
+                ReleaseCoclassID(cid);
+                numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                break;
+            }
+
+            default:
+                Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+        }
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -62,12 +95,10 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
     return sInstance;
 }
 
-int TPZA_Executor::RunTask(AutoPtr<CZMQChannel::ServiceRunnable> thisServiceRunnable,
-                                    AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
+int ThreadPoolExecutor::RunTask(
+    /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
-    //thisObj->mTarget->Invoke(inParcel, outParcel)
-
-    AutoPtr<Worker> w = new Worker(thisServiceRunnable, inParcel, outParcel);
+    AutoPtr<Worker> w = new Worker(task, this);
     return threadPool->addTask(w);
 }
 
@@ -83,6 +114,29 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
     int i;
 
     while (true) {
+        struct timespec currentTime;
+        clock_gettime(CLOCK_REALTIME, &currentTime);
+
+        // check for free time out connection
+        if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) +
+                    1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec) >
+                                    ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
+            clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
+
+            pthread_mutex_lock(&m_pthreadMutex);
+
+            for (i = 0;  i < ((mWorkerList.size()) &&
+                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++) {
+                if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+                            1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
+                                            ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                    delete mWorkerList[i];
+                    mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
+                }
+            }
+            pthread_mutex_unlock(&m_pthreadMutex);
+        }
+
         pthread_mutex_lock(&m_pthreadMutex);
 
         for (i = 0;  i < ((mWorkerList.size()) &&
@@ -154,8 +208,8 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
         if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
             continue;
 
-        if ((currentTime.tv_sec - mWorkerList[i]->mCreateTime.tv_sec) +
-                    1000000000L * (currentTime.tv_nsec - mWorkerList[i]->mCreateTime.tv_nsec) >
+        if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+                    1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                     ComoConfig::TPZA_TASK_EXPIRES) {
             break;
         }

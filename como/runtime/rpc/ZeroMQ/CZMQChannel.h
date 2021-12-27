@@ -72,7 +72,7 @@ public:
         /* [out] */ RPCType& type) override;
 
     ECode GetServerName(
-        /* [out] */ String& value) override;
+        /* [out] */ String& serverName) override;
 
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
@@ -123,6 +123,7 @@ private:
     RPCPeer mPeer;
     String mName;
     String mServerName;
+    void  *mSocket;
     Boolean mStarted;
     Mutex mLock;
     Condition mCond;

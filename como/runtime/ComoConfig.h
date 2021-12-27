@@ -17,6 +17,7 @@
 #ifndef __COMO_CONFIG_H__
 #define __COMO_CONFIG_H__
 
+#include <unordered_map>
 #include "comotypes.h"
 
 namespace como {
@@ -35,6 +36,8 @@ using CpuInvokeDsa = ECode(*)(
 class ComoConfig
 {
 public:
+    ComoConfig();
+
     static int ThreadPool_MAX_THREAD_NUM;
     static int ThreadPool_MAX_DBUS_DISPATCHER;
 
@@ -47,6 +50,9 @@ public:
 
     // TPCI: Thread Pool Channel Invoke
     static Long TPCI_TASK_EXPIRES;
+
+    static std::unordered_map<std::string, std::string> ServerNameEndpointMap;
+    static std::string ComoRuntimeInstanceIdentity;
 };
 
 } // namespace como

@@ -34,7 +34,7 @@ typedef struct tagDBusConnectionContainer {
 
 static std::vector<DBusConnectionContainer*> conns;
 static int num_DBUS_DISPATCHER = 0;
-struct timespec lastCheckConnExpireTime = {0,0};
+static struct timespec lastCheckConnExpireTime = {0,0};
 
 CDBusChannel::ServiceRunnable::ServiceRunnable(
     /* [in] */ CDBusChannel* owner,
