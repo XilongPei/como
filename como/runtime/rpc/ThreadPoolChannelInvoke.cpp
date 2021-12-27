@@ -127,7 +127,16 @@ pthread_cond_t ThreadPoolChannelInvoke::m_pthreadCond = PTHREAD_COND_INITIALIZER
 ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 {
     mThreadNum = threadNum;
-    create();
+    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    for (int i = 0;  i < mThreadNum;  i++) {
+        pthread_attr_t threadAddr;
+        pthread_attr_init(&threadAddr);
+        pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
+        if (pthread_create(&pthread_id[i], threadAddr, ThreadPoolChannelInvoke::threadFunc,
+                                                                        nullptr) != 0) {
+            Logger::E("ThreadPoolChannelInvoke", "pthread_create() error");
+        }
+    }
 }
 
 /*
@@ -183,27 +192,6 @@ int ThreadPoolChannelInvoke::cleanTask(int posWorkerList)
     pthread_mutex_unlock(&m_pthreadMutex);
 
     return posWorkerList;
-}
-
-/*
- * create the thread pool
- */
-int ThreadPoolChannelInvoke::create(void)
-{
-    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
-
-    for (int i = 0;  i < mThreadNum;  i++) {
-        pthread_attr_t threadAddr;
-        pthread_attr_init(&threadAddr);
-        pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
-
-        pthread_t thread;
-        int ret = pthread_create(&pthread_id[i], nullptr, ThreadPoolChannelInvoke::threadFunc, nullptr);
-        if (ret != 0) {
-            return E_RUNTIME_EXCEPTION;
-        }
-    }
-    return 0;
 }
 
 int ThreadPoolChannelInvoke::stopAll()

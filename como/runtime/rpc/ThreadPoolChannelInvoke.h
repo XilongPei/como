@@ -94,8 +94,6 @@ private:
 protected:
     static void *threadFunc(void *threadData);
 
-    int create();
-
 public:
     ThreadPoolChannelInvoke(int threadNum = 10);
     static int addTask(TPCI_Executor::Worker *task);
