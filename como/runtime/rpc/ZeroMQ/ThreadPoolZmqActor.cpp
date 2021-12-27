@@ -54,10 +54,10 @@ ECode TPZA_Executor::Worker::Invoke()
     if (CzmqRecvBuf(eventCode, mSocket, buf, sizeof(buf), ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
-            case ZmqFunCode.Method_Invoke:
+            case ZmqFunCode::Method_Invoke:
                 return mStub->Invoke(mInParcel, mOutParcel);
 
-            case ZmqFunCode.GetComponentMetadata: {
+            case ZmqFunCode::GetComponentMetadata: {
                 AutoPtr<IParcel> argParcel = new CDBusParcel();
                 argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
                 CoclassID cid;

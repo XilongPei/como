@@ -15,7 +15,7 @@
 //=========================================================================
 
 #include <unordered_map>
-#include "Czmq.h"
+#include "zmq.h"
 #include "checksum.h"
 
 namespace como {
@@ -153,10 +153,9 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 }
 
 /**
- * Send an Invoke request through ZeroMQ and wait for the server to return the
- * calculation result
+ * Send an Invoke request through ZeroMQ
  */
-Integer CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t bufSize)
+Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize)
 {
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);
 
@@ -171,12 +170,12 @@ Integer CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, co
         numberOfBytes = zmq_send(socket, buf, bufSize, 0);
     }
     else {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
+        Logger::E("CZMQUtils::CzmqSendBuf", "errno %d", errno);
         return -1;
     }
 
     if (numberOfBytes == -1) {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
+        Logger::E("CZMQUtils::CzmqSendBuf", "errno %d", errno);
         return -1;
     }
 
@@ -184,7 +183,7 @@ Integer CZMQUtils::CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, co
 }
 
 /**
- *
+ * Receive message into buffer
  */
 Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait)
 {
@@ -197,6 +196,8 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf
         if (EAGAIN == errno) {
             return 0;
         }
+        Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", errno);
+        return -1;
     }
     else {
         int more;
@@ -204,19 +205,6 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf
         int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
-
-            // Create an empty 0MQ message
-            zmq_msg_t msg;
-            int rc = zmq_msg_init (&msg);
-            assert (rc == 0);
-
-            // Block until a message is available to be received from socket
-            rc = zmq_msg_recv (&msg, socket, 0);
-            assert (rc != -1);
-
-            // Release message
-            zmq_msg_close (&msg);
-
             if (-1 == numberOfBytes) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", errno);
                 return -1;
@@ -237,13 +225,9 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf
             numberOfBytes = 0;
         }
     }
-    else {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
-        return -1;
-    }
 
     if (numberOfBytes == -1) {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
+        Logger::E("CZMQUtils::CzmqSendBuf", "errno %d", errno);
         return -1;
     }
 
@@ -251,8 +235,7 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf
 }
 
 /**
- * Release message: zmq_msg_close (&msg);
- *
+ * Receive message into zmq_msg_t, it should be rleased with zmq_msg_close(&msg)
  */
 Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait)
 {
@@ -261,35 +244,29 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
 
     // Block until a message is available to be received from socket if wait != ZMQ_DONTWAIT
     numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), wait);
-    if (numberOfBytes != -1) {
+    if (numberOfBytes == -1) {
         if (EAGAIN == errno) {
             return 0;
         }
+        Logger::E("CZMQUtils::CzmqRecvMsg", "errno %d", errno);
+        return -1;
     }
     else {
         int more;
         size_t more_size = sizeof (more);
         int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
-            numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
-
             int rc = zmq_msg_init(&msg);
             assert (rc == 0);
 
             // Block until a message is available to be received from socket
-            rc = zmq_msg_recv (&msg, socket, 0);
-            assert (rc != -1);
-
+            numberOfBytes = zmq_msg_recv(&msg, socket, 0);
              if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", errno);
-                return -1;
-            }
-            if (numberOfBytes >= bufSize) {
-                Logger::E("CZMQUtils::CzmqRecvBuf", "Message is bigger than the buffer");
+                Logger::E("CZMQUtils::CzmqRecvMsg", "errno %d", errno);
                 return -1;
             }
 
-            Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), numberOfBytes);
+            Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(zmq_msg_data(msg)), numberOfBytes);
             if ((funCodeAndCRC64.crc64 != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 return -1;
@@ -299,15 +276,6 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
         else {
             numberOfBytes = 0;
         }
-    }
-    else {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
-        return -1;
-    }
-
-    if (numberOfBytes == -1) {
-        Logger::E("CZMQUtils::CzmqSendWithReplyAndBlock", "errno %d", errno);
-        return -1;
     }
 
     return numberOfBytes;

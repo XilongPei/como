@@ -24,11 +24,13 @@
 
 namespace como {
 
-enum ZmqFunCode {
-    GetComponentMetadata = 0,
-    Method_Invoke = 1,
-    Actor_IsPeerAlive = 2,
-    Object_Release = 3
+class ZmqFunCode {
+    enum {
+        GetComponentMetadata = 0,
+        Method_Invoke = 1,
+        Actor_IsPeerAlive = 2,
+        Object_Release = 3
+    };
 };
 
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
@@ -50,7 +52,7 @@ class CZMQUtils {
 
     int CzmqCloseSocket(const char *serverName);
 
-    Integer CzmqSendWithReplyAndBlock(Integer eventCode, void *socket, const void *buf, size_t bufSize);
+    Integer CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize);
 
     static void *CzmqFindSocket(const char *serverName);
 

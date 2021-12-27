@@ -19,10 +19,10 @@
 #include "rpc/CProxy.h"
 #include "rpc/CStub.h"
 #include "rpc/registry.h"
-#include "rpc/dbus/CZMQChannel.h"
-#include "rpc/dbus/CZMQChannelFactory.h"
-#include "rpc/dbus/CZMQParcel.h"
-#include "rpc/dbus/InterfacePack.h"
+#include "rpc/ZeroMQ/CZMQChannel.h"
+#include "rpc/ZeroMQ/CZMQChannelFactory.h"
+#include "rpc/ZeroMQ/CZMQParcel.h"
+#include "rpc/ZeroMQ/InterfacePack.h"
 #include "util/comosp.h"
 
 namespace como {
