@@ -128,6 +128,11 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 {
     mThreadNum = threadNum;
     pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    if (nullptr == pthread_id) {
+        Logger::E("ThreadPoolChannelInvoke", "calloc() error");
+        return;
+    }
+
     for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);

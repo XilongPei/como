@@ -17,12 +17,14 @@
 #include <unordered_map>
 #include "zmq.h"
 #include "checksum.h"
+#include "CZMQUtils.h"
 
 namespace como {
 
 class EndpointSocket {
+public:
     ~EndpointSocket() {
-        int rc = Czmq_close(socket);
+        int rc = zmq_close(socket);
     }
 
 public:
@@ -30,16 +32,19 @@ public:
     void *socket;
 };
 
-std::unordered_map<std::string, EndpointSocket*> CZMQUtils::Czmq_sockets;
+static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
 
 void *comoZmqContext = nullptr;
 Mutex comoZmqContextLock;
 
 
+/*
+int rc = zmq_ctx_destroy(context);
+*/
 void *CZMQUtils::CzmqGetContext() {
     Mutex::AutoLock lock(comoZmqContextLock);
     if (nullptr == comoZmqContext) {
-        comoZmqContext = Czmq_ctx_new();
+        comoZmqContext = zmq_ctx_new();
     }
     return comoZmqContext;
 }
@@ -49,7 +54,7 @@ void *CZMQUtils::CzmqGetContext() {
  * ^^^^^^^
  * A socket of type 'ZMQ_REQ' is used by a _client_ to send requests to and
  * receive replies from a _service_. This socket type allows only an alternating
- * sequence of _Czmq_send(request)_ and subsequent _Czmq_recv(reply)_ calls. Each
+ * sequence of _zmq_send(request)_ and subsequent _zmq_recv(reply)_ calls. Each
  * request sent is round-robined among all _services_, and each reply received is
  * matched with the last issued request.
  * For connection-oriented transports, If the ZMQ_IMMEDIATE option is set and there
@@ -60,40 +65,43 @@ void *CZMQUtils::CzmqGetContext() {
  * ^^^^^^^
  * A socket of type 'ZMQ_REP' is used by a _service_ to receive requests from and
  * send replies to a _client_. This socket type allows only an alternating
- * sequence of _Czmq_recv(request)_ and subsequent _Czmq_send(reply)_ calls. Each
+ * sequence of _zmq_recv(request)_ and subsequent _zmq_send(reply)_ calls. Each
  * request received is fair-queued from among all _clients_, and each reply sent
  * is routed to the _client_ that issued the last request. If the original
  * requester does not exist any more the reply is silently discarded.
  */
-void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, int identityLen,
+void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t identityLen,
                               const char *serverName, const char *endpoint, int type)
 {
     EndpointSocket *endpointSocket;
 
-    endpointSocket = Czmq_sockets.find(serverName);
-    if (endpointSocket != Czmq_sockets.end())
+    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                        zmq_sockets.find(std::string(serverName));
+    if (tmp != zmq_sockets.end()) {
+        endpointSocket = tmp->second;
         return endpointSocket->socket;
+    }
 
     if (nullptr == context)
-        context = Czmq_getContext();
+        context = CzmqGetContext();
 
     void *socket;
     if (ZMQ_REP != type) {
-        socket = Czmq_socket(context, ZMQ_REQ);
+        socket = zmq_socket(context, ZMQ_REQ);
         if (identityLen > 254)
             identityLen = 254;
         if (identityLen > 0) {
-            Czmq_setsockopt(requester, ZMQ_ROUTING_ID, identity, identityLen);
+            zmq_setsockopt(socket, ZMQ_ROUTING_ID, identity, identityLen);
         }
         else {
             static const char *identityDefault = "COMO";
-            Czmq_setsockopt(requester, ZMQ_ROUTING_ID, identityDefault, strlen(identityDefault));
+            zmq_setsockopt(socket, ZMQ_ROUTING_ID, identityDefault, strlen(identityDefault));
         }
     }
     else {
-        socket = Czmq_socket(context, ZMQ_REP);
+        socket = zmq_socket(context, ZMQ_REP);
         if (identity != nullptr) {
-            if (Czmq_getsockopt(requester, ZMQ_ROUTING_ID, identity, identityLen) != 0) {
+            if (zmq_getsockopt(context, ZMQ_ROUTING_ID, (char *)identity, &identityLen) != 0) {
                 Logger::E("CZMQUtils::CzmqGetSocket", "errno %d", errno);
             }
         }
@@ -102,22 +110,17 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, int identity
 
     if (nullptr != socket) {
         if (nullptr != endpoint) {
-            int rc = Czmq_connect(socket, endpoint);
-            if (rc != 0)
+            int rc = zmq_connect(socket, endpoint);
+            if (rc != 0) {
                 Logger::E("CZMQUtils::CzmqGetSocket", "endpoint: %s errno %d", endpoint, errno);
+            }
         }
         endpointSocket = new EndpointSocket();
         endpointSocket->endpoint = std::string(endpoint);
         endpointSocket->socket = socket;
-        Czmq_sockets.emplace(serverName, endpointSocket);
+        zmq_sockets.emplace(serverName, endpointSocket);
     }
 
-    /*
-    int rc = Czmq_connect(socket, endpoint);
-    int rc = Czmq_disconnect(socket, endpoint);
-    int rc = Czmq_close(socket);
-    int rc = Czmq_ctx_destroy(context);
-    */
     return socket;
 }
 
@@ -128,13 +131,15 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 {
     EndpointSocket *endpointSocket;
 
-    endpointSocket = Czmq_sockets.find(serverName);
-    if (endpointSocket != Czmq_sockets.end()) {
-        int rc;
+    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                        zmq_sockets.find(std::string(serverName));
+    if (tmp != zmq_sockets.end()) {
+        endpointSocket = tmp->second;
 
-        rc = Czmq_disconnect(endpointSocket->socket, endpointSocket->endpoint);
-        if (Czmq_disconnect != 0) {
-            rc = Czmq_close(endpointSocket->socket);
+        int rc;
+        rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
+        if (zmq_disconnect != 0) {
+            rc = zmq_close(endpointSocket->socket);
         }
         if (rc != 0) {
             Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d", errno);
@@ -142,7 +147,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         }
 
         delete(endpointSocket);
-        int delNum = unordered_map.erase(serverName);
+        int delNum = zmq_sockets.erase(std::string(serverName));
         if (delNum != 1) {
             Logger::E("CZMQUtils::CzmqCloseSocket", "serverName should be unique name");
         }
@@ -185,7 +190,8 @@ Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf,
 /**
  * Receive message into buffer
  */
-Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait)
+Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
+                                                            size_t bufSize, Boolean wait)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
@@ -257,7 +263,6 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
         int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             int rc = zmq_msg_init(&msg);
-            assert (rc == 0);
 
             // Block until a message is available to be received from socket
             numberOfBytes = zmq_msg_recv(&msg, socket, 0);
@@ -266,7 +271,8 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
                 return -1;
             }
 
-            Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(zmq_msg_data(msg)), numberOfBytes);
+            Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(zmq_msg_data(&msg)),
+                                                                                    numberOfBytes);
             if ((funCodeAndCRC64.crc64 != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 return -1;
@@ -286,8 +292,10 @@ void *CZMQUtils::CzmqFindSocket(const char *serverName)
 {
     EndpointSocket *endpointSocket;
 
-    endpointSocket = Czmq_sockets.find(serverName);
-    if (endpointSocket != Czmq_sockets.end()) {
+    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                        zmq_sockets.find(std::string(serverName));
+    if (tmp != zmq_sockets.end()) {
+        endpointSocket = tmp->second;
         return endpointSocket->socket;
     }
 

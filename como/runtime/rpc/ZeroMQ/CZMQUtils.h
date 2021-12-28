@@ -34,20 +34,23 @@ public:
     };
 };
 
+#pragma pack(1)
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
     Integer eCode;      // eventCode, ECode
     Long crc64;
     Integer msgSize;
 } COMO_ZMQ_RPC_MSG_HEAD;
+#pragma pack()
 
 class CZMQUtils {
 public:
-    void *CzmqGetContext();
+    static void *CzmqGetContext();
 
-    static void *CzmqGetSocket(void *context, const char *identity, int identityLen,
+    static void *CzmqGetSocket(void *context, const char *identity, size_t identityLen,
                               const char *serverName, const char *endpoint, int type);
 
-    static Integer CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait);
+    static Integer CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
+                                                                size_t bufSize, Boolean wait);
 
     static Integer CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait);
 

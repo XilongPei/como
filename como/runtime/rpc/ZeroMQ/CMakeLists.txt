@@ -31,7 +31,9 @@ set(SOURCES
     CZMQChannelFactory.cpp
     CZMQParcel.cpp
     InterfacePack.cpp
-    ThreadPoolZmqActor.cpp)
+    ThreadPoolZmqActor.cpp
+    CZMQUtils.cpp
+)
 
 add_library(rpc-ZeroMQ STATIC
     ${SOURCES})

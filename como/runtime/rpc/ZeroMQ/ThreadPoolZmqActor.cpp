@@ -27,7 +27,7 @@
 
 namespace como {
 
-static struct timespec lastCheckConnExpireTime = {0,0};
+static struct timespec lastCheckConnExpireTime = {0, 0};
 
 //-------------------------------------------------------------------------
 // TPZA : ThreadPoolZmqActor
@@ -49,10 +49,12 @@ TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 }
 
-ECode TPZA_Executor::Worker::Invoke()
+ECode TPZA_Executor::Worker::HandleMessage()
 {
     Integer eventCode;
     zmq_msg_t msg;
+    ECode ec;
+    int numberOfBytes;
 
     if (CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
@@ -62,13 +64,14 @@ ECode TPZA_Executor::Worker::Invoke()
                 argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
                 zmq_msg_close(&msg);
                 AutoPtr<IParcel> resParcel = new CZMQParcel();
-                ECode ec = mStub->Invoke(argParcel, resParcel);
+
+                ec = mStub->Invoke(argParcel, resParcel);
 
                 HANDLE resData;
                 Long resSize;
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
-                CZMQUtils::CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
+                numberOfBytes = CZMQUtils::CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
                 break;
             }
 
@@ -80,15 +83,20 @@ ECode TPZA_Executor::Worker::Invoke()
                 AutoPtr<IMetaComponent> mc;
                 CoGetComponentMetadata(*cid.mCid, nullptr, mc);
                 Array<Byte> metadata;
-                ECode ec = mc->GetSerializedMetadata(metadata);
+
+                ec = mc->GetSerializedMetadata(metadata);
+
                 ReleaseCoclassID(cid);
-                int numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
                 break;
             }
 
             default:
                 Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
         }
+
+        mWorkerStatus = WORKER_TASK_FINISH;
+        pthread_cond_signal(&mCond);
     }
 
     return NOERROR;
@@ -104,6 +112,7 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 {
     {
         Mutex::AutoLock lock(sInstanceLock);
+
         if (nullptr == sInstance) {
             sInstance = new TPZA_Executor();
             threadPool = new ThreadPoolZmqActor(ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM);
@@ -133,7 +142,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
-        // check for free time out connection
+        // check for time out connection
         if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) +
                     1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
@@ -178,9 +187,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         pthread_mutex_unlock(&m_pthreadMutex);
 
-        w->ec = w->Invoke();
-        w->mWorkerStatus = WORKER_TASK_FINISH;
-        pthread_cond_signal(&(w->mCond));
+        w->HandleMessage();
     }
 
     return reinterpret_cast<void*>(ec);
@@ -199,7 +206,21 @@ pthread_cond_t ThreadPoolZmqActor::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 {
     mThreadNum = threadNum;
-    create();
+    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    if (nullptr == pthread_id) {
+        Logger::E("ThreadPoolChannelInvoke", "calloc() error");
+        return;
+    }
+
+    for (int i = 0;  i < mThreadNum;  i++) {
+        pthread_attr_t threadAddr;
+        pthread_attr_init(&threadAddr);
+        pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
+        if (pthread_create(&pthread_id[i], nullptr, ThreadPoolZmqActor::threadFunc,
+                                                                        nullptr) != 0) {
+            Logger::E("ThreadPoolZmqActor", "pthread_create() error");
+        }
+    }
 }
 
 /*
@@ -255,27 +276,6 @@ int ThreadPoolZmqActor::cleanTask(int posWorkerList)
     pthread_mutex_unlock(&m_pthreadMutex);
 
     return posWorkerList;
-}
-
-/*
- * create the thread pool
- */
-int ThreadPoolZmqActor::create(void)
-{
-    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
-
-    for (int i = 0;  i < mThreadNum;  i++) {
-        pthread_attr_t threadAddr;
-        pthread_attr_init(&threadAddr);
-        pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
-
-        pthread_t thread;
-        int ret = pthread_create(&pthread_id[i], nullptr, ThreadPoolZmqActor::threadFunc, nullptr);
-        if (ret != 0) {
-            return E_RUNTIME_EXCEPTION;
-        }
-    }
-    return 0;
 }
 
 int ThreadPoolZmqActor::stopAll()
