@@ -27,7 +27,7 @@ namespace como {
 
 extern const CoclassID CID_CZMQChannel;
 
-COCLASS_ID(8efc6167-e82e-4c7d-89aa-668f397b23cd)
+COCLASS_ID(4006ca46-c33d-a51f-3ac6-2b62ec497c2f)
 class CZMQChannel
     : public Object
     , public IRPCChannel

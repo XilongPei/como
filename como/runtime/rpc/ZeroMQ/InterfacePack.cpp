@@ -18,10 +18,12 @@
 
 namespace como {
 
-const InterfaceID IID_IDBusInterfacePack =
-        {{0x6447561d,0x49aa,0x48b3,0x9faa,{0xef,0x72,0xed,0x76,0xf8,0xe2}}, &CID_COMORuntime};
+// ./comouuid --cpp -cityhash como::IZMQInterfacePack
+// {0xeb4666d2,0xf89d,0x3564,0x54e9,{0xc7,0xf0,0x08,0x05,0x93,0x79}}
+const InterfaceID IID_IZMQInterfacePack =
+        {{0xeb4666d2,0xf89d,0x3564,0x54e9,{0xc7,0xf0,0x08,0x05,0x93,0x79}}, &CID_COMORuntime};
 
-COMO_INTERFACE_IMPL_LIGHT_3(InterfacePack, LightRefBase, IInterfacePack, IDBusInterfacePack, IParcelable);
+COMO_INTERFACE_IMPL_LIGHT_3(InterfacePack, LightRefBase, IInterfacePack, IZMQInterfacePack, IParcelable);
 
 InterfacePack::~InterfacePack()
 {
@@ -67,14 +69,13 @@ ECode InterfacePack::GetServerName(
 ECode InterfacePack::GetHashCode(
     /* [out] */ Integer& hash)
 {
-    hash = mDBusName.GetHashCode();
+    hash = mServerName.GetHashCode();
     return NOERROR;
 }
 
 ECode InterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadString(mDBusName);
     source->ReadCoclassID(mCid);
     source->ReadInterfaceID(mIid);
     source->ReadBoolean(mIsParcelable);
@@ -85,23 +86,11 @@ ECode InterfacePack::ReadFromParcel(
 ECode InterfacePack::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteString(mDBusName);
     dest->WriteCoclassID(mCid);
     dest->WriteInterfaceID(mIid);
     dest->WriteBoolean(mIsParcelable);
     dest->WriteString(mServerName);
     return NOERROR;
-}
-
-String InterfacePack::GetDBusName()
-{
-    return mDBusName;
-}
-
-void InterfacePack::SetDBusName(
-    /* [in] */ const String& name)
-{
-    mDBusName = name;
 }
 
 void InterfacePack::SetCoclassID(

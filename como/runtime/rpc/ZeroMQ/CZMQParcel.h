@@ -30,16 +30,16 @@
  * limitations under the License.
  */
 
-#ifndef __COMO_CDBUSPARCEL_H__
-#define __COMO_CDBUSPARCEL_H__
+#ifndef __COMO_CZMQPARCEL_H__
+#define __COMO_CZMQPARCEL_H__
 
 #include "util/comoobj.h"
 
 namespace como {
 
-extern const CoclassID CID_CDbusParcel;
+extern const CoclassID CID_CZMQParcel;
 
-COCLASS_ID(28208469-8814-49af-80f7-8b147391fb94)
+COCLASS_ID(abc0f905-d6f3-6696-8a0a-31037f69cddd)
 class CZMQParcel
     : public Object
     , public IParcel
@@ -223,4 +223,4 @@ private:
 
 } // namespace como
 
-#endif //__COMO_CDBUSPARCEL_H__
+#endif //__COMO_CZMQPARCEL_H__

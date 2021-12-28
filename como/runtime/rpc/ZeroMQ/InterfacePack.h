@@ -23,18 +23,18 @@
 
 namespace como {
 
-extern const InterfaceID IID_IDBusInterfacePack;
+extern const InterfaceID IID_IZMQInterfacePack;
 
-INTERFACE_ID(6447561d-49aa-48b3-9faa-ef72ed76f8e2)
-interface IDBusInterfacePack : public IInterface
+INTERFACE_ID(d26646eb-9df8-6435-e954-c7f008059379)
+interface IZMQInterfacePack : public IInterface
 {
     using IInterface::Probe;
 
-    inline static IDBusInterfacePack* Probe(
+    inline static IZMQInterfacePack* Probe(
         /* [in] */ IInterface* object)
     {
         if (object == nullptr) return nullptr;
-        return (IDBusInterfacePack*)object->Probe(IID_IDBusInterfacePack);
+        return (IZMQInterfacePack*)object->Probe(IID_IZMQInterfacePack);
     }
 };
 

@@ -21,6 +21,7 @@ if($ENV{PLATFORM} STREQUAL "linux")
 elseif($ENV{PLATFORM} STREQUAL "android")
     add_subdirectory(binder)
 endif()
+add_subdirectory(ZeroMQ)
 
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")

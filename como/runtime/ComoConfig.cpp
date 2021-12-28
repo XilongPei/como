@@ -35,6 +35,8 @@ long ComoConfig::DBUS_BUS_SESSION_EXPIRES = 1000000000L * 60 * 60 * 48;
 int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;
 CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 
+int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 2;
+
 /*
  * /como/como/como/runtime/util/comolog.h
  * int Logger::sLevel = DEBUG;
@@ -43,6 +45,9 @@ int Logger_sLevel = 0;
 
 // ns, 30s
 Long ComoConfig::TPCI_TASK_EXPIRES = 1000000000L * 30;
+
+// ns, 30s
+Long ComoConfig::TPZA_TASK_EXPIRES = 1000000000L * 30;
 
 std::unordered_map<std::string, std::string> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");

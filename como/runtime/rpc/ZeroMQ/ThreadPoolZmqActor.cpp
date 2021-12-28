@@ -18,9 +18,12 @@
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
+#include "zmq.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
 #include "ThreadPoolZmqActor.h"
+#include "CZMQUtils.h"
+#include "CZMQParcel.h"
 
 namespace como {
 
@@ -37,7 +40,7 @@ TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
     String serverName;
     channel->GetServerName(serverName);
 
-    void *mSocket = CzmqFindSocket(serverName);
+    void *mSocket = CZMQUtils::CzmqFindSocket(serverName);
     if (nullptr == mSocket) {
         Logger::E("TPZA_Executor::Worker", "CzmqFindSocket: %s", serverName.string());
     }
@@ -51,27 +54,27 @@ ECode TPZA_Executor::Worker::Invoke()
     Integer eventCode;
     zmq_msg_t msg;
 
-    if (CzmqRecvMsg(eventCode, mSsocket, msg, ZMQ_DONTWAIT) != 0) {
+    if (CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
-                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(msg)), zmq_msg_size(msg));
+                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
                 zmq_msg_close(&msg);
-                AutoPtr<IParcel> resParcel = new CDBusParcel();
+                AutoPtr<IParcel> resParcel = new CZMQParcel();
                 ECode ec = mStub->Invoke(argParcel, resParcel);
 
                 HANDLE resData;
                 Long resSize;
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
-                CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
+                CZMQUtils::CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
                 break;
             }
 
             case ZmqFunCode::GetComponentMetadata: {
-                AutoPtr<IParcel> argParcel = new CDBusParcel();
-                argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
+                AutoPtr<IParcel> argParcel = new CZMQParcel();
+                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
                 CoclassID cid;
                 argParcel->ReadCoclassID(cid);
                 AutoPtr<IMetaComponent> mc;
@@ -79,7 +82,7 @@ ECode TPZA_Executor::Worker::Invoke()
                 Array<Byte> metadata;
                 ECode ec = mc->GetSerializedMetadata(metadata);
                 ReleaseCoclassID(cid);
-                numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                int numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
                 break;
             }
 
@@ -87,6 +90,8 @@ ECode TPZA_Executor::Worker::Invoke()
                 Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
         }
     }
+
+    return NOERROR;
 }
 
 //-------------------------------------------------------------------------
@@ -110,8 +115,7 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 int TPZA_Executor::RunTask(
     /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
-    AutoPtr<Worker> w = new Worker(task, this);
-    return threadPool->addTask(w);
+    return threadPool->addTask(task);
 }
 
 int TPZA_Executor::CleanTask(int posWorkerList)
