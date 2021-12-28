@@ -14,48 +14,24 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __COMO_CDBUSCHANNEL_H__
-#define __COMO_CDBUSCHANNEL_H__
+#ifndef __COMO_CZMQCHANNEL_H__
+#define __COMO_CZMQCHANNEL_H__
 
 #include "CProxy.h"
 #include "CStub.h"
-#include "ThreadPoolExecutor.h"
+//#include "ThreadPoolZmqActor.h"
 #include "util/comoobj.h"
 #include "util/mutex.h"
-#include <dbus/dbus.h>
 
 namespace como {
 
-extern const CoclassID CID_CDBusChannel;
+extern const CoclassID CID_CZMQChannel;
 
-COCLASS_ID(8efc6167-e82e-4c7d-89aa-668f397b23cc)
+COCLASS_ID(8efc6167-e82e-4c7d-89aa-668f397b23cd)
 class CZMQChannel
     : public Object
     , public IRPCChannel
 {
-private:
-    class ServiceRunnable
-        : public ThreadPoolExecutor::Runnable
-    {
-    public:
-        ServiceRunnable(
-            /* [in] */ CZMQChannel* owner,
-            /* [in] */ IStub* target);
-
-        ECode Run();
-
-    private:
-        static DBusHandlerResult HandleMessage(
-            /* [in] */ DBusConnection* conn,
-            /* [in] */ DBusMessage* msg,
-            /* [in] */ void* arg);
-
-    private:
-        CZMQChannel* mOwner;
-        IStub* mTarget;
-        Boolean mRequestToQuit;
-    };
-
 public:
     CZMQChannel(
         /* [in] */ RPCType type,
@@ -70,6 +46,9 @@ public:
 
     ECode GetRPCType(
         /* [out] */ RPCType& type) override;
+
+    ECode SetServerName(
+        /* [in] */ const String& serverName) override;
 
     ECode GetServerName(
         /* [out] */ String& serverName) override;
@@ -143,4 +122,4 @@ inline CZMQChannel* CZMQChannel::GetStubChannel(
 
 } // namespace como
 
-#endif // __COMO_CDBUSCHANNEL_H__
+#endif // __COMO_CZMQCHANNEL_H__

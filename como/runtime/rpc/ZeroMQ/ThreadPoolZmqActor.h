@@ -24,6 +24,7 @@
 #include "util/arraylist.h"
 #include "util/mutex.h"
 #include "comoerror.h"
+#include "CZMQChannel.h"
 
 namespace como {
 
@@ -78,8 +79,8 @@ public:
 public:
     static AutoPtr<TPZA_Executor> GetInstance();
 
-    int RunTask(AutoPtr<IRPCChannel> channel, thisObj,
-                                AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+    int RunTask(
+        /* [in] */ AutoPtr<TPZA_Executor::Worker> task);
 
     int CleanTask(int posWorkerList);
 

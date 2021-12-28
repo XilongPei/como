@@ -24,6 +24,7 @@
 #include "rpc/ZeroMQ/CZMQParcel.h"
 #include "rpc/ZeroMQ/InterfacePack.h"
 #include "util/comosp.h"
+#include "ThreadPoolZmqActor.h"
 
 namespace como {
 
@@ -34,7 +35,7 @@ CZMQChannelFactory::CZMQChannelFactory(
     : mType(type)
 {
     // initial the ThreadPool environment, to avoid the delay of first RPC call
-    ThreadPoolExecutor::GetInstance();
+    TPZA_Executor::GetInstance();
 }
 
 ECode CZMQChannelFactory::CreateInterfacePack(
@@ -84,14 +85,14 @@ ECode CZMQChannelFactory::MarshalInterface(
         ECode ec = FindExportObject(mType, IObject::Probe(object), stub);
         if (SUCCEEDED(ec)) {
             CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
-            pack->SetDBusName(channel->mName);
+            //pack->SetDBusName(channel->mName);
             pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
         }
         else {
             IProxy* proxy = IProxy::Probe(object);
             if (proxy != nullptr) {
                 CZMQChannel* channel = CZMQChannel::GetProxyChannel(proxy);
-                pack->SetDBusName(channel->mName);
+                //pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CProxy*)proxy)->GetTargetCoclassID());
             }
             else {
@@ -102,7 +103,7 @@ ECode CZMQChannelFactory::MarshalInterface(
                     return ec;
                 }
                 CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
-                pack->SetDBusName(channel->mName);
+                //pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
                 RegisterExportObject(mType, IObject::Probe(object), stub);
             }

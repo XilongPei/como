@@ -25,8 +25,12 @@
 #include "util/comolog.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
+#include "ThreadPoolZmqActor.h"
 
 namespace como {
+
+const CoclassID CID_CDBusChannel =
+        {{0x8efc6167,0xe82e,0x4c7d,0x89aa,{0x66,0x8f,0x39,0x7b,0x23,0xcd}}, &CID_COMORuntime};
 
 COMO_INTERFACE_IMPL_1(CZMQChannel, Object, IRPCChannel);
 
@@ -40,16 +44,25 @@ CZMQChannel::CZMQChannel(
     , mStarted(false)
     , mCond(mLock)
 {
-    std::string endpoint = ComoConfig::ServerNameEndpointMap.find(mServerName);
-    mSocket = CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity,
-                                    strlen(ComoConfig::ComoRuntimeInstanceIdentity),
-                                    mServerName, (const char *)endpoint, ZMQ_REQ);
+    std::unordered_map<std::string, std::string>::iterator tmp =
+            ComoConfig::ServerNameEndpointMap.find(std::string(mServerName.string()));
+    std::string endpoint;
+    if (tmp != ComoConfig::ServerNameEndpointMap.end()) {
+        endpoint = tmp->second;
+    }
+    else {
+        Logger::E("CZMQChannel", "Unregistered ServerName: %s", mServerName.string());
+    }
+
+    mSocket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                    ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                    mServerName.string(), endpoint.c_str(), ZMQ_REQ);
 }
 
 ECode CZMQChannel::Apply(
     /* [in] */ IInterfacePack* ipack)
 {
-    mName = InterfacePack::From(ipack)->GetDBusName();
+    //mName = InterfacePack::From(ipack)->GetDBusName();
     return NOERROR;
 }
 
@@ -57,6 +70,13 @@ ECode CZMQChannel::GetRPCType(
     /* [out] */ RPCType& type)
 {
     type = mType;
+    return NOERROR;
+}
+
+ECode CZMQChannel::SetServerName(
+    /* [in] */ const String& serverName)
+{
+    mServerName = serverName;
     return NOERROR;
 }
 
@@ -107,19 +127,19 @@ ECode CZMQChannel::GetComponentMetadata(
     parcel->GetData(data);
     parcel->GetDataSize(size);
 
-    int rc = CzmqSendBuf(GetComponentMetadata, mSocket, data, size);
+    int rc = CZMQUtils::CzmqSendBuf(ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
 
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CzmqRecvMsg(eventCode, mSocket, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, 0);
 
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
 
         }
         else {
-            void* replyData = zmq_msg_data(msg);
-            Integer replySize = zmq_msg_size(msg);
+            void* replyData = zmq_msg_data(&msg);
+            Integer replySize = zmq_msg_size(&msg);
             metadata = Array<Byte>::Allocate(replySize);
             if (metadata.IsNull()) {
                 Logger::E("CZMQChannel", "Malloc %d size metadata failed.", replySize);
@@ -152,7 +172,7 @@ ECode CZMQChannel::Invoke(
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
 
-    CzmqSendBuf(Method_Invoke, socket, data, size);
+    CZMQUtils::CzmqSendBuf(ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
 
     Integer eventCode;
     String serverName;
@@ -162,13 +182,13 @@ ECode CZMQChannel::Invoke(
     int replySize = CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, 0);
 
     if (SUCCEEDED(ec)) {
-        resParcel = new CDBusParcel();
+        resParcel = new CZMQParcel();
 
         Integer hasOutArgs;
         method->GetOutArgumentsNumber(hasOutArgs);
         if (hasOutArgs) {
             if (replySize > 0) {
-                resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(msg)), zmq_msg_size(msg));
+                resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
             }
         }
     }
@@ -191,7 +211,7 @@ ECode CZMQChannel::StartListening(
 
     if (mPeer == RPCPeer::Stub) {
         AutoPtr<TPZA_Executor::Worker> w = new TPZA_Executor::Worker(this, stub);
-        ret = ThreadPoolExecutor::GetInstance()->RunTask(w);
+        ret = TPZA_Executor::GetInstance()->RunTask(w);
     }
 
     if (0 == ret) {

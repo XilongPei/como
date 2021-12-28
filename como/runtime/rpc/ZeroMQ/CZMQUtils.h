@@ -25,6 +25,7 @@
 namespace como {
 
 class ZmqFunCode {
+public:
     enum {
         GetComponentMetadata = 0,
         Method_Invoke = 1,
@@ -34,25 +35,25 @@ class ZmqFunCode {
 };
 
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
-    Integer eventCode,
-    Long crc64,
-    Integer msgSize
+    Integer eCode;      // eventCode, ECode
+    Long crc64;
+    Integer msgSize;
 } COMO_ZMQ_RPC_MSG_HEAD;
 
 class CZMQUtils {
-
+public:
     void *CzmqGetContext();
 
-    void *CzmqGetSocket(void *context, const char *identity, int identityLen,
+    static void *CzmqGetSocket(void *context, const char *identity, int identityLen,
                               const char *serverName, const char *endpoint, int type);
 
-    Integer CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait);
+    static Integer CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf, size_t bufSize, Boolean wait);
 
-    Integer CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait);
+    static Integer CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait);
 
-    int CzmqCloseSocket(const char *serverName);
+    static int CzmqCloseSocket(const char *serverName);
 
-    Integer CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize);
+    static Integer CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize);
 
     static void *CzmqFindSocket(const char *serverName);
 

@@ -153,7 +153,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 }
 
 /**
- * Send an Invoke request through ZeroMQ
+ * Send an buffer through ZeroMQ
  */
 Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize)
 {
@@ -161,7 +161,7 @@ Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf,
 
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    funCodeAndCRC64.eventCode = eventCode;
+    funCodeAndCRC64.eCode = eventCode;
     funCodeAndCRC64.crc64 = crc64;
     funCodeAndCRC64.msgSize = bufSize;
 
@@ -219,7 +219,7 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, const void *buf
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 return -1;
             }
-            eventCode = funCodeAndCRC64.eventCode;
+            eventCode = funCodeAndCRC64.eCode;
         }
         else {
             numberOfBytes = 0;
@@ -271,7 +271,7 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 return -1;
             }
-            eventCode = funCodeAndCRC64.eventCode;
+            eventCode = funCodeAndCRC64.eCode;
         }
         else {
             numberOfBytes = 0;

@@ -49,13 +49,25 @@ TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
 ECode TPZA_Executor::Worker::Invoke()
 {
     Integer eventCode;
-    const char buf[4096];
+    zmq_msg_t msg;
 
-    if (CzmqRecvBuf(eventCode, mSocket, buf, sizeof(buf), ZMQ_DONTWAIT) != 0) {
+    if (CzmqRecvMsg(eventCode, mSsocket, msg, ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
-            case ZmqFunCode::Method_Invoke:
-                return mStub->Invoke(mInParcel, mOutParcel);
+            case ZmqFunCode::Method_Invoke: {
+                AutoPtr<IParcel> argParcel = new CZMQParcel();
+                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(msg)), zmq_msg_size(msg));
+                zmq_msg_close(&msg);
+                AutoPtr<IParcel> resParcel = new CDBusParcel();
+                ECode ec = mStub->Invoke(argParcel, resParcel);
+
+                HANDLE resData;
+                Long resSize;
+                resParcel->GetData(resData);
+                resParcel->GetDataSize(resSize);
+                CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
+                break;
+            }
 
             case ZmqFunCode::GetComponentMetadata: {
                 AutoPtr<IParcel> argParcel = new CDBusParcel();
@@ -95,7 +107,7 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
     return sInstance;
 }
 
-int ThreadPoolExecutor::RunTask(
+int TPZA_Executor::RunTask(
     /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
     AutoPtr<Worker> w = new Worker(task, this);

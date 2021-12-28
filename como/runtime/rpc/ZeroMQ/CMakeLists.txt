@@ -14,7 +14,7 @@
 # limitations under the License.
 #=========================================================================
 
-set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/dbus)
+set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/ZeroMQ)
 
 include_directories(
     ./
@@ -27,12 +27,12 @@ include_directories(
 )
 
 set(SOURCES
-    CDBusChannel.cpp
-    CDBusChannelFactory.cpp
-    CDBusParcel.cpp
+    CZMQChannel.cpp
+    CZMQChannelFactory.cpp
+    CZMQParcel.cpp
     InterfacePack.cpp
-    ThreadPoolExecutor.cpp)
+    ThreadPoolZmqActor.cpp)
 
-add_library(rpc-dbus STATIC
+add_library(rpc-ZeroMQ STATIC
     ${SOURCES})
-add_dependencies(rpc-dbus cdl)
+add_dependencies(rpc-ZeroMQ cdl)
