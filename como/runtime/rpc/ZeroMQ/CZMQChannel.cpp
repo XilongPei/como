@@ -130,21 +130,24 @@ ECode CZMQChannel::GetComponentMetadata(
     parcel->GetDataSize(size);
 
     int rc = CZMQUtils::CzmqSendBuf(ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
+    if (-1 == rc) {
+        return E_RUNTIME_EXCEPTION;
+    }
 
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, 0);
-
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
-
+            Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);
+            ec = E_RUNTIME_EXCEPTION;
         }
         else {
             void* replyData = zmq_msg_data(&msg);
             Integer replySize = zmq_msg_size(&msg);
             metadata = Array<Byte>::Allocate(replySize);
             if (metadata.IsNull()) {
-                Logger::E("CZMQChannel", "Malloc %d size metadata failed.", replySize);
+                Logger::E("GetComponentMetadata", "Malloc %d size metadata failed.", replySize);
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
             else {
@@ -153,7 +156,7 @@ ECode CZMQChannel::GetComponentMetadata(
         }
     }
     else {
-        Logger::E("CZMQChannel", "Remote call failed with ec = 0x%x.", ec);
+        Logger::E("GetComponentMetadata", "RCZMQUtils::CzmqRecvMsg().");
     }
 
     // Release message

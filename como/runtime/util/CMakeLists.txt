@@ -61,6 +61,7 @@ COPY(util ${UTIL_SRC_DIR}/comolog.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comoobj.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comoref.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/comolock.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/mutex.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/ComoFunctionSafetyObject.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/FSOGetterSetter.h ${INC_DIR})
 
@@ -70,7 +71,9 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comolog.h
     ${UTIL_SRC_DIR}/comoobj.h
     ${UTIL_SRC_DIR}/comoref.h
-    ${UTIL_SRC_DIR}/comolock.h)
+    ${UTIL_SRC_DIR}/comolock.h
+    ${UTIL_SRC_DIR}/mutex.h
+)
 
 install(FILES
     ${DEPLOY_HEADERS}

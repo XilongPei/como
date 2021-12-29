@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include "zmq.h"
 #include "checksum.h"
+#include "ComoConfig.h"
 #include "CZMQUtils.h"
 
 namespace como {
@@ -33,18 +34,21 @@ public:
 };
 
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
-
-void *comoZmqContext = nullptr;
-Mutex comoZmqContextLock;
-
+static void *comoZmqContext = nullptr;
 
 /*
-int rc = zmq_ctx_destroy(context);
+int rc = zmq_ctx_shutdown(context);
 */
 void *CZMQUtils::CzmqGetContext() {
-    Mutex::AutoLock lock(comoZmqContextLock);
+
+    Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
+
     if (nullptr == comoZmqContext) {
         comoZmqContext = zmq_ctx_new();
+
+        /* custom context
+        zmq_ctx_set(comoZmqContext, ZMQ_IO_THREADS, 1);
+        */
     }
     return comoZmqContext;
 }
@@ -86,7 +90,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
         context = CzmqGetContext();
 
     void *socket;
-    if (ZMQ_REP != type) {
+    if (ZMQ_REP != type) {      // I am client
         socket = zmq_socket(context, ZMQ_REQ);
         if (identityLen > 254)
             identityLen = 254;
@@ -98,7 +102,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
             zmq_setsockopt(socket, ZMQ_ROUTING_ID, identityDefault, strlen(identityDefault));
         }
     }
-    else {
+    else {                      // I am server
         socket = zmq_socket(context, ZMQ_REP);
         if (identity != nullptr) {
             if (zmq_getsockopt(context, ZMQ_ROUTING_ID, (char *)identity, &identityLen) != 0) {
@@ -106,7 +110,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
             }
         }
     }
-
 
     if (nullptr != socket) {
         if (nullptr != endpoint) {
@@ -259,8 +262,8 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
     }
     else {
         int more;
-        size_t more_size = sizeof (more);
-        int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
+        size_t more_size = sizeof(more);
+        int rc = zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             int rc = zmq_msg_init(&msg);
 
@@ -299,6 +302,120 @@ void *CZMQUtils::CzmqFindSocket(const char *serverName)
         return endpointSocket->socket;
     }
 
+    return nullptr;
+}
+
+static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size);
+static void *rep_socket_monitor(void *ctx);
+
+void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
+{
+    EndpointSocket *endpointSocket;
+
+    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                        zmq_sockets.find(std::string(serverName));
+    if (tmp != zmq_sockets.end()) {
+        endpointSocket = tmp->second;
+        return endpointSocket->socket;
+    }
+
+    pthread_t thread ;
+    // REP socket monitor, all events
+    int rc = zmq_socket_monitor(endpointSocket->socket, endpointSocket->endpoint.c_str(), ZMQ_EVENT_ALL);
+    if (0 != rc)
+        return nullptr;
+
+    rc = pthread_create(&thread, NULL, rep_socket_monitor, CZMQUtils::CzmqGetContext());
+    if (0 != rc)
+        return nullptr;
+
+    return nullptr;
+}
+
+/**
+ * Read one event off the monitor socket; return value and address
+ * by reference, if not null, and event number by value. Returns -1
+ * in case of error.
+ */
+static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size)
+{
+    //  First frame in message contains event number and value
+    zmq_msg_t msg;
+    zmq_msg_init(&msg);
+    if (zmq_msg_recv(&msg, socket, 0) == -1)
+        return -1;              //  Interrupted, presumably
+    //assert(zmq_msg_more(&msg));
+
+    uint8_t *data = (uint8_t *)zmq_msg_data(&msg);
+    uint16_t event = *(uint16_t *)(data);
+    value = *(uint32_t *)(data + 2);
+
+    //  Second frame in message contains event address
+    zmq_msg_init(&msg);
+    if (zmq_msg_recv(&msg, socket, 0) == -1)
+        return -1;              //  Interrupted, presumably
+    //assert(!zmq_msg_more(&msg));
+
+    if (msg_data) {
+        uint8_t *data = (uint8_t *)zmq_msg_data(&msg);
+        size_t size = zmq_msg_size(&msg);
+
+        if (msg_data_size > size) {
+            memcpy(msg_data, data, size);
+            msg_data[size] = '\0';
+        }
+        else {
+            memcpy(msg_data, data, msg_data_size);
+            msg_data[msg_data_size] = '\0';
+        }
+        msg_data_size = size;
+    }
+
+    return event;
+}
+
+// REP socket monitor thread
+static void *rep_socket_monitor(void *ctx)
+{
+    int event;
+    static char msg_data[1025] ;
+    int rc;
+
+    void *socket = zmq_socket(ctx, ZMQ_PAIR);
+    if (nullptr == socket)
+        return nullptr;
+
+    rc = zmq_connect(socket, "inproc://monitor.rep");
+    if (0 != rc)
+        return nullptr;
+
+    uint32_t value;
+    size_t msg_data_size = sizeof(msg_data);
+    while (event = get_monitor_event(socket, value, msg_data, msg_data_size) > 0) {
+        switch (event) {
+            case ZMQ_EVENT_LISTENING:
+                printf("listening socket descriptor %d\n", value);
+                printf("listening socket address %s\n", msg_data);
+                break;
+            case ZMQ_EVENT_ACCEPTED:
+                printf("accepted socket descriptor %d\n", value);
+                printf("accepted socket address %s\n", msg_data);
+                break;
+            case ZMQ_EVENT_CLOSE_FAILED:
+                printf("socket close failure error code %d\n", value);
+                printf("socket address %s\n", msg_data);
+                break;
+            case ZMQ_EVENT_CLOSED:
+                printf("closed socket descriptor %d\n", value);
+                printf("closed socket address %s\n", msg_data);
+                break;
+            case ZMQ_EVENT_DISCONNECTED:
+                printf("disconnected socket descriptor %d\n", value);
+                printf("disconnected socket address %s\n", msg_data);
+                break;
+        }
+    }
+    zmq_close(socket);
     return nullptr;
 }
 

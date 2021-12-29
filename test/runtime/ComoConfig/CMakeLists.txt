@@ -22,7 +22,7 @@ set(ComoConfig_OBJ_DIR ${RUNTIME_OBJ_DIR}/ComoConfig)
 include_directories(
     ./
     ${INC_DIR}
-    ${ComoConfig_OBJ_DIR})
+    ${OBJ_DIR})
 
 set(SOURCES
     main.cpp)

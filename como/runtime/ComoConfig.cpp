@@ -24,6 +24,8 @@ ComoConfig::ComoConfig() {
 
 std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string endpoint)
 {
+    Mutex::AutoLock lock(CZMQUtils_ContextLock);
+
     ServerNameEndpointMap.emplace(serverName, endpoint);
 
     return serverName;
@@ -58,5 +60,8 @@ Long ComoConfig::TPZA_TASK_EXPIRES = 1000000000L * 30;
 
 std::unordered_map<std::string, std::string> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
+
+
+Mutex ComoConfig::CZMQUtils_ContextLock;
 
 } // namespace como

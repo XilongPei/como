@@ -60,9 +60,7 @@ public:
 
     static void *CzmqFindSocket(const char *serverName);
 
-private:
-    static void *comoZmqContext;
-    static Mutex comoZmqContextLock;
+    static void *CzmqSocketMonitor(const char *serverName);
 };
 
 } // namespace como

@@ -19,6 +19,7 @@
 
 #include <unordered_map>
 #include "comotypes.h"
+#include "util/mutex.h"
 
 namespace como {
 
@@ -60,6 +61,8 @@ public:
 
     static std::unordered_map<std::string, std::string> ServerNameEndpointMap;
     static std::string ComoRuntimeInstanceIdentity;
+
+    static Mutex CZMQUtils_ContextLock;
 };
 
 } // namespace como
