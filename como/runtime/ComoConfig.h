@@ -33,10 +33,12 @@ using CpuInvokeDsa = ECode(*)(
 #define MAX_DSA_IN_ONE_SYSTEM   2
 #define ENABLE_RUNTIME_LOGGER   1
 
-class ComoConfig
+class COM_PUBLIC ComoConfig
 {
 public:
     ComoConfig();
+
+    static std::string AddZeroMQEndpoint(std::string serverName, std::string endpoint);
 
     static int ThreadPool_MAX_THREAD_NUM;
     static int ThreadPool_MAX_DBUS_DISPATCHER;

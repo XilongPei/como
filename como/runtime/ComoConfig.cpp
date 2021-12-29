@@ -22,6 +22,13 @@ ComoConfig::ComoConfig() {
     ServerNameEndpointMap.emplace(std::string("localhost"), std::string("127.0.0.1:1239"));
 }
 
+std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string endpoint)
+{
+    ServerNameEndpointMap.emplace(serverName, endpoint);
+
+    return serverName;
+}
+
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
 
 // should less than ThreadPool_MAX_THREAD_NUM
