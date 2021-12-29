@@ -19,7 +19,7 @@
 
 #include <unordered_map>
 #include "comotypes.h"
-#include "util/mutex.h"
+#include "mutex.h"
 
 namespace como {
 
