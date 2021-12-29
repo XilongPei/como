@@ -29,8 +29,9 @@ public:
     }
 
 public:
-    std::string endpoint;
+    void *context;
     void *socket;
+    std::string endpoint;
 };
 
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
@@ -79,11 +80,15 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
 {
     EndpointSocket *endpointSocket;
 
-    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
-                                        zmq_sockets.find(std::string(serverName));
-    if (tmp != zmq_sockets.end()) {
-        endpointSocket = tmp->second;
-        return endpointSocket->socket;
+    {
+        Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
+
+        std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                            zmq_sockets.find(std::string(serverName));
+        if (tmp != zmq_sockets.end()) {
+            endpointSocket = tmp->second;
+            return endpointSocket->socket;
+        }
     }
 
     if (nullptr == context)
@@ -118,10 +123,16 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
                 Logger::E("CZMQUtils::CzmqGetSocket", "endpoint: %s errno %d", endpoint, zmq_errno());
             }
         }
+
         endpointSocket = new EndpointSocket();
-        endpointSocket->endpoint = std::string(endpoint);
+        endpointSocket->context = context;
         endpointSocket->socket = socket;
-        zmq_sockets.emplace(serverName, endpointSocket);
+        endpointSocket->endpoint = std::string(endpoint);
+        {
+            Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
+
+            zmq_sockets.emplace(serverName, endpointSocket);
+        }
     }
 
     return socket;
@@ -133,6 +144,8 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
 int CZMQUtils::CzmqCloseSocket(const char *serverName)
 {
     EndpointSocket *endpointSocket;
+
+    Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
     std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
                                         zmq_sockets.find(std::string(serverName));
@@ -295,6 +308,8 @@ void *CZMQUtils::CzmqFindSocket(const char *serverName)
 {
     EndpointSocket *endpointSocket;
 
+    Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
+
     std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
                                         zmq_sockets.find(std::string(serverName));
     if (tmp != zmq_sockets.end()) {
@@ -306,17 +321,20 @@ void *CZMQUtils::CzmqFindSocket(const char *serverName)
 }
 
 static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size);
-static void *rep_socket_monitor(void *ctx);
+static void *rep_socket_monitor(void *endpointSocket);
 
 void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
 {
     EndpointSocket *endpointSocket;
 
-    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
-                                        zmq_sockets.find(std::string(serverName));
-    if (tmp != zmq_sockets.end()) {
-        endpointSocket = tmp->second;
-        return endpointSocket->socket;
+    {
+        Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
+
+        std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+                                            zmq_sockets.find(std::string(serverName));
+        if (tmp != zmq_sockets.end()) {
+            endpointSocket = tmp->second;
+        }
     }
 
     pthread_t thread ;
@@ -325,7 +343,7 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
     if (0 != rc)
         return nullptr;
 
-    rc = pthread_create(&thread, NULL, rep_socket_monitor, CZMQUtils::CzmqGetContext());
+    rc = pthread_create(&thread, NULL, rep_socket_monitor, endpointSocket);
     if (0 != rc)
         return nullptr;
 
@@ -339,34 +357,44 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
  */
 static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size)
 {
-    //  First frame in message contains event number and value
+    // First frame in message contains event number and value
     zmq_msg_t msg;
     zmq_msg_init(&msg);
-    if (zmq_msg_recv(&msg, socket, 0) == -1)
-        return -1;              //  Interrupted, presumably
-    //assert(zmq_msg_more(&msg));
+    if (zmq_msg_recv(&msg, socket, 0) == -1) {
+        return -1;              // Interrupted, presumably
+    }
+
+    if (! zmq_msg_more(&msg)) {
+        Logger::E("get_monitor_event", "bad packet 1.");
+        return -1;
+    }
 
     uint8_t *data = (uint8_t *)zmq_msg_data(&msg);
     uint16_t event = *(uint16_t *)(data);
     value = *(uint32_t *)(data + 2);
 
-    //  Second frame in message contains event address
+    // Second frame in message contains event address
     zmq_msg_init(&msg);
-    if (zmq_msg_recv(&msg, socket, 0) == -1)
+    if (zmq_msg_recv(&msg, socket, 0) == -1) {
         return -1;              //  Interrupted, presumably
-    //assert(!zmq_msg_more(&msg));
+    }
+
+    if (zmq_msg_more(&msg)) {
+        Logger::E("get_monitor_event", "bad packet 2.");
+        return -1;
+    }
 
     if (msg_data) {
         uint8_t *data = (uint8_t *)zmq_msg_data(&msg);
         size_t size = zmq_msg_size(&msg);
 
-        if (msg_data_size > size) {
+        if (msg_data_size > (size + 1)) {
             memcpy(msg_data, data, size);
             msg_data[size] = '\0';
         }
         else {
-            memcpy(msg_data, data, msg_data_size);
-            msg_data[msg_data_size] = '\0';
+            memcpy(msg_data, data, msg_data_size-1);
+            msg_data[msg_data_size-1] = '\0';
         }
         msg_data_size = size;
     }
@@ -375,17 +403,17 @@ static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size
 }
 
 // REP socket monitor thread
-static void *rep_socket_monitor(void *ctx)
+static void *rep_socket_monitor(void *endpointSocket)
 {
     int event;
-    static char msg_data[1025] ;
+    static char msg_data[1025];
     int rc;
 
-    void *socket = zmq_socket(ctx, ZMQ_PAIR);
+    void *socket = zmq_socket(((EndpointSocket*)endpointSocket)->context, ZMQ_PAIR);
     if (nullptr == socket)
         return nullptr;
 
-    rc = zmq_connect(socket, "inproc://monitor.rep");
+    rc = zmq_connect(socket, ((EndpointSocket*)endpointSocket)->endpoint.c_str());
     if (0 != rc)
         return nullptr;
 
