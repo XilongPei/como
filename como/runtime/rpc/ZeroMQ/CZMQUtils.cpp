@@ -118,7 +118,13 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
 
     if (nullptr != socket) {
         if (nullptr != endpoint) {
-            int rc = zmq_connect(socket, endpoint);
+            int rc;
+
+            if (ZMQ_REP != type)    // create outgoing connection from socket
+                rc = zmq_connect(socket, endpoint);
+            else                    // accept incoming connections on a socket
+                rc = zmq_bind(socket, endpoint);
+
             if (rc != 0) {
                 Logger::E("CZMQUtils::CzmqGetSocket", "endpoint: %s errno %d", endpoint, zmq_errno());
             }
