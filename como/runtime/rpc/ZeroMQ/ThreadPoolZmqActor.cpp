@@ -143,8 +143,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
         // check for time out connection
-        if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) +
-                    1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec) >
+        if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) /*+ // ns accuracy is not required
+                    1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec)*/ >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
             clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
