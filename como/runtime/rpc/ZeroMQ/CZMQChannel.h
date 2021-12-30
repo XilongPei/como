@@ -105,7 +105,6 @@ private:
     void  *mSocket;
     Boolean mStarted;
     Mutex mLock;
-    Condition mCond;
 };
 
 inline CZMQChannel* CZMQChannel::GetProxyChannel(

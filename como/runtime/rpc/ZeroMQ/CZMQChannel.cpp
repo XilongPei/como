@@ -44,7 +44,6 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
-    , mCond(mLock)
 {
     std::unordered_map<std::string, std::string>::iterator tmp =
             ComoConfig::ServerNameEndpointMap.find(std::string(mServerName.string()));
@@ -219,12 +218,6 @@ ECode CZMQChannel::StartListening(
         ret = TPZA_Executor::GetInstance()->RunTask(w);
     }
 
-    if (0 == ret) {
-        Mutex::AutoLock lock(mLock);
-        while (!mStarted) {
-            mCond.Wait();
-        }
-    }
     return NOERROR;
 }
 
