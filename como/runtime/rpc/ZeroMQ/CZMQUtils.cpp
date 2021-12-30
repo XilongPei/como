@@ -29,7 +29,6 @@ public:
     }
 
 public:
-    void *context;
     void *socket;
     std::string endpoint;
 };
@@ -83,10 +82,10 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
-        std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+        std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                             zmq_sockets.find(std::string(serverName));
-        if (tmp != zmq_sockets.end()) {
-            endpointSocket = tmp->second;
+        if (iter != zmq_sockets.end()) {
+            endpointSocket = iter->second;
             return endpointSocket->socket;
         }
     }
@@ -131,7 +130,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
         }
 
         endpointSocket = new EndpointSocket();
-        endpointSocket->context = context;
         endpointSocket->socket = socket;
         endpointSocket->endpoint = std::string(endpoint);
         {
@@ -153,24 +151,22 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 
     Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
-    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+    std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                         zmq_sockets.find(std::string(serverName));
-    if (tmp != zmq_sockets.end()) {
-        endpointSocket = tmp->second;
+    if (iter != zmq_sockets.end()) {
+        endpointSocket = iter->second;
 
         int rc;
         rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
-        if (zmq_disconnect != 0) {
+        if (0 != rc) {
             rc = zmq_close(endpointSocket->socket);
-        }
-        if (rc != 0) {
             Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d", zmq_errno());
             return rc;
         }
 
         delete(endpointSocket);
         int delNum = zmq_sockets.erase(std::string(serverName));
-        if (delNum != 1) {
+        if (1 != delNum) {
             Logger::E("CZMQUtils::CzmqCloseSocket", "serverName should be unique name");
         }
         return delNum;
@@ -230,7 +226,7 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
     else {
         int more;
         size_t more_size = sizeof (more);
-        int rc = zmq_getsockopt (socket, ZMQ_RCVMORE, &more, &more_size);
+        int rc = zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
             if (-1 == numberOfBytes) {
@@ -316,10 +312,10 @@ void *CZMQUtils::CzmqFindSocket(const char *serverName)
 
     Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
-    std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+    std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                         zmq_sockets.find(std::string(serverName));
-    if (tmp != zmq_sockets.end()) {
-        endpointSocket = tmp->second;
+    if (iter != zmq_sockets.end()) {
+        endpointSocket = iter->second;
         return endpointSocket->socket;
     }
 
@@ -336,10 +332,10 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
-        std::unordered_map<std::string, EndpointSocket*>::iterator tmp =
+        std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                             zmq_sockets.find(std::string(serverName));
-        if (tmp != zmq_sockets.end()) {
-            endpointSocket = tmp->second;
+        if (iter != zmq_sockets.end()) {
+            endpointSocket = iter->second;
         }
     }
 
@@ -366,7 +362,7 @@ static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size
     // First frame in message contains event number and value
     zmq_msg_t msg;
     zmq_msg_init(&msg);
-    if (zmq_msg_recv(&msg, socket, 0) == -1) {
+    if (zmq_msg_recv(&msg, socket, ZMQ_DONTWAIT) == -1) {
         return -1;              // Interrupted, presumably
     }
 
@@ -381,7 +377,8 @@ static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size
 
     // Second frame in message contains event address
     zmq_msg_init(&msg);
-    if (zmq_msg_recv(&msg, socket, 0) == -1) {
+
+    if (zmq_msg_recv(&msg, socket, ZMQ_DONTWAIT) == -1) {
         return -1;              //  Interrupted, presumably
     }
 
@@ -405,51 +402,90 @@ static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size
         msg_data_size = size;
     }
 
+    zmq_msg_close(&msg);
+
     return event;
 }
+
+static void *socketZMQ_PAIR = nullptr;
+static bool shutdown = false;
 
 // REP socket monitor thread
 static void *rep_socket_monitor(void *endpointSocket)
 {
-    int event;
-    static char msg_data[1025];
-    int rc;
-
-    void *socket = zmq_socket(((EndpointSocket*)endpointSocket)->context, ZMQ_PAIR);
-    if (nullptr == socket)
-        return nullptr;
-
-    rc = zmq_connect(socket, ((EndpointSocket*)endpointSocket)->endpoint.c_str());
-    if (0 != rc)
+    if (nullptr == socketZMQ_PAIR) {
+        socketZMQ_PAIR = zmq_socket(CZMQUtils::CzmqGetContext(), ZMQ_PAIR);
+    }
+    if (nullptr == socketZMQ_PAIR)
         return nullptr;
 
     uint32_t value;
+    static char msg_data[1025];
     size_t msg_data_size = sizeof(msg_data);
-    while (event = get_monitor_event(socket, value, msg_data, msg_data_size) > 0) {
+
+    std::unordered_map<std::string, EndpointSocket*>::iterator iter = zmq_sockets.begin();
+    while (!shutdown) {
+        int event;
+        int rc;
+        const char *endpoint;
+
+        if (nullptr != endpointSocket) {
+            endpoint = ((EndpointSocket*)endpointSocket)->endpoint.c_str();
+        }
+        else {
+            if (iter != zmq_sockets.end()) {
+                EndpointSocket *epSocket = (EndpointSocket*)(iter->second);
+                endpoint = epSocket->endpoint.c_str();
+                iter++;
+            }
+            else {
+                iter = zmq_sockets.begin();
+            }
+
+        }
+
+        rc = zmq_connect(socketZMQ_PAIR, endpoint);
+        if (0 != rc) {
+            Logger::V("ZMQ monitor", "cann't connect %s\n", endpoint);
+            continue;
+        }
+
+        event = get_monitor_event(socketZMQ_PAIR, value, msg_data, msg_data_size);
         switch (event) {
             case ZMQ_EVENT_LISTENING:
-                printf("listening socket descriptor %d\n", value);
-                printf("listening socket address %s\n", msg_data);
+                Logger::V("ZMQ monitor", "listening socket descriptor %d\n", value);
+                Logger::V("ZMQ monitor", "listening socket address %s\n", msg_data);
                 break;
             case ZMQ_EVENT_ACCEPTED:
-                printf("accepted socket descriptor %d\n", value);
-                printf("accepted socket address %s\n", msg_data);
+                Logger::V("ZMQ monitor", "accepted socket descriptor %d\n", value);
+                Logger::V("ZMQ monitor", "accepted socket address %s\n", msg_data);
                 break;
             case ZMQ_EVENT_CLOSE_FAILED:
-                printf("socket close failure error code %d\n", value);
-                printf("socket address %s\n", msg_data);
+                Logger::V("ZMQ monitor", "socket close failure error code %d\n", value);
+                Logger::V("ZMQ monitor", "socket address %s\n", msg_data);
                 break;
             case ZMQ_EVENT_CLOSED:
-                printf("closed socket descriptor %d\n", value);
-                printf("closed socket address %s\n", msg_data);
+                Logger::V("ZMQ monitor", "closed socket descriptor %d\n", value);
+                Logger::V("ZMQ monitor", "closed socket address %s\n", msg_data);
                 break;
             case ZMQ_EVENT_DISCONNECTED:
-                printf("disconnected socket descriptor %d\n", value);
-                printf("disconnected socket address %s\n", msg_data);
+                Logger::V("ZMQ monitor", "disconnected socket descriptor %d\n", value);
+                Logger::V("ZMQ monitor", "disconnected socket address %s\n", msg_data);
                 break;
+            default:
+                if (zmq_errno() != EAGAIN) {
+                    // this socket is invalid, close it
+                    CZMQUtils::CzmqCloseSocket(((EndpointSocket*)endpointSocket)->endpoint.c_str());
+                }
+        }
+
+        rc = zmq_disconnect(socketZMQ_PAIR, endpoint);
+        if (0 != rc) {
+            Logger::V("ZMQ monitor", "cann't disconnect %s\n", endpoint);
+            continue;
         }
     }
-    zmq_close(socket);
+    zmq_close(socketZMQ_PAIR);
     return nullptr;
 }
 
