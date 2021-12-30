@@ -178,7 +178,17 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                 TPZA_Executor::defaultHandleMessage();
             }
 
-            // wait 100ns, a short time, CPU is too tired
+            /* wait 100ns, a short time, CPU is too tired.
+               Theoretically, it should be calculated as follows, but the delay
+               accuracy is not required here, so it is important to reduce the
+               amount of calculation.
+
+               timeout_ms: the ms we want to wait
+
+            long nsec = curTime.tv_usec * 1000 + (timeout_ms % 1000) * 1000000;
+            curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
+            curTime.tv_nsec = nsec % 1000000000;
+            */
             struct timespec curTime;
             clock_gettime(CLOCK_REALTIME, &curTime);
             curTime.tv_nsec += 100;
