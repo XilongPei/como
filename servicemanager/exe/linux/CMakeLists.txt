@@ -19,26 +19,57 @@ project(servicemanager CXX)
 set(SM_EXE_SRC_DIR ${SM_SRC_DIR}/exe/linux)
 set(SM_EXE_OBJ_DIR ${SM_OBJ_DIR}/exe/linux)
 
+# ====== COMO Over ZeroMQ Support ======
+set(COMO_RUNTIME_DIR $ENV{ROOT}/como/runtime)
+set(RPC_ZeroMQ_INC
+    ${EXTERNAL_DIR}/libcrc/include
+    ${COMO_RUNTIME_DIR}
+    ${COMO_RUNTIME_DIR}/rpc
+    ${COMO_RUNTIME_DIR}/rpc/ZeroMQ
+)
+set(RPC_ZeroMQ_SOURCES
+    RpcOverZeroMQ.cpp
+    ${COMO_RUNTIME_DIR}/util/mutex.cpp
+    ${COMO_RUNTIME_DIR}/rpc/ZeroMQ/CZMQParcel.cpp
+    ${COMO_RUNTIME_DIR}/rpc/ZeroMQ/ThreadPoolZmqActor.cpp
+    ${COMO_RUNTIME_DIR}/rpc/ZeroMQ/CZMQUtils.cpp
+)
+set(RPC_ZeroMQ_LIBS
+    pthread
+    zmq
+)
+
+set(RPC_ZeroMQ_DEFINITIONS -DRPC_OVER_ZeroMQ_SUPPORT)
+
+MESSAGE(STATUS "===== ${RPC_ZeroMQ_DEFINITIONS} ========= ${RPC_ZeroMQ_SOURCES}")
+# ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
+
 include_directories(
     ./
     ${INC_DIR}
     ${SM_EXE_OBJ_DIR}
     /usr/include/dbus-1.0
-    /usr/lib/x86_64-linux-gnu/dbus-1.0/include)
+    /usr/lib/x86_64-linux-gnu/dbus-1.0/include
+    ${RPC_ZeroMQ_INC}
+)
 
 set(SOURCES
     ServiceManager.cpp
-    main.cpp)
+    main.cpp
+    ${RPC_ZeroMQ_SOURCES}
+)
 
 IMPORT_LIBRARY(comort.so)
 
-add_definitions(-DCOMO_WITH_RPC)
+add_definitions(-DCOMO_WITH_RPC ${RPC_ZeroMQ_DEFINITIONS})
 
 add_executable(servicemanager
     ${SOURCES})
 target_link_libraries(servicemanager
     comort.so
-    dbus-1)
+    dbus-1
+    ${RPC_ZeroMQ_LIBS}
+)
 add_dependencies(servicemanager comort)
 
 COPY(servicemanager ${SM_EXE_OBJ_DIR}/servicemanager ${BIN_DIR})

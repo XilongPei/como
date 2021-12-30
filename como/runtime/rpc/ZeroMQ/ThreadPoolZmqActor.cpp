@@ -107,6 +107,7 @@ ECode TPZA_Executor::Worker::HandleMessage()
 AutoPtr<TPZA_Executor> TPZA_Executor::sInstance = nullptr;
 Mutex TPZA_Executor::sInstanceLock;
 AutoPtr<ThreadPoolZmqActor> TPZA_Executor::threadPool = nullptr;
+HANDLE_MESSAGE_FUNCTION TPZA_Executor::defaultHandleMessage = nullptr;
 
 AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 {
@@ -132,6 +133,11 @@ int TPZA_Executor::CleanTask(int posWorkerList)
     return threadPool->cleanTask(posWorkerList);
 }
 
+int TPZA_Executor::SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func)
+{
+    defaultHandleMessage = func;
+    return 0;
+}
 
 void *ThreadPoolZmqActor::threadFunc(void *threadData)
 {
@@ -148,7 +154,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
             clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
-            pthread_mutex_lock(&m_pthreadMutex);
+            pthread_mutex_lock(&pthreadMutex);
 
             for (i = 0;  i < ((mWorkerList.size()) &&
                          (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++) {
@@ -159,25 +165,31 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                     mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
                 }
             }
-            pthread_mutex_unlock(&m_pthreadMutex);
+            pthread_mutex_unlock(&pthreadMutex);
         }
 
-        pthread_mutex_lock(&m_pthreadMutex);
+        pthread_mutex_lock(&pthreadMutex);
 
         for (i = 0;  i < ((mWorkerList.size()) &&
                      (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
 
         while ((i >= mWorkerList.size()) && !shutdown) {
-            pthread_mutex_unlock(&m_pthreadMutex);
-            pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-            pthread_mutex_lock(&m_pthreadMutex);
+            if (nullptr != TPZA_Executor::defaultHandleMessage) {
+                TPZA_Executor::defaultHandleMessage();
+            }
+
+            // wait 100ns, a short time, CPU is too tired
+            struct timespec curTime;
+            clock_gettime(CLOCK_REALTIME, &curTime);
+            curTime.tv_nsec += 100;
+            pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
 
             for (i = 0;  i < ((mWorkerList.size()) &&
                          (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
         }
 
         if (shutdown) {
-            pthread_mutex_unlock(&m_pthreadMutex);
+            pthread_mutex_unlock(&pthreadMutex);
             pthread_exit(nullptr);
             return nullptr;
         }
@@ -185,7 +197,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         AutoPtr<TPZA_Executor::Worker> w = mWorkerList[i];
         w->mWorkerStatus = WORKER_TASK_RUNNING;
 
-        pthread_mutex_unlock(&m_pthreadMutex);
+        pthread_mutex_unlock(&pthreadMutex);
 
         w->HandleMessage();
     }
@@ -200,8 +212,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 bool ThreadPoolZmqActor::shutdown = false;
 std::vector<TPZA_Executor::Worker*> ThreadPoolZmqActor::mWorkerList;   // task list
 
-pthread_mutex_t ThreadPoolZmqActor::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t ThreadPoolZmqActor::m_pthreadCond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t ThreadPoolZmqActor::pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t ThreadPoolZmqActor::pthreadCond = PTHREAD_COND_INITIALIZER;
 
 ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 {
@@ -232,7 +244,7 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
 
-    pthread_mutex_lock(&m_pthreadMutex);
+    pthread_mutex_lock(&pthreadMutex);
 
     for (i = 0;  i < mWorkerList.size();  i++) {
         if (nullptr == mWorkerList[i])
@@ -260,8 +272,8 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
         mWorkerList.push_back(task);
     }
 
-    pthread_mutex_unlock(&m_pthreadMutex);
-    pthread_cond_signal(&m_pthreadCond);
+    pthread_mutex_unlock(&pthreadMutex);
+    pthread_cond_signal(&pthreadCond);
 
     return i;
 }
@@ -271,9 +283,9 @@ int ThreadPoolZmqActor::cleanTask(int posWorkerList)
     if (posWorkerList < 0 || (posWorkerList >= mWorkerList.size()))
         return -1;
 
-    pthread_mutex_lock(&m_pthreadMutex);
+    pthread_mutex_lock(&pthreadMutex);
     mWorkerList[posWorkerList] = nullptr;
-    pthread_mutex_unlock(&m_pthreadMutex);
+    pthread_mutex_unlock(&pthreadMutex);
 
     return posWorkerList;
 }
@@ -285,7 +297,7 @@ int ThreadPoolZmqActor::stopAll()
     }
 
     shutdown = true;
-    pthread_cond_broadcast(&m_pthreadCond);
+    pthread_cond_broadcast(&pthreadCond);
 
     for (int i = 0; i < mThreadNum; i++) {
         pthread_join(pthread_id[i], nullptr);
@@ -294,8 +306,8 @@ int ThreadPoolZmqActor::stopAll()
     free(pthread_id);
     pthread_id = nullptr;
 
-    pthread_mutex_destroy(&m_pthreadMutex);
-    pthread_cond_destroy(&m_pthreadCond);
+    pthread_mutex_destroy(&pthreadMutex);
+    pthread_cond_destroy(&pthreadCond);
 
     return 0;
 }

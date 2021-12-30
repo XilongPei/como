@@ -28,6 +28,8 @@
 
 namespace como {
 
+using HANDLE_MESSAGE_FUNCTION = ECode(*)();
+
 /*
 +==ThreadPoolZmqActor==+== thread pool
 |                      |
@@ -80,6 +82,10 @@ public:
 
     int CleanTask(int posWorkerList);
 
+    int SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func);
+
+    static HANDLE_MESSAGE_FUNCTION defaultHandleMessage;
+
 private:
     static AutoPtr<TPZA_Executor> sInstance;
     static AutoPtr<ThreadPoolZmqActor> threadPool;
@@ -97,13 +103,11 @@ private:
     int mThreadNum;                                             // most thread number
     pthread_t *pthread_id;
 
-    static pthread_mutex_t m_pthreadMutex;
-    static pthread_cond_t m_pthreadCond;
-
-protected:
-    static void *threadFunc(void *threadData);
-
 public:
+    static void *threadFunc(void *threadData);
+    static pthread_mutex_t pthreadMutex;
+    static pthread_cond_t pthreadCond;
+
     ThreadPoolZmqActor(int threadNum = 10);
     static int addTask(TPZA_Executor::Worker *task);
     static int cleanTask(int posWorkerList);

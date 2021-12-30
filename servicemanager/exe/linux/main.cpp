@@ -19,6 +19,10 @@
 #include <dbus/dbus.h>
 #include <cstdio>
 
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+#include "RpcOverZeroMQ.h"
+#endif
+
 using como::Logger;
 using jing::ServiceManager;
 
@@ -27,6 +31,11 @@ int main(int argv, char** argc)
     DBusError err;
 
     Logger_D("ServiceManager", "starting ...");
+
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+    // TPZA : ThreadPoolZmqActor
+    jing::RpcOverZeroMQ::startTPZA_Executor();
+#endif
 
     dbus_error_init(&err);
 
