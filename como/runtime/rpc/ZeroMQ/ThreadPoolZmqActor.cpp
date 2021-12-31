@@ -38,15 +38,18 @@ TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
     , mCond(PTHREAD_COND_INITIALIZER)
 {
     String serverName;
-    channel->GetServerName(serverName);
-
-    void *mSocket = CZMQUtils::CzmqFindSocket(serverName);
+    void *mSocket = channel->GetSocket();
     if (nullptr == mSocket) {
         Logger::E("TPZA_Executor::Worker", "CzmqFindSocket: %s", serverName.string());
     }
 
     pthread_mutex_init(&mMutex, NULL);
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
+}
+
+TPZA_Executor::Worker::~Worker()
+{
+    // close socket?
 }
 
 ECode TPZA_Executor::Worker::HandleMessage()
@@ -92,7 +95,11 @@ ECode TPZA_Executor::Worker::HandleMessage()
             }
 
             default:
-                Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+                if (nullptr != TPZA_Executor::defaultHandleMessage) {
+                    if (TPZA_Executor::defaultHandleMessage(eventCode, mSocket, msg) != 0) {
+                        Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+                    }
+                }
         }
 
         mWorkerStatus = WORKER_TASK_FINISH;
@@ -175,7 +182,9 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         while ((i >= mWorkerList.size()) && !shutdown) {
             if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                TPZA_Executor::defaultHandleMessage();
+                Integer eventCode;
+                zmq_msg_t msg;
+                TPZA_Executor::defaultHandleMessage(eventCode, nullptr, msg);
             }
 
             /* wait 100ns, a short time, CPU is too tired.

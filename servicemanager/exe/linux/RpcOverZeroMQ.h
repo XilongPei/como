@@ -21,6 +21,7 @@
 #include <comoapi.h>
 #include <comosp.h>
 #include <comoref.h>
+#include "zmq.h"
 
 namespace jing {
 
@@ -29,7 +30,7 @@ class RpcOverZeroMQ
 {
 public:
     static void startTPZA_Executor();
-    static ECode HandleMessage();
+    static ECode HandleMessage(Integer& eventCode, void *socket, zmq_msg_t& msg);
 };
 
 } // namespace jing

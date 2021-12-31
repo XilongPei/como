@@ -18,6 +18,7 @@
 #define __COMO_THREADPOOLZMQACTOR_H__
 
 #include <vector>
+#include "zmq.h"
 #include "comoobj.h"
 #include "comotypes.h"
 #include "comoref.h"
@@ -28,7 +29,7 @@
 
 namespace como {
 
-using HANDLE_MESSAGE_FUNCTION = ECode(*)();
+using HANDLE_MESSAGE_FUNCTION = ECode(*)(Integer&,void *,zmq_msg_t&);
 
 /*
 +==ThreadPoolZmqActor==+== thread pool
@@ -61,6 +62,7 @@ public:
     {
     public:
         Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub);
+        ~Worker();
 
         ECode HandleMessage();
 

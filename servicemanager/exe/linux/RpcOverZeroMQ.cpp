@@ -31,7 +31,7 @@ void RpcOverZeroMQ::startTPZA_Executor()
     tPZA_Executor->SetDefaultHandleMessage(HandleMessage);
 }
 
-ECode RpcOverZeroMQ::HandleMessage()
+ECode RpcOverZeroMQ::HandleMessage(Integer& eventCode, void *socket, zmq_msg_t& msg)
 {
     static int i = 0;
     printf("------ %d --\n", i++);

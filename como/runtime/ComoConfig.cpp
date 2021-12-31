@@ -19,16 +19,22 @@
 namespace como {
 
 ComoConfig::ComoConfig() {
-    ServerNameEndpointMap.emplace(std::string("localhost"), std::string("127.0.0.1:1239"));
+    //
 }
 
 std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string endpoint)
 {
     Mutex::AutoLock lock(CZMQUtils_ContextLock);
 
-    ServerNameEndpointMap.emplace(serverName, endpoint);
+    ServerNodeInfo *sni = (ServerNodeInfo*)malloc(sizeof(ServerNodeInfo));
+    if (nullptr != sni) {
+        sni->socket = nullptr;
+        sni->endpoint = endpoint;
+        ServerNameEndpointMap.emplace(serverName, sni);
+        return serverName;
+    }
 
-    return serverName;
+    return nullptr;
 }
 
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
@@ -58,7 +64,7 @@ Long ComoConfig::TPCI_TASK_EXPIRES = 1000000000L * 30;
 // ns, 30s
 Long ComoConfig::TPZA_TASK_EXPIRES = 1000000000L * 30;
 
-std::unordered_map<std::string, std::string> ComoConfig::ServerNameEndpointMap;
+std::unordered_map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
 
 

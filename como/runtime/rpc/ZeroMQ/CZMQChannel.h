@@ -91,6 +91,8 @@ public:
     static CZMQChannel* GetStubChannel(
         /* [in] */ IStub* stub);
 
+    inline void *GetSocket(void);
+
 private:
     friend class CDBusChannelFactory;
 
@@ -117,6 +119,11 @@ inline CZMQChannel* CZMQChannel::GetStubChannel(
     /* [in] */ IStub* stub)
 {
     return (CZMQChannel*)((CStub*)stub)->GetChannel().Get();
+}
+
+inline void *CZMQChannel::GetSocket(void)
+{
+    return mSocket;
 }
 
 } // namespace como

@@ -45,19 +45,26 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
 {
-    std::unordered_map<std::string, std::string>::iterator tmp =
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
             ComoConfig::ServerNameEndpointMap.find(std::string(mServerName.string()));
     std::string endpoint;
-    if (tmp != ComoConfig::ServerNameEndpointMap.end()) {
-        endpoint = tmp->second;
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        endpoint = iter->second->endpoint;
     }
     else {
         Logger::E("CZMQChannel", "Unregistered ServerName: %s", mServerName.string());
     }
 
-    mSocket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                    ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                    mServerName.string(), endpoint.c_str(), ZMQ_REQ);
+    // here, need a lock
+    if (nullptr != iter->second->socket) {
+        mSocket = iter->second->socket;
+    }
+    else {
+        mSocket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                        mServerName.string(), endpoint.c_str(), ZMQ_REQ);
+        iter->second->socket = mSocket;
+    }
 }
 
 ECode CZMQChannel::Apply(
