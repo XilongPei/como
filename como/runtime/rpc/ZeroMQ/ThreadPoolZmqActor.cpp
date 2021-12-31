@@ -54,12 +54,13 @@ TPZA_Executor::Worker::~Worker()
 
 ECode TPZA_Executor::Worker::HandleMessage()
 {
+    HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
     ECode ec;
     int numberOfBytes;
 
-    if (CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, ZMQ_DONTWAIT) != 0) {
+    if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
@@ -68,13 +69,29 @@ ECode TPZA_Executor::Worker::HandleMessage()
                 zmq_msg_close(&msg);
                 AutoPtr<IParcel> resParcel = new CZMQParcel();
 
-                ec = mStub->Invoke(argParcel, resParcel);
+                if (hChannel == reinterpret_cast<HANDLE>((CZMQChannel*)mChannel)) {
+                    ec = mStub->Invoke(argParcel, resParcel);
+                }
+                else {
+                    Worker *w = ThreadPoolZmqActor::findWorkerByChannelHandle(hChannel);
+                    if (nullptr != w) {
+                        ec = mStub->Invoke(argParcel, resParcel);
+                    }
+                    else {
+                        if (nullptr != TPZA_Executor::defaultHandleMessage) {
+                            if (TPZA_Executor::defaultHandleMessage(eventCode, mSocket, msg) != 0) {
+                                Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+                            }
+                        }
+                    }
+                }
 
                 HANDLE resData;
                 Long resSize;
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
-                numberOfBytes = CZMQUtils::CzmqSendBuf(ec, mSocket, (const void *)resData, resSize);
+                numberOfBytes = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>((CZMQChannel*)mChannel), ec,
+                                                            mSocket, (const void *)resData, resSize);
                 break;
             }
 
@@ -297,12 +314,48 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
     return i;
 }
 
+/*
+ * Find Worker by ChannelHandle, `mSocket + mChannel` is unique id of an IStub
+ */
+TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hChannel)
+{
+    int i;
+    TPZA_Executor::Worker *task;
+
+    pthread_mutex_lock(&pthreadMutex);
+
+    for (i = 0;  i < mWorkerList.size();  i++) {
+        if (nullptr == mWorkerList[i])
+            continue;
+
+        if (mWorkerList[i]->mWorkerStatus == hChannel)
+            break;
+    }
+    if (i < mWorkerList.size()) {
+        task = mWorkerList[i];
+    }
+    else {
+        task = nullptr;
+    }
+
+    pthread_mutex_unlock(&pthreadMutex);
+    pthread_cond_signal(&pthreadCond);
+
+    return task;
+}
+
+
+
 int ThreadPoolZmqActor::cleanTask(int posWorkerList)
 {
     if (posWorkerList < 0 || (posWorkerList >= mWorkerList.size()))
         return -1;
 
     pthread_mutex_lock(&pthreadMutex);
+
+    if (nullptr != mWorkerList[posWorkerList])
+        delete mWorkerList[posWorkerList];
+
     mWorkerList[posWorkerList] = nullptr;
     pthread_mutex_unlock(&pthreadMutex);
 

@@ -135,14 +135,16 @@ ECode CZMQChannel::GetComponentMetadata(
     parcel->GetData(data);
     parcel->GetDataSize(size);
 
-    int rc = CZMQUtils::CzmqSendBuf(ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
+    int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
+                    ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
     }
 
+    HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
             Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);
@@ -183,14 +185,15 @@ ECode CZMQChannel::Invoke(
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
 
-    CZMQUtils::CzmqSendBuf(ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
+    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this), ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
 
+    HANDLE hChannel;
     Integer eventCode;
     String serverName;
     GetServerName(serverName);
     zmq_msg_t msg;
     void *socket = CZMQUtils::CzmqFindSocket(serverName.string());
-    int replySize = CZMQUtils::CzmqRecvMsg(eventCode, mSocket, msg, 0);
+    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
 
     if (SUCCEEDED(ec)) {
         resParcel = new CZMQParcel();

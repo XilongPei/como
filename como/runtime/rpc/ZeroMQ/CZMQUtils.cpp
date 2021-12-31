@@ -178,7 +178,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 /**
  * Send an buffer through ZeroMQ
  */
-Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf, size_t bufSize)
+Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket, const void *buf, size_t bufSize)
 {
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);
 
@@ -208,7 +208,7 @@ Integer CZMQUtils::CzmqSendBuf(Integer eventCode, void *socket, const void *buf,
 /**
  * Receive message into buffer
  */
-Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
+Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socket, void *buf,
                                                             size_t bufSize, Boolean wait)
 {
     int numberOfBytes;
@@ -244,6 +244,7 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
                 return -1;
             }
             eventCode = funCodeAndCRC64.eCode;
+            hChannel = funCodeAndCRC64.hChannel;
         }
         else {
             numberOfBytes = 0;
@@ -261,7 +262,7 @@ Integer CZMQUtils::CzmqRecvBuf(Integer& eventCode, void *socket, void *buf,
 /**
  * Receive message into zmq_msg_t, it should be rleased with zmq_msg_close(&msg)
  */
-Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait)
+Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
@@ -296,6 +297,7 @@ Integer CZMQUtils::CzmqRecvMsg(Integer& eventCode, void *socket, zmq_msg_t& msg,
                 return -1;
             }
             eventCode = funCodeAndCRC64.eCode;
+            hChannel = funCodeAndCRC64.hChannel;
         }
         else {
             numberOfBytes = 0;

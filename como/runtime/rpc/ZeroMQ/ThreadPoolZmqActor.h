@@ -99,6 +99,7 @@ class ThreadPoolZmqActor
 {
 public:
     static std::vector<TPZA_Executor::Worker*> mWorkerList;     // task list
+    static TPZA_Executor::Worker *findWorkerByChannelHandle(HANDLE hChannel);
 
 private:
     static bool shutdown;
