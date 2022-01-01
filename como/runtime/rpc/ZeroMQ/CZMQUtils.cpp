@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include <unordered_map>
-#include "zmq.h"
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"

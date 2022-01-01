@@ -35,10 +35,14 @@ using CpuInvokeDsa = ECode(*)(
 #define ENABLE_RUNTIME_LOGGER   1
 
 
-typedef struct tagServerNodeInfo {
+class ServerNodeInfo {
+public:
+    ServerNodeInfo();
+
     void *socket;
     std::string endpoint;
-} ServerNodeInfo;
+    int inChannel;
+};
 
 class COM_PUBLIC ComoConfig
 {

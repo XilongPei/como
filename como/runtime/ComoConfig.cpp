@@ -22,11 +22,16 @@ ComoConfig::ComoConfig() {
     //
 }
 
+ServerNodeInfo::ServerNodeInfo()
+    : socket(nullptr)
+    , inChannel(0)
+{}
+
 std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string endpoint)
 {
     Mutex::AutoLock lock(CZMQUtils_ContextLock);
 
-    ServerNodeInfo *sni = (ServerNodeInfo*)malloc(sizeof(ServerNodeInfo));
+    ServerNodeInfo *sni = new ServerNodeInfo();
     if (nullptr != sni) {
         sni->socket = nullptr;
         sni->endpoint = endpoint;

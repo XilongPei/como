@@ -58,12 +58,16 @@ CZMQChannel::CZMQChannel(
     // here, need a lock
     if (nullptr != iter->second->socket) {
         mSocket = iter->second->socket;
+        iter->second->inChannel++;
     }
     else {
         mSocket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
                                         ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                         mServerName.string(), endpoint.c_str(), ZMQ_REQ);
-        iter->second->socket = mSocket;
+        if (nullptr != mSocket) {
+            iter->second->socket = mSocket;
+            iter->second->inChannel++;
+        }
     }
 }
 

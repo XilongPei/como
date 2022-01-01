@@ -17,6 +17,7 @@
 #ifndef __CZMQUTILS_H__
 #define __CZMQUTILS_H__
 
+#include "zmq.h"
 #include "comotypes.h"
 #include "comoref.h"
 #include "util/arraylist.h"

@@ -29,7 +29,7 @@
 
 namespace como {
 
-using HANDLE_MESSAGE_FUNCTION = ECode(*)(Integer&,void *,zmq_msg_t&);
+using HANDLE_MESSAGE_FUNCTION = ECode(*)(HANDLE,Integer,void *,zmq_msg_t&);
 
 /*
 +==ThreadPoolZmqActor==+== thread pool

@@ -30,7 +30,8 @@ class RpcOverZeroMQ
 {
 public:
     static void startTPZA_Executor();
-    static ECode HandleMessage(Integer& eventCode, void *socket, zmq_msg_t& msg);
+    static void *threadFunc(void *threadData);
+    static ECode HandleMessage(HANDLE hChannel, Integer eventCode, void *socket, zmq_msg_t& msg);
 };
 
 } // namespace jing

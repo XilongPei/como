@@ -79,8 +79,8 @@ ECode TPZA_Executor::Worker::HandleMessage()
                     }
                     else {
                         if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                            if (TPZA_Executor::defaultHandleMessage(eventCode, mSocket, msg) != 0) {
-                                Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+                            if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
+                                Logger::E("TPZA_Executor::Worker::Invoke", "bad hChannel");
                             }
                         }
                     }
@@ -113,7 +113,7 @@ ECode TPZA_Executor::Worker::HandleMessage()
 
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                    if (TPZA_Executor::defaultHandleMessage(eventCode, mSocket, msg) != 0) {
+                    if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
                         Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
                     }
                 }
@@ -201,7 +201,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             if (nullptr != TPZA_Executor::defaultHandleMessage) {
                 Integer eventCode;
                 zmq_msg_t msg;
-                TPZA_Executor::defaultHandleMessage(eventCode, nullptr, msg);
+                TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, nullptr, msg);
             }
 
             /* wait 100ns, a short time, CPU is too tired.
