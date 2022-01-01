@@ -45,6 +45,8 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
 {
+    Mutex::AutoLock lock(mLock);
+
     std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
             ComoConfig::ServerNameEndpointMap.find(std::string(mServerName.string()));
     std::string endpoint;
@@ -55,7 +57,6 @@ CZMQChannel::CZMQChannel(
         Logger::E("CZMQChannel", "Unregistered ServerName: %s", mServerName.string());
     }
 
-    // here, need a lock
     if (nullptr != iter->second->socket) {
         mSocket = iter->second->socket;
         iter->second->inChannel++;
