@@ -50,6 +50,20 @@ else()
         ${INC_DIR})
 endif()
 
+###
+set(RPC_OVER_ZeroMQ_SUPPORT_Enable enable)
+
+if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "notenable")
+    # ====== COMO Over ZeroMQ Support ======
+    set(RPC_ZeroMQ_LIBS
+        zmq
+        rpc-ZeroMQ
+    )
+    # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
+else()
+    set(RPC_ZeroMQ_LIBS "")
+endif()
+
 set(SOURCES
     comoids.cpp
     ComoConfig.cpp
@@ -84,6 +98,7 @@ if($ENV{PLATFORM} STREQUAL "linux")
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
             rpc-dbus
+            ${RPC_ZeroMQ_LIBS}
             -Wl,--no-whole-archive)
     else()
         set(COMORT_LINK_LIBS

@@ -183,6 +183,7 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
 
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    funCodeAndCRC64.hChannel = hChannel;
     funCodeAndCRC64.eCode = eventCode;
     funCodeAndCRC64.crc64 = crc64;
     funCodeAndCRC64.msgSize = bufSize;

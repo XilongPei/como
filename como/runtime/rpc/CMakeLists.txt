@@ -21,8 +21,17 @@ if($ENV{PLATFORM} STREQUAL "linux")
 elseif($ENV{PLATFORM} STREQUAL "android")
     add_subdirectory(binder)
 endif()
-add_subdirectory(ZeroMQ)
 
+###
+set(RPC_OVER_ZeroMQ_SUPPORT_Enable enable)
+
+if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "notenable")
+    # ====== COMO Over ZeroMQ Support ======
+    add_subdirectory(ZeroMQ)
+    set(RPC_ZeroMQ_DEFINITIONS -DRPC_OVER_ZeroMQ_SUPPORT)
+    add_definitions(${RPC_ZeroMQ_DEFINITIONS})
+    # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
+endif()
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
     set(ThreadPoolChannelInvoke ThreadPoolChannelInvoke.cpp)

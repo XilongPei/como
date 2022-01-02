@@ -165,12 +165,26 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         if (ipack != nullptr) {
             AutoPtr<IParcel> parcel;
-            CoCreateParcel(RPCType::Local, parcel);
-            parcel->WriteString(ipack->mDBusName);
-            parcel->WriteCoclassID(ipack->mCid);
-            parcel->WriteInterfaceID(ipack->mIid);
-            parcel->WriteBoolean(ipack->mIsParcelable);
-
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+            if (ipack->mServerName.IsEmpty()) {
+#endif
+                CoCreateParcel(RPCType::Local, parcel);
+                parcel->WriteString(ipack->mDBusName);
+                parcel->WriteCoclassID(ipack->mCid);
+                parcel->WriteInterfaceID(ipack->mIid);
+                parcel->WriteBoolean(ipack->mIsParcelable);
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+            }
+            else {
+                // Keep the same order with InterfacePack::ReadFromParcel() in
+                // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
+                CoCreateParcel(RPCType::Remote, parcel);
+                parcel->WriteCoclassID(ipack->mCid);
+                parcel->WriteInterfaceID(ipack->mIid);
+                parcel->WriteBoolean(ipack->mIsParcelable);
+                parcel->WriteString(ipack->mServerName);
+            }
+#endif
             HANDLE resData = 0;
             Long resSize = 0;
             parcel->GetData(resData);

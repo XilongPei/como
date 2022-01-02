@@ -22,6 +22,9 @@
 #elif defined(__linux__)
 #include "dbus/CDBusChannelFactory.h"
 #endif
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+#include "ZeroMQ/CZMQChannelFactory.h"
+#endif
 
 namespace como {
 
@@ -30,7 +33,11 @@ static AutoPtr<IRPCChannelFactory> sLocalFactory = new CBinderChannelFactory(RPC
 #elif defined(__linux__)
 static AutoPtr<IRPCChannelFactory> sLocalFactory = new CDBusChannelFactory(RPCType::Local);
 #endif
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+static AutoPtr<IRPCChannelFactory> sRemoteFactory = new CZMQChannelFactory(RPCType::Remote);
+#else
 static AutoPtr<IRPCChannelFactory> sRemoteFactory;
+#endif
 
 ECode CoCreateParcel(
     /* [in] */ RPCType type,
