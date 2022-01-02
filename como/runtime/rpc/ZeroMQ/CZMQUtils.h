@@ -28,10 +28,13 @@ namespace como {
 class ZmqFunCode {
 public:
     enum {
-        GetComponentMetadata = 0,
-        Method_Invoke = 1,
-        Actor_IsPeerAlive = 2,
-        Object_Release = 3
+        GetComponentMetadata = 0x0,
+        Method_Invoke        = 0x0101,
+        Actor_IsPeerAlive    = 0x0102,
+        Object_Release       = 0x0103,
+        AddService           = 0x0201,
+        GetService           = 0x0202,
+        RemoveService        = 0x0203,
     };
 };
 

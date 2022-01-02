@@ -34,6 +34,7 @@ ECode ServiceManager::AddService(
     }
 
     InterfacePack* ipack = new InterfacePack();
+    ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;
     ipack->mIid = object.mIid;

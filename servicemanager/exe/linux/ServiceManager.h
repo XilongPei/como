@@ -32,6 +32,7 @@ class ServiceManager
 public:
     struct InterfacePack
     {
+        String mServerName;
         String mDBusName;
         CoclassID mCid;
         InterfaceID mIid;

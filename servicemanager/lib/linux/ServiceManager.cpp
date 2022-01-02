@@ -14,9 +14,12 @@
 // limitations under the License.
 //=========================================================================
 
-#include "ServiceManager.h"
-#include <comolog.h>
+#include <unordered_map>
 #include <dbus/dbus.h>
+#include "ServiceManager.h"
+#include "comolog.h"
+#include "CZMQUtils.h"
+#include "ComoConfig.h"
 
 namespace jing {
 
@@ -31,14 +34,6 @@ ECode ServiceManager::AddService(
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
-    return AddRemoteService(nullptr, name, object);
-}
-
-ECode ServiceManager::AddRemoteService(
-    /* [in] */ const String& serverName,
-    /* [in] */ const String& name,
-    /* [in] */ IInterface* object)
-{
     if (name.IsEmpty() || object == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -50,13 +45,7 @@ ECode ServiceManager::AddRemoteService(
                 name.string());
         return ec;
     }
-
-    if ((nullptr == serverName) || serverName.IsEmpty()) {
-        ipack->SetServerName(String(""));
-    }
-    else {
-        ipack->SetServerName(serverName);
-    }
+    ipack->SetServerName(String(""));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Local, parcel);
@@ -142,6 +131,68 @@ Exit:
 
     return ec;
 }
+
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+
+ECode ServiceManager::AddRemoteService(
+    /* [in] */ const String& serverName,
+    /* [in] */ const String& name,
+    /* [in] */ IInterface* object)
+{
+    if (name.IsEmpty() || object == nullptr) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr<IInterfacePack> ipack;
+    ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
+    if (FAILED(ec)) {
+        Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
+                name.string());
+        return ec;
+    }
+
+    if ((nullptr == serverName) || serverName.IsEmpty()) {
+        return AddService(name, object);
+    }
+
+    ipack->SetServerName(name);     // name, hold name of Service
+
+    AutoPtr<IParcel> parcel;
+    CoCreateParcel(RPCType::Remote, parcel);
+    IParcelable::Probe(ipack)->WriteToParcel(parcel);
+    HANDLE buffer;
+    parcel->GetData(buffer);
+    Long size;
+    parcel->GetDataSize(size);
+
+    const char* str = nullptr;
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+            ComoConfig::ServerNameEndpointMap.find(std::string(serverName.string()));
+    std::string endpoint;
+    void *socket;
+
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        endpoint = iter->second->endpoint;
+    }
+    else {
+        Logger::E("CZMQChannel", "Unregistered ServerName: %s", serverName.string());
+    }
+
+    if (nullptr != iter->second->socket) {
+        socket = iter->second->socket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                             ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                             serverName.string(), endpoint.c_str(), ZMQ_REQ);
+    }
+
+    Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr), ZmqFunCode::AddService,
+                                        socket, (const void *)buffer, size);
+
+    return ec;
+}
+#endif
 
 ECode ServiceManager::GetService(
     /* [in] */ const String& name,

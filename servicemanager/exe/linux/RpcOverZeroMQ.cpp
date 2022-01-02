@@ -20,6 +20,7 @@
 #include "comolog.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
+#include "ServiceManager.h"
 #include "ThreadPoolZmqActor.h"
 #include "RpcOverZeroMQ.h"
 
@@ -87,12 +88,40 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
 
 ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *socket, zmq_msg_t& msg)
 {
-    static int i = 0;
-    printf("------ %d --\n", i++);
-    usleep(100000);
+    ECode ec = NOERROR;
+    switch (eventCode) {
+        case ZmqFunCode::AddService: {      // 0x0201
+            void *data = zmq_msg_data(&msg);
+            size_t size = zmq_msg_size(&msg);
 
-    //pthread_cond_signal(&ThreadPoolZmqActor::pthreadCond);
-    //pthread_cond_broadcast(&ThreadPoolZmqActor::pthreadCond);
+            const char* str;
+            AutoPtr<IParcel> parcel;
+            ServiceManager::InterfacePack ipack;
+
+            CoCreateParcel(RPCType::Remote, parcel);
+            parcel->SetData(reinterpret_cast<HANDLE>(data), size);
+
+            // Keep the same order with InterfacePack::WriteToParcel() in
+            // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
+            parcel->ReadCoclassID(ipack.mCid);
+            parcel->ReadInterfaceID(ipack.mIid);
+            parcel->ReadBoolean(ipack.mIsParcelable);
+            parcel->ReadString(ipack.mServerName);
+
+            ec = ServiceManager::GetInstance()->AddService(str, ipack);
+
+            zmq_msg_close (&msg);
+            break;
+        }
+        case ZmqFunCode::GetService: {      // 0x0202
+            break;
+        }
+        case ZmqFunCode::RemoveService: {   // 0x0203
+            break;
+        }
+        default:
+            Logger::E("RpcOverZeroMQ", "HandleMessage() error");
+    }
 
     return NOERROR;
 }
