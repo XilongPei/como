@@ -38,13 +38,13 @@ interface IZMQInterfacePack : public IInterface
     }
 };
 
-class InterfacePack
+class CZMQInterfacePack
     : public LightRefBase
     , public IInterfacePack
     , public IParcelable
 {
 public:
-    ~InterfacePack();
+    ~CZMQInterfacePack();
 
     COMO_INTERFACE_DECL();
 
@@ -81,7 +81,7 @@ public:
     void SetParcelable(
         /* [in] */ Boolean parcelable);
 
-    inline static InterfacePack* From(
+    inline static CZMQInterfacePack* From(
         /* [in] */ IInterfacePack* ipack);
 
 private:
@@ -91,10 +91,10 @@ private:
     String mServerName;
 };
 
-InterfacePack* InterfacePack::From(
+CZMQInterfacePack* CZMQInterfacePack::From(
     /* [in] */ IInterfacePack* ipack)
 {
-    return (InterfacePack*)ipack;
+    return (CZMQInterfacePack*)ipack;
 }
 
 } // namespace como

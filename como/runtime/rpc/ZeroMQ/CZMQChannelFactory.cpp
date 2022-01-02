@@ -22,7 +22,7 @@
 #include "rpc/ZeroMQ/CZMQChannel.h"
 #include "rpc/ZeroMQ/CZMQChannelFactory.h"
 #include "rpc/ZeroMQ/CZMQParcel.h"
-#include "rpc/ZeroMQ/InterfacePack.h"
+#include "rpc/ZeroMQ/CZMQInterfacePack.h"
 #include "util/comosp.h"
 #include "ThreadPoolZmqActor.h"
 
@@ -41,7 +41,7 @@ CZMQChannelFactory::CZMQChannelFactory(
 ECode CZMQChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
-    ipack = new InterfacePack();
+    ipack = new CZMQInterfacePack();
     return NOERROR;
 }
 
@@ -66,7 +66,7 @@ ECode CZMQChannelFactory::MarshalInterface(
 {
     InterfaceID iid;
     object->GetInterfaceID(object, iid);
-    InterfacePack* pack = new InterfacePack();
+    CZMQInterfacePack* pack = new CZMQInterfacePack();
     pack->SetInterfaceID(iid);
 
     if (IParcelable::Probe(object) != nullptr) {

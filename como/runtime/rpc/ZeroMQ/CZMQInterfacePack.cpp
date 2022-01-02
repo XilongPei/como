@@ -14,7 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
-#include "InterfacePack.h"
+#include "CZMQInterfacePack.h"
 
 namespace como {
 
@@ -23,57 +23,57 @@ namespace como {
 const InterfaceID IID_IZMQInterfacePack =
         {{0xeb4666d2,0xf89d,0x3564,0x54e9,{0xc7,0xf0,0x08,0x05,0x93,0x79}}, &CID_COMORuntime};
 
-COMO_INTERFACE_IMPL_LIGHT_3(InterfacePack, LightRefBase, IInterfacePack, IZMQInterfacePack, IParcelable);
+COMO_INTERFACE_IMPL_LIGHT_3(CZMQInterfacePack, LightRefBase, IInterfacePack, IZMQInterfacePack, IParcelable);
 
-InterfacePack::~InterfacePack()
+CZMQInterfacePack::~CZMQInterfacePack()
 {
     ReleaseCoclassID(mCid);
     ReleaseInterfaceID(mIid);
 }
 
-ECode InterfacePack:: GetCoclassID(
+ECode CZMQInterfacePack:: GetCoclassID(
     /* [out] */ CoclassID& cid)
 {
     cid = mCid;
     return NOERROR;
 }
 
-ECode InterfacePack::GetInterfaceID(
+ECode CZMQInterfacePack::GetInterfaceID(
     /* [out] */ InterfaceID& iid)
 {
     iid = mIid;
     return NOERROR;
 }
 
-ECode InterfacePack::IsParcelable(
+ECode CZMQInterfacePack::IsParcelable(
     /* [out] */ Boolean& parcelable)
 {
     parcelable = mIsParcelable;
     return NOERROR;
 }
 
-ECode InterfacePack::SetServerName(
+ECode CZMQInterfacePack::SetServerName(
     /* [in] */ const String& serverName)
 {
     mServerName = serverName;
     return NOERROR;
 }
 
-ECode InterfacePack::GetServerName(
+ECode CZMQInterfacePack::GetServerName(
     /* [out] */ String& serverName)
 {
     serverName = mServerName;
     return NOERROR;
 }
 
-ECode InterfacePack::GetHashCode(
+ECode CZMQInterfacePack::GetHashCode(
     /* [out] */ Integer& hash)
 {
     hash = mServerName.GetHashCode();
     return NOERROR;
 }
 
-ECode InterfacePack::ReadFromParcel(
+ECode CZMQInterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadCoclassID(mCid);
@@ -83,7 +83,7 @@ ECode InterfacePack::ReadFromParcel(
     return NOERROR;
 }
 
-ECode InterfacePack::WriteToParcel(
+ECode CZMQInterfacePack::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteCoclassID(mCid);
@@ -93,19 +93,19 @@ ECode InterfacePack::WriteToParcel(
     return NOERROR;
 }
 
-void InterfacePack::SetCoclassID(
+void CZMQInterfacePack::SetCoclassID(
     /* [in] */ const CoclassID& cid)
 {
     mCid = CloneCoclassID(cid);
 }
 
-void InterfacePack::SetInterfaceID(
+void CZMQInterfacePack::SetInterfaceID(
     /* [in] */ const InterfaceID& iid)
 {
     mIid = CloneInterfaceID(iid);
 }
 
-void InterfacePack::SetParcelable(
+void CZMQInterfacePack::SetParcelable(
     /* [in] */ Boolean parcelable)
 {
     mIsParcelable = parcelable;

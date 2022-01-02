@@ -53,15 +53,18 @@ endif()
 ###
 set(RPC_OVER_ZeroMQ_SUPPORT_Enable enable)
 
-if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "notenable")
+if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     # ====== COMO Over ZeroMQ Support ======
     set(RPC_ZeroMQ_LIBS
-        zmq
         rpc-ZeroMQ
+    )
+    set(RPC_ZeroMQ_SYS_LIBS
+        zmq
     )
     # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
 else()
     set(RPC_ZeroMQ_LIBS "")
+    set(RPC_ZeroMQ_SYS_LIBS "")
 endif()
 
 set(SOURCES
@@ -124,6 +127,7 @@ if($ENV{PLATFORM} STREQUAL "linux")
     if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
         target_link_libraries(comort
             pthread
+            ${RPC_ZeroMQ_SYS_LIBS}
             dbus-1)
     else()
         target_link_libraries(comort

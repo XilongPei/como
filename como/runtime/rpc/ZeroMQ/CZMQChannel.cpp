@@ -21,7 +21,7 @@
 #include "comorpc.h"
 #include "CZMQChannel.h"
 #include "CZMQParcel.h"
-#include "InterfacePack.h"
+#include "CZMQInterfacePack.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
@@ -75,7 +75,7 @@ CZMQChannel::CZMQChannel(
 ECode CZMQChannel::Apply(
     /* [in] */ IInterfacePack* ipack)
 {
-    //mName = InterfacePack::From(ipack)->GetDBusName();
+    //mName = CZMQInterfacePack::From(ipack)->GetDBusName();
     return NOERROR;
 }
 
@@ -233,6 +233,14 @@ ECode CZMQChannel::StartListening(
         ret = TPZA_Executor::GetInstance()->RunTask(w);
     }
 
+    return NOERROR;
+}
+
+ECode CZMQChannel::Match(
+    /* [in] */ IInterfacePack* ipack,
+    /* [out] */ Boolean& matched)
+{
+    matched = false;
     return NOERROR;
 }
 

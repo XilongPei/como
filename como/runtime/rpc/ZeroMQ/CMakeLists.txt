@@ -30,7 +30,7 @@ set(SOURCES
     CZMQChannel.cpp
     CZMQChannelFactory.cpp
     CZMQParcel.cpp
-    InterfacePack.cpp
+    CZMQInterfacePack.cpp
     ThreadPoolZmqActor.cpp
     CZMQUtils.cpp
 )
