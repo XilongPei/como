@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <unistd.h>
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
@@ -31,11 +32,9 @@ static struct timespec lastCheckConnExpireTime = {0, 0};
 
 //-------------------------------------------------------------------------
 // TPZA : ThreadPoolZmqActor
-TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
-    : mChannel(channel)
-    , mStub(stub)
+TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
+    : mStub(stub)
     , mWorkerStatus(WORKER_TASK_READY)
-    , mCond(PTHREAD_COND_INITIALIZER)
 {
     String serverName;
     void *mSocket = channel->GetSocket();
@@ -43,8 +42,11 @@ TPZA_Executor::Worker::Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub)
         Logger::E("TPZA_Executor::Worker", "CzmqFindSocket: %s", serverName.string());
     }
 
-    pthread_mutex_init(&mMutex, NULL);
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
+
+    HANDLE pid = getpid();
+    mChannel = ((pid & 0xFFFF) << 48) | (reinterpret_cast<HANDLE>(channel) & 0xFFFFFFFFFFFF);
+    //                    1 0                                                   5 4 3 2 1 0
 }
 
 TPZA_Executor::Worker::~Worker()
@@ -69,7 +71,7 @@ ECode TPZA_Executor::Worker::HandleMessage()
                 zmq_msg_close(&msg);
                 AutoPtr<IParcel> resParcel = new CZMQParcel();
 
-                if (hChannel == reinterpret_cast<HANDLE>((CZMQChannel*)mChannel)) {
+                if (hChannel == mChannel) {
                     ec = mStub->Invoke(argParcel, resParcel);
                 }
                 else {
@@ -90,7 +92,7 @@ ECode TPZA_Executor::Worker::HandleMessage()
                 Long resSize;
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
-                numberOfBytes = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>((CZMQChannel*)mChannel), ec,
+                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
                                                             mSocket, (const void *)resData, resSize);
                 break;
             }
@@ -120,7 +122,7 @@ ECode TPZA_Executor::Worker::HandleMessage()
         }
 
         mWorkerStatus = WORKER_TASK_FINISH;
-        pthread_cond_signal(&mCond);
+        //pthread_cond_signal(&mCond);
     }
 
     return NOERROR;
@@ -328,7 +330,7 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hCha
         if (nullptr == mWorkerList[i])
             continue;
 
-        if (mWorkerList[i]->mWorkerStatus == hChannel)
+        if (mWorkerList[i]->mChannel == hChannel)
             break;
     }
     if (i < mWorkerList.size()) {

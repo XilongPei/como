@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include <unordered_map>
+#include <unistd.h>
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
@@ -183,10 +184,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
 
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    funCodeAndCRC64.hChannel = hChannel;
     funCodeAndCRC64.eCode = eventCode;
     funCodeAndCRC64.crc64 = crc64;
     funCodeAndCRC64.msgSize = bufSize;
+
+    HANDLE pid = getpid();
+    funCodeAndCRC64.hChannel = ((pid & 0xFFFF) << 48) | (hChannel & 0xFFFFFFFFFFFF);
+    //                                    1 0                           5 4 3 2 1 0
 
     numberOfBytes = zmq_send(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), ZMQ_SNDMORE);
     if (numberOfBytes != -1) {

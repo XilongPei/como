@@ -61,17 +61,15 @@ public:
         : public Object
     {
     public:
-        Worker(AutoPtr<CZMQChannel> channel, AutoPtr<IStub> stub);
+        Worker(CZMQChannel *channel, AutoPtr<IStub> stub);
         ~Worker();
 
         ECode HandleMessage();
 
     public:
         void *mSocket;
-        AutoPtr<CZMQChannel> mChannel;
+        HANDLE mChannel;
         AutoPtr<IStub> mStub;
-        pthread_mutex_t mMutex;
-        pthread_cond_t mCond;
         struct timespec lastAccessTime;
         int mWorkerStatus;
     };

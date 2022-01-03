@@ -226,11 +226,9 @@ ECode CZMQChannel::Invoke(
 ECode CZMQChannel::StartListening(
     /* [in] */ IStub* stub)
 {
-    int ret = 0;
-
     if (mPeer == RPCPeer::Stub) {
         AutoPtr<TPZA_Executor::Worker> w = new TPZA_Executor::Worker(this, stub);
-        ret = TPZA_Executor::GetInstance()->RunTask(w);
+        TPZA_Executor::GetInstance()->RunTask(w);
     }
 
     return NOERROR;
