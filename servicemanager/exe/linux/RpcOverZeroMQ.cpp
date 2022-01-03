@@ -94,7 +94,6 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *soc
             void *data = zmq_msg_data(&msg);
             size_t size = zmq_msg_size(&msg);
 
-            const char* str;
             AutoPtr<IParcel> parcel;
             ServiceManager::InterfacePack ipack;
 
@@ -106,9 +105,21 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *soc
             parcel->ReadCoclassID(ipack.mCid);
             parcel->ReadInterfaceID(ipack.mIid);
             parcel->ReadBoolean(ipack.mIsParcelable);
-            parcel->ReadString(ipack.mServerName);
 
-            ec = ServiceManager::GetInstance()->AddService(str, ipack);
+            String serverName, name;
+            parcel->ReadString(serverName);
+            Integer pos = serverName.IndexOf('\n', 0);
+            if (pos < 0) {
+                Logger::E("RpcOverZeroMQ", "HandleMessage() AddService, bad serverName: %s", serverName);
+                zmq_msg_close (&msg);
+                break;
+            }
+
+            ipack.mServerName = serverName.Substring(0, pos);
+            name = serverName.Substring(pos+1, 4096);   // 4096, any big number, the max length of serverName
+                                                        // String::GetLength() cost time
+
+            ec = ServiceManager::GetInstance()->AddService(name, ipack);
 
             zmq_msg_close (&msg);
             break;

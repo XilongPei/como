@@ -135,7 +135,8 @@ Exit:
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 
 ECode ServiceManager::AddRemoteService(
-    /* [in] */ const String& serverName,
+    /* [in] */ const String& thisServerName,
+    /* [in] */ const String& thatServerName,
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
@@ -151,11 +152,12 @@ ECode ServiceManager::AddRemoteService(
         return ec;
     }
 
-    if ((nullptr == serverName) || serverName.IsEmpty()) {
+    if ((nullptr == thisServerName) || thisServerName.IsEmpty() ||
+        (nullptr == thatServerName) || thatServerName.IsEmpty()) {
         return AddService(name, object);
     }
 
-    ipack->SetServerName(name);     // name, hold name of Service
+    ipack->SetServerName(name + "\n" + thisServerName);     // name, hold name of Service
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -184,7 +186,7 @@ ECode ServiceManager::AddRemoteService(
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
                                              ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                             serverName.string(), endpoint.c_str(), ZMQ_REQ);
+                                             thatServerName.string(), endpoint.c_str(), ZMQ_REQ);
     }
 
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr), ZmqFunCode::AddService,
