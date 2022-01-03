@@ -190,7 +190,7 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
 
     HANDLE pid = getpid();
     funCodeAndCRC64.hChannel = ((pid & 0xFFFF) << 48) | (hChannel & 0xFFFFFFFFFFFF);
-    //                                    1 0                           5 4 3 2 1 0
+    //                                    1 0                          5 4 3 2 1 0
 
     numberOfBytes = zmq_send(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), ZMQ_SNDMORE);
     if (numberOfBytes != -1) {
