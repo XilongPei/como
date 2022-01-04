@@ -291,6 +291,7 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassCpp(
 
     builder.Append(mOwner->mLicense);
     builder.Append("\n");
+    builder.Append("#include <cstdlib>\n");
     builder.AppendFormat("#include \"%s.h\"\n", mk->mName);
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     if (!String(mi->mName).Equals("IClassObject") && (mOwner->mMode & Properties::CODEGEN_SPLIT)) {
@@ -302,7 +303,7 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassCpp(
     builder.Append("#include <comoapi.h>\n");
     builder.Append("#include <comoclsobj.h>\n");
     builder.Append("#include <comolock.h>\n");
-    builder.Append("#include <cstdlib>\n");
+    builder.Append("#include <ComoContext.h>\n");
     builder.Append("#include <new>\n");
     builder.Append("\n");
     builder.Append("using namespace como;\n");
@@ -425,7 +426,24 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
             builder.Append(Properties::INDENT).Append("*object = nullptr;\n");
         }
         else {
-            builder.Append(Properties::INDENT).AppendFormat("void* addr = calloc(sizeof(%s), 1);\n", mk->mName);
+            builder.Append(Properties::INDENT).AppendFormat("void* addr;\n", mk->mName);
+
+builder.Append("#ifdef COMO_FUNCTION_SAFETY\n");
+builder.Append(Properties::INDENT).AppendFormat("if (ComoContext::gComoContext != nullptr) {\n");
+builder.Append(Properties::INDENT).AppendFormat("    if (ComoContext::gComoContext->funComoCalloc != nullptr) {\n");
+builder.Append(Properties::INDENT).AppendFormat("        addr = ComoContext::gComoContext->funComoCalloc(sizeof(%s), 1);\n", mk->mName);
+builder.Append(Properties::INDENT).AppendFormat("    }\n");
+builder.Append(Properties::INDENT).AppendFormat("    else {\n");
+builder.Append(Properties::INDENT).AppendFormat("        addr = calloc(sizeof(%s), 1);\n", mk->mName);
+builder.Append(Properties::INDENT).AppendFormat("    }\n");
+builder.Append(Properties::INDENT).AppendFormat("}\n");
+builder.Append(Properties::INDENT).AppendFormat("else {\n");
+builder.Append(Properties::INDENT).AppendFormat("    addr = calloc(sizeof(%s), 1);\n", mk->mName);
+builder.Append(Properties::INDENT).AppendFormat("}\n");
+builder.Append("#else\n");
+builder.Append(Properties::INDENT).AppendFormat("addr = calloc(sizeof(%s), 1);\n", mk->mName);
+builder.Append("#endif\n");
+
             builder.Append(Properties::INDENT).Append("if (addr == nullptr) {\n");
             builder.Append(Properties::INDENT + Properties::INDENT).Append("return E_OUT_OF_MEMORY_ERROR;\n");
             builder.Append(Properties::INDENT).Append("}\n");

@@ -18,7 +18,7 @@
 
 namespace como {
 
-ComoContext *gComoContext = nullptr;
+ComoContext *ComoContext::gComoContext = nullptr;
 
 ComoContext::ComoContext()
     : funComoCalloc(nullptr)
