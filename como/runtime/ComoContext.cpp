@@ -15,6 +15,8 @@
 //=========================================================================
 
 #include "ComoContext.h"
+#include "ComoConfig.h"
+#include "jemalloc_utils.h"
 
 namespace como {
 
@@ -22,6 +24,11 @@ ComoContext *ComoContext::gComoContext = nullptr;
 
 ComoContext::ComoContext()
     : funComoCalloc(nullptr)
-{}
+{
+    if (ComoConfig::sizeofFscpMemAreaInfo > 0) {
+        //jemallocControl(ComoConfig::MemAreaInfo, ComoConfig::sizeofMemAreaInfo, funComoCalloc);
+    }
+}
+
 
 } // namespace como

@@ -30,7 +30,6 @@ public:
 
     static ComoContext *gComoContext;
 
-    //static void *gMemArea;          // in ComoConfig
     Integer iCurrentMemArea;
     COMO_CALLOC funComoCalloc;
 

@@ -39,7 +39,9 @@ if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
         rpc
         type
         util
-        ${INC_DIR})
+        ${INC_DIR}
+        ${COMO_SRC_DIR}/../external/jemalloc/export_como
+    )
 else()
     include_directories(
         ./
@@ -47,7 +49,9 @@ else()
         reflection
         type
         util
-        ${INC_DIR})
+        ${INC_DIR}
+        ${COMO_SRC_DIR}/../external/jemalloc/export_como
+    )
 endif()
 
 ###

@@ -21,7 +21,7 @@ namespace como {
 
 using COMO_CALLOC = void*(*)(size_t, size_t);
 
-void jemallocControl(void *MemAreaInfo, COMO_CALLOC& funComoCalloc);
+int jemallocControl(void *MemAreasInfo, int numAreas, COMO_CALLOC& funComoCalloc);
 
 } // namespace como
 

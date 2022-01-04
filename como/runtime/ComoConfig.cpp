@@ -72,7 +72,20 @@ Long ComoConfig::TPZA_TASK_EXPIRES = 1000000000L * 30;
 std::unordered_map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
 
-
 Mutex ComoConfig::CZMQUtils_ContextLock;
+
+FSCP_MEM_AREA_INFO ComoConfig::FscpMemAreaInfo[] = {
+    {
+        .mem_size  = 0,
+        .base      = nullptr,
+        .allocated = 0
+    },
+    {
+        .mem_size  = 0,
+        .base      = nullptr,
+        .allocated = 0
+    }
+};
+int ComoConfig::sizeofFscpMemAreaInfo = sizeof(ComoConfig::FscpMemAreaInfo) / sizeof(FSCP_MEM_AREA_INFO);
 
 } // namespace como

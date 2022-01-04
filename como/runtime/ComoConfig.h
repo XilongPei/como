@@ -44,6 +44,14 @@ public:
     int inChannel;
 };
 
+
+// FSCP: Function Safety Computing Platform
+typedef struct tagFSCP_MEM_AREA_INFO {
+    size_t mem_size;        // Size of space to be managed
+    void  *base;            // Base address of space to be managed
+    size_t allocated;       // Allocated size
+} FSCP_MEM_AREA_INFO;
+
 class COM_PUBLIC ComoConfig
 {
 public:
@@ -73,6 +81,9 @@ public:
     static std::string ComoRuntimeInstanceIdentity;
 
     static Mutex CZMQUtils_ContextLock;
+
+    static FSCP_MEM_AREA_INFO FscpMemAreaInfo[];
+    static int sizeofFscpMemAreaInfo;
 };
 
 } // namespace como
