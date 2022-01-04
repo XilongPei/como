@@ -70,7 +70,9 @@ endif()
 set(SOURCES
     comoids.cpp
     ComoConfig.cpp
-    runtime.cpp)
+    ComoContext.cpp
+    runtime.cpp
+)
 
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
     set(COMORT_LINK_LIBS
@@ -145,6 +147,7 @@ COPY(comort ${RUNTIME_SRC_DIR}/comodef.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/comoerror.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/comotypes.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/ComoConfig.h ${INC_DIR})
+COPY(comort ${RUNTIME_SRC_DIR}/ComoContext.h ${INC_DIR})
 COPY(comort ${RUNTIME_OBJ_DIR}/comort.so ${BIN_DIR})
 
 set(DEPLOY_HEADERS
