@@ -27,21 +27,12 @@ typedef struct tagFSCP_MEM_AREA_INFO {
 } FSCP_MEM_AREA_INFO;
 #endif
 
-// 待管理的空间大小
-size_t mem_size = 1 << 30;
-// 待管理的空间的首地址
-void* base;
-// 已经分配出去的大小
-size_t allocated = 0;
-
 static FSCP_MEM_AREA_INFO *gFscpMemAreasInfo;
 static int curFscpMemArea = 0;
 
-int jemallocControl(void *MemAreasInfo, int numAreas, COMO_CALLOC& funComoCalloc)
+int JemallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas)
 {
     gFscpMemAreasInfo = (MEM_AREA_INFO *)MemAreasInfo;
-
-    funComoCalloc = je_malloc;
 
     // 用je_mallctl('arenas.extend')命令创建一个arean，
     // 参考jemalloc/doc/jemalloc.html中arenas.extend一段
@@ -151,5 +142,11 @@ ONE_CHUNK_HOOK(5)
 };
 
 //-----------------------------HOOK END-----------------------------
+
+
+COMO_CALLOC JemallocUtils::getFscpCalloc(int idArea, COMO_CALLOC& funFscpCalloc)
+{
+    //
+}
 
 } // namespace como

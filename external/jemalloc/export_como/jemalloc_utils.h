@@ -21,7 +21,28 @@ namespace como {
 
 using COMO_CALLOC = void*(*)(size_t, size_t);
 
-int jemallocControl(void *MemAreasInfo, int numAreas, COMO_CALLOC& funComoCalloc);
+class JemallocUtils {
+public:
+/*  Management of memory distributed in multiple areas.
+    FSCP: Function Safety Computing Platform
+
+The map of multiple areas memory:
+    +----+----------+--           -+--------------+--      -+--------+--
+    |    | area_0   |  ::::::::::: | area_1       |  :::::: | area_2 |
+    +----+----------+--           -+--------------+--      -+--------+--
+         base0                     base1                    base2
+         0:funFscpCalloc           1:funFscpCalloc          2:funFscpCalloc
+*/
+    /**
+     * Tell Jemalloc areas information
+     */
+    static int setupFscpMemAreas(void *MemAreasInfo, int numAreas);
+
+    /**
+     * Get the calloc function pointer of area idArea
+     */
+    static COMO_CALLOC getFscpCalloc(int idArea, COMO_CALLOC& funFscpCalloc);
+};
 
 } // namespace como
 
