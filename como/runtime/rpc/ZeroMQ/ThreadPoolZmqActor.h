@@ -64,7 +64,7 @@ public:
         Worker(CZMQChannel *channel, AutoPtr<IStub> stub);
         ~Worker();
 
-        ECode HandleMessage();
+        TPZA_Executor::Worker * HandleMessage();
 
     public:
         void *mSocket;

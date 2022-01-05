@@ -54,7 +54,7 @@ TPZA_Executor::Worker::~Worker()
     // close socket?
 }
 
-ECode TPZA_Executor::Worker::HandleMessage()
+TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 {
     HANDLE hChannel;
     Integer eventCode;
@@ -81,7 +81,8 @@ ECode TPZA_Executor::Worker::HandleMessage()
                     }
                     else {
                         if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                            if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
+                            if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr),
+                                                                    eventCode, mSocket, msg) != 0) {
                                 Logger::E("TPZA_Executor::Worker::Invoke", "bad hChannel");
                             }
                         }
@@ -113,19 +114,37 @@ ECode TPZA_Executor::Worker::HandleMessage()
                 break;
             }
 
+            case ZmqFunCode::Actor_IsPeerAlive: {
+                Boolean b = true;
+                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
+                                                       mSocket, (const void *)&b, sizeof(Boolean));
+                break;
+            }
+
+            case ZmqFunCode::Object_Release: {
+                if (hChannel == mChannel)
+                        return this;
+
+                Worker *w = ThreadPoolZmqActor::findWorkerByChannelHandle(hChannel);
+                if (nullptr == w) {
+                    Logger::E("TPZA_Executor::Worker::Invoke", "bad Channel");
+                }
+                return w;
+            }
+
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                    if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
+                    if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr),
+                                                                    eventCode, mSocket, msg) != 0) {
                         Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
                     }
                 }
         }
 
         mWorkerStatus = WORKER_TASK_FINISH;
-        //pthread_cond_signal(&mCond);
     }
 
-    return NOERROR;
+    return 0;
 }
 
 //-------------------------------------------------------------------------
@@ -237,7 +256,10 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         pthread_mutex_unlock(&pthreadMutex);
 
-        w->HandleMessage();
+        if ((w = w->HandleMessage()) != nullptr) {
+            delete w;
+            mWorkerList[i] = nullptr;
+        }
     }
 
     return reinterpret_cast<void*>(ec);
