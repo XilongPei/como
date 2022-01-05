@@ -51,7 +51,8 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
 
 TPZA_Executor::Worker::~Worker()
 {
-    // close socket?
+    if (zmq_close(w->mSocket) != 0)
+        Logger::E("TPZA_Executor::Worker::~Worker", "zmq_close() errno %d", zmq_errno());
 }
 
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
@@ -144,7 +145,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
         mWorkerStatus = WORKER_TASK_FINISH;
     }
 
-    return 0;
+    return nullptr;
 }
 
 //-------------------------------------------------------------------------
@@ -344,7 +345,7 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
 TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hChannel)
 {
     int i;
-    TPZA_Executor::Worker *task;
+    TPZA_Executor::Worker *w;
 
     pthread_mutex_lock(&pthreadMutex);
 
@@ -356,19 +357,17 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hCha
             break;
     }
     if (i < mWorkerList.size()) {
-        task = mWorkerList[i];
+        w = mWorkerList[i];
     }
     else {
-        task = nullptr;
+        w = nullptr;
     }
 
     pthread_mutex_unlock(&pthreadMutex);
     pthread_cond_signal(&pthreadCond);
 
-    return task;
+    return w;
 }
-
-
 
 int ThreadPoolZmqActor::cleanTask(int posWorkerList)
 {
