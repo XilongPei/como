@@ -51,8 +51,15 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
 
 TPZA_Executor::Worker::~Worker()
 {
-    if (zmq_close(w->mSocket) != 0)
-        Logger::E("TPZA_Executor::Worker::~Worker", "zmq_close() errno %d", zmq_errno());
+    int num = ThreadPoolZmqActor::countWorkerBySocket(mSocket);
+    if (1 == num) {
+        if (zmq_close(mSocket) != 0)
+            Logger::E("TPZA_Executor::Worker::~Worker", "zmq_close() errno %d", zmq_errno());
+    }
+    else if (0 == num) {
+        Logger::E("TPZA_Executor::Worker::~Worker",
+                                "The Worker can't be found in ThreadPoolZmqActor::mWorkerList");
+    }
 }
 
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
@@ -368,6 +375,29 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hCha
 
     return w;
 }
+
+/*
+ * Count Worker by socket
+ */
+int ThreadPoolZmqActor::countWorkerBySocket(void *socket)
+{
+    int num = 0;
+
+    pthread_mutex_lock(&pthreadMutex);
+
+    for (int i = 0;  i < mWorkerList.size();  i++) {
+        if (nullptr == mWorkerList[i])
+            continue;
+
+        if (mWorkerList[i]->mSocket == socket)
+            num++;
+    }
+
+    pthread_mutex_unlock(&pthreadMutex);
+
+    return num;
+}
+
 
 int ThreadPoolZmqActor::cleanTask(int posWorkerList)
 {
