@@ -51,6 +51,11 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
 
 TPZA_Executor::Worker::~Worker()
 {
+/**
+ * The ZeroMQ socket managed by ZeroMQ/zmq_sockets are always open. In order to
+ * improve the efficiency of use, always maintain the connection with all servers.
+ */
+#if 0
     int num = ThreadPoolZmqActor::countWorkerBySocket(mSocket);
     if (1 == num) {
         if (zmq_close(mSocket) != 0)
@@ -60,6 +65,7 @@ TPZA_Executor::Worker::~Worker()
         Logger::E("TPZA_Executor::Worker::~Worker",
                                 "The Worker can't be found in ThreadPoolZmqActor::mWorkerList");
     }
+#endif
 }
 
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
