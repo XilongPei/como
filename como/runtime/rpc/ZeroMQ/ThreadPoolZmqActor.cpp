@@ -246,7 +246,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
                timeout_ms: the ms we want to wait
 
-            long nsec = curTime.tv_usec * 1000 + (timeout_ms % 1000) * 1000000;
+            long nsec = curTime.tv_nsec + (timeout_ms % 1000) * 1000000;
             curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
             curTime.tv_nsec = nsec % 1000000000;
             */

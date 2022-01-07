@@ -1751,14 +1751,20 @@ ECode InterfaceProxy::ProxyEntry(
         }
     }
     else {
-        struct timespec time_out;
-        clock_gettime(CLOCK_REALTIME, &time_out);
-        time_out.tv_nsec += lvalue;
+        struct timespec curTime;
+        clock_gettime(CLOCK_REALTIME, &curTime);
+
+        Long nsec = curTime.tv_nsec + lvalue % 1000000;
+                                              //123456
+        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + lvalue / 1000000000;
+                                                //123456789           //123456789
+        curTime.tv_nsec = nsec % 1000000000;
+                                //123456789
 
         int posInWorkerList = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
                                                                             method, inParcel, outParcel);
         int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mCond),
-                                         &(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &time_out);
+                                         &(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &curTime);
         if (ret != 110 /*time out*/) {
             ec = ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->ec;
             delete ThreadPoolChannelInvoke::mWorkerList[posInWorkerList];
