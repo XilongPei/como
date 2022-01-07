@@ -24,7 +24,7 @@ public:
 	 *     word : return the wordptr
 	 *   return : first word ptr;
 	 */
-	static char *WordBreak(char *string, int *num, char *word[], char *breakChar);
+	static char *WordBreak(char *string, int& num, char *word[], char *breakChar);
 
 	/**
 	 *  seperate string s into pieces, such as:
@@ -32,7 +32,7 @@ public:
 	 *  is seed is NULL, alloc the pointer memory, else use seeds
 	 *  to store it.
 	 */
-	static int SeperateStr(char *s, char seperator, char **seeds, int seedsCapacity);
+	static char **SeperateStr(char *s, char seperator, char **seeds, int& seedsCapacity);
 };
 
 } // namespace como

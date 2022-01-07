@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "mistring.h"
 
 namespace como {
@@ -25,46 +26,49 @@ namespace como {
  *     word : return the wordptr
  *   return : first word ptr;
  */
-char *MiString::WordBreak(char *string, int *num, char *word[], char *breakChar)
+char *MiString::WordBreak(char *string, int& num, char *word[], char *breakChar)
 {
     char *rp;
-    int maxNum = *num;
+    int maxNum = num;
 
     if (maxNum < 1)
         maxNum = 1;
 
-    if ((nullptr == string) || (nullptr == num)  || (nullptr == word) || (nullptr == breakChar))
+    if ((nullptr == string) || (nullptr == word) || (nullptr == breakChar))
         return nullptr;
 
-    *num = 0;
+    num = 0;
     rp = string;
 
-    while (*rp == ' ' || *rp == '\t' || strchr(breakChar, *rp)) {
-        rp++; // skip top space
+    while (isspace(*rp) || strchr(breakChar, *rp)) {
+        rp++;   // skip top space
         if (*rp == '\0')
             break;
     }
 
-    word[*num] = rp;
-    while (*rp != '\0') {
-        while ((*rp != ' ') && (!strchr(breakChar, *rp)) && (*rp != '\0'))
+    word[num] = rp;
+    while (*rp) {
+        while ((!isspace(*rp)) && (!strchr(breakChar, *rp)) && (*rp != '\0'))
             rp++;
 
-        if (*rp != '\0') {
+        if (*rp) {
             *rp = '\0';
             rp++;
         }
 
-        if ((*rp != '\0') && strchr(breakChar, *rp) != nullptr)
+        if (*rp && strchr(breakChar, *rp) != nullptr)
             rp++;
 
-        while (*rp == ' ')
-            rp++; // skip blanks
+        while (isspace(*rp))
+            rp++;   // skip blanks
 
-        if ((*rp != '\0') && (strchr(breakChar, *rp) != nullptr))
+        if (*rp && (strchr(breakChar, *rp) != nullptr))
             rp++;
 
-        word[++(*num)] = rp;
+        if (num >= maxNum)
+            break;
+
+        word[++num] = rp;
     }
 
     return word[0];
@@ -77,60 +81,58 @@ char *MiString::WordBreak(char *string, int *num, char *word[], char *breakChar)
  *  is seed is nullptr, alloc the pointer memory, else use seeds
  *  to store it.
  */
-int MiString::SeperateStr(char *s, char seperator, char **seeds, int seedsCapacity)
+char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCapacity)
 {
-    short count;
     char *sz;
+    int maxNum = seedsCapacity;
 
     if (seeds == nullptr) {
-        count = 2;
+        seedsCapacity = 2;
         sz = s;
         while (*sz != '\0') {
             if (*sz++ == seperator)
-                count++;
+                seedsCapacity++;
         }
-        if ((seeds = (char **)calloc(count, sizeof(char *))) == nullptr) {
-            return -1;
+        if ((seeds = (char **)calloc(seedsCapacity, sizeof(char *))) == nullptr) {
+            return nullptr;
         }
     }
 
-    count = 0;
-    seeds[count] = s;
+    seedsCapacity = 0;
+    seeds[seedsCapacity] = s;
     while (*s) {
-        if (count >= seedsCapacity)
+        if (seedsCapacity >= maxNum)
             break;
 
         if (*s == seperator)   {
             *s = '\0';
-            seeds[++count] = ++s;
+            seeds[++seedsCapacity] = ++s;
         }
         else {
             s++;
         }
     }
-    seedsCapacity = count;
 
-    return count;
+    return seeds;
 
 }
 
 } // namespace como
 
-/*
 int main(int argc, char *argv[])
 {
     int num = 2;
     char *word[3];
     char  buf[256];
     strcpy(buf, (char*)"name=tongji");
-    char *str = como::MiString::WordBreak(buf, &num, word, (char*)"=");
+    char *str = como::MiString::WordBreak(buf, num, word, (char*)"=");
     printf("como::MiString::WordBreak():\n%s\n%s\n", word[0], word[1]);
 
     char s[80] = {"c:\\tg\\sub0.dbf"};
     char *seeds[10];
-    int i = como::MiString::SeperateStr(s, '\\', seeds, 10);
-    printf("%d\n%s\n%s\n%s\n", i, seeds[0], seeds[1], seeds[2]);
+    int seedsCapacity = 10;
+    como::MiString::SeperateStr(s, '\\', seeds, seedsCapacity);
+    printf("%d\n%s\n%s\n%s\n", seedsCapacity, seeds[0], seeds[1], seeds[2]);
 
     return 0;
 }
-*/

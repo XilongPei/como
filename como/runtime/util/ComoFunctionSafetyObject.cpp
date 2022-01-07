@@ -28,6 +28,7 @@
 #include "comoobj.h"
 #include "comoapi.h"
 #include "comolog.h"
+#include "mistring.h"
 #include "ComoFunctionSafetyObject.h"
 
 using namespace std;
@@ -75,7 +76,33 @@ ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     }
     else {
         // parse funcSafetySetting
-        mExpires = CFSO_ExpireVALID;
+        char *sfunc = strdup(funcSafetySetting.string());
+        if (nullptr == sfunc) {
+            mExpires = CFSO_ExpireVALID;
+            Logger::E("ComoFunctionSafetyObject", "strdup error");
+        }
+        else {
+            int seedsCapacity;
+            char **seeds = MiString::SeperateStr(sfunc, ';', nullptr, seedsCapacity);
+            if (nullptr == seeds) {
+                mExpires = CFSO_ExpireVALID;
+                free(sfunc);
+                Logger::E("ComoFunctionSafetyObject", "MiString::SeperateStr error");
+            }
+            else {
+                int num = 2;
+                char *words[2];
+                MiString::WordBreak(seeds[0], num, words, (char*)"=");
+                if (num < 2) {
+                    mExpires = CFSO_ExpireVALID;
+                }
+                else {
+                    mExpires = atol(seeds[1]);
+                    free(sfunc);
+                    free(seeds);
+                }
+            }
+        }
     }
 
     clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
