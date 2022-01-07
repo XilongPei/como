@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <pthread.h>
 #include "comoobj.h"
+#include "comoapi.h"
 #include "comolog.h"
 #include "ComoFunctionSafetyObject.h"
 
@@ -63,8 +64,20 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 //
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     : mIsValid(0)
-    , mExpires(CFSO_ExpireVALID)
 {
+    AutoPtr<IMetaCoclass> klass;
+    IObject::Probe(this)->GetCoclass(klass);
+    String funcSafetySetting;
+    klass->GetFuncSafetySetting(funcSafetySetting);
+
+    if (funcSafetySetting.IsEmpty()) {
+        mExpires = CFSO_ExpireVALID;
+    }
+    else {
+        // parse funcSafetySetting
+        mExpires = CFSO_ExpireVALID;
+    }
+
     clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
     pthread_mutex_lock(&funSafetyLock);
     objsLifeCycleExpires.cfso_push(this);
