@@ -116,6 +116,7 @@ int MiString::SeperateStr(char *s, char seperator, char **seeds, int seedsCapaci
 
 } // namespace como
 
+/*
 int main(int argc, char *argv[])
 {
     int num = 2;
@@ -132,3 +133,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+*/
