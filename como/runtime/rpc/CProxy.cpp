@@ -1732,6 +1732,10 @@ ECode InterfaceProxy::ProxyEntry(
 
     if (! thisObj->mServerName.IsEmpty()) {
         // remote process call
+        ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
+        if (FAILED(ec)) {
+            goto ProxyExit;
+        }
     }
 
 #ifndef COMO_FUNCTION_SAFETY
