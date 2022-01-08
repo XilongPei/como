@@ -67,6 +67,7 @@ enum CFSO_Expires {
 
 #define CFSO_VECTOR_SizeNullArray   300
 
+// Class Function Safety Object management VECTOR
 class CFSO_VECTOR
 {
 public:
@@ -79,7 +80,7 @@ public:
     int cfso_find(ComoFunctionSafetyObject *cfso);
 
 private:
-    void cfso_allocate();
+    unsigned int cfso_allocate();
 
     ComoFunctionSafetyObject *_data;    // the data
     unsigned int _size;     // number of ComoFunctionSafetyObject *

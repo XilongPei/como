@@ -33,7 +33,7 @@ if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
 endif()
 
-if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     set(ThreadPoolChannelInvoke ThreadPoolChannelInvoke.cpp)
 else()
     set(ThreadPoolChannelInvoke)

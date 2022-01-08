@@ -45,7 +45,9 @@ public:
 };
 static SoelfComoFunctionSafetyObject soelfComoFunctionSafetyObject;
 
-CFSO_VECTOR objsLifeCycleExpires;
+// define an instance of CFSO_VECTOR, Class Function Safety Object management VECTOR
+// All the objects for overdue management are in this variable
+static CFSO_VECTOR objsLifeCycleExpires;
 
 //
 // class SoelfComoFunctionSafetyObject
@@ -107,7 +109,9 @@ ComoFunctionSafetyObject::ComoFunctionSafetyObject()
 
     clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
     pthread_mutex_lock(&funSafetyLock);
-    objsLifeCycleExpires.cfso_push(this);
+    if (objsLifeCycleExpires.cfso_push(this) < 0) {
+        Logger::E("ComoFunctionSafetyObject", "Construct Object error");
+    }
     pthread_mutex_unlock(&funSafetyLock);
 }
 
@@ -180,8 +184,9 @@ ECode ComoFunctionSafetyObject::InvalidObject(
 
 
 //
-// class CFSO_VECTOR
-//
+// class CFSO_VECTOR, Class Function Safety Object management VECTOR
+//-------------------------------------------------------------------------
+
 CFSO_VECTOR::CFSO_VECTOR()
 {
     _size = 0;
@@ -196,16 +201,20 @@ CFSO_VECTOR::~CFSO_VECTOR()
     free(_data);
 }
 
-void CFSO_VECTOR::cfso_allocate()
+unsigned int CFSO_VECTOR::cfso_allocate()
 {
     ComoFunctionSafetyObject *newData = (ComoFunctionSafetyObject *)realloc(_data,
                                             sizeof(ComoFunctionSafetyObject*) * (_size + extra));
 
-    if (newData == NULL)
-        free(_data);
-    else
+    if (nullptr == newData) {
+        _extra = 0;
+        Logger::D("CFSO_VECTOR::cfso_allocate", "realloc error");
+    }
+    else {
         _extra = extra;
-    _data = newData;
+        _data = newData;
+    }
+    return _extra;
 }
 
 int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
@@ -216,8 +225,10 @@ int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
         return index;
     }
 
-    if (_extra < 1)
-        cfso_allocate();
+    if (_extra < 1) {
+        if (cfso_allocate() <= 0)
+            return -1;
+    }
 
     *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + _size *
                                                     sizeof(ComoFunctionSafetyObject*)) = cfso;

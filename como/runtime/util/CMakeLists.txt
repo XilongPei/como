@@ -26,7 +26,7 @@ include_directories(
     ${EXTERNAL_DIR}/cityhash/export_como
 )
 
-if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "COMO_FUNCTION_SAFETY_ENABLE")
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     set(ComoFunctionSafetyObject
         ComoFunctionSafetyObject.cpp
         FSOGetterSetter.cpp
