@@ -14,6 +14,8 @@
 // limitations under the License.
 //=========================================================================
 
+// FSO: Function Safety Object
+
 #ifndef __FSOGetterSetter_h__
 #define __FSOGetterSetter_h__
 
@@ -24,14 +26,14 @@ namespace como {
 
 #define _FSO_MAKE_FUNC_GET_NAME_(n) get##n
 #define FSO_MAKE_FUNC_GET_NAME(n) _FSO_MAKE_FUNC_GET_NAME_(n)
-#define callFSOGetter(fieldName,args...) FSO_MAKE_FUNC_GET_NAME(fieldName)(args)
+#define CallFSOGetter(fieldName,args...) FSO_MAKE_FUNC_GET_NAME(fieldName)(args)
 
 #define _FSO_MAKE_FUNC_SET_NAME_inside_(n) _set_##n
 #define FSO_MAKE_FUNC_SET_NAME_inside(n) _FSO_MAKE_FUNC_SET_NAME_inside_(n)
 
 #define _FSO_MAKE_FUNC_SET_NAME_(n) set##n
 #define FSO_MAKE_FUNC_SET_NAME(n) _FSO_MAKE_FUNC_SET_NAME_(n)
-#define callFSOSetter(fieldName,args...) FSO_MAKE_FUNC_SET_NAME(fieldName)(args)
+#define CallFSOSetter(fieldName,args...) FSO_MAKE_FUNC_SET_NAME(fieldName)(args)
 
 #if defined(__aarch64__)
     #define CALL_FUNC_GET(name)         \
@@ -49,6 +51,14 @@ namespace como {
 #elif defined(__i386__)
 #elif defined(__riscv)
     #if (__riscv_xlen == 64)
+        #define CALL_FUNC_GET(name)         \
+            "sd    ra, return_from_func;"  \
+            "call _get_"#name               \
+            "return_from_func:"
+        #define CALL_FUNC_SET(name)         \
+            "sd    ra, return_from_func;"  \
+            "call _set_"#name               \
+            "return_from_func:"
     #endif
 #else
     #error Unknown Architecture
