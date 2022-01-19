@@ -17,6 +17,7 @@
 #ifndef __COMO_LOGGER_H__
 #define __COMO_LOGGER_H__
 
+#include <cstdarg>
 #include "comodef.h"
 
 namespace como {
@@ -48,6 +49,12 @@ public:
         /* [in] */ const char* tag,
         /* [in] */ const char* format, ...);
 
+    static void Log(
+        /* [in] */ int level,
+        /* [in] */ const char* tag,
+        /* [in] */ const char* format,
+        /* [in] */ va_list argList);
+
     static void SetLevel(
         /* [in] */ int level);
 
@@ -55,10 +62,20 @@ public:
         /* [in] */ const char *szSamplingTag_);
 
 public:
-    static constexpr int VERBOSE = 0;
-    static constexpr int DEBUG = 1;
+    /* refer to external/EasyLogger/easylogger/inc/elog.h
+    #define ELOG_LVL_ASSERT                      0
+    #define ELOG_LVL_ERROR                       1
+    #define ELOG_LVL_WARN                        2
+    #define ELOG_LVL_INFO                        3
+    #define ELOG_LVL_DEBUG                       4
+    #define ELOG_LVL_VERBOSE                     5
+    */
+    static constexpr int ASSERT  = 0;
+    static constexpr int ERROR   = 1;
     static constexpr int WARNING = 2;
-    static constexpr int ERROR = 3;
+    static constexpr int INFO    = 3;
+    static constexpr int DEBUG   = 4;
+    static constexpr int VERBOSE = 5;
 
 private:
     COM_LOCAL static int sLevel;

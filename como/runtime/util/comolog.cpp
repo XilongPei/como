@@ -73,7 +73,7 @@ void Logger::D(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (DEBUG < sLevel) {
+    if (DEBUG > sLevel) {
         return;
     }
 
@@ -92,7 +92,7 @@ void Logger::E(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (ERROR < sLevel) {
+    if (ERROR > sLevel) {
         return;
     }
 
@@ -111,7 +111,7 @@ void Logger::V(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (VERBOSE < sLevel) {
+    if (VERBOSE > sLevel) {
         return;
     }
 
@@ -130,7 +130,7 @@ void Logger::W(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (WARNING < sLevel) {
+    if (WARNING > sLevel) {
         return;
     }
 
@@ -169,7 +169,7 @@ void Logger::Log(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (level < sLevel) {
+    if (level > sLevel) {
         return;
     }
 
@@ -182,6 +182,24 @@ void Logger::Log(
     va_start(argList, format);
     elog_output_args(level, tag, "", "", 0, buf, argList);
     va_end(argList);
+}
+
+void Logger::Log(
+    /* [in] */ int level,
+    /* [in] */ const char* tag,
+    /* [in] */ const char* format,
+    /* [in] */ va_list argList)
+{
+    if (level > sLevel) {
+        return;
+    }
+
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    char buf[256];
+    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %s", szSamplingTag, currentTime, tag, format);
+    elog_output_args(level, tag, "", "", 0, buf, argList);
 }
 
 void Logger::SetLevel(
