@@ -21,9 +21,11 @@
 namespace como {
 
 ComoContext *ComoContext::gComoContext = nullptr;
+Mutex ComoContext::gContextLock;
 
 ComoContext::ComoContext()
     : funComoCalloc(nullptr)
+    , iCurrentMemArea(0)
 {
     if (ComoConfig::sizeofFscpMemAreaInfo > 0) {
         //jemallocControl(ComoConfig::MemAreaInfo, ComoConfig::sizeofMemAreaInfo, funComoCalloc);

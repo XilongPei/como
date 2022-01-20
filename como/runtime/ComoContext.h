@@ -29,10 +29,24 @@ public:
     ComoContext();
 
     static ComoContext *gComoContext;
+    static Mutex gContextLock;
 
+    // --- Memory Area
     Integer iCurrentMemArea;
     COMO_CALLOC funComoCalloc;
 
+    #define BEGIN_USE_MY_MEM_AREA                                   \
+    {                                                               \
+        Mutex::AutoLock lock(gContextLock);                         \
+        Integer iCurrentMemArea = gComoContext->iCurrentMemArea;    \
+        COMO_CALLOC funComoCalloc = gComoContext->funComoCalloc;    \
+
+    #define END_USE_MY_MEM_AREA                                     \
+        gComoContext->iCurrentMemArea = iCurrentMemArea;            \
+        gComoContext->funComoCalloc = funComoCalloc;                \
+    }
+
+    // ---
     Mutex contextLock;
 };
 
