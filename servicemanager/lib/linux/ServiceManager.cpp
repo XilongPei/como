@@ -18,7 +18,9 @@
 #include <dbus/dbus.h>
 #include "ServiceManager.h"
 #include "comolog.h"
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "CZMQUtils.h"
+#endif
 #include "ComoConfig.h"
 
 namespace jing {
@@ -193,6 +195,15 @@ ECode ServiceManager::AddRemoteService(
                                         socket, (const void *)buffer, size);
 
     return ec;
+}
+#else
+ECode ServiceManager::AddRemoteService(
+    /* [in] */ const String& thisServerName,
+    /* [in] */ const String& thatServerName,
+    /* [in] */ const String& name,
+    /* [in] */ IInterface* object)
+{
+    return NOERROR;
 }
 #endif
 

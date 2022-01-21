@@ -54,10 +54,7 @@ else()
     )
 endif()
 
-###
-set(RPC_OVER_ZeroMQ_SUPPORT_Enable enable)
-
-if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
+if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     # ====== COMO Over ZeroMQ Support ======
     set(RPC_ZeroMQ_LIBS
         rpc-ZeroMQ

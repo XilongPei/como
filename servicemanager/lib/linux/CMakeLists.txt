@@ -19,10 +19,7 @@ project(libservicemanager CXX)
 set(SM_LIB_SRC_DIR ${SM_SRC_DIR}/lib/linux)
 set(SM_LIB_OBJ_DIR ${SM_OBJ_DIR}/lib/linux)
 
-###
-set(RPC_OVER_ZeroMQ_SUPPORT_Enable enable)
-
-if("${RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
+if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     # ====== COMO Over ZeroMQ Support ======
     set(COMO_RUNTIME_DIR $ENV{ROOT}/como/runtime)
     set(RPC_ZeroMQ_INC
@@ -67,6 +64,7 @@ set(SOURCES
 IMPORT_LIBRARY(comort.so)
 
 add_definitions(-DCOMO_WITH_RPC)
+add_definitions(RPC_ZeroMQ_DEFINITIONS)
 
 add_library(libservicemanager
     SHARED
