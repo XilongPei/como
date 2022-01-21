@@ -88,4 +88,6 @@ FSCP_MEM_AREA_INFO ComoConfig::FscpMemAreaInfo[] = {
 };
 int ComoConfig::sizeofFscpMemAreaInfo = sizeof(ComoConfig::FscpMemAreaInfo) / sizeof(FSCP_MEM_AREA_INFO);
 
+std::string ComoConfig::sPhxPaxosDataPath = std::string("/ComoRuntimeData/PhxPaxosData");
+
 } // namespace como

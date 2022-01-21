@@ -84,6 +84,8 @@ public:
 
     static FSCP_MEM_AREA_INFO FscpMemAreaInfo[];
     static int sizeofFscpMemAreaInfo;
+
+    static std::string sPhxPaxosDataPath;
 };
 
 } // namespace como
