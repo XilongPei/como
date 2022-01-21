@@ -21,7 +21,8 @@ include_directories(
     ../
     ../../../../inc
     ${INC_DIR}
-    ${LIBCORE_OBJ_DIR})
+    ${LIBCORE_OBJ_DIR}
+)
 
 set(SOURCES
     ConcurrentLinkedQueue.cpp
@@ -31,8 +32,10 @@ set(SOURCES
     atomic/AtomicBoolean.cpp
     atomic/AtomicInteger.cpp
     atomic/AtomicLong.cpp
-    locks/LockSupport)
+    locks/LockSupport.cpp
+)
 
 add_library(como_util_concurrent STATIC
-    ${SOURCES})
+    ${SOURCES}
+)
 add_dependencies(como_util_concurrent build_libcore)
