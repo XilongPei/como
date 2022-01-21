@@ -64,7 +64,7 @@ set(SOURCES
 IMPORT_LIBRARY(comort.so)
 
 add_definitions(-DCOMO_WITH_RPC)
-add_definitions(RPC_ZeroMQ_DEFINITIONS)
+add_definitions(${RPC_ZeroMQ_DEFINITIONS})
 
 add_library(libservicemanager
     SHARED
