@@ -1,0 +1,6 @@
+[submodule "external/libzmq"]
+	path = external/libzmq
+	url = https://gitee.com/tjopenlab/libzmq
+[submodule "external/phxpaxos"]
+	path = external/phxpaxos
+	url = https://gitee.com/tjopenlab/phxpaxos
