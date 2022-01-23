@@ -16,6 +16,11 @@
 
 set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/ZeroMQ)
 
+# libzmq is optional part of COMO
+if(NOT EXISTS "${EXTERNAL_DIR}/libzmq/include/zmq.h")
+    message(FATAL_ERROR "external/libzmq hasn't been built")
+endif()
+
 include_directories(
     ./
     ../
@@ -24,6 +29,7 @@ include_directories(
     ../../util
     ${INC_DIR}
     ${EXTERNAL_DIR}/libcrc/include
+    ${EXTERNAL_DIR}/libzmq/include
 )
 
 set(SOURCES

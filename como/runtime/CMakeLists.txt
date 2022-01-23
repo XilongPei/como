@@ -60,7 +60,7 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         rpc-ZeroMQ
     )
     set(RPC_ZeroMQ_SYS_LIBS
-        zmq
+        ${EXTERNAL_DIR}/libzmq/build/lib/libzmq.a
     )
     # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
 else()
