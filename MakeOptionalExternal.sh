@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# build result:
+# ./external/libzmq/build/lib/libzmq.a
+# ./external/phxpaxos/export_como/PhxPaxos.so
+
 current_path=$(pwd);
 
 function perror() {
@@ -44,7 +48,16 @@ function build_libzmq()
     psucc "make libzmq ok."
 }
 
+function build_phxpaxos()
+{
+    cd ${ROOT}/external/phxpaxos;
+    ./MakeMe.sh;
+    go_back;
+
+    psucc "make phxpaxos ok."
+}
+
 build_libzmq;
+build_phxpaxos;
 
 psucc "COMO build, Make optional external done."
-
