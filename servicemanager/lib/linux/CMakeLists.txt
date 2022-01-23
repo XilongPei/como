@@ -27,6 +27,7 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         ${COMO_RUNTIME_DIR}
         ${COMO_RUNTIME_DIR}/rpc
         ${COMO_RUNTIME_DIR}/rpc/ZeroMQ
+        ${EXTERNAL_DIR}/libzmq/include
     )
     set(RPC_ZeroMQ_SOURCES
         ${COMO_RUNTIME_DIR}/util/mutex.cpp

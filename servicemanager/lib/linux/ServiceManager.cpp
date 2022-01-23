@@ -171,7 +171,7 @@ ECode ServiceManager::AddRemoteService(
 
     const char* str = nullptr;
     std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(serverName.string()));
+            ComoConfig::ServerNameEndpointMap.find(std::string(thatServerName.string()));
     std::string endpoint;
     void *socket;
 
@@ -179,7 +179,7 @@ ECode ServiceManager::AddRemoteService(
         endpoint = iter->second->endpoint;
     }
     else {
-        Logger::E("CZMQChannel", "Unregistered ServerName: %s", serverName.string());
+        Logger::E("CZMQChannel", "Unregistered ServerName: %s", thatServerName.string());
     }
 
     if (nullptr != iter->second->socket) {
