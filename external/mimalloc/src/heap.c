@@ -204,6 +204,10 @@ mi_heap_t* mi_heap_new(void) {
   // push on the thread local heaps list
   heap->next = heap->tld->heaps;
   heap->tld->heaps = heap;
+
+  // -1 meand NOT in the FSCP(Function Safety Computing Platform) partition managed memory
+  heap->iFscpMemArea = -1;
+
   return heap;
 }
 

@@ -382,6 +382,10 @@ struct mi_heap_s {
   size_t                page_retired_max;                    // largest retired index into the `pages` array.
   mi_heap_t*            next;                                // list of heaps per thread
   bool                  no_reclaim;                          // `true` if this heap should not reclaim abandoned pages
+
+  // in the FSCP(Function Safety Computing Platform) partition managed memory
+  // < 0, means not in FSCP area
+  int                   iFscpMemArea;
 };
 
 

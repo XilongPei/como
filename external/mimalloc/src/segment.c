@@ -1351,8 +1351,25 @@ void _mi_segment_huge_page_free(mi_segment_t* segment, mi_page_t* page, mi_block
    Page allocation
 ----------------------------------------------------------- */
 
+// defined in ComoConfig.h
+// sources in directory external/ shouldn't include COMO head file
+typedef struct tagFSCP_MEM_AREA_INFO {
+    size_t mem_size;        // Size of space to be managed
+    void  *base;            // Base address of space to be managed
+    size_t allocated;       // Allocated size
+} FSCP_MEM_AREA_INFO;
+extern FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
+extern int como_MimallocUtils_numFscpMemArea = 0;
+
 mi_page_t* _mi_segment_page_alloc(mi_heap_t* heap, size_t block_size, mi_segments_tld_t* tld, mi_os_tld_t* os_tld) {
   mi_page_t* page;
+
+  // check whether in the FSCP(Function Safety Computing Platform) partition managed memory
+  if (heap->iFscpMemArea >= 0) {
+    page = NULL;
+    return page
+  }
+
   if (block_size <= MI_SMALL_OBJ_SIZE_MAX) {
     page = mi_segment_small_page_alloc(heap, block_size, tld, os_tld);
   }

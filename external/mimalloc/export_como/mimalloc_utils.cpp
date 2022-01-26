@@ -27,16 +27,39 @@ typedef struct tagFSCP_MEM_AREA_INFO {
     size_t allocated;       // Allocated size
 } FSCP_MEM_AREA_INFO;
 
-static FSCP_MEM_AREA_INFO *gFscpMemAreasInfo;
+extern "C" FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
+extern "C" int como_MimallocUtils_numFscpMemArea = 0;
 static int curFscpMemArea = 0;
+static mi_heap_t* heapsFscpMemArea = nullptr;
 
-int JemallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas)
+int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas)
 {
+    /*
+        // FSCP: Function Safety Computing Platform
+        typedef struct tagFSCP_MEM_AREA_INFO {
+            size_t mem_size;        // Size of space to be managed
+            void  *base;            // Base address of space to be managed
+            size_t allocated;       // Allocated size
+        } FSCP_MEM_AREA_INFO;
+    */
+    como_MimallocUtils_gFscpMemAreasInfo = (FSCP_MEM_AREA_INFO *)MemAreasInfo;
+    como_MimallocUtils_numFscpMemArea = numAreas;
+    if (numAreas > 0) {
+        heapsFscpMemArea = calloc(sizeof(mi_heap_t*), numAreas);
+        if (nullptr == heapsFscpMemArea)
+            return 1;
+        for(int i = 0;  i < numAreas;  i++) {
+            heapsFscpMemArea[i] = mi_heap_new();
+            heapsFscpMemArea[i]->iFscpMemArea = i;
+        }
+    }
+
+    return 0;
 }
 
 void *MimallocUtils::malloc(size_t size)
 {
-    void* p = mi_heap_malloc(heaps[curFscpMemArea], size);
+    void* p = mi_heap_malloc(heapsFscpMemArea[curFscpMemArea], size);
 }
 
 void MimallocUtils::free(void* ptr)
