@@ -16,7 +16,7 @@
 
 #include "ComoContext.h"
 #include "ComoConfig.h"
-#include "jemalloc_utils.h"
+#include "mimalloc_utils.h"
 
 namespace como {
 
