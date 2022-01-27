@@ -519,7 +519,16 @@ Integer RefBase::DecStrong(
         refs->mBase->OnLastStrongRef(id);
         Integer flags = refs->mFlags.load(std::memory_order_relaxed);
         if ((flags & OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_STRONG) {
-            delete this;
+            if (0 == funFreeMem) {
+                delete this;
+            }
+            else {
+                FREE_MEM_FUNCTION func;
+                func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
+                                                                        // 5 4 3 2 1 0
+                Short shortPara = funFreeMem >> 48;
+                func(shortPara);
+            }
         }
     }
     refs->DecWeak(id);
@@ -788,8 +797,8 @@ RefBase::WeakRef* RefBase::GetWeakRefs() const
 
 RefBase::RefBase()
     : mRefs(new WeakRefImpl(this))
-{
-}
+    , funFreeMem(0)
+{}
 
 RefBase::~RefBase()
 {

@@ -39,6 +39,8 @@
 
 namespace como {
 
+using FREE_MEM_FUNCTION = void(*)(Short);
+
 class COM_PUBLIC RefBase
 {
 public:
@@ -84,6 +86,8 @@ public:
         /* [in] */ const void* id) const;
 
     WeakRef* GetWeakRefs() const;
+
+    inline void SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara);
 
     inline void PrintRefs() const;
 
@@ -138,6 +142,7 @@ private:
         /* [in] */ const RefBase& o);
 
     WeakRefImpl* const mRefs;
+    HANDLE funFreeMem;
 };
 
 void RefBase::PrintRefs() const
@@ -164,6 +169,12 @@ Integer RefBase::Release(
     return DecStrong(reinterpret_cast<const void*>(id));
 }
 
+void RefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
+{
+    funFreeMem = ((HANDLE)shortPara << 48) | (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
+                                                                               // 5 4 3 2 1 0
+}
+
 // LightRefBase
 class COM_PUBLIC LightRefBase
 {
@@ -185,15 +196,19 @@ public:
 
     inline Integer GetStrongCount() const;
 
+    inline void SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara);
+
 protected:
     inline virtual ~LightRefBase();
 
 private:
     mutable std::atomic<Integer> mCount;
+    HANDLE funFreeMem;
 };
 
 LightRefBase::LightRefBase()
     : mCount(0)
+    , funFreeMem(0)
 {}
 
 LightRefBase::~LightRefBase()
@@ -212,7 +227,16 @@ Integer LightRefBase::Release(
     Integer c = mCount.fetch_sub(1, std::memory_order_release);
     if (c == 1) {
         std::atomic_thread_fence(std::memory_order_acquire);
-        delete this;
+        if (0 == funFreeMem) {
+            delete this;
+        }
+        else {
+            FREE_MEM_FUNCTION func;
+            func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
+                                                                    // 5 4 3 2 1 0
+            Short shortPara = funFreeMem >> 48;
+            func(shortPara);
+        }
     }
     return c - 1;
 }
@@ -233,6 +257,12 @@ ECode LightRefBase::GetInterfaceID(
 Integer LightRefBase::GetStrongCount() const
 {
     return mCount.load(std::memory_order_relaxed);
+}
+
+void LightRefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
+{
+    funFreeMem = ((HANDLE)shortPara << 48) | (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
+                                                                               // 5 4 3 2 1 0
 }
 
 // WeakReferenceImpl
