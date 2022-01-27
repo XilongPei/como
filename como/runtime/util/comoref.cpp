@@ -526,7 +526,8 @@ Integer RefBase::DecStrong(
                 FREE_MEM_FUNCTION func;
                 func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
                                                                         // 5 4 3 2 1 0
-                Short shortPara = funFreeMem >> 48;
+                Short shortPara = (Short)(funFreeMem >> 48);
+                this->~RefBase();
                 func(shortPara);
             }
         }
