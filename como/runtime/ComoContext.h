@@ -17,6 +17,8 @@
 #ifndef __COMO_CONTEXT_H__
 #define __COMO_CONTEXT_H__
 
+#include <pthread.h>
+#include "comoref.h"
 #include "mutex.h"
 
 namespace como {
@@ -29,21 +31,23 @@ public:
     ComoContext();
 
     static ComoContext *gComoContext;
-    static Mutex gContextLock;
+    static pthread_mutex_t gContextLock;
 
     // --- Memory Area
     Integer iCurrentMemArea;
     COMO_CALLOC funComoCalloc;
+    FREE_MEM_FUNCTION freeMemInArea;
 
-    #define BEGIN_USE_MY_MEM_AREA                                   \
-    {                                                               \
-        Mutex::AutoLock lock(gContextLock);                         \
-        Integer iCurrentMemArea = gComoContext->iCurrentMemArea;    \
-        COMO_CALLOC funComoCalloc = gComoContext->funComoCalloc;    \
+    #define BEGIN_USE_MY_MEM_AREA                                               \
+    {                                                                           \
+        pthread_mutex_lock(&ComoContext::gContextLock);                         \
+        Integer iCurrentMemArea = ComoContext::gComoContext->iCurrentMemArea;   \
+        COMO_CALLOC funComoCalloc = ComoContext::gComoContext->funComoCalloc;
 
-    #define END_USE_MY_MEM_AREA                                     \
-        gComoContext->iCurrentMemArea = iCurrentMemArea;            \
-        gComoContext->funComoCalloc = funComoCalloc;                \
+    #define END_USE_MY_MEM_AREA                                                 \
+        ComoContext::gComoContext->iCurrentMemArea = iCurrentMemArea;           \
+        ComoContext::gComoContext->funComoCalloc = funComoCalloc;               \
+        pthread_mutex_unlock(&ComoContext::gContextLock);                       \
     }
 
     // ---

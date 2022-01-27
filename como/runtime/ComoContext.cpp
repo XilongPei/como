@@ -21,7 +21,7 @@
 namespace como {
 
 ComoContext *ComoContext::gComoContext = nullptr;
-Mutex ComoContext::gContextLock;
+pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
 ComoContext::ComoContext()
     : funComoCalloc(nullptr)
