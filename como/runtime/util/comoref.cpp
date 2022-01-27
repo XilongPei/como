@@ -519,7 +519,7 @@ Integer RefBase::DecStrong(
         refs->mBase->OnLastStrongRef(id);
         Integer flags = refs->mFlags.load(std::memory_order_relaxed);
         if ((flags & OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_STRONG) {
-            if (0 == funFreeMem) {
+            if (LIKELY(0 == funFreeMem)) {
                 delete this;
             }
             else {

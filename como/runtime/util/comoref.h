@@ -227,7 +227,7 @@ Integer LightRefBase::Release(
     Integer c = mCount.fetch_sub(1, std::memory_order_release);
     if (c == 1) {
         std::atomic_thread_fence(std::memory_order_acquire);
-        if (0 == funFreeMem) {
+        if (LIKELY(0 == funFreeMem)) {
             delete this;
         }
         else {
