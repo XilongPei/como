@@ -19,6 +19,9 @@
 
 namespace como {
 
+using COMO_MALLOC = void*(*)(size_t);
+using FREE_MEM_FUNCTION = void(*)(Short,const void*);
+
 class MimallocUtils {
 public:
 /*  Management of memory distributed in multiple areas.
@@ -34,10 +37,11 @@ The map of multiple areas memory:
     /**
      * Tell mimalloc areas information
      */
-    static int setupFscpMemAreas(void *MemAreasInfo, int numAreas);
+    static int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
+                                 COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
 
-    void *malloc(size_t size);
-    void free (void* ptr);
+    void *area_malloc(size_t size);
+    void area_free(Short shortPara, const void *ptr);
 };
 
 } // namespace como

@@ -32,7 +32,8 @@ extern "C" int como_MimallocUtils_numFscpMemArea = 0;
 static int curFscpMemArea = 0;
 static mi_heap_t* heapsFscpMemArea = nullptr;
 
-int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas)
+int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
+                                     COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree)
 {
     /*
         // FSCP: Function Safety Computing Platform
@@ -54,15 +55,18 @@ int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas)
         }
     }
 
+    mimalloc = mi_malloc;
+    mifree = mi_free;
+
     return 0;
 }
 
-void *MimallocUtils::malloc(size_t size)
+void *MimallocUtils::area_malloc(size_t size)
 {
     void* p = mi_heap_malloc(heapsFscpMemArea[curFscpMemArea], size);
 }
 
-void MimallocUtils::free(void* ptr)
+void MimallocUtils::area_free(Short shortPara, const void *ptr)
 {
      mi_free(ptr);
 }

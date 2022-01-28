@@ -39,7 +39,7 @@
 
 namespace como {
 
-using FREE_MEM_FUNCTION = void(*)(Short);
+using FREE_MEM_FUNCTION = void(*)(Short,const void*);
 
 class COM_PUBLIC RefBase
 {
@@ -236,7 +236,7 @@ Integer LightRefBase::Release(
                                                                     // 5 4 3 2 1 0
             Short shortPara = (Short)(funFreeMem >> 48);
             this->~LightRefBase();
-            func(shortPara);
+            func(shortPara, this);
         }
     }
     return c - 1;

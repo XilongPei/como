@@ -528,7 +528,7 @@ Integer RefBase::DecStrong(
                                                                         // 5 4 3 2 1 0
                 Short shortPara = (Short)(funFreeMem >> 48);
                 this->~RefBase();
-                func(shortPara);
+                func(shortPara, this);
             }
         }
     }

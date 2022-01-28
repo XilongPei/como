@@ -23,7 +23,7 @@
 
 namespace como {
 
-using COMO_CALLOC = void*(*)(size_t, size_t);
+using COMO_MALLOC = void*(*)(size_t);
 
 class COM_PUBLIC ComoContext
 {
@@ -35,20 +35,24 @@ public:
 
     // --- Memory Area
     Integer iCurrentMemArea;
-    COMO_CALLOC funComoCalloc;
+    COMO_MALLOC funComoMalloc;
     FREE_MEM_FUNCTION freeMemInArea;
 
     #define BEGIN_USE_MY_MEM_AREA                                               \
     {                                                                           \
         pthread_mutex_lock(&ComoContext::gContextLock);                         \
         Integer iCurrentMemArea = ComoContext::gComoContext->iCurrentMemArea;   \
-        COMO_CALLOC funComoCalloc = ComoContext::gComoContext->funComoCalloc;
+        COMO_MALLOC funComoMalloc = ComoContext::gComoContext->funComoMalloc;
 
     #define END_USE_MY_MEM_AREA                                                 \
         ComoContext::gComoContext->iCurrentMemArea = iCurrentMemArea;           \
-        ComoContext::gComoContext->funComoCalloc = funComoCalloc;               \
+        ComoContext::gComoContext->funComoMalloc = funComoMalloc;               \
         pthread_mutex_unlock(&ComoContext::gContextLock);                       \
     }
+
+    #define SET_ComoObject_FreeMemInArea(ptr)                                   \
+    ((RefBase*)ptr)->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea,    \
+                                    ComoContext::gComoContext->iCurrentMemArea);
 
     // ---
     Mutex contextLock;

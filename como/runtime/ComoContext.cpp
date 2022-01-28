@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "util/comolog.h"
 #include "ComoContext.h"
 #include "ComoConfig.h"
 #include "mimalloc_utils.h"
@@ -24,12 +25,19 @@ ComoContext *ComoContext::gComoContext = nullptr;
 pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
 ComoContext::ComoContext()
-    : funComoCalloc(nullptr)
+    : funComoMalloc(nullptr)
+    , freeMemInArea(nullptr)
     , iCurrentMemArea(0)
 {
     if (ComoConfig::sizeofFscpMemAreaInfo > 0) {
-        //jemallocControl(ComoConfig::MemAreaInfo, ComoConfig::sizeofMemAreaInfo, funComoCalloc);
-    }
+/*
+        int ret =  MimallocUtils::setupFscpMemAreas(ComoConfig::FscpMemAreaInfo,
+                                                    ComoConfig::sizeofFscpMemAreaInfo,
+                                                    funComoMalloc, freeMemInArea);
+        if (0 != ret) {
+            Logger::E("ComoContext", "new ComoContext error, errno: %d", ret);
+        }
+*/    }
 }
 
 
