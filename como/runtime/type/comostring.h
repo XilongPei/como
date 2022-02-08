@@ -294,12 +294,12 @@ public:
         /* [in] */ Integer bytes);
 
 private:
-    void WriteCharArray(
+    ECode WriteCharArray(
         /* [in] */ const Array<Char>& charArray,
         /* [in] */ Integer start,
         /* [in] */ Integer length);
 
-    void AppendBytes(
+    ECode AppendBytes(
         /* [in] */ const char* string,
         /* [in] */ Integer byteSize);
 

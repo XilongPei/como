@@ -131,7 +131,9 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
-    WriteCharArray(charArray, start, charArray.GetLength());
+    ECode ec = WriteCharArray(charArray, start, charArray.GetLength());
+    if (FAILED(ec))
+        Logger::E("String", "String failed: %x", ec);
 }
 
 String::String(
@@ -141,7 +143,9 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
-    WriteCharArray(charArray, start, length);
+    ECode ec = WriteCharArray(charArray, start, length);
+    if (FAILED(ec))
+        Logger::E("String", "String failed: %x", ec);
 }
 
 String::String(
@@ -757,23 +761,26 @@ String String::Replace(
     /* [in] */ const char* target,
     /* [in] */ const char* replacement) const
 {
-    if (target == nullptr || target[0] == '\0' ||
-            replacement == nullptr) {
+    if (target == nullptr || target[0] == '\0' || replacement == nullptr)
         return *this;
-    }
 
     char* index = strstr(mString, target);
-    if (index == nullptr) {
+    if (index == nullptr)
         return *this;
-    }
 
     String newStr(nullptr);
     char* p = mString;
     Integer step = strlen(target);
     Integer replacementSize = strlen(replacement);
     while (index != nullptr) {
-        newStr.AppendBytes(p, index - p);
-        newStr.AppendBytes(replacement, replacementSize);
+        ECode ec = newStr.AppendBytes(p, index - p);
+        if (FAILED(ec))
+            return *this;
+
+        ec = newStr.AppendBytes(replacement, replacementSize);
+        if (FAILED(ec))
+            return *this;
+
         p = index + step;
         index = strstr(p, target);
     }
@@ -986,14 +993,14 @@ Integer String::GetByteSize(
     return byteSize;
 }
 
-void String::WriteCharArray(
+ECode String::WriteCharArray(
     /* [in] */ const Array<Char>& charArray,
     /* [in] */ Integer start,
     /* [in] */ Integer length)
 {
-    if (start < 0 || start > charArray.GetLength() || length < 0) {
-        return;
-    }
+    if (start < 0 || start > charArray.GetLength() || length < 0)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     length = (start + length) <= charArray.GetLength() ?
             length : (charArray.GetLength() - start);
 
@@ -1003,9 +1010,8 @@ void String::WriteCharArray(
     }
 
     char* buf = LockBuffer(totalByteSize);
-    if (buf == nullptr) {
-        return;
-    }
+    if (buf == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     for (Integer i = start; i < start + length; i++) {
         Integer byteSize = GetByteSize(charArray[i]);
@@ -1014,19 +1020,25 @@ void String::WriteCharArray(
     }
     UnlockBuffer(totalByteSize);
     mString[totalByteSize] = '\0';
+
+    return NOERROR;
 }
 
-void String::AppendBytes(
+ECode String::AppendBytes(
     /* [in] */ const char* string,
     /* [in] */ Integer byteSize)
 {
     Integer oldSize = GetByteLength();
     Integer newByteSize = oldSize + byteSize;
     char* buf = LockBuffer(newByteSize);
-    if (buf == nullptr) return;
+    if (buf == nullptr) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     memcpy(buf + oldSize, string, byteSize);
     UnlockBuffer(newByteSize);
     buf[newByteSize] = '\0';
+
+    return NOERROR;
 }
 
 Integer String::LastByteIndexOfInternal(
@@ -1108,7 +1120,7 @@ ECode String::UnlockBuffer(
         }
 
         mString = (char*)buf->GetData();
-        mString[byteSize] = 0;
+        mString[byteSize] = '\0';
     }
 
     return NOERROR;
