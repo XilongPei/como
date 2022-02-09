@@ -171,8 +171,10 @@ String::~String()
 
 Integer String::GetLength() const
 {
-    if (IsEmpty()) return 0;
-    if (IsCounted()) return GetCharCount();
+    if (IsEmpty())
+        return 0;
+    if (IsCounted())
+        return GetCharCount();
 
     Integer charCount = 0;
     Integer byteSize;
@@ -192,7 +194,8 @@ Integer String::GetLength() const
 Integer String::GetUTF16Length(
     /* [in] */ Integer start) const
 {
-    if (IsEmpty()) return 0;
+    if (IsEmpty())
+        return 0;
 
     Integer utf16Count = 0, charCount = 0;
     Integer byteSize;
@@ -213,7 +216,8 @@ Integer String::GetUTF16Length(
 
 Integer String::GetByteLength() const
 {
-    if (mString == nullptr || mString[0] == '\0') return 0;
+    if (nullptr == mString || mString[0] == '\0')
+        return 0;
 
     return (Integer)SharedBuffer::GetBufferFromData(mString)->GetSize() - 1;
 }
@@ -236,7 +240,8 @@ Integer String::GetHashCode() const
 Char String::GetChar(
     /* [in] */ Integer index) const
 {
-    if (IsEmpty() || index < 0) return INVALID_CHAR;
+    if (IsEmpty() || index < 0)
+        return INVALID_CHAR;
 
     Integer byteSize;
     const char* p = mString;
@@ -383,13 +388,14 @@ ECode String::GetUTF16Chars(
 Integer String::Compare(
     /* [in] */ const char* string) const
 {
-    if (mString == string) return 0;
-    if (mString == nullptr) return -1;
-    if (string == nullptr) return 1;
-
-    if (mString[0] == '\0' && string[0] == '\0') {
+    if (mString == string)
         return 0;
-    }
+    if (mString == nullptr)
+        return -1;
+    if (string == nullptr)
+        return 1;
+    if (mString[0] == '\0' && string[0] == '\0')
+        return 0;
 
     return strcmp(mString, string);
 }
@@ -397,13 +403,14 @@ Integer String::Compare(
 Integer String::CompareIgnoreCase(
     /* [in] */ const char* string) const
 {
-    if (mString == string) return 0;
-    if (mString == nullptr) return -1;
-    if (string == nullptr) return 1;
-
-    if (mString[0] == '\0' && string[0] == '\0') {
+    if (mString == string)
         return 0;
-    }
+    if (mString == nullptr)
+        return -1;
+    if (string == nullptr)
+        return 1;
+    if (mString[0] == '\0' && string[0] == '\0')
+        return 0;
 
     return strcasecmp(mString, string);
 }
@@ -469,7 +476,8 @@ String String::Substring(
     /* [in] */ Integer charStart,
     /* [in] */ Integer charEnd) const
 {
-    if (mString == nullptr) return String();
+    if (mString == nullptr)
+        return String();
     if (charStart < 0 || charEnd < 0 ||
         charStart > charEnd || charStart >= GetLength()) {
         return String("");
@@ -502,7 +510,8 @@ Integer String::IndexOf(
     /* [in] */ Char c,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (fromCharIndex < 0) return -1;
+    if (fromCharIndex < 0)
+        return -1;
 
     Integer byteSize, i = 0;
     const char* p = mString;
@@ -523,9 +532,8 @@ Integer String::IndexOf(
     /* [in] */ const char* string,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (string == nullptr || string[0] == '\0') {
+    if (string == nullptr || string[0] == '\0')
         return -1;
-    }
 
     Integer i = 0;
     Integer byteSize;
@@ -574,9 +582,9 @@ Integer String::LastIndexOf(
 Integer String::LastIndexOf(
     /* [in] */ const char* string) const
 {
-    if (string == nullptr || string[0] == '\0') {
+    if (string == nullptr || string[0] == '\0')
         return -1;
-    }
+
     Integer byteIndex = LastByteIndexOfInternal(
             string, GetByteLength() - 1);
     return ToCharIndex(byteIndex);
@@ -586,9 +594,9 @@ Integer String::LastIndexOf(
     /* [in] */ const char* string,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (string == nullptr || string[0] == '\0') {
+    if (string == nullptr || string[0] == '\0')
         return -1;
-    }
+
     Integer charByteSize;
     Integer fromByteIndex = ToByteIndex(
             fromCharIndex, &charByteSize);
@@ -607,13 +615,12 @@ Boolean String::EndsWith(
 String& String::operator=(
     /* [in] */ const String& other)
 {
-    if (mString == other.mString) {
+    if (mString == other.mString)
         return *this;
-    }
 
-    if (other.mString != nullptr) {
+    if (other.mString != nullptr)
         SharedBuffer::GetBufferFromData(other.mString)->AddRef();
-    }
+
     if (mString != nullptr) {
         SharedBuffer::GetBufferFromData(mString)->Release();
     }
@@ -625,9 +632,9 @@ String& String::operator=(
 String& String::operator=(
     /* [in] */ String&& other)
 {
-    if (mString != nullptr) {
+    if (mString != nullptr)
         SharedBuffer::GetBufferFromData(mString)->Release();
-    }
+
     mString = other.mString;
     mCharCount = other.mCharCount;
     other.mString = nullptr;
@@ -637,9 +644,9 @@ String& String::operator=(
 String& String::operator=(
     /* [in] */ const char* string)
 {
-    if (mString != nullptr) {
+    if (mString != nullptr)
         SharedBuffer::GetBufferFromData(mString)->Release();
-    }
+
     mString = string != nullptr ?
         AllocFromUTF8(string, strlen(string)) : nullptr;
     mCharCount = 0;
@@ -649,16 +656,14 @@ String& String::operator=(
 String& String::operator+=(
     /* [in] */ const String& other)
 {
-    if (other.IsEmpty()) {
+    if (other.IsEmpty())
         return *this;
-    }
 
     Integer origByteSize = GetByteLength();
     Integer newByteSize = origByteSize + other.GetByteLength();
     char* buf = LockBuffer(newByteSize);
-    if (buf == nullptr) {
+    if (nullptr == buf)
         return *this;
-    }
 
     memcpy(buf + origByteSize, other.string(), other.GetByteLength());
     buf[newByteSize] = '\0';
@@ -670,17 +675,15 @@ String& String::operator+=(
 String& String::operator+=(
     /* [in] */ const char* string)
 {
-    if (string == nullptr || string[0] == '\0') {
+    if (string == nullptr || string[0] == '\0')
         return *this;
-    }
 
     Integer origByteSize = GetByteLength();
     Integer stringByteSize = strlen(string);
     Integer newByteSize = origByteSize + stringByteSize;
     char* buf = LockBuffer(newByteSize);
-    if (buf == nullptr) {
+    if (nullptr == buf)
         return *this;
-    }
 
     memcpy(buf + origByteSize, string, stringByteSize);
     buf[newByteSize] = '\0';
@@ -739,7 +742,8 @@ String String::Replace(
     /* [in] */ Char oldChar,
     /* [in] */ Char newChar) const
 {
-    if (oldChar == newChar) return *this;
+    if (oldChar == newChar)
+        return *this;
 
     String newStr(nullptr);
 
@@ -793,9 +797,8 @@ String String::Replace(
 
 String String::Trim() const
 {
-    if (mString == nullptr) {
+    if (nullptr == mString)
         return String(nullptr);
-    }
 
     Integer byteSize = GetByteLength();
 
@@ -819,9 +822,8 @@ String String::Trim() const
 
 String String::TrimStart() const
 {
-    if (mString == nullptr) {
+    if (nullptr == mString)
         return String(nullptr);
-    }
 
     Integer byteSize = GetByteLength();
 
@@ -835,9 +837,8 @@ String String::TrimStart() const
 
 String String::TrimEnd() const
 {
-    if (mString == nullptr) {
+    if (nullptr == mString)
         return String(nullptr);
-    }
 
     const char* end = mString + GetByteLength() - 1;
     while (isspace(*end) && end >= mString) {
@@ -851,9 +852,8 @@ Integer String::ToByteIndex(
     /* [in] */ Integer charIndex,
     /* [in] */ Integer* charByteSize) const
 {
-    if (charIndex < 0 || charIndex >= GetLength()) {
+    if (charIndex < 0 || charIndex >= GetLength())
         return -1;
-    }
 
     Integer charCount = 0;
     Integer byteSize;
@@ -879,9 +879,8 @@ Integer String::ToCharIndex(
     /* [in] */ Integer byteIndex,
     /* [in] */ Integer* charByteSize) const
 {
-    if (byteIndex < 0 || byteIndex > GetByteLength()) {
+    if (byteIndex < 0 || byteIndex > GetByteLength())
         return -1;
-    }
 
     Integer charIndex = 0;
     Integer byteSize;
@@ -1010,7 +1009,7 @@ ECode String::WriteCharArray(
     }
 
     char* buf = LockBuffer(totalByteSize);
-    if (buf == nullptr)
+    if (nullptr == buf)
         return E_OUT_OF_MEMORY_ERROR;
 
     for (Integer i = start; i < start + length; i++) {
@@ -1031,9 +1030,9 @@ ECode String::AppendBytes(
     Integer oldSize = GetByteLength();
     Integer newByteSize = oldSize + byteSize;
     char* buf = LockBuffer(newByteSize);
-    if (buf == nullptr) {
+    if (nullptr == buf)
         return E_OUT_OF_MEMORY_ERROR;
-    }
+
     memcpy(buf + oldSize, string, byteSize);
     UnlockBuffer(newByteSize);
     buf[newByteSize] = '\0';
@@ -1083,7 +1082,13 @@ startSearchForLastChar:
 char* String::LockBuffer(
     /* [in] */ Integer byteSize)
 {
-    if (byteSize < 0) return nullptr;
+    if (byteSize < 0)
+        return nullptr;
+
+    if (byteSize < SharedBuffer::GetBufferFromData(mString)->GetCapacity()) {
+        SharedBuffer::GetBufferFromData(mString)->SetSize(byteSize);
+        return mString;
+    }
 
     SharedBuffer* buf;
     if (mString != nullptr) {
@@ -1093,7 +1098,8 @@ char* String::LockBuffer(
     else {
         buf = SharedBuffer::Alloc(byteSize + 1);
     }
-    if (buf == nullptr) return nullptr;
+    if (nullptr == buf)
+        return nullptr;
 
     mString = (char*)buf->GetData();
     return mString;
@@ -1102,7 +1108,8 @@ char* String::LockBuffer(
 ECode String::UnlockBuffer(
     /* [in] */ Integer byteSize)
 {
-    if (byteSize < 0) return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    if (byteSize < 0)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
     if (byteSize != GetByteLength()) {
         SharedBuffer* buf;
@@ -1113,9 +1120,8 @@ ECode String::UnlockBuffer(
         else {
             buf = SharedBuffer::Alloc(byteSize + 1);
         }
-        if (buf == nullptr) {
-            Logger::E("String", "Unlock %d bytes buffer failed",
-                    byteSize);
+        if (nullptr == buf) {
+            Logger::E("String", "Unlock %d bytes buffer failed", byteSize);
             return E_OUT_OF_MEMORY_ERROR;
         }
 
@@ -1203,6 +1209,19 @@ void String::WriteUTF8Bytes(
         case 2: *--dst = (Byte)((c | kByteMark) & kByteMask); c >>= 6;
         case 1: *--dst = (Byte)(c | kFirstByteMark[bytes]);
     }
+}
+
+ECode String::Reserve(
+        /* [in] */ size_t newCapacity) const
+{
+    if (SharedBuffer::GetBufferFromData(mString)->Reserve(newCapacity) != nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
+    return NOERROR;
+}
+
+size_t String::GetCapacity() const
+{
+    return SharedBuffer::GetBufferFromData(mString)->GetCapacity();
 }
 
 } // namespace como

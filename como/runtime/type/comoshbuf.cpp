@@ -54,6 +54,7 @@ SharedBuffer* SharedBuffer::Alloc(
         // The following is OK on Android-supported platforms.
         sb->mRefs.store(1, std::memory_order_relaxed);
         sb->mSize = size;
+        sb->mCapacity = size;
     }
     return sb;
 }
@@ -82,7 +83,8 @@ SharedBuffer* SharedBuffer::EditResize(
 {
     if (OnlyOwner()) {
         SharedBuffer* buf = const_cast<SharedBuffer*>(this);
-        if (buf->mSize == newSize) return buf;
+        if (buf->mSize == newSize)
+            return buf;
         // Don't overflow if the combined size of the new buffer / header is larger than
         // size_max.
         if (newSize >= (SIZE_MAX - sizeof(SharedBuffer))) {
@@ -93,13 +95,13 @@ SharedBuffer* SharedBuffer::EditResize(
         buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newSize);
         if (buf != nullptr) {
             buf->mSize = newSize;
+            buf->mCapacity = newSize;
             return buf;
         }
     }
     SharedBuffer* sb = Alloc(newSize);
     if (sb) {
-        const size_t mySize = mSize;
-        memcpy(sb->GetData(), GetData(), newSize < mySize ? newSize : mySize);
+        memcpy(sb->GetData(), GetData(), newSize < mSize ? newSize : mSize);
         Release();
     }
     return sb;
@@ -118,6 +120,37 @@ SharedBuffer* SharedBuffer::Reset(
 {
     SharedBuffer* sb = Alloc(new_size);
     if (sb) {
+        Release();
+    }
+    return sb;
+}
+
+SharedBuffer* SharedBuffer::Reserve(
+        /* [in] */ size_t newCapacity) const
+{
+    if (OnlyOwner()) {
+        SharedBuffer* buf = const_cast<SharedBuffer*>(this);
+        if (buf->mSize == newCapacity)
+            return buf;
+        // Don't overflow if the combined size of the new buffer / header is larger than
+        // size_max.
+        if (newCapacity >= (SIZE_MAX - sizeof(SharedBuffer))) {
+            Logger::E("SharedBuffer", "Invalid buffer size %zu", newCapacity);
+            return nullptr;
+        }
+
+        buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newCapacity);
+        if (buf != nullptr) {
+            if (newCapacity < mSize)
+                buf->mSize = newCapacity;
+
+            buf->mCapacity = newCapacity;
+            return buf;
+        }
+    }
+    SharedBuffer* sb = Alloc(newCapacity);
+    if (sb) {
+        memcpy(sb->GetData(), GetData(), newCapacity < mSize ? newCapacity : mSize);
         Release();
     }
     return sb;

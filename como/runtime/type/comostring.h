@@ -293,6 +293,21 @@ public:
         /* [in] */ Char c,
         /* [in] */ Integer bytes);
 
+    /**
+     * Request a change in capacity
+     * Requests that the string capacity be adapted to a planned change in size
+     * to a length of up to n characters.
+     * If n is greater than the current string capacity, the function causes the
+     * container to increase its capacity to n characters (or greater).
+     * In all other cases, it is taken as a non-binding request to shrink the
+     * string capacity: the container implementation is free to optimize otherwise
+     * and leave the string with a capacity greater than n.
+     * This function has no effect on the string length and cannot alter its content.
+     */
+    ECode Reserve(
+        /* [in] */ size_t newCapacity) const;
+
+    size_t GetCapacity() const;
 private:
     ECode WriteCharArray(
         /* [in] */ const Array<Char>& charArray,
