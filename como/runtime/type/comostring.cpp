@@ -1086,7 +1086,7 @@ char* String::LockBuffer(
         return nullptr;
 
     if (byteSize < SharedBuffer::GetBufferFromData(mString)->GetCapacity()) {
-        SharedBuffer::GetBufferFromData(mString)->SetSize(byteSize);
+        SharedBuffer::GetBufferFromData(mString)->SetSize(byteSize + 1);
         return mString;
     }
 
