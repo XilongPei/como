@@ -141,7 +141,7 @@ SharedBuffer* SharedBuffer::Reserve(
 
         buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newCapacity);
         if (buf != nullptr) {
-            if (newCapacity < mSize)
+            if (newCapacity < buf->mSize)
                 buf->mSize = newCapacity;
 
             buf->mCapacity = newCapacity;

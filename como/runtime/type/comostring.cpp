@@ -1086,15 +1086,14 @@ char* String::LockBuffer(
     if (byteSize < 0)
         return nullptr;
 
-    if (byteSize < SharedBuffer::GetBufferFromData(mString)->GetCapacity()) {
-        SharedBuffer::GetBufferFromData(mString)->SetSize(byteSize + 1);
-        return mString;
-    }
-
     SharedBuffer* buf;
     if (mString != nullptr) {
-        buf = SharedBuffer::GetBufferFromData(mString)->EditResize(
-                byteSize + 1);
+        if (byteSize < SharedBuffer::GetBufferFromData(mString)->GetCapacity()) {
+            SharedBuffer::GetBufferFromData(mString)->SetSize(byteSize + 1);
+            return mString;
+        }
+
+        buf = SharedBuffer::GetBufferFromData(mString)->EditResize(byteSize + 1);
     }
     else {
         buf = SharedBuffer::Alloc(byteSize + 1);
@@ -1213,15 +1212,24 @@ void String::WriteUTF8Bytes(
 }
 
 ECode String::Reserve(
-        /* [in] */ size_t newCapacity) const
+        /* [in] */ size_t newCapacity)
 {
-    if (SharedBuffer::GetBufferFromData(mString)->Reserve(newCapacity) != nullptr)
+    if ((nullptr == mString) || (0 == newCapacity))
+        return NOERROR;
+
+    SharedBuffer *sb = SharedBuffer::GetBufferFromData(mString)->Reserve(newCapacity);
+    if (nullptr == sb)
         return E_OUT_OF_MEMORY_ERROR;
+
+    mString = (char*)(sb->GetData());
     return NOERROR;
 }
 
 size_t String::GetCapacity() const
 {
+    if (nullptr == mString)
+        return 0;
+
     return SharedBuffer::GetBufferFromData(mString)->GetCapacity();
 }
 

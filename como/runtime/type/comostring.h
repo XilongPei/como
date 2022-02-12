@@ -305,7 +305,7 @@ public:
      * This function has no effect on the string length and cannot alter its content.
      */
     ECode Reserve(
-        /* [in] */ size_t newCapacity) const;
+        /* [in] */ size_t newCapacity);
 
     size_t GetCapacity() const;
 private:
