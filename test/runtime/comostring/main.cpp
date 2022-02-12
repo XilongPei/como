@@ -17,6 +17,7 @@
 #include <comosp.h>
 #include <comoobj.h>
 #include <gtest/gtest.h>
+#include <string.h>
 
 using namespace como;
 
@@ -31,6 +32,19 @@ TEST(StringTest, TestStringReplace)
     EXPECT_STREQ(".university.college", str2.Replace("::", ".").string());
     EXPECT_STREQ("university.college.", str3.Replace("::", ".").string());
     EXPECT_STREQ("tongji.university.college", str4.Replace("::", ".").string());
+}
+
+TEST(StringTest, TestReserve)
+{
+    String str("tongji");
+
+    EXPECT_EQ(str.Reserve(4096), NOERROR);
+    EXPECT_EQ(str.GetCapacity(), 4096);
+
+    str += " university";
+    EXPECT_EQ(str.GetCapacity(), 4096);
+    EXPECT_EQ(str.GetByteLength(), strlen("tongji university"));
+    EXPECT_STREQ("tongji university", str.string());
 }
 
 int main(int argc, char **argv)

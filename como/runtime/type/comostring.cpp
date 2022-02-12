@@ -67,14 +67,15 @@ static char* GetEmptyString()
 static char* AllocFromUTF8(
     /* [in] */ const char* string, size_t byteSize)
 {
-    if (byteSize == 0) return GetEmptyString();
+    if (0 == byteSize)
+        return GetEmptyString();
     if (byteSize > INT_MAX) {
         Logger::E("String", "Invalid buffer size %zu", byteSize);
         return nullptr;
     }
 
     SharedBuffer* buf = SharedBuffer::Alloc(byteSize + 1);
-    if (buf == nullptr) {
+    if (nullptr == buf) {
         Logger::E("String", "Malloc string which size is %zu failed.", byteSize);
         return nullptr;
     }
