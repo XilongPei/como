@@ -14,7 +14,7 @@
 # limitations under the License.
 #=========================================================================
 
-set(RUNTIME_SRC_DIR ${TEST_SRC_DIR}/runtime)
-set(RUNTIME_OBJ_DIR ${TEST_OBJ_DIR}/runtime)
+set(RUNTIME_SRC_DIR ${TEST_SRC_DIR}/ComplexTest)
+set(RUNTIME_OBJ_DIR ${TEST_OBJ_DIR}/ComplexTest)
 
 add_subdirectory(ComoContext)
