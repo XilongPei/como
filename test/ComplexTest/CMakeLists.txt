@@ -1,5 +1,5 @@
 #=========================================================================
-# Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+# Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,7 @@
 # limitations under the License.
 #=========================================================================
 
-set(TEST_SRC_DIR ${PROJECT_DIR}/test)
-set(TEST_OBJ_DIR ${OBJ_DIR}/test)
+set(RUNTIME_SRC_DIR ${TEST_SRC_DIR}/runtime)
+set(RUNTIME_OBJ_DIR ${TEST_OBJ_DIR}/runtime)
 
-add_subdirectory(compiler)
-add_subdirectory(runtime)
-add_subdirectory(libtest)
-add_subdirectory(entrypoint)
-add_subdirectory(support)
-add_subdirectory(libcore)
-add_subdirectory(ComplexTest)
+add_subdirectory(ComoContext)
