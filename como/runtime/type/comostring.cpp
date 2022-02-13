@@ -1217,11 +1217,16 @@ ECode String::Reserve(
     if ((nullptr == mString) || (0 == newCapacity))
         return NOERROR;
 
-    SharedBuffer *sb = SharedBuffer::GetBufferFromData(mString)->Reserve(newCapacity);
+    SharedBuffer *sb = SharedBuffer::GetBufferFromData(mString);
+    size_t size_ = sb->GetSize();
+    sb = sb->Reserve(newCapacity);
     if (nullptr == sb)
         return E_OUT_OF_MEMORY_ERROR;
 
     mString = (char*)(sb->GetData());
+    if (size_ != sb->GetSize())
+        ClearCounted();
+
     return NOERROR;
 }
 
