@@ -26,8 +26,6 @@ using namespace std;
 
 namespace como {
 
-int gMemError = 0;
-
 /*
 A 64-bit Linux, the upper 2 bytes of the user mode pointer are always 0, and
 these 2 bytes are used to store the check value of the remaining 6 bytes.
@@ -55,12 +53,6 @@ struct _byte {
     unsigned b7:1;      unsigned b6:1;      unsigned b5:1;      unsigned b4:1;
     unsigned b3:1;      unsigned b2:1;      unsigned b1:1;      unsigned b0:1;
 };
-
-static unsigned get_bit_count(unsigned char b)
-{
-    struct _byte *by = (struct _byte*)&b;
-    return by->b7 + by->b6 + by->b5 + by->b4 + by->b3 + by->b2 + by->b1 + by->b0;
-}
 
 struct _long {
     unsigned b0_7:1;    unsigned b0_6:1;    unsigned b0_5:1;    unsigned b0_4:1;
@@ -108,10 +100,9 @@ unsigned long encodeUnsignedLong(unsigned long l)
     L->b7_1 = L->b1_7 ^ L->b1_6 ^ L->b1_5 ^ L->b1_4 ^ L->b1_3 ^ L->b1_2 ^ L->b1_1 ^ L->b1_0;
     L->b7_0 = L->b0_7 ^ L->b0_6 ^ L->b0_5 ^ L->b0_4 ^ L->b0_3 ^ L->b0_2 ^ L->b0_1 ^ L->b0_0;
 
-    /*
-    L->b7_7 = 0;
-    L->b7_6 = 0;
-    */
+    // keep the lowest 2 bits
+    L->b7_7 = L->b0_1;
+    L->b7_6 = L->b0_0;
 
     return l;
 }
@@ -139,26 +130,30 @@ unsigned long decodeUnsignedLong(unsigned long l)
     by1->b1 = L->b7_1 ^ L->b1_7 ^ L->b1_6 ^ L->b1_5 ^ L->b1_4 ^ L->b1_3 ^ L->b1_2 ^ L->b1_1 ^ L->b1_0;
     by1->b0 = L->b7_0 ^ L->b0_7 ^ L->b0_6 ^ L->b0_5 ^ L->b0_4 ^ L->b0_3 ^ L->b0_2 ^ L->b0_1 ^ L->b0_0;
 
-    if ( ('\0' == b1) && ('\0' == b0)) {
-        *(unsigned short*)((unsigned char*)&l + 6) = 0;
+    if (('\0' == b1) && ('\0' == b0)) {
+        *((unsigned short *)&l + 3) = 0;
         return l;
     }
 
-    if ((get_bit_count(b1) == 1) && (get_bit_count(b0) == 1)) {
-        // fix the pointer
-        int n1, n0;
-        unsigned char *b;
-        for (n1 = 0;  (n1 < 6) && (((1 << n1) & b1) == 1);  n1++);
-        for (n0 = 0;  (n0 < 8) && (((1 << n0) & b0) == 1);  n0++);
-        if ((n1 < 6) && (n0 < 8)) {
-            b = (unsigned char *)&l + n1;
-            *b ^= (1 << n0);
+    // check the lowest 2 bits?
+    // L->b7_7;
+    // L->b7_6;
+
+    // fix the pointer
+    int n1, n0;
+    unsigned char *b;
+    for (n1 = 0;  n1 < 6;  n1++) {
+        if (((1 << n1) & b1) == 1) {
+            for (n0 = 0;  n0 < 8;  n0++) {
+                if (((1 << n0) & b0) == 1) {
+                    b = (unsigned char *)&l + n1;
+                    *b ^= (1 << n0);
+                }
+            }
         }
-        return l;
     }
 
-    // found error, set global error information, don't clear it for others could set it before
-    gMemError = 1;
+    // set highest 2 bytes of l to 0
     *((unsigned short *)&l + 3) = 0;
 
     return l;
@@ -174,7 +169,7 @@ int main()
     bits = (int)'u';
 
     str = bits.to_string();
-    printf("bit count: %d of %s 'u'\n", como::get_bit_count('u'), str.c_str());
+    printf("bits: %s 'u'\n", str.c_str());
 
     const char *p = str.c_str();
     unsigned long L1, L2;
