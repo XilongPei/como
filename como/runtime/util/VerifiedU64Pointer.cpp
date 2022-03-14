@@ -26,6 +26,9 @@ using namespace std;
 
 namespace como {
 
+int gUnfixedMemError = 0;
+int gFixedMemError = 0;
+
 /*
 A 64-bit Linux, the upper 2 bytes of the user mode pointer are always 0, and
 these 2 bytes are used to store the check value of the remaining 6 bytes.
@@ -146,6 +149,13 @@ unsigned long decodeUnsignedLong(unsigned long l)
         return l;
     }
 
+    // one is 0, another is not 0
+    if (b1 ^ b0) {
+        *((unsigned short *)&l + 3) = 0;
+        gUnfixedMemError++;
+        return l;
+    }
+
     // fix the pointer
     int n1, n0;
     unsigned char *b;
@@ -155,6 +165,7 @@ unsigned long decodeUnsignedLong(unsigned long l)
                 if (((1 << n0) & b0) == 1) {
                     b = (unsigned char *)&l + n1;
                     *b ^= (1 << n0);
+                    gFixedMemError++;
                 }
             }
         }
