@@ -24,6 +24,8 @@
 using namespace std;
 #endif
 
+#include "VerifiedU64Pointer.h"
+
 namespace como {
 
 int gUnfixedMemError = 0;
