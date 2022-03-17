@@ -279,18 +279,24 @@ static char* ini_reader_string(char* str, int num, void* stream) {
         if (c == '\n')
             break;
 #ifndef NOT_MULTI_EXPRESSION_IN_ONE_LINE
-        if ((',' == c) || (';' == c))
+        if ((',' == c) || (';' == c)) {
+            strp--;
             break;
+        }
+
         if ('"' == c) {     // string: "this is a \" string"
             c = *ctx_ptr++;
             ctx_num_left--;
+            *strp++ = c;
             while ('"' != c && (0 != ctx_num_left)) {
                 if ((c == '\\') && (ctx_num_left > 1)) {
                     c = *ctx_ptr++;
                     ctx_num_left--;
+                    *strp++ = c;
                 }
                 c = *ctx_ptr++;
                 ctx_num_left--;
+                *strp++ = c;
             }
         }
 #endif
