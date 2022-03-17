@@ -88,6 +88,10 @@ public:
     static std::string sPhxPaxosDataPath;
 };
 
+// defined in VerifiedU64Pointer.cpp
+extern int gUnfixedMemError;
+extern int gFixedMemError;
+
 } // namespace como
 
 #endif // __COMO_CONFIG_H__

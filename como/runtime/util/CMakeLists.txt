@@ -66,6 +66,7 @@ COPY(util ${UTIL_SRC_DIR}/mutex.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/ComoFunctionSafetyObject.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/FSOGetterSetter.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/mistring.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/VerifiedU64Pointer.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comosp.h
