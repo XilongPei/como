@@ -104,7 +104,7 @@ public:
         free(mBuckets);
     }
 
-    void Put(
+    int Put(
         /* [in] */ const Key& key,
         /* [in] */ Val value)
     {
@@ -117,24 +117,28 @@ public:
         }
 
         int hash = HashKey(key);
-        if (hash == -1) return;
+        if (hash == -1)
+            return -1;
 
         int index = (unsigned int)hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
+            if (nullptr == b)
+                return -2;
+
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
             mBuckets[index] = b;
             mCount++;
-            return;
+            return 0;
         }
         else {
             Bucket* prev = mBuckets[index];
             while (prev != nullptr) {
                 if (!compareF(prev->mKey, key)) {
                     assignValF(&prev->mValue, value, this);
-                    return;
+                    return 0;
                 }
                 else if (prev->mNext == nullptr) {
                     break;
@@ -142,12 +146,15 @@ public:
                 prev = prev->mNext;
             }
             Bucket* b = new Bucket();
+            if (nullptr == b)
+                return -2;
+
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
             prev->mNext = b;
             mCount++;
-            return;
+            return 0;
         }
     }
 
