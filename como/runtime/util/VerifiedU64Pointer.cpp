@@ -157,9 +157,9 @@ unsigned long decodeUnsignedLong(unsigned long l)
     int n1, n0;
     unsigned char *b;
     for (n1 = 0;  n1 < 6;  n1++) {
-        if (((1 << n1) & b1) == 1) {
+        if ((1 << n1) & b1) {
             for (n0 = 0;  n0 < 8;  n0++) {
-                if (((1 << n0) & b0) == 1) {
+                if ((1 << n0) & b0) {
                     b = (unsigned char *)&l + n1;
                     *b ^= (1 << n0);
                     gFixedMemError++;
