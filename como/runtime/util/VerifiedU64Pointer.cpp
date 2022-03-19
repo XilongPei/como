@@ -50,8 +50,9 @@ Errors of 1 bit can be corrected, and errors of 2 or more bits can be detected.
    | ......
    +-- => bit5 ^ ... bit0 => C_byte1[7]
 
-   C_byte0[6]
-   C_byte0[7]
+   the check bits of the 2 check bytes
+   C_byte0[6] => C_byte1[0..7]
+   C_byte0[7] => C_byte0[0..5]
 */
 
 struct _byte {
