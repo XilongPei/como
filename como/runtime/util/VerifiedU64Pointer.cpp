@@ -106,11 +106,9 @@ unsigned long encodeUnsignedLong(unsigned long l)
     L->b7_1 = L->b1_7 ^ L->b1_6 ^ L->b1_5 ^ L->b1_4 ^ L->b1_3 ^ L->b1_2 ^ L->b1_1 ^ L->b1_0;
     L->b7_0 = L->b0_7 ^ L->b0_6 ^ L->b0_5 ^ L->b0_4 ^ L->b0_3 ^ L->b0_2 ^ L->b0_1 ^ L->b0_0;
 
-    /*
-    // keep the lowest 2 bits
-    L->b7_7 = L->b0_1;
-    L->b7_6 = L->b0_0;
-    */
+    // Calculate the check bit of the check byte
+    L->b7_7 = L->b7_5 ^ L->b7_4 ^ L->b7_3 ^ L->b7_2 ^ L->b7_1 ^ L->b7_0;
+    L->b7_6 = L->b6_7 ^ L->b6_6 ^ L->b6_5 ^ L->b6_4 ^ L->b6_3 ^ L->b6_2 ^ L->b6_1 ^ L->b6_0;
 
     return l;
 }
@@ -131,7 +129,6 @@ unsigned long decodeUnsignedLong(unsigned long l)
     by0->b1 = L->b6_1 ^ L->b0_1 ^ L->b1_1 ^ L->b2_1 ^ L->b3_1 ^ L->b4_1 ^ L->b5_1;
     by0->b0 = L->b6_0 ^ L->b0_0 ^ L->b1_0 ^ L->b2_0 ^ L->b3_0 ^ L->b4_0 ^ L->b5_0;
 
-    b1 = '\0';
     by1->b5 = L->b7_5 ^ L->b5_7 ^ L->b5_6 ^ L->b5_5 ^ L->b5_4 ^ L->b5_3 ^ L->b5_2 ^ L->b5_1 ^ L->b5_0;
     by1->b4 = L->b7_4 ^ L->b4_7 ^ L->b4_6 ^ L->b4_5 ^ L->b4_4 ^ L->b4_3 ^ L->b4_2 ^ L->b4_1 ^ L->b4_0;
     by1->b3 = L->b7_3 ^ L->b3_7 ^ L->b3_6 ^ L->b3_5 ^ L->b3_4 ^ L->b3_3 ^ L->b3_2 ^ L->b3_1 ^ L->b3_0;
@@ -139,12 +136,9 @@ unsigned long decodeUnsignedLong(unsigned long l)
     by1->b1 = L->b7_1 ^ L->b1_7 ^ L->b1_6 ^ L->b1_5 ^ L->b1_4 ^ L->b1_3 ^ L->b1_2 ^ L->b1_1 ^ L->b1_0;
     by1->b0 = L->b7_0 ^ L->b0_7 ^ L->b0_6 ^ L->b0_5 ^ L->b0_4 ^ L->b0_3 ^ L->b0_2 ^ L->b0_1 ^ L->b0_0;
 
-    /*
-    // check the lowest 2 bits?
-    if (L->b7_7 != L->b0_1) || (L->b7_6 != L->b0_0) {
-        // error
-    }
-    */
+    // Verify the check bit of the check byte
+    by1->b7 = L->b7_7 ^ L->b7_5 ^ L->b7_4 ^ L->b7_3 ^ L->b7_2 ^ L->b7_1 ^ L->b7_0;
+    by1->b6 = L->b7_6 ^ L->b6_7 ^ L->b6_6 ^ L->b6_5 ^ L->b6_4 ^ L->b6_3 ^ L->b6_2 ^ L->b6_1 ^ L->b6_0;
 
     if (('\0' == b1) && ('\0' == b0)) {
         *((unsigned short *)&l + 3) = 0;
