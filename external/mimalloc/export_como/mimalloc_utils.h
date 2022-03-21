@@ -40,8 +40,13 @@ The map of multiple areas memory:
     static int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
                                  COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
 
+    void area_SetCurMemArea(int curFscpMemArea);
+
+    // alloc memory from curFscpMemArea
     void *area_malloc(size_t size);
-    void area_free(Short shortPara, const void *ptr);
+
+    // mi_free can detect its segment (Segment that contains the pointer) by itself
+    void area_free(const void *ptr);
 };
 
 } // namespace como

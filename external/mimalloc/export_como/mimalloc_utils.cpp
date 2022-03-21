@@ -61,6 +61,12 @@ int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
     return 0;
 }
 
+
+void MimallocUtils::area_SetCurMemArea(int curFscpMemArea)
+{
+    curFscpMemArea = iFscpMemArea;
+}
+
 void *MimallocUtils::area_malloc(size_t size)
 {
     void* p = mi_heap_malloc(heapsFscpMemArea[curFscpMemArea], size);
