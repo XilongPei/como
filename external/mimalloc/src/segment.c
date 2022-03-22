@@ -1347,9 +1347,7 @@ void _mi_segment_huge_page_free(mi_segment_t* segment, mi_page_t* page, mi_block
 #endif
 }
 
-/* -----------------------------------------------------------
-   Page allocation
------------------------------------------------------------ */
+// ______FSCP______FSCP______FSCP______FSCP______FSCP______FSCP______FSCP______
 
 // defined in ComoConfig.h
 // sources in directory external/ shouldn't include COMO head file
@@ -1361,26 +1359,158 @@ typedef struct tagFSCP_MEM_AREA_INFO {
 extern FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
 extern int como_MimallocUtils_numFscpMemArea;
 
+// learn from mi_segment_init
+static mi_segment_t* FSCP_mi_segment_init(size_t required, mi_page_kind_t page_kind, size_t page_shift, mi_segments_tld_t* tld, mi_os_tld_t* os_tld)
+{
+  // the segment parameter is non-null if it came from our cache
+  mi_assert_internal(segment==NULL || (required==0 && page_kind <= MI_PAGE_LARGE));
+
+  // calculate needed sizes first
+  size_t capacity;
+  if (page_kind == MI_PAGE_HUGE) {
+    mi_assert_internal(page_shift == MI_SEGMENT_SHIFT && required > 0);
+    capacity = 1;
+  }
+  else {
+    mi_assert_internal(required == 0);
+    size_t page_size = (size_t)1 << page_shift;
+    capacity = MI_SEGMENT_SIZE / page_size;
+    mi_assert_internal(MI_SEGMENT_SIZE % page_size == 0);
+    mi_assert_internal(capacity >= 1 && capacity <= MI_SMALL_PAGES_PER_SEGMENT);
+  }
+  size_t info_size;
+  size_t pre_size;
+  size_t segment_size = mi_segment_size(capacity, required, &pre_size, &info_size);
+  mi_assert_internal(segment_size >= required);
+
+  // Initialize parameters
+  const bool eager_delayed = (page_kind <= MI_PAGE_MEDIUM &&          // don't delay for large objects
+                              !_mi_os_has_overcommit() &&             // never delay on overcommit systems
+                              _mi_current_thread_count() > 2 &&       // do not delay for the first N threads
+                              tld->count < (size_t)mi_option_get(mi_option_eager_commit_delay));
+  const bool eager  = !eager_delayed && mi_option_is_enabled(mi_option_eager_commit);
+  bool commit = eager; // || (page_kind >= MI_PAGE_LARGE);
+  bool pages_still_good = false;
+  bool is_zero = false;
+
+  // Allocate the segment from the OS
+  size_t memid;
+  bool   mem_large = (!eager_delayed && (MI_SECURE==0)); // only allow large OS pages once we are no longer lazy
+  bool   is_pinned = false;
+  mi_segment_t *segment = (mi_segment_t*)_mi_mem_alloc_aligned(segment_size, MI_SEGMENT_SIZE, &commit, &mem_large, &is_pinned, &is_zero, &memid, os_tld);
+  if (segment == NULL) return NULL;  // failed to allocate
+  if (!commit) {
+    // ensure the initial info is committed
+    mi_assert_internal(!mem_large && !is_pinned);
+    bool commit_zero = false;
+    bool ok = _mi_mem_commit(segment, pre_size, &commit_zero, tld->os);
+    if (commit_zero) is_zero = true;
+    if (!ok) {
+      // commit failed; we cannot touch the memory: free the segment directly and return `NULL`
+      _mi_mem_free(segment, MI_SEGMENT_SIZE, memid, false, false, os_tld);
+      return NULL;
+    }
+  }
+  segment->memid = memid;
+  segment->mem_is_pinned = (mem_large || is_pinned);
+  segment->mem_is_committed = commit;
+  mi_segments_track_size((long)segment_size, tld);
+
+  mi_assert_internal(segment != NULL && (uintptr_t)segment % MI_SEGMENT_SIZE == 0);
+  mi_assert_internal(segment->mem_is_pinned ? segment->mem_is_committed : true);
+  mi_atomic_store_ptr_release(mi_segment_t, &segment->abandoned_next, NULL);  // tsan
+  if (!pages_still_good) {
+    // zero the segment info (but not the `mem` fields)
+    ptrdiff_t ofs = offsetof(mi_segment_t, next);
+    memset((uint8_t*)segment + ofs, 0, info_size - ofs);
+
+    // initialize pages info
+    for (uint8_t i = 0; i < capacity; i++) {
+      segment->pages[i].segment_idx = i;
+      segment->pages[i].is_reset = false;
+      segment->pages[i].is_committed = commit;
+      segment->pages[i].is_zero_init = is_zero;
+    }
+  }
+  else {
+    // zero the segment info but not the pages info (and mem fields)
+    ptrdiff_t ofs = offsetof(mi_segment_t, next);
+    memset((uint8_t*)segment + ofs, 0, offsetof(mi_segment_t,pages) - ofs);
+  }
+
+  // initialize
+  segment->page_kind  = page_kind;
+  segment->capacity   = capacity;
+  segment->page_shift = page_shift;
+  segment->segment_size = segment_size;
+  segment->segment_info_size = pre_size;
+  segment->thread_id  = _mi_thread_id();
+  segment->cookie = _mi_ptr_cookie(segment);
+  // _mi_stat_increase(&tld->stats->page_committed, segment->segment_info_size);
+
+  // set protection
+  mi_segment_protect(segment, true, tld->os);
+
+  // insert in free lists for small and medium pages
+  if (page_kind <= MI_PAGE_MEDIUM) {
+    mi_segment_insert_in_free_queue(segment, tld);
+  }
+
+  //fprintf(stderr,"mimalloc: alloc segment at %p\n", (void*)segment);
+  return segment;
+}
+
+static mi_page_t* mi_segment_FSCP_page_alloc(size_t block_size, mi_segments_tld_t* tld, mi_os_tld_t* os_tld) {
+  mi_segment_t* segment;
+  if (block_size <= MI_SMALL_OBJ_SIZE_MAX) {
+    segment = FSCP_mi_segment_init(block_size, MI_PAGE_SMALL, MI_SMALL_PAGE_SHIFT, tld, os_tld);
+  }
+  else if (block_size <= MI_MEDIUM_OBJ_SIZE_MAX) {
+    segment = FSCP_mi_segment_init(block_size, MI_PAGE_MEDIUM, MI_MEDIUM_PAGE_SHIFT, tld, os_tld);
+  }
+  else if (block_size <= MI_LARGE_OBJ_SIZE_MAX) {
+    segment = FSCP_mi_segment_init(block_size, MI_PAGE_LARGE, MI_LARGE_PAGE_SHIFT, tld, os_tld);
+  }
+  else {
+    segment = FSCP_mi_segment_init(block_size, MI_PAGE_HUGE, MI_SEGMENT_SHIFT, tld, os_tld);
+  }
+
+  if (segment == NULL)
+    return NULL;
+  mi_page_t* page = mi_segment_find_free(segment, tld);
+  mi_assert_internal(page != NULL);
+#if MI_DEBUG>=2
+  _mi_segment_page_start(segment, page, sizeof(void*), NULL, NULL)[0] = 0;
+#endif
+  return page;
+}
+
+// ^^^^^^FSCP^^^^^^FSCP^^^^^^FSCP^^^^^^FSCP^^^^^^FSCP^^^^^^FSCP^^^^^^FSCP^^^^^^
+
+/* -----------------------------------------------------------
+   Page allocation
+----------------------------------------------------------- */
+
 mi_page_t* _mi_segment_page_alloc(mi_heap_t* heap, size_t block_size, mi_segments_tld_t* tld, mi_os_tld_t* os_tld) {
   mi_page_t* page;
 
   // check whether in the FSCP(Function Safety Computing Platform) partition managed memory
   if (heap->iFscpMemArea >= 0) {
-    page = NULL;
-    return page;
-  }
-
-  if (block_size <= MI_SMALL_OBJ_SIZE_MAX) {
-    page = mi_segment_small_page_alloc(heap, block_size, tld, os_tld);
-  }
-  else if (block_size <= MI_MEDIUM_OBJ_SIZE_MAX) {
-    page = mi_segment_medium_page_alloc(heap, block_size, tld, os_tld);
-  }
-  else if (block_size <= MI_LARGE_OBJ_SIZE_MAX) {
-    page = mi_segment_large_page_alloc(heap, block_size, tld, os_tld);
+    page = mi_segment_FSCP_page_alloc(block_size, tld, os_tld);
   }
   else {
-    page = mi_segment_huge_page_alloc(block_size,tld,os_tld);
+    if (block_size <= MI_SMALL_OBJ_SIZE_MAX) {
+      page = mi_segment_small_page_alloc(heap, block_size, tld, os_tld);
+    }
+    else if (block_size <= MI_MEDIUM_OBJ_SIZE_MAX) {
+      page = mi_segment_medium_page_alloc(heap, block_size, tld, os_tld);
+    }
+    else if (block_size <= MI_LARGE_OBJ_SIZE_MAX) {
+      page = mi_segment_large_page_alloc(heap, block_size, tld, os_tld);
+    }
+    else {
+      page = mi_segment_huge_page_alloc(block_size,tld,os_tld);
+    }
   }
   mi_assert_expensive(page == NULL || mi_segment_is_valid(_mi_page_segment(page),tld));
   mi_assert_internal(page == NULL || (mi_segment_page_size(_mi_page_segment(page)) - (MI_SECURE == 0 ? 0 : _mi_os_page_size())) >= block_size);
