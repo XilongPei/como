@@ -40,7 +40,7 @@ The map of multiple areas memory:
     static int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
                                  COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
 
-    static area_SetCurMemArea(int curFscpMemArea);
+    static void area_SetCurMemArea(int curFscpMemArea);
 
     // alloc memory from curFscpMemArea
     static void *area_malloc(size_t size);
