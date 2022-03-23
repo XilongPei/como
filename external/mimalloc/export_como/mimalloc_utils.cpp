@@ -29,7 +29,6 @@ typedef struct tagFSCP_MEM_AREA_INFO {
 
 extern "C" FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
 extern "C" int como_MimallocUtils_numFscpMemArea = 0;
-static int curFscpMemArea = 0;
 static mi_heap_t* heapsFscpMemArea = nullptr;
 
 int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
@@ -49,7 +48,7 @@ int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
         heapsFscpMemArea = calloc(sizeof(mi_heap_t*), numAreas);
         if (nullptr == heapsFscpMemArea)
             return 1;
-        for(int i = 0;  i < numAreas;  i++) {
+        for (int i = 0;  i < numAreas;  i++) {
             heapsFscpMemArea[i] = mi_heap_new();
             heapsFscpMemArea[i]->iFscpMemArea = i;
         }
@@ -62,19 +61,15 @@ int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
 }
 
 
-void MimallocUtils::area_SetCurMemArea(int curFscpMemArea)
+void *MimallocUtils::area_malloc(short iMemArea, size_t size)
 {
-    curFscpMemArea = iFscpMemArea;
+    void* p = mi_heap_malloc(heapsFscpMemArea[iMemArea], size);
 }
 
-void *MimallocUtils::area_malloc(size_t size)
+void MimallocUtils::area_free(short iMemArea, const void *ptr)
 {
-    void* p = mi_heap_malloc(heapsFscpMemArea[curFscpMemArea], size);
-}
-
-void MimallocUtils::area_free(Short shortPara, const void *ptr)
-{
-     mi_free(ptr);
+    (void)(iMemArea);
+    mi_free(ptr);
 }
 
 } // namespace como

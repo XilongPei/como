@@ -19,7 +19,7 @@
 
 namespace como {
 
-using COMO_MALLOC = void*(*)(size_t);
+using COMO_MALLOC = void*(*)(short,size_t);
 using FREE_MEM_FUNCTION = void(*)(short,const void*);
 
 class MimallocUtils {
@@ -38,15 +38,13 @@ The map of multiple areas memory:
      * Tell mimalloc areas information
      */
     static int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
-                                 COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
-
-    static void area_SetCurMemArea(int curFscpMemArea);
+                                 COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree);
 
     // alloc memory from curFscpMemArea
-    static void *area_malloc(size_t size);
+    static void *area_malloc(short iMemArea, size_t size);
 
     // mi_free can detect its segment (Segment that contains the pointer) by itself
-    static void area_free(const void *ptr);
+    static void area_free(short iMemArea, const void *ptr);
 };
 
 } // namespace como
