@@ -431,11 +431,9 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
 builder.Append("#ifdef COMO_FUNCTION_SAFETY\n");
 builder.Append(Properties::INDENT).AppendFormat("if (ComoContext::gComoContext != nullptr) {\n");
 builder.Append(Properties::INDENT).AppendFormat("    if (ComoContext::gComoContext->funComoMalloc != nullptr) {\n");
-
 builder.Append(Properties::INDENT).AppendFormat(
 "        addr = ComoContext::gComoContext->funComoMalloc(ComoContext::gComoContext->iCurrentMemArea, sizeof(%s));\n",
 mk->mName);
-
 builder.Append(Properties::INDENT).AppendFormat("    }\n");
 builder.Append(Properties::INDENT).AppendFormat("    else {\n");
 builder.Append(Properties::INDENT).AppendFormat("        addr = calloc(sizeof(%s), 1);\n", mk->mName);

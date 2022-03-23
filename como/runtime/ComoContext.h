@@ -41,7 +41,7 @@ public:
     #define BEGIN_USE_MY_MEM_AREA                                               \
     {                                                                           \
         pthread_mutex_lock(&ComoContext::gContextLock);                         \
-        Short iCurrentMemArea = ComoContext::gComoContext->iCurrentMemArea;   \
+        Short iCurrentMemArea = ComoContext::gComoContext->iCurrentMemArea;     \
         COMO_MALLOC funComoMalloc = ComoContext::gComoContext->funComoMalloc;
 
     #define END_USE_MY_MEM_AREA                                                 \
