@@ -19,6 +19,9 @@
 
 #include "comotypes.h"
 #include <utility>
+#ifdef COMO_FUNCTION_SAFETY
+#include "VerifiedU64Pointer.h"
+#endif
 
 namespace como {
 
