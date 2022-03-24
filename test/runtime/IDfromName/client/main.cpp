@@ -89,6 +89,7 @@ TEST(TestIDfromName, testNewWithoutIID)
     AutoPtr<IFoo> foo;
     ECode ec = CFoo::New(iid, (IInterface**)&foo);
     EXPECT_EQ(ec, NOERROR);
+    foo->Foo(1239);
 }
 
 int main(int argc, char **argv)

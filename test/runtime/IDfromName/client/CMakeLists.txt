@@ -34,11 +34,11 @@ set(GENERATED_SOURCES
 
 IMPORT_LIBRARY(comort.so)
 
-add_executable(id_demo
+add_executable(testIDfromName
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(id_demo comort.so ${GTEST_LIBS})
-add_dependencies(id_demo IDfromName_FooBar_demo gtest gtest_main)
+target_link_libraries(testIDfromName comort.so ${GTEST_LIBS})
+add_dependencies(testIDfromName IDfromName_FooBar_demo gtest gtest_main)
 
 add_custom_command(
     OUTPUT
