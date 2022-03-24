@@ -14,13 +14,18 @@
 // limitations under the License.
 //=========================================================================
 
-/**
- * Test parsing a interface with constant data members.
- */
+namespace como {
+namespace demo {
 
-enum Size
+[
+    //uuid(ef1b8367-e32d-4dc0-b320-688cf4d9bdec),
+    version(0.1.0)
+]
+interface IBar
 {
-    Small,
-    Middle,
-    Large
+    Bar(
+        [in] String data);
+}
+
+}
 }

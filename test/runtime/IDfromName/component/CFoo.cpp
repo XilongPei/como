@@ -14,26 +14,30 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __CFOO_H__
-#define __CFOO_H__
+#include "CFoo.h"
+#include <cstdio>
 
-#include <comoobj.h>
-#include "_CFoo.h"
+namespace como {
+namespace demo {
 
-Coclass(CFoo)
-    , public Object
-    , public IFoo
+COMO_INTERFACE_IMPL_1(CFoo, Object, IFoo);
+
+CFoo::CFoo()
 {
-public:
-    CFoo() = default;
+    printf("==== Call CFoo() ====\n");
+}
 
-    ~CFoo() = default;
+CFoo::~CFoo()
+{
+    printf("==== Call ~CFoo() ====\n");
+}
 
-    COMO_INTERFACE_DECL();
+ECode CFoo::Foo(
+    /* [in] */ Integer data)
+{
+    printf("==== Call CFoo::Foo, data is %d ====\n", data);
+    return NOERROR;
+}
 
-    COMO_OBJECT_DECL();
-
-    ECode Foo() override;
-};
-
-#endif // __CFOO_H__
+}
+}

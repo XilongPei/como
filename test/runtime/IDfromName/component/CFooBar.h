@@ -14,55 +14,43 @@
 // limitations under the License.
 //=========================================================================
 
-#include "CFooBar.h"
+#ifndef __COMO_DEMO_CFOOBAR_H__
+#define __COMO_DEMO_CFOOBAR_H__
 
-namespace Namespace1 {
-namespace Namespace2 {
-namespace Namespace3 {
+#include <comoapi.h>
+#include <comoobj.h>
+#include "como.demo.IFoo.h"
+#include "como.demo.IBar.h"
+#include "_como_demo_CFooBar.h"
 
-COMO_INTERFACE_IMPL_2(CFooBar, Object, IFoo3, IFooBar);
-COMO_OBJECT_IMPL(CFooBar);
+namespace como {
+namespace demo {
 
-ECode CFooBar::Constructor()
+Coclass(CFooBar)
+    , public Object
+    , public IFoo
+    , public IBar
 {
-    return NOERROR;
+public:
+    CFooBar();
+
+    ~CFooBar();
+
+    COMO_INTERFACE_DECL();
+
+    ECode Constructor();
+
+    ECode Constructor(
+        /* [in] */ Long data);
+
+    ECode Foo(
+        /* [in] */ Integer data) override;
+
+    ECode Bar(
+        /* [in] */ const String& data) override;
+};
+
+}
 }
 
-ECode CFooBar::Constructor(
-    /* [in] */ const String& name)
-{
-    return NOERROR;
-}
-
-ECode CFooBar::Foo(
-    /* [in] */ const Array<Byte>& value)
-{
-    return NOERROR;
-}
-
-ECode CFooBar::Foo(
-    /* [in] */ const Array<Array<Integer>*>& value)
-{
-    return NOERROR;
-}
-
-ECode CFooBar::Foo()
-{
-    return NOERROR;
-}
-
-ECode CFooBar::Bar(
-    /* [in] */ Integer value)
-{
-    return NOERROR;
-}
-
-ECode CFooBar::FooBar(
-    /* [in] */ const String& value)
-{
-    return NOERROR;
-}
-
-} // Namespace3
-} // Namespace2
-} // Namespace1
+#endif //__COMO_DEMO_CFOOBAR_H__

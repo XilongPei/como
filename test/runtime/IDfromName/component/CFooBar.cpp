@@ -1,5 +1,5 @@
 //=========================================================================
-// Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,46 @@
 // limitations under the License.
 //=========================================================================
 
-[
-    //uuid(6c69c8bc-b62d-4dad-811b-26f73cd2aaa7),
-    uri("http://como.org/components/test/IDfromName.so"),
-    description("This is the definition of TestModule.")
-]
-module TestModuleIDfromName
+#include "CFooBar.h"
+#include <cstdio>
+
+namespace como {
+namespace demo {
+
+COMO_INTERFACE_IMPL_2(CFooBar, Object, IFoo, IBar);
+
+CFooBar::CFooBar()
 {
+    printf("==== Call CFooBar() ====\n");
+}
 
-include "Constants.cdl"
-include "Enumerations.cdl"
-include "Interfaces.cdl"
-include "Coclasses.cdl"
+CFooBar::~CFooBar()
+{
+    printf("==== Call ~CFooBar() ====\n");
+}
 
+ECode CFooBar::Constructor()
+{
+    return NOERROR;
+}
+
+ECode CFooBar::Constructor(
+    /* [in] */ Long data)
+{
+    return NOERROR;
+}
+
+ECode CFooBar::Foo(
+    /* [in] */ Integer data)
+{
+    return NOERROR;
+}
+
+ECode CFooBar::Bar(
+    /* [in] */ const String& data)
+{
+    return NOERROR;
+}
+
+}
 }
