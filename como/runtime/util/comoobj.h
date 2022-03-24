@@ -125,9 +125,9 @@ inline void Object::setObjSize(Integer objSize)
 // generate a ComponentID from module name or
 // a CoclassID from Coclass namespace::name or
 // an InterfaceID from Interface namespace::name
-COM_PUBLIC ComponentID ComponentIDfromName(String name);
-COM_PUBLIC CoclassID CoclassIDfromName(String namespaceAndName);
-COM_PUBLIC InterfaceID InterfaceIDfromName(String namespaceAndName);
+COM_PUBLIC ComponentID ComponentIDfromName(String name, const char* uri);
+COM_PUBLIC CoclassID CoclassIDfromName(String namespaceAndName, const ComponentID* componentID);
+COM_PUBLIC InterfaceID InterfaceIDfromName(String namespaceAndName, const ComponentID* componentID);
 
 } // namespace como
 

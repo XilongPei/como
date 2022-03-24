@@ -305,7 +305,7 @@ Boolean Object::InstanceOf(
     return ocid == cid;
 }
 
-ComponentID ComponentIDfromName(String name)
+ComponentID ComponentIDfromName(String name, const char* uri)
 {
     ComponentID mid;
 #ifdef __SIZEOF_INT128__
@@ -314,10 +314,11 @@ ComponentID ComponentIDfromName(String name)
     uint128 i128 = CityHash128(name, name.GetByteLength());
     memcpy((Byte*)&mid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
+    mid.mUri = uri;
     return mid;
 }
 
-CoclassID CoclassIDfromName(String namespaceAndName)
+CoclassID CoclassIDfromName(String namespaceAndName, const ComponentID* componentID)
 {
     CoclassID cid;
 #ifdef __SIZEOF_INT128__
@@ -326,10 +327,11 @@ CoclassID CoclassIDfromName(String namespaceAndName)
     uint128 i128 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
     memcpy((Byte*)&cid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
+    cid.mCid = componentID;
     return cid;
 }
 
-InterfaceID InterfaceIDfromName(String namespaceAndName)
+InterfaceID InterfaceIDfromName(String namespaceAndName, const ComponentID* componentID)
 {
     InterfaceID iid;
 #ifdef __SIZEOF_INT128__
@@ -338,6 +340,7 @@ InterfaceID InterfaceIDfromName(String namespaceAndName)
     uint128 i128 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
     memcpy((Byte*)&iid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
+    iid.mCid = componentID;
     return iid;
 }
 

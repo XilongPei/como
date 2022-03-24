@@ -1,5 +1,5 @@
 //=========================================================================
-// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
+// Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
 // limitations under the License.
 //=========================================================================
 
+#include <comosp.h>
+#include <comoobj.h>
 #include <gtest/gtest.h>
 
-// this testcase is for cdlc, if it has been here, everything is right
-TEST(testCompiler, testCompiler)
+using namespace como;
+
+TEST(testIDfromName, testIDfromName)
 {
-    EXPECT_EQ(0, 0);
+    ComponentID componentID = ComponentIDfromName("String name", nullptr);
+    InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", componentID);
+    EXPECT_EQ(DumpUUID(iid.mUuid), "8b4f178e-6355-baf9-1060-7c8c594bf8b0");
 }
 
 int main(int argc, char **argv)
