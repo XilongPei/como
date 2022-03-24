@@ -16,10 +16,10 @@
 
 [
     //uuid(6c69c8bc-b62d-4dad-811b-26f73cd2aaa7),
-    uri("http://como.org/components/test/compiler_test.so"),
+    uri("http://como.org/components/test/IDfromName.so"),
     description("This is the definition of TestModule.")
 ]
-module TestModule
+module TestModuleIDfromName
 {
 
 include "Constants.cdl"

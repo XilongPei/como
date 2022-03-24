@@ -17,14 +17,27 @@
 #include <comosp.h>
 #include <comoobj.h>
 #include <gtest/gtest.h>
+#include "_Namespace1_Namespace2_Namespace3_CFooBar.h"
+#include "CFooBar.h"
 
 using namespace como;
+using namespace Namespace1::Namespace2::Namespace3;
 
-TEST(testIDfromName, testIDfromName)
+TEST(TestIDfromName, testInterfaceIDfromName)
 {
-    ComponentID componentID = ComponentIDfromName("String name", nullptr);
-    InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", componentID);
-    EXPECT_EQ(DumpUUID(iid.mUuid), "8b4f178e-6355-baf9-1060-7c8c594bf8b0");
+    const ComponentID componentID = ComponentIDfromName("TestModule",
+                                    "http://como.org/components/test/IDfromName.so");
+    InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", &componentID);
+    EXPECT_STREQ(DumpUUID(iid.mUuid), "8e174f8b-5563-f9ba-6010-7c8c594bf8b0");
+}
+
+TEST(TestIDfromName, testNewWithoutIID)
+{
+    const ComponentID componentID = ComponentIDfromName("TestModuleIDfromName", nullptr);
+    InterfaceID iid = InterfaceIDfromName("Namespace1::Namespace2::Namespace3::CFooBar", &componentID);
+    AutoPtr<IFooBar> fooBar;
+    ECode ec = CFooBar::New(iid, (IInterface**)&fooBar);
+    EXPECT_EQ(ec, NOERROR);
 }
 
 int main(int argc, char **argv)
