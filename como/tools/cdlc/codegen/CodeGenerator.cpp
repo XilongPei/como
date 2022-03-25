@@ -469,8 +469,8 @@ builder.Append("#endif\n");
                     mk->mName);
             builder.Append(Properties::INDENT).AppendFormat("*object = _obj->Probe(%s);\n",
                     mm->mParameters[mm->mParameterNumber - 2]->mName);
-            builder.Append(Properties::INDENT).Append("Object* obj = static_cast<Object*>(_obj);\n");
-            builder.Append(Properties::INDENT).AppendFormat("if (obj) { obj->setObjSize(sizeof(%s)); }\n", mk->mName);
+            builder.Append(Properties::INDENT).AppendFormat("if (*object) { "
+                "Object* obj = static_cast<Object*>(_obj);  obj->setObjSize(sizeof(%s)); }\n", mk->mName);
             builder.Append(Properties::INDENT).Append("else { return E_INTERFACE_NOT_FOUND_EXCEPTION; }\n");
             builder.Append(Properties::INDENT).Append("REFCOUNT_ADD(*object);\n");
         }
