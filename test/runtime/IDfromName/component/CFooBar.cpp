@@ -49,9 +49,17 @@ ECode CFooBar::Foo(
     return NOERROR;
 }
 
+ECode CFooBar::BarInt(
+    /* [in] */ Integer data)
+{
+    printf("==== Call CBar::BarInt, data is %d ====\n", data);
+    return NOERROR;
+}
+
 ECode CFooBar::Bar(
     /* [in] */ const String& data)
 {
+    printf("==== Call CBar::Bar, data is %s ====\n", data.string());
     return NOERROR;
 }
 

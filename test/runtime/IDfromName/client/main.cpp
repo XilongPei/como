@@ -16,6 +16,8 @@
 
 #include "como.demo.CFoo.h"
 #include "como.demo.IFoo.h"
+#include "como.demo.IBar.h"
+#include "como.demo.CFooBar.h"
 #include "FooBarDemo.h"
 #include <comoapi.h>
 #include <comosp.h>
@@ -28,13 +30,23 @@ using namespace como;
 
 using como::demo::CFoo;
 using como::demo::IFoo;
+using como::demo::IBar;
+using como::demo::CFooBar;
 using como::demo::IID_IFoo;
+using como::demo::IID_IBar;
 
 TEST(TestIDfromName, testMain)
 {
     AutoPtr<IFoo> foo;
     CFoo::New(IID_IFoo, (IInterface**)&foo);
     foo->Foo(9);
+
+    AutoPtr<IBar> bar;
+    ECode ec = CFooBar::New(IID_IBar, (IInterface**)&bar);
+    printf("CFooBar::New(), ECode: %d\n", ec);
+    bar->Bar(String("testMain: Tongji University (1)"));
+
+    IBar::Probe(bar)->BarInt(1239);
 
     AutoPtr<IMetaComponent> mc;
     CoGetComponentMetadata(CID_FooBarDemo, nullptr, mc);
@@ -77,19 +89,23 @@ TEST(TestIDfromName, testMain)
 TEST(TestIDfromName, testInterfaceIDfromName)
 {
     const ComponentID componentID = ComponentIDfromName("TestModule",
-                                    "http://como.org/components/test/IDfromName.so");
+                    "http://como.org/component/sample/IDfromName_FooBar_demo.so");
     InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", &componentID);
     EXPECT_STREQ(DumpUUID(iid.mUuid), "8e174f8b-5563-f9ba-6010-7c8c594bf8b0");
 }
 
 TEST(TestIDfromName, testNewWithoutIID)
 {
-    const ComponentID componentID = ComponentIDfromName("FooBarDemo", nullptr);
+    const ComponentID componentID = ComponentIDfromName("FooBarDemo",
+                    "http://como.org/component/sample/IDfromName_FooBar_demo.so");
     InterfaceID iid = InterfaceIDfromName("como::demo::IBar", &componentID);
     AutoPtr<IFoo> foo;
     ECode ec = CFoo::New(iid, (IInterface**)&foo);
+    EXPECT_NE(ec, NOERROR);
+    AutoPtr<IBar> bar;
+    ec = CFooBar::New(iid, (IInterface**)&bar);
     EXPECT_EQ(ec, NOERROR);
-    foo->Foo(1239);
+    bar->Bar(String("testNewWithoutIID: Tongji University"));
 }
 
 int main(int argc, char **argv)

@@ -51,10 +51,10 @@ add_custom_command(
         -d ${CLIENT_OBJ_DIR}
         -metadata-so "${BIN_DIR}/IDfromName_FooBar_demo.so")
 
-COPY(id_demo ${CLIENT_OBJ_DIR}/id_demo ${BIN_DIR})
+COPY(testIDfromName ${CLIENT_OBJ_DIR}/testIDfromName ${BIN_DIR})
 
 install(FILES
-    ${CLIENT_OBJ_DIR}/id_demo
+    ${CLIENT_OBJ_DIR}/testIDfromName
     DESTINATION ${BIN_DIR}
     PERMISSIONS
         OWNER_READ

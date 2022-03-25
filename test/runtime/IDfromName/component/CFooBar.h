@@ -46,6 +46,9 @@ public:
     ECode Foo(
         /* [in] */ Integer data) override;
 
+    ECode BarInt(
+        /* [in] */ Integer data) override;
+
     ECode Bar(
         /* [in] */ const String& data) override;
 };

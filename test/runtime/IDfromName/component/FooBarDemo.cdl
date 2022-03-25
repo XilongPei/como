@@ -15,8 +15,8 @@
 //=========================================================================
 
 [
-    uuid(6a07eff9-9090-41a9-bfc3-67eb3ed80f49),
-    uri("http://como.org/component/sample/FooBarDemo.so")
+    //uuid(6a07eff9-9090-41a9-bfc3-67eb3ed80f49),
+    uri("http://como.org/component/sample/IDfromName_FooBar_demo.so")
 ]
 module FooBarDemo
 {
