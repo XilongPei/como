@@ -19,6 +19,7 @@
 
 #include "metadata/Metadata.h"
 #include "util/String.h"
+#include "util/StringBuilder.h"
 
 namespace cdlc {
 
@@ -35,6 +36,11 @@ private:
     String DumpMetaComponent(
         /* [in] */ como::MetaComponent* mc,
         /* [in] */ const String& prefix);
+
+    void DumpMetaNamespaceLoop(
+        /* [in] */ como::MetaNamespace* mn,
+        /* [in] */ const String& prefix,
+        /* [in] */ StringBuilder& builder);
 
     String DumpMetaNamespace(
         /* [in] */ como::MetaNamespace* mn,

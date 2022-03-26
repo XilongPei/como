@@ -16,7 +16,6 @@
 
 #include "metadata/MetadataDumper.h"
 #include "util/Properties.h"
-#include "util/StringBuilder.h"
 #include <memory>
 
 namespace cdlc {
@@ -31,6 +30,24 @@ String MetadataDumper::Dump(
     return DumpMetaComponent(mComponent, prefix);
 }
 
+void MetadataDumper::DumpMetaNamespaceLoop(
+    /* [in] */ como::MetaNamespace* mn,
+    /* [in] */ const String& prefix,
+    /* [in] */ StringBuilder& builder)
+{
+    if (nullptr == mn)
+        return;
+
+    String namespaceInfo;
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"%s\":\n", mn->mName);
+    namespaceInfo = DumpMetaNamespace(mn, prefix + Properties::INDENT);
+    builder.Append(namespaceInfo);
+    builder.Append("\n\n");
+
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++)
+        DumpMetaNamespaceLoop(mn->mNamespaces[i], prefix, builder);
+}
+
 String MetadataDumper::DumpMetaComponent(
     /* [in] */ como::MetaComponent* mc,
     /* [in] */ const String& prefix)
@@ -38,7 +55,7 @@ String MetadataDumper::DumpMetaComponent(
     StringBuilder builder;
 
     builder.Append(prefix).Append("{\n");
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mMagic\":\"0x%x\",\n", mc->mMagic);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mMagic\":0x%x,\n", mc->mMagic);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mSize\":%d,\n", mc->mSize);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mUuid\":\"%s\",\n", DumpUUID(mc->mUuid).string());
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", mc->mName);
@@ -50,16 +67,26 @@ String MetadataDumper::DumpMetaComponent(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d,\n", mc->mInterfaceNumber);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mTypeNumber\":%d", mc->mTypeNumber);
 
-    if (mc->mNamespaceNumber > 0) {
-        builder.Append(",\n");
-        builder.Append(prefix + Properties::INDENT).AppendFormat("\"mGlobalNamespace\":{\n");
-        String namespaceInfo = DumpMetaNamespace(mc->mGlobalNamespace,
-                prefix + Properties::INDENT + Properties::INDENT);
+    builder.Append(",\n\n");
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mGlobalNamespace\":\n");
+    String namespaceInfo = DumpMetaNamespace(mc->mGlobalNamespace, prefix + Properties::INDENT);
+    builder.Append(namespaceInfo);
+    builder.Append("\n\n");
+
+    for (int i = 0;  i < mc->mNamespaceNumber;  i++) {
+        como::MetaNamespace* mn = mc->mGlobalNamespace->mNamespaces[i];
+        builder.Append(prefix + Properties::INDENT).AppendFormat("\"%s\":\n", mn->mName);
+        namespaceInfo = DumpMetaNamespace(mn,
+                                          prefix + Properties::INDENT);
         builder.Append(namespaceInfo);
-        builder.Append(prefix + Properties::INDENT).Append("}");
+        builder.Append("\n\n");
+
+        for (int j = 0;  j < mn->mNamespaceNumber;  j++) {
+            DumpMetaNamespaceLoop(mn->mNamespaces[j], prefix, builder);
+        }
     }
-    builder.Append("\n");
-    builder.Append(prefix).Append("}\n");
+
+    builder.Append("}\n");
 
     return builder.ToString();
 }
@@ -90,7 +117,7 @@ String MetadataDumper::DumpMetaNamespace(
             String constantInfo = DumpMetaConstant(constant,
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(constantInfo);
-            builder.AppendFormat("%s", i < mn->mConstantNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mn->mConstantNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -103,7 +130,7 @@ String MetadataDumper::DumpMetaNamespace(
             String enumerationInfo = DumpMetaEnumeration(enumeration,
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(enumerationInfo);
-            builder.AppendFormat("%s", i < mn->mEnumerationNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mn->mEnumerationNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -113,10 +140,9 @@ String MetadataDumper::DumpMetaNamespace(
         builder.Append(prefix + Properties::INDENT).Append("\"mInterfaces\":[\n");
         for (int i = 0; i < mn->mInterfaceNumber; i++) {
             como::MetaInterface* interface = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
-            String interfaceInfo = DumpMetaInterface(interface,
-                    prefix + Properties::INDENT + Properties::INDENT);
+            String interfaceInfo = DumpMetaInterface(interface, prefix + Properties::INDENT);
             builder.Append(interfaceInfo);
-            builder.AppendFormat("%s", i < mn->mInterfaceNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mn->mInterfaceNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -126,9 +152,9 @@ String MetadataDumper::DumpMetaNamespace(
         builder.Append(prefix + Properties::INDENT).Append("\"mCoclasss\":[\n");
         for (int i = 0; i < mn->mCoclassNumber; i++) {
             como::MetaCoclass* klass = mComponent->mCoclasses[mn->mCoclassIndexes[i]];
-            String klassInfo = DumpMetaCoclass(klass, prefix + Properties::INDENT);
+            String klassInfo = DumpMetaCoclass(klass, prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(klassInfo);
-            builder.AppendFormat("%s", i < mn->mCoclassNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mn->mCoclassNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -172,13 +198,13 @@ String MetadataDumper::DumpMetaEnumeration(
     for (int i = 0; i < me->mEnumeratorNumber; i++) {
         builder.Append(prefix + Properties::INDENT + Properties::INDENT);
         builder.AppendFormat("{ \"%s\":%d }", me->mEnumerators[i]->mName, me->mEnumerators[i]->mValue);
-        builder.AppendFormat("%s", i < me->mEnumeratorNumber - 1 ? ",\n" : "\n");
+        builder.AppendFormat("%s", i < me->mEnumeratorNumber - 1 ? ",\n" :"\n");
     }
     builder.Append(prefix + Properties::INDENT).Append("]");
     if (me->mProperties & TYPE_EXTERNAL) {
         builder.Append(",\n");
         char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
-        builder.AppendFormat("\"mExternalModule\":\"%s\"\n", *externalPtr);
+        builder.Append(prefix + Properties::INDENT).AppendFormat("\"mExternalModule\":\"%s\"\n", *externalPtr);
     }
     else {
         builder.Append("\n");
@@ -198,14 +224,15 @@ String MetadataDumper::DumpMetaCoclass(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mUuid\":\"%s\",\n", DumpUUID(mk->mUuid).string());
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", mk->mName);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespace\":\"%s\",\n", mk->mNamespace);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d\n", mk->mInterfaceNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mInterfaceNumber\":%d", mk->mInterfaceNumber);
     if (mk->mInterfaceNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mInterfaces\":[\n");
         for (int i = 0; i < mk->mInterfaceNumber; i++) {
-            builder.Append(prefix + Properties::INDENT).AppendFormat("{ \"Interface\":\"%s\" }",
+            builder.Append(prefix + Properties::INDENT + Properties::INDENT).AppendFormat(
+                    "{ \"Interface\":\"%s\" }",
                     mComponent->mInterfaces[mk->mInterfaceIndexes[i]]->mName);
-            builder.AppendFormat("%s", i < mk->mInterfaceNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mk->mInterfaceNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -219,8 +246,9 @@ String MetadataDumper::DumpMetaCoclass(
         if (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED) {
             builder.Append("\"COCLASS_CONSTRUCTOR_DELETED\"");
         }
-        builder.Append("\n");
     }
+
+    builder.Append("\n");
     builder.Append(prefix).Append("}");
 
     return builder.ToString();
@@ -255,7 +283,7 @@ String MetadataDumper::DumpMetaInterface(
             String constantInfo = DumpMetaConstant(mi->mConstants[i],
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(constantInfo);
-            builder.AppendFormat("%s", i < mi->mConstantNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mi->mConstantNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -264,10 +292,9 @@ String MetadataDumper::DumpMetaInterface(
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mMethods\":[\n");
         for (int i = 0; i < mi->mMethodNumber; i++) {
-            String methodInfo = DumpMetaMethod(mi->mMethods[i],
-                    prefix + Properties::INDENT + Properties::INDENT);
+            String methodInfo = DumpMetaMethod(mi->mMethods[i], prefix + Properties::INDENT);
             builder.Append(methodInfo);
-            builder.AppendFormat("%s", i < mi->mMethodNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mi->mMethodNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -277,17 +304,16 @@ String MetadataDumper::DumpMetaInterface(
         builder.Append(prefix + Properties::INDENT).Append("\"mNestedInterfaces\":[\n");
         for (int i = 0; i < mi->mNestedInterfaceNumber; i++) {
             como::MetaInterface* interface = mComponent->mInterfaces[mi->mNestedInterfaceIndexes[i]];
-            String interfaceInfo = DumpMetaInterface(interface,
-                    prefix + Properties::INDENT + Properties::INDENT);
+            String interfaceInfo = DumpMetaInterface(interface, prefix + Properties::INDENT);
             builder.Append(interfaceInfo);
-            builder.AppendFormat("%s", i < mi->mNestedInterfaceNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mi->mNestedInterfaceNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
     if (mi->mProperties & TYPE_EXTERNAL) {
         builder.Append(",\n");
         char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
-        builder.AppendFormat("\"mExternalModule\":\"%s\"\n", *externalPtr);
+        builder.Append(prefix + Properties::INDENT).AppendFormat("\"mExternalModule\":\"%s\"\n", *externalPtr);
     }
     else {
         builder.Append("\n");
@@ -322,7 +348,7 @@ String MetadataDumper::DumpMetaMethod(
             String parameterInfo = DumpMetaParameter(mm->mParameters[i],
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(parameterInfo);
-            builder.AppendFormat("%s", i < mm->mParameterNumber - 1 ? ",\n" : "\n");
+            builder.AppendFormat("%s", i < mm->mParameterNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -477,7 +503,7 @@ String MetadataDumper::DumpMetaValue(
 
     switch (mt->mKind) {
         case como::TypeKind::Boolean:
-            builder.Append(mv->mBooleanValue ? "true" : "false");
+            builder.Append(mv->mBooleanValue ? "true" :"false");
             break;
         case como::TypeKind::Char:
             builder.AppendFormat("%c", (char)mv->mIntegralValue);
