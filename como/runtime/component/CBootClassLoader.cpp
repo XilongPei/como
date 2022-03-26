@@ -194,6 +194,12 @@ ECode CBootClassLoader::FindComponent(
     /* [in] */ const ComponentID& compId,
     /* [out] */ String& compPath)
 {
+    if (nullptr == compId.mUri) {
+        Logger::E(TAG, "The name of component (ComponentID.mUri) is null.");
+        compPath = nullptr;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     String uri(compId.mUri);
     if (mDebug) {
         Logger::D(TAG, "The uri of the component which will be loaded is \"%s\".",
