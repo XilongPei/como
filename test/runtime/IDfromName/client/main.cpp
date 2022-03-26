@@ -98,11 +98,12 @@ TEST(TestIDfromName, testNewWithoutIID)
 {
     const ComponentID componentID = ComponentIDfromName("FooBarDemo",
                     "http://como.org/component/sample/IDfromName_FooBar_demo.so");
-    InterfaceID iid = InterfaceIDfromName("como::demo::IBar", &componentID);
     InterfaceID iid2 = InterfaceIDfromName("como::demo::IBar2", &componentID);
     AutoPtr<IFoo> foo;
     ECode ec = CFoo::New(iid2, (IInterface**)&foo);
     EXPECT_NE(ec, NOERROR);
+
+    InterfaceID iid = InterfaceIDfromName("como::demo::IBar", nullptr);
     AutoPtr<IBar> bar;
     ec = CFooBar::New(iid, (IInterface**)&bar);
     EXPECT_EQ(ec, NOERROR);
