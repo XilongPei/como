@@ -460,9 +460,8 @@ builder.Append("#endif\n");
                 }
                 builder.Append(");\n");
                 builder.Append(Properties::INDENT).Append("if (FAILED(ec)) {\n");
-                builder.Append(Properties::INDENT + Properties::INDENT).Append(
-                                                    "reinterpret_cast<LightRefBase*>(_obj)->DeleteThis();\n");
-                builder.Append(Properties::INDENT + Properties::INDENT).Append("return ec;\n");
+                builder.Append(Properties::INDENT).Append("    delete _obj;\n");
+                builder.Append(Properties::INDENT).Append("    return ec;\n");
                 builder.Append(Properties::INDENT).Append("}\n");
             }
             builder.Append(Properties::INDENT).AppendFormat("_obj->AttachMetadata(mComponent, \"%s%s\");\n",
@@ -482,12 +481,12 @@ builder.Append(
 "                return E_INTERFACE_NOT_FOUND_EXCEPTION;\n"
 "            }\n"
 "        }\n"
-"        reinterpret_cast<LightRefBase*>(_obj)->DeleteThis();\n"
+"        delete _obj;\n"
 "        return E_INTERFACE_NOT_FOUND_EXCEPTION;\n"
 "    }\n"
 "#else\n"
 "    else {\n"
-"        reinterpret_cast<LightRefBase*>(_obj)->DeleteThis();\n"
+"        delete _obj;\n"
 "        return E_INTERFACE_NOT_FOUND_EXCEPTION; \n"
 "    }\n"
 "#endif\n");
