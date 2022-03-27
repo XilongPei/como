@@ -460,7 +460,8 @@ builder.Append("#endif\n");
                 }
                 builder.Append(");\n");
                 builder.Append(Properties::INDENT).Append("if (FAILED(ec)) {\n");
-                builder.Append(Properties::INDENT + Properties::INDENT).Append("free(addr);\n");
+                builder.Append(Properties::INDENT + Properties::INDENT).Append(
+                                                    "reinterpret_cast<LightRefBase*>(_obj)->Release();\n");
                 builder.Append(Properties::INDENT + Properties::INDENT).Append("return ec;\n");
                 builder.Append(Properties::INDENT).Append("}\n");
             }
@@ -471,7 +472,26 @@ builder.Append("#endif\n");
                     mm->mParameters[mm->mParameterNumber - 2]->mName);
             builder.Append(Properties::INDENT).AppendFormat("if (*object) { "
                                                 "((Object*)_obj)->setObjSize(sizeof(%s)); }\n", mk->mName);
-            builder.Append(Properties::INDENT).Append("else { return E_INTERFACE_NOT_FOUND_EXCEPTION; }\n");
+
+builder.Append(
+"#ifdef COMO_FUNCTION_SAFETY\n"
+"    else {\n"
+"        if (ComoContext::gComoContext != nullptr) {\n"
+"            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
+"                ComoContext::gComoContext->freeMemInArea(ComoContext::gComoContext->iCurrentMemArea, addr);\n"
+"                return E_INTERFACE_NOT_FOUND_EXCEPTION;\n"
+"            }\n"
+"        }\n"
+"        reinterpret_cast<LightRefBase*>(_obj)->Release();\n"
+"        return E_INTERFACE_NOT_FOUND_EXCEPTION;\n"
+"    }\n"
+"#else\n"
+"    else {\n"
+"        reinterpret_cast<LightRefBase*>(_obj)->Release();\n"
+"        return E_INTERFACE_NOT_FOUND_EXCEPTION; \n"
+"    }\n"
+"#endif\n");
+
             builder.Append(Properties::INDENT).Append("REFCOUNT_ADD(*object);\n");
         }
         builder.Append(Properties::INDENT).Append("return NOERROR;\n");
