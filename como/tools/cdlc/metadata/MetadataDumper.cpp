@@ -33,7 +33,8 @@ String MetadataDumper::Dump(
 void MetadataDumper::DumpMetaNamespaceLoop(
     /* [in] */ como::MetaNamespace* mn,
     /* [in] */ const String& prefix,
-    /* [in] */ StringBuilder& builder)
+    /* [in] */ StringBuilder& builder,
+    /* [in] */ bool lastOne)
 {
     if (nullptr == mn)
         return;
@@ -42,10 +43,15 @@ void MetadataDumper::DumpMetaNamespaceLoop(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"%s\":\n", mn->mName);
     namespaceInfo = DumpMetaNamespace(mn, prefix + Properties::INDENT);
     builder.Append(namespaceInfo);
+    if (!lastOne) {
+        builder.Append(",");
+    }
     builder.Append("\n\n");
 
-    for (int i = 0;  i < mn->mNamespaceNumber;  i++)
-        DumpMetaNamespaceLoop(mn->mNamespaces[i], prefix, builder);
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
+        bool lastOne = (i < mn->mNamespaceNumber - 1) ? false : true;
+        DumpMetaNamespaceLoop(mn->mNamespaces[i], prefix, builder, lastOne);
+    }
 }
 
 String MetadataDumper::DumpMetaComponent(
@@ -71,18 +77,24 @@ String MetadataDumper::DumpMetaComponent(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mGlobalNamespace\":\n");
     String namespaceInfo = DumpMetaNamespace(mc->mGlobalNamespace, prefix + Properties::INDENT);
     builder.Append(namespaceInfo);
+    if (0 != mc->mNamespaceNumber) {
+        builder.Append(",");
+    }
     builder.Append("\n\n");
 
     for (int i = 0;  i < mc->mNamespaceNumber;  i++) {
         como::MetaNamespace* mn = mc->mGlobalNamespace->mNamespaces[i];
         builder.Append(prefix + Properties::INDENT).AppendFormat("\"%s\":\n", mn->mName);
-        namespaceInfo = DumpMetaNamespace(mn,
-                                          prefix + Properties::INDENT);
+        namespaceInfo = DumpMetaNamespace(mn, prefix + Properties::INDENT);
         builder.Append(namespaceInfo);
+        if (0 != mn->mNamespaceNumber) {
+            builder.Append(",");
+        }
         builder.Append("\n\n");
 
         for (int j = 0;  j < mn->mNamespaceNumber;  j++) {
-            DumpMetaNamespaceLoop(mn->mNamespaces[j], prefix, builder);
+            bool lastOne = (j < mn->mNamespaceNumber - 1) ? false : true;
+            DumpMetaNamespaceLoop(mn->mNamespaces[j], prefix, builder, lastOne);
         }
     }
 

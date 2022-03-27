@@ -40,7 +40,8 @@ private:
     void DumpMetaNamespaceLoop(
         /* [in] */ como::MetaNamespace* mn,
         /* [in] */ const String& prefix,
-        /* [in] */ StringBuilder& builder);
+        /* [in] */ StringBuilder& builder,
+        /* [in] */ bool lastOne);
 
     String DumpMetaNamespace(
         /* [in] */ como::MetaNamespace* mn,
