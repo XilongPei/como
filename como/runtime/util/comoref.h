@@ -187,6 +187,8 @@ public:
     inline Integer Release(
         /* [in] */ HANDLE id = 0) const;
 
+    inline void DeleteThis() const;
+
     inline IInterface* Probe(
         /* [in] */ const InterfaceID& iid) const;
 
@@ -240,6 +242,22 @@ Integer LightRefBase::Release(
         }
     }
     return c - 1;
+}
+
+void LightRefBase::DeleteThis() const
+{
+    std::atomic_thread_fence(std::memory_order_acquire);
+    if (LIKELY(0 == funFreeMem)) {
+        delete this;
+    }
+    else {
+        FREE_MEM_FUNCTION func;
+        func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
+                                                                // 5 4 3 2 1 0
+        Short shortPara = (Short)(funFreeMem >> 48);
+        this->~LightRefBase();
+        func(shortPara, this);
+    }
 }
 
 IInterface* LightRefBase::Probe(
