@@ -469,8 +469,19 @@ builder.Append("#endif\n");
                     mk->mName);
             builder.Append(Properties::INDENT).AppendFormat("*object = _obj->Probe(%s);\n",
                     mm->mParameters[mm->mParameterNumber - 2]->mName);
-            builder.Append(Properties::INDENT).AppendFormat("if (*object) { "
-                                                "((Object*)_obj)->setObjSize(sizeof(%s)); }\n", mk->mName);
+
+builder.AppendFormat(
+"    if (*object) {\n"
+"        ((Object*)_obj)->setObjSize(sizeof(%s)); "
+"        #ifdef COMO_FUNCTION_SAFETY\n"
+"        if (ComoContext::gComoContext != nullptr) {\n"
+"            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
+"                ((RefBase*)ptr)->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea,\n"
+"                                               ComoContext::gComoContext->iCurrentMemArea);\n"
+"            }"
+"        }"
+"        #endif\n"
+"    }\n", mk->mName);
 
 builder.Append(
 "#ifdef COMO_FUNCTION_SAFETY\n"
