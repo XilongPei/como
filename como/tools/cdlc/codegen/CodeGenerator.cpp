@@ -472,14 +472,14 @@ builder.Append("#endif\n");
 
 builder.AppendFormat(
 "    if (*object) {\n"
-"        ((Object*)_obj)->setObjSize(sizeof(%s)); "
+"        ((Object*)_obj)->setObjSize(sizeof(%s)); \n"
 "        #ifdef COMO_FUNCTION_SAFETY\n"
 "        if (ComoContext::gComoContext != nullptr) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
 "                ((RefBase*)ptr)->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea,\n"
 "                                               ComoContext::gComoContext->iCurrentMemArea);\n"
-"            }"
-"        }"
+"            }\n"
+"        }\n"
 "        #endif\n"
 "    }\n", mk->mName);
 
