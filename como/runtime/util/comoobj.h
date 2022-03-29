@@ -65,7 +65,7 @@ public:
     void OnLastWeakRef(
         /* [in] */ const void* id) override;
 
-    inline void setObjSize(Integer objSize);
+    inline void SetObjSize(Integer objSize);
 
     static ECode GetCoclassID(
         /* [in] */ IInterface* obj,
@@ -117,7 +117,7 @@ private:
     Integer mObjSize;
 };
 
-inline void Object::setObjSize(Integer objSize)
+inline void Object::SetObjSize(Integer objSize)
 {
     mObjSize = objSize;
 }

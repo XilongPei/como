@@ -472,7 +472,7 @@ builder.Append("#endif\n");
 
 builder.AppendFormat(
 "    if (*object) {\n"
-"        _obj->setObjSize(sizeof(%s));\n"
+"        _obj->SetObjSize(sizeof(%s));\n"
 "#ifdef COMO_FUNCTION_SAFETY\n"
 "        if (ComoContext::gComoContext != nullptr) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
