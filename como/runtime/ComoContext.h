@@ -38,22 +38,6 @@ public:
     COMO_MALLOC funComoMalloc;
     FREE_MEM_FUNCTION freeMemInArea;
 
-    #define BEGIN_USE_MY_MEM_AREA                                               \
-    {                                                                           \
-        pthread_mutex_lock(&ComoContext::gContextLock);                         \
-        Short iCurrentMemArea = ComoContext::gComoContext->iCurrentMemArea;     \
-        COMO_MALLOC funComoMalloc = ComoContext::gComoContext->funComoMalloc;
-
-    #define END_USE_MY_MEM_AREA                                                 \
-        ComoContext::gComoContext->iCurrentMemArea = iCurrentMemArea;           \
-        ComoContext::gComoContext->funComoMalloc = funComoMalloc;               \
-        pthread_mutex_unlock(&ComoContext::gContextLock);                       \
-    }
-
-    #define SET_ComoObject_FreeMemInArea(ptr)                                   \
-    ((RefBase*)ptr)->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea,    \
-                                    ComoContext::gComoContext->iCurrentMemArea);
-
     // ---
     Mutex contextLock;
 };

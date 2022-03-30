@@ -429,10 +429,11 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
             builder.Append(Properties::INDENT).AppendFormat("void* addr;\n", mk->mName);
 
 builder.Append("#ifdef COMO_FUNCTION_SAFETY\n");
-builder.Append(Properties::INDENT).AppendFormat("if (ComoContext::gComoContext != nullptr) {\n");
+builder.Append(Properties::INDENT).AppendFormat(
+         "if ((iid.mCid != nullptr) && ((HANDLE)iid.mCid < 4096) && (ComoContext::gComoContext != nullptr)) {\n");
 builder.Append(Properties::INDENT).AppendFormat("    if (ComoContext::gComoContext->funComoMalloc != nullptr) {\n");
 builder.Append(Properties::INDENT).AppendFormat(
-"        addr = ComoContext::gComoContext->funComoMalloc(ComoContext::gComoContext->iCurrentMemArea, sizeof(%s));\n",
+"        addr = ComoContext::gComoContext->funComoMalloc((Short)(HANDLE)iid.mCid - 1, sizeof(%s));\n",
 mk->mName);
 builder.Append(Properties::INDENT).AppendFormat("    }\n");
 builder.Append(Properties::INDENT).AppendFormat("    else {\n");
@@ -474,10 +475,9 @@ builder.AppendFormat(
 "    if (*object) {\n"
 "        _obj->SetObjSize(sizeof(%s));\n"
 "#ifdef COMO_FUNCTION_SAFETY\n"
-"        if (ComoContext::gComoContext != nullptr) {\n"
+"        if ((iid.mCid != nullptr) && ((HANDLE)iid.mCid < 4096) && (ComoContext::gComoContext != nullptr)) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
-"                _obj->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea,\n"
-"                                               ComoContext::gComoContext->iCurrentMemArea);\n"
+"                _obj->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea, (Short)(HANDLE)iid.mCid - 1);\n"
 "            }\n"
 "        }\n"
 "#endif\n"
@@ -486,9 +486,9 @@ builder.AppendFormat(
 builder.Append(
 "#ifdef COMO_FUNCTION_SAFETY\n"
 "    else {\n"
-"        if (ComoContext::gComoContext != nullptr) {\n"
+"        if ((iid.mCid != nullptr) && ((HANDLE)iid.mCid < 4096) && (ComoContext::gComoContext != nullptr)) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
-"                ComoContext::gComoContext->freeMemInArea(ComoContext::gComoContext->iCurrentMemArea, addr);\n"
+"                ComoContext::gComoContext->freeMemInArea((Short)(HANDLE)iid.mCid - 1, addr);\n"
 "                return E_INTERFACE_NOT_FOUND_EXCEPTION;\n"
 "            }\n"
 "        }\n"

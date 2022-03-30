@@ -128,6 +128,7 @@ inline void Object::SetObjSize(Integer objSize)
 COM_PUBLIC ComponentID ComponentIDfromName(String name, const char* uri);
 COM_PUBLIC CoclassID CoclassIDfromName(String namespaceAndName, const ComponentID* componentID);
 COM_PUBLIC InterfaceID InterfaceIDfromName(String namespaceAndName, const ComponentID* componentID);
+COM_PUBLIC InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemArea);
 
 } // namespace como
 

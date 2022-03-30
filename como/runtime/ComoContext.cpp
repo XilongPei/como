@@ -27,7 +27,6 @@ pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 ComoContext::ComoContext()
     : funComoMalloc(nullptr)
     , freeMemInArea(nullptr)
-    , iCurrentMemArea(0)
 {
     if (ComoConfig::sizeofFscpMemAreaInfo > 0) {
 /*

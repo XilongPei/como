@@ -108,6 +108,8 @@ TEST(TestIDfromName, testNewWithoutIID)
     ec = CFooBar::New(iid, (IInterface**)&bar);
     EXPECT_EQ(ec, NOERROR);
     bar->Bar(String("testNewWithoutIID: Tongji University"));
+
+    printf("%d\n", (Short)(HANDLE)iid.mCid - 1);
 }
 
 int main(int argc, char **argv)

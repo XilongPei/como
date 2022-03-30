@@ -344,4 +344,22 @@ InterfaceID InterfaceIDfromName(String namespaceAndName, const ComponentID* comp
     return iid;
 }
 
+InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemArea)
+{
+    InterfaceID iid;
+#ifdef __SIZEOF_INT128__
+    *(uint128 *)&iid.mUuid.mData1 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
+#else
+    uint128 i128 = CityHash128(namespaceAndName, namespaceAndName.GetByteLength());
+    memcpy((Byte*)&iid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
+#endif
+
+    if ((iMemArea < 0) || (iMemArea > 4096))
+        iid.mCid = nullptr;
+    else
+        iid.mCid = (const ComponentID*)(HANDLE)(iMemArea + 1);
+
+    return iid;
+}
+
 } // namespace como

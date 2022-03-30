@@ -58,12 +58,10 @@ TEST(BigIntegerTest, ValueOfTest)
         AutoPtr<IBigInteger> bi;
         BigIntegerFactory::ValueOf(i, bi);
 */
-        BEGIN_USE_MY_MEM_AREA;
 
         CBigInteger *biTest;
         ((RefBase*)biTest)->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea, 0);
 
-        END_USE_MY_MEM_AREA;
 
 /*        Integer iv;
         INumber::Probe(bi)->IntegerValue(iv);
