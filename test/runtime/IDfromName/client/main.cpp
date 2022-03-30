@@ -90,7 +90,7 @@ TEST(TestIDfromName, testInterfaceIDfromName)
 {
     const ComponentID componentID = ComponentIDfromName("TestModule",
                     "http://como.org/component/sample/IDfromName_FooBar_demo.so");
-    InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", &componentID);
+    InterfaceID iid = InterfaceIDfromName("String::namespaceAndName", componentID);
     EXPECT_STREQ(DumpUUID(iid.mUuid), "8e174f8b-5563-f9ba-6010-7c8c594bf8b0");
 }
 
@@ -98,7 +98,7 @@ TEST(TestIDfromName, testNewWithoutIID)
 {
     const ComponentID componentID = ComponentIDfromName("FooBarDemo",
                     "http://como.org/component/sample/IDfromName_FooBar_demo.so");
-    InterfaceID iid2 = InterfaceIDfromName("como::demo::IBar2", &componentID);
+    InterfaceID iid2 = InterfaceIDfromName("como::demo::IBar2", componentID);
     AutoPtr<IFoo> foo;
     ECode ec = CFoo::New(iid2, (IInterface**)&foo);
     EXPECT_NE(ec, NOERROR);
@@ -108,8 +108,24 @@ TEST(TestIDfromName, testNewWithoutIID)
     ec = CFooBar::New(iid, (IInterface**)&bar);
     EXPECT_EQ(ec, NOERROR);
     bar->Bar(String("testNewWithoutIID: Tongji University"));
+}
 
-    printf("%d\n", (Short)(HANDLE)iid.mCid - 1);
+TEST(TestIDfromName, testNewInMemArea)
+{
+    InterfaceID iid = InterfaceIDfromNameWithMemArea("como::demo::IBar", 1);
+    AutoPtr<IBar> bar;
+    ECode ec = CFooBar::New(iid, (IInterface**)&bar);
+    EXPECT_EQ(ec, NOERROR);
+    bar->Bar(String("testNewInMemArea: Tongji University"));
+}
+
+TEST(TestIDfromName, testNewInMemAreaWithIID)
+{
+    InterfaceID iid = InterfaceIDWithMemArea(IID_IBar, 1);
+    AutoPtr<IBar> bar;
+    ECode ec = CFooBar::New(iid, (IInterface**)&bar);
+    EXPECT_EQ(ec, NOERROR);
+    bar->Bar(String("testNewInMemAreaWithIID: Tongji University"));
 }
 
 int main(int argc, char **argv)

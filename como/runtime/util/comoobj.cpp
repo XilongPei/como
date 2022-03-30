@@ -362,4 +362,17 @@ InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemAr
     return iid;
 }
 
+InterfaceID InterfaceIDWithMemArea(InterfaceID& iid, Short iMemArea)
+{
+    InterfaceID value;
+
+    value = iid;
+    if ((iMemArea < 0) || (iMemArea > 4096))
+        value.mCid = nullptr;
+    else
+        value.mCid = (const ComponentID*)(HANDLE)(iMemArea + 1);
+
+    return value;
+}
+
 } // namespace como
