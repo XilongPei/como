@@ -129,7 +129,7 @@ COM_PUBLIC ComponentID ComponentIDfromName(String name, const char* uri);
 COM_PUBLIC CoclassID CoclassIDfromName(String namespaceAndName, const ComponentID* componentID);
 COM_PUBLIC InterfaceID InterfaceIDfromName(String namespaceAndName, const ComponentID* componentID);
 COM_PUBLIC InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemArea);
-COM_PUBLIC InterfaceID InterfaceIDWithMemArea(InterfaceID& iid, Short iMemArea);
+COM_PUBLIC InterfaceID InterfaceIDWithMemArea(const InterfaceID& iid, Short iMemArea);
 
 } // namespace como
 

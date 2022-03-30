@@ -362,7 +362,7 @@ InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemAr
     return iid;
 }
 
-InterfaceID InterfaceIDWithMemArea(InterfaceID& iid, Short iMemArea)
+InterfaceID InterfaceIDWithMemArea(const InterfaceID& iid, Short iMemArea)
 {
     InterfaceID value;
 
