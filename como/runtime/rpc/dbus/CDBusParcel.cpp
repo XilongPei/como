@@ -47,15 +47,15 @@ COMO_OBJECT_IMPL(CDBusParcel);
 
 CDBusParcel::CDBusParcel()
     : mError(NOERROR)
-    , mData(nullptr)
+    , mData(mBuffer)
     , mDataSize(0)
-    , mDataCapacity(0)
+    , mDataCapacity(MAX_BUFFER_SIZE)
     , mDataPos(0)
 {}
 
 CDBusParcel::~CDBusParcel()
 {
-    if (mData != nullptr) {
+    if (mData != mBuffer) {
         free(mData);
     }
 }
@@ -972,6 +972,15 @@ ECode CDBusParcel::RestartWrite(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    if (desired < MAX_BUFFER_SIZE) {
+        if (mData != mBuffer)
+            free(mData);
+        mData = mBuffer;
+        mDataCapacity = MAX_BUFFER_SIZE;
+        mDataSize = mDataPos = 0;
+        return NOERROR;
+    }
+
     Byte* data = (Byte*)realloc(mData, desired);
     if (data == nullptr && desired > mDataCapacity) {
         mError = E_OUT_OF_MEMORY_ERROR;
@@ -994,7 +1003,7 @@ ECode CDBusParcel::ContinueWrite(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    if (mData != nullptr) {
+    if (mData != mBuffer) {
         if (desired > mDataCapacity) {
             Byte* data = (Byte*)realloc(mData, desired);
             if (data != nullptr) {
@@ -1016,15 +1025,25 @@ ECode CDBusParcel::ContinueWrite(
         }
     }
     else {
-        Byte* data = (Byte*)malloc(desired);
-        if (data == nullptr) {
-            mError = E_OUT_OF_MEMORY_ERROR;
-            return E_OUT_OF_MEMORY_ERROR;
-        }
+        if (desired > mDataCapacity) {
+            Byte* data = (Byte*)malloc(desired);
+            if (data == nullptr) {
+                mError = E_OUT_OF_MEMORY_ERROR;
+                return E_OUT_OF_MEMORY_ERROR;
+            }
 
-        mData = data;
-        mDataSize = mDataPos = 0;
-        mDataCapacity = desired;
+            memcpy(data, mData, mDataSize);
+            mData = data;
+            mDataCapacity = desired;
+        }
+        else {
+            if (mDataSize > desired) {
+                mDataSize = desired;
+            }
+            if (mDataPos > desired) {
+                mDataPos = desired;
+            }
+        }
     }
 
     return NOERROR;

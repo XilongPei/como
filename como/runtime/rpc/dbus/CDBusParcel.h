@@ -213,12 +213,14 @@ private:
 private:
     static constexpr Integer TAG_NULL = 0;
     static constexpr Integer TAG_NOT_NULL = 1;
+    static constexpr Integer MAX_BUFFER_SIZE = 128;
 
     ECode mError;
     Byte* mData;
     Long mDataSize;
     Long mDataCapacity;
     mutable Long mDataPos;
+    Byte mBuffer[MAX_BUFFER_SIZE];
 };
 
 } // namespace como
