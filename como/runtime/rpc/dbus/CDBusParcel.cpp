@@ -935,7 +935,9 @@ restart_write:
     }
 
     ECode ec = GrowData(padded);
-    if (SUCCEEDED(ec)) goto restart_write;
+    if (SUCCEEDED(ec))
+        goto restart_write;
+
     return nullptr;
 }
 
@@ -981,7 +983,14 @@ ECode CDBusParcel::RestartWrite(
         return NOERROR;
     }
 
-    Byte* data = (Byte*)realloc(mData, desired);
+    Byte* data;
+    if (mData != mBuffer) {
+        data = (Byte*)realloc(mData, desired);
+    }
+    else {
+        data = (Byte*)malloc(desired);
+    }
+
     if (data == nullptr && desired > mDataCapacity) {
         mError = E_OUT_OF_MEMORY_ERROR;
         return E_OUT_OF_MEMORY_ERROR;
@@ -1085,7 +1094,9 @@ restart_write:
     }
 
     ECode ec = GrowData(mDataPos - oldDataPos + sizeof(value));
-    if (SUCCEEDED(ec)) goto restart_write;
+    if (SUCCEEDED(ec))
+        goto restart_write;
+
     return ec;
 }
 
