@@ -257,19 +257,19 @@ TEST(ReflectionTest, TestCoclassGetMethods)
                 break;
             case 6:
                 EXPECT_STREQ("TestMethod3", name.string());
-                EXPECT_STREQ("(ILZCSI)E", sig.string());
+                EXPECT_STREQ("(IJZCSI)E", sig.string());
                 break;
             case 7:
                 EXPECT_STREQ("TestMethod4", name.string());
-                EXPECT_STREQ("(ILZCSDFID&)E", sig.string());
+                EXPECT_STREQ("(IJZCSDFID&)E", sig.string());
                 break;
             case 8:
                 EXPECT_STREQ("TestMethod5", name.string());
-                EXPECT_STREQ("(ILZCSDFIFDDFFDDFD&)E", sig.string());
+                EXPECT_STREQ("(IJZCSDFIFDDFFDDFD&)E", sig.string());
                 break;
             case 9:
                 EXPECT_STREQ("TestMethod6", name.string());
-                EXPECT_STREQ("(ILZCSDFIFDDFFDDFI&D&)E", sig.string());
+                EXPECT_STREQ("(IJZCSDFIFDDFFDDFI&D&)E", sig.string());
                 break;
             default:
                 break;
@@ -380,7 +380,7 @@ TEST(ReflectionTest, TestMethodInvokeTestMethod3)
     AutoPtr<IInterface> obj;
     klass->CreateObject(IID_IInterface, &obj);
     AutoPtr<IMetaMethod> method;
-    klass->GetMethod("TestMethod3", "(ILZCSI)E", method);
+    klass->GetMethod("TestMethod3", "(IJZCSI)E", method);
     Integer arg1 = 9;
     Long arg2 = 99;
     Boolean arg3 = true;
@@ -413,7 +413,7 @@ TEST(ReflectionTest, TestMethodInvokeTestMethod4)
     AutoPtr<IInterface> obj;
     klass->CreateObject(IID_IInterface, &obj);
     AutoPtr<IMetaMethod> method;
-    klass->GetMethod("TestMethod4", "(ILZCSDFID&)E", method);
+    klass->GetMethod("TestMethod4", "(IJZCSDFID&)E", method);
     Integer arg1 = 9;
     Long arg2 = 99;
     Boolean arg3 = true;
@@ -453,7 +453,7 @@ TEST(ReflectionTest, TestMethodInvokeTestMethod5)
     AutoPtr<IInterface> obj;
     klass->CreateObject(IID_IInterface, &obj);
     AutoPtr<IMetaMethod> method;
-    klass->GetMethod("TestMethod5", "(ILZCSDFIFDDFFDDFD&)E", method);
+    klass->GetMethod("TestMethod5", "(IJZCSDFIFDDFFDDFD&)E", method);
     Integer arg1 = 9;
     Long arg2 = 99;
     Boolean arg3 = true;
@@ -509,7 +509,7 @@ TEST(ReflectionTest, TestMethodInvokeTestMethod6)
     AutoPtr<IInterface> obj;
     klass->CreateObject(IID_IInterface, &obj);
     AutoPtr<IMetaMethod> method;
-    klass->GetMethod("TestMethod6", "(ILZCSDFIFDDFFDDFI&D&)E", method);
+    klass->GetMethod("TestMethod6", "(IJZCSDFIFDDFFDDFI&D&)E", method);
     Integer arg1 = 9;
     Long arg2 = 99;
     Boolean arg3 = true;
