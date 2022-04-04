@@ -32,6 +32,7 @@ class COM_PUBLIC ComoFunctionSafetyObject
 public:
     ComoFunctionSafetyObject();
     ~ComoFunctionSafetyObject();
+    ECode AfterConstruction();
 
     Long GetExpires();
 

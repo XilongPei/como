@@ -67,6 +67,9 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 //
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     : mIsValid(0)
+{}
+
+ECode ComoFunctionSafetyObject::AfterConstruction()
 {
     AutoPtr<IMetaCoclass> klass;
     IObject::Probe(this)->GetCoclass(klass);
@@ -113,6 +116,8 @@ ComoFunctionSafetyObject::ComoFunctionSafetyObject()
         Logger::E("ComoFunctionSafetyObject", "Construct Object error");
     }
     pthread_mutex_unlock(&funSafetyLock);
+
+    return NOERROR;
 }
 
 ComoFunctionSafetyObject::~ComoFunctionSafetyObject()

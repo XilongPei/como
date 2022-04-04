@@ -240,7 +240,7 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     // if function safety Coclass, it should inherit ComoFunctionSafetyObject
     if (! String(mk->mFuncSafetySetting).IsEmpty()) {
         builder.Append( "#ifdef COMO_FUNCTION_SAFETY\n"
-                        "    : ComoFunctionSafetyObject\n"
+                        "    : public ComoFunctionSafetyObject\n"
                         "#endif\n");
     }
 
@@ -479,6 +479,7 @@ builder.AppendFormat(
 "    if (*object) {\n"
 "        _obj->SetObjSize(sizeof(%s));\n"
 "#ifdef COMO_FUNCTION_SAFETY\n"
+"        _obj->AfterConstruction();\n"
 "        if ((iid.mCid != nullptr) && ((HANDLE)iid.mCid < 4096) && (ComoContext::gComoContext != nullptr)) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
 "                _obj->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea, (Short)(HANDLE)iid.mCid - 1);\n"
