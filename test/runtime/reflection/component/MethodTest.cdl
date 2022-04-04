@@ -93,7 +93,8 @@ interface IMethodTest
 
 [
     uuid(85511188-d0e5-42b0-99d7-483a0129ac94),
-    version(0.1.0)
+    version(0.1.0),
+    FuncSafetySetting("expire")
 ]
 coclass CMethodTester
 {
