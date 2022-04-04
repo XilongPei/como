@@ -222,7 +222,7 @@ TEST(ReflectionTest, TestGetFuncSafetySetting)
     mc->GetCoclass("como::test::reflection::CMethodTester", klass);
     String funcSafetySetting;
     klass->GetFuncSafetySetting(funcSafetySetting);
-    EXPECT_STREQ("expire", funcSafetySetting);
+    EXPECT_STREQ("expire", funcSafetySetting.string());
 }
 
 TEST(ReflectionTest, TestCoclassGetMethods)

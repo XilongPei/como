@@ -27,8 +27,7 @@ using namespace std;
 namespace como {
 
 class COM_PUBLIC ComoFunctionSafetyObject
-    : public RefBase
-    , public IComoFunctionSafetyObject
+    : public IComoFunctionSafetyObject
 {
 public:
     ComoFunctionSafetyObject();
