@@ -478,15 +478,22 @@ builder.Append("#endif\n");
 builder.AppendFormat(
 "    if (*object) {\n"
 "        _obj->SetObjSize(sizeof(%s));\n"
-"#ifdef COMO_FUNCTION_SAFETY\n"
-"        _obj->AfterConstruction();\n"
+"#ifdef COMO_FUNCTION_SAFETY\n", mk->mName);
+
+// if function safety Coclass and FuncSafetySetting has been set
+if (! String(mk->mFuncSafetySetting).IsEmpty()) {
+    builder.Append(
+"        _obj->AfterConstruction();\n");
+}
+
+builder.Append(
 "        if ((iid.mCid != nullptr) && ((HANDLE)iid.mCid < 4096) && (ComoContext::gComoContext != nullptr)) {\n"
 "            if (ComoContext::gComoContext->freeMemInArea != nullptr) {\n"
 "                _obj->SetFunFreeMem(ComoContext::gComoContext->freeMemInArea, (Short)(HANDLE)iid.mCid - 1);\n"
 "            }\n"
 "        }\n"
 "#endif\n"
-"    }\n", mk->mName);
+"    }\n");
 
 builder.Append(
 "#ifdef COMO_FUNCTION_SAFETY\n"
