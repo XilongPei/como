@@ -254,6 +254,19 @@ TEST(ReflectionTest, TestCoclassGetMethods)
     mc->GetCoclass("como::test::reflection::CMethodTester", klass);
     Integer methodNumber;
     klass->GetMethodNumber(methodNumber);
+
+#ifdef COMO_FUNCTION_SAFETY
+    EXPECT_EQ(12, methodNumber);
+    Array<IMetaMethod*> methods(methodNumber);
+    klass->GetAllMethods(methods);
+    for (Integer i = 0; i < methodNumber; i++) {
+        IMetaMethod* method = methods[i];
+        String name, sig;
+        method->GetName(name);
+        method->GetSignature(sig);
+        printf("Method: %s    Signature: %s\n", name.string(), sig.string());
+    }
+#else
     EXPECT_EQ(10, methodNumber);
     Array<IMetaMethod*> methods(methodNumber);
     klass->GetAllMethods(methods);
@@ -307,6 +320,7 @@ TEST(ReflectionTest, TestCoclassGetMethods)
                 break;
         }
     }
+#endif
 }
 
 TEST(ReflectionTest, TestMethodGetParameters)
