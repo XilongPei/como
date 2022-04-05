@@ -74,6 +74,9 @@ public:
     static AutoPtr<IMetaCoclass> GetCoclass(
         /* [in] */ IInterface* obj);
 
+    static String GetFuncSafetySetting(
+        /* [in] */ IInterface* obj);
+
     static String GetCoclassName(
         /* [in] */ IInterface* obj);
 

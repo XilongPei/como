@@ -181,6 +181,20 @@ AutoPtr<IMetaCoclass> Object::GetCoclass(
     return nullptr;
 }
 
+String Object::GetFuncSafetySetting(
+    /* [in] */ IInterface* obj)
+{
+    IObject* o = IObject::Probe(obj);
+    if (o != nullptr) {
+        AutoPtr<IMetaCoclass> mc;
+        o->GetCoclass(mc);
+        String funcSafetySetting;
+        mc->GetFuncSafetySetting(funcSafetySetting);
+        return funcSafetySetting;
+    }
+    return nullptr;
+}
+
 String Object::GetCoclassName(
     /* [in] */ IInterface* obj)
 {

@@ -39,6 +39,9 @@ ECode CMethodTester::TestMethod1(
     /* [in] */ Integer arg,
     /* [out] */ Integer& result)
 {
+
+    ((ComoFunctionSafetyObject*)this)->SetLastModifiedInfo();
+
     printf("==== call TestMethod1(arg:%d result addr:%p) ====\n", arg, &result);
     result = arg;
     return NOERROR;

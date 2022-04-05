@@ -17,6 +17,7 @@
 #include "ReflectionTestUnit.h"
 #include <comoapi.h>
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 TEST(ReflectionTest, TestComponentGetName)
 {
@@ -223,6 +224,26 @@ TEST(ReflectionTest, TestGetFuncSafetySetting)
     String funcSafetySetting;
     klass->GetFuncSafetySetting(funcSafetySetting);
     EXPECT_STREQ("expire", funcSafetySetting.string());
+}
+
+TEST(ReflectionTest, TestIComoFunctionSafetyObject)
+{
+    AutoPtr<IMetaComponent> mc;
+    CoGetComponentMetadata(CID_ReflectionTestUnit, nullptr, mc);
+    AutoPtr<IMetaCoclass> klass;
+    mc->GetCoclass("como::test::reflection::CMethodTester", klass);
+#ifdef COMO_FUNCTION_SAFETY
+    AutoPtr<IInterface> obj;
+    klass->CreateObject(IID_IInterface, &obj);
+    EXPECT_TRUE(obj != nullptr);
+
+    IComoFunctionSafetyObject *objFunctionSafety;
+    objFunctionSafety = IComoFunctionSafetyObject::Probe(obj);
+    EXPECT_TRUE(objFunctionSafety != nullptr);
+
+    Integer isValid;
+    objFunctionSafety->InvalidObject(isValid);
+#endif
 }
 
 TEST(ReflectionTest, TestCoclassGetMethods)
