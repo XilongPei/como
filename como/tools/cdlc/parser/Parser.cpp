@@ -1928,6 +1928,26 @@ bool Parser::ParseCoclass(
 
     if (result) {
         klass->SetAttributes(attrs);
+
+        // interface IComoFunctionSafetyObject INTERFACE_ID
+        static UUID *uuidIComoFunctionSafetyObject =
+                                 UUID::Parse("00000000-0000-0000-0000-000000000008");
+
+        // If cdlc is not currently in the COMO_FUNCTION_SAFETY environment, it is
+        // inappropriate to add the como::IComoFunctionSafetyObject interface forcibly
+        String str = klass->GetFuncSafetySetting();
+        if (! str.IsEmpty()) {
+            int i;
+            for (i = 0;  (i < klass->GetInterfaceNumber()) &&
+                         (klass->GetInterfaceUUID(i) != uuidIComoFunctionSafetyObject);  i++);
+            if (i >= klass->GetInterfaceNumber()) {
+                AutoPtr<InterfaceType> interface = FindInterface(String("como::IComoFunctionSafetyObject"));
+                if (interface != nullptr) {
+                    klass->InsertInterface(interface);
+                }
+            }
+        }
+
         mCurrentNamespace->AddCoclassType(klass);
     }
 

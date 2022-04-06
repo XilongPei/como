@@ -61,10 +61,15 @@ public:
     inline void AddInterface(
         /* [in] */ InterfaceType* interface);
 
+    inline void InsertInterface(
+        /* [in] */ InterfaceType* interface);
+
     AutoPtr<InterfaceType> GetInterface(
         /* [in] */ int i);
 
     inline int GetInterfaceNumber();
+
+    inline AutoPtr<UUID> GetInterfaceUUID(int pos);
 
     String GetSignature() override;
 
@@ -141,9 +146,22 @@ void CoclassType::AddInterface(
     }
 }
 
+void CoclassType::InsertInterface(
+    /* [in] */ InterfaceType* interface)
+{
+    if (interface != nullptr) {
+        mInterfaces.insert(mInterfaces.begin(), interface);
+    }
+}
+
 int CoclassType::GetInterfaceNumber()
 {
     return mInterfaces.size();
+}
+
+AutoPtr<UUID> CoclassType::GetInterfaceUUID(int pos)
+{
+    return mInterfaces[pos]->GetUUID();
 }
 
 AutoPtr<CoclassType> CoclassType::CastFrom(

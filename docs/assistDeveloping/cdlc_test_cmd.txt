@@ -1,0 +1,8 @@
+/home/xilong/home/como/out/host/como/tools/cdlc/cdlc -gen -mode-component \
+-i /home/xilong/home/como/test/runtime/reflection/component \
+-d /home/xilong/home/como/out/target/como.linux.x64.rls/test/runtime/reflection/component \
+-c /home/xilong/home/como/test/runtime/reflection/component/ReflectionTestUnit.cdl
+
+
+
+
