@@ -32,6 +32,7 @@
 #include "cityhash.h"
 #include <cstdlib>
 #include <unistd.h>
+#include <string.h>
 
 namespace cdlc {
 
@@ -1935,15 +1936,18 @@ bool Parser::ParseCoclass(
 
         // If cdlc is not currently in the COMO_FUNCTION_SAFETY environment, it is
         // inappropriate to add the como::IComoFunctionSafetyObject interface forcibly
-        String str = klass->GetFuncSafetySetting();
-        if (! str.IsEmpty()) {
-            int i;
-            for (i = 0;  (i < klass->GetInterfaceNumber()) &&
-                         (klass->GetInterfaceUUID(i) != uuidIComoFunctionSafetyObject);  i++);
-            if (i >= klass->GetInterfaceNumber()) {
-                AutoPtr<InterfaceType> interface = FindInterface(String("como::IComoFunctionSafetyObject"));
-                if (interface != nullptr) {
-                    klass->InsertInterface(interface);
+        char *env = getenv("COMO_FUNCTION_SAFETY");
+        if ((nullptr != env) && strcasecmp(env, "enable") == 0) {
+            String str = klass->GetFuncSafetySetting();
+            if (! str.IsEmpty()) {
+                int i;
+                for (i = 0;  (i < klass->GetInterfaceNumber()) &&
+                             (klass->GetInterfaceUUID(i) != uuidIComoFunctionSafetyObject);  i++);
+                if (i >= klass->GetInterfaceNumber()) {
+                    AutoPtr<InterfaceType> interface = FindInterface(String("como::IComoFunctionSafetyObject"));
+                    if (interface != nullptr) {
+                        klass->InsertInterface(interface);
+                    }
                 }
             }
         }
