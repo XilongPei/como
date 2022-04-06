@@ -1934,7 +1934,7 @@ bool Parser::ParseCoclass(
         static UUID *uuidIComoFunctionSafetyObject =
                                  UUID::Parse("00000000-0000-0000-0000-000000000008");
 
-        // If cdlc is not currently in the COMO_FUNCTION_SAFETY environment, it is
+        // If COMO_FUNCTION_SAFETY is not currently in the cdlc running environment, it is
         // inappropriate to add the como::IComoFunctionSafetyObject interface forcibly
         char *env = getenv("COMO_FUNCTION_SAFETY");
         if ((nullptr != env) && strcasecmp(env, "enable") == 0) {
