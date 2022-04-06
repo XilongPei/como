@@ -702,6 +702,13 @@ ECode CDBusChannel::Invoke(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
+        resParcel = new CDBusParcel();
+        if (nullptr == resParcel) {
+            Logger::E("CDBusChannel.Invoke()", "Fail to new CDBusParcel()");
+            ec = E_REMOTE_EXCEPTION;
+            goto Exit;
+        }
+
         Integer hasOutArgs;
         method->GetOutArgumentsNumber(hasOutArgs);
         if (0 != hasOutArgs) {
