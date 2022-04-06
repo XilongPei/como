@@ -212,7 +212,16 @@ inline int ArrayLength(const T (&)[N])
             iid = IID_##InterfaceName;                     \
             return NOERROR;                                \
         }                                                  \
-        return SuperclassName::GetInterfaceID(object, iid); \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {             \
+            String s = Object::GetFuncSafetySetting((IInterface*)(InterfaceName*)this); \
+            if (s.IsEmpty()) {                                                          \
+                return SuperclassName::GetInterfaceID(object, iid);                     \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
+        }                                                       \
+        return SuperclassName::GetInterfaceID(object, iid);     \
     }
 #endif
 
@@ -260,6 +269,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface2*)this) {    \
             iid = IID_##Interface2;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
@@ -318,6 +336,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface3*)this) {    \
             iid = IID_##Interface3;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
@@ -382,6 +409,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface4*)this) {    \
             iid = IID_##Interface4;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
@@ -452,6 +488,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface5*)this) {    \
             iid = IID_##Interface5;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
@@ -528,6 +573,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface6*)this) {    \
             iid = IID_##Interface6;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
@@ -610,6 +664,15 @@ inline int ArrayLength(const T (&)[N])
         }                                                       \
         else if (object == (IInterface*)(Interface7*)this) {    \
             iid = IID_##Interface7;                             \
+        }                                                       \
+        else if (object == (IInterface*)(IComoFunctionSafetyObject*)this) {          \
+            String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
+            if (s.IsEmpty()) {                                                       \
+                return SuperclassName::GetInterfaceID(object, iid);                  \
+            }                                                   \
+            else {                                              \
+                iid = IID_IComoFunctionSafetyObject;            \
+            }                                                   \
         }                                                       \
         else {                                                  \
             return SuperclassName::GetInterfaceID(object, iid); \
