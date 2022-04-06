@@ -41,6 +41,9 @@ ECode CDBusChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
     ipack = new InterfacePack();
+    if (nullptr == ipack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -48,6 +51,9 @@ ECode CDBusChannelFactory::CreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CDBusParcel();
+    if (nullptr == parcel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -56,6 +62,9 @@ ECode CDBusChannelFactory::CreateChannel(
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
     channel = (IRPCChannel*)new CDBusChannel(mType, peer);
+    if (nullptr == channel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -66,6 +75,10 @@ ECode CDBusChannelFactory::MarshalInterface(
     InterfaceID iid;
     object->GetInterfaceID(object, iid);
     InterfacePack* pack = new InterfacePack();
+    if (nullptr == pack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     pack->SetInterfaceID(iid);
 
     if (IParcelable::Probe(object) != nullptr) {

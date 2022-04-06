@@ -42,6 +42,9 @@ ECode CZMQChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
     ipack = new CZMQInterfacePack();
+    if (nullptr == ipack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -49,6 +52,9 @@ ECode CZMQChannelFactory::CreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CZMQParcel();
+    if (nullptr == parcel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -57,6 +63,9 @@ ECode CZMQChannelFactory::CreateChannel(
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
     channel = (IRPCChannel*)new CZMQChannel(mType, peer);
+    if (nullptr == channel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -67,6 +76,10 @@ ECode CZMQChannelFactory::MarshalInterface(
     InterfaceID iid;
     object->GetInterfaceID(object, iid);
     CZMQInterfacePack* pack = new CZMQInterfacePack();
+    if (nullptr == pack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     pack->SetInterfaceID(iid);
 
     if (IParcelable::Probe(object) != nullptr) {

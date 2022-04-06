@@ -1721,7 +1721,11 @@ ECode InterfaceProxy::ProxyEntry(
 
     RPCType type;
     thisObj->mOwner->mChannel->GetRPCType(type);
-    CoCreateParcel(type, inParcel);
+    ec = CoCreateParcel(type, inParcel);
+    if (FAILED(ec)) {
+        goto ProxyExit;
+    }
+
     inParcel->WriteInteger(RPC_MAGIC_NUMBER);
     inParcel->WriteInteger(thisObj->mIndex);
     inParcel->WriteInteger(methodIndex + 4);

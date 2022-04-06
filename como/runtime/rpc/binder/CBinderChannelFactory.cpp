@@ -36,6 +36,9 @@ ECode CBinderChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
     ipack = new InterfacePack();
+    if (nullptr == ipack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -43,6 +46,9 @@ ECode CBinderChannelFactory::CreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CBinderParcel();
+    if (nullptr == parcel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -51,6 +57,9 @@ ECode CBinderChannelFactory::CreateChannel(
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
     channel = (IRPCChannel*)new CBinderChannel(mType, peer);
+    if (nullptr == channel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     return NOERROR;
 }
 
@@ -61,6 +70,10 @@ ECode CBinderChannelFactory::MarshalInterface(
     InterfaceID iid;
     object->GetInterfaceID(object, iid);
     InterfacePack* pack = new InterfacePack();
+    if (nullptr == pack) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     pack->SetInterfaceID(iid);
 
     if (IParcelable::Probe(object) != nullptr) {
