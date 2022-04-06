@@ -190,7 +190,8 @@ ECode CZMQChannel::Invoke(
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
 
-    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this), ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
+    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this), ZmqFunCode::Method_Invoke,
+                                                           mSocket, (void *)data, size);
 
     HANDLE hChannel;
     Integer eventCode;

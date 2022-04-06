@@ -53,6 +53,9 @@ ThreadPoolExecutor::Worker::Worker(
 ECode ThreadPoolExecutor::Worker::Run()
 {
     // This run will not return, but wait in the processing mechanism of the message queue
+    // CDBusChannel::ServiceRunnable::Run()
+    // The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the
+    // number ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER
     return mTask->Run();
 }
 

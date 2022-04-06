@@ -42,9 +42,10 @@ std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string en
     return nullptr;
 }
 
+// REM in ThreadPoolExecutor::Worker::Run():
+// The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the
+// number ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER
 int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
-
-// should less than ThreadPool_MAX_THREAD_NUM
 int ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER = 1;
 
 // The period of detecting whether the object is overdue, in ns

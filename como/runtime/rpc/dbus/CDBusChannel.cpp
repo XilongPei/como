@@ -118,6 +118,8 @@ ECode CDBusChannel::ServiceRunnable::Run()
             {
                 Mutex::AutoLock lock(connsLock);
 
+                //@ `Mechanism CHECK_FOR_FREE`
+
                 // check for free time out connection
                 if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) /*+ // ns accuracy is not required
                             1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec)*/ >
@@ -126,8 +128,10 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
                     Mutex::AutoLock lock(connsLock);
 
-                    for(std::vector<DBusConnectionContainer*>::iterator it = conns.begin();
-                                                                    it != conns.end(); ) {
+                    // The reason why we iterate over conns here is because we want to release the
+                    // member of conns in the loop
+                    for (std::vector<DBusConnectionContainer*>::iterator it = conns.begin();
+                                                                                   it != conns.end(); ) {
                         if ((currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
                                     1000000000L * (currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
                                    /*987654321*/                  ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
@@ -159,19 +163,26 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     // dbus_connection_read_write_dispatch() return TRUE if the
                     // disconnect message has not been processed
                     if (! dbus_connection_read_write_dispatch(conn_dbus, 0)) {
-                        // release the DBusConnection
+                        // `Mechanism CHECK_FOR_FREE` will release the DBusConnection
                         conns[i]->lastAccessTime.tv_sec = 0;
                     }
 
                     status = dbus_connection_get_dispatch_status(conn_dbus);
                     if (DBUS_DISPATCH_DATA_REMAINS == status) {
+                    // DBUS_DISPATCH_DATA_REMAINS indicates that the message queue may contain messages.
+                    // Note, DBUS_DISPATCH_DATA_REMAINS really means that either we have messages in the
+                    // queue, or we have raw bytes buffered up that need to be parsed. When these bytes
+                    // are parsed, they may not add up to an entire message. Thus, it's possible to see
+                    // a status of DBUS_DISPATCH_DATA_REMAINS but not have a message yet.
                         clock_gettime(CLOCK_REALTIME, &(conns[i]->lastAccessTime));
                     }
                     else
                         break;
-                } while (!mRequestToQuit);
+                } while (! mRequestToQuit);
 
                 if (status == DBUS_DISPATCH_NEED_MEMORY) {
+                // DBUS_DISPATCH_NEED_MEMORY indicates that there could be data,
+                // but we can't know for sure without more memory.
                     Logger::E("CDBusChannel", "DBus dispatching needs more memory.");
                     break;
                 }
@@ -195,11 +206,11 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
     /* [in] */ DBusMessage* msg,
     /* [in] */ void* arg)
 {
-    CDBusChannel::ServiceRunnable* thisObj = static_cast<CDBusChannel::ServiceRunnable*>(arg);
+    CDBusChannel::ServiceRunnable* thisRunnable = static_cast<CDBusChannel::ServiceRunnable*>(arg);
 
     if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "GetComponentMetadata")) {
         if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle \"GetComponentMetadata\" message.");
+            Logger::D("CDBusChannel", "Handle GetComponentMetadata message");
         }
 
         DBusMessageIter args;
@@ -207,18 +218,23 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         void* data = nullptr;
         Integer size = 0;
 
-        if (!dbus_message_iter_init(msg, &args)) {
-            Logger::E("CDBusChannel", "\"GetComponentMetadata\" message has no arguments.");
+        if (! dbus_message_iter_init(msg, &args)) {
+            Logger::E("CDBusChannel", "HandleMessage dbus_message_iter_init() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("CDBusChannel", "\"GetComponentMetadata\" message has no array arguments.");
+            Logger::E("CDBusChannel", "HandleMessage dbus_message_iter_get_arg_type() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         dbus_message_iter_recurse(&args, &subArg);
         dbus_message_iter_get_fixed_array(&subArg, &data, (int*)&size);
 
         AutoPtr<IParcel> argParcel = new CDBusParcel();
+        if (argParcel == nullptr) {
+            Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
         argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
         CoclassID cid;
         argParcel->ReadCoclassID(cid);
@@ -234,24 +250,21 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         HANDLE resData = reinterpret_cast<HANDLE>(metadata.GetPayload());
         Long resSize = metadata.GetLength();
-        dbus_message_iter_open_container(&args,
-                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
-        dbus_message_iter_append_fixed_array(&subArg,
-                DBUS_TYPE_BYTE, &resData, resSize);
+        dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+        dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
         dbus_message_iter_close_container(&args, &subArg);
 
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger::E("CDBusChannel", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
 
         dbus_message_unref(reply);
     }
-    else if (dbus_message_is_method_call(msg,
-            STUB_INTERFACE_PATH, "Invoke")) {
+    else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Invoke")) {
         if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle \"Invoke\" message.");
+            Logger::D("CDBusChannel", "Handle Invoke message.");
         }
 
         DBusMessageIter args;
@@ -259,21 +272,32 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         void* data = nullptr;
         Integer size = 0;
 
-        if (!dbus_message_iter_init(msg, &args)) {
-            Logger::E("CDBusChannel", "\"Invoke\" message has no arguments.");
+        if (! dbus_message_iter_init(msg, &args)) {
+            Logger::E("CDBusChannel", "Invoke message has no arguments.");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("CDBusChannel", "\"Invoke\" message has no array arguments.");
+            Logger::E("CDBusChannel", "Invoke message has no array arguments.");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         dbus_message_iter_recurse(&args, &subArg);
         dbus_message_iter_get_fixed_array(&subArg, &data, (int*)&size);
 
         AutoPtr<IParcel> argParcel = new CDBusParcel();
+        if (argParcel == nullptr) {
+            Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
         argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
+
         AutoPtr<IParcel> resParcel = new CDBusParcel();
-        ECode ec = thisObj->mTarget->Invoke(argParcel, resParcel);
+        if (resParcel == nullptr) {
+            Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
+        ECode ec = thisRunnable->mTarget->Invoke(argParcel, resParcel);
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
 
@@ -281,24 +305,21 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         HANDLE resData;
         Long resSize;
-        dbus_message_iter_open_container(&args,
-                DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+        dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
         resParcel->GetData(resData);
         resParcel->GetDataSize(resSize);
-        dbus_message_iter_append_fixed_array(&subArg,
-                DBUS_TYPE_BYTE, &resData, resSize);
+        dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
         dbus_message_iter_close_container(&args, &subArg);
 
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger::E("CDBusChannel", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
 
         dbus_message_unref(reply);
     }
-    else if (dbus_message_is_method_call(msg,
-            STUB_INTERFACE_PATH, "IsPeerAlive")) {
+    else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "IsPeerAlive")) {
         if (CDBusChannel::DEBUG) {
             Logger::D("CDBusChannel", "Handle \"IsPeerAlive\" message.");
         }
@@ -314,21 +335,20 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_append_basic(&args, DBUS_TYPE_BOOLEAN, &val);
 
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger::E("CDBusChannel", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
 
         dbus_message_unref(reply);
     }
-    else if (dbus_message_is_method_call(msg,
-            STUB_INTERFACE_PATH, "Release")) {
+    else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Release")) {
         if (CDBusChannel::DEBUG) {
             Logger::D("CDBusChannel", "Handle \"Release\" message.");
         }
 
-        thisObj->mTarget->Release();
-        thisObj->mRequestToQuit = true;
+        thisRunnable->mTarget->Release();
+        thisRunnable->mRequestToQuit = true;
     }
     else {
         const char* name = dbus_message_get_member(msg);
@@ -405,13 +425,12 @@ ECode CDBusChannel::IsPeerAlive(
 
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+                                                                      err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(
-            mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "IsPeerAlive");
+    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "IsPeerAlive");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
@@ -424,12 +443,13 @@ ECode CDBusChannel::IsPeerAlive(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel.IsPeerAlive()", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.IsPeerAlive()",
+                            "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger::E("CDBusChannel", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -444,7 +464,7 @@ ECode CDBusChannel::IsPeerAlive(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
-        if (!dbus_message_iter_next(&args)) {
+        if (! dbus_message_iter_next(&args)) {
             Logger::E("CDBusChannel", "Reply has no out arguments.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
@@ -524,7 +544,7 @@ ECode CDBusChannel::GetComponentMetadata(
 
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+                                                                        err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -538,12 +558,10 @@ ECode CDBusChannel::GetComponentMetadata(
     }
 
     dbus_message_iter_init_append(msg, &args);
-    dbus_message_iter_open_container(&args,
-            DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
     parcel->GetData(data);
     parcel->GetDataSize(size);
-    dbus_message_iter_append_fixed_array(&subArg,
-            DBUS_TYPE_BYTE, &data, size);
+    dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &data, size);
     dbus_message_iter_close_container(&args, &subArg);
 
     if (DEBUG) {
@@ -552,12 +570,13 @@ ECode CDBusChannel::GetComponentMetadata(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel.GetComponentMetadata()", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.GetComponentMetadata()",
+                                        "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger::E("CDBusChannel", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -572,7 +591,7 @@ ECode CDBusChannel::GetComponentMetadata(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
-        if (!dbus_message_iter_next(&args)) {
+        if (! dbus_message_iter_next(&args)) {
             Logger::E("CDBusChannel", "Reply has no out arguments.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
@@ -586,8 +605,7 @@ ECode CDBusChannel::GetComponentMetadata(
         void* replyData = nullptr;
         Integer replySize;
         dbus_message_iter_recurse(&args, &subArg);
-        dbus_message_iter_get_fixed_array(&subArg,
-                &replyData, &replySize);
+        dbus_message_iter_get_fixed_array(&subArg, &replyData, &replySize);
 
         metadata = Array<Byte>::Allocate(replySize);
         if (metadata.IsNull()) {
@@ -639,14 +657,12 @@ ECode CDBusChannel::Invoke(
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\"", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(
-            mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "Invoke");
+    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "Invoke");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
@@ -654,12 +670,10 @@ ECode CDBusChannel::Invoke(
     }
 
     dbus_message_iter_init_append(msg, &args);
-    dbus_message_iter_open_container(&args,
-            DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
-    dbus_message_iter_append_fixed_array(&subArg,
-            DBUS_TYPE_BYTE, &data, size);
+    dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &data, size);
     dbus_message_iter_close_container(&args, &subArg);
 
     if (DEBUG) {
@@ -673,7 +687,7 @@ ECode CDBusChannel::Invoke(
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger::E("CDBusChannel", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -688,12 +702,10 @@ ECode CDBusChannel::Invoke(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
-        resParcel = new CDBusParcel();
-
         Integer hasOutArgs;
         method->GetOutArgumentsNumber(hasOutArgs);
-        if (hasOutArgs) {
-            if (!dbus_message_iter_next(&args)) {
+        if (0 != hasOutArgs) {
+            if (! dbus_message_iter_next(&args)) {
                 Logger::E("CDBusChannel", "Reply has no out arguments.");
                 ec = E_REMOTE_EXCEPTION;
                 goto Exit;
@@ -707,8 +719,7 @@ ECode CDBusChannel::Invoke(
             void* replyData = nullptr;
             Integer replySize;
             dbus_message_iter_recurse(&args, &subArg);
-            dbus_message_iter_get_fixed_array(&subArg,
-                    &replyData, &replySize);
+            dbus_message_iter_get_fixed_array(&subArg, &replyData, &replySize);
             if (replyData != nullptr) {
                 resParcel->SetData(reinterpret_cast<HANDLE>(replyData), replySize);
             }
@@ -744,6 +755,11 @@ ECode CDBusChannel::StartListening(
 
     if (mPeer == RPCPeer::Stub) {
         AutoPtr<ThreadPoolExecutor::Runnable> r = new ServiceRunnable(this, stub);
+        if (nullptr == r) {
+            Logger::E("CDBusChannel::StartListening", "new ServiceRunnable error");
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
         ret = ThreadPoolExecutor::GetInstance()->RunTask(r);
     }
 

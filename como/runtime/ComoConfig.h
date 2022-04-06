@@ -59,6 +59,9 @@ public:
 
     static std::string AddZeroMQEndpoint(std::string serverName, std::string endpoint);
 
+    // REM in ThreadPoolExecutor::Worker::Run():
+    // The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the
+    // number ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER
     static int ThreadPool_MAX_THREAD_NUM;
     static int ThreadPool_MAX_DBUS_DISPATCHER;
 
