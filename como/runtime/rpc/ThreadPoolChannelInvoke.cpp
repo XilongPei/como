@@ -168,7 +168,7 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
 
         if ((currentTime.tv_sec - mWorkerList[i]->mCreateTime.tv_sec) +
                     1000000000L * (currentTime.tv_nsec - mWorkerList[i]->mCreateTime.tv_nsec) >
-                    ComoConfig::TPCI_TASK_EXPIRES) {
+                   /*987654321*/                               ComoConfig::TPCI_TASK_EXPIRES) {
             break;
         }
     }

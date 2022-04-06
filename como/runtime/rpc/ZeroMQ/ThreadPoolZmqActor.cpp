@@ -219,7 +219,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                          (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++) {
                 if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                             1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
-                                            ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                           /*987654321*/                           ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
                     delete mWorkerList[i];
                     mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
                 }
@@ -333,7 +333,7 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
 
         if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                     1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
-                    ComoConfig::TPZA_TASK_EXPIRES) {
+                   /*987654321*/                                  ComoConfig::TPZA_TASK_EXPIRES) {
             break;
         }
     }

@@ -130,7 +130,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                                                                     it != conns.end(); ) {
                         if ((currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
                                     1000000000L * (currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
-                                                    ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                                   /*987654321*/                  ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
 
                             IInterface* intf = reinterpret_cast<IInterface*>((*it)->user_data);
                             REFCOUNT_RELEASE(intf);
