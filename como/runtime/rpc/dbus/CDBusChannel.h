@@ -134,6 +134,7 @@ private:
 inline CDBusChannel* CDBusChannel::GetProxyChannel(
     /* [in] */ IProxy* proxy)
 {
+    // AutoPtr.Get(): get (IRPCChannel*) from AutoPtr<IRPCChannel> return by GetChannel()
     return (CDBusChannel*)((CProxy*)proxy)->GetChannel().Get();
 }
 

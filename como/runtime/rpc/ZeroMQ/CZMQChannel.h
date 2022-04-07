@@ -110,6 +110,7 @@ private:
 inline CZMQChannel* CZMQChannel::GetProxyChannel(
     /* [in] */ IProxy* proxy)
 {
+    // AutoPtr.Get(): get (IRPCChannel*) from AutoPtr<IRPCChannel> return by GetChannel()
     return (CZMQChannel*)((CProxy*)proxy)->GetChannel().Get();
 }
 
