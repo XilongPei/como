@@ -489,21 +489,22 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
     }
 
     MetaInterface* mi = mMetadata->mInterfaces[index];
-    String fullName = String::Format("%s::%s",
-            mi->mNamespace, mi->mName);
+    String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
 
-    if (!mInterfaceNameMap.ContainsKey(fullName)) {
+    if (! mInterfaceNameMap.ContainsKey(fullName)) {
         Mutex::AutoLock lock(mInterfacesLock);
-        if (!mInterfaceNameMap.ContainsKey(fullName)) {
-            AutoPtr<CMetaInterface> miObj = new CMetaInterface(
-                    this, mMetadata, mi);
+        if (! mInterfaceNameMap.ContainsKey(fullName)) {
+            AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
+            if (nullptr == miObj)
+                return nullptr;
+
             Integer realIndex = index;
             for (Integer i = 0; i <= index; i++) {
                 if (mMetadata->mInterfaces[i]->mProperties & TYPE_EXTERNAL) {
                     realIndex--;
                 }
             }
-            if (!(mi->mProperties & TYPE_EXTERNAL)) {
+            if (! (mi->mProperties & TYPE_EXTERNAL)) {
                 mInterfaces.Set(realIndex, miObj);
             }
             mInterfaceNameMap.Put(fullName, miObj);

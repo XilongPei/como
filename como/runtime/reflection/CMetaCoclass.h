@@ -127,11 +127,11 @@ public:
 private:
     void BuildAllConstructors();
 
-    void BuildAllInterfaces();
+    ECode BuildAllInterfaces();
 
     void BuildAllConstants();
 
-    void BuildAllMethods();
+    ECode BuildAllMethods();
 
     void BuildInterfaceMethodLocked(
         /* [in] */ IMetaInterface* miObj,

@@ -149,10 +149,12 @@ ECode CMetaCoclass::GetAllInterfaces(
         return NOERROR;
     }
 
-    BuildAllInterfaces();
+    ECode ec = BuildAllInterfaces();
+    if (FAILED(ec))
+        return ec;
 
     Integer N = MIN(mInterfaces.GetLength(), intfs.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         intfs.Set(i, miObj);
     }
@@ -261,10 +263,12 @@ ECode CMetaCoclass::GetMethodNumber(
 ECode CMetaCoclass::GetAllMethods(
     /* [out] */ Array<IMetaMethod*>& methods)
 {
-    BuildAllMethods();
+    ECode ec = BuildAllMethods();
+    if (FAILED(ec))
+        return ec;
 
     Integer N = MIN(mMethods.GetLength(), methods.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         methods.Set(i, mMethods[i]);
     }
 
@@ -274,7 +278,9 @@ ECode CMetaCoclass::GetAllMethods(
 ECode CMetaCoclass::GetAllMethodsOverrideInfo(
     /* [out] */ Array<Boolean>& overridesInfo)
 {
-   BuildAllMethods();
+    ECode ec = BuildAllMethods();
+    if (FAILED(ec))
+        return ec;
 
    Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -294,7 +300,9 @@ ECode CMetaCoclass::GetMethod(
         return NOERROR;
     }
 
-    BuildAllMethods();
+    ECode ec = BuildAllMethods();
+    if (FAILED(ec))
+        return ec;
 
     // fullName style: nameSpace.methodName
     Integer pos = fullName.IndexOf('.');
@@ -388,7 +396,7 @@ void CMetaCoclass::BuildAllConstructors()
     }
 }
 
-void CMetaCoclass::BuildAllInterfaces()
+ECode CMetaCoclass::BuildAllInterfaces()
 {
     if (mInterfaces[0] == nullptr) {
         Mutex::AutoLock lock(mInterfacesLock);
@@ -396,13 +404,18 @@ void CMetaCoclass::BuildAllInterfaces()
             for (Integer i = 0; i < mMetadata->mInterfaceNumber - 1; i++) {
                 Integer intfIndex = mMetadata->mInterfaceIndexes[i];
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(intfIndex);
+                if (nullptr == miObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 mInterfaces.Set(i, miObj);
             }
         }
     }
+
+    return NOERROR;
 }
 
-void CMetaCoclass::BuildAllMethods()
+ECode CMetaCoclass::BuildAllMethods()
 {
     Integer number;
     GetMethodNumber(number);
@@ -414,7 +427,10 @@ void CMetaCoclass::BuildAllMethods()
             BuildInterfaceMethodLocked(mOwner->mIInterface, index);
             for (Integer i = 0; i < mMetadata->mInterfaceNumber - 1; i++) {
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(
-                        mMetadata->mInterfaceIndexes[i]);
+                                                mMetadata->mInterfaceIndexes[i]);
+                if (nullptr == miObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 String name, ns;
                 miObj->GetName(name);
                 miObj->GetNamespace(ns);
@@ -459,6 +475,8 @@ void CMetaCoclass::BuildAllMethods()
             }
         }
     }
+
+    return NOERROR;
 }
 
 void CMetaCoclass::BuildInterfaceMethodLocked(

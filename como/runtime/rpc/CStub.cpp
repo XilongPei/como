@@ -53,7 +53,9 @@ ECode InterfaceStub::UnmarshalArguments(
     /* [in] */ IParcel* argParcel,
     /* [out] */ AutoPtr<IArgumentList>& argList)
 {
-    method->CreateArgumentList(argList);
+    ECode ec = method->CreateArgumentList(argList);
+    if (FAILED(ec))
+        return ec;
 
     Integer N;
     method->GetParameterNumber(N);
@@ -532,11 +534,16 @@ ECode InterfaceStub::Invoke(
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IMetaMethod> mm;
-    mTargetMetadata->GetMethod(methodIndex, mm);
-    AutoPtr<IArgumentList> argList;
-    ECode ec = UnmarshalArguments(mm, argParcel, argList);
+    ECode ec = mTargetMetadata->GetMethod(methodIndex, mm);
     if (FAILED(ec)) {
-        Logger::E("CStub", "UnmarshalArguments failed with ec is 0x%x.", ec);
+        Logger::E("CStub", "Invoke GetMethod failed with ec is 0x%x.", ec);
+        return ec;
+    }
+
+    AutoPtr<IArgumentList> argList;
+    ec = UnmarshalArguments(mm, argParcel, argList);
+    if (FAILED(ec)) {
+        Logger::E("CStub", "Invoke UnmarshalArguments failed with ec is 0x%x.", ec);
         return ec;
     }
 
@@ -665,11 +672,13 @@ ECode CStub::CreateObject(
     mc->GetCoclassID(cid);
 
     if (DEBUG) {
-        Logger::D("CStub", "Object's CoclassID is %s",
-                DumpUUID(cid.mUuid).string());
+        Logger::D("CStub", "Object's CoclassID is %s", DumpUUID(cid.mUuid).string());
     }
 
     AutoPtr<CStub> stubObj = new CStub();
+    if (nullptr == stubObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     stubObj->mTarget = obj;
     stubObj->mCid = cid;
     stubObj->mTargetMetadata = mc;
@@ -678,10 +687,24 @@ ECode CStub::CreateObject(
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
     Array<IMetaInterface*> interfaces(interfaceNumber);
-    mc->GetAllInterfaces(interfaces);
+    ECode ec = mc->GetAllInterfaces(interfaces);
+    if (FAILED(ec)) {
+        Logger::E("CStub", "GetAllInterfaces failed with ec is 0x%x", ec);
+        return ec;
+    }
+
     stubObj->mInterfaces = Array<InterfaceStub*>(interfaceNumber);
     for (Integer i = 0; i < interfaceNumber; i++) {
         AutoPtr<InterfaceStub> istub = new InterfaceStub();
+        if (nullptr == istub) {
+            // rollback this transaction
+            for (Integer j = 0;  j < i;  j++)
+                delete stubObj->mInterfaces[j];
+            delete stubObj;
+
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
         istub->mOwner = stubObj;
         istub->mTargetMetadata = interfaces[i];
         istub->mTargetMetadata->GetInterfaceID(istub->mIid);
@@ -691,13 +714,18 @@ ECode CStub::CreateObject(
             interfaces[i]->GetNamespace(ns);
             interfaces[i]->GetName(name);
             Logger::E("CStub", "Object does not have \"%s::%s\" interface.",
-                    ns.string(), name.string());
+                                                        ns.string(), name.string());
+            // rollback this transaction
+            for (Integer j = 0;  j < i;  j++)
+                delete stubObj->mInterfaces[j];
+            delete stubObj;
+
             return E_INTERFACE_NOT_FOUND_EXCEPTION;
         }
         stubObj->mInterfaces[i] = istub;
     }
 
-    ECode ec = channel->StartListening(stubObj);
+    ec = channel->StartListening(stubObj);
     if (FAILED(ec)) {
         Logger::E("CStub", "Channel start listening failed with ec is 0x%x", ec);
         return ec;
