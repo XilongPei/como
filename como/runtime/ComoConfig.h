@@ -67,18 +67,17 @@ public:
 
     static long DBUS_BUS_CHECK_EXPIRES_PERIOD;
     static long DBUS_BUS_SESSION_EXPIRES;
+    // TPCI: Thread Pool Channel Invoke
+    static Long TPCI_TASK_EXPIRES;
+    // TPZA: Thread Pool ZMQ Actor
+    static Long TPZA_TASK_EXPIRES;
+
     static int ThreadPoolChannelInvoke_MAX_THREAD_NUM;
     static int Logger_sLevel;
 
     static int ThreadPoolZmqActor_MAX_THREAD_NUM;
 
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
-
-    // TPCI: Thread Pool Channel Invoke
-    static Long TPCI_TASK_EXPIRES;
-
-    // TPZA: Thread Pool ZMQ Actor
-    static Long TPZA_TASK_EXPIRES;
 
     static std::unordered_map<std::string, ServerNodeInfo*> ServerNameEndpointMap;
     static std::string ComoRuntimeInstanceIdentity;

@@ -49,9 +49,11 @@ int ComoConfig::ThreadPool_MAX_THREAD_NUM = 2;
 int ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER = 1;
 
 // The period of detecting whether the object is overdue, in ns
-long ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD = 1000000000L * 60 * 2;
-
-long ComoConfig::DBUS_BUS_SESSION_EXPIRES = 1000000000L * 60 * 60 * 48;
+long ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD  = 1000000000L * 60 * 2;
+long ComoConfig::DBUS_BUS_SESSION_EXPIRES       = 1000000000L * 60 * 60 * 48;
+Long ComoConfig::TPCI_TASK_EXPIRES              = 1000000000L * 30; // ns, 30s
+Long ComoConfig::TPZA_TASK_EXPIRES              = 1000000000L * 30; // ns, 30s
+                                                 /*987654321*/
 
 int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;
 CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
@@ -63,12 +65,6 @@ int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 2;
  * int Logger::sLevel = DEBUG;
  */
 int Logger_sLevel = 0;
-
-// ns, 30s
-Long ComoConfig::TPCI_TASK_EXPIRES = 1000000000L * 30;
-
-// ns, 30s
-Long ComoConfig::TPZA_TASK_EXPIRES = 1000000000L * 30;
 
 std::unordered_map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
