@@ -66,12 +66,15 @@ int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> me
                                     AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
 {
     AutoPtr<Worker> w = new Worker(channel, method, inParcel, outParcel);
+    if (nullptr == w) {
+        return -1;
+    }
     return threadPool->addTask(w);
 }
 
-int TPCI_Executor::CleanTask(int posWorkerList)
+int TPCI_Executor::CleanTask(int pos)
 {
-    return threadPool->cleanTask(posWorkerList);
+    return threadPool->cleanTask(pos);
 }
 
 
@@ -106,7 +109,10 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 
         pthread_mutex_unlock(&m_pthreadMutex);
 
+        // the w->Invoke() will block until the Channel (dbus, binder, ZeroMQ)
+        // finish this Worker. such as: CDBusChannel::Invoke()
         w->ec = w->Invoke();
+
         w->mWorkerStatus = WORKER_TASK_FINISH;
         pthread_cond_signal(&(w->mCond));
     }
@@ -187,16 +193,17 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
     return i;
 }
 
-int ThreadPoolChannelInvoke::cleanTask(int posWorkerList)
+int ThreadPoolChannelInvoke::cleanTask(int pos)
 {
-    if (posWorkerList < 0 || (posWorkerList >= mWorkerList.size()))
+    if (pos < 0 || (pos >= mWorkerList.size()))
         return -1;
 
     pthread_mutex_lock(&m_pthreadMutex);
-    mWorkerList[posWorkerList] = nullptr;
+    delete mWorkerList[pos];
+    mWorkerList[pos] = nullptr;
     pthread_mutex_unlock(&m_pthreadMutex);
 
-    return posWorkerList;
+    return pos;
 }
 
 int ThreadPoolChannelInvoke::stopAll()

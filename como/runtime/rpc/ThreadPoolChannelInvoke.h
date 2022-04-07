@@ -28,6 +28,7 @@
 namespace como {
 
 constexpr ECode FUNCTION_SAFETY_CALL_TIMEOUT = MAKE_COMORT_ECODE(1, 0x1);
+constexpr ECode FUNCTION_SAFETY_CALL_OUT_OF_MEMORY = MAKE_COMORT_ECODE(1, 0x2);
 
 class ThreadPoolChannelInvoke;
 enum WORKER_STATUS {

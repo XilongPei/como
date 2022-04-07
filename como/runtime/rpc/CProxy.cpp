@@ -39,6 +39,7 @@
 #ifdef COMO_FUNCTION_SAFETY
 #include <time.h>
 #include <pthread.h>
+#include <errno.h>
 #include <ThreadPoolChannelInvoke.h>
 #endif
 
@@ -1765,18 +1766,21 @@ ECode InterfaceProxy::ProxyEntry(
         curTime.tv_nsec = nsec % 1000000000;
                                 //123456789
 
-        int posInWorkerList = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
-                                                                            method, inParcel, outParcel);
-        int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mCond),
-                                         &(ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->mMutex), &curTime);
-        if (ret != 110 /*time out*/) {
-            ec = ThreadPoolChannelInvoke::mWorkerList[posInWorkerList]->ec;
-            delete ThreadPoolChannelInvoke::mWorkerList[posInWorkerList];
-            TPCI_Executor::GetInstance()->CleanTask(posInWorkerList);
+        int pos = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
+                                                            method, inParcel, outParcel);
+        if (pos < 0) {
+            ec = FUNCTION_SAFETY_CALL_OUT_OF_MEMORY;
+            goto ProxyExit;
         }
-        else {
+
+        int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
+                             &(ThreadPoolChannelInvoke::mWorkerList[pos]->mMutex), &curTime);
+        if (ret != ETIMEDOUT /*110, time out*/)
+            ec = ThreadPoolChannelInvoke::mWorkerList[pos]->ec;
+        else
             ec = FUNCTION_SAFETY_CALL_TIMEOUT;
-        }
+
+        TPCI_Executor::GetInstance()->CleanTask(pos);
 
         if (FAILED(ec)) {
             goto ProxyExit;
