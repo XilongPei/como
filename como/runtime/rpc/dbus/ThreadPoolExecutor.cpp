@@ -70,7 +70,13 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
     Mutex::AutoLock lock(sInstanceLock);
     if (sInstance == nullptr) {
         sInstance = new ThreadPoolExecutor();
-        threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
+        if (nullptr != sInstance)
+            threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
+
+        if (nullptr == threadPool) {
+            delete sInstance;
+            return nullptr;
+        }
     }
     return sInstance;
 }
@@ -78,9 +84,11 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 int ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
-    AutoPtr<Worker> w = new Worker(task, this);
-    threadPool->addTask(w);
-    return 0;
+    AutoPtr<Worker> worker = new Worker(task, this);
+    if (nullptr == worker)
+        return -1;
+
+    return threadPool->addTask(worker);
 }
 
 void *ThreadPool::threadFunc(void *threadData)
@@ -139,6 +147,7 @@ ThreadPool::ThreadPool(int threadNum)
     pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == pthread_ids) {
         Logger::E("ThreadPool", "create thread error");
+        return;
     }
 
     for (int i = 0; i < mThreadNum; i++) {
@@ -157,7 +166,10 @@ ThreadPool::ThreadPool(int threadNum)
 int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 {
     pthread_mutex_lock(&m_pthreadMutex);
-    mWorkerList.Add(task);
+
+    if (! mWorkerList.Add(task))
+        return -1;
+
     pthread_mutex_unlock(&m_pthreadMutex);
     pthread_cond_signal(&m_pthreadCond);
     return 0;

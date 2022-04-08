@@ -761,13 +761,19 @@ ECode CDBusChannel::StartListening(
     int ret = 0;
 
     if (mPeer == RPCPeer::Stub) {
-        AutoPtr<ThreadPoolExecutor::Runnable> r = new ServiceRunnable(this, stub);
-        if (nullptr == r) {
+        AutoPtr<ThreadPoolExecutor::Runnable> runable = new ServiceRunnable(this, stub);
+        if (nullptr == runable) {
             Logger::E("CDBusChannel::StartListening", "new ServiceRunnable error");
             return E_OUT_OF_MEMORY_ERROR;
         }
 
-        ret = ThreadPoolExecutor::GetInstance()->RunTask(r);
+        AutoPtr<ThreadPoolExecutor> instance = ThreadPoolExecutor::GetInstance();
+        if (nullptr == instance) {
+            Logger::E("CDBusChannel::StartListening", "GetInstance error");
+            delete runable;
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+        ret = instance->RunTask(runable);
     }
 
     if (0 == ret) {
