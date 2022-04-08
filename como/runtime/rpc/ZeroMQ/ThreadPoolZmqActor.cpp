@@ -120,11 +120,14 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 AutoPtr<IMetaComponent> mc;
                 CoGetComponentMetadata(*cid.mCid, nullptr, mc);
                 Array<Byte> metadata;
-
                 ec = mc->GetSerializedMetadata(metadata);
 
                 ReleaseCoclassID(cid);
-                numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                if (SUCCEEDED(ec))
+                    numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                else
+                    numberOfBytes = zmq_send(mSocket, "", 1, 0);
+
                 break;
             }
 

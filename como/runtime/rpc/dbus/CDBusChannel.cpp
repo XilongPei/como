@@ -245,22 +245,35 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         ReleaseCoclassID(cid);
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr != reply) {
+            dbus_message_iter_init_append(reply, &args);
+            dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
 
-        dbus_message_iter_init_append(reply, &args);
-        dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
-        HANDLE resData = reinterpret_cast<HANDLE>(metadata.GetPayload());
-        Long resSize = metadata.GetLength();
-        dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
-        dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
-        dbus_message_iter_close_container(&args, &subArg);
+            HANDLE resData;
+            Long resSize;
+            if (SUCCEEDED(ec)) {
+                resData = reinterpret_cast<HANDLE>(metadata.GetPayload());
+                resSize = metadata.GetLength();
+            }
+            else {
+                resData = reinterpret_cast<HANDLE>("");
+                resSize = 1;
+            }
 
-        dbus_uint32_t serial = 0;
-        if (! dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("CDBusChannel", "Send reply message failed.");
+            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
+            dbus_message_iter_close_container(&args, &subArg);
+
+            dbus_uint32_t serial = 0;
+            if (! dbus_connection_send(conn, reply, &serial)) {
+                Logger::E("CDBusChannel", "Send reply message failed.");
+            }
+            dbus_connection_flush(conn);
+            dbus_message_unref(reply);
         }
-        dbus_connection_flush(conn);
-
-        dbus_message_unref(reply);
+        else {
+            dbus_connection_flush(conn);
+        }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Invoke")) {
         if (CDBusChannel::DEBUG) {
@@ -300,24 +313,28 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         ECode ec = thisRunnable->mTarget->Invoke(argParcel, resParcel);
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr != reply) {
+            dbus_message_iter_init_append(reply, &args);
+            dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
 
-        dbus_message_iter_init_append(reply, &args);
-        dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
-        HANDLE resData;
-        Long resSize;
-        dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
-        resParcel->GetData(resData);
-        resParcel->GetDataSize(resSize);
-        dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
-        dbus_message_iter_close_container(&args, &subArg);
+            HANDLE resData;
+            Long resSize;
+            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+            resParcel->GetData(resData);
+            resParcel->GetDataSize(resSize);
+            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
+            dbus_message_iter_close_container(&args, &subArg);
 
-        dbus_uint32_t serial = 0;
-        if (! dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("CDBusChannel", "Send reply message failed.");
+            dbus_uint32_t serial = 0;
+            if (! dbus_connection_send(conn, reply, &serial)) {
+                Logger::E("CDBusChannel", "Send reply message failed.");
+            }
+            dbus_connection_flush(conn);
+            dbus_message_unref(reply);
         }
-        dbus_connection_flush(conn);
-
-        dbus_message_unref(reply);
+        else {
+            dbus_connection_flush(conn);
+        }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "IsPeerAlive")) {
         if (CDBusChannel::DEBUG) {
@@ -326,21 +343,24 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         DBusMessageIter args;
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr != reply) {
+            ECode ec = NOERROR;
+            dbus_bool_t val = TRUE;
 
-        ECode ec = NOERROR;
-        dbus_bool_t val = TRUE;
+            dbus_message_iter_init_append(reply, &args);
+            dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
+            dbus_message_iter_append_basic(&args, DBUS_TYPE_BOOLEAN, &val);
 
-        dbus_message_iter_init_append(reply, &args);
-        dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
-        dbus_message_iter_append_basic(&args, DBUS_TYPE_BOOLEAN, &val);
-
-        dbus_uint32_t serial = 0;
-        if (! dbus_connection_send(conn, reply, &serial)) {
-            Logger::E("CDBusChannel", "Send reply message failed.");
+            dbus_uint32_t serial = 0;
+            if (! dbus_connection_send(conn, reply, &serial)) {
+                Logger::E("CDBusChannel", "Send reply message failed.");
+            }
+            dbus_connection_flush(conn);
+            dbus_message_unref(reply);
         }
-        dbus_connection_flush(conn);
-
-        dbus_message_unref(reply);
+        else {
+            dbus_connection_flush(conn);
+        }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Release")) {
         if (CDBusChannel::DEBUG) {

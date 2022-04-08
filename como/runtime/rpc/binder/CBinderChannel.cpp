@@ -132,9 +132,15 @@ android::status_t CBinderChannel::ServiceRunnable::onTransact(
             ECode ec = mc->GetSerializedMetadata(metadata);
             ReleaseCoclassID(cid);
 
-            reply->writeInt32(NOERROR);
-            reply->writeInt32(metadata.GetLength());
-            reply->write(metadata.GetPayload(), metadata.GetLength());
+            reply->writeInt32(ec);
+            if (SUCCEEDED(ec)) {
+                reply->writeInt32(metadata.GetLength());
+                reply->write(metadata.GetPayload(), metadata.GetLength());
+            }
+            else {
+                reply->writeInt32(1);
+                reply->write("", 1);
+            }
 
             return android::NO_ERROR;
         }
