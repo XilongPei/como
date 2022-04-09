@@ -385,11 +385,11 @@ void CMetaCoclass::BuildAllConstructors()
         Mutex::AutoLock lock(mConstructorsLock);
         if (mConstructors[0] == nullptr) {
             MetaInterface* mi = mOwner->mMetadata->mInterfaces[
-                    mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
+                 mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
             for (Integer i = 0; i < mi->mMethodNumber; i++) {
                 MetaMethod* mm = mi->mMethods[i];
                 AutoPtr<IMetaConstructor> mcObj = new CMetaConstructor(
-                        this, mi, i, mm);
+                                                               this, mi, i, mm);
                 mConstructors.Set(i, mcObj);
             }
         }
@@ -485,7 +485,7 @@ void CMetaCoclass::BuildInterfaceMethodLocked(
 {
     Integer N;
     miObj->GetMethodNumber(N);
-    for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4); i < N; i++) {
+    for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4);  i < N;  i++) {
         AutoPtr<IMetaMethod> mmObj;
         miObj->GetMethod(i, mmObj);
         mMethods.Set(index, mmObj);
@@ -566,13 +566,14 @@ ECode CMetaCoclass::GetConstant(
 
 void CMetaCoclass::BuildAllConstants()
 {
-    if (mConstants[0] == nullptr) {
+    if (nullptr == mConstants[0]) {
         Mutex::AutoLock lock(mConstantsLock);
-        if (mConstants[0] == nullptr) {
-            for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
+        if (nullptr == mConstants[0]) {
+            for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
-                        mOwner->mMetadata, mMetadata->mConstants[i]);
-                mConstants.Set(i, mcObj);
+                                   mOwner->mMetadata, mMetadata->mConstants[i]);
+                if (nullptr != mcObj)
+                    mConstants.Set(i, mcObj);
             }
         }
     }

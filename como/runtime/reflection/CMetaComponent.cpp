@@ -264,7 +264,7 @@ ECode CMetaComponent::GetSerializedMetadata(
     /* [out, callee] */ Array<Byte>& metadata)
 {
     MetaComponent* mmc = reinterpret_cast<MetaComponent*>(
-            mComponent->mMetadataWrapper->mMetadata);
+                                        mComponent->mMetadataWrapper->mMetadata);
     metadata = Array<Byte>::Allocate(mmc->mSize);
     if (metadata.IsNull()) {
         Logger::E("CMetaComponent", "Malloc %lu size metadata failed.", mmc->mSize);
@@ -355,77 +355,86 @@ ECode CMetaComponent::GetClassObject(
     }
 }
 
-void CMetaComponent::BuildAllConstants()
+ECode CMetaComponent::BuildAllConstants()
 {
     if (mMetadata->mConstantNumber == 0) {
-        return;
+        return NOERROR;
     }
 
     if (mConstantsAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Mutex::AutoLock lock(mConstantsLock);
 
     if (mConstantsAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
         MetaConstant* mc = mMetadata->mConstants[i];
-        String fullName = String::Format("%s::%s",
-                mc->mNamespace, mc->mName);
-        AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
-                mMetadata, mc);
-        mConstants.Set(i, mcObj);
-        mConstantNameMap.Put(fullName, mcObj);
+        String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
+        AutoPtr<CMetaConstant> mcObj = new CMetaConstant(mMetadata, mc);
+        if (nullptr != mcObj) {
+            mConstants.Set(i, mcObj);
+            mConstantNameMap.Put(fullName, mcObj);
+        }
+        else {
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
     mConstantsAlreadyBuilt = true;
+    return NOERROR;
 }
 
-void CMetaComponent::BuildAllCoclasses()
+ECode CMetaComponent::BuildAllCoclasses()
 {
     if (mMetadata->mCoclassNumber == 0) {
-        return;
+        return NOERROR;
     }
 
     if (mCoclassesAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Mutex::AutoLock lock(mCoclassesLock);
 
     if (mCoclassesAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     for (Integer i = 0; i < mMetadata->mCoclassNumber; i++) {
         MetaCoclass* mc = mMetadata->mCoclasses[i];
-        String fullName = String::Format("%s::%s",
-                mc->mNamespace, mc->mName);
-        AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(
-                this, mMetadata, mc);
-        mCoclasses.Set(i, mcObj);
-        mCoclassNameMap.Put(fullName, mcObj);
-        mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj);
+        String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
+        AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(this, mMetadata, mc);
+        if (nullptr != mcObj) {
+            mCoclasses.Set(i, mcObj);
+            mCoclassNameMap.Put(fullName, mcObj);
+            mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj);
+        }
+        else {
+            // roll back this transaction?
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
     mCoclassesAlreadyBuilt = true;
+    return NOERROR;
 }
 
-void CMetaComponent::BuildAllEnumerations()
+ECode CMetaComponent::BuildAllEnumerations()
 {
     if (mMetadata->mEnumerationNumber == 0) {
-        return;
+        return NOERROR;
     }
 
     if (mEnumerationsAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Mutex::AutoLock lock(mEnumerationsLock);
 
     if (mEnumerationsAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Integer index = 0;
@@ -434,31 +443,36 @@ void CMetaComponent::BuildAllEnumerations()
         if (me->mProperties & TYPE_EXTERNAL) {
             continue;
         }
-        String fullName = String::Format("%s::%s",
-                me->mNamespace, me->mName);
-        AutoPtr<CMetaEnumeration> meObj = new CMetaEnumeration(
-                this, mMetadata, me);
-        mEnumerations.Set(index, meObj);
-        mEnumerationNameMap.Put(fullName, meObj);
-        index++;
+        String fullName = String::Format("%s::%s", me->mNamespace, me->mName);
+        AutoPtr<CMetaEnumeration> meObj = new CMetaEnumeration(this, mMetadata, me);
+        if (nullptr != meObj) {
+            mEnumerations.Set(index, meObj);
+            mEnumerationNameMap.Put(fullName, meObj);
+            index++;
+        }
+        else {
+            // roll back this transaction?
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
     mEnumerationsAlreadyBuilt = true;
+    return NOERROR;
 }
 
-void CMetaComponent::BuildAllInterfaces()
+ECode CMetaComponent::BuildAllInterfaces()
 {
     if (mMetadata->mInterfaceNumber == 0) {
-        return;
+        return NOERROR;
     }
 
     if (mInterfacesAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Mutex::AutoLock lock(mInterfacesLock);
 
     if (mInterfacesAlreadyBuilt) {
-        return;
+        return NOERROR;
     }
 
     Integer index = 0;
@@ -467,18 +481,23 @@ void CMetaComponent::BuildAllInterfaces()
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
         }
-        String fullName = String::Format("%s::%s",
-                mi->mNamespace, mi->mName);
+        String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
         if (!mInterfaceNameMap.ContainsKey(fullName)) {
-            AutoPtr<CMetaInterface> miObj = new CMetaInterface(
-                    this, mMetadata, mi);
-            mInterfaces.Set(index, miObj);
-            mInterfaceNameMap.Put(fullName, miObj);
-            mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
+            AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
+            if (nullptr != miObj) {
+                mInterfaces.Set(index, miObj);
+                mInterfaceNameMap.Put(fullName, miObj);
+                mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
+                index++;
+            }
+            else {
+                // roll back this transaction?
+                return E_OUT_OF_MEMORY_ERROR;
+            }
         }
-        index++;
     }
     mInterfacesAlreadyBuilt = true;
+    return NOERROR;
 }
 
 AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
@@ -520,7 +539,7 @@ void CMetaComponent::LoadAllClassObjectGetters()
     if (mComponent->mSoGetAllClassObjects != nullptr) {
         Integer N;
         ClassObjectGetter* getters = mComponent->mSoGetAllClassObjects(N);
-        for (Integer i = 0; i < N; i++) {
+        for (Integer i = 0;  i < N;  i++) {
             const CoclassID& cid = getters[i].mCid;
             mClassObjects.Put(cid.mUuid, &getters[i]);
         }

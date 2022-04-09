@@ -184,17 +184,34 @@ ECode CMetaInterface::GetMethod(
 
     BuildAllMethods();
 
-    for (Integer i = 0; i < mMethods.GetLength(); i++) {
-        IMetaMethod* mmObj = mMethods[i];
-        String mmName, mmSignature;
-        mmObj->GetName(mmName);
-        mmObj->GetSignature(mmSignature);
-        if (mmName.Equals(name) && mmSignature.Equals(signature)) {
-            method = mmObj;
-            return NOERROR;
+    method = nullptr;
+
+    if (! signature.IsEmpty()) {
+        for (Integer i = 0;  i < mMethods.GetLength();  i++) {
+            IMetaMethod* mmObj = mMethods[i];
+            String mmName, mmSignature;
+            mmObj->GetName(mmName);
+            mmObj->GetSignature(mmSignature);
+            if (mmName.Equals(name) && mmSignature.Equals(signature)) {
+                method = mmObj;
+                return NOERROR;
+            }
         }
     }
-    method = nullptr;
+    else {
+        for (Integer i = 0;  i < mMethods.GetLength();  i++) {
+            IMetaMethod* mmObj = mMethods[i];
+            String mmName;
+            mmObj->GetName(mmName);
+            if (mmName.Equals(name)) {
+                if (nullptr != method)
+                    return E_INVALID_SIGNATURE_EXCEPTION;;
+
+                method = mmObj;
+            }
+        }
+    }
+
     return NOERROR;
 }
 
@@ -268,12 +285,15 @@ Integer CMetaInterface::BuildInterfaceMethod(
     Integer startIndex = 0;
     if (mi->mBaseInterfaceIndex != -1) {
         startIndex = BuildInterfaceMethod(mOwner->mMetadata->mInterfaces[
-                mi->mBaseInterfaceIndex]);
+                                                      mi->mBaseInterfaceIndex]);
     }
 
     for (Integer i = 0; i < mi->mMethodNumber; i++) {
         AutoPtr<CMetaMethod> mmObj = new CMetaMethod(mOwner->mMetadata,
-                this, startIndex + i, mi->mMethods[i]);
+                                         this, startIndex + i, mi->mMethods[i]);
+        if (nullptr == mmObj)
+            return -1;
+
         mMethods.Set(startIndex + i, mmObj);
     }
     return startIndex + mi->mMethodNumber;

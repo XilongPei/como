@@ -120,13 +120,13 @@ public:
     ECode GetOpaque(
         /* [out] */ HANDLE &opaque) override;
 
-    void BuildAllConstants();
+    ECode BuildAllConstants();
 
-    void BuildAllCoclasses();
+    ECode BuildAllCoclasses();
 
-    void BuildAllEnumerations();
+    ECode BuildAllEnumerations();
 
-    void BuildAllInterfaces();
+    ECode BuildAllInterfaces();
 
     AutoPtr<IMetaInterface> BuildInterface(
         /* [in] */ Integer index);

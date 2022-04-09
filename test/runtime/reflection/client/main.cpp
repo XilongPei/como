@@ -323,6 +323,18 @@ TEST(ReflectionTest, TestCoclassGetMethods)
 #endif
 }
 
+TEST(ReflectionTest, TestGetMethodWithoutSignature)
+{
+    AutoPtr<IMetaComponent> mc;
+    CoGetComponentMetadata(CID_ReflectionTestUnit, nullptr, mc);
+    AutoPtr<IMetaCoclass> klass;
+    mc->GetCoclass("como::test::reflection::CMethodTester", klass);
+
+    AutoPtr<IMetaMethod> method;
+    klass->GetMethod("TestMethod1", nullptr, method);
+    EXPECT_NE(nullptr, method);
+}
+
 TEST(ReflectionTest, TestMethodGetParameters)
 {
     AutoPtr<IMetaComponent> mc;
