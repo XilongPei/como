@@ -14,16 +14,35 @@
 // limitations under the License.
 //=========================================================================
 
-#include <FSOGetterSetter.h>
+#include <stdio.h>
+#include "FSOGetterSetter.h"
 
-namespace como {
+//namespace como {
 
 extern "C" void FSOGetterChecker()
 {
+    puts("FSOGetterChecker");
 }
 
 extern "C" void FSOSetterChecker()
 {
+    puts("FSOSetterChecker");
 }
 
-} // namespace como
+void FSOGetter(PropertyName, const char *s)
+{
+    puts(s);
+}
+
+void FSOSetter(PropertyName, const char *s)
+{
+    puts(s);
+}
+
+//} // namespace como
+
+int main()
+{
+    CallFSOGetter(PropertyName, "===test main CallFSOGetter====\n");
+    CallFSOSetter(PropertyName, "===test main CallFSOSetter====\n");
+}

@@ -19,7 +19,7 @@
 #ifndef __FSOGetterSetter_h__
 #define __FSOGetterSetter_h__
 
-namespace como {
+//namespace como {
 
 #define _FSO_MAKE_FUNC_GET_NAME_inside_(n) _get_##n
 #define FSO_MAKE_FUNC_GET_NAME_inside(n) _FSO_MAKE_FUNC_GET_NAME_inside_(n)
@@ -87,24 +87,6 @@ extern "C" void FSO_MAKE_FUNC_GET_NAME_inside(fieldName)(args)
 };                                                                              \
 extern "C" void FSO_MAKE_FUNC_SET_NAME_inside(fieldName)(args)
 
-/*
-void FSOGetter(PropertyName, const char *s)
-{
-    puts(s);
-}
-
-void FSOSetter(PropertyName, const char *s)
-{
-    puts(s);
-}
-
-int main()
-{
-    callFSOGetter(PropertyName, "===test main callFSOGetter====\n");
-    callFSOSetter(PropertyName, "===test main callFSOSetter====\n");
-}
-*/
-
-} // namespace como
+//} // namespace como
 
 #endif // __FSOGetterSetter_h__

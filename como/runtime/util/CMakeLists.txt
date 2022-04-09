@@ -29,7 +29,6 @@ include_directories(
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     set(ComoFunctionSafetyObject
         ComoFunctionSafetyObject.cpp
-        FSOGetterSetter.cpp
     )
 else()
     set(ComoFunctionSafetyObject)
