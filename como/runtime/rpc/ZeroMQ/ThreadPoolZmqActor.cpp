@@ -173,12 +173,16 @@ HANDLE_MESSAGE_FUNCTION TPZA_Executor::defaultHandleMessage = nullptr;
 
 AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 {
-    {
-        Mutex::AutoLock lock(sInstanceLock);
+    Mutex::AutoLock lock(sInstanceLock);
 
-        if (nullptr == sInstance) {
-            sInstance = new TPZA_Executor();
+    if (nullptr == sInstance) {
+        sInstance = new TPZA_Executor();
+        if (nullptr != sInstance)
             threadPool = new ThreadPoolZmqActor(ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM);
+
+        if (nullptr == threadPool) {
+            delete sInstance;
+            return nullptr;
         }
     }
     return sInstance;
