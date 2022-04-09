@@ -19,8 +19,6 @@
 #include <stdio.h>
 #include "FSOGetterSetter.h"
 
-// no namespace vvvvvvvv
-
 extern "C" void FSOGetterChecker()
 {
     puts("FSOGetterChecker");
@@ -40,34 +38,6 @@ void FSOSetter(PropertyName, const char *s)
 {
     puts(s);
 }
-
-/*
-// no namespace ^^^^^^^^
-
-namespace como {
-
-extern "C" void FSOGetterChecker()
-{
-    puts("FSOGetterChecker");
-}
-
-extern "C" void FSOSetterChecker()
-{
-    puts("FSOSetterChecker");
-}
-
-void FSOGetter(PropertyName, const char *s)
-{
-    puts(s);
-}
-
-void FSOSetter(PropertyName, const char *s)
-{
-    puts(s);
-}
-
-} // namespace como
-*/
 
 TEST(CallFSOGetterSetter, testMain)
 {

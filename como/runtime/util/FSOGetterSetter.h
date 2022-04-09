@@ -36,14 +36,15 @@
 #define CallFSOSetter(fieldName,args...) FSO_MAKE_FUNC_SET_NAME(fieldName)(args)
 
 #if defined(__aarch64__)
-    #define CALL_FUNC_GET(name)         \
-        "adr    lr, return_from_func;"  \
-        "call _get_"#name               \
-        "return_from_func:"
-    #define CALL_FUNC_SET(name)         \
-        "adr    lr, return_from_func;"  \
-        "call _set_"#name               \
-        "return_from_func:"
+    #define CALL_FUNC_GET(name)                     \
+        "adr    lr, "#name"_get_return_from_func;"  \
+        "call   _get_"#name";"                      \
+        #name"_get_return_from_func:;"
+
+    #define CALL_FUNC_SET(name)                     \
+        "adr    lr, "#name"_set_return_from_func;"  \
+        "call   _set_"#name";"                      \
+        #name"_set_return_from_func:;"
 #elif defined(__x86_64__)
     #define CALL_FUNC_GET(name)     "call _get_"#name";"
     #define CALL_FUNC_SET(name)     "call _set_"#name";"
@@ -51,14 +52,15 @@
 #elif defined(__i386__)
 #elif defined(__riscv)
     #if (__riscv_xlen == 64)
-        #define CALL_FUNC_GET(name)         \
-            "sd    ra, return_from_func;"  \
-            "call _get_"#name               \
-            "return_from_func:"
-        #define CALL_FUNC_SET(name)         \
-            "sd    ra, return_from_func;"  \
-            "call _set_"#name               \
-            "return_from_func:"
+        #define CALL_FUNC_GET(name)                     \
+            "sd    ra, "#name"_get_return_from_func;"   \
+            "call  _get_"#name";"                       \
+            #name"_get_return_from_func:;"
+
+        #define CALL_FUNC_SET(name)                     \
+            "sd    ra, "#name"_set_return_from_func;"   \
+            "call  _set_"#name";"                       \
+            #name"_set_return_from_func:;"
     #endif
 #else
     #error Unknown Architecture
@@ -67,6 +69,18 @@
 extern "C" void FSOGetterChecker();
 extern "C" void FSOSetterChecker();
 
+/* FSOGetter will translate:
+
+    void FSOGetter(`Propertyname`, const char *s) {
+===>
+    get`Propertyname`(args) {
+        adr    lr, `Propertyname`_get_return_from_func
+        call   _get_`Propertyname`
+        `Propertyname`_get_return_from_func:
+        FSOGetterChecker();
+    }
+    extern "C" void _get_`Propertyname`(args) {
+*/
 #define FSOGetter(fieldName,args...) FSO_MAKE_FUNC_GET_NAME(fieldName)(args) {  \
     __asm__ __volatile__(                                                       \
         CALL_FUNC_GET(fieldName)                                                \
