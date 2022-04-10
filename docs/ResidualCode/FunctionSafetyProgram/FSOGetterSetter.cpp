@@ -19,22 +19,22 @@
 
 //namespace como {
 
-extern "C" void FSOGetterChecker()
+extern "C" void FSOGetterChecker(char *s)
 {
-    puts("FSOGetterChecker");
+    printf("FSOGetterChecker %s\n", s);
 }
 
-extern "C" void FSOSetterChecker()
+extern "C" void FSOSetterChecker(char *s)
 {
-    puts("FSOSetterChecker");
+    printf("FSOSetterChecker %s\n", s);
 }
 
-void FSOGetter(PropertyName, const char *s)
+extern "C" void FSOGetter(PropertyName, char *s)
 {
     puts(s);
 }
 
-void FSOSetter(PropertyName, const char *s)
+extern "C" void FSOSetter(PropertyName, char *s)
 {
     puts(s);
 }
@@ -43,6 +43,6 @@ void FSOSetter(PropertyName, const char *s)
 
 int main()
 {
-    CallFSOGetter(PropertyName, "===test main CallFSOGetter====\n");
-    CallFSOSetter(PropertyName, "===test main CallFSOSetter====\n");
+    CallFSOGetter(PropertyName, (char*)"===test main CallFSOGetter====\n");
+    CallFSOSetter(PropertyName, (char*)"===test main CallFSOSetter====\n");
 }
