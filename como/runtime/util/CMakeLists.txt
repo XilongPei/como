@@ -24,6 +24,7 @@ include_directories(
     ${EXTERNAL_DIR}/EasyLogger/easylogger/inc
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/cityhash/export_como
+    ${EXTERNAL_DIR}/inih
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
@@ -44,6 +45,7 @@ set(SOURCES
     mutex.cpp
     ${EXTERNAL_DIR}/cityhash/export_como/cityhash.cc
     mistring.cpp
+    ${EXTERNAL_DIR}/inih/ini.c
 )
 
 add_library(util STATIC

@@ -29,6 +29,7 @@
 #include "comoapi.h"
 #include "comolog.h"
 #include "mistring.h"
+#include "ini.h"
 #include "ComoFunctionSafetyObject.h"
 
 using namespace std;
@@ -69,6 +70,14 @@ ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     : mIsValid(0)
 {}
 
+static int handler(void* user, const char* section, const char* name, const char* value)
+{
+    if (strcmp(section, "") == 0 && strcmp(name, "expires") == 0) {
+        (*(Long*)user) = atol(value);
+    }
+    return 1;
+}
+
 ECode ComoFunctionSafetyObject::AfterConstruction()
 {
     AutoPtr<IMetaCoclass> klass;
@@ -81,32 +90,8 @@ ECode ComoFunctionSafetyObject::AfterConstruction()
     }
     else {
         // parse funcSafetySetting
-        char *sfunc = strdup(funcSafetySetting.string());
-        if (nullptr == sfunc) {
+        if (ini_parse_string(funcSafetySetting.string(), handler, &mExpires) < 0) {
             mExpires = CFSO_ExpireVALID;
-            Logger::E("ComoFunctionSafetyObject", "strdup error");
-        }
-        else {
-            int seedsCapacity;
-            char **seeds = MiString::SeperateStr(sfunc, ';', nullptr, seedsCapacity);
-            if (nullptr == seeds) {
-                mExpires = CFSO_ExpireVALID;
-                free(sfunc);
-                Logger::E("ComoFunctionSafetyObject", "MiString::SeperateStr error");
-            }
-            else {
-                int num = 2;
-                char *words[2];
-                MiString::WordBreak(seeds[0], num, words, (char*)"=");
-                if (num < 2) {
-                    mExpires = CFSO_ExpireVALID;
-                }
-                else {
-                    mExpires = atol(seeds[1]);
-                    free(sfunc);
-                    free(seeds);
-                }
-            }
         }
     }
 
