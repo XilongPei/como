@@ -72,7 +72,7 @@ ComoFunctionSafetyObject::ComoFunctionSafetyObject()
 
 static int handler(void* user, const char* section, const char* name, const char* value)
 {
-    if (strcmp(section, "") == 0 && strcmp(name, "expires") == 0) {
+    if (/*strcmp(section, "") == 0 && */strcmp(name, "expires") == 0) {
         (*(Long*)user) = atol(value);
     }
     return 1;
