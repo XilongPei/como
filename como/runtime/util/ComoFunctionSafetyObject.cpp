@@ -182,7 +182,7 @@ ECode ComoFunctionSafetyObject::GetChecksum(
         /* [out] */ Long& currentChecksum)
 {
     lastChecksum = mChecksum;
-    currentChecksum = mChecksum = Object::GetCRC64(reinterpret_cast<Object*>(this));
+    currentChecksum = mChecksum = Object::GetCRC64((IInterface*)this);
     return NOERROR;
 }
 
