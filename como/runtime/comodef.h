@@ -199,7 +199,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(InterfaceName*)this); \
             if (s.IsEmpty())                               \
                 return nullptr;                            \
-            return (IComoFunctionSafetyObject*)(IInterface*)(InterfaceName*)this;       \
+            return (IComoFunctionSafetyObject*)this;       \
         }                                                  \
         return SuperclassName::Probe(iid);                 \
     }                                                      \
@@ -255,7 +255,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
@@ -319,7 +319,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
@@ -389,7 +389,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
@@ -465,7 +465,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
@@ -547,7 +547,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
@@ -635,7 +635,7 @@ inline int ArrayLength(const T (&)[N])
             String s = Object::GetFuncSafetySetting((IInterface*)(Interface1*)this); \
             if (s.IsEmpty())                                    \
                 return nullptr;                                 \
-            return (IComoFunctionSafetyObject*)(IInterface*)(Interface1*)this;       \
+            return (IComoFunctionSafetyObject*)this;            \
         }                                                       \
         return SuperclassName::Probe(iid);                      \
     }                                                           \
