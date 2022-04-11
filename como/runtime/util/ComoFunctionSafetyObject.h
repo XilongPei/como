@@ -41,18 +41,25 @@ public:
 
     ECode SetLastModifiedInfo();
 
-    /*
+    /**
      * default function for checking ComoFunctionSafetyObject
      */
     ECode IsValid(
             /* [out] */ Integer& isValid) override;
 
-    /*
+    /**
      * default function for setting property isValid of ComoFunctionSafetyObject
      * if parameter isValid is 0, means set Object valid
      */
     ECode InvalidObject(
             /* [out] */ Integer isValid) override;
+
+    /**
+     * Take out the last checksum and the current Object's checksum
+     */
+    ECode GetChecksum(
+            /* [out] */ Long& lastChecksum,
+            /* [out] */ Long& currentChecksum) override;
 private:
     Integer mIsValid;                   // value definition: 0:valid; others:invalid
     Long mChecksum;

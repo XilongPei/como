@@ -240,7 +240,7 @@ Long Object::GetCRC64(
 {
     Object* o = (Object*)IObject::Probe(obj);
     if (o == nullptr) {
-        return reinterpret_cast<uintptr_t>(IInterface::Probe(obj));
+        return 0L;
     }
     return GetCRC64(o);
 }

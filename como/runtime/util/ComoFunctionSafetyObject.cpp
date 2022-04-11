@@ -142,7 +142,7 @@ ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
     return NOERROR;
 }
 
-/*
+/**
  * default function for checking ComoFunctionSafetyObject
  */
 ECode ComoFunctionSafetyObject::IsValid(
@@ -162,7 +162,7 @@ ECode ComoFunctionSafetyObject::IsValid(
     return NOERROR;
 }
 
-/*
+/**
  * default function for setting property isValid of ComoFunctionSafetyObject
  * if parameter isValid is 0, means set Object valid
  */
@@ -173,6 +173,17 @@ ECode ComoFunctionSafetyObject::InvalidObject(
     return NOERROR;
 }
 
+/**
+ * Take out the last checksum and the current Object's checksum
+ */
+ECode ComoFunctionSafetyObject::GetChecksum(
+        /* [out] */ Long& lastChecksum,
+        /* [out] */ Long& currentChecksum)
+{
+    lastChecksum = mChecksum;
+    currentChecksum = mChecksum = Object::GetCRC64(reinterpret_cast<Object*>(this));
+    return NOERROR;
+}
 
 //
 // class CFSO_VECTOR, Class Function Safety Object management VECTOR
