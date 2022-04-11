@@ -43,7 +43,7 @@ namespace demo {
 ]
 coclass CFoo
 {
-    interface IComoFunctionSafetyObject;
+    //interface IComoFunctionSafetyObject;
     interface IFoo;
 }
 
@@ -59,7 +59,7 @@ coclass CFooBar
     Constructor(
         [in] Long data);
 
-    interface IComoFunctionSafetyObject;
+    //interface IComoFunctionSafetyObject;
     interface IFoo;
     interface IBar;
 }
