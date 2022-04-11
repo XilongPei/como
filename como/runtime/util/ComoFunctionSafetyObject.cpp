@@ -68,6 +68,7 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 //
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     : mIsValid(0)
+    , mChecksum(0)
 {}
 
 static int handler(void* user, const char* section, const char* name, const char* value)
