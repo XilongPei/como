@@ -32,4 +32,7 @@ add_subdirectory(reflection)
 add_subdirectory(rpc)
 add_subdirectory(ComoConfig)
 add_subdirectory(IDfromName)
-add_subdirectory(FunctionSafetyProgram)
+
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
+    add_subdirectory(FunctionSafetyProgram)
+endif()
