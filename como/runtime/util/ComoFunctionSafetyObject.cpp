@@ -182,6 +182,13 @@ ECode ComoFunctionSafetyObject::GetChecksum(
         /* [out] */ Long& currentChecksum)
 {
     lastChecksum = mChecksum;
+
+    // During CRC calculation, mCheckSum should be temporarily cleared to 0,
+    // because mCheckSum is also a part of the object, and CRC calculation result
+    // will be stored in mCheckSum, resulting in inconsistency between the object
+    // and before CRC calculation
+    mChecksum = 0L;
+
     currentChecksum = mChecksum = Object::GetCRC64((IInterface*)this);
     return NOERROR;
 }

@@ -236,13 +236,16 @@ Integer Object::GetHashCode(
 }
 
 Long Object::GetCRC64(
-    /* [in] */ IInterface* obj)
+    /* [in] */ IInterface* intf)
 {
-    Object* o = (Object*)IObject::Probe(obj);
-    if (o == nullptr) {
+    // Sometimes, for example, in function safety calculation, because the object
+    // in the object inherits ComoFunctionSafetyObject, Object* is not the header
+    // pointer of the whole object
+    Object* obj = (Object*)IObject::Probe(intf);
+    if (nullptr == obj) {
         return 0L;
     }
-    return GetCRC64(o);
+    return crc_64_ecma(reinterpret_cast<const unsigned char *>(intf), obj->mObjSize);
 }
 
 Long Object::GetCRC64(

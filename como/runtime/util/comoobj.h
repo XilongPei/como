@@ -90,7 +90,7 @@ public:
         /* [in] */ Object* obj);
 
     static Long GetCRC64(
-        /* [in] */ IInterface* obj);
+        /* [in] */ IInterface* intf);
 
     static Long GetCRC64(
         /* [in] */ Object* obj);
