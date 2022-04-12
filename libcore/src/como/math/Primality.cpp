@@ -76,6 +76,8 @@ ECode Primality::NextProbablePrime(
 
     AutoPtr<BigInt> startPoint = ni->Copy();
     AutoPtr<BigInt> probPrime = new BigInt();
+    if (nullptr == probPrime)
+        return E_OUT_OF_MEMORY_ERROR;
 
     // Fix startPoint to "next odd number":
     startPoint->AddPositiveInteger(BigInt::RemainderByPositiveInteger(ni, 2) + 1);

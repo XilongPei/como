@@ -111,6 +111,9 @@ ECode BigInteger::Constructor(
     /* [in] */ Long value)
 {
     AutoPtr<BigInt> bigInt = new BigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     bigInt->PutULongInt(value, (sign < 0));
     SetBigInt(bigInt);
     return NOERROR;
@@ -176,7 +179,11 @@ ECode BigInteger::Constructor(
                 candidate |= 1; // Any prime longer than 2 bits must have the bottom bit set.
             }
         } while (!IsSmallPrime(candidate));
+
         AutoPtr<BigInt> prime = new BigInt();
+        if (nullptr == prime)
+            return E_OUT_OF_MEMORY_ERROR;
+
         prime->PutULongInt(candidate, false);
         SetBigInt(prime);
     }
@@ -212,6 +219,9 @@ ECode BigInteger::Constructor(
     /* [in] */ const String& value)
 {
     AutoPtr<BigInt> bigInt = new BigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bigInt->PutDecString(value));
     SetBigInt(bigInt);
     return NOERROR;
@@ -227,12 +237,18 @@ ECode BigInteger::Constructor(
     }
     if (radix == 10) {
         AutoPtr<BigInt> bigInt = new BigInt();
+        if (nullptr == bigInt)
+            return E_OUT_OF_MEMORY_ERROR;
+
         FAIL_RETURN(bigInt->PutDecString(value));
         SetBigInt(bigInt);
         return NOERROR;
     }
     else if (radix == 16) {
         AutoPtr<BigInt> bigInt = new BigInt();
+        if (nullptr == bigInt)
+            return E_OUT_OF_MEMORY_ERROR;
+
         FAIL_RETURN(bigInt->PutHexString(value));
         SetBigInt(bigInt);
         return NOERROR;
@@ -272,6 +288,9 @@ ECode BigInteger::Constructor(
         }
     }
     AutoPtr<BigInt> bigInt = new BigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     bigInt->PutBigEndian(magnitude, signum < 0);
     SetBigInt(bigInt);
     return NOERROR;
@@ -285,6 +304,9 @@ ECode BigInteger::Constructor(
         return E_NUMBER_FORMAT_EXCEPTION;
     }
     AutoPtr<BigInt> bigInt = new BigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     bigInt->PutBigEndianTwosComplement(value);
     SetBigInt(bigInt);
     return NOERROR;
@@ -302,6 +324,9 @@ AutoPtr<BigInt> BigInteger::GetBigInt()
             return mBigInt;
         }
         AutoPtr<BigInt> bigInt = new BigInt();
+        if (nullptr == bigInt)
+            return nullptr;
+
         bigInt->PutLittleEndianIntegers(mDigits, (mSign < 0));
         SetBigInt(bigInt);
         return bigInt;
@@ -838,11 +863,31 @@ ECode BigInteger::DivideAndRemainder(
 
     AutoPtr<BigInt> divisorBigInt = From(divisor)->GetBigInt();
     AutoPtr<BigInt> quotient = new BigInt();
+    if (nullptr == quotient)
+        return E_OUT_OF_MEMORY_ERROR;
+
     AutoPtr<BigInt> remainder = new BigInt();
+    if (nullptr == remainder) {
+        delete quotient;
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     BigInt::Division(GetBigInt(), divisorBigInt, quotient, remainder);
     AutoPtr<IBigInteger> quotientBi, remainderBi;
-    CBigInteger::New(quotient, IID_IBigInteger, (IInterface**)&quotientBi);
-    CBigInteger::New(remainder, IID_IBigInteger, (IInterface**)&remainderBi);
+    ECode ec = CBigInteger::New(quotient, IID_IBigInteger, (IInterface**)&quotientBi);
+    if (FAILED(ec)) {
+        delete quotient;
+        delete remainder;
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    ec = CBigInteger::New(remainder, IID_IBigInteger, (IInterface**)&remainderBi);
+    if (FAILED(ec)) {
+        delete quotient;
+        delete remainder;
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     *result = Array<IBigInteger*>(2);
     result->Set(0, quotientBi);
     result->Set(1, remainderBi);
@@ -854,6 +899,9 @@ ECode BigInteger::Divide(
     /* [out] */ AutoPtr<IBigInteger>& result)
 {
     AutoPtr<BigInt> quotient = new BigInt();
+    if (nullptr == quotient)
+        return E_OUT_OF_MEMORY_ERROR;
+
     BigInt::Division(GetBigInt(), From(divisor)->GetBigInt(), quotient, nullptr);
     result = nullptr;
     return CBigInteger::New(quotient, IID_IBigInteger, (IInterface**)&result);
@@ -864,6 +912,9 @@ ECode BigInteger::Remainder(
     /* [out] */ AutoPtr<IBigInteger>& result)
 {
     AutoPtr<BigInt> remainder = new BigInt();
+    if (nullptr == remainder)
+        return E_OUT_OF_MEMORY_ERROR;
+
     BigInt::Division(GetBigInt(), From(divisor)->GetBigInt(), nullptr, remainder);
     result = nullptr;
     return CBigInteger::New(remainder, IID_IBigInteger, (IInterface**)&result);

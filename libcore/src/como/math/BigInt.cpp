@@ -64,6 +64,9 @@ void BigInt::MakeValid()
 AutoPtr<BigInt> BigInt::NewBigInt()
 {
     AutoPtr<BigInt> bi = new BigInt();
+    if (nullptr == bi)
+        return nullptr;
+
     bi->mBignum = static_cast<Long>(reinterpret_cast<uintptr_t>(BN_new()));
     return bi;
 }
@@ -590,6 +593,9 @@ AutoPtr<BigInt> BigInt::Exp(
 {
     // Sign of p is ignored!
     AutoPtr<BigInt> power = new BigInt();
+    if (nullptr == power)
+        return nullptr;
+
     power->PutLongInt(p);
     return BigExp(a, power);
 }

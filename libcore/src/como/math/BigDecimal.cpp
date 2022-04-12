@@ -415,9 +415,14 @@ ECode BigDecimal::Constructor(
         }
         else {
             AutoPtr<BigInt> bi = new BigInt();
+            if (nullptr == bi)
+                return E_OUT_OF_MEMORY_ERROR;
+
             bi->PutLongInt(mantissa);
             bi->Shift(-mScale);
-            CBigInteger::New(bi, IID_IBigInteger, (IInterface**)&mIntegerValue);
+            ECode ec = CBigInteger::New(bi, IID_IBigInteger, (IInterface**)&mIntegerValue);
+            if (FAILED(ec))
+                return E_OUT_OF_MEMORY_ERROR;
         }
         mScale = 0;
     }
