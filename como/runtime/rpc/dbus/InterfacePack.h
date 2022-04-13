@@ -91,11 +91,11 @@ public:
         /* [in] */ IInterfacePack* ipack);
 
 private:
-    String mDBusName;
+    String mDBusName;       // channel->mName, dbus_bus_get_unique_name(conn);
     CoclassID mCid;
     InterfaceID mIid;
     Boolean mIsParcelable { false };
-    String mServerName;
+    String mServerName;     // the same machine, ServerAddress is nullptr
 };
 
 InterfacePack* InterfacePack::From(

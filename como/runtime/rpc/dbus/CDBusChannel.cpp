@@ -545,7 +545,6 @@ ECode CDBusChannel::GetComponentMetadata(
     /* [in] */ const CoclassID& cid,
     /* [out, callee] */ Array<Byte>& metadata)
 {
-    ECode ec = NOERROR;
     DBusError err;
     DBusConnection* conn = nullptr;
     DBusMessage* msg = nullptr;
@@ -555,7 +554,10 @@ ECode CDBusChannel::GetComponentMetadata(
     Long size;
 
     AutoPtr<IParcel> parcel;
-    CoCreateParcel(RPCType::Local, parcel);
+    ECode ec = CoCreateParcel(RPCType::Local, parcel);
+    if (FAILED(ec))
+        goto Exit;
+
     parcel->WriteCoclassID(cid);
 
     dbus_error_init(&err);

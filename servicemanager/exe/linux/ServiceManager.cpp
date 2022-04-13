@@ -83,8 +83,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
     /* [in] */ DBusMessage* msg,
     /* [in] */ void* arg)
 {
-    if (dbus_message_is_method_call(msg,
-            INTERFACE_PATH, "AddService")) {
+    if (dbus_message_is_method_call(msg, INTERFACE_PATH, "AddService")) {
         DBusMessageIter args;
         DBusMessageIter subArg;
         void* data = nullptr;
@@ -97,12 +96,12 @@ DBusHandlerResult ServiceManager::HandleMessage(
         Logger_D("ServiceManager", "ServiceManager::HandleMessage AddService.");
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger_E("ServiceManager", "\"AddService\" message has no arguments.");
+            Logger_E("ServiceManager", "AddService message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("ServiceManager", "\"AddService\" message has no string arguments.");
+            Logger_E("ServiceManager", "AddService message has no string arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
@@ -110,23 +109,31 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_get_basic(&args, &str);
         dbus_message_iter_next(&args);
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("ServiceManager", "\"AddService\" message has no array arguments.");
+            Logger_E("ServiceManager", "AddService message has no array arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
         }
         dbus_message_iter_recurse(&args, &subArg);
         dbus_message_iter_get_fixed_array(&subArg, &data, (int*)&size);
 
-        CoCreateParcel(RPCType::Local, parcel);
-        parcel->SetData(reinterpret_cast<HANDLE>(data), size);
-        parcel->ReadString(ipack.mDBusName);
-        parcel->ReadCoclassID(ipack.mCid);
-        parcel->ReadInterfaceID(ipack.mIid);
-        parcel->ReadBoolean(ipack.mIsParcelable);
-        ec = ServiceManager::GetInstance()->AddService(str, ipack);
+        ec = CoCreateParcel(RPCType::Local, parcel);
+        if (SUCCEEDED(ec)) {
+            parcel->SetData(reinterpret_cast<HANDLE>(data), size);
+            parcel->ReadString(ipack.mDBusName);
+            parcel->ReadCoclassID(ipack.mCid);
+            parcel->ReadInterfaceID(ipack.mIid);
+            parcel->ReadBoolean(ipack.mIsParcelable);
+            ec = ServiceManager::GetInstance()->AddService(str, ipack);
+        }
 
     AddServiceExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr == reply) {
+            Logger_E("ServiceManager::HandleMessage",
+                               "dbus_message_new_method_return return nullptr");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
@@ -136,21 +143,23 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_connection_flush(conn);
         dbus_message_unref(reply);
     }
-    else if (dbus_message_is_method_call(msg,
-            INTERFACE_PATH, "GetService")) {
+    else if (dbus_message_is_method_call(msg, INTERFACE_PATH, "GetService")) {
         DBusMessageIter args;
         DBusMessageIter subArg;
         const char* str;
         InterfacePack* ipack = nullptr;
         ECode ec = NOERROR;
+        HANDLE resData = reinterpret_cast<HANDLE>("");
+        Long resSize = 0;
+        AutoPtr<IParcel> parcel;
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger_E("ServiceManager", "\"GetService\" message has no arguments.");
+            Logger_E("ServiceManager", "GetService message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto GetServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("ServiceManager", "\"GetService\" message has no string arguments.");
+            Logger_E("ServiceManager", "GetService message has no string arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto GetServiceExit;
         }
@@ -161,14 +170,26 @@ DBusHandlerResult ServiceManager::HandleMessage(
 
     GetServiceExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr == reply) {
+            Logger_E("ServiceManager::HandleMessage",
+                               "dbus_message_new_method_return return nullptr");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
+
+        if (FAILED(ec))
+            goto GetServiceExit_2;
+
         if (ipack != nullptr) {
-            AutoPtr<IParcel> parcel;
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
             if (ipack->mServerName.IsEmpty()) {
 #endif
-                CoCreateParcel(RPCType::Local, parcel);
+                ec = CoCreateParcel(RPCType::Local, parcel);
+                if (FAILED(ec))
+                    goto GetServiceExit_2;
+
                 parcel->WriteString(ipack->mDBusName);
                 parcel->WriteCoclassID(ipack->mCid);
                 parcel->WriteInterfaceID(ipack->mIid);
@@ -178,21 +199,24 @@ DBusHandlerResult ServiceManager::HandleMessage(
             else {
                 // Keep the same order with InterfacePack::ReadFromParcel() in
                 // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
-                CoCreateParcel(RPCType::Remote, parcel);
+                ec = CoCreateParcel(RPCType::Remote, parcel);
+                if (FAILED(ec))
+                    goto GetServiceExit_2;
+
                 parcel->WriteCoclassID(ipack->mCid);
                 parcel->WriteInterfaceID(ipack->mIid);
                 parcel->WriteBoolean(ipack->mIsParcelable);
                 parcel->WriteString(ipack->mServerName);
             }
 #endif
-            HANDLE resData = 0;
-            Long resSize = 0;
             parcel->GetData(resData);
             parcel->GetDataSize(resSize);
+
+    GetServiceExit_2:
             dbus_message_iter_open_container(&args,
-                    DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+                            DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
             dbus_message_iter_append_fixed_array(&subArg,
-                    DBUS_TYPE_BYTE, &resData, resSize);
+                                             DBUS_TYPE_BYTE, &resData, resSize);
             dbus_message_iter_close_container(&args, &subArg);
         }
 
@@ -203,19 +227,18 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_connection_flush(conn);
         dbus_message_unref(reply);
     }
-    else if (dbus_message_is_method_call(msg,
-            INTERFACE_PATH, "RemoveService")) {
+    else if (dbus_message_is_method_call(msg, INTERFACE_PATH, "RemoveService")) {
         DBusMessageIter args;
         DBusMessageIter subArg;
         const char* str;
         ECode ec = NOERROR;
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger_E("ServiceManager", "\"RemoveService\" message has no arguments.");
+            Logger_E("ServiceManager", "RemoveService message has no arguments.");
             goto RemoveServiceExit;
         }
         if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("ServiceManager", "\"RemoveService\" message has no string arguments.");
+            Logger_E("ServiceManager", "RemoveService message has no string arguments.");
             goto RemoveServiceExit;
         }
 
@@ -225,6 +248,12 @@ DBusHandlerResult ServiceManager::HandleMessage(
 
     RemoveServiceExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr == reply) {
+            Logger_E("ServiceManager::HandleMessage",
+                               "dbus_message_new_method_return return nullptr");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
@@ -238,7 +267,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         const char* name = dbus_message_get_member(msg);
         if (name != nullptr) {
             Logger_D("servicemanager",
-                    "The message which name is \"%s\" does not be handled.", name);
+                  "The message which name is \"%s\" does not be handled.", name);
         }
     }
 

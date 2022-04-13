@@ -88,7 +88,7 @@ private:
     CoclassID mCid;
     InterfaceID mIid;
     Boolean mIsParcelable { false };
-    String mServerName;
+    String mServerName;     // the same machine, ServerAddress is nullptr
 };
 
 CZMQInterfacePack* CZMQInterfacePack::From(
