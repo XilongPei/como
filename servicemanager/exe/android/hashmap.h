@@ -37,7 +37,7 @@ static int get_lower_bound(const int* first, const int* last, int n)
     for (int i = 0; first + i != last; i++) {
         int l = *(first + i);
         int r = *(first + i + 1);
-        if (l < n && n < r) {
+        if (l <= n && n < r) {
             return (n - l) < (r - n) ? l : r;
         }
     }
@@ -49,7 +49,7 @@ inline int get_next_prime(int n)
     return get_lower_bound(&prime_list[0], &prime_list[10], n);
 }
 
-template<class Key, class Val>
+template<typename Key, typename Val>
 class HashMap
 {
 private:
@@ -102,7 +102,7 @@ public:
         free(mBuckets);
     }
 
-    void Put(
+    int Put(
         /* [in] */ const Key& key,
         /* [in] */ Val value)
     {
@@ -111,22 +111,26 @@ public:
         AssignFunc<Val> assignValF;
 
         int hash = HashKey(key);
-        if (hash == -1) return;
+        if (hash == -1)
+            return -1;
 
-        int index = hash % mBucketSize;
+        int index = (unsigned int)hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
+            if (nullptr == b)
+                return -2;
+
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
             mBuckets[index] = b;
-            return;
+            return 0;
         }
         else {
             Bucket* prev = mBuckets[index];
             while (prev != nullptr) {
                 if (!compareF(prev->mKey, key)) {
                     assignValF(&prev->mValue, value, this);
-                    return;
+                    return 0;
                 }
                 else if (prev->mNext == nullptr) {
                     break;
@@ -134,10 +138,13 @@ public:
                 prev = prev->mNext;
             }
             Bucket* b = new Bucket();
+            if (nullptr == b)
+                return -2;
+
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
             prev->mNext = b;
-            return;
+            return 0;
         }
     }
 
@@ -149,7 +156,7 @@ public:
         int hash = HashKey(key);
         if (hash == -1) return false;
 
-        int index = hash % mBucketSize;
+        int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (!compareF(curr->mKey, key)) return true;
@@ -167,7 +174,7 @@ public:
         int hash = HashKey(key);
         if (hash == -1) return Val(0);
 
-        int index = hash % mBucketSize;
+        int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (!compareF(curr->mKey, key)) return curr->mValue;
@@ -185,7 +192,7 @@ public:
         int hash = HashKey(key);
         if (hash == -1) return;
 
-        int index = hash % mBucketSize;
+        int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {

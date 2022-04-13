@@ -34,6 +34,9 @@ ECode ServiceManager::AddService(
     }
 
     InterfacePack* ipack = new InterfacePack();
+    if (nullptr == ipack)
+        return E_OUT_OF_MEMORY_ERROR;
+
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;
@@ -41,7 +44,11 @@ ECode ServiceManager::AddService(
     ipack->mIsParcelable = object.mIsParcelable;
 
     Mutex::AutoLock lock(mServicesLock);
-    mServices.Put(name, ipack);
+    if (mServices.Put(name, ipack) != 0) {
+        delete ipack;
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     return NOERROR;
 }
 
