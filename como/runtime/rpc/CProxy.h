@@ -319,6 +319,9 @@ public:
 
     COMO_INTERFACE_DECL();
 
+    void OnLastStrongRef(
+        /* [in] */ const void* id) override;
+
     ECode GetTargetCoclass(
         /* [out] */ AutoPtr<IMetaCoclass>& target) override;
 
@@ -352,6 +355,9 @@ public:
         /* [in] */ IClassLoader* loader,
         /* [out] */ AutoPtr<IProxy>& proxy,
         /* [in] */ const String& serverName);
+
+    // I don't want all members to be encapsulated
+    AutoPtr<IInterfacePack> mIpack;
 
 private:
     friend class InterfaceProxy;

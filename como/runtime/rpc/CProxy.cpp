@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <ThreadPoolChannelInvoke.h>
 #endif
+#include "registry.h"
 
 namespace como {
 
@@ -1942,17 +1943,30 @@ ECode CProxy::CreateObjectEx(
     }
 
     AutoPtr<CProxy> proxyObj = new CProxy();
+    if (nullptr == proxyObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     mc->GetCoclassID(proxyObj->mCid);
     proxyObj->mTargetMetadata = mc;
     proxyObj->mChannel = channel;
+    proxyObj->mIpack = nullptr;
 
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
     Array<IMetaInterface*> interfaces(interfaceNumber);
+    if (interfaces.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     mc->GetAllInterfaces(interfaces);
     proxyObj->mInterfaces = Array<InterfaceProxy*>(interfaceNumber);
+    if (proxyObj->mInterfaces.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     for (Integer i = 0; i < interfaceNumber; i++) {
         AutoPtr<InterfaceProxy> iproxy = new InterfaceProxy();
+        if (nullptr == iproxy)
+            return E_OUT_OF_MEMORY_ERROR;
+
         iproxy->mIndex = i;
         iproxy->mOwner = proxyObj;
         iproxy->mTargetMetadata = interfaces[i];
@@ -1965,6 +1979,16 @@ ECode CProxy::CreateObjectEx(
 
     proxy = proxyObj;
     return NOERROR;
+}
+
+void CProxy::OnLastStrongRef(
+    /* [in] */ const void* id)
+{
+    if (nullptr == mIpack)
+        return;
+
+    UnregisterImportObject(RPCType::Local, mIpack);
+    Object::OnLastStrongRef(id);
 }
 
 } // namespace como

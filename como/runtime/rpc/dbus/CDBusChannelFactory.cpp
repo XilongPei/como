@@ -171,6 +171,8 @@ ECode CDBusChannelFactory::UnmarshalInterface(
             return ec;
         }
 
+        ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
+
         RegisterImportObject(mType, ipack, IObject::Probe(proxy));
 
         InterfaceID iid;
