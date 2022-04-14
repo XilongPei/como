@@ -751,7 +751,7 @@ ECode CDBusParcel::ReadInterface(
         ECode ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
         if (FAILED(ec)) {
             Logger::E("CDBusParcel::ReadInterface",
-              "Unmarshal the interface in ReadInterface failed. ECode: %x", ec);
+              "Unmarshal the interface in ReadInterface failed. ECode: 0x%X", ec);
             return ec;
         }
 

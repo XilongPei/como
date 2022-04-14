@@ -536,21 +536,21 @@ ECode InterfaceStub::Invoke(
     AutoPtr<IMetaMethod> mm;
     ECode ec = mTargetMetadata->GetMethod(methodIndex, mm);
     if (FAILED(ec)) {
-        Logger::E("CStub", "Invoke GetMethod failed with ec is 0x%x.", ec);
+        Logger::E("CStub", "Invoke GetMethod failed with ec is 0x%X.", ec);
         return ec;
     }
 
     AutoPtr<IArgumentList> argList;
     ec = UnmarshalArguments(mm, argParcel, argList);
     if (FAILED(ec)) {
-        Logger::E("CStub", "Invoke UnmarshalArguments failed with ec is 0x%x.", ec);
+        Logger::E("CStub", "Invoke UnmarshalArguments failed with ec is 0x%X.", ec);
         return ec;
     }
 
     ECode ret = mm->Invoke(mObject, argList);
     ec = MarshalResults(mm, argList, resParcel);
     if (FAILED(ec)) {
-        Logger::E("CStub", "MarshalResults failed with ec is 0x%x.", ec);
+        Logger::E("CStub", "MarshalResults failed with ec is 0x%X.", ec);
     }
 
     return ret;
@@ -619,7 +619,7 @@ ECode CStub::Invoke(
     Integer magic;
     argParcel->ReadInteger(magic);
     if (magic != RPC_MAGIC_NUMBER) {
-        Logger::E("CStub", "Magic number 0x%x is invalid.", magic);
+        Logger::E("CStub", "Magic number 0x%X is invalid.", magic);
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -689,7 +689,7 @@ ECode CStub::CreateObject(
     Array<IMetaInterface*> interfaces(interfaceNumber);
     ECode ec = mc->GetAllInterfaces(interfaces);
     if (FAILED(ec)) {
-        Logger::E("CStub", "GetAllInterfaces failed with ec is 0x%x", ec);
+        Logger::E("CStub", "GetAllInterfaces failed with ec is 0x%X", ec);
         return ec;
     }
 
@@ -727,7 +727,7 @@ ECode CStub::CreateObject(
 
     ec = channel->StartListening(stubObj);
     if (FAILED(ec)) {
-        Logger::E("CStub", "Channel start listening failed with ec is 0x%x", ec);
+        Logger::E("CStub", "Channel start listening failed with ec is 0x%X", ec);
         return ec;
     }
 

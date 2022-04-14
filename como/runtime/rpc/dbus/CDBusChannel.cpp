@@ -501,7 +501,7 @@ ECode CDBusChannel::IsPeerAlive(
     }
     else {
         if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
         }
     }
 
@@ -639,7 +639,7 @@ ECode CDBusChannel::GetComponentMetadata(
     }
     else {
         if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
         }
     }
 
@@ -756,7 +756,7 @@ ECode CDBusChannel::Invoke(
     }
     else {
         if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
         }
     }
 

@@ -140,7 +140,7 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
             Logger::E("CDBusChannelFactory::UnmarshalInterface",
-                               "CoCreateObjectInstance failed. ECode: %x", ec);
+                               "CoCreateObjectInstance failed. ECode: 0x%X", ec);
             return ec;
         }
     }
@@ -168,7 +168,7 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
             Logger::E("CDBusChannelFactory::UnmarshalInterface",
-                                         "CoCreateProxy failed. ECode: %x", ec);
+                                         "CoCreateProxy failed. ECode: 0x%X", ec);
             object = nullptr;
             return ec;
         }

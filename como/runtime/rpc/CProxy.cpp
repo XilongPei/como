@@ -1793,7 +1793,7 @@ ECode InterfaceProxy::ProxyEntry(
 
 ProxyExit:
     if (DEBUG) {
-        Logger::D("CProxy", "Exit ProxyEntry with ec(0x%x)", ec);
+        Logger::D("CProxy", "Exit ProxyEntry with ec(0x%X)", ec);
     }
 
     return ec;
@@ -1934,20 +1934,20 @@ ECode CProxy::CreateObjectEx(
         Array<Byte> metadata;
         ec = channel->GetComponentMetadata(cid, metadata);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "GetComponentMetadata failed. ECode: %x", ec);
+            Logger::E("CProxy", "GetComponentMetadata failed. ECode: 0x%X", ec);
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
 
         AutoPtr<IMetaComponent> component;
         ec = loader->LoadMetadata(metadata, component);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "LoadMetadata failed. ECode: %x", ec);
+            Logger::E("CProxy", "LoadMetadata failed. ECode: 0x%X", ec);
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
 
         ec = loader->LoadCoclass(cid, mc);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "Get IMetaCoclass failed. ECode: %x", ec);
+            Logger::E("CProxy", "Get IMetaCoclass failed. ECode: 0x%X", ec);
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
     }

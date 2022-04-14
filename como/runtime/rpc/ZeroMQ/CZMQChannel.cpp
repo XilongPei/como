@@ -214,7 +214,7 @@ ECode CZMQChannel::Invoke(
     }
     else {
         if (DEBUG) {
-            Logger::D("CZMQChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CZMQChannel", "Remote call failed with ec = 0x%X.", ec);
         }
     }
 

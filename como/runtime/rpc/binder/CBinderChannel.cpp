@@ -290,7 +290,7 @@ ECode CBinderChannel::GetComponentMetadata(
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
         if (DEBUG) {
-            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
         }
         return ec;
     }
@@ -328,7 +328,7 @@ ECode CBinderChannel::Invoke(
     resParcel->ReadInteger(ec);
     if (FAILED(ec)) {
         if (DEBUG) {
-            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%x.", ec);
+            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
         }
         return ec;
     }

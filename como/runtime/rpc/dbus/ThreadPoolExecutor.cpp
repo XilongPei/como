@@ -117,7 +117,7 @@ void *ThreadPool::threadFunc(void *threadData)
 
             pid = getpid();
             tid = pthread_self();
-            Logger::D("ThreadPool", "pid:%u tid:%u (0x%x) mWorkerList.GetSize()=%d",
+            Logger::D("ThreadPool", "pid:%u tid:%u (0x%X) mWorkerList.GetSize()=%d",
                       (unsigned int)pid, (unsigned int)tid, (unsigned int)tid, i);
         }
 #endif
