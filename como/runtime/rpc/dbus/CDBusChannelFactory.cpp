@@ -139,7 +139,8 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ipack->GetInterfaceID(iid);
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
-            Logger::E("CDBusChannelFactory", "Create the object in ReadInterface failed.");
+            Logger::E("CDBusChannelFactory::UnmarshalInterface",
+                               "CoCreateObjectInstance failed. ECode: %x", ec);
             return ec;
         }
     }
@@ -166,7 +167,8 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         AutoPtr<IProxy> proxy;
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
-            Logger::E("CDBusChannelFactory", "Unmarshal the interface in ReadInterface failed.");
+            Logger::E("CDBusChannelFactory::UnmarshalInterface",
+                                         "CoCreateProxy failed. ECode: %x", ec);
             object = nullptr;
             return ec;
         }

@@ -1924,20 +1924,30 @@ ECode CProxy::CreateObjectEx(
 {
     proxy = nullptr;
 
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
     AutoPtr<IMetaCoclass> mc;
-    loader->LoadCoclass(cid, mc);
-    if (mc == nullptr) {
+    ECode ec = loader->LoadCoclass(cid, mc);
+    if (FAILED(ec)) {
         Array<Byte> metadata;
-        channel->GetComponentMetadata(cid, metadata);
+        ec = channel->GetComponentMetadata(cid, metadata);
+        if (FAILED(ec)) {
+            Logger::E("CProxy", "GetComponentMetadata failed. ECode: %x", ec);
+            return E_CLASS_NOT_FOUND_EXCEPTION;
+        }
+
         AutoPtr<IMetaComponent> component;
-        loader->LoadMetadata(metadata, component);
-        loader->LoadCoclass(cid, mc);
-        if (mc == nullptr) {
-            Logger::E("CProxy", "Get IMetaCoclass failed.");
+        ec = loader->LoadMetadata(metadata, component);
+        if (FAILED(ec)) {
+            Logger::E("CProxy", "LoadMetadata failed. ECode: %x", ec);
+            return E_CLASS_NOT_FOUND_EXCEPTION;
+        }
+
+        ec = loader->LoadCoclass(cid, mc);
+        if (FAILED(ec)) {
+            Logger::E("CProxy", "Get IMetaCoclass failed. ECode: %x", ec);
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
     }
