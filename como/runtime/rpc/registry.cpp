@@ -214,4 +214,58 @@ ECode FindImportObject(
     return E_NOT_FOUND_EXCEPTION;
 }
 
+static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub)
+{
+    AutoPtr<IMetaCoclass> klass;
+    obj->GetCoclass(klass);
+    String name, ns;
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    str += ("Namespace=" + ns + ";Name=" + name);
+}
+
+static void ImportRegistryWalker(String& str, IInterfacePack* intfPack, IObject* obj)
+{
+    AutoPtr<IMetaCoclass> klass;
+    obj->GetCoclass(klass);
+    String name, ns;
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    str += ("Namespace=" + ns + ";Name=" + name);
+
+    InterfaceID iid;
+    String serverName;
+    intfPack->GetInterfaceID(iid);
+    intfPack->GetServerName(serverName);
+    str += (";InterfaceID=" + DumpUUID(iid.mUuid) + ";ServerName=" + serverName);
+}
+
+ECode WalkExportObject(
+    /* [in] */ RPCType type,
+    /* [out] */ String& strBuffer)
+{
+    HashMap<IObject*, IStub*>& registry = (type == RPCType::Local) ?
+                                   sLocalExportRegistry : sRemoteExportRegistry;
+    Mutex& registryLock = (type == RPCType::Local) ?
+                           sLocalExportRegistryLock : sRemoteExportRegistryLock;
+
+    Mutex::AutoLock lock(registryLock);
+    registry.GetValues(strBuffer, ExportRegistryWalker);
+    return NOERROR;
+}
+
+ECode WalkImportObject(
+    /* [in] */ RPCType type,
+    /* [out] */ String& strBuffer)
+{
+    HashMap<IInterfacePack*, IObject*>& registry = (type == RPCType::Local) ?
+                                   sLocalImportRegistry : sRemoteImportRegistry;
+    Mutex& registryLock = (type == RPCType::Local) ?
+                           sLocalImportRegistryLock : sRemoteImportRegistryLock;
+
+    Mutex::AutoLock lock(registryLock);
+    registry.GetValues(strBuffer, ImportRegistryWalker);
+    return NOERROR;
+}
+
 } // namespace como

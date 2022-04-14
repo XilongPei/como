@@ -31,8 +31,10 @@ static const int prime_list[11] =
 
 static int get_lower_bound(const int* first, const int* last, int n)
 {
-    if (n <= *first) return *first;
-    if (n >= *last) return *last;
+    if (n <= *first)
+        return *first;
+    if (n >= *last)
+        return *last;
     for (int i = 0; first + i != last; i++) {
         int l = *(first + i);
         int r = *(first + i + 1);
@@ -79,18 +81,24 @@ private:
     };
 
 public:
+
+    // Walker for struct Bucket
+    using HashMapWalker = void(*)(String&,Key,Val);
+
     HashMap(
         /* [in] */ int size = 50)
         : mCount(0)
     {
         mBucketSize = get_next_prime(size);
         mBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
+        if (nullptr == mBuckets)
+            mBucketSize = 0;
         mThreshold = mBucketSize * LOAD_FACTOR;
     }
 
     ~HashMap()
     {
-        for (int i = 0; i < mBucketSize; i++) {
+        for (int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -164,7 +172,8 @@ public:
         CompareFunc<Key> compareF;
 
         int hash = HashKey(key);
-        if (hash == -1) return false;
+        if (hash == -1)
+            return false;
 
         int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
@@ -182,12 +191,14 @@ public:
         CompareFunc<Key> compareF;
 
         int hash = HashKey(key);
-        if (hash == -1) return Val(0);
+        if (hash == -1)
+            return Val(0);
 
         int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) return curr->mValue;
+            if (curr->mHash == hash && !compareF(curr->mKey, key))
+                return curr->mValue;
             curr = curr->mNext;
         }
 
@@ -200,7 +211,8 @@ public:
         CompareFunc<Key> compareF;
 
         int hash = HashKey(key);
-        if (hash == -1) return;
+        if (hash == -1)
+            return;
 
         int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
@@ -252,9 +264,12 @@ public:
         }
 
         Array<Val> values(N);
+        if (values.IsNull())
+            return values;
+
         if (N > 0) {
             Long idx = 0;
-            for (int i = 0; i < mBucketSize; i++) {
+            for (int i = 0;  i < mBucketSize;  i++) {
                 if (mBuckets[i] != nullptr) {
                     Bucket* curr = mBuckets[i];
                     while (curr != nullptr) {
@@ -266,6 +281,19 @@ public:
             }
         }
         return values;
+    }
+
+    void GetValues(String& str, HashMapWalker walker)
+    {
+        for (int i = 0;  i < mBucketSize;  i++) {
+            if (mBuckets[i] != nullptr) {
+                Bucket* curr = mBuckets[i];
+                while (curr != nullptr) {
+                    walker(str, curr->mKey, curr->mValue);
+                    curr = curr->mNext;
+                }
+            }
+        }
     }
 
 private:

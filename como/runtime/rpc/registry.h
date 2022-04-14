@@ -54,6 +54,14 @@ extern ECode FindImportObject(
     /* [in] */ IInterfacePack* ipack,
     /* [out] */ AutoPtr<IObject>& object);
 
+extern ECode WalkExportObject(
+    /* [in] */ RPCType type,
+    /* [out] */ String& strBuffer);
+
+extern ECode WalkImportObject(
+    /* [in] */ RPCType type,
+    /* [out] */ String& strBuffer);
+
 } // namespace como
 
 #endif // __COMO_REGISTRY_H__

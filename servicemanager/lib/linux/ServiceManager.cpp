@@ -43,14 +43,19 @@ ECode ServiceManager::AddService(
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Local, ipack);
     if (FAILED(ec)) {
-        Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
-                name.string());
+        Logger_E("ServiceManager",
+            "Marshal the interface which named \"%s\" failed.",  name.string());
         return ec;
     }
     ipack->SetServerName(String(""));
 
     AutoPtr<IParcel> parcel;
-    CoCreateParcel(RPCType::Local, parcel);
+    ec = CoCreateParcel(RPCType::Local, parcel);
+    if (FAILED(ec)) {
+        Logger_E("ServiceManager", "CoCreateParcel fail, ECode is %d", ec);
+        return ec;
+    }
+
     IParcelable::Probe(ipack)->WriteToParcel(parcel);
     HANDLE buffer;
     parcel->GetData(buffer);
@@ -68,15 +73,14 @@ ECode ServiceManager::AddService(
 
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger_E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+        Logger_E("ServiceManager",
+                 "Connect to bus daemon failed, error is \"%s\".", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(
-            DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
-            "AddService");
+    msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
+                                                                  "AddService");
     if (msg == nullptr) {
         Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
@@ -87,9 +91,9 @@ ECode ServiceManager::AddService(
     str = name.string();
     dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &str);
     dbus_message_iter_open_container(&args,
-            DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+                            DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
     dbus_message_iter_append_fixed_array(&subArg,
-            DBUS_TYPE_BYTE, (void*)&buffer, size);
+                                          DBUS_TYPE_BYTE, (void*)&buffer, size);
     dbus_message_iter_close_container(&args, &subArg);
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
@@ -235,8 +239,8 @@ ECode ServiceManager::GetService(
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(
-            DBUS_NAME, OBJECT_PATH, INTERFACE_PATH, "GetService");
+    msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
+                                                                  "GetService");
     if (msg == nullptr) {
         Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
@@ -283,8 +287,7 @@ ECode ServiceManager::GetService(
         void* replyData = nullptr;
         Integer replySize;
         dbus_message_iter_recurse(&args, &subArg);
-        dbus_message_iter_get_fixed_array(&subArg,
-                &replyData, &replySize);
+        dbus_message_iter_get_fixed_array(&subArg, &replyData, &replySize);
         if (replyData != nullptr) {
             AutoPtr<IParcel> parcel;
             CoCreateParcel(RPCType::Local, parcel);
@@ -350,8 +353,8 @@ ECode ServiceManager::RemoveService(
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(
-            DBUS_NAME, OBJECT_PATH, INTERFACE_PATH, "RemoveService");
+    msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
+                                                                "RemoveService");
     if (msg == nullptr) {
         Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
