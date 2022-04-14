@@ -14,45 +14,20 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __COMO_HASHMAP_H__
-#define __COMO_HASHMAP_H__
+#ifndef __COMO_HASHMAP_CACHE_H__
+#define __COMO_HASHMAP_CACHE_H__
 
-#include "type/comoarray.h"
 #include <cstdlib>
 #include <cstring>
 #include <assert.h>
+#include "ComoConfig.h"
+#include "type/comoarray.h"
+#include "hashmap.h"
 
 namespace como {
 
-static const int prime_list[11] =
-{
-    5ul,    11ul,   23ul,   53ul,   97ul,   193ul,
-    389ul,  769ul,  1543ul, 3079ul, 6151ul
-};
-
-static int get_lower_bound(const int* first, const int* last, int n)
-{
-    if (n <= *first)
-        return *first;
-    if (n >= *last)
-        return *last;
-    for (int i = 0; first + i != last; i++) {
-        int l = *(first + i);
-        int r = *(first + i + 1);
-        if (l <= n && n < r) {
-            return (n - l) < (r - n) ? l : r;
-        }
-    }
-    return *last;
-}
-
-inline int get_next_prime(int n)
-{
-    return get_lower_bound(&prime_list[0], &prime_list[10], n);
-}
-
 template<typename Key, typename Val>
-class HashMap
+class HashMapCache
 {
 private:
     struct Bucket
@@ -78,6 +53,8 @@ private:
         int mHash;
         Key mKey;
         Val mValue;
+        struct timespec lastAccessTime;
+
         struct Bucket* mNext;
     };
 
@@ -86,7 +63,7 @@ public:
     // Walker for struct Bucket
     using HashMapWalker = void(*)(String&,Key,Val);
 
-    HashMap(
+    HashMapCache(
         /* [in] */ int size = 50)
         : mCount(0)
     {
@@ -95,9 +72,10 @@ public:
         if (nullptr == mBuckets)
             mBucketSize = 0;
         mThreshold = mBucketSize * LOAD_FACTOR;
+        clock_gettime(CLOCK_REALTIME, &mLastCheanTime);
     }
 
-    ~HashMap()
+    ~HashMapCache()
     {
         for (int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
@@ -140,6 +118,7 @@ public:
             assignValF(&b->mValue, value, this);
             mBuckets[index] = b;
             mCount++;
+            clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));
             return 0;
         }
         else {
@@ -163,6 +142,7 @@ public:
             assignValF(&b->mValue, value, this);
             prev->mNext = b;
             mCount++;
+            clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));
             return 0;
         }
     }
@@ -179,7 +159,10 @@ public:
         int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) return true;
+            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+                clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
+                return true;
+            }
             curr = curr->mNext;
         }
 
@@ -198,8 +181,10 @@ public:
         int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key))
+            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+                clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
                 return curr->mValue;
+            }
             curr = curr->mNext;
         }
 
@@ -226,8 +211,7 @@ public:
                 else {
                     prev->mNext = curr->mNext;
                 }
-                delete curr;
-                mCount--;
+                curr->lastAccessTime.tv_sec = 0;
                 return;
             }
             prev = curr;
@@ -305,6 +289,33 @@ public:
         return mCount;
     }
 
+    void CleanUpExpiredData()
+    {
+        struct timespec currentTime;
+        clock_gettime(CLOCK_REALTIME, &currentTime);
+
+        if ((currentTime.tv_sec - mLastCheanTime.tv_sec) < CHECK_EXPIRES_PERIOD)
+            return;
+
+        mLastCheanTime = currentTime;
+
+        for (int i = 0;  i < mBucketSize;  i++) {
+            if (mBuckets[i] != nullptr) {
+                Bucket* curr = mBuckets[i];
+                while (curr != nullptr) {
+                    if ((currentTime.tv_sec - curr->lastAccessTime.tv_sec) >
+                                                               TIMEOUT_BUCKET) {
+                        Bucket* next = curr->mNext;
+                        delete curr;
+                        mCount--;
+                        curr = next;
+                    }
+                    curr = curr->mNext;
+                }
+            }
+        }
+    }
+
 private:
     int HashKey(
         /* [in] */ const Key& key)
@@ -364,12 +375,16 @@ private:
 private:
     static constexpr float LOAD_FACTOR = 0.75;
     static constexpr int MAX_BUCKET_SIZE = INT32_MAX - 8;
+    static constexpr int CHECK_EXPIRES_PERIOD = 300;
+    static constexpr int TIMEOUT_BUCKET = 600;
+
     int mThreshold;
     int mCount;
     int mBucketSize;
     Bucket** mBuckets;
+    struct timespec mLastCheanTime;
 };
 
 } // namespace como
 
-#endif // __COMO_HASHMAP_H__
+#endif // __COMO_HASHMAP_CACHE_H__
