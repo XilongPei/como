@@ -152,9 +152,9 @@ ECode ComoFunctionSafetyObject::IsValid(
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
 
-    if ((mLastModifiedTime.tv_sec - time.tv_sec) +
-                1000000000L * (mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {
-               //123456789
+    if (1000000000L * (mLastModifiedTime.tv_sec - time.tv_sec) +
+       /*987654321*/    (mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {
+
         isValid = CFSO_ExpireTime;
         return NOERROR;
     }

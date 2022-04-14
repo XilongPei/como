@@ -215,8 +215,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
         // check for time out connection
-        if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) /*+ // ns accuracy is not required
-                    1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec)*/ >
+        // ns accuracy is not required
+        if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
             clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
@@ -224,9 +224,9 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
             for (i = 0;  i < ((mWorkerList.size()) &&
                          (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++) {
-                if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
-                            1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
-                           /*987654321*/                           ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+                   /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
+                                                         ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
                     delete mWorkerList[i];
                     mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
                 }

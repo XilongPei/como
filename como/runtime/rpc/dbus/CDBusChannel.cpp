@@ -121,9 +121,9 @@ ECode CDBusChannel::ServiceRunnable::Run()
                 //@ `Mechanism CHECK_FOR_FREE`
 
                 // check for free time out connection
-                if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) /*+ // ns accuracy is not required
-                            1000000000L * (lastCheckConnExpireTime.tv_nsec - currentTime.tv_nsec)*/ >
-                                            ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
+                // ns accuracy is not required
+                if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
+                                    ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
                     clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
                     Mutex::AutoLock lock(connsLock);
@@ -131,10 +131,10 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     // The reason why we iterate over conns here is because we want to release the
                     // member of conns in the loop
                     for (std::vector<DBusConnectionContainer*>::iterator it = conns.begin();
-                                                                                   it != conns.end(); ) {
-                        if ((currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
-                                    1000000000L * (currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
-                                   /*987654321*/                  ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                                                                         it != conns.end(); ) {
+                        if (1000000000L * (currentTime.tv_sec - (*it)->lastAccessTime.tv_sec) +
+                           /*987654321*/(currentTime.tv_nsec - (*it)->lastAccessTime.tv_nsec) >
+                                                        ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
 
                             IInterface* intf = reinterpret_cast<IInterface*>((*it)->user_data);
                             REFCOUNT_RELEASE(intf);
