@@ -76,7 +76,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
     opVTable.message_function = CDBusChannel::ServiceRunnable::HandleMessage;
 
     dbus_connection_register_object_path(conn,
-                                         STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this));
+                         STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this));
 
     {
         Mutex::AutoLock lock(mOwner->mLock);
@@ -101,6 +101,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
         conn_->conn = conn;
         conn_->user_data = static_cast<void*>(this);
+        REFCOUNT_ADD(this);
         clock_gettime(CLOCK_REALTIME, &conn_->lastAccessTime);
         conns.push_back(conn_);
     }
