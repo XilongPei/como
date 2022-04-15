@@ -72,10 +72,13 @@ ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt, String constNa
 
 ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf, String constName, Long& lvalue)
 {
+    if (nullptr == intf)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     ECode ec;
     AutoPtr<IMetaConstant> constt;
     ec = intf->GetConstant(constName, constt);
-    if (FAILED(ec))
+    if (FAILED(ec) || (nullptr == constt))
         return ec;
 
     return constantGetLong(constt, constName, lvalue);
