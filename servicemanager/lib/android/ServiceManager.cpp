@@ -94,7 +94,7 @@ ECode ServiceManager::AddService(
 
     ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%X", ec);
         return ec;
     }
 
@@ -120,7 +120,7 @@ ECode ServiceManager::GetService(
 
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%X", ec);
         return ec;
     }
 
@@ -152,7 +152,7 @@ ECode ServiceManager::RemoveService(
 
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
-        Logger_E("ServiceManager", "Remote call failed with ec = 0x%x.", ec);
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%X", ec);
         return ec;
     }
 

@@ -593,7 +593,7 @@ ECode CDBusChannel::GetComponentMetadata(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel.GetComponentMetadata()",
+        Logger::E("CDBusChannel.GetComponentMetadata",
                                         "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -705,7 +705,7 @@ ECode CDBusChannel::Invoke(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel.Invoke()", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.Invoke", "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -727,7 +727,7 @@ ECode CDBusChannel::Invoke(
     if (SUCCEEDED(ec)) {
         resParcel = new CDBusParcel();
         if (nullptr == resParcel) {
-            Logger::E("CDBusChannel.Invoke()", "Fail to new CDBusParcel()");
+            Logger::E("CDBusChannel.Invoke", "Fail to new CDBusParcel()");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }

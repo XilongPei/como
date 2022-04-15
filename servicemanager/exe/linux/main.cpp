@@ -41,17 +41,19 @@ int main(int argv, char** argc)
 
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger_E("servicemanager", "Connect to bus daemon failed, error is \"%s\".",
-                err.message);
+        Logger_E("servicemanager",
+                 "Connect to dbus daemon failed, error is \"%s\".",
+                 err.message);
         dbus_error_free(&err);
         return -1;
     }
 
     dbus_bus_request_name(conn, ServiceManager::DBUS_NAME,
-            DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
+                                        DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
     if (dbus_error_is_set(&err)) {
-        Logger_E("servicemanager", "Request servicemanager dbus name failed, error is \"%s\".",
-                err.message);
+        Logger_E("servicemanager",
+                 "Request servicemanager dbus name failed, error is \"%s\".",
+                 err.message);
         dbus_error_free(&err);
         dbus_connection_close(conn);
         dbus_connection_unref(conn);
