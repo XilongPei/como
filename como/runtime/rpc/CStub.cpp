@@ -120,6 +120,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::String: {
                     String* value = new String();
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new String() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     argParcel->ReadString(*value);
                     argList->SetInputArgumentOfString(i, *value);
                     break;
@@ -138,6 +143,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Array: {
                     Triple* t = new Triple();
+                    if (nullptr == t) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Triple() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     argParcel->ReadArray(t);
                     argList->SetInputArgumentOfArray(i, *t);
                     break;
@@ -163,6 +173,11 @@ ECode InterfaceStub::UnmarshalArguments(
             switch (kind) {
                 case TypeKind::Char: {
                     Char* value = new Char;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Char() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadChar(*value);
                     }
@@ -171,6 +186,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Byte: {
                     Byte* value = new Byte;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Byte() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadByte(*value);
                     }
@@ -179,6 +199,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Short: {
                     Short* value = new Short;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Short() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadShort(*value);
                     }
@@ -187,6 +212,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Integer: {
                     Integer* value = new Integer;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadInteger(*value);
                     }
@@ -195,6 +225,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Long: {
                     Long* value = new Long;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Long() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadLong(*value);
                     }
@@ -203,6 +238,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Float: {
                     Float* value = new Float;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Float() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadFloat(*value);
                     }
@@ -211,6 +251,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Double: {
                     Double* value = new Double;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Double() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadDouble(*value);
                     }
@@ -219,6 +264,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Boolean: {
                     Boolean* value = new Boolean;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Boolean() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadBoolean(*value);
                     }
@@ -227,6 +277,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::String: {
                     String* value = new String();
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new String() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadString(*value);
                     }
@@ -235,6 +290,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::ECode: {
                     ECode* value = new ECode;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new ECode() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadECode(*value);
                     }
@@ -243,6 +303,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Enum: {
                     Integer* value = new Integer;
+                    if (nullptr == value) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadEnumeration(*value);
                     }
@@ -251,6 +316,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Array: {
                     Triple* t = new Triple();
+                    if (nullptr == t) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Triple() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadArray(t);
                     }
@@ -259,6 +329,11 @@ ECode InterfaceStub::UnmarshalArguments(
                 }
                 case TypeKind::Interface: {
                     IInterface** intf = new IInterface*;
+                    if (nullptr == intf) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new IInterface* error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadInterface(*reinterpret_cast<AutoPtr<IInterface>*>(intf));
                     }
@@ -473,6 +548,7 @@ ECode InterfaceStub::MarshalResults(
                     IInterface** intf = reinterpret_cast<IInterface**>(addr);
                     resParcel->WriteInterface(*intf);
                     REFCOUNT_RELEASE(*intf);
+                    delete intf;
                     break;
                 }
                 case TypeKind::CoclassID:
@@ -547,9 +623,15 @@ ECode InterfaceStub::Invoke(
     }
 
     ECode ret = mm->Invoke(mObject, argList);
-    ec = MarshalResults(mm, argList, resParcel);
-    if (FAILED(ec)) {
-        Logger::E("CStub", "MarshalResults failed with ec is 0x%X.", ec);
+    if (SUCCEEDED(ret)) {
+        ec = MarshalResults(mm, argList, resParcel);
+        if (FAILED(ec)) {
+            Logger::E("CStub", "MarshalResults failed with ec is 0x%X.", ec);
+        }
+    }
+    else {
+        argList = nullptr;
+        resParcel = nullptr;
     }
 
     return ret;
