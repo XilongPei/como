@@ -780,9 +780,13 @@ ECode CDBusParcel::WriteInterface(
             return ec;
         }
 
-        IParcelable::Probe(ipack)->WriteToParcel(this);
+        IParcelable* p;
+        p = IParcelable::Probe(ipack);
+        if (p != nullptr) {
+            p->WriteToParcel(this);
+        }
 
-        IParcelable* p = IParcelable::Probe(value);
+        p = IParcelable::Probe(value);
         if (p != nullptr) {
             p->WriteToParcel(this);
         }

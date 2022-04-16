@@ -401,7 +401,9 @@ ECode InterfaceStub::MarshalResults(
     /* [in] */ IArgumentList* argList,
     /* [out] */ AutoPtr<IParcel>& resParcel)
 {
+    HANDLE addr;
     Integer N;
+
     method->GetParameterNumber(N);
     for (Integer i = 0; i < N; i++) {
         AutoPtr<IMetaParameter> param;
@@ -434,14 +436,12 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::Enum:
                     break;
                 case TypeKind::String: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     String* value = reinterpret_cast<String*>(addr);
                     delete value;
                     break;
                 }
                 case TypeKind::Array: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Triple* t = reinterpret_cast<Triple*>(addr);
                     t->FreeData();
@@ -449,7 +449,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Interface: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     IInterface* intf = reinterpret_cast<IInterface*>(addr);
                     REFCOUNT_RELEASE(intf);
@@ -469,7 +468,6 @@ ECode InterfaceStub::MarshalResults(
         else if (ioAttr == IOAttribute::OUT || ioAttr == IOAttribute::IN_OUT) {
             switch (kind) {
                 case TypeKind::Char: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Char* value = reinterpret_cast<Char*>(addr);
                     resParcel->WriteChar(*value);
@@ -477,7 +475,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Byte: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Byte* value = reinterpret_cast<Byte*>(addr);
                     resParcel->WriteByte(*value);
@@ -485,7 +482,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Short: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Short* value = reinterpret_cast<Short*>(addr);
                     resParcel->WriteShort(*value);
@@ -493,7 +489,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Integer: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Integer* value = reinterpret_cast<Integer*>(addr);
                     resParcel->WriteInteger(*value);
@@ -501,7 +496,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Long: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Long* value = reinterpret_cast<Long*>(addr);
                     resParcel->WriteLong(*value);
@@ -509,7 +503,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Float: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Float* value = reinterpret_cast<Float*>(addr);
                     resParcel->WriteFloat(*value);
@@ -517,7 +510,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Double: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Double* value = reinterpret_cast<Double*>(addr);
                     resParcel->WriteDouble(*value);
@@ -525,7 +517,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Boolean: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Boolean* value = reinterpret_cast<Boolean*>(addr);
                     resParcel->WriteBoolean(*value);
@@ -533,7 +524,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::String: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     String* value = reinterpret_cast<String*>(addr);
                     resParcel->WriteString(*value);
@@ -541,7 +531,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::ECode: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     ECode* value = reinterpret_cast<ECode*>(addr);
                     resParcel->WriteECode(*value);
@@ -549,7 +538,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Enum: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Integer* value = reinterpret_cast<Integer*>(addr);
                     resParcel->WriteEnumeration(*value);
@@ -557,7 +545,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Array: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Triple* t = reinterpret_cast<Triple*>(addr);
                     resParcel->WriteArray(*t);
@@ -565,7 +552,6 @@ ECode InterfaceStub::MarshalResults(
                     break;
                 }
                 case TypeKind::Interface: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     IInterface** intf = reinterpret_cast<IInterface**>(addr);
                     resParcel->WriteInterface(*intf);
@@ -588,7 +574,6 @@ ECode InterfaceStub::MarshalResults(
         else if (ioAttr == IOAttribute::OUT_CALLEE) {
             switch (kind) {
                 case TypeKind::Array: {
-                    HANDLE addr;
                     argList->GetArgumentAddress(i, addr);
                     Triple* t = reinterpret_cast<Triple*>(addr);
                     resParcel->WriteArray(*t);

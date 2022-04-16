@@ -81,20 +81,22 @@ ECode CDBusChannelFactory::MarshalInterface(
 
     pack->SetInterfaceID(iid);
 
+    IObject *obj = IObject::Probe(object);
+    if (nullptr == obj) {
+        Logger::E("CDBusChannelFactory", "The Object is not a como object.");
+        ipack = nullptr;
+        return E_NOT_COMO_OBJECT_EXCEPTION;
+    }
+
     if (IParcelable::Probe(object) != nullptr) {
-        if (IObject::Probe(object) == nullptr) {
-            Logger::E("CDBusChannelFactory", "The Object is not a como object.");
-            ipack = nullptr;
-            return E_NOT_COMO_OBJECT_EXCEPTION;
-        }
         CoclassID cid;
-        IObject::Probe(object)->GetCoclassID(cid);
+        obj->GetCoclassID(cid);
         pack->SetCoclassID(cid);
         pack->SetParcelable(true);
     }
     else {
         AutoPtr<IStub> stub;
-        ECode ec = FindExportObject(mType, IObject::Probe(object), stub);
+        ECode ec = FindExportObject(mType, obj, stub);
         if (SUCCEEDED(ec)) {
             CDBusChannel* channel = CDBusChannel::GetStubChannel(stub);
             pack->SetDBusName(channel->mName);
@@ -117,7 +119,12 @@ ECode CDBusChannelFactory::MarshalInterface(
                 CDBusChannel* channel = CDBusChannel::GetStubChannel(stub);
                 pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
-                RegisterExportObject(mType, IObject::Probe(object), stub);
+                ec = RegisterExportObject(mType, obj, stub);
+                if (FAILED(ec)) {
+                    Logger::E("CDBusChannelFactory", "RegisterExportObject failed.");
+                    ipack = nullptr;
+                    return ec;
+                }
             }
         }
     }
