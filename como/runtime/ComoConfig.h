@@ -65,6 +65,7 @@ public:
     static int ThreadPool_MAX_THREAD_NUM;
     static int ThreadPool_MAX_DBUS_DISPATCHER;
 
+    static int  DBUS_CONNECTION_MAX_NUM;
     static long DBUS_BUS_CHECK_EXPIRES_PERIOD;
     static long DBUS_BUS_SESSION_EXPIRES;
     // TPCI: Thread Pool Channel Invoke

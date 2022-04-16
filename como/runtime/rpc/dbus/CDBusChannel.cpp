@@ -123,7 +123,8 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
                 // check for free time out connection
                 // ns accuracy is not required
-                if ((currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
+                if (conns.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
+                         (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
                     clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
