@@ -32,8 +32,10 @@ static const int prime_list[11] =
 
 static int get_lower_bound(const int* first, const int* last, int n)
 {
-    if (n <= *first) return *first;
-    if (n >= *last) return *last;
+    if (n <= *first)
+        return *first;
+    if (n >= *last)
+        return *last;
     for (int i = 0; first + i != last; i++) {
         int l = *(first + i);
         int r = *(first + i + 1);
@@ -80,7 +82,7 @@ private:
 
 public:
     HashMap(
-        /* [in] */ int size = 50)
+        /* [in] */ unsigned int size = 50)
     {
         mBucketSize = get_next_prime(size);
         mBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
@@ -88,7 +90,7 @@ public:
 
     ~HashMap()
     {
-        for (int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0; i < mBucketSize; i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -110,11 +112,11 @@ public:
         AssignFunc<Key> assignKeyF;
         AssignFunc<Val> assignValF;
 
-        int hash = HashKey(key);
+        unsigned int hash = HashKey(key);
         if (hash == -1)
             return -1;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
             if (nullptr == b)
@@ -153,13 +155,15 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
-        if (hash == -1) return false;
+        unsigned int hash = HashKey(key);
+        if (hash == -1)
+            return false;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (!compareF(curr->mKey, key)) return true;
+            if (!compareF(curr->mKey, key))
+                return true;
             curr = curr->mNext;
         }
 
@@ -171,13 +175,15 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
-        if (hash == -1) return Val(0);
+        unsigned int hash = HashKey(key);
+        if (hash == -1)
+            return Val(0);
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (!compareF(curr->mKey, key)) return curr->mValue;
+            if (!compareF(curr->mKey, key))
+                return curr->mValue;
             curr = curr->mNext;
         }
 
@@ -189,10 +195,11 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
-        if (hash == -1) return;
+        unsigned int hash = HashKey(key);
+        if (hash == -1)
+            return;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
@@ -215,7 +222,7 @@ public:
 
     void Clear()
     {
-        for (int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0; i < mBucketSize; i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -229,7 +236,7 @@ public:
     }
 
 private:
-    int HashKey(
+    unsigned int HashKey(
         /* [in] */ const Key& key)
     {
         HashFunc<Key> hashF;
@@ -237,7 +244,7 @@ private:
     }
 
 private:
-    int mBucketSize;
+    unsigned int mBucketSize;
     Bucket** mBuckets;
 };
 

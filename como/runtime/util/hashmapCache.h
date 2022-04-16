@@ -50,7 +50,7 @@ private:
             mNext = nullptr;
         }
 
-        int mHash;
+        unsigned int mHash;
         Key mKey;
         Val mValue;
         struct timespec lastAccessTime;
@@ -64,7 +64,7 @@ public:
     using HashMapWalker = void(*)(String&,Key,Val);
 
     HashMapCache(
-        /* [in] */ int size = 50)
+        /* [in] */ unsigned int size = 50)
         : mCount(0)
     {
         mBucketSize = get_next_prime(size);
@@ -77,7 +77,7 @@ public:
 
     ~HashMapCache()
     {
-        for (int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -103,11 +103,11 @@ public:
             Rehash();
         }
 
-        int hash = HashKey(key);
+        unsigned int hash = HashKey(key);
         if (hash == -1)
             return -1;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
             if (nullptr == b)
@@ -152,11 +152,11 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
+        unsigned int hash = HashKey(key);
         if (hash == -1)
             return false;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (curr->mHash == hash && !compareF(curr->mKey, key)) {
@@ -174,11 +174,11 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
+        unsigned int hash = HashKey(key);
         if (hash == -1)
             return Val(0);
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (curr->mHash == hash && !compareF(curr->mKey, key)) {
@@ -196,11 +196,11 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        int hash = HashKey(key);
+        unsigned int hash = HashKey(key);
         if (hash == -1)
             return;
 
-        int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
@@ -223,7 +223,7 @@ public:
 
     void Clear()
     {
-        for (int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0; i < mBucketSize; i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -240,7 +240,7 @@ public:
     Array<Val> GetValues()
     {
         Long N = 0;
-        for (int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0; i < mBucketSize; i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -257,7 +257,7 @@ public:
 
         if (N > 0) {
             Long idx = 0;
-            for (int i = 0;  i < mBucketSize;  i++) {
+            for (unsigned int i = 0;  i < mBucketSize;  i++) {
                 if (mBuckets[i] != nullptr) {
                     Bucket* curr = mBuckets[i];
                     while (curr != nullptr) {
@@ -273,7 +273,7 @@ public:
 
     void GetValues(String& str, HashMapWalker walker)
     {
-        for (int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -284,7 +284,7 @@ public:
         }
     }
 
-    int GetDataNumber()
+    unsigned int GetDataNumber()
     {
         return mCount;
     }
@@ -299,7 +299,7 @@ public:
 
         mLastCheanTime = currentTime;
 
-        for (int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -317,7 +317,7 @@ public:
     }
 
 private:
-    int HashKey(
+    unsigned int HashKey(
         /* [in] */ const Key& key)
     {
         HashFunc<Key> hashF;
@@ -329,16 +329,17 @@ private:
         if (mBucketSize == MAX_BUCKET_SIZE) {
             return;
         }
-        int oldBucketSize = mBucketSize;
+        unsigned int oldBucketSize = mBucketSize;
         mBucketSize = oldBucketSize * 2 + 1;
         if (mBucketSize > MAX_BUCKET_SIZE || mBucketSize < 0) {
             mBucketSize = MAX_BUCKET_SIZE;
         }
         Bucket** newBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
         if (newBuckets == nullptr) {
+            mBucketSize = oldBucketSize;
             return;
         }
-        for (int i = 0; i < oldBucketSize; i++) {
+        for (unsigned int i = 0; i < oldBucketSize; i++) {
             Bucket* curr = mBuckets[i];
             while (curr != nullptr) {
                 Bucket* next = curr->mNext;
@@ -354,13 +355,12 @@ private:
 
     void PutBucket(
         /* [in] */ Bucket** buckets,
-        /* [in] */ int bucketSize,
+        /* [in] */ unsigned int bucketSize,
         /* [in] */ Bucket* bucket)
     {
-        int index = bucket->mHash % bucketSize;
+        unsigned int index = bucket->mHash % bucketSize;
         if (buckets[index] == nullptr) {
             buckets[index] = bucket;
-            return;
         }
         else {
             Bucket* prev = buckets[index];
@@ -368,7 +368,6 @@ private:
                 prev = prev->mNext;
             }
             prev->mNext = bucket;
-            return;
         }
     }
 
@@ -378,9 +377,9 @@ private:
     static constexpr int CHECK_EXPIRES_PERIOD = 300;
     static constexpr int TIMEOUT_BUCKET = 600;
 
-    int mThreshold;
-    int mCount;
-    int mBucketSize;
+    unsigned int mThreshold;
+    unsigned int mCount;
+    unsigned int mBucketSize;
     Bucket** mBuckets;
     struct timespec mLastCheanTime;
 };
