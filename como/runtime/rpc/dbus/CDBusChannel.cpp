@@ -128,8 +128,6 @@ ECode CDBusChannel::ServiceRunnable::Run()
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
                     clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
-                    Mutex::AutoLock lock(connsLock);
-
                     // The reason why we iterate over conns here is because we want to release the
                     // member of conns in the loop
                     for (std::vector<DBusConnectionContainer*>::iterator it = conns.begin();
