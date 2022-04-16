@@ -52,14 +52,15 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".", err.message);
+        Logger::E("CDBusChannel::ServiceRunnable::Run",
+                  "Connect to bus daemon failed, error is \"%s\".", err.message);
         dbus_error_free(&err);
         return E_RUNTIME_EXCEPTION;
     }
 
     const char* name = dbus_bus_get_unique_name(conn);
     if (nullptr == name) {
-        Logger::E("CDBusChannel", "Get unique name failed.");
+        Logger::E("CDBusChannel::ServiceRunnable::Run", "Get unique name failed.");
         if (nullptr != conn) {
             dbus_connection_close(conn);
             dbus_connection_unref(conn);
@@ -686,8 +687,8 @@ ECode CDBusChannel::GetComponentMetadata(
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                                                                        err.message);
+        Logger::E("CDBusChannel::GetComponentMetadata",
+                  "Connect to bus daemon failed, error is \"%s\".", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -800,7 +801,8 @@ ECode CDBusChannel::Invoke(
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel::Invoke",
+                  "Connect to bus daemon failed, error is \"%s\"", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }

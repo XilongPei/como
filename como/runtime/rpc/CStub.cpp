@@ -61,9 +61,17 @@ ECode InterfaceStub::UnmarshalArguments(
     method->GetParameterNumber(N);
     for (Integer i = 0; i < N; i++) {
         AutoPtr<IMetaParameter> param;
-        method->GetParameter(i, param);
+        ECode ec = method->GetParameter(i, param);
+        if (FAILED(ec)) {
+            Logger::E("InterfaceStub::UnmarshalArguments",
+                                 "method->GetParameter() error, ECode: %d", ec);
+            return ec;
+        }
+
         AutoPtr<IMetaType> type;
+        // just an assignment, needn't to check the return value
         param->GetType(type);
+
         TypeKind kind;
         type->GetTypeKind(kind);
         IOAttribute ioAttr;
@@ -354,6 +362,11 @@ ECode InterfaceStub::UnmarshalArguments(
             switch (kind) {
                 case TypeKind::Array: {
                     Triple* t = new Triple();
+                    if (nullptr == t) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "new Triple() error");
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+
                     argList->SetOutputArgumentOfArray(i, reinterpret_cast<HANDLE>(t));
                     break;
                 }
@@ -400,12 +413,8 @@ ECode InterfaceStub::MarshalResults(
         }
 
         AutoPtr<IMetaType> type;
-        ec = param->GetType(type);
-        if (FAILED(ec)) {
-            Logger::E("InterfaceStub::MarshalResults",
-                                       "param->GetType() error, ECode: %d", ec);
-            return ec;
-        }
+        // just an assignment, needn't to check the return value
+        param->GetType(type);
 
         TypeKind kind;
         type->GetTypeKind(kind);
