@@ -392,9 +392,21 @@ ECode InterfaceStub::MarshalResults(
     method->GetParameterNumber(N);
     for (Integer i = 0; i < N; i++) {
         AutoPtr<IMetaParameter> param;
-        method->GetParameter(i, param);
+        ECode ec = method->GetParameter(i, param);
+        if (FAILED(ec)) {
+            Logger::E("InterfaceStub::MarshalResults",
+                                 "method->GetParameter() error, ECode: %d", ec);
+            return ec;
+        }
+
         AutoPtr<IMetaType> type;
-        param->GetType(type);
+        ec = param->GetType(type);
+        if (FAILED(ec)) {
+            Logger::E("InterfaceStub::MarshalResults",
+                                       "param->GetType() error, ECode: %d", ec);
+            return ec;
+        }
+
         TypeKind kind;
         type->GetTypeKind(kind);
         IOAttribute ioAttr;
@@ -440,7 +452,8 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CStub", "Invalid [in] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("InterfaceStub::MarshalResults",
+                          "Invalid [in] type(%d), param index: %d.\n", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -557,7 +570,9 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CStub", "Invalid [in, out] or [out] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("InterfaceStub::MarshalResults",
+                              "Invalid [in, out] or [out] type(%d), param index: %d.\n",
+                              kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -588,7 +603,9 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::InterfaceID:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CStub", "Invalid [out, callee] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("InterfaceStub::MarshalResults",
+                              "Invalid [out, callee] type(%d), param index: %d.\n",
+                              kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
