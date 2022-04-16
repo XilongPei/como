@@ -473,7 +473,6 @@ ECode InterfaceStub::MarshalResults(
                     IInterface** intf = reinterpret_cast<IInterface**>(addr);
                     resParcel->WriteInterface(*intf);
                     REFCOUNT_RELEASE(*intf);
-                    delete intf;
                     break;
                 }
                 case TypeKind::CoclassID:
