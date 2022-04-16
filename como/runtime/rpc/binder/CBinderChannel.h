@@ -122,6 +122,9 @@ public:
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
 
+    ECode ReleasePeer(
+        /* [out] */ Boolean& alive) override;
+
     ECode LinkToDeath(
         /* [in] */ IProxy* proxy,
         /* [in] */ IDeathRecipient* recipient,

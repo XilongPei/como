@@ -328,6 +328,9 @@ public:
     ECode IsStubAlive(
         /* [out] */ Boolean& alive) override;
 
+    ECode ReleaseStub(
+        /* [out] */ Boolean& alive) override;
+
     ECode LinkToDeath(
         /* [in] */ IDeathRecipient* recipient,
         /* [in] */ HANDLE cookie = 0,

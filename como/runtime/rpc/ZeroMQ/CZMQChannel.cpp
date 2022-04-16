@@ -108,6 +108,15 @@ ECode CZMQChannel::IsPeerAlive(
     return ec;
 }
 
+ECode CZMQChannel::ReleasePeer(
+    /* [out] */ Boolean& alive)
+{
+    //TODO
+    ECode ec = NOERROR;
+    alive = true;
+    return ec;
+}
+
 ECode CZMQChannel::LinkToDeath(
     /* [in] */ IProxy* proxy,
     /* [in] */ IDeathRecipient* recipient,

@@ -216,6 +216,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         // check for time out connection
         // ns accuracy is not required
+        // TODO, mWorkerList.size() is not the really num in mWorkerList
         if (mWorkerList.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
             (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
@@ -223,8 +224,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
             pthread_mutex_lock(&pthreadMutex);
 
-            for (i = 0;  i < ((mWorkerList.size()) &&
-                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++) {
+            for (i = 0;  (i < mWorkerList.size()) &&
+                                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus);  i++) {
                 if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {

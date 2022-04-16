@@ -1879,6 +1879,12 @@ ECode CProxy::IsStubAlive(
     return mChannel->IsPeerAlive(alive);
 }
 
+ECode CProxy::ReleaseStub(
+    /* [out] */ Boolean& alive)
+{
+    return mChannel->ReleasePeer(alive);
+}
+
 ECode CProxy::LinkToDeath(
     /* [in] */ IDeathRecipient* recipient,
     /* [in] */ HANDLE cookie,

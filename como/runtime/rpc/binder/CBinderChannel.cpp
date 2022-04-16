@@ -218,6 +218,14 @@ ECode CBinderChannel::IsPeerAlive(
     return NOERROR;
 }
 
+ECode CBinderChannel::ReleasePeer(
+    /* [out] */ Boolean& alive)
+{
+    //TODO
+    alive = mBinder->isBinderAlive() ? true : false;
+    return NOERROR;
+}
+
 ECode CBinderChannel::LinkToDeath(
     /* [in] */ IProxy* proxy,
     /* [in] */ IDeathRecipient* recipient,

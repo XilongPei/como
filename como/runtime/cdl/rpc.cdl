@@ -219,6 +219,9 @@ interface IRPCChannel
     IsPeerAlive(
         [out] Boolean& alive);
 
+    ReleasePeer(
+        [out] Boolean& alive);
+
     LinkToDeath(
         [in] IProxy* proxy,
         [in] IDeathRecipient* recipient,
@@ -284,6 +287,9 @@ interface IProxy
         [out] IMetaCoclass&& target);
 
     IsStubAlive(
+        [out] Boolean& alive);
+
+    ReleaseStub(
         [out] Boolean& alive);
 
     LinkToDeath(
