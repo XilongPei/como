@@ -164,6 +164,14 @@ ECode InterfaceStub::UnmarshalArguments(
                     AutoPtr<IInterface> value;
                     argParcel->ReadInterface(value);
                     argList->SetInputArgumentOfInterface(i, value);
+
+                    //@ `REFCOUNT`
+                    // MarshalResults/UnmarshalArguments organization is equivalent to an
+                    // intermediary. The intermediary holds the reference count of the
+                    // object. Because the parameter and result conversion of COMO is not
+                    // managed by the C + + scope, the intermediary needs to manage itself.
+                    // The correctness of the reference data can be guaranteed only when
+                    // the control is handed over to the caller or callee
                     REFCOUNT_ADD(value);
                     break;
                 }
@@ -451,6 +459,8 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::Interface: {
                     argList->GetArgumentAddress(i, addr);
                     IInterface* intf = reinterpret_cast<IInterface*>(addr);
+
+                    //@ `REFCOUNT`
                     REFCOUNT_RELEASE(intf);
                     break;
                 }
@@ -555,7 +565,9 @@ ECode InterfaceStub::MarshalResults(
                     argList->GetArgumentAddress(i, addr);
                     IInterface** intf = reinterpret_cast<IInterface**>(addr);
                     resParcel->WriteInterface(*intf);
-                    REFCOUNT_RELEASE(*intf);
+
+                    //@ `REFCOUNT`
+                    REFCOUNT_ADD(*intf);
                     delete intf;
                     break;
                 }
