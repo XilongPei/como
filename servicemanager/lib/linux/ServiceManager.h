@@ -46,6 +46,9 @@ public:
     ECode RemoveService(
         /* [in] */ const String& name);
 
+    ECode RemoveService(
+        /* [in] */ const String& name,
+        /* [in] */ IInterface* intfService);
 private:
     ServiceManager() {}
     ServiceManager(
