@@ -46,7 +46,14 @@ CDBusChannel::ServiceRunnable::ServiceRunnable(
 
 ECode CDBusChannel::ServiceRunnable::Run()
 {
+    if (conns.size() >= ComoConfig::DBUS_CONNECTION_MAX_NUM) {
+        Logger::E("CDBusChannel::ServiceRunnable::Run",
+                                                 "Too many D-Bus connections.");
+        return E_TOO_MANY_CONNECTION_EXCEPTION;
+    }
+
     DBusError err;
+    bool connsNeedCheck = false;
 
     dbus_error_init(&err);
 
@@ -125,6 +132,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                 // check for free time out connection
                 // ns accuracy is not required
                 if (conns.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
+                         connsNeedCheck ||
                          (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
                     clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
@@ -166,6 +174,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     if (! dbus_connection_read_write_dispatch(conn_dbus, 0)) {
                         // `Mechanism CHECK_FOR_FREE` will release the DBusConnection
                         conns[i]->lastAccessTime.tv_sec = 0;
+                        connsNeedCheck = true;
                     }
 
                     status = dbus_connection_get_dispatch_status(conn_dbus);
@@ -184,6 +193,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                 if (mRequestToQuit) {
                     // `Mechanism CHECK_FOR_FREE` will release the DBusConnection
                     conns[i]->lastAccessTime.tv_sec = 0;
+                    connsNeedCheck = true;
                 }
 
                 if (status == DBUS_DISPATCH_NEED_MEMORY) {
@@ -195,6 +205,8 @@ ECode CDBusChannel::ServiceRunnable::Run()
             }
 
             // usleep - suspend execution for microsecond intervals
+            // Even if there is no external request, dbus_connection_read_write_dispatch
+            // needs to process it circularly
             usleep(20);
         }
     }
