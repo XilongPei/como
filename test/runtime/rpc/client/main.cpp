@@ -164,7 +164,7 @@ TEST(RPCTest, TestIsStubAlive)
     EXPECT_TRUE(alive);
 }
 
-#if 0
+/*
 TEST(RPCTest, TestReleaseStub)
 {
     EXPECT_TRUE(SERVICE != nullptr);
@@ -174,13 +174,11 @@ TEST(RPCTest, TestReleaseStub)
     proxy->ReleaseStub(alive);
     EXPECT_TRUE(alive);
 
-    /*
     ECode ec = ServiceManager::GetInstance()->RemoveService(String("rpcservice"));
     EXPECT_TRUE(SUCCEEDED(ec));
-    */
-}
-#endif
 
+}
+*/
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

@@ -23,6 +23,7 @@
 #include "InterfacePack.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
+#include "registry.h"
 
 namespace como {
 
@@ -358,12 +359,24 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         if (CDBusChannel::DEBUG) {
             Logger::D("CDBusChannel", "Handle IsPeerAlive message.");
         }
+
         DBusMessageIter args;
+        Boolean pong;
+        RPCType type;
+        AutoPtr<IStub> stub;
+
+        ((CStub*)thisRunnable->mTarget)->GetChannel()->GetRPCType(type);
+        IObject* obj = ((CStub*)thisRunnable->mTarget)->GetTarget();
+        ECode ec = FindExportObject(type, obj, stub);
+        if (SUCCEEDED(ec) && (stub == thisRunnable->mTarget))
+            pong = true;
+        else
+            pong = false;
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
         if (nullptr != reply) {
             ECode ec = NOERROR;
-            dbus_bool_t val = TRUE;
+            dbus_bool_t val = pong;
 
             dbus_message_iter_init_append(reply, &args);
             dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
