@@ -86,6 +86,7 @@ ECode InterfacePack::ReadFromParcel(
     source->ReadInterfaceID(mIid);
     source->ReadBoolean(mIsParcelable);
     source->ReadString(mServerName);
+    source->ReadLong(mServerObjectId);
     return NOERROR;
 }
 
@@ -97,6 +98,7 @@ ECode InterfacePack::WriteToParcel(
     dest->WriteInterfaceID(mIid);
     dest->WriteBoolean(mIsParcelable);
     dest->WriteString(mServerName);
+    dest->WriteLong(mServerObjectId);
     return NOERROR;
 }
 
@@ -127,6 +129,13 @@ void InterfacePack::SetParcelable(
     /* [in] */ Boolean parcelable)
 {
     mIsParcelable = parcelable;
+}
+
+
+void InterfacePack::SetServerObjectId(
+    /* [in] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
 }
 
 } // namespace como

@@ -120,8 +120,9 @@ ECode CDBusChannelFactory::MarshalInterface(
                 pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
 
-                Long hash = 0;
-                //obj->GetHashCode(hash);
+                Long hash;
+                obj->GetHashCode(hash);
+                pack->SetServerObjectId(hash);
 
                 ec = RegisterExportObject(mType, obj, stub);
                 if (FAILED(ec)) {
