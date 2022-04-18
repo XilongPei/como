@@ -60,7 +60,7 @@ interface IConcurrentHashMap
         [out] ISet&& entries);
 
     GetHashCode(
-        [out] Integer& hash);
+        [out] Long& hash);
 
     GetKeySet(
         [out] ISet&& keys);

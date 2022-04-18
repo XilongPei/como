@@ -219,7 +219,7 @@ ECode DoubleBuffer::ToString(
 }
 
 ECode DoubleBuffer::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     Integer p;

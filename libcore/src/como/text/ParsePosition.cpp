@@ -72,7 +72,7 @@ ECode ParsePosition::Equals(
 }
 
 ECode ParsePosition::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (mErrorIndex << 16) | mIndex;
     return NOERROR;

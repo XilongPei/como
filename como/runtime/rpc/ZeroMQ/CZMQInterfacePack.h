@@ -64,7 +64,7 @@ public:
         /* [out] */ String& serverName) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode GetServerObjectId(
         /* [out] */ Long& serverObjectId) override;

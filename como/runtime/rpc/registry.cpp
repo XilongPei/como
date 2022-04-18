@@ -24,10 +24,10 @@ namespace como {
 template<>
 struct HashFunc<IObject*>
 {
-    inline Integer operator()(
+    inline Long operator()(
         /* [in] */ IObject* data)
     {
-        Integer hash;
+        Long hash;
         data->GetHashCode(hash);
         return hash;
     }
@@ -36,10 +36,10 @@ struct HashFunc<IObject*>
 template<>
 struct HashFunc<IInterfacePack*>
 {
-    inline Integer operator()(
+    inline Long operator()(
         /* [in] */ IInterfacePack* data)
     {
-        Integer hash;
+        Long hash;
         data->GetHashCode(hash);
         return hash;
     }

@@ -555,7 +555,7 @@ ECode ArrayList::Equals(
 }
 
 ECode ArrayList::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return AbstractList::GetHashCode(hash);
 }

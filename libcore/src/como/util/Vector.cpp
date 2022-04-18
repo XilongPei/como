@@ -682,7 +682,7 @@ ECode Vector::Equals(
 }
 
 ECode Vector::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     AutoLock lock(this);
 

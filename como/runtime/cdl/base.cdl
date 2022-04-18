@@ -56,7 +56,7 @@ interface IObject
         [out] IMetaCoclass&& klass);
 
     GetHashCode(
-        [out] Integer& hash);
+        [out] Long& hash);
 
     GetCRC64(
         [out] Long& crc64);

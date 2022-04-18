@@ -70,7 +70,7 @@ ECode CBoolean::Equals(
 }
 
 ECode CBoolean::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mValue ? 1231 : 1237;
     return NOERROR;

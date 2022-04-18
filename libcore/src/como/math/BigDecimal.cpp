@@ -1917,7 +1917,7 @@ ECode BigDecimal::Max(
 }
 
 ECode BigDecimal::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     if (mHashCode != 0) {
         hash = mHashCode;

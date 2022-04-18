@@ -482,7 +482,7 @@ ECode Hashtable::Equals(
 }
 
 ECode Hashtable::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     /*
      * This code detects the recursion caused by computing the hash code
@@ -504,7 +504,7 @@ ECode Hashtable::GetHashCode(
     for (Integer i = 0; i < mTable.GetLength(); i++) {
         HashtableEntry* entry = mTable[i];
         while (entry != nullptr) {
-            Integer eh;
+            Long eh;
             entry->GetHashCode(eh);
             hash += eh;
             entry = entry->mNext;
@@ -782,7 +782,7 @@ ECode Hashtable::HashtableEntry::Equals(
 }
 
 ECode Hashtable::HashtableEntry::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mHash ^ Object::GetHashCode(mValue);
     return NOERROR;

@@ -287,7 +287,7 @@ ECode LocaleExtensions::ToString(
 }
 
 ECode LocaleExtensions::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mId.GetHashCode();
     return NOERROR;

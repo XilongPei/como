@@ -114,7 +114,7 @@ ECode CLong::Equals(
 }
 
 ECode CLong::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

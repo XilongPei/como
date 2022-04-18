@@ -534,7 +534,7 @@ ECode ZoneInfo::Equals(
 }
 
 ECode ZoneInfo::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     constexpr Integer prime = 31;
     hash = 1;

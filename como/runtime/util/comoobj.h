@@ -41,7 +41,7 @@ public:
         /* [out] */ AutoPtr<IMetaCoclass>& klass) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode GetCRC64(
         /* [out] */ Long& crc64) override;
@@ -83,10 +83,10 @@ public:
     static String GetCoclassName(
         /* [in] */ Object* obj);
 
-    static Integer GetHashCode(
+    static Long GetHashCode(
         /* [in] */ IInterface* obj);
 
-    static Integer GetHashCode(
+    static Long GetHashCode(
         /* [in] */ Object* obj);
 
     static Long GetCRC64(

@@ -309,7 +309,7 @@ ECode GregorianCalendar::Equals(
 }
 
 ECode GregorianCalendar::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     Calendar::GetHashCode(hash);
     hash = hash ^ (Integer)mGregorianCutoverDate;

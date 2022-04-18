@@ -128,7 +128,7 @@ ECode CFloat::Equals(
 }
 
 ECode CFloat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

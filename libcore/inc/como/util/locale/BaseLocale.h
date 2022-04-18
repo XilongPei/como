@@ -68,7 +68,7 @@ private:
             /* [out] */ Integer& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         static AutoPtr<Key> Normalize(
             /* [in] */ Key* key);
@@ -123,7 +123,7 @@ public:
         /* [out] */ String& desc) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
 private:
     static Cache* Get_CACHE();

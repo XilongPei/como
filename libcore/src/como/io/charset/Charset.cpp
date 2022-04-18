@@ -668,7 +668,7 @@ ECode Charset::CompareTo(
 }
 
 ECode Charset::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     String canonicalName;
     GetName(canonicalName);

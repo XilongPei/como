@@ -64,7 +64,7 @@ private:
             /* [out] */ Boolean& same) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Clone(
             /* [in] */ const InterfaceID& iid,

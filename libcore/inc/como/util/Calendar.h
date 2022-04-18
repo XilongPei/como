@@ -180,7 +180,7 @@ public:
         /* [out] */ Boolean& same) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode Before(
         /* [in] */ IInterface* when,

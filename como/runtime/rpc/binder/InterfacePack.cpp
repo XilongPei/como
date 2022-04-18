@@ -67,7 +67,7 @@ ECode InterfacePack::GetServerName(
 }
 
 ECode InterfacePack::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = reinterpret_cast<uintptr_t>(mBinder.get());
     return NOERROR;

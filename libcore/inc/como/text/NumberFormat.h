@@ -150,7 +150,7 @@ public:
     static Array<ILocale*> GetAvailableLocales();
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode Equals(
         /* [in] */ IInterface* obj,

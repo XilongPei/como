@@ -762,7 +762,7 @@ InternalLocaleBuilder::CaseInsensitiveString::CaseInsensitiveString(
 }
 
 ECode InternalLocaleBuilder::CaseInsensitiveString::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mLowerStr.GetHashCode();
     return NOERROR;
@@ -811,7 +811,7 @@ InternalLocaleBuilder::CaseInsensitiveChar::CaseInsensitiveChar(
 }
 
 ECode InternalLocaleBuilder::CaseInsensitiveChar::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mLowerCh;
     return NOERROR;

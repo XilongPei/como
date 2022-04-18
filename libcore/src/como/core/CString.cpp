@@ -98,7 +98,7 @@ ECode CString::Equals(
 }
 
 ECode CString::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mString.GetHashCode();
     return NOERROR;

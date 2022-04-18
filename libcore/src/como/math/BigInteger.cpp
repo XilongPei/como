@@ -767,7 +767,7 @@ ECode BigInteger::Max(
 }
 
 ECode BigInteger::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     if (mHashCode == 0) {
         PrepareRepresentation();

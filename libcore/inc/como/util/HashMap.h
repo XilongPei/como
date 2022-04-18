@@ -70,7 +70,7 @@ public:
             /* [out] */ String& str) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode SetValue(
             /* [in] */ IInterface* value,
@@ -298,7 +298,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
 protected:
     static Integer Hash(

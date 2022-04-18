@@ -219,7 +219,7 @@ ECode IntegerBuffer::ToString(
 }
 
 ECode IntegerBuffer::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     Integer p;

@@ -312,7 +312,7 @@ ECode ImmutableGregorianDate::Equals(
 }
 
 ECode ImmutableGregorianDate::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return mDate->GetHashCode(hash);
 }

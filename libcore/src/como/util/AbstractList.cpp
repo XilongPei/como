@@ -319,7 +319,7 @@ ECode AbstractList::Equals(
 }
 
 ECode AbstractList::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     AutoPtr<IIterator> it;

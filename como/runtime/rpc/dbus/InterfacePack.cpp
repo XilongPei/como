@@ -65,7 +65,7 @@ ECode InterfacePack::GetServerName(
 }
 
 ECode InterfacePack::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mDBusName.GetHashCode();
     return NOERROR;

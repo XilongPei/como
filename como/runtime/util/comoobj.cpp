@@ -91,7 +91,7 @@ ECode Object::GetCoclass(
 }
 
 ECode Object::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = reinterpret_cast<HANDLE>(this);
     return NOERROR;
@@ -217,7 +217,7 @@ String Object::GetCoclassName(
     return name;
 }
 
-Integer Object::GetHashCode(
+Long Object::GetHashCode(
     /* [in] */ IInterface* obj)
 {
     Object* o = (Object*)IObject::Probe(obj);
@@ -227,10 +227,10 @@ Integer Object::GetHashCode(
     return GetHashCode(o);
 }
 
-Integer Object::GetHashCode(
+Long Object::GetHashCode(
     /* [in] */ Object* obj)
 {
-    Integer hash;
+    Long hash;
     obj->GetHashCode(hash);
     return hash;
 }

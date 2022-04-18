@@ -50,7 +50,7 @@ private:
             mNext = nullptr;
         }
 
-        unsigned int mHash;
+        unsigned long mHash;
         Key mKey;
         Val mValue;
         struct timespec lastAccessTime;
@@ -103,10 +103,7 @@ public:
             Rehash();
         }
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
-            return -1;
-
+        unsigned long hash = HashKey(key);
         unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();

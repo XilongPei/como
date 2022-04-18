@@ -168,7 +168,7 @@ private:
             /* [out] */ Boolean& same) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
     public:
         AutoPtr<BaseLocale> mBase;
@@ -362,7 +362,7 @@ public:
         /* [out] */ String& name) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode Equals(
         /* [in] */ IInterface* obj,

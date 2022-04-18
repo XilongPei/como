@@ -636,7 +636,7 @@ ECode Date::CompareTo(
 }
 
 ECode Date::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     Long ht;
     GetTime(ht);

@@ -164,7 +164,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode Equals(
         /* [in] */ IInterface* obj,

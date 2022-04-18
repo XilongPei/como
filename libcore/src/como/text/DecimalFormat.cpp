@@ -554,7 +554,7 @@ ECode DecimalFormat::Equals(
 }
 
 ECode DecimalFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     String prefix;
     GetPositivePrefix(prefix);

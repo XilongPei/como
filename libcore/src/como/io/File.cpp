@@ -939,7 +939,7 @@ ECode File::Equals(
 }
 
 ECode File::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return GetFS()->GetHashCode(this, hash);
 }

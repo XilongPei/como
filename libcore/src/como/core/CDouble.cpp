@@ -128,7 +128,7 @@ ECode CDouble::Equals(
 }
 
 ECode CDouble::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

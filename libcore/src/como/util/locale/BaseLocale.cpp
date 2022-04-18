@@ -161,7 +161,7 @@ ECode BaseLocale::ToString(
 }
 
 ECode BaseLocale::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     VOLATILE_GET(hash, mHash);
     if (hash == 0) {
@@ -332,7 +332,7 @@ ECode BaseLocale::Key::CompareTo(
 }
 
 ECode BaseLocale::Key::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mHash;
     return NOERROR;

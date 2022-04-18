@@ -169,7 +169,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         String ToString();
 
@@ -177,7 +177,7 @@ private:
         AutoPtr<HashtableEntry> Clone();
 
     public:
-        Integer mHash;
+        Long mHash;
         AutoPtr<IInterface> mKey;
         AutoPtr<IInterface> mValue;
         AutoPtr<HashtableEntry> mNext;
@@ -315,7 +315,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode PutIfAbsent(
         /* [in] */ IInterface* key,

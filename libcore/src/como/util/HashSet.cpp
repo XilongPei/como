@@ -165,7 +165,7 @@ ECode HashSet::Equals(
 }
 
 ECode HashSet::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return AbstractSet::GetHashCode(hash);
 }

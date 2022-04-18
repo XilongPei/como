@@ -76,7 +76,7 @@ public:
         /* [in] */ Double d);
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode Equals(
         /* [in] */ IInterface* obj,

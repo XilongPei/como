@@ -219,7 +219,7 @@ ECode FloatBuffer::ToString(
 }
 
 ECode FloatBuffer::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     Integer p;

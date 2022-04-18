@@ -661,7 +661,7 @@ ECode ConcurrentLinkedQueue::Equals(
 }
 
 ECode ConcurrentLinkedQueue::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return AbstractQueue::GetHashCode(hash);
 }

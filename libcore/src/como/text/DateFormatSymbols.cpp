@@ -303,7 +303,7 @@ ECode DateFormatSymbols::CloneImpl(
 }
 
 ECode DateFormatSymbols::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     VOLATILE_GET(hash, mCachedHashCode);
     if (hash == 0) {

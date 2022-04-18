@@ -588,7 +588,7 @@ ECode SimpleTimeZone::CloneImpl(
 }
 
 ECode SimpleTimeZone::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     AutoLock lock(this);
 

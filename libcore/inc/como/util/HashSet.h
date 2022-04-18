@@ -94,7 +94,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode RemoveAll(
         /* [in] */ ICollection* c,

@@ -1086,13 +1086,13 @@ ECode Locale::CloneImpl(
 }
 
 ECode Locale::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     VOLATILE_GET(hash, mHashCodeValue);
     if (hash == 0) {
         mBaseLocale->GetHashCode(hash);
         if (mLocaleExtensions != nullptr) {
-            Integer lhc;
+            Long lhc;
             mLocaleExtensions->GetHashCode(lhc);
             hash ^= lhc;
         }
@@ -1197,10 +1197,10 @@ Locale::LocaleKey::LocaleKey(
     , mExts(extensions)
 {
     // Calculate the hash value here because it's always used.
-    Integer h;
+    Long h;
     mBase->GetHashCode(h);
     if (mExts != nullptr) {
-        Integer eh;
+        Long eh;
         mExts->GetHashCode(eh);
         h ^= eh;
     }
@@ -1243,7 +1243,7 @@ ECode Locale::LocaleKey::Equals(
 }
 
 ECode Locale::LocaleKey::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mHash;
     return NOERROR;

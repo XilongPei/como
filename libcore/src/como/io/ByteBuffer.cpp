@@ -295,7 +295,7 @@ ECode ByteBuffer::ToString(
 }
 
 ECode ByteBuffer::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     Integer p;

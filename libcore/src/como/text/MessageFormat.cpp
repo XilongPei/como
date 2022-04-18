@@ -627,7 +627,7 @@ ECode MessageFormat::Equals(
 }
 
 ECode MessageFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mPattern.GetHashCode();
     return NOERROR;

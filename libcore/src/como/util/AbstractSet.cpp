@@ -47,7 +47,7 @@ ECode AbstractSet::Equals(
 }
 
 ECode AbstractSet::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     AutoPtr<IIterator> it;

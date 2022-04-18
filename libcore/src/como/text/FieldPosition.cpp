@@ -119,7 +119,7 @@ ECode FieldPosition::Equals(
 }
 
 ECode FieldPosition::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (mField << 24) | (mBeginIndex << 16) | mEndIndex;
     return NOERROR;

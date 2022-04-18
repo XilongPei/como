@@ -875,7 +875,7 @@ ECode UnixFileSystem::Compare(
 
 ECode UnixFileSystem::GetHashCode(
     /* [in] */ IFile* f,
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     String path;
     f->GetPath(path);

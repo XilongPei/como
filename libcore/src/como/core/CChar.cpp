@@ -72,7 +72,7 @@ ECode CChar::Equals(
 }
 
 ECode CChar::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

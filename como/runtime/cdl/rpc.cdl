@@ -189,7 +189,7 @@ interface IInterfacePack
         [out] String& serverName);
 
     GetHashCode(
-        [out] Integer& hash);
+        [out] Long& hash);
 
     GetServerObjectId(
         [out] Long& serverObjectId);

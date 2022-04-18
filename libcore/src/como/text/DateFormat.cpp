@@ -251,7 +251,7 @@ ECode DateFormat::IsLenient(
 }
 
 ECode DateFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = Object::GetHashCode(mNumberFormat);
     return NOERROR;

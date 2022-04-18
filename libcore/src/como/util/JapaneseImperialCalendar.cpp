@@ -217,9 +217,9 @@ ECode JapaneseImperialCalendar::Equals(
 }
 
 ECode JapaneseImperialCalendar::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
-    Integer chash, jhash;
+    Long chash, jhash;
     Calendar::GetHashCode(chash);
     mJdate->GetHashCode(jhash);
     hash = chash + jhash;

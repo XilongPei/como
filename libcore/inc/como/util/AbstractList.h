@@ -175,7 +175,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     virtual ECode RemoveRange(
         /* [in] */ Integer fromIndex,

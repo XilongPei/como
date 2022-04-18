@@ -76,7 +76,7 @@ public:
             /* [out] */ AutoPtr<IInterface>& value) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode ToString(
             /* [out] */ String& desc) override;
@@ -492,7 +492,7 @@ public:
             /* [out] */ AutoPtr<IInterface>& value) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode ToString(
             /* [out] */ String& desc) override;
@@ -595,7 +595,7 @@ public:
             /* [out] */ Boolean* changed = nullptr) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Equals(
             /* [in] */ IInterface* obj,
@@ -665,7 +665,7 @@ public:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
     };
 
     class EntrySetView
@@ -700,7 +700,7 @@ public:
             /* [out] */ Boolean* changed = nullptr) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Equals(
             /* [in] */ IInterface* obj,
@@ -832,7 +832,7 @@ public:
         /* [out] */ AutoPtr<ISet>& entries) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode ToString(
         /* [out] */ String& desc) override;

@@ -2087,7 +2087,7 @@ ECode SimpleDateFormat::CloneImpl(
 }
 
 ECode SimpleDateFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mPattern.GetHashCode();
     return NOERROR;

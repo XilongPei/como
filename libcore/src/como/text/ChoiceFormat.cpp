@@ -323,7 +323,7 @@ ECode ChoiceFormat::CloneImpl(
 }
 
 ECode ChoiceFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mChoiceLimits.GetLength();
     if (mChoiceFormats.GetLength() > 0) {

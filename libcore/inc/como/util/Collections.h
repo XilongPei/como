@@ -130,7 +130,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Add(
             /* [in] */ IInterface* obj,
@@ -197,7 +197,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Get(
             /* [in] */ Integer index,
@@ -384,7 +384,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
     protected:
         AutoPtr<ICollection> mC; // Backing Collection
@@ -415,7 +415,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Add(
             /* [in] */ IInterface* obj,
@@ -490,7 +490,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode Get(
             /* [in] */ Integer index,
@@ -754,7 +754,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode AddAll(
             /* [in] */ ICollection* c,
@@ -800,7 +800,7 @@ private:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
         ECode PutIfAbsent(
             /* [in] */ IInterface* key,
@@ -849,7 +849,7 @@ private:
             /* [out] */ Boolean& isEqual) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hash) override;
+            /* [out] */ Long& hash) override;
 
     public:
         AutoPtr<IComparator> mCmp;

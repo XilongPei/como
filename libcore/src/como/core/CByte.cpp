@@ -114,7 +114,7 @@ ECode CByte::Equals(
 }
 
 ECode CByte::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

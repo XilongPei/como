@@ -551,7 +551,7 @@ ECode ConcurrentHashMap::GetEntrySet(
 }
 
 ECode ConcurrentHashMap::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     VOLATILE_GET(Array<Node*>t, mTable);
@@ -1204,7 +1204,7 @@ ECode ConcurrentHashMap::Node::GetValue(
 }
 
 ECode ConcurrentHashMap::Node::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     VOLATILE_GET(IInterface* val, mVal);
     hash = Object::GetHashCode(mKey) ^ Object::GetHashCode(val);
@@ -2198,7 +2198,7 @@ ECode ConcurrentHashMap::MapEntry::GetValue(
 }
 
 ECode ConcurrentHashMap::MapEntry::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = Object::GetHashCode(mKey) ^ Object::GetHashCode(mVal);
     return NOERROR;
@@ -2488,7 +2488,7 @@ ECode ConcurrentHashMap::KeySetView::AddAll(
 }
 
 ECode ConcurrentHashMap::KeySetView::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     FOR_EACH(IInterface*, e, , this) {
@@ -2628,7 +2628,7 @@ ECode ConcurrentHashMap::ValuesView::Equals(
 }
 
 ECode ConcurrentHashMap::ValuesView::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return CollectionView::GetHashCode(hash);
 }
@@ -2734,7 +2734,7 @@ ECode ConcurrentHashMap::EntrySetView::AddAll(
 }
 
 ECode ConcurrentHashMap::EntrySetView::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     VOLATILE_GET(Array<Node*> t, mMap->mTable);

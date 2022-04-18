@@ -114,7 +114,7 @@ ECode CShort::Equals(
 }
 
 ECode CShort::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = (Integer)mValue;
     return NOERROR;

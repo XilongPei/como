@@ -221,7 +221,7 @@ Array<ILocale*> NumberFormat::GetAvailableLocales()
 }
 
 ECode NumberFormat::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mMaximumIntegerDigits * 37 + mMaxFractionDigits;
     return NOERROR;

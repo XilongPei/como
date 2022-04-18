@@ -392,7 +392,7 @@ ECode DecimalFormatSymbols::Equals(
 }
 
 ECode DecimalFormatSymbols::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mZeroDigit;
     hash = hash * 37 + mGroupingSeparator;

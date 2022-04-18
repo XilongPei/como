@@ -149,7 +149,7 @@ ECode MathContext::Equals(
 }
 
 ECode MathContext::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = ((mPrecision << 3) | static_cast<Integer>(mRoundingMode));
     return NOERROR;

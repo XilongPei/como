@@ -628,7 +628,7 @@ ECode HashMap::Equals(
 }
 
 ECode HashMap::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return AbstractMap::GetHashCode(hash);
 }
@@ -659,7 +659,7 @@ ECode HashMap::Node::ToString(
 }
 
 ECode HashMap::Node::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = Object::GetHashCode(mKey) ^ Object::GetHashCode(mValue);
     return NOERROR;

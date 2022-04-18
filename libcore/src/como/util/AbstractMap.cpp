@@ -574,7 +574,7 @@ ECode AbstractMap::Equals(
 }
 
 ECode AbstractMap::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     AutoPtr<ISet> entries;
@@ -700,7 +700,7 @@ ECode AbstractMap::SimpleEntry::Equals(
 }
 
 ECode AbstractMap::SimpleEntry::GetHashCode(
-    /* [out] */ Integer& hashCode)
+    /* [out] */ Long& hashCode)
 {
     hashCode = (mKey == NULL ? 0 : Object::GetHashCode(mKey)) ^
             (mValue == NULL ? 0 : Object::GetHashCode(mValue));
@@ -773,7 +773,7 @@ ECode AbstractMap::SimpleImmutableEntry::Equals(
 }
 
 ECode AbstractMap::SimpleImmutableEntry::GetHashCode(
-    /* [out] */ Integer& hashCode)
+    /* [out] */ Long& hashCode)
 {
     hashCode = (mKey == NULL ? 0 : Object::GetHashCode(mKey)) ^
             (mValue == NULL ? 0 : Object::GetHashCode(mValue));

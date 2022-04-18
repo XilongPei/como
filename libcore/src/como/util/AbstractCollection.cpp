@@ -388,7 +388,7 @@ ECode AbstractCollection::Equals(
 }
 
 ECode AbstractCollection::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return SyncObject::GetHashCode(hash);
 }

@@ -125,7 +125,7 @@ ECode Era::Equals(
 }
 
 ECode Era::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     if (mHash == 0) {
         mHash = mName.GetHashCode() ^ mAbbr.GetHashCode() ^ (Integer)mSince ^ (Integer)(mSince >> 32)

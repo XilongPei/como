@@ -295,7 +295,7 @@ public:
         /* [out] */ AutoPtr<IBigDecimal>& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode ToString(
         /* [out] */ String& desc) override;

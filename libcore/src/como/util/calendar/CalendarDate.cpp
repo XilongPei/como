@@ -447,7 +447,7 @@ ECode CalendarDate::Equals(
 }
 
 ECode CalendarDate::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     // a pseudo (local standard) time stamp value in milliseconds
     // from the Epoch, assuming Gregorian calendar fields.

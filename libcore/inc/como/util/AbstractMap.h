@@ -66,7 +66,7 @@ public:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hashCode) override;
+            /* [out] */ Long& hashCode) override;
 
         ECode ToString(
             /* [out] */ String& str) override;
@@ -106,7 +106,7 @@ public:
             /* [out] */ Boolean& result) override;
 
         ECode GetHashCode(
-            /* [out] */ Integer& hashCode) override;
+            /* [out] */ Long& hashCode) override;
 
         ECode ToString(
             /* [out] */ String& str) override;
@@ -167,7 +167,7 @@ public:
         /* [out] */ Boolean& result) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode ToString(
         /* [out] */ String& str) override;

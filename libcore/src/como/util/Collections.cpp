@@ -337,7 +337,7 @@ ECode Collections::UnmodifiableSet::Equals(
 }
 
 ECode Collections::UnmodifiableSet::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return IObject::Probe(mC)->GetHashCode(hash);
 }
@@ -443,7 +443,7 @@ ECode Collections::UnmodifiableList::Equals(
 }
 
 ECode Collections::UnmodifiableList::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return IObject::Probe(mList)->GetHashCode(hash);
 }
@@ -859,7 +859,7 @@ ECode Collections::SynchronizedCollection::Equals(
 }
 
 ECode Collections::SynchronizedCollection::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     return SyncObject::GetHashCode(hash);
 }
@@ -882,7 +882,7 @@ ECode Collections::SynchronizedSet::Equals(
 }
 
 ECode Collections::SynchronizedSet::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     AutoLock lock(mMutex);
     hash = Object::GetHashCode(mC);
@@ -992,7 +992,7 @@ ECode Collections::SynchronizedList::Equals(
 }
 
 ECode Collections::SynchronizedList::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     AutoLock lock(mMutex);
     hash = Object::GetHashCode(mList);
@@ -1449,7 +1449,7 @@ ECode Collections::EmptyList::Equals(
 }
 
 ECode Collections::EmptyList::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     return NOERROR;
@@ -1538,7 +1538,7 @@ ECode Collections::EmptyMap::Equals(
 }
 
 ECode Collections::EmptyMap::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 0;
     return NOERROR;
@@ -1608,7 +1608,7 @@ ECode Collections::ReverseComparator2::Equals(
 }
 
 ECode Collections::ReverseComparator2::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = Object::GetHashCode(mCmp) ^ IInteger::MIN_VALUE;
     return NOERROR;

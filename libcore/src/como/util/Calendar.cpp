@@ -749,7 +749,7 @@ ECode Calendar::Equals(
 }
 
 ECode Calendar::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     Integer otheritems = (mLenient ? 1 : 0)
             | (mFirstDayOfWeek << 1)

@@ -2919,10 +2919,10 @@ ECode TreeMap::TreeMapEntry::Equals(
 }
 
 ECode TreeMap::TreeMapEntry::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
-    Integer keyHash = 0;
-    Integer valueHash = 0;
+    Long keyHash = 0;
+    Long valueHash = 0;
     if (IObject::Probe(mKey) != nullptr) {
         IObject::Probe(mKey)->GetHashCode(keyHash);
     }

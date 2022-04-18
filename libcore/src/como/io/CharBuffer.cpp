@@ -287,7 +287,7 @@ ECode CharBuffer::GetArrayOffset(
 }
 
 ECode CharBuffer::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = 1;
     Integer p;

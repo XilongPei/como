@@ -114,7 +114,7 @@ ECode CInteger::Equals(
 }
 
 ECode CInteger::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mValue;
     return NOERROR;

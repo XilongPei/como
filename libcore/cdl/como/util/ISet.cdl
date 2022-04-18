@@ -53,7 +53,7 @@ interface ISet
         [out] Boolean& result);
 
     GetHashCode(
-        [out] Integer& hash);
+        [out] Long& hash);
 
     GetIterator(
         [out] IIterator&& it);

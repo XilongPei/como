@@ -83,7 +83,7 @@ public:
         /* [out] */ IInterface** prevValue = nullptr) override;
 
     ECode GetHashCode(
-        /* [out] */ Integer& hash) override;
+        /* [out] */ Long& hash) override;
 
     ECode ToString(
         /* [out] */ String& str) override;
@@ -133,7 +133,7 @@ ECode AttributeEntry::SetValue(
 }
 
 ECode AttributeEntry::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = Object::GetHashCode(mKey) ^ Object::GetHashCode(mValue);
     return NOERROR;
@@ -861,7 +861,7 @@ ECode AttributedString::AttributedStringIterator::Equals(
 }
 
 ECode AttributedString::AttributedStringIterator::GetHashCode(
-    /* [out] */ Integer& hash)
+    /* [out] */ Long& hash)
 {
     hash = mOwner->mText.GetHashCode() ^ mCurrentIndex ^ mBeginIndex ^ mEndIndex;
     return NOERROR;
