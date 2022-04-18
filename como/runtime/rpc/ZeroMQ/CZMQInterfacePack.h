@@ -66,8 +66,8 @@ public:
     ECode GetHashCode(
         /* [out] */ Integer& hash) override;
 
-    ECode GetServerIdString(
-        /* [out] */ String& serverIdString) override;
+    ECode GetServerObjectId(
+        /* [out] */ Long& serverObjectId) override;
 
     ECode ReadFromParcel(
         /* [in] */ IParcel* source) override;
@@ -92,6 +92,7 @@ private:
     InterfaceID mIid;
     Boolean mIsParcelable { false };
     String mServerName;     // the same machine, ServerAddress is nullptr
+    Long mServerObjectId;
 };
 
 CZMQInterfacePack* CZMQInterfacePack::From(

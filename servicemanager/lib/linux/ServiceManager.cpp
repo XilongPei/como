@@ -438,4 +438,80 @@ ECode ServiceManager::RemoveService(
     return ServiceManager::GetInstance()->RemoveService(name);
 }
 
+ECode ServiceManager::RemoveObject(
+    /* [in] */ IInterfacePack* intf)
+{
+    ECode ec = NOERROR;
+    DBusError err;
+    DBusConnection* conn = nullptr;
+    DBusMessage* msg = nullptr;
+    DBusMessage* reply = nullptr;
+    DBusMessageIter args;
+    const char* str = nullptr;
+
+    dbus_error_init(&err);
+
+    conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
+    if (dbus_error_is_set(&err)) {
+        Logger_E("ServiceManager", "Connect to bus daemon failed, error is \"%s\".",
+                err.message);
+        ec = E_RUNTIME_EXCEPTION;
+        goto Exit;
+    }
+
+    msg = dbus_message_new_method_call(DBUS_NAME, STUB_OBJECT_PATH,
+                                           STUB_INTERFACE_PATH, "RemoveObject");
+    if (msg == nullptr) {
+        Logger_E("ServiceManager", "Fail to create dbus message.");
+        ec = E_RUNTIME_EXCEPTION;
+        goto Exit;
+    }
+
+    dbus_message_iter_init_append(msg, &args);
+    Long hash;
+    intf->GetServerObjectId(hash);
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT64, &hash);
+
+    reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
+    if (dbus_error_is_set(&err)) {
+        Logger_E("ServiceManager", "Fail to send message, error is \"%s\"", err.message);
+        ec = E_REMOTE_EXCEPTION;
+        goto Exit;
+    }
+
+    if (!dbus_message_iter_init(reply, &args)) {
+        Logger_E("ServiceManager", "Reply has no results.");
+        ec = E_REMOTE_EXCEPTION;
+        goto Exit;
+    }
+
+    if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
+        Logger_E("ServiceManager", "The first result is not Integer.");
+        ec = E_REMOTE_EXCEPTION;
+        goto Exit;
+    }
+
+    dbus_message_iter_get_basic(&args, &ec);
+
+    if (FAILED(ec)) {
+        Logger_E("ServiceManager", "Remote call failed with ec = 0x%X", ec);
+    }
+
+Exit:
+    if (msg != nullptr) {
+        dbus_message_unref(msg);
+    }
+    if (reply != nullptr) {
+        dbus_message_unref(reply);
+    }
+    if (conn != nullptr) {
+        dbus_connection_close(conn);
+        dbus_connection_unref(conn);
+    }
+
+    dbus_error_free(&err);
+
+    return ec;
+}
+
 } // namespace jing

@@ -119,6 +119,10 @@ ECode CDBusChannelFactory::MarshalInterface(
                 CDBusChannel* channel = CDBusChannel::GetStubChannel(stub);
                 pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
+
+                Long hash = 0;
+                //obj->GetHashCode(hash);
+
                 ec = RegisterExportObject(mType, obj, stub);
                 if (FAILED(ec)) {
                     Logger::E("CDBusChannelFactory", "RegisterExportObject failed.");

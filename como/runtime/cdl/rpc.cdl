@@ -191,8 +191,8 @@ interface IInterfacePack
     GetHashCode(
         [out] Integer& hash);
 
-    GetServerIdString(
-        [out] String& serverIdString);
+    GetServerObjectId(
+        [out] Long& serverObjectId);
 }
 
 interface IArgumentList;

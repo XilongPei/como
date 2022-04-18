@@ -73,12 +73,10 @@ ECode InterfacePack::GetHashCode(
     return NOERROR;
 }
 
-ECode InterfacePack::GetServerIdString(
-    /* [out] */ String& serverIdString)
+ECode InterfacePack::GetServerObjectId(
+    /* [out] */ Long& serverObjectId)
 {
-    char buf[32];
-    snprintf(buf, 32, "0x%p", reinterpret_cast<uintptr_t>(mBinder.get()));
-    serverIdString = String(buf);
+    serverObjectId = reinterpret_cast<uintptr_t>(mBinder.get());
     return NOERROR;
 }
 

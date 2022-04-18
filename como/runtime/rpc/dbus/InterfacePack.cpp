@@ -71,10 +71,10 @@ ECode InterfacePack::GetHashCode(
     return NOERROR;
 }
 
-ECode InterfacePack::GetServerIdString(
-    /* [out] */ String& serverIdString)
+ECode InterfacePack::GetServerObjectId(
+    /* [out] */ Long& serverObjectId)
 {
-    serverIdString = mDBusName;
+    serverObjectId = mServerObjectId;
     return NOERROR;
 }
 
