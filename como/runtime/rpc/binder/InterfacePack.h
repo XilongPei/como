@@ -91,15 +91,22 @@ public:
     void SetParcelable(
         /* [in] */ Boolean parcelable);
 
+    void SetServerObjectId(
+        /* [in] */ Long serverObjectId);
+
     inline static InterfacePack* From(
         /* [in] */ IInterfacePack* ipack);
 
 private:
     android::sp<android::IBinder> mBinder;
+
+    // `InterfacePack Android`
+
     CoclassID mCid;
     InterfaceID mIid;
     Boolean mIsParcelable { false };
     String mServerName;     // the same machine, ServerAddress is nullptr
+    Long mServerObjectId;
 };
 
 InterfacePack* InterfacePack::From(
@@ -108,6 +115,6 @@ InterfacePack* InterfacePack::From(
     return (InterfacePack*)ipack;
 }
 
-}
+} // namespace como
 
 #endif // __COMO_INTERFACEPACK_H__

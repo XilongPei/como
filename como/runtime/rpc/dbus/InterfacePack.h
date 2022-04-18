@@ -97,6 +97,9 @@ public:
         /* [in] */ IInterfacePack* ipack);
 
 private:
+
+    //@ `InterfacePack` Interface description data
+
     String mDBusName;       // channel->mName, dbus_bus_get_unique_name(conn);
     CoclassID mCid;
     InterfaceID mIid;

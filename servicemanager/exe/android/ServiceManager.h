@@ -30,6 +30,8 @@ class ServiceManager
     , public android::BBinder
 {
 private:
+
+    // `InterfacePack Android`
     struct InterfacePack
     {
         android::sp<android::IBinder> mBinder;

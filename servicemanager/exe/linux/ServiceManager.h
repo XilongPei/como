@@ -30,6 +30,9 @@ class ServiceManager
     : public LightRefBase
 {
 public:
+
+    //@ `InterfacePack`
+
     struct InterfacePack
     {
         String mServerName;
@@ -37,6 +40,7 @@ public:
         CoclassID mCid;
         InterfaceID mIid;
         Boolean mIsParcelable;
+        Long mServerObjectId;
     };
 
 public:

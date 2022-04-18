@@ -42,6 +42,7 @@ ECode ServiceManager::AddService(
     ipack->mCid = object.mCid;
     ipack->mIid = object.mIid;
     ipack->mIsParcelable = object.mIsParcelable;
+    ipack->mServerObjectId = 0;
 
     Mutex::AutoLock lock(mServicesLock);
     if (mServices.Put(name, ipack) != 0) {
@@ -197,10 +198,12 @@ DBusHandlerResult ServiceManager::HandleMessage(
                 if (FAILED(ec))
                     goto GetServiceExit_2;
 
+                // Consistent with InterfacePack::WriteToParcel() write order
                 parcel->WriteString(ipack->mDBusName);
                 parcel->WriteCoclassID(ipack->mCid);
                 parcel->WriteInterfaceID(ipack->mIid);
                 parcel->WriteBoolean(ipack->mIsParcelable);
+                parcel->WriteLong(ipack->mServerObjectId);
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
             }
             else {
@@ -213,6 +216,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
                 parcel->WriteCoclassID(ipack->mCid);
                 parcel->WriteInterfaceID(ipack->mIid);
                 parcel->WriteBoolean(ipack->mIsParcelable);
+                parcel->WriteLong(ipack->mServerObjectId);
                 parcel->WriteString(ipack->mServerName);
             }
 #endif

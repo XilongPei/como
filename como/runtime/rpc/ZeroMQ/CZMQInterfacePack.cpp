@@ -86,6 +86,7 @@ ECode CZMQInterfacePack::ReadFromParcel(
     source->ReadCoclassID(mCid);
     source->ReadInterfaceID(mIid);
     source->ReadBoolean(mIsParcelable);
+    source->ReadLong(mServerObjectId);
     source->ReadString(mServerName);
     return NOERROR;
 }
@@ -96,6 +97,7 @@ ECode CZMQInterfacePack::WriteToParcel(
     dest->WriteCoclassID(mCid);
     dest->WriteInterfaceID(mIid);
     dest->WriteBoolean(mIsParcelable);
+    dest->WriteLong(mServerObjectId);
     dest->WriteString(mServerName);
     return NOERROR;
 }

@@ -85,8 +85,8 @@ ECode InterfacePack::ReadFromParcel(
     source->ReadCoclassID(mCid);
     source->ReadInterfaceID(mIid);
     source->ReadBoolean(mIsParcelable);
-    source->ReadString(mServerName);
     source->ReadLong(mServerObjectId);
+    source->ReadString(mServerName);
     return NOERROR;
 }
 
@@ -97,8 +97,8 @@ ECode InterfacePack::WriteToParcel(
     dest->WriteCoclassID(mCid);
     dest->WriteInterfaceID(mIid);
     dest->WriteBoolean(mIsParcelable);
-    dest->WriteString(mServerName);
     dest->WriteLong(mServerObjectId);
+    dest->WriteString(mServerName);
     return NOERROR;
 }
 
@@ -130,7 +130,6 @@ void InterfacePack::SetParcelable(
 {
     mIsParcelable = parcelable;
 }
-
 
 void InterfacePack::SetServerObjectId(
     /* [in] */ Long serverObjectId)
