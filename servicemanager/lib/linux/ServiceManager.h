@@ -51,7 +51,7 @@ public:
         /* [in] */ IInterface* intfService);
 
     ECode ReleaseObject(
-        /* [in] */ IInterfacePack* intf);
+        /* [in] */ IProxy* proxy);
 private:
     ServiceManager() {}
     ServiceManager(

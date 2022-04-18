@@ -305,6 +305,9 @@ interface IProxy
         [in] HANDLE cookie = 0,
         [in] Integer flags = 0,
         [out] IDeathRecipient&* outRecipient = nullptr);
+
+    GetIpack(
+        [out] IInterfacePack&& ipack);
 }
 
 [

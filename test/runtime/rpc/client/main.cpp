@@ -164,6 +164,15 @@ TEST(RPCTest, TestIsStubAlive)
     EXPECT_TRUE(alive);
 }
 
+TEST(RPCTest, TestReleaseObject)
+{
+    EXPECT_TRUE(SERVICE != nullptr);
+    IProxy* proxy = IProxy::Probe(SERVICE);
+    EXPECT_TRUE(proxy != nullptr);
+    ECode ec = ServiceManager::GetInstance()->ReleaseObject(proxy);
+    EXPECT_EQ(0, ec);
+}
+
 /*
 TEST(RPCTest, TestReleaseStub)
 {

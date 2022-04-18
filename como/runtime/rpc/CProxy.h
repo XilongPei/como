@@ -342,6 +342,9 @@ public:
         /* [in] */ Integer flags = 0,
         /* [out] */ AutoPtr<IDeathRecipient>* outRecipient = nullptr) override;
 
+    ECode GetIpack(
+        /* [out] */ AutoPtr<IInterfacePack>& ipack);
+
     AutoPtr<IRPCChannel> GetChannel();
 
     CoclassID GetTargetCoclassID();

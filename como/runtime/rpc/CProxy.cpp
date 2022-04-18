@@ -1902,6 +1902,13 @@ ECode CProxy::UnlinkToDeath(
     return mChannel->UnlinkToDeath(this, recipient, cookie, flags, outRecipient);
 }
 
+ECode CProxy::GetIpack(
+    /* [out] */ AutoPtr<IInterfacePack>& ipack)
+{
+    ipack = mIpack;
+    return NOERROR;
+}
+
 AutoPtr<IRPCChannel> CProxy::GetChannel()
 {
     return mChannel;
