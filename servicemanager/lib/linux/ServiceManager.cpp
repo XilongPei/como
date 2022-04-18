@@ -438,7 +438,7 @@ ECode ServiceManager::RemoveService(
     return ServiceManager::GetInstance()->RemoveService(name);
 }
 
-ECode ServiceManager::RemoveObject(
+ECode ServiceManager::ReleaseObject(
     /* [in] */ IInterfacePack* intf)
 {
     ECode ec = NOERROR;
@@ -460,7 +460,7 @@ ECode ServiceManager::RemoveObject(
     }
 
     msg = dbus_message_new_method_call(DBUS_NAME, STUB_OBJECT_PATH,
-                                           STUB_INTERFACE_PATH, "RemoveObject");
+                                           STUB_INTERFACE_PATH, "ReleaseObject");
     if (msg == nullptr) {
         Logger_E("ServiceManager", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;

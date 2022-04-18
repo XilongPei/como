@@ -149,10 +149,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
-            return false;
-
+        unsigned long hash = HashKey(key);
         unsigned int index = (unsigned int)hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -171,10 +168,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
-            return Val(0);
-
+        unsigned long hash = HashKey(key);
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -193,10 +187,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
-            return;
-
+        unsigned long hash = HashKey(key);
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
@@ -214,13 +205,33 @@ public:
             prev = curr;
             curr = prev->mNext;
         }
+    }
 
-        return;
+    void Remove(
+        /* [in] */ unsigned long hash)
+    {
+        unsigned int index = hash % mBucketSize;
+        Bucket* curr = mBuckets[index];
+        Bucket* prev = curr;
+        while (curr != nullptr) {
+            if (curr->mHash == hash) {
+                if (curr == mBuckets[index]) {
+                    mBuckets[index] = curr->mNext;
+                }
+                else {
+                    prev->mNext = curr->mNext;
+                }
+                curr->lastAccessTime.tv_sec = 0;
+                return;
+            }
+            prev = curr;
+            curr = prev->mNext;
+        }
     }
 
     void Clear()
     {
-        for (unsigned int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -314,7 +325,7 @@ public:
     }
 
 private:
-    unsigned int HashKey(
+    unsigned long HashKey(
         /* [in] */ const Key& key)
     {
         HashFunc<Key> hashF;

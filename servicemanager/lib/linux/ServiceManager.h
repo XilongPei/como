@@ -50,7 +50,7 @@ public:
         /* [in] */ const String& name,
         /* [in] */ IInterface* intfService);
 
-    ECode RemoveObject(
+    ECode ReleaseObject(
         /* [in] */ IInterfacePack* intf);
 private:
     ServiceManager() {}

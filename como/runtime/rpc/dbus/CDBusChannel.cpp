@@ -423,26 +423,26 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
             dbus_connection_flush(conn);
         }
     }
-    else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "RemoveObject")) {
+    else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "ReleaseObject")) {
         DBusMessageIter args;
         DBusMessageIter subArg;
         Long hash;
         ECode ec = NOERROR;
 
         if (!dbus_message_iter_init(msg, &args)) {
-            Logger_E("CDBusChannel", "RemoveObject message has no arguments.");
-            goto RemoveObjectExit;
+            Logger_E("CDBusChannel", "ReleaseObject message has no arguments.");
+            goto ReleaseObjectExit;
         }
         if (DBUS_TYPE_UINT64 != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("CDBusChannel", "RemoveObject message has no string arguments.");
-            goto RemoveObjectExit;
+            Logger_E("CDBusChannel", "ReleaseObject message has no string arguments.");
+            goto ReleaseObjectExit;
         }
 
         dbus_message_iter_get_basic(&args, &hash);
 
-        //ec = UnregisterExportHash(RPCType::Local, hash);
+        ec = UnregisterExportObject(RPCType::Local, hash);
 
-    RemoveObjectExit:
+    ReleaseObjectExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
         if (nullptr == reply) {
             Logger_E("CDBusChannel::HandleMessage",
