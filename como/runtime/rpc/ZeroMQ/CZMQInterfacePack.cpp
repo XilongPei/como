@@ -73,6 +73,13 @@ ECode CZMQInterfacePack::GetHashCode(
     return NOERROR;
 }
 
+ECode InterfacePack::GetServerIdString(
+    /* [out] */ String& serverIdString)
+{
+    serverIdString = mDBusName;
+    return NOERROR;
+}
+
 ECode CZMQInterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {

@@ -66,6 +66,9 @@ public:
     ECode GetHashCode(
         /* [out] */ Integer& hash) override;
 
+    ECode GetServerIdString(
+        /* [out] */ String& serverIdString) override;
+
     ECode ReadFromParcel(
         /* [in] */ IParcel* source) override;
 

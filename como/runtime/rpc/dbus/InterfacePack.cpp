@@ -71,6 +71,13 @@ ECode InterfacePack::GetHashCode(
     return NOERROR;
 }
 
+ECode InterfacePack::GetServerIdString(
+    /* [out] */ String& serverIdString)
+{
+    serverIdString = mDBusName;
+    return NOERROR;
+}
+
 ECode InterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {

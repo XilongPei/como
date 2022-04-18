@@ -190,6 +190,9 @@ interface IInterfacePack
 
     GetHashCode(
         [out] Integer& hash);
+
+    GetServerIdString(
+        [out] String& serverIdString);
 }
 
 interface IArgumentList;

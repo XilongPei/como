@@ -16,6 +16,7 @@
 
 #include "rpc/binder/InterfacePack.h"
 #include <binder/Parcel.h>
+#include <stdio.h>
 
 namespace como {
 
@@ -69,6 +70,15 @@ ECode InterfacePack::GetHashCode(
     /* [out] */ Integer& hash)
 {
     hash = reinterpret_cast<uintptr_t>(mBinder.get());
+    return NOERROR;
+}
+
+ECode InterfacePack::GetServerIdString(
+    /* [out] */ String& serverIdString)
+{
+    char buf[32];
+    snprintf(buf, 32, "0x%p", reinterpret_cast<uintptr_t>(mBinder.get()));
+    serverIdString = String(buf);
     return NOERROR;
 }
 
