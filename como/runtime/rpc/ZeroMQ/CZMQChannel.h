@@ -59,6 +59,9 @@ public:
     ECode ReleasePeer(
         /* [out] */ Boolean& alive) override;
 
+    ECode ReleaseObject(
+        /* [in] */ Long objectId) override;
+
     ECode LinkToDeath(
         /* [in] */ IProxy* proxy,
         /* [in] */ IDeathRecipient* recipient,

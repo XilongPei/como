@@ -331,6 +331,9 @@ public:
     ECode ReleaseStub(
         /* [out] */ Boolean& alive) override;
 
+    ECode ReleaseObject(
+        /* [in] */ Long objectId) override;
+
     ECode LinkToDeath(
         /* [in] */ IDeathRecipient* recipient,
         /* [in] */ HANDLE cookie = 0,

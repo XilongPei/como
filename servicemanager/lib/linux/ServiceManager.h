@@ -50,8 +50,6 @@ public:
         /* [in] */ const String& name,
         /* [in] */ IInterface* intfService);
 
-    ECode ReleaseObject(
-        /* [in] */ IProxy* proxy);
 private:
     ServiceManager() {}
     ServiceManager(

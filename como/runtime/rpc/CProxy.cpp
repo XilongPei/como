@@ -1885,6 +1885,12 @@ ECode CProxy::ReleaseStub(
     return mChannel->ReleasePeer(alive);
 }
 
+ECode CProxy::ReleaseObject(
+    /* [in] */ Long objectId)
+{
+    return mChannel->ReleaseObject(objectId);
+}
+
 ECode CProxy::LinkToDeath(
     /* [in] */ IDeathRecipient* recipient,
     /* [in] */ HANDLE cookie,

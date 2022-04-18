@@ -117,6 +117,14 @@ ECode CZMQChannel::ReleasePeer(
     return ec;
 }
 
+ECode CZMQChannel::ReleaseObject(
+    /* [in] */ Long objectId)
+{
+    //TODO
+    objectId = 0;
+    return NOERROR;
+}
+
 ECode CZMQChannel::LinkToDeath(
     /* [in] */ IProxy* proxy,
     /* [in] */ IDeathRecipient* recipient,

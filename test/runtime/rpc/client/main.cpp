@@ -169,7 +169,13 @@ TEST(RPCTest, TestReleaseObject)
     EXPECT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
-    ECode ec = ServiceManager::GetInstance()->ReleaseObject(proxy);
+
+    Long hash;
+    AutoPtr<IInterfacePack> ipack;
+    proxy->GetIpack(ipack);
+    ipack->GetServerObjectId(hash);
+
+    ECode ec = proxy->ReleaseObject(hash);
     EXPECT_EQ(0, ec);
 }
 

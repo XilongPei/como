@@ -226,6 +226,14 @@ ECode CBinderChannel::ReleasePeer(
     return NOERROR;
 }
 
+ECode CBinderChannel::ReleaseObject(
+    /* [in] */ Long objectId)
+{
+    //TODO
+    objectId = 0;
+    return NOERROR;
+}
+
 ECode CBinderChannel::LinkToDeath(
     /* [in] */ IProxy* proxy,
     /* [in] */ IDeathRecipient* recipient,
