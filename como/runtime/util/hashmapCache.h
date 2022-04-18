@@ -150,7 +150,7 @@ public:
         CompareFunc<Key> compareF;
 
         unsigned long hash = HashKey(key);
-        unsigned int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (curr->mHash == hash && !compareF(curr->mKey, key)) {
@@ -248,7 +248,7 @@ public:
     Array<Val> GetValues()
     {
         Long N = 0;
-        for (unsigned int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
