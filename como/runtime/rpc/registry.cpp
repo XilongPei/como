@@ -18,6 +18,7 @@
 #include "registry.h"
 #include "util/mutex.h"
 #include "util/hashmapCache.h"
+#include "reflection/reflHelpers.h"
 
 namespace como {
 
@@ -68,6 +69,12 @@ ECode RegisterExportObject(
                                    sLocalExportRegistry : sRemoteExportRegistry;
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        String strBuffer;
+        reflHelpers::intfGetObjectInfo(object, strBuffer);
+        Logger::D("RegisterExportObject", "Object of %s\n", strBuffer.string());
+    }
 
     Mutex::AutoLock lock(registryLock);
     if (0 != registry.Put(object, stub))

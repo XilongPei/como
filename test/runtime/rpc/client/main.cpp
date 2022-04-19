@@ -126,6 +126,24 @@ TEST(RPCTest, TestCallTestMethod4)
     Boolean onlyMetadata;
     mc->IsOnlyMetadata(onlyMetadata);
     EXPECT_TRUE(onlyMetadata);
+
+    //
+    // It does not implement the COMO class of IParcelable interface.
+    // The method execution is on the service server side.
+    //
+    // Probe(obj)
+    IProxy* proxy = IProxy::Probe(obj);
+    EXPECT_TRUE(proxy != nullptr);
+
+    AutoPtr<como::IInterfacePack> ipack;
+    ec = proxy->GetIpack(ipack);
+    EXPECT_EQ(0, ec);
+
+    Long hash;
+    ipack->GetHashCode(hash);
+    printf("====> TestCallTestMethod4: %llx\n", hash);
+    ec = proxy->ReleaseObject(hash);
+    EXPECT_EQ(0, ec);
 }
 
 TEST(RPCTest, TestCallTestMethod5)
@@ -155,11 +173,16 @@ TEST(RPCTest, TestCallTestMethod5)
     mc->IsOnlyMetadata(onlyMetadata);
     EXPECT_FALSE(onlyMetadata);
 
+    //
+    // It implements the COMO class of IParcelable interface. Its method
+    // execution is executed on the client side.
+    //
+    // Probe(SERVICE)
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
     Long hash;
     IObject::Probe(obj)->GetHashCode(hash);
-    printf("====> test: %llx\n", hash);
+    printf("====> TestCallTestMethod5: %llx\n", hash);
     ec = proxy->ReleaseObject(hash);
     EXPECT_EQ(0, ec);
 }
