@@ -75,7 +75,9 @@ private:
             mNext = nullptr;
         }
 
-        unsigned int mHash;
+        // Even if the hash value calculated in HashFunc is negative, it is forced
+        // to be positive when assigned to unsigned long
+        unsigned long mHash;
         Key mKey;
         Val mValue;
         struct Bucket* mNext;
@@ -125,8 +127,8 @@ public:
             Rehash();
         }
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
+        unsigned long hash = HashKey(key);
+        if (0 == hash)
             return -1;
 
         unsigned int index = hash % mBucketSize;
@@ -172,11 +174,11 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
+        unsigned long hash = HashKey(key);
+        if (0 == hash)
             return false;
 
-        unsigned int index = (unsigned int)hash % mBucketSize;
+        unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if (curr->mHash == hash && !compareF(curr->mKey, key))
@@ -192,8 +194,8 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
+        unsigned long hash = HashKey(key);
+        if (0 == hash)
             return Val(0);
 
         unsigned int index = hash % mBucketSize;
@@ -207,14 +209,14 @@ public:
         return Val(0);
     }
 
-    void Remove(
+    int Remove(
         /* [in] */ const Key& key)
     {
         CompareFunc<Key> compareF;
 
-        unsigned int hash = HashKey(key);
-        if (hash == -1)
-            return;
+        unsigned long hash = HashKey(key);
+        if (0 == hash)
+            return 0;
 
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
@@ -229,13 +231,13 @@ public:
                 }
                 delete curr;
                 mCount--;
-                return;
+                return 1;
             }
             prev = curr;
             curr = prev->mNext;
         }
 
-        return;
+        return 0;
     }
 
     void Clear()
@@ -307,7 +309,7 @@ public:
     }
 
 private:
-    unsigned int HashKey(
+    unsigned long HashKey(
         /* [in] */ const Key& key)
     {
         HashFunc<Key> hashF;
@@ -325,9 +327,9 @@ private:
             mBucketSize = MAX_BUCKET_SIZE;
         }
         Bucket** newBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
-        if (newBuckets == nullptr) {
+        if (newBuckets == nullptr)
             return;
-        }
+
         for (unsigned int i = 0; i < oldBucketSize; i++) {
             Bucket* curr = mBuckets[i];
             while (curr != nullptr) {
@@ -350,7 +352,6 @@ private:
         unsigned int index = bucket->mHash % bucketSize;
         if (buckets[index] == nullptr) {
             buckets[index] = bucket;
-            return;
         }
         else {
             Bucket* prev = buckets[index];
@@ -358,7 +359,6 @@ private:
                 prev = prev->mNext;
             }
             prev->mNext = bucket;
-            return;
         }
     }
 

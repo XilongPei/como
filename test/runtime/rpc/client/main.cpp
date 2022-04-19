@@ -19,6 +19,7 @@
 #include <comosp.h>
 #include <ServiceManager.h>
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 using como::test::rpc::CID_CService;
 using como::test::rpc::IService;
@@ -136,6 +137,7 @@ TEST(RPCTest, TestCallTestMethod5)
     EXPECT_EQ(ec, NOERROR);
     EXPECT_TRUE(obj != nullptr);
     EXPECT_TRUE(IProxy::Probe(obj) == nullptr);
+
     Integer arg1 = 6;
     Integer result1;
     obj->TestMethod1(arg1, result1);
@@ -152,6 +154,14 @@ TEST(RPCTest, TestCallTestMethod5)
     Boolean onlyMetadata;
     mc->IsOnlyMetadata(onlyMetadata);
     EXPECT_FALSE(onlyMetadata);
+
+    IProxy* proxy = IProxy::Probe(SERVICE);
+    EXPECT_TRUE(proxy != nullptr);
+    Long hash;
+    IObject::Probe(obj)->GetHashCode(hash);
+    printf("====> test: %llx\n", hash);
+    ec = proxy->ReleaseObject(hash);
+    EXPECT_EQ(0, ec);
 }
 
 TEST(RPCTest, TestIsStubAlive)

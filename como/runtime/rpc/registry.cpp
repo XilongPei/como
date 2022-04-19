@@ -45,16 +45,6 @@ struct HashFunc<IInterfacePack*>
     }
 };
 
-template<>
-struct HashFunc<Long>
-{
-    inline Long operator()(
-        /* [in] */ Long data)
-    {
-        return data;
-    }
-};
-
 static HashMapCache<IObject*, IStub*> sLocalExportRegistry;
 static Mutex sLocalExportRegistryLock;
 static HashMapCache<IObject*, IStub*> sRemoteExportRegistry;
@@ -117,7 +107,8 @@ ECode UnregisterExportObject(
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     Mutex::AutoLock lock(registryLock);
-    registry.Remove(hash);
+    if (! registry.RemoveByHash(hash))
+        return E_NOT_FOUND_EXCEPTION;
     return NOERROR;
 }
 

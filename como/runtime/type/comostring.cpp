@@ -223,11 +223,11 @@ Integer String::GetByteLength() const
     return (Integer)SharedBuffer::GetBufferFromData(mString)->GetSize() - 1;
 }
 
-Integer String::GetHashCode() const
+Long String::GetHashCode() const
 {
     // BKDR Hash Function
-    unsigned int seed = 31; // 31 131 1313 13131 131313 etc..
-    unsigned int hash = 0;
+    Long seed = 31; // 31 131 1313 13131 131313 etc..
+    Long hash = 0;
 
     const char* string = mString;
     if (string) {
@@ -235,7 +235,7 @@ Integer String::GetHashCode() const
             hash = hash * seed + (*string);
         }
     }
-    return (hash & 0x7FFFFFFF);
+    return hash;
 }
 
 Char String::GetChar(

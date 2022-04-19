@@ -84,7 +84,7 @@ public:
 
     Integer GetByteLength() const;
 
-    Integer GetHashCode() const;
+    Long GetHashCode() const;
 
     inline const char* string() const;
 

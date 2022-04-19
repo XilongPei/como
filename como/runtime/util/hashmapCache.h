@@ -50,6 +50,8 @@ private:
             mNext = nullptr;
         }
 
+        // Even if the hash value calculated in HashFunc is negative, it is forced
+        // to be positive when assigned to unsigned long
         unsigned long mHash;
         Key mKey;
         Val mValue;
@@ -103,7 +105,10 @@ public:
             Rehash();
         }
 
-        unsigned long hash = HashKey(key);
+        Long hash = HashKey(key);
+        if (0 == hash)
+            return -3;
+
         unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
@@ -149,7 +154,10 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned long hash = HashKey(key);
+        Long hash = HashKey(key);
+        if (0 == hash)
+            return false;
+
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -168,7 +176,10 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        unsigned long hash = HashKey(key);
+        Long hash = HashKey(key);
+        if (0 == hash)
+            return Val(0);
+
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -182,12 +193,15 @@ public:
         return Val(0);
     }
 
-    void Remove(
+    int Remove(
         /* [in] */ const Key& key)
     {
         CompareFunc<Key> compareF;
 
-        unsigned long hash = HashKey(key);
+        Long hash = HashKey(key);
+        if (0 == hash)
+            return 0;
+
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
@@ -199,18 +213,24 @@ public:
                 else {
                     prev->mNext = curr->mNext;
                 }
-                curr->lastAccessTime.tv_sec = 0;
-                return;
+                delete curr;
+                mCount--;
+                return 1;
             }
             prev = curr;
             curr = prev->mNext;
         }
+
+        return 0;
     }
 
-    void Remove(
-        /* [in] */ unsigned long hash)
+    int RemoveByHash(
+        /* [in] */ Long hash)
     {
         unsigned int index = hash % mBucketSize;
+        if (0 == hash)
+            return 0;
+
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
@@ -221,12 +241,15 @@ public:
                 else {
                     prev->mNext = curr->mNext;
                 }
-                curr->lastAccessTime.tv_sec = 0;
-                return;
+                delete curr;
+                mCount--;
+                return 1;
             }
             prev = curr;
             curr = prev->mNext;
         }
+
+        return 0;
     }
 
     void Clear()
