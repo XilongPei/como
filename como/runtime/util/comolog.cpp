@@ -208,6 +208,11 @@ void Logger::SetLevel(
     sLevel = level;
 }
 
+int Logger::GetLevel()
+{
+    return sLevel;
+}
+
 void Logger::SetSamplingTag(
     /* [in] */ const char *szSamplingTag_)
 {

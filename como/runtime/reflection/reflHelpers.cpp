@@ -84,4 +84,33 @@ ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf, String cons
     return constantGetLong(constt, constName, lvalue);
 }
 
+ECode reflHelpers::mmGetMethodInfo(AutoPtr<IMetaMethod> mm, String& strBuffer)
+{
+    String name;
+    String signature;
+
+    mm->GetName(name);
+    mm->GetSignature(signature);
+    strBuffer = name + "(" + signature + ")";
+
+    return NOERROR;
+}
+
+ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer)
+{
+    AutoPtr<IMetaCoclass> klass;
+    IObject::Probe(intf)->GetCoclass(klass);
+    if (nullptr == klass) {
+        strBuffer = "";
+    }
+    else {
+        String name, ns;
+        klass->GetName(name);
+        klass->GetNamespace(ns);
+        strBuffer = ns + "::" + name;
+    }
+
+    return NOERROR;
+}
+
 } // namespace como

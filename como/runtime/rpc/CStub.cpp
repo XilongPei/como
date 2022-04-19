@@ -33,6 +33,7 @@
 #include "comorpc.h"
 #include "CStub.h"
 #include "registry.h"
+#include "reflection/reflHelpers.h"
 
 namespace como {
 
@@ -636,6 +637,15 @@ ECode InterfaceStub::Invoke(
     if (FAILED(ec)) {
         Logger::E("CStub", "Invoke GetMethod failed with ec is 0x%X.", ec);
         return ec;
+    }
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        String strBuffer1;
+        String strBuffer2;
+        reflHelpers::mmGetMethodInfo(mm, strBuffer1);
+        reflHelpers::intfGetObjectInfo(mObject, strBuffer2);
+        Logger::D("CStub", "Object of %s Invoke Method: %s\n",
+                                      strBuffer2.string(), strBuffer1.string());
     }
 
     AutoPtr<IArgumentList> argList;

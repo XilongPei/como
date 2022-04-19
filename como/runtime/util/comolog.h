@@ -58,6 +58,8 @@ public:
     static void SetLevel(
         /* [in] */ int level);
 
+    static int GetLevel();
+
     static void SetSamplingTag(
         /* [in] */ const char *szSamplingTag_);
 
