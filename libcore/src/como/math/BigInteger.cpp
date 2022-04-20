@@ -413,7 +413,7 @@ ECode BigInteger::Abs(
 {
     AutoPtr<BigInt> bigInt = GetBigInt();
     if (bigInt->Sign() >= 0) {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
     AutoPtr<BigInt> a = bigInt->Copy();
@@ -428,7 +428,7 @@ ECode BigInteger::Negate(
     AutoPtr<BigInt> bigInt = GetBigInt();
     Integer sign = bigInt->Sign();
     if (sign == 0) {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
     AutoPtr<BigInt> a = bigInt->Copy();
@@ -444,7 +444,7 @@ ECode BigInteger::Add(
     AutoPtr<BigInt> lhs = GetBigInt();
     AutoPtr<BigInt> rhs = From(value)->GetBigInt();
     if (rhs->Sign() == 0) {
-        result = this;
+        result = (IBigInteger*)this;
         return NOERROR;
     }
     if (lhs->Sign() == 0) {
@@ -462,7 +462,7 @@ ECode BigInteger::Subtract(
     AutoPtr<BigInt> lhs = GetBigInt();
     AutoPtr<BigInt> rhs = From(value)->GetBigInt();
     if (rhs->Sign() == 0) {
-        result = this;
+        result = (IBigInteger*)this;
         return NOERROR;
     }
     result = nullptr;
@@ -492,13 +492,13 @@ ECode BigInteger::ShiftLeft(
     /* [out] */ AutoPtr<IBigInteger>& value)
 {
     if (n == 0) {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
     Integer sign;
     Signum(sign);
     if (sign == 0) {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
     if ((sign > 0) || (n >= 0)) {
@@ -516,7 +516,7 @@ AutoPtr<IBigInteger> BigInteger::ShiftLeftOneBit()
     Integer sign;
     Signum(sign);
     if (sign == 0) {
-        return this;
+        return (IBigInteger*)this;
     }
     else {
         AutoPtr<IBigInteger> bi;
@@ -592,7 +592,7 @@ ECode BigInteger::SetBit(
         return BitLevel::FlipBit(this, n, value);
     }
     else {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
 }
@@ -607,7 +607,7 @@ ECode BigInteger::ClearBit(
         return BitLevel::FlipBit(this, n, value);
     }
     else {
-        value = this;
+        value = (IBigInteger*)this;
         return NOERROR;
     }
 }
@@ -752,7 +752,7 @@ ECode BigInteger::Min(
 {
     Integer cmp;
     FAIL_RETURN(CompareTo(value, cmp));
-    result = cmp == -1 ? this : value;
+    result = cmp == -1 ? (IBigInteger*)this : value;
     return NOERROR;
 }
 
@@ -762,7 +762,7 @@ ECode BigInteger::Max(
 {
     Integer cmp;
     FAIL_RETURN(CompareTo(value, cmp));
-    result = cmp == 1 ? this : value;
+    result = cmp == 1 ? (IBigInteger*)this : value;
     return NOERROR;
 }
 
@@ -786,7 +786,7 @@ ECode BigInteger::Equals(
     /* [out] */ Boolean& same)
 {
     BigInteger* value = (BigInteger*)IBigInteger::Probe(obj);
-    if (this == value) {
+    if ((IBigInteger*)this == value) {
         same = true;
         return NOERROR;
     }
@@ -954,7 +954,7 @@ ECode BigInteger::ModPow(
         FAIL_RETURN(ModInverse(modulus, base));
     }
     else {
-        base = this;
+        base = (IBigInteger*)this;
     }
     result = nullptr;
     return CBigInteger::New(BigInt::ModExp(From(base)->GetBigInt(),
@@ -1200,5 +1200,5 @@ ECode BigInteger::ShortValue(
     return NOERROR;
 }
 
-}
-}
+} // namespace math
+} // namespace como

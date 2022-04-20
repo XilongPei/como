@@ -68,6 +68,10 @@ AutoPtr<BigInt> BigInt::NewBigInt()
         return nullptr;
 
     bi->mBignum = static_cast<Long>(reinterpret_cast<uintptr_t>(BN_new()));
+    if (bi->mBignum == 0) {
+        CHECK(0);
+        return nullptr;
+    }
     return bi;
 }
 
@@ -199,7 +203,10 @@ String BigInt::ToAscii(
 {
     Integer length = s.GetLength();
     AutoPtr<IStringBuilder> result;
-    CStringBuilder::New(length, IID_IStringBuilder, (IInterface**)&result);
+    ECode ec = CStringBuilder::New(length, IID_IStringBuilder, (IInterface**)&result);
+    if (FAILED(ec)) {
+        return nullptr;
+    }
     for (Integer i = 0; i < length; ++i) {
         Char ch = s.GetChar(i);
         Integer value = Character::Digit(ch, base);
@@ -440,6 +447,10 @@ AutoPtr<BigInt> BigInt::Shift(
     /* [in] */ Integer n)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
 
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
@@ -508,6 +519,10 @@ AutoPtr<BigInt> BigInt::Addition(
     /* [in] */ BigInt* b)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnB = toBigNum(b->mBignum);
@@ -532,6 +547,10 @@ AutoPtr<BigInt> BigInt::Subtraction(
     /* [in] */ BigInt* b)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnB = toBigNum(b->mBignum);
@@ -546,6 +565,10 @@ AutoPtr<BigInt> BigInt::Gcd(
     /* [in] */ BigInt* b)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnB = toBigNum(b->mBignum);
@@ -561,6 +584,10 @@ AutoPtr<BigInt> BigInt::Product(
     /* [in] */ BigInt* b)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnB = toBigNum(b->mBignum);
@@ -577,6 +604,10 @@ AutoPtr<BigInt> BigInt::BigExp(
 {
     // Sign of p is ignored!
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnP = toBigNum(p->mBignum);
@@ -637,6 +668,10 @@ AutoPtr<BigInt> BigInt::Modulus(
     /* [in] */ BigInt* m)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnM = toBigNum(m->mBignum);
@@ -653,6 +688,10 @@ AutoPtr<BigInt> BigInt::ModExp(
     /* [in] */ BigInt* m)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnP = toBigNum(p->mBignum);
@@ -669,6 +708,10 @@ AutoPtr<BigInt> BigInt::ModInverse(
     /* [in] */ BigInt* m)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     BIGNUM* bnA = toBigNum(a->mBignum);
     BIGNUM* bnM = toBigNum(m->mBignum);
@@ -683,6 +726,10 @@ AutoPtr<BigInt> BigInt::GeneratePrimeDefault(
     /* [in] */ Integer bitLength)
 {
     AutoPtr<BigInt> r = NewBigInt();
+    if (nullptr == r) {
+        CHECK(0);
+        return nullptr;
+    }
     BIGNUM* bnR = toBigNum(r->mBignum);
     if (!BN_generate_prime_ex(bnR, bitLength, false, 0, 0, nullptr)) {
         CHECK(0);
