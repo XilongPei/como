@@ -440,24 +440,24 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
 
         dbus_message_iter_get_basic(&args, &hash);
 
-        ec = UnregisterExportObject(RPCType::Local, hash);
+        if (0 != hash)
+            ec = UnregisterExportObject(RPCType::Local, hash);
 
     ReleaseObjectExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
-        if (nullptr == reply) {
-            Logger_E("CDBusChannel::HandleMessage",
-                               "dbus_message_new_method_return return nullptr");
-            return DBUS_HANDLER_RESULT_HANDLED;
+        if (nullptr != reply) {
+            dbus_message_iter_init_append(reply, &args);
+            dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
+            dbus_uint32_t serial = 0;
+            if (!dbus_connection_send(conn, reply, &serial)) {
+                Logger_E("CDBusChannel", "Send reply message failed.");
+            }
+            dbus_connection_flush(conn);
+            dbus_message_unref(reply);
         }
-
-        dbus_message_iter_init_append(reply, &args);
-        dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
-        dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
-            Logger_E("CDBusChannel", "Send reply message failed.");
+        else {
+            dbus_connection_flush(conn);
         }
-        dbus_connection_flush(conn);
-        dbus_message_unref(reply);
     }
     else {
         const char* name = dbus_message_get_member(msg);

@@ -140,7 +140,7 @@ TEST(RPCTest, TestCallTestMethod4)
     EXPECT_EQ(0, ec);
 
     Long hash;
-    ipack->GetHashCode(hash);
+    ipack->GetServerObjectId(hash);
     printf("====> TestCallTestMethod4: %llx\n", hash);
     ec = proxy->ReleaseObject(hash);
     EXPECT_EQ(0, ec);
@@ -184,7 +184,7 @@ TEST(RPCTest, TestCallTestMethod5)
     IObject::Probe(obj)->GetHashCode(hash);
     printf("====> TestCallTestMethod5: %llx\n", hash);
     ec = proxy->ReleaseObject(hash);
-    EXPECT_EQ(0, ec);
+    EXPECT_NE(0, ec);
 }
 
 TEST(RPCTest, TestIsStubAlive)
