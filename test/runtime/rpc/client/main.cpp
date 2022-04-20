@@ -18,6 +18,7 @@
 #include <comoapi.h>
 #include <comosp.h>
 #include <ServiceManager.h>
+#include <rpcHelpers.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
 
@@ -25,6 +26,7 @@ using como::test::rpc::CID_CService;
 using como::test::rpc::IService;
 using como::test::rpc::ITestInterface;
 using jing::ServiceManager;
+using jing::RpcHelpers;
 
 static AutoPtr<IService> SERVICE;
 
@@ -113,6 +115,7 @@ TEST(RPCTest, TestCallTestMethod4)
     EXPECT_EQ(ec, NOERROR);
     EXPECT_TRUE(obj != nullptr);
     EXPECT_TRUE(IProxy::Probe(obj) != nullptr);
+
     Integer arg1 = 6;
     Integer result1;
     obj->TestMethod1(arg1, result1);
@@ -141,7 +144,6 @@ TEST(RPCTest, TestCallTestMethod4)
 
     Long hash;
     ipack->GetServerObjectId(hash);
-    printf("====> TestCallTestMethod4: %llx\n", hash);
     ec = proxy->ReleaseObject(hash);
     EXPECT_EQ(0, ec);
 }
@@ -182,7 +184,6 @@ TEST(RPCTest, TestCallTestMethod5)
     EXPECT_TRUE(proxy != nullptr);
     Long hash;
     IObject::Probe(obj)->GetHashCode(hash);
-    printf("====> TestCallTestMethod5: %llx\n", hash);
     ec = proxy->ReleaseObject(hash);
     EXPECT_NE(0, ec);
 }
@@ -209,6 +210,20 @@ TEST(RPCTest, TestReleaseObject)
     ipack->GetServerObjectId(hash);
 
     ECode ec = proxy->ReleaseObject(hash);
+    EXPECT_EQ(0, ec);
+}
+
+TEST(RPCTest, TestRpcHelpers)
+{
+    EXPECT_TRUE(SERVICE != nullptr);
+    ECode ec = E_REMOTE_EXCEPTION;
+    AutoPtr<ITestInterface> obj;
+    ec = SERVICE->TestMethod4(obj);
+    EXPECT_EQ(ec, NOERROR);
+    EXPECT_TRUE(obj != nullptr);
+    EXPECT_TRUE(IProxy::Probe(obj) != nullptr);
+
+    ec = RpcHelpers::ReleaseRemoteObject(SERVICE, obj);
     EXPECT_EQ(0, ec);
 }
 

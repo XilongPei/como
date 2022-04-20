@@ -424,21 +424,4 @@ Exit:
     return ec;
 }
 
-ECode ServiceManager::RemoveService(
-    /* [in] */ const String& name,
-    /* [in] */ IInterface* intfService)
-{
-    IProxy* proxy = IProxy::Probe(intfService);
-    if (proxy != nullptr) {
-        Boolean alive;
-        proxy->ReleaseStub(alive);
-        if (! alive) {
-            Logger_D("ServiceManager::RemoveService",
-                                           "Corresponding IStub doesn't exist");
-        }
-    }
-
-    return ServiceManager::GetInstance()->RemoveService(name);
-}
-
 } // namespace jing

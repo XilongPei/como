@@ -46,10 +46,6 @@ public:
     ECode RemoveService(
         /* [in] */ const String& name);
 
-    ECode RemoveService(
-        /* [in] */ const String& name,
-        /* [in] */ IInterface* intfService);
-
 private:
     ServiceManager() {}
     ServiceManager(
@@ -59,8 +55,6 @@ private:
     static constexpr const char* DBUS_NAME = "jing.servicemanager";
     static constexpr const char* OBJECT_PATH = "/jing/servicemanager";
     static constexpr const char* INTERFACE_PATH = "jing.servicemanager.IServiceManager";
-    static constexpr const char* STUB_OBJECT_PATH = "/como/rpc/CStub";
-    static constexpr const char* STUB_INTERFACE_PATH = "como.rpc.IStub";
 
     static AutoPtr<ServiceManager> sInstance;
 };

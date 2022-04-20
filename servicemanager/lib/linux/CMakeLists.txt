@@ -59,6 +59,7 @@ include_directories(
 
 set(SOURCES
     ServiceManager.cpp
+    rpcHelpers.cpp
     ${RPC_ZeroMQ_SOURCES}
 )
 
@@ -78,6 +79,7 @@ target_link_libraries(libservicemanager
 add_dependencies(libservicemanager comort)
 
 COPY(libservicemanager ${SM_LIB_SRC_DIR}/ServiceManager.h ${INC_DIR})
+COPY(libservicemanager ${SM_LIB_SRC_DIR}/rpcHelpers.h ${INC_DIR})
 COPY(libservicemanager ${SM_LIB_OBJ_DIR}/libservicemanager.so ${BIN_DIR})
 
 install(FILES
