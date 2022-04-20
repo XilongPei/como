@@ -124,7 +124,6 @@ public:
 private:
     friend class CDBusChannelFactory;
 
-    static constexpr Boolean DEBUG = false;
     static constexpr const char* STUB_OBJECT_PATH = "/como/rpc/CStub";
     static constexpr const char* STUB_INTERFACE_PATH = "como.rpc.IStub";
 

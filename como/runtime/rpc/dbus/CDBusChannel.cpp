@@ -45,6 +45,20 @@ CDBusChannel::ServiceRunnable::ServiceRunnable(
     , mRequestToQuit(false)
 {}
 
+#define EXIT_dbus_connection_send_with_reply(msg,reply,conn,err)    \
+    if (nullptr != msg) {                                           \
+        dbus_message_unref(msg);                                    \
+    }                                                               \
+    if (nullptr != reply) {                                         \
+        dbus_message_unref(reply);                                  \
+    }                                                               \
+    if (nullptr != conn) {                                          \
+        dbus_connection_close(conn);                                \
+        dbus_connection_unref(conn);                                \
+    }                                                               \
+    dbus_error_free(&err);
+
+
 ECode CDBusChannel::ServiceRunnable::Run()
 {
     if (conns.size() >= ComoConfig::DBUS_CONNECTION_MAX_NUM) {
@@ -228,9 +242,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
     CDBusChannel::ServiceRunnable* thisRunnable = static_cast<CDBusChannel::ServiceRunnable*>(arg);
 
     if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "GetComponentMetadata")) {
-        if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle GetComponentMetadata message");
-        }
+        Logger::D("CDBusChannel", "Handle GetComponentMetadata message");
 
         DBusMessageIter args;
         DBusMessageIter subArg;
@@ -279,8 +291,10 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
                 resSize = 1;
             }
 
-            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
-            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
+            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+                                             DBUS_TYPE_BYTE_AS_STRING, &subArg);
+            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE,
+                                                             &resData, resSize);
             dbus_message_iter_close_container(&args, &subArg);
 
             dbus_uint32_t serial = 0;
@@ -295,9 +309,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Invoke")) {
-        if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle Invoke message.");
-        }
+        Logger::D("CDBusChannel", "Handle Invoke message.");
 
         DBusMessageIter args;
         DBusMessageIter subArg;
@@ -309,7 +321,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("CDBusChannel", "Invoke message has no array arguments.");
+            Logger::E("CDBusChannel", "Invoke message has no ARRAY arguments.");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
         dbus_message_iter_recurse(&args, &subArg);
@@ -338,10 +350,12 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
 
             HANDLE resData;
             Long resSize;
-            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+            dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+                                             DBUS_TYPE_BYTE_AS_STRING, &subArg);
             resParcel->GetData(resData);
             resParcel->GetDataSize(resSize);
-            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &resData, resSize);
+            dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE,
+                                                             &resData, resSize);
             dbus_message_iter_close_container(&args, &subArg);
 
             dbus_uint32_t serial = 0;
@@ -356,9 +370,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "IsPeerAlive")) {
-        if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle IsPeerAlive message.");
-        }
+        Logger::D("CDBusChannel", "Handle IsPeerAlive message.");
 
         DBusMessageIter args;
         Boolean pong;
@@ -394,9 +406,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         }
     }
     else if (dbus_message_is_method_call(msg, STUB_INTERFACE_PATH, "Release")) {
-        if (CDBusChannel::DEBUG) {
-            Logger::D("CDBusChannel", "Handle Release message.");
-        }
+        Logger::D("CDBusChannel", "Handle Release message.");
 
         thisRunnable->mTarget->Release();
         thisRunnable->mRequestToQuit = true;
@@ -434,7 +444,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
             goto ReleaseObjectExit;
         }
         if (DBUS_TYPE_UINT64 != dbus_message_iter_get_arg_type(&args)) {
-            Logger_E("CDBusChannel", "ReleaseObject message has no string arguments.");
+            Logger_E("CDBusChannel", "ReleaseObject message has no UINT64 argument.");
             goto ReleaseObjectExit;
         }
 
@@ -461,9 +471,9 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
     }
     else {
         const char* name = dbus_message_get_member(msg);
-        if (name != nullptr && CDBusChannel::DEBUG) {
+        if (nullptr != name) {
             Logger::D("CDBusChannel",
-                    "The message which name is \"%s\" does not be handled.", name);
+                 "The message which name is \"%s\" does not be handled.", name);
         }
     }
 
@@ -533,27 +543,26 @@ ECode CDBusChannel::IsPeerAlive(
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                                                                      err.message);
+        Logger::E("CDBusChannel",
+                 "Connect to bus daemon failed, error is \"%s\".", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "IsPeerAlive");
+    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
+                                            STUB_INTERFACE_PATH, "IsPeerAlive");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    if (DEBUG) {
-        Logger::D("CDBusChannel", "Send message.");
-    }
+    Logger::D("CDBusChannel", "Send message.");
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel.IsPeerAlive()",
-                            "Fail to send message, error is \"%s\"", err.message);
+                          "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -579,7 +588,7 @@ ECode CDBusChannel::IsPeerAlive(
             goto Exit;
         }
         if (DBUS_TYPE_BOOLEAN != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("CDBusChannel", "Reply arguments is not array.");
+            Logger::E("CDBusChannel", "Reply arguments is not BOOLEAN.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
@@ -589,25 +598,11 @@ ECode CDBusChannel::IsPeerAlive(
         alive = val == TRUE ? true : false;
     }
     else {
-        if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
     }
 
 Exit:
-    if (msg != nullptr) {
-        dbus_message_unref(msg);
-    }
-    if (reply != nullptr) {
-        dbus_message_unref(reply);
-    }
-    if (conn != nullptr) {
-        dbus_connection_close(conn);
-        dbus_connection_unref(conn);
-    }
-
-    dbus_error_free(&err);
-
+    EXIT_dbus_connection_send_with_reply(msg, reply, conn, err);
     return ec;
 }
 
@@ -627,27 +622,26 @@ ECode CDBusChannel::ReleasePeer(
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel", "Connect to bus daemon failed, error is \"%s\".",
-                                                                      err.message);
+        Logger::E("CDBusChannel",
+                 "Connect to bus daemon failed, error is \"%s\".", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "Release");
+    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
+                                                STUB_INTERFACE_PATH, "Release");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
 
-    if (DEBUG) {
-        Logger::D("CDBusChannel", "Send message.");
-    }
+    Logger::D("CDBusChannel", "Send message.");
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel.IsPeerAlive()",
-                            "Fail to send message, error is \"%s\"", err.message);
+                          "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -673,7 +667,7 @@ ECode CDBusChannel::ReleasePeer(
             goto Exit;
         }
         if (DBUS_TYPE_BOOLEAN != dbus_message_iter_get_arg_type(&args)) {
-            Logger::E("CDBusChannel", "Reply arguments is not array.");
+            Logger::E("CDBusChannel", "Reply arguments is not BOOLEAN.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
@@ -683,25 +677,11 @@ ECode CDBusChannel::ReleasePeer(
         alive = val == TRUE ? true : false;
     }
     else {
-        if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
     }
 
 Exit:
-    if (msg != nullptr) {
-        dbus_message_unref(msg);
-    }
-    if (reply != nullptr) {
-        dbus_message_unref(reply);
-    }
-    if (conn != nullptr) {
-        dbus_connection_close(conn);
-        dbus_connection_unref(conn);
-    }
-
-    dbus_error_free(&err);
-
+    EXIT_dbus_connection_send_with_reply(msg, reply, conn, err);
     return ec;
 }
 
@@ -763,20 +743,19 @@ ECode CDBusChannel::GetComponentMetadata(
     }
 
     dbus_message_iter_init_append(msg, &args);
-    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+                                             DBUS_TYPE_BYTE_AS_STRING, &subArg);
     parcel->GetData(data);
     parcel->GetDataSize(size);
     dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &data, size);
     dbus_message_iter_close_container(&args, &subArg);
 
-    if (DEBUG) {
-        Logger::D("CDBusChannel", "Send message.");
-    }
+    Logger::D("CDBusChannel", "Send message.");
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel.GetComponentMetadata",
-                                        "Fail to send message, error is \"%s\"", err.message);
+                          "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -821,25 +800,11 @@ ECode CDBusChannel::GetComponentMetadata(
         memcpy(metadata.GetPayload(), replyData, replySize);
     }
     else {
-        if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
     }
 
 Exit:
-    if (msg != nullptr) {
-        dbus_message_unref(msg);
-    }
-    if (reply != nullptr) {
-        dbus_message_unref(reply);
-    }
-    if (conn != nullptr) {
-        dbus_connection_close(conn);
-        dbus_connection_unref(conn);
-    }
-
-    dbus_error_free(&err);
-
+    EXIT_dbus_connection_send_with_reply(msg, reply, conn, err);
     return ec;
 }
 
@@ -882,9 +847,7 @@ ECode CDBusChannel::Invoke(
     dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &data, size);
     dbus_message_iter_close_container(&args, &subArg);
 
-    if (DEBUG) {
-        Logger::D("CDBusChannel", "Send message.");
-    }
+    Logger::D("CDBusChannel", "Send message.");
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
@@ -924,7 +887,7 @@ ECode CDBusChannel::Invoke(
                 goto Exit;
             }
             if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-                Logger::E("CDBusChannel", "Reply arguments is not array.");
+                Logger::E("CDBusChannel", "Reply arguments is not ARRAY.");
                 ec = E_REMOTE_EXCEPTION;
                 goto Exit;
             }
@@ -933,31 +896,17 @@ ECode CDBusChannel::Invoke(
             Integer replySize;
             dbus_message_iter_recurse(&args, &subArg);
             dbus_message_iter_get_fixed_array(&subArg, &replyData, &replySize);
-            if (replyData != nullptr) {
+            if (nullptr != replyData) {
                 resParcel->SetData(reinterpret_cast<HANDLE>(replyData), replySize);
             }
         }
     }
     else {
-        if (DEBUG) {
-            Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
     }
 
 Exit:
-    if (msg != nullptr) {
-        dbus_message_unref(msg);
-    }
-    if (reply != nullptr) {
-        dbus_message_unref(reply);
-    }
-    if (conn != nullptr) {
-        dbus_connection_close(conn);
-        dbus_connection_unref(conn);
-    }
-
-    dbus_error_free(&err);
-
+    EXIT_dbus_connection_send_with_reply(msg, reply, conn, err);
     return ec;
 }
 
@@ -1016,7 +965,6 @@ ECode CDBusChannel::ReleaseObject(
     DBusMessage* msg = nullptr;
     DBusMessage* reply = nullptr;
     DBusMessageIter args;
-    const char* str = nullptr;
 
     dbus_error_init(&err);
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
@@ -1029,7 +977,7 @@ ECode CDBusChannel::ReleaseObject(
 
     msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
                                            STUB_INTERFACE_PATH, "ReleaseObject");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger_E("ServiceManager::ReleaseObject", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -1055,7 +1003,7 @@ ECode CDBusChannel::ReleaseObject(
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
         Logger_E("ServiceManager::ReleaseObject",
-                                            "The first result is not Integer.");
+                                              "The first result is not INT32.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -1068,19 +1016,7 @@ ECode CDBusChannel::ReleaseObject(
     }
 
 Exit:
-    if (msg != nullptr) {
-        dbus_message_unref(msg);
-    }
-    if (reply != nullptr) {
-        dbus_message_unref(reply);
-    }
-    if (conn != nullptr) {
-        dbus_connection_close(conn);
-        dbus_connection_unref(conn);
-    }
-
-    dbus_error_free(&err);
-
+    EXIT_dbus_connection_send_with_reply(msg, reply, conn, err);
     return ec;
 }
 
