@@ -97,7 +97,7 @@ TEST(BigDecimalTest, TestRound)
     AutoPtr<IBigDecimal> bigDecimal;
     CBigDecimal::New(String("0.999999999999999"), IID_IBigDecimal, (IInterface**)&bigDecimal);
     AutoPtr<IMathContext> mc;
-    CMathContext::New(2, RoundingMode::FLOOR, IID_IMathContext, (IInterface**)&mc);
+    CMathContext::New(3, RoundingMode::FLOOR, IID_IMathContext, (IInterface**)&mc);
     AutoPtr<IBigDecimal> rounded;
     bigDecimal->Round(mc, rounded);
     EXPECT_STREQ("0.99", Object::ToString(rounded).string());
