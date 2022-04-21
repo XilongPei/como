@@ -56,7 +56,7 @@ public:
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IMetaEnumerator>& enumr) override;
 
-    void BuildAllEnumerators();
+    ECode BuildAllEnumerators();
 
 public:
     MetaEnumeration* mMetadata;

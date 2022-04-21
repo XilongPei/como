@@ -34,6 +34,9 @@ CMetaConstant::CMetaConstant(
     , mNamespace(mk->mNamespace)
 {
     mType = new CMetaType(mc, mc->mTypes[mk->mTypeIndex]);
+    if (nullptr == mType)
+        Logger::E("CMetaConstant::CMetaConstant", "new CMetaType failed.");
+
     mValue = BuildValue(mType);
 }
 
@@ -69,6 +72,11 @@ AutoPtr<IMetaValue> CMetaConstant::BuildValue(
     /* [in] */ IMetaType* type)
 {
     AutoPtr<CMetaValue> value = new CMetaValue();
+    if (nullptr == value) {
+        Logger::E("CMetaConstant::BuildValue", "new CMetaValue failed.");
+        return nullptr;
+    }
+
     value->mType = type;
     TypeKind kind;
     type->GetTypeKind(kind);

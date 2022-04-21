@@ -92,11 +92,11 @@ public:
 private:
     Integer CalculateMethodNumber();
 
-    void BuildBaseInterface();
+    ECode BuildBaseInterface();
 
-    void BuildAllConstants();
+    ECode BuildAllConstants();
 
-    void BuildAllMethods();
+    ECode BuildAllMethods();
 
     Integer BuildInterfaceMethod(
         /* [in] */ MetaInterface* mi);

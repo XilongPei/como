@@ -80,9 +80,7 @@ ECode CMetaConstructor::GetParameterNumber(
 ECode CMetaConstructor::GetAllParameters(
     /* [out] */ Array<IMetaParameter*>& params)
 {
-    ECode ec = BuildAllParameters();
-    if (FAILED(ec))
-        return ec;
+    FAIL_RETURN(BuildAllParameters());
 
     Integer N = MIN(mParameters.GetLength(), params.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -100,9 +98,7 @@ ECode CMetaConstructor::GetParameter(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    ECode ec = BuildAllParameters();
-    if (FAILED(ec))
-        return ec;
+    FAIL_RETURN(BuildAllParameters());
 
     param = mParameters[index];
     return NOERROR;
@@ -117,9 +113,7 @@ ECode CMetaConstructor::GetParameter(
         return NOERROR;
     }
 
-    ECode ec = BuildAllParameters();
-    if (FAILED(ec))
-        return ec;
+    FAIL_RETURN(BuildAllParameters());
 
     for (Integer i = 0; i < mParameters.GetLength(); i++) {
         String mpName;
@@ -143,9 +137,7 @@ ECode CMetaConstructor::GetOutArgumentsNumber(
 ECode CMetaConstructor::CreateArgumentList(
     /* [out] */ AutoPtr<IArgumentList>& argList)
 {
-    ECode ec = BuildAllParameters();
-    if (FAILED(ec))
-        return ec;
+    FAIL_RETURN(BuildAllParameters());
 
     argList = new CArgumentList(mParameters);
     if (nullptr == argList)

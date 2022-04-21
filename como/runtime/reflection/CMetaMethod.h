@@ -91,7 +91,7 @@ public:
         /* [out] */ HANDLE &opaque) override;
 
 private:
-    void BuildAllParameters();
+    ECode BuildAllParameters();
 
     ECode InvokeImpl(
         /* [in] */ IInterface* thisObject,

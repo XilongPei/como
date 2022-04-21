@@ -143,7 +143,7 @@ ECode CMetaInterface::GetMethodNumber(
 ECode CMetaInterface::GetAllMethods(
     /* [out] */ Array<IMetaMethod*>& methods)
 {
-    BuildAllMethods();
+    FAIL_RETURN(BuildAllMethods());
 
     Integer N = MIN(mMethods.GetLength(), methods.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -162,7 +162,7 @@ ECode CMetaInterface::GetDeclaredMethodNumber(
 ECode CMetaInterface::GetDeclaredMethods(
     /* [out] */ Array<IMetaMethod*>& methods)
 {
-    BuildAllMethods();
+    FAIL_RETURN(BuildAllMethods());
 
     Integer offset = mMethods.GetLength() - mMetadata->mMethodNumber;
     Integer N = MIN(mMetadata->mMethodNumber, methods.GetLength());
@@ -182,7 +182,7 @@ ECode CMetaInterface::GetMethod(
         return NOERROR;
     }
 
-    BuildAllMethods();
+    FAIL_RETURN(BuildAllMethods());
 
     method = nullptr;
 
@@ -224,7 +224,7 @@ ECode CMetaInterface::GetMethod(
         return NOERROR;
     }
 
-    BuildAllMethods();
+    FAIL_RETURN(BuildAllMethods());
 
     method = mMethods[index];
     return NOERROR;
@@ -246,37 +246,47 @@ Integer CMetaInterface::CalculateMethodNumber()
     return number;
 }
 
-void CMetaInterface::BuildBaseInterface()
+ECode CMetaInterface::BuildBaseInterface()
 {
     if (mMetadata->mBaseInterfaceIndex != -1) {
         AutoPtr<IMetaInterface> base =
                 mOwner->BuildInterface(mMetadata->mBaseInterfaceIndex);
+        if (nullptr == base)
+            return E_OUT_OF_MEMORY_ERROR;
+
         mBaseInterface = static_cast<CMetaInterface*>(base.Get());
     }
+    return NOERROR;
 }
 
-void CMetaInterface::BuildAllConstants()
+ECode CMetaInterface::BuildAllConstants()
 {
     if (mConstants[0] == nullptr) {
         Mutex::AutoLock lock(mConstantsLock);
         if (mConstants[0] == nullptr) {
             for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
-                        mOwner->mMetadata, mMetadata->mConstants[i]);
+                                   mOwner->mMetadata, mMetadata->mConstants[i]);
+                if (nullptr == mcObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 mConstants.Set(i, mcObj);
             }
         }
     }
+    return NOERROR;
 }
 
-void CMetaInterface::BuildAllMethods()
+ECode CMetaInterface::BuildAllMethods()
 {
     if (mMethods[0] == nullptr) {
         Mutex::AutoLock lock(mMethodsLock);
         if (mMethods[0] == nullptr) {
-            BuildInterfaceMethod(mMetadata);
+            if (BuildInterfaceMethod(mMetadata) < 0)
+                return E_OUT_OF_MEMORY_ERROR;
         }
     }
+    return NOERROR;
 }
 
 Integer CMetaInterface::BuildInterfaceMethod(
@@ -286,6 +296,8 @@ Integer CMetaInterface::BuildInterfaceMethod(
     if (mi->mBaseInterfaceIndex != -1) {
         startIndex = BuildInterfaceMethod(mOwner->mMetadata->mInterfaces[
                                                       mi->mBaseInterfaceIndex]);
+        if (startIndex < 0)
+            return startIndex;
     }
 
     for (Integer i = 0; i < mi->mMethodNumber; i++) {

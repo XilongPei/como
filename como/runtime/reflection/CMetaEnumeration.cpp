@@ -69,7 +69,7 @@ ECode CMetaEnumeration::GetAllEnumerators(
         return NOERROR;
     }
 
-    BuildAllEnumerators();
+    FAIL_RETURN(BuildAllEnumerators());
 
     for (Integer i = 0; i < mEnumerators.GetLength(); i++) {
         enumrs.Set(i, mEnumerators[i]);
@@ -87,7 +87,7 @@ ECode CMetaEnumeration::GetEnumerator(
         return NOERROR;
     }
 
-    BuildAllEnumerators();
+    FAIL_RETURN(BuildAllEnumerators());
 
     for (Integer i = 0; i < mEnumerators.GetLength(); i++) {
         String enumrName;
@@ -102,7 +102,7 @@ ECode CMetaEnumeration::GetEnumerator(
     return NOERROR;
 }
 
-void CMetaEnumeration::BuildAllEnumerators()
+ECode CMetaEnumeration::BuildAllEnumerators()
 {
     if (mEnumerators[0] == nullptr) {
         Mutex::AutoLock lock(mEnumeratorsLock);
@@ -110,10 +110,14 @@ void CMetaEnumeration::BuildAllEnumerators()
             for (Integer i = 0; i < mMetadata->mEnumeratorNumber; i++) {
                 MetaEnumerator* me = mMetadata->mEnumerators[i];
                 AutoPtr<IMetaEnumerator> meObj = new CMetaEnumerator(this, me);
+                if (nullptr == meObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 mEnumerators.Set(i, meObj);
             }
         }
     }
+    return NOERROR;
 }
 
 } // namespace como

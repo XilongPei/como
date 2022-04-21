@@ -93,7 +93,7 @@ ECode CMetaMethod::GetParameterNumber(
 ECode CMetaMethod::GetAllParameters(
     /* [out] */ Array<IMetaParameter*>& params)
 {
-    BuildAllParameters();
+    FAIL_RETURN(BuildAllParameters());
 
     Integer N = MIN(mParameters.GetLength(), params.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -111,7 +111,7 @@ ECode CMetaMethod::GetParameter(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    BuildAllParameters();
+    FAIL_RETURN(BuildAllParameters());
 
     param = mParameters[index];
     return NOERROR;
@@ -126,7 +126,7 @@ ECode CMetaMethod::GetParameter(
         return NOERROR;
     }
 
-    BuildAllParameters();
+    FAIL_RETURN(BuildAllParameters());
 
     for (Integer i = 0; i < mParameters.GetLength(); i++) {
         IMetaParameter* mpObj = mParameters[i];
@@ -144,7 +144,7 @@ ECode CMetaMethod::GetParameter(
 ECode CMetaMethod::GetOutArgumentsNumber(
     /* [out] */ Integer& outArgs)
 {
-    BuildAllParameters();
+    FAIL_RETURN(BuildAllParameters());
 
     outArgs = mHasOutArguments;
     return NOERROR;
@@ -153,9 +153,12 @@ ECode CMetaMethod::GetOutArgumentsNumber(
 ECode CMetaMethod::CreateArgumentList(
     /* [out] */ AutoPtr<IArgumentList>& argList)
 {
-    BuildAllParameters();
+    FAIL_RETURN(BuildAllParameters());
 
     argList = new CArgumentList(mParameters);
+    if (nullptr == argList)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -301,15 +304,18 @@ ECode CMetaMethod::GetOpaque(
     return NOERROR;
 }
 
-void CMetaMethod::BuildAllParameters()
+ECode CMetaMethod::BuildAllParameters()
 {
     if (mParameters[0] == nullptr) {
         Mutex::AutoLock lock(mParametersLock);
         if (mParameters[0] == nullptr) {
             for (Integer i = 0; i < mMetadata->mParameterNumber; i++) {
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
-                        mOwner->mOwner->mMetadata, this,
-                        mMetadata->mParameters[i], i);
+                                                mOwner->mOwner->mMetadata, this,
+                                                  mMetadata->mParameters[i], i);
+                if (nullptr == mpObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 mParameters.Set(i, mpObj);
                 if ((mpObj->mIOAttr == IOAttribute::OUT) ||
                                       (mpObj->mIOAttr == IOAttribute::IN_OUT)) {
@@ -318,6 +324,7 @@ void CMetaMethod::BuildAllParameters()
             }
         }
     }
+    return NOERROR;
 }
 
 } // namespace como
