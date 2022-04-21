@@ -56,6 +56,11 @@ ECode CZMQInterfacePack::SetServerName(
     /* [in] */ const String& serverName)
 {
     mServerName = serverName;
+
+    if (nullptr != mChannel) {
+        mChannel->SetServerName(serverName);
+    }
+
     return NOERROR;
 }
 
@@ -99,6 +104,12 @@ ECode CZMQInterfacePack::WriteToParcel(
     dest->WriteBoolean(mIsParcelable);
     dest->WriteLong(mServerObjectId);
     dest->WriteString(mServerName);
+    return NOERROR;
+}
+
+ECode CZMQInterfacePack::GiveMeAhand(
+    /* [in] */ const String& aHand)
+{
     return NOERROR;
 }
 

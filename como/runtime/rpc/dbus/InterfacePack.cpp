@@ -102,6 +102,12 @@ ECode InterfacePack::WriteToParcel(
     return NOERROR;
 }
 
+ECode InterfacePack::GiveMeAhand(
+    /* [in] */ const String& aHand)
+{
+    return NOERROR;
+}
+
 String InterfacePack::GetDBusName()
 {
     return mDBusName;

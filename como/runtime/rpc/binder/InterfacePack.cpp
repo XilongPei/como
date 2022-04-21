@@ -108,6 +108,12 @@ ECode InterfacePack::WriteToParcel(
     return NOERROR;
 }
 
+ECode InterfacePack::GiveMeAhand(
+    /* [in] */ const String& aHand)
+{
+    return NOERROR;
+}
+
 android::sp<android::IBinder> InterfacePack::GetAndroidBinder()
 {
     return mBinder;

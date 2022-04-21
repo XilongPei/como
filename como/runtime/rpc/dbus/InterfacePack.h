@@ -76,6 +76,9 @@ public:
     ECode WriteToParcel(
         /* [in] */ IParcel* dest) override;
 
+    ECode GiveMeAhand(
+        /* [in] */ const String& aHand) override;
+
     String GetDBusName();
 
     void SetDBusName(

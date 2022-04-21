@@ -164,6 +164,12 @@ ECode ServiceManager::AddRemoteService(
         return AddService(name, object);
     }
 
+    // Tell the channel implemented by ZeroMQ the server (thatServerName)
+    // it wants to connect to
+    ipack->GiveMeAhand(thatServerName);
+
+    // Tell others my (thisServerName) identification information as a service
+    // provider so that others can find me
     ipack->SetServerName(name + "\n" + thisServerName);     // name, hold name of Service
 
     AutoPtr<IParcel> parcel;

@@ -77,6 +77,9 @@ public:
     ECode WriteToParcel(
         /* [in] */ IParcel* dest) override;
 
+    ECode GiveMeAhand(
+        /* [in] */ const String& aHand) override;
+
     android::sp<android::IBinder> GetAndroidBinder();
 
     void SetAndroidBinder(

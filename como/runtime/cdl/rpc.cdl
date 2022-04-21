@@ -193,6 +193,9 @@ interface IInterfacePack
 
     GetServerObjectId(
         [out] Long& serverObjectId);
+
+    GiveMeAhand(
+        [in] String aHand);
 }
 
 interface IArgumentList;

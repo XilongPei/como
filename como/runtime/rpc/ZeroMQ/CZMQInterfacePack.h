@@ -75,6 +75,9 @@ public:
     ECode WriteToParcel(
         /* [in] */ IParcel* dest) override;
 
+    ECode GiveMeAhand(
+        /* [in] */ const String& aHand) override;
+
     void SetCoclassID(
         /* [in] */ const CoclassID& cid);
 
@@ -89,6 +92,8 @@ public:
 
     inline static CZMQInterfacePack* From(
         /* [in] */ IInterfacePack* ipack);
+
+    AutoPtr<IRPCChannel> mChannel;
 
 private:
     CoclassID mCid;

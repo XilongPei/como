@@ -44,7 +44,27 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
+{}
+
+ECode CZMQChannel::Apply(
+    /* [in] */ IInterfacePack* ipack)
 {
+    //mName = CZMQInterfacePack::From(ipack)->GetDBusName();
+    return NOERROR;
+}
+
+ECode CZMQChannel::GetRPCType(
+    /* [out] */ RPCType& type)
+{
+    type = mType;
+    return NOERROR;
+}
+
+ECode CZMQChannel::SetServerName(
+    /* [in] */ const String& serverName)
+{
+    mServerName = serverName;
+
     Mutex::AutoLock lock(mLock);
 
     std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
@@ -70,26 +90,7 @@ CZMQChannel::CZMQChannel(
             iter->second->inChannel++;
         }
     }
-}
 
-ECode CZMQChannel::Apply(
-    /* [in] */ IInterfacePack* ipack)
-{
-    //mName = CZMQInterfacePack::From(ipack)->GetDBusName();
-    return NOERROR;
-}
-
-ECode CZMQChannel::GetRPCType(
-    /* [out] */ RPCType& type)
-{
-    type = mType;
-    return NOERROR;
-}
-
-ECode CZMQChannel::SetServerName(
-    /* [in] */ const String& serverName)
-{
-    mServerName = serverName;
     return NOERROR;
 }
 

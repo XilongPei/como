@@ -22,3 +22,5 @@ set(RPC_OBJ_DIR ${RUNTIME_OBJ_DIR}/rpc)
 add_subdirectory(component)
 add_subdirectory(client)
 add_subdirectory(service)
+
+add_subdirectory(serviceZMQ)
