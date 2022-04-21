@@ -73,7 +73,7 @@ ECode CZMQInterfacePack::GetHashCode(
     return NOERROR;
 }
 
-ECode InterfacePack::GetServerObjectId(
+ECode CZMQInterfacePack::GetServerObjectId(
     /* [out] */ Long& serverObjectId)
 {
     serverObjectId = mServerObjectId;

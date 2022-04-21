@@ -93,6 +93,12 @@ gmake install
 sudo apt-get install libicu-dev
 ```
 
+### Install autoreconf
+###### Ubuntu
+```shell
+sudo apt-get install autoreconf
+```
+
 ### How to build
 1. <code>cd como</code>
 
