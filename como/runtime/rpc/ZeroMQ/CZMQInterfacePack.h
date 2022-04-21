@@ -84,6 +84,9 @@ public:
     void SetParcelable(
         /* [in] */ Boolean parcelable);
 
+    void SetServerObjectId(
+        /* [in] */ Long serverObjectId);
+
     inline static CZMQInterfacePack* From(
         /* [in] */ IInterfacePack* ipack);
 

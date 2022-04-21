@@ -83,7 +83,8 @@ ECode CDBusChannelFactory::MarshalInterface(
 
     IObject *obj = IObject::Probe(object);
     if (nullptr == obj) {
-        Logger::E("CDBusChannelFactory", "The Object is not a como object.");
+        Logger::E("CDBusChannelFactory::MarshalInterface",
+                                            "The Object is not a COMO object.");
         ipack = nullptr;
         return E_NOT_COMO_OBJECT_EXCEPTION;
     }
@@ -112,7 +113,8 @@ ECode CDBusChannelFactory::MarshalInterface(
             else {
                 ec = CoCreateStub(object, mType, stub);
                 if (FAILED(ec)) {
-                    Logger::E("CDBusChannelFactory", "Marshal interface failed.");
+                    Logger::E("CDBusChannelFactory::MarshalInterface",
+                                                   "Marshal interface failed.");
                     ipack = nullptr;
                     return ec;
                 }
@@ -126,7 +128,8 @@ ECode CDBusChannelFactory::MarshalInterface(
 
                 ec = RegisterExportObject(mType, obj, stub);
                 if (FAILED(ec)) {
-                    Logger::E("CDBusChannelFactory", "RegisterExportObject failed.");
+                    Logger::E("CDBusChannelFactory::MarshalInterface",
+                                                "RegisterExportObject failed.");
                     ipack = nullptr;
                     return ec;
                 }
@@ -152,7 +155,7 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
             Logger::E("CDBusChannelFactory::UnmarshalInterface",
-                               "CoCreateObjectInstance failed. ECode: 0x%X", ec);
+                              "CoCreateObjectInstance failed. ECode: 0x%X", ec);
             return ec;
         }
     }
@@ -180,14 +183,20 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
             Logger::E("CDBusChannelFactory::UnmarshalInterface",
-                                         "CoCreateProxy failed. ECode: 0x%X", ec);
+                                       "CoCreateProxy failed. ECode: 0x%X", ec);
             object = nullptr;
             return ec;
         }
 
         ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
 
-        RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        if (FAILED(ec)) {
+            Logger::E("CDBusChannelFactory::UnmarshalInterface",
+                                "RegisterImportObject failed. ECode: 0x%X", ec);
+            object = nullptr;
+            return ec;
+        }
 
         InterfaceID iid;
         ipack->GetInterfaceID(iid);

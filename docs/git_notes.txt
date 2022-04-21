@@ -1,0 +1,4 @@
+git clone --recursive https://gitee.com/tjopenlab/como
+git pull --recurse-submodules
+git submodule update --remote --recursive
+git submodule update --recursive

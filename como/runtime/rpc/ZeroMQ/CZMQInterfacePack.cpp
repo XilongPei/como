@@ -120,4 +120,10 @@ void CZMQInterfacePack::SetParcelable(
     mIsParcelable = parcelable;
 }
 
+void CZMQInterfacePack::SetServerObjectId(
+    /* [in] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
+}
+
 } // namespace como

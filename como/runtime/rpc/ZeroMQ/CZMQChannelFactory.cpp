@@ -82,12 +82,15 @@ ECode CZMQChannelFactory::MarshalInterface(
 
     pack->SetInterfaceID(iid);
 
+    IObject *obj = IObject::Probe(object);
+    if (nullptr == obj) {
+        Logger::E("CZMQChannelFactory::MarshalInterface",
+                                            "The Object is not a COMO object.");
+        ipack = nullptr;
+        return E_NOT_COMO_OBJECT_EXCEPTION;
+    }
+
     if (IParcelable::Probe(object) != nullptr) {
-        if (IObject::Probe(object) == nullptr) {
-            Logger::E("CZMQChannelFactory", "The Object is not a como object.");
-            ipack = nullptr;
-            return E_NOT_COMO_OBJECT_EXCEPTION;
-        }
         CoclassID cid;
         IObject::Probe(object)->GetCoclassID(cid);
         pack->SetCoclassID(cid);
@@ -95,7 +98,7 @@ ECode CZMQChannelFactory::MarshalInterface(
     }
     else {
         AutoPtr<IStub> stub;
-        ECode ec = FindExportObject(mType, IObject::Probe(object), stub);
+        ECode ec = FindExportObject(mType, obj, stub);
         if (SUCCEEDED(ec)) {
             CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
             //pack->SetDBusName(channel->mName);
@@ -111,14 +114,26 @@ ECode CZMQChannelFactory::MarshalInterface(
             else {
                 ec = CoCreateStub(object, mType, stub);
                 if (FAILED(ec)) {
-                    Logger::E("CZMQChannelFactory", "Marshal interface failed.");
+                    Logger::E("CZMQChannelFactory::MarshalInterface",
+                                                   "Marshal interface failed.");
                     ipack = nullptr;
                     return ec;
                 }
                 CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
                 //pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
-                RegisterExportObject(mType, IObject::Probe(object), stub);
+
+                Long hash;
+                obj->GetHashCode(hash);
+                pack->SetServerObjectId(hash);
+
+                ec = RegisterExportObject(mType, obj, stub);
+                if (FAILED(ec)) {
+                    Logger::E("CZMQChannelFactory::MarshalInterface",
+                                                "RegisterExportObject failed.");
+                    ipack = nullptr;
+                    return ec;
+                }
             }
         }
     }
@@ -140,7 +155,8 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         ipack->GetInterfaceID(iid);
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
-            Logger::E("CZMQChannelFactory", "Create the object in ReadInterface failed.");
+            Logger::E("CZMQChannelFactory::UnmarshalInterface",
+                                  "Create the object in ReadInterface failed.");
             return ec;
         }
     }
@@ -167,12 +183,19 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         AutoPtr<IProxy> proxy;
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
-            Logger::E("CZMQChannelFactory", "Unmarshal the interface in ReadInterface failed.");
+            Logger::E("CZMQChannelFactory::UnmarshalInterface",
+                            "Unmarshal the interface in ReadInterface failed.");
             object = nullptr;
             return ec;
         }
 
-        RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        if (FAILED(ec)) {
+            Logger::E("CZMQChannelFactory::UnmarshalInterface",
+                                "RegisterImportObject failed. ECode: 0x%X", ec);
+            object = nullptr;
+            return ec;
+        }
 
         InterfaceID iid;
         ipack->GetInterfaceID(iid);

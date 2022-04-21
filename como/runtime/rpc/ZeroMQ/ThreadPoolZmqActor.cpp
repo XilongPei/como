@@ -36,12 +36,6 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
     : mStub(stub)
     , mWorkerStatus(WORKER_TASK_READY)
 {
-    String serverName;
-    void *mSocket = channel->GetSocket();
-    if (nullptr == mSocket) {
-        Logger::E("TPZA_Executor::Worker", "CzmqFindSocket: %s", serverName.string());
-    }
-
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 
     HANDLE pid = getpid();
@@ -81,9 +75,21 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
-                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
+                if (nullptr == argParcel) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                               "new CZMQParcel return nullptr");
+                    break;
+                }
+
+                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
+                                                            zmq_msg_size(&msg));
                 zmq_msg_close(&msg);
                 AutoPtr<IParcel> resParcel = new CZMQParcel();
+                if (nullptr == resParcel) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                               "new CZMQParcel return nullptr");
+                    break;
+                }
 
                 if (hChannel == mChannel) {
                     ec = mStub->Invoke(argParcel, resParcel);
@@ -95,9 +101,11 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     }
                     else {
                         if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                            if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr),
-                                                                    eventCode, mSocket, msg) != 0) {
-                                Logger::E("TPZA_Executor::Worker::Invoke", "bad hChannel");
+                            if (TPZA_Executor::defaultHandleMessage(
+                                reinterpret_cast<HANDLE>(nullptr), eventCode,
+                                                           mSocket, msg) != 0) {
+                                Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                                  "defaultHandleMessage error");
                             }
                         }
                     }
@@ -108,23 +116,38 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
-                                                            mSocket, (const void *)resData, resSize);
+                                       mSocket, (const void *)resData, resSize);
                 break;
             }
 
             case ZmqFunCode::GetComponentMetadata: {
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
-                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
+                if (nullptr == argParcel) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                               "new CZMQParcel return nullptr");
+                    break;
+                }
+
+                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
+                                                            zmq_msg_size(&msg));
                 CoclassID cid;
                 argParcel->ReadCoclassID(cid);
                 AutoPtr<IMetaComponent> mc;
-                CoGetComponentMetadata(*cid.mCid, nullptr, mc);
+                ec = CoGetComponentMetadata(*cid.mCid, nullptr, mc);
+                if (FAILED(ec)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                               "CoGetComponentMetadata error, ECode: 0x%X", ec);
+                    ReleaseCoclassID(cid);
+                    break;
+                }
+
                 Array<Byte> metadata;
                 ec = mc->GetSerializedMetadata(metadata);
 
                 ReleaseCoclassID(cid);
                 if (SUCCEEDED(ec))
-                    numberOfBytes = zmq_send(mSocket, metadata.GetPayload(), metadata.GetLength(), 0);
+                    numberOfBytes = zmq_send(mSocket, metadata.GetPayload(),
+                                                       metadata.GetLength(), 0);
                 else
                     numberOfBytes = zmq_send(mSocket, "", 1, 0);
 
@@ -133,8 +156,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 
             case ZmqFunCode::Actor_IsPeerAlive: {
                 Boolean b = true;
-                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
-                                                       mSocket, (const void *)&b, sizeof(Boolean));
+                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                                             (const void *)&b, sizeof(Boolean));
                 break;
             }
 
@@ -151,8 +174,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                    if (TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr),
-                                                                    eventCode, mSocket, msg) != 0) {
+                    if (TPZA_Executor::defaultHandleMessage(
+                        reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
                         Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
                     }
                 }
@@ -218,7 +241,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         // ns accuracy is not required
         // TODO, mWorkerList.size() is not the really num in mWorkerList
         if (mWorkerList.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
-            (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
+                         (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
             clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
 
@@ -239,13 +262,14 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         pthread_mutex_lock(&pthreadMutex);
 
         for (i = 0;  i < ((mWorkerList.size()) &&
-                     (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
 
         while ((i >= mWorkerList.size()) && !shutdown) {
             if (nullptr != TPZA_Executor::defaultHandleMessage) {
                 Integer eventCode;
                 zmq_msg_t msg;
-                TPZA_Executor::defaultHandleMessage(reinterpret_cast<HANDLE>(nullptr), eventCode, nullptr, msg);
+                TPZA_Executor::defaultHandleMessage(
+                    reinterpret_cast<HANDLE>(nullptr), eventCode, nullptr, msg);
             }
 
             /* wait 100ns, a short time, CPU is too tired.
@@ -311,8 +335,8 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
-        if (pthread_create(&pthread_id[i], nullptr, ThreadPoolZmqActor::threadFunc,
-                                                                        nullptr) != 0) {
+        if (pthread_create(&pthread_id[i], nullptr,
+                                ThreadPoolZmqActor::threadFunc, nullptr) != 0) {
             Logger::E("ThreadPoolZmqActor", "pthread_create() error");
         }
     }

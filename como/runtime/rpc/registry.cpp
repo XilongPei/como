@@ -188,8 +188,10 @@ ECode RegisterImportObject(
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
 
     Mutex::AutoLock lock(registryLock);
-    registry.Put(ipack, object);
-    return NOERROR;
+    if (0 == registry.Put(ipack, object))
+        return NOERROR;
+
+    return E_OUT_OF_MEMORY_ERROR;
 }
 
 ECode UnregisterImportObject(

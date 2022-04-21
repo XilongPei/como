@@ -188,10 +188,12 @@ ECode CZMQParcel::ReadString(
     if (size == 0) {
         return NOERROR;
     }
+
     const char* str = (const char*)ReadInplace(size + 1);
     if (str == nullptr) {
         return E_RUNTIME_EXCEPTION;
     }
+
     value = str;
     return NOERROR;
 }
