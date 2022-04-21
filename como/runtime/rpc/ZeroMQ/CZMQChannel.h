@@ -21,7 +21,6 @@
 #include "CStub.h"
 //#include "ThreadPoolZmqActor.h"
 #include "util/comoobj.h"
-#include "util/mutex.h"
 
 namespace como {
 
@@ -98,6 +97,7 @@ public:
         /* [in] */ IStub* stub);
 
     inline void *GetSocket(void);
+    inline void SetSocket(void *socket);
 
 private:
     friend class CZMQChannelFactory;
@@ -110,7 +110,6 @@ private:
     String mServerName;
     void  *mSocket;
     Boolean mStarted;
-    Mutex mLock;
 };
 
 inline CZMQChannel* CZMQChannel::GetProxyChannel(
@@ -129,6 +128,11 @@ inline CZMQChannel* CZMQChannel::GetStubChannel(
 inline void *CZMQChannel::GetSocket(void)
 {
     return mSocket;
+}
+
+inline void CZMQChannel::SetSocket(void *socket)
+{
+    mSocket = socket;
 }
 
 } // namespace como

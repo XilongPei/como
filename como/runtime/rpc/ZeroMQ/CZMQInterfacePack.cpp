@@ -14,6 +14,9 @@
 // limitations under the License.
 //=========================================================================
 
+#include "ComoConfig.h"
+#include "CZMQUtils.h"
+#include "CZMQChannel.h"
 #include "CZMQInterfacePack.h"
 
 namespace como {
@@ -110,6 +113,37 @@ ECode CZMQInterfacePack::WriteToParcel(
 ECode CZMQInterfacePack::GiveMeAhand(
     /* [in] */ const String& aHand)
 {
+
+    Mutex::AutoLock lock(mLock);
+
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+            ComoConfig::ServerNameEndpointMap.find(std::string(aHand.string()));
+    std::string endpoint;
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        endpoint = iter->second->endpoint;
+    }
+    else {
+        Logger::E("CZMQChannel", "Unregistered ServerName: %s", aHand.string());
+    }
+
+    void *socket;
+
+    if (nullptr != iter->second->socket) {
+        socket = iter->second->socket;
+        iter->second->inChannel++;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                        aHand.string(), endpoint.c_str(), ZMQ_REQ);
+        if (nullptr != socket) {
+            iter->second->socket = socket;
+            iter->second->inChannel++;
+        }
+    }
+
+    ((CZMQChannel*)(IRPCChannel*)mChannel)->SetSocket(socket);
+
     return NOERROR;
 }
 

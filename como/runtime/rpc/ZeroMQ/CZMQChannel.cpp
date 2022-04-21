@@ -23,7 +23,6 @@
 #include "CZMQParcel.h"
 #include "CZMQInterfacePack.h"
 #include "util/comolog.h"
-#include "ComoConfig.h"
 #include "CZMQUtils.h"
 #include "ThreadPoolZmqActor.h"
 
@@ -64,33 +63,6 @@ ECode CZMQChannel::SetServerName(
     /* [in] */ const String& serverName)
 {
     mServerName = serverName;
-
-    Mutex::AutoLock lock(mLock);
-
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(mServerName.string()));
-    std::string endpoint;
-    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
-        endpoint = iter->second->endpoint;
-    }
-    else {
-        Logger::E("CZMQChannel", "Unregistered ServerName: %s", mServerName.string());
-    }
-
-    if (nullptr != iter->second->socket) {
-        mSocket = iter->second->socket;
-        iter->second->inChannel++;
-    }
-    else {
-        mSocket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                        mServerName.string(), endpoint.c_str(), ZMQ_REQ);
-        if (nullptr != mSocket) {
-            iter->second->socket = mSocket;
-            iter->second->inChannel++;
-        }
-    }
-
     return NOERROR;
 }
 

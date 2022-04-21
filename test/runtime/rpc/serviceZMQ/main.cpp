@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include "ComoConfig.h"
+#include <stdio.h>
 
 using como::test::rpc::CService;
 using como::test::rpc::IService;
@@ -43,8 +44,8 @@ int main(int argv, char** argc)
     }
 
     ServiceManager::GetInstance()->AddRemoteService(
-                                                String("127.0.0.1:80801"),
-                                                String("127.0.0.1:80801"),
+                                                String("127.0.0.1:8081"),
+                                                String("127.0.0.1:8082"),
                                                 String("rpcserviceZMQ"), srv);
 
     printf("==== rpc serviceZMQ wait for calling ====\n");

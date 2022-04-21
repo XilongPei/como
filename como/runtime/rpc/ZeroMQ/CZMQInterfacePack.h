@@ -20,6 +20,7 @@
 #include "comotypes.h"
 #include "rpc/registry.h"
 #include "util/comoref.h"
+#include "util/mutex.h"
 
 namespace como {
 
@@ -94,6 +95,7 @@ public:
         /* [in] */ IInterfacePack* ipack);
 
     AutoPtr<IRPCChannel> mChannel;
+    Mutex mLock;
 
 private:
     CoclassID mCid;
