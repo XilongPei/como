@@ -93,10 +93,11 @@ gmake install
 sudo apt-get install libicu-dev
 ```
 
-### Install autoreconf
+### Install autoreconf libtool
 ###### Ubuntu
 ```shell
 sudo apt-get install autoreconf
+sudo apt-get install libtool
 ```
 
 ### How to build
