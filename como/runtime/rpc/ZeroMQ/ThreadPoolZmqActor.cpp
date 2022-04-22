@@ -251,6 +251,9 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
             for (i = 0;  (i < mWorkerList.size()) &&
                                    (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus);  i++) {
+                if (nullptr == mWorkerList[i])
+                    continue;
+
                 if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
@@ -263,8 +266,12 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         pthread_mutex_lock(&pthreadMutex);
 
-        for (i = 0;  i < ((mWorkerList.size()) &&
-                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+        for (i = 0;  i < mWorkerList.size();  i++) {
+            if ((nullptr == mWorkerList[i]) ||
+                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+                break;
+            }
+        }
 
         while ((i >= mWorkerList.size()) && !shutdown) {
             if (nullptr != TPZA_Executor::defaultHandleMessage) {
@@ -290,8 +297,13 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             curTime.tv_nsec += 100;
             pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
 
-            for (i = 0;  i < ((mWorkerList.size()) &&
-                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+            for (i = 0;  i < mWorkerList.size();  i++) {
+                if (nullptr == mWorkerList[i])
+                    continue;
+
+                if (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)
+                    break;
+            }
         }
 
         if (shutdown) {
@@ -300,14 +312,18 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             return nullptr;
         }
 
-        AutoPtr<TPZA_Executor::Worker> w = mWorkerList[i];
-        w->mWorkerStatus = WORKER_TASK_RUNNING;
+        if (i < mWorkerList.size()) {
+            AutoPtr<TPZA_Executor::Worker> worker = mWorkerList[i];
+            if (nullptr != worker) {
+                worker->mWorkerStatus = WORKER_TASK_RUNNING;
 
-        pthread_mutex_unlock(&pthreadMutex);
+                pthread_mutex_unlock(&pthreadMutex);
 
-        if ((w = w->HandleMessage()) != nullptr) {
-            delete w;
-            mWorkerList[i] = nullptr;
+                if (worker->HandleMessage() != nullptr) {
+                    delete worker;
+                    mWorkerList[i] = nullptr;
+                }
+            }
         }
     }
 

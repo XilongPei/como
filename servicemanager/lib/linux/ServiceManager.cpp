@@ -143,7 +143,7 @@ Exit:
 
 ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& thisServerName,
-    /* [in] */ const String& thatServerName,
+    /* [in] */ const String& snServManager,
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
@@ -152,8 +152,8 @@ ECode ServiceManager::AddRemoteService(
     }
 
     Logger_D("ServiceManager::AddRemoteService",
-             "thisServerName: %s  thatServerName: %s  name: %s",
-             thisServerName.string(), thatServerName.string(), name.string());
+             "thisServerName: %s  snServManager: %s  name: %s",
+             thisServerName.string(), snServManager.string(), name.string());
 
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
@@ -165,16 +165,19 @@ ECode ServiceManager::AddRemoteService(
     }
 
     if ((nullptr == thisServerName) || thisServerName.IsEmpty() ||
-        (nullptr == thatServerName) || thatServerName.IsEmpty()) {
+        (nullptr == snServManager) || snServManager.IsEmpty()) {
         return AddService(name, object);
     }
 
+    /**
+     * Check whether we should call GiveMeAhand to setup waiting endpoint
+     */
     bool firstOne;
-    std::string strServerName = ComoConfig::GetZeroMQEndpoint(
+    std::string strep = ComoConfig::GetZeroMQEndpoint(
                                              thisServerName.string(), firstOne);
-    if (strServerName.empty()) {
+    if (strep.empty()) {
         Logger_E("ServiceManager::AddRemoteService",
-                 "GetZeroMQEndpoint \"%s\" failed.", name.string());
+                 "GetZeroMQEndpoint \"%s\" failed.", strep.c_str());
         return E_NOT_FOUND_EXCEPTION;
     }
 
@@ -182,13 +185,16 @@ ECode ServiceManager::AddRemoteService(
     // "localhost" is in ComoConfig::ServerNameEndpointMap,
     // added by ComoConfig::AddZeroMQEndpoint
     if (! firstOne) {
-        ipack->GiveMeAhand(thisServerName);
+        ipack->GiveMeAhand(String(strep.c_str()));
     }
 
+    /**
+     * Prepare parcel
+     */
     // Tell others my (thisServerName) identification information as a service
     // provider so that others can find me
     // name, hold name of Service
-    ipack->SetServerName(name + "\n" + String(strServerName.c_str()));
+    ipack->SetServerName(name + "\n" + String(strep.c_str()));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -198,34 +204,39 @@ ECode ServiceManager::AddRemoteService(
     Long size;
     parcel->GetDataSize(size);
 
-    const char* str = nullptr;
+    /**
+     * tell ServiceManager to add service
+     */
     std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(thatServerName.string()));
-    std::string endpoint;
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+    std::string strServerEndpoint;
     void *socket;
 
+    bool found;
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
-        endpoint = iter->second->endpoint;
+        strServerEndpoint = iter->second->endpoint;
+        found = true;
     }
     else {
+        found = false;
         Logger::E("ServiceManager::AddRemoteService",
-                        "Unregistered ServerName: %s", thatServerName.string());
+                        "Unregistered ServerName: %s", snServManager.string());
     }
 
-    if (nullptr != iter->second->socket) {
+    if (found && (nullptr != iter->second->socket)) {
         socket = iter->second->socket;
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
                                 ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
                                 ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                thatServerName.string(), endpoint.c_str(), ZMQ_REQ);
+                                snServManager.string(),
+                                strServerEndpoint.c_str(), ZMQ_REQ);
     }
 
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ZmqFunCode::AddService,
                                         socket, (const void *)buffer, size);
-
     return ec;
 }
 #else

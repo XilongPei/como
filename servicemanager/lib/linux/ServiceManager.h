@@ -35,7 +35,7 @@ public:
 
     ECode AddRemoteService(
         /* [in] */ const String& thisServerName,
-        /* [in] */ const String& thatServerName,
+        /* [in] */ const String& snServManager,
         /* [in] */ const String& name,
         /* [in] */ IInterface* object);
 
