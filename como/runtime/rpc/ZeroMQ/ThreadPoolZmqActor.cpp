@@ -316,14 +316,18 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             AutoPtr<TPZA_Executor::Worker> worker = mWorkerList[i];
             if (nullptr != worker) {
                 worker->mWorkerStatus = WORKER_TASK_RUNNING;
-
                 pthread_mutex_unlock(&pthreadMutex);
-
                 if (worker->HandleMessage() != nullptr) {
                     delete worker;
                     mWorkerList[i] = nullptr;
                 }
             }
+            else {
+                pthread_mutex_unlock(&pthreadMutex);
+            }
+        }
+        else {
+            pthread_mutex_unlock(&pthreadMutex);
         }
     }
 

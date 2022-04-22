@@ -159,8 +159,8 @@ ECode ServiceManager::AddRemoteService(
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
     if (FAILED(ec)) {
         Logger_E("ServiceManager::AddRemoteService",
-                 "Marshal the interface which named \"%s\" failed.",
-                 name.string());
+                                "Marshal the interface which named '%s' failed",
+                                name.string());
         return ec;
     }
 
@@ -177,7 +177,7 @@ ECode ServiceManager::AddRemoteService(
                                              thisServerName.string(), firstOne);
     if (strep.empty()) {
         Logger_E("ServiceManager::AddRemoteService",
-                 "GetZeroMQEndpoint \"%s\" failed.", strep.c_str());
+                              "GetZeroMQEndpoint \"%s\" failed", strep.c_str());
         return E_NOT_FOUND_EXCEPTION;
     }
 
@@ -185,7 +185,7 @@ ECode ServiceManager::AddRemoteService(
     // "localhost" is in ComoConfig::ServerNameEndpointMap,
     // added by ComoConfig::AddZeroMQEndpoint
     if (! firstOne) {
-        ipack->GiveMeAhand(String(strep.c_str()));
+        ipack->GiveMeAhand(snServManager);
     }
 
     /**
@@ -219,6 +219,7 @@ ECode ServiceManager::AddRemoteService(
     }
     else {
         found = false;
+        strServerEndpoint = "";
         Logger::E("ServiceManager::AddRemoteService",
                         "Unregistered ServerName: %s", snServManager.string());
     }
@@ -232,6 +233,13 @@ ECode ServiceManager::AddRemoteService(
                                 ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 snServManager.string(),
                                 strServerEndpoint.c_str(), ZMQ_REQ);
+    }
+
+    if (nullptr == socket) {
+        Logger::E("ServiceManager::AddRemoteService",
+                        "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
+                        snServManager.string(), strServerEndpoint.c_str());
+        return E_REMOTE_EXCEPTION;
     }
 
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),

@@ -27,14 +27,46 @@
 namespace jing {
 
 void *threadFunc(void *threadData);
+static void *socket = nullptr;
 
 void RpcOverZeroMQ::startTPZA_Executor()
 {
-    Logger_D("ServiceManager", "starting daemon for RPC over ZeroMQ...");
+    Logger::D("ServiceManager", "starting daemon for RPC over ZeroMQ...");
 
-    AutoPtr<TPZA_Executor> tPZA_Executor = TPZA_Executor::GetInstance();
-    tPZA_Executor->SetDefaultHandleMessage(HandleMessage);
+    // prepare ComoConfig
+    std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
+                                            std::string("tcp://127.0.0.1:8081"));
+    if (std::string("localhost") != ret) {
+        printf("Failed to AddZeroMQEndpoint\n");
+    }
 
+    ret = ComoConfig::AddZeroMQEndpoint(std::string("ServiceManager"),
+                                            std::string("tcp://127.0.0.1:8088"));
+    if (std::string("ServiceManager") != ret) {
+        printf("Failed to AddZeroMQEndpoint\n");
+    }
+
+    // end of prepare ComoConfig
+
+    bool firstOne;
+    std::string strep = ComoConfig::GetZeroMQEndpoint("ServiceManager", firstOne);
+
+    socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                "ServiceManager", strep.c_str(),
+                                ZMQ_REP);
+    if (nullptr == socket) {
+        Logger::E("startTPZA_Executor",
+                  "CzmqGetSocket error, Server: 'ServiceManager', Endpoint: %s",
+                  strep.c_str());
+    }
+
+    int timeout = -1;  // milliseconds
+    zmq_setsockopt(socket, ZMQ_RCVTIMEO, &timeout, sizeof(int));
+
+    Logger::D("startTPZA_Executor", "Server: 'ServiceManager', Endpoint: %s",
+                                                                 strep.c_str());
     pthread_attr_t threadAddr;
     pthread_attr_init(&threadAddr);
     pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
@@ -48,45 +80,26 @@ void RpcOverZeroMQ::startTPZA_Executor()
 void *RpcOverZeroMQ::threadFunc(void *threadData)
 {
     ECode ec = NOERROR;
-    int i;
+    HANDLE hChannel;
+    Integer eventCode;
+    zmq_msg_t msg;
 
     while (true) {
-        HANDLE hChannel;
-        Integer eventCode;
-        zmq_msg_t msg;
-        int numberOfBytes;
-        void *socket = nullptr;
-
-        std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
-                                                ComoConfig::ServerNameEndpointMap.begin();
-        while (iter != ComoConfig::ServerNameEndpointMap.end()) {
-            if (iter->second->inChannel <= 0) {
-                socket = iter->second->socket;
-                if (nullptr == socket) {
-                    socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                            ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                            ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                            iter->first.c_str(), iter->second->endpoint.c_str(),
-                                            ZMQ_REQ);
-                    iter->second->socket = socket;
-                }
-            }
-            else
-                continue;
-
-            if (nullptr == socket)
-                continue;
-
-            if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, ZMQ_DONTWAIT) != 0) {
-                ec = HandleMessage(hChannel, eventCode, socket, msg);
-            }
+        if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) != 0) {
+            ec = HandleMessage(hChannel, eventCode, socket, msg);
         }
-   }
+
+        if (FAILED(ec)) {
+            Logger::E("RpcOverZeroMQ::threadFunc", "ECode: 0x%X", ec);
+            usleep(200);
+        }
+    }
 
     return reinterpret_cast<void*>(ec);
 }
 
-ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *socket, zmq_msg_t& msg)
+ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
+                                                   void *socket, zmq_msg_t& msg)
 {
     ECode ec = NOERROR;
     switch (eventCode) {
@@ -110,18 +123,21 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *soc
             parcel->ReadString(serverName);
             Integer pos = serverName.IndexOf('\n', 0);
             if (pos < 0) {
-                Logger::E("RpcOverZeroMQ", "HandleMessage() AddService, bad serverName: %s", serverName);
-                zmq_msg_close (&msg);
+                Logger::E("RpcOverZeroMQ",
+                  "HandleMessage() AddService, bad serverName: %s", serverName);
+                zmq_msg_close(&msg);
                 break;
             }
 
             ipack.mServerName = serverName.Substring(0, pos);
-            name = serverName.Substring(pos+1, 4096);   // 4096, any big number, the max length of serverName
-                                                        // String::GetLength() cost time
+
+            // 4096, any big number, the max length of serverName
+            // String::GetLength() cost time
+            name = serverName.Substring(pos+1, 4096);
 
             ec = ServiceManager::GetInstance()->AddService(name, ipack);
 
-            zmq_msg_close (&msg);
+            zmq_msg_close(&msg);
             break;
         }
         case ZmqFunCode::GetService: {      // 0x0202
@@ -131,7 +147,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode, void *soc
             break;
         }
         default:
-            Logger::E("RpcOverZeroMQ", "HandleMessage() error");
+            Logger::E("RpcOverZeroMQ", "HandleMessage() unknown eventCode");
     }
 
     return NOERROR;
