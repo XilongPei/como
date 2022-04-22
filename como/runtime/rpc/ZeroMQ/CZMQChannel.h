@@ -96,6 +96,9 @@ public:
     static CZMQChannel* GetStubChannel(
         /* [in] */ IStub* stub);
 
+    inline static CZMQChannel* From(
+        /* [in] */ IRPCChannel* iRpcChannel);
+
     inline void *GetSocket(void);
     inline void SetSocket(void *socket);
 
@@ -133,6 +136,12 @@ inline void *CZMQChannel::GetSocket(void)
 inline void CZMQChannel::SetSocket(void *socket)
 {
     mSocket = socket;
+}
+
+inline CZMQChannel* CZMQChannel::From(
+    /* [in] */ IRPCChannel* iRpcChannel)
+{
+    return (CZMQChannel*)iRpcChannel;
 }
 
 } // namespace como

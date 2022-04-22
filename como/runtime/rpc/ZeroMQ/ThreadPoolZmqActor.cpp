@@ -38,6 +38,8 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
 {
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 
+    mSocket = channel->GetSocket();
+
     HANDLE pid = getpid();
     mChannel = ((pid & 0xFFFF) << 48) | (reinterpret_cast<HANDLE>(channel) & 0xFFFFFFFFFFFF);
     //                    1 0                                                   5 4 3 2 1 0

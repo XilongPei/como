@@ -45,11 +45,14 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
+    , mSocket(nullptr)
 {
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
-                                      ComoConfig::ServerNameEndpointMap.begin();
     std::string name;
     std::string endpoint;
+    void *socket;
+
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+                                      ComoConfig::ServerNameEndpointMap.begin();
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
         name = iter->first;
         endpoint = iter->second->endpoint;
@@ -59,23 +62,27 @@ CZMQChannel::CZMQChannel(
         return;
     }
 
-    void *socket;
-
     if (nullptr != iter->second->socket) {
         socket = iter->second->socket;
         iter->second->inChannel++;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                        name.c_str(), endpoint.c_str(), ZMQ_REQ);
+        // I am server, I will accept incoming connections on a socket
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                name.c_str(), endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
             iter->second->inChannel++;
         }
+        else {
+            Logger::E("CZMQChannel", "CzmqGetSocket error");
+            return;
+        }
     }
 
-    SetSocket(socket);
+    mSocket = socket;
 }
 
 ECode CZMQChannel::Apply(
@@ -251,8 +258,13 @@ ECode CZMQChannel::StartListening(
     /* [in] */ IStub* stub)
 {
     if (mPeer == RPCPeer::Stub) {
-        AutoPtr<TPZA_Executor::Worker> w = new TPZA_Executor::Worker(this, stub);
-        TPZA_Executor::GetInstance()->RunTask(w);
+        AutoPtr<TPZA_Executor::Worker> worker = new TPZA_Executor::Worker(this, stub);
+        if (nullptr == worker) {
+            Logger::D("CZMQChannel::StartListening", "new TPZA_Executor::Worker failed");
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
+        TPZA_Executor::GetInstance()->RunTask(worker);
     }
 
     return NOERROR;

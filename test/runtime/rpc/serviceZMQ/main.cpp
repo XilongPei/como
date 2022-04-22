@@ -32,7 +32,8 @@ int main(int argv, char** argc)
 {
     AutoPtr<IService> srv;
 
-    std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),  std::string("127.0.0.1:8081"));
+    std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
+                                            std::string("tcp://127.0.0.1:8081"));
     if (std::string("localhost") != ret) {
         printf("Failed to AddZeroMQEndpoint\n");
     }
@@ -51,8 +52,8 @@ int main(int argv, char** argc)
             /* [in] */ IInterface* object)
     #endif
     ServiceManager::GetInstance()->AddRemoteService(
-                                                String("127.0.0.1:8081"),
-                                                String("127.0.0.1:8082"),
+                                                String("localhost"),
+                                                String("tcp://127.0.0.1:8082"),
                                                 String("rpcserviceZMQ"), srv);
 
     printf("==== rpc serviceZMQ wait for calling ====\n");

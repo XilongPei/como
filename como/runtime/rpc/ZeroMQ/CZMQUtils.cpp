@@ -19,6 +19,7 @@
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
+#include <stdio.h>
 
 namespace como {
 
@@ -109,8 +110,16 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
     else {                      // I am server
         socket = zmq_socket(context, ZMQ_REP);
         if (identity != nullptr) {
-            if (zmq_getsockopt(context, ZMQ_ROUTING_ID, (char *)identity, &identityLen) != 0) {
-                Logger::E("CZMQUtils::CzmqGetSocket", "errno %d", zmq_errno());
+
+            // A routing id must be at least one byte and at most 255 bytes long.
+            // Identities starting with a zero byte are reserved for use by the
+            // ZeroMQ infrastructure.
+            char buf[256];
+            size_t len = 255;
+            if (zmq_getsockopt(socket, ZMQ_ROUTING_ID, buf, &len) != 0) {
+                Logger::E("CZMQUtils::CzmqGetSocket",
+                          "zmq_getsockopt error, errno %d, identity: %s",
+                          zmq_errno(), (char*)identity);
             }
         }
     }
@@ -119,17 +128,30 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
         if (nullptr != endpoint) {
             int rc;
 
-            if (ZMQ_REP != type)    // create outgoing connection from socket
+            if (ZMQ_REP != type) {   // create outgoing connection from socket
                 rc = zmq_connect(socket, endpoint);
-            else                    // accept incoming connections on a socket
+                if (rc != 0) {
+                    Logger::E("CZMQUtils::CzmqGetSocket",
+                              "zmq_connect error, %s errno %d", endpoint, zmq_errno());
+                    return nullptr;
+                }
+            }
+            else {                   // accept incoming connections on a socket
                 rc = zmq_bind(socket, endpoint);
-
-            if (rc != 0) {
-                Logger::E("CZMQUtils::CzmqGetSocket", "endpoint: %s errno %d", endpoint, zmq_errno());
+                if (rc != 0) {
+                    Logger::E("CZMQUtils::CzmqGetSocket",
+                              "zmq_bind error, %s errno %d", endpoint, zmq_errno());
+                    return nullptr;
+                }
             }
         }
 
         endpointSocket = new EndpointSocket();
+        if (nullptr == endpointSocket) {
+            Logger::E("CZMQUtils::CzmqGetSocket", "new EndpointSocket error");
+            return nullptr;
+        }
+
         endpointSocket->socket = socket;
         endpointSocket->endpoint = std::string(endpoint);
         {

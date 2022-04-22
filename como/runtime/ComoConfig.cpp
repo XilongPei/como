@@ -42,6 +42,23 @@ std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string en
     return nullptr;
 }
 
+std::string ComoConfig::GetZeroMQEndpoint(std::string serverName, bool& firstOne)
+{
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iterBegin =
+                                                  ServerNameEndpointMap.begin();
+
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iterFind =
+                                         ServerNameEndpointMap.find(serverName);
+
+    if (iterFind != ServerNameEndpointMap.end()) {
+        firstOne = (iterBegin == iterFind) ? true  : false;
+        return iterFind->second->endpoint;
+    }
+
+    firstOne = false;
+    return nullptr;
+}
+
 // REM in ThreadPoolExecutor::Worker::Run():
 // The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the
 // number ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER

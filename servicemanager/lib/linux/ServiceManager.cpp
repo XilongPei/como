@@ -151,11 +151,16 @@ ECode ServiceManager::AddRemoteService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    Logger_D("ServiceManager::AddRemoteService",
+             "thisServerName: %s  thatServerName: %s  name: %s",
+             thisServerName.string(), thatServerName.string(), name.string());
+
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
     if (FAILED(ec)) {
-        Logger_E("ServiceManager", "Marshal the interface which named \"%s\" failed.",
-                name.string());
+        Logger_E("ServiceManager::AddRemoteService",
+                 "Marshal the interface which named \"%s\" failed.",
+                 name.string());
         return ec;
     }
 
@@ -164,12 +169,26 @@ ECode ServiceManager::AddRemoteService(
         return AddService(name, object);
     }
 
+    bool firstOne;
+    std::string strServerName = ComoConfig::GetZeroMQEndpoint(
+                                             thisServerName.string(), firstOne);
+    if (strServerName.empty()) {
+        Logger_E("ServiceManager::AddRemoteService",
+                 "GetZeroMQEndpoint \"%s\" failed.", name.string());
+        return E_NOT_FOUND_EXCEPTION;
+    }
+
     // Tell ZeroMQ which port to listen to and wait for the request from the client
-    ipack->GiveMeAhand(thatServerName);
+    // "localhost" is in ComoConfig::ServerNameEndpointMap,
+    // added by ComoConfig::AddZeroMQEndpoint
+    if (! firstOne) {
+        ipack->GiveMeAhand(thisServerName);
+    }
 
     // Tell others my (thisServerName) identification information as a service
     // provider so that others can find me
-    ipack->SetServerName(name + "\n" + thisServerName);     // name, hold name of Service
+    // name, hold name of Service
+    ipack->SetServerName(name + "\n" + String(strServerName.c_str()));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -189,19 +208,22 @@ ECode ServiceManager::AddRemoteService(
         endpoint = iter->second->endpoint;
     }
     else {
-        Logger::E("CZMQChannel", "Unregistered ServerName: %s", thatServerName.string());
+        Logger::E("ServiceManager::AddRemoteService",
+                        "Unregistered ServerName: %s", thatServerName.string());
     }
 
     if (nullptr != iter->second->socket) {
         socket = iter->second->socket;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                             ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                             thatServerName.string(), endpoint.c_str(), ZMQ_REQ);
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                thatServerName.string(), endpoint.c_str(), ZMQ_REQ);
     }
 
-    Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr), ZmqFunCode::AddService,
+    Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                        ZmqFunCode::AddService,
                                         socket, (const void *)buffer, size);
 
     return ec;

@@ -113,36 +113,41 @@ ECode CZMQInterfacePack::WriteToParcel(
 ECode CZMQInterfacePack::GiveMeAhand(
     /* [in] */ const String& aHand)
 {
+    std::string name;
+    std::string endpoint;
+    void *socket;
 
     Mutex::AutoLock lock(mLock);
 
     std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
             ComoConfig::ServerNameEndpointMap.find(std::string(aHand.string()));
-    std::string endpoint;
+
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        name = iter->first;
         endpoint = iter->second->endpoint;
     }
     else {
-        Logger::E("CZMQChannel", "Unregistered ServerName: %s", aHand.string());
+        Logger::E("CZMQInterfacePack::GiveMeAhand",
+                                 "Unregistered ServerName: %s", aHand.string());
+        return E_NOT_FOUND_EXCEPTION;
     }
-
-    void *socket;
 
     if (nullptr != iter->second->socket) {
         socket = iter->second->socket;
         iter->second->inChannel++;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
-                                        aHand.string(), endpoint.c_str(), ZMQ_REQ);
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                name.c_str(), endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
             iter->second->inChannel++;
         }
     }
 
-    ((CZMQChannel*)(IRPCChannel*)mChannel)->SetSocket(socket);
+    CZMQChannel::From(mChannel)->SetSocket(socket);
 
     return NOERROR;
 }
