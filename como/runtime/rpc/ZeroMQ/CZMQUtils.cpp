@@ -132,7 +132,8 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
                 rc = zmq_connect(socket, endpoint);
                 if (rc != 0) {
                     Logger::E("CZMQUtils::CzmqGetSocket",
-                              "zmq_connect error, %s errno %d", endpoint, zmq_errno());
+                              "zmq_connect error, %s errno %d %s", endpoint,
+                              zmq_errno(), zmq_strerror(zmq_errno()));
                     return nullptr;
                 }
             }
@@ -140,7 +141,8 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
                 rc = zmq_bind(socket, endpoint);
                 if (rc != 0) {
                     Logger::E("CZMQUtils::CzmqGetSocket",
-                              "zmq_bind error, %s errno %d", endpoint, zmq_errno());
+                              "zmq_bind error, %s errno %d %s", endpoint,
+                              zmq_errno(), zmq_strerror(zmq_errno()));
                     return nullptr;
                 }
             }
@@ -182,7 +184,8 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
         if (0 != rc) {
             rc = zmq_close(endpointSocket->socket);
-            Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d", zmq_errno());
+            Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d, %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
             return rc;
         }
 
