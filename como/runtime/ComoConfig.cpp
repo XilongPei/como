@@ -44,14 +44,13 @@ std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string en
 
 std::string ComoConfig::GetZeroMQEndpoint(std::string serverName, bool& firstOne)
 {
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iterBegin =
+    std::map<std::string, ServerNodeInfo*>::iterator iterBegin =
                                                   ServerNameEndpointMap.begin();
 
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iterFind =
+    std::map<std::string, ServerNodeInfo*>::iterator iterFind =
                                          ServerNameEndpointMap.find(serverName);
-
     if (iterFind != ServerNameEndpointMap.end()) {
-        firstOne = (iterBegin == iterFind) ? true  : false;
+        firstOne = (iterBegin->first == iterFind->first) ? true  : false;
         return iterFind->second->endpoint;
     }
 
@@ -84,7 +83,7 @@ int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 2;
  */
 int Logger_sLevel = 0;
 
-std::unordered_map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
+std::map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
 
 Mutex ComoConfig::CZMQUtils_ContextLock;

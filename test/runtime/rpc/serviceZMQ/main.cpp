@@ -38,6 +38,12 @@ int main(int argv, char** argc)
         printf("Failed to AddZeroMQEndpoint\n");
     }
 
+    ret = ComoConfig::AddZeroMQEndpoint(std::string("Service1"),
+                                            std::string("tcp://127.0.0.1:8082"));
+    if (std::string("Service1") != ret) {
+        printf("Failed to AddZeroMQEndpoint\n");
+    }
+
     ret = ComoConfig::AddZeroMQEndpoint(std::string("ServiceManager"),
                                             std::string("tcp://127.0.0.1:8088"));
     if (std::string("ServiceManager") != ret) {

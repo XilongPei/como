@@ -22,7 +22,7 @@
 #include "CZMQUtils.h"
 #endif
 #include "ComoConfig.h"
-
+#include <stdio.h>
 namespace jing {
 
 AutoPtr<ServiceManager> ServiceManager::sInstance = new ServiceManager();
@@ -174,7 +174,7 @@ ECode ServiceManager::AddRemoteService(
      */
     bool firstOne;
     std::string strep = ComoConfig::GetZeroMQEndpoint(
-                                             thisServerName.string(), firstOne);
+                                std::string(thisServerName.string()), firstOne);
     if (strep.empty()) {
         Logger_E("ServiceManager::AddRemoteService",
                               "GetZeroMQEndpoint \"%s\" failed", strep.c_str());
@@ -207,7 +207,7 @@ ECode ServiceManager::AddRemoteService(
     /**
      * tell ServiceManager to add service
      */
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
             ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
     std::string strServerEndpoint;
     void *socket;

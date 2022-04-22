@@ -17,7 +17,7 @@
 #ifndef __COMO_CONFIG_H__
 #define __COMO_CONFIG_H__
 
-#include <unordered_map>
+#include <map>
 #include "comotypes.h"
 #include "mutex.h"
 
@@ -81,7 +81,7 @@ public:
 
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
 
-    static std::unordered_map<std::string, ServerNodeInfo*> ServerNameEndpointMap;
+    static std::map<std::string, ServerNodeInfo*> ServerNameEndpointMap;
     static std::string ComoRuntimeInstanceIdentity;
 
     static Mutex CZMQUtils_ContextLock;

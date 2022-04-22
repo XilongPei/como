@@ -51,7 +51,7 @@ CZMQChannel::CZMQChannel(
     std::string endpoint;
     void *socket;
 
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
                                       ComoConfig::ServerNameEndpointMap.begin();
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
         name = iter->first;
@@ -77,7 +77,9 @@ CZMQChannel::CZMQChannel(
             iter->second->inChannel++;
         }
         else {
-            Logger::E("CZMQChannel", "CzmqGetSocket error");
+            Logger::E("CZMQChannel",
+                      "CzmqGetSocket error, channel name: %s, endpoint: %s",
+                      name.c_str(), endpoint.c_str());
             return;
         }
     }

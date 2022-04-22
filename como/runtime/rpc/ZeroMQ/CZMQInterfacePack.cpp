@@ -119,7 +119,7 @@ ECode CZMQInterfacePack::GiveMeAhand(
 
     Mutex::AutoLock lock(mLock);
 
-    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
             ComoConfig::ServerNameEndpointMap.find(std::string(aHand.string()));
 
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
