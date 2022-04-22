@@ -164,8 +164,7 @@ ECode ServiceManager::AddRemoteService(
         return AddService(name, object);
     }
 
-    // Tell the channel implemented by ZeroMQ the server (thatServerName)
-    // it wants to connect to
+    // Tell ZeroMQ which port to listen to and wait for the request from the client
     ipack->GiveMeAhand(thatServerName);
 
     // Tell others my (thisServerName) identification information as a service

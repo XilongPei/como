@@ -32,8 +32,8 @@ int main(int argv, char** argc)
 {
     AutoPtr<IService> srv;
 
-    std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("tongji"),  std::string(""));
-    if (std::string("tongji") != ret) {
+    std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),  std::string("127.0.0.1:8081"));
+    if (std::string("localhost") != ret) {
         printf("Failed to AddZeroMQEndpoint\n");
     }
 
@@ -43,6 +43,13 @@ int main(int argv, char** argc)
         return 1;
     }
 
+    #if 0
+        ECode ServiceManager::AddRemoteService(
+            /* [in] */ const String& thisServerName,
+            /* [in] */ const String& thatServerName,
+            /* [in] */ const String& name,
+            /* [in] */ IInterface* object)
+    #endif
     ServiceManager::GetInstance()->AddRemoteService(
                                                 String("127.0.0.1:8081"),
                                                 String("127.0.0.1:8082"),

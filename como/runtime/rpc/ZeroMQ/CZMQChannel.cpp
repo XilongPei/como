@@ -15,9 +15,11 @@
 //=========================================================================
 
 #include <vector>
+#include <string>
 #include <unistd.h>
 #include <time.h>
 #include "zmq.h"
+#include "ComoConfig.h"
 #include "comorpc.h"
 #include "CZMQChannel.h"
 #include "CZMQParcel.h"
@@ -43,7 +45,38 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
-{}
+{
+    std::unordered_map<std::string, ServerNodeInfo*>::iterator iter =
+                                      ComoConfig::ServerNameEndpointMap.begin();
+    std::string name;
+    std::string endpoint;
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        name = iter->first;
+        endpoint = iter->second->endpoint;
+    }
+    else {
+        Logger::E("CZMQChannel", "Hasn't register any servers");
+        return;
+    }
+
+    void *socket;
+
+    if (nullptr != iter->second->socket) {
+        socket = iter->second->socket;
+        iter->second->inChannel++;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                        ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                        name.c_str(), endpoint.c_str(), ZMQ_REQ);
+        if (nullptr != socket) {
+            iter->second->socket = socket;
+            iter->second->inChannel++;
+        }
+    }
+
+    SetSocket(socket);
+}
 
 ECode CZMQChannel::Apply(
     /* [in] */ IInterfacePack* ipack)
