@@ -19,7 +19,6 @@
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
-#include <stdio.h>
 
 namespace como {
 
@@ -118,8 +117,8 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
             size_t len = 255;
             if (zmq_getsockopt(socket, ZMQ_ROUTING_ID, buf, &len) != 0) {
                 Logger::E("CZMQUtils::CzmqGetSocket",
-                          "zmq_getsockopt error, errno %d, identity: %s",
-                          zmq_errno(), (char*)identity);
+                          "zmq_getsockopt error, errno %d %s, identity: %s",
+                          zmq_errno(), zmq_strerror(zmq_errno()), (char*)identity);
             }
         }
     }
@@ -224,14 +223,14 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
         numberOfBytes = zmq_send(socket, buf, bufSize, 0);
     }
     else {
-        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send funCodeAndCRC64 errno, %s",
-                                                     zmq_strerror(zmq_errno()));
+        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send funCodeAndCRC64 errno, %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
         return -1;
     }
 
     if (numberOfBytes == -1) {
-        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send buffer errno, %s",
-                                                     zmq_strerror(zmq_errno()));
+        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send buffer errno, %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
         return -1;
     }
 
@@ -241,8 +240,8 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
 /**
  * Receive message into buffer
  */
-Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socket, void *buf,
-                                                            size_t bufSize, Boolean wait)
+Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
+                          void *socket, void *buf, size_t bufSize, Boolean wait)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
@@ -253,7 +252,8 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socke
         if (EAGAIN == errno) {
             return 0;
         }
-        Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", zmq_errno());
+        Logger::E("CZMQUtils::CzmqRecvBuf", "error: %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
         return -1;
     }
     else {
@@ -263,7 +263,8 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socke
         if (more) {
             numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvBuf", "errno %d", zmq_errno());
+                Logger::E("CZMQUtils::CzmqRecvBuf", "errno: %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
                 return -1;
             }
             if (numberOfBytes >= bufSize) {
@@ -307,7 +308,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
         if (EAGAIN == errno) {
             return 0;
         }
-        Logger::E("CZMQUtils::CzmqRecvMsg", "errno %d", zmq_errno());
+        Logger::E("CZMQUtils::CzmqRecvMsg", "errno: %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
         return -1;
     }
     else {
@@ -319,8 +321,9 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
 
             // Block until a message is available to be received from socket
             numberOfBytes = zmq_msg_recv(&msg, socket, 0);
-             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "errno %d", zmq_errno());
+            if (-1 == numberOfBytes) {
+                Logger::E("CZMQUtils::CzmqRecvMsg", "errno: %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
                 return -1;
             }
 

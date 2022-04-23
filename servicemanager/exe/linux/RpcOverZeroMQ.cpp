@@ -14,7 +14,6 @@
 // limitations under the License.
 //=========================================================================
 
-#include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
 #include "comolog.h"
@@ -37,13 +36,13 @@ void RpcOverZeroMQ::startTPZA_Executor()
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
                                             std::string("tcp://127.0.0.1:8081"));
     if (std::string("localhost") != ret) {
-        printf("Failed to AddZeroMQEndpoint\n");
+        Logger::E("startTPZA_Executor", "Failed to AddZeroMQEndpoint\n");
     }
 
     ret = ComoConfig::AddZeroMQEndpoint(std::string("ServiceManager"),
                                             std::string("tcp://127.0.0.1:8088"));
     if (std::string("ServiceManager") != ret) {
-        printf("Failed to AddZeroMQEndpoint\n");
+        Logger::E("startTPZA_Executor", "Failed to AddZeroMQEndpoint\n");
     }
 
     // end of prepare ComoConfig
@@ -78,13 +77,14 @@ void RpcOverZeroMQ::startTPZA_Executor()
 
 void *RpcOverZeroMQ::threadFunc(void *threadData)
 {
-    ECode ec = NOERROR;
+    ECode ec;
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
 
     while (true) {
-        if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) != 0) {
+        ec = NOERROR;
+        if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
         }
 
@@ -117,6 +117,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             parcel->ReadCoclassID(ipack.mCid);
             parcel->ReadInterfaceID(ipack.mIid);
             parcel->ReadBoolean(ipack.mIsParcelable);
+            parcel->ReadLong(ipack.mServerObjectId);
 
             String serverName, name;
             parcel->ReadString(serverName);
