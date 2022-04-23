@@ -81,11 +81,19 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
+    Integer rc;
 
     while (true) {
         ec = NOERROR;
         if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
+
+            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                             ZmqFunCode::AnswerECode,
+                                             socket, (const void *)&ec, sizeof(ec));
+            if (rc <= 0) {
+                usleep(100);
+            }
         }
 
         if (FAILED(ec)) {

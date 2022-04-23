@@ -308,7 +308,7 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
         if (EAGAIN == errno) {
             return 0;
         }
-        Logger::E("CZMQUtils::CzmqRecvMsg", "errno: %d %s",
+        Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         return -1;
     }
@@ -322,7 +322,7 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             // Block until a message is available to be received from socket
             numberOfBytes = zmq_msg_recv(&msg, socket, 0);
             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "errno: %d %s",
+                Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_recv error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
                 return -1;
             }

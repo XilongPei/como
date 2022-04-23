@@ -244,6 +244,16 @@ ECode ServiceManager::AddRemoteService(
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ZmqFunCode::AddService,
                                         socket, (const void *)buffer, size);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
+    HANDLE hChannel;
+    Integer eventCode;
+    zmq_msg_t msg;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
     return ec;
 }
 #else
