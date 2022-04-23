@@ -39,6 +39,9 @@ public:
     };
 };
 
+constexpr ECode E_ZMQ_FUN_CODE_ERROR = MAKE_COMORT_ECODE(0, 0xE0);
+constexpr ECode ZMQ_BAD_REPLY_DATA = MAKE_COMORT_ECODE(0, 0xE1);
+
 #pragma pack(1)
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
     HANDLE  hChannel;

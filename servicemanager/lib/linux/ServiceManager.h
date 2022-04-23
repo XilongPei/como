@@ -43,7 +43,16 @@ public:
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IInterface>& object);
 
+    ECode GetRemoteService(
+        /* [in] */ const String& snServManager,
+        /* [in] */ const String& name,
+        /* [out] */ AutoPtr<IInterface>& object);
+
     ECode RemoveService(
+        /* [in] */ const String& name);
+
+    ECode RemoveRemoteService(
+        /* [in] */ const String& snServManager,
         /* [in] */ const String& name);
 
 private:

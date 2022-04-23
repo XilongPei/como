@@ -81,20 +81,16 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    Integer rc;
 
     while (true) {
         ec = NOERROR;
         if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
-
-            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
-                                             ZmqFunCode::AnswerECode,
-                                             socket, (const void *)&ec, sizeof(ec));
-            if (rc <= 0) {
-                usleep(100);
-            }
         }
+
+        // In the service program, the complete recv() and send() must appear in
+        // pairs. Similarly, in the client program, after send(), there should
+        // also be recv(). This rule is guaranteed by HandleMessage()
 
         if (FAILED(ec)) {
             Logger::E("RpcOverZeroMQ::threadFunc", "ECode: 0x%X", ec);
@@ -109,11 +105,12 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                                                    void *socket, zmq_msg_t& msg)
 {
     ECode ec = NOERROR;
+    Integer rc;
+    void *data = zmq_msg_data(&msg);
+    size_t size = zmq_msg_size(&msg);
+
     switch (eventCode) {
         case ZmqFunCode::AddService: {      // 0x0201
-            void *data = zmq_msg_data(&msg);
-            size_t size = zmq_msg_size(&msg);
-
             AutoPtr<IParcel> parcel;
             ServiceManager::InterfacePack ipack;
 
@@ -145,16 +142,73 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
 
             ec = ServiceManager::GetInstance()->AddService(name, ipack);
 
+            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                         ZmqFunCode::AnswerECode,
+                                         socket, (const void *)&ec, sizeof(ec));
+            if (rc <= 0)
+                usleep(100);
+
             zmq_msg_close(&msg);
             break;
         }
         case ZmqFunCode::GetService: {      // 0x0202
+            ServiceManager::InterfacePack* ipack = nullptr;
+            ECode ec = NOERROR;
+            HANDLE resData = reinterpret_cast<HANDLE>("");
+            Long resSize = 0;
+            AutoPtr<IParcel> parcel;
+
+            ec = ServiceManager::GetInstance()->GetService((char*)data, &ipack);
+
+            if (FAILED(ec))
+                goto HandleMessage_Exit;
+
+            if (nullptr != ipack) {
+                if (! ipack->mServerName.IsEmpty()) {
+                    // Keep the same order with InterfacePack::ReadFromParcel() in
+                    // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
+                    ec = CoCreateParcel(RPCType::Remote, parcel);
+                    if (FAILED(ec))
+                        goto HandleMessage_Exit;
+
+                    parcel->WriteCoclassID(ipack->mCid);
+                    parcel->WriteInterfaceID(ipack->mIid);
+                    parcel->WriteBoolean(ipack->mIsParcelable);
+                    parcel->WriteLong(ipack->mServerObjectId);
+                    parcel->WriteString(ipack->mServerName);
+                }
+                parcel->GetData(resData);
+                parcel->GetDataSize(resSize);
+            }
+
+        HandleMessage_Exit:
+            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                        ZmqFunCode::AnswerECode,
+                                        socket, (const void *)resData, resSize);
+            if (rc <= 0)
+                usleep(100);
+
             break;
         }
         case ZmqFunCode::RemoveService: {   // 0x0203
+            ec = ServiceManager::GetInstance()->RemoveService((char*)data);
+
+            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                         ZmqFunCode::AnswerECode,
+                                         socket, (const void *)&ec, sizeof(ec));
+            if (rc <= 0)
+                usleep(100);
+
             break;
         }
         default:
+            ec = E_ZMQ_FUN_CODE_ERROR;
+            rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                         ZmqFunCode::AnswerECode,
+                                         socket, (const void *)&ec, sizeof(ec));
+            if (rc <= 0)
+                usleep(100);
+
             Logger::E("RpcOverZeroMQ", "HandleMessage() unknown eventCode");
     }
 

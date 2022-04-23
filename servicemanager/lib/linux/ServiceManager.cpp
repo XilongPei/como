@@ -369,6 +369,11 @@ ECode ServiceManager::GetService(
                 else {
                     ec = CoUnmarshalInterface(ipack, RPCType::Remote, object);
                 }
+
+                if (FAILED(ec)) {
+                    Logger_E("ServiceManager::GetService",
+                              "CoUnmarshalInterface failed with ec = 0x%X", ec);
+                }
             }
             else {
                 Logger_E("ServiceManager::GetService",
@@ -478,5 +483,215 @@ Exit:
 
     return ec;
 }
+
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+
+ECode ServiceManager::RemoveRemoteService(
+    /* [in] */ const String& snServManager,
+    /* [in] */ const String& name)
+{
+    if (name.IsEmpty()) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Logger_D("ServiceManager::RemoveRemoteService",
+                                         "snServManager: %s  name: %s",
+                                         snServManager.string(), name.string());
+
+    if ((nullptr == snServManager) || snServManager.IsEmpty()) {
+        return RemoveService(name);
+    }
+
+    /**
+     * tell ServiceManager to add service
+     */
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+    std::string strServerEndpoint;
+    void *socket;
+
+    bool found;
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        strServerEndpoint = iter->second->endpoint;
+        found = true;
+    }
+    else {
+        found = false;
+        strServerEndpoint = "";
+        Logger::E("ServiceManager::RemoveRemoteService",
+                        "Unregistered ServerName: %s", snServManager.string());
+    }
+
+    if (found && (nullptr != iter->second->socket)) {
+        socket = iter->second->socket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                snServManager.string(),
+                                strServerEndpoint.c_str(), ZMQ_REQ);
+    }
+
+    if (nullptr == socket) {
+        Logger::E("ServiceManager::RemoveRemoteService",
+                        "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
+                        snServManager.string(), strServerEndpoint.c_str());
+        return E_REMOTE_EXCEPTION;
+    }
+
+    const char *str = name.string();
+    Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                      ZmqFunCode::RemoveService,
+                                      socket, (const void *)str, strlen(str)+1);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
+    HANDLE hChannel;
+    Integer eventCode;
+    zmq_msg_t msg;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
+    return NOERROR;
+}
+
+ECode ServiceManager::GetRemoteService(
+    /* [in] */ const String& snServManager,
+    /* [in] */ const String& name,
+    /* [out] */ AutoPtr<IInterface>& object)
+{
+    if (name.IsEmpty()) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Logger_D("ServiceManager::GetRemoteService",
+                                         "snServManager: %s  name: %s",
+                                         snServManager.string(), name.string());
+
+    if ((nullptr == snServManager) || snServManager.IsEmpty()) {
+        return RemoveService(name);
+    }
+
+    /**
+     * tell ServiceManager to add service
+     */
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+    std::string strServerEndpoint;
+    void *socket;
+
+    bool found;
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        strServerEndpoint = iter->second->endpoint;
+        found = true;
+    }
+    else {
+        found = false;
+        strServerEndpoint = "";
+        Logger::E("ServiceManager::GetRemoteService",
+                        "Unregistered ServerName: %s", snServManager.string());
+    }
+
+    if (found && (nullptr != iter->second->socket)) {
+        socket = iter->second->socket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
+                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
+                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
+                                snServManager.string(),
+                                strServerEndpoint.c_str(), ZMQ_REQ);
+    }
+
+    if (nullptr == socket) {
+        Logger::E("ServiceManager::GetRemoteService",
+                        "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
+                        snServManager.string(), strServerEndpoint.c_str());
+        return E_REMOTE_EXCEPTION;
+    }
+
+    const char *str = name.string();
+    Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
+                                      ZmqFunCode::RemoveService,
+                                      socket, (const void *)str, strlen(str)+1);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
+    HANDLE hChannel;
+    Integer eventCode;
+    zmq_msg_t msg;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    if (rc <= 0)
+        return E_REMOTE_EXCEPTION;
+
+    void *replyData = zmq_msg_data(&msg);
+    size_t replySize = zmq_msg_size(&msg);
+    ECode ec;
+
+    if (replyData != nullptr) {
+        AutoPtr<IParcel> parcel;
+        ec = CoCreateParcel(RPCType::Local, parcel);
+        if (FAILED(ec)) {
+            Logger_E("ServiceManager::GetRemoteService",
+                                    "CoCreateParcel failed with ec = 0x%X", ec);
+            return ec;
+        }
+
+        parcel->SetData(reinterpret_cast<HANDLE>(replyData), replySize);
+
+        AutoPtr<IInterfacePack> ipack;
+        ec = CoCreateInterfacePack(RPCType::Local, ipack);
+        if (SUCCEEDED(ec)) {
+            IParcelable::Probe(ipack)->ReadFromParcel(parcel);
+
+            String str = nullptr;
+            ec = ipack->GetServerName(str);
+            if ((nullptr == str) || str.IsEmpty()) {
+                ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
+            }
+            else {
+                ec = CoUnmarshalInterface(ipack, RPCType::Remote, object);
+            }
+
+            if (FAILED(ec)) {
+                Logger_E("ServiceManager::GetRemoteService",
+                              "CoUnmarshalInterface failed with ec = 0x%X", ec);
+                return ec;
+            }
+        }
+        else {
+            Logger_E("ServiceManager::GetRemoteService",
+                             "CoCreateInterfacePack failed with ec = 0x%X", ec);
+            return ec;
+        }
+    }
+    else {
+        Logger_E("ServiceManager::GetRemoteService", "Bad reply data");
+        return ZMQ_BAD_REPLY_DATA;
+    }
+
+    return ec;
+}
+
+#else
+
+ECode ServiceManager::RemoveRemoteService(
+    /* [in] */ const String& snServManager,
+    /* [in] */ const String& name)
+{
+    return NOERROR;
+}
+
+ECode ServiceManager::GetRemoteService(
+    /* [in] */ const String& snServManager,
+    /* [in] */ const String& name,
+    /* [out] */ AutoPtr<IInterface>& object);
+{
+    return NOERROR;
+}
+
+#endif
 
 } // namespace jing
