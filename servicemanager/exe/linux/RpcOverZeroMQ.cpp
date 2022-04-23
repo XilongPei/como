@@ -164,8 +164,11 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
 
             ec = ServiceManager::GetInstance()->GetService((char*)data, &ipack);
 
-            if (FAILED(ec))
+            if (FAILED(ec)) {
+                Logger::E("RpcOverZeroMQ::HandleMessage",
+                           "ServiceManager::GetService error, %s", (char*)data);
                 goto HandleMessage_Exit_GetService;
+            }
 
             if (nullptr != ipack) {
                 if (! ipack->mServerName.IsEmpty()) {

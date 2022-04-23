@@ -244,15 +244,21 @@ ECode ServiceManager::AddRemoteService(
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ZmqFunCode::AddService,
                                         socket, (const void *)buffer, size);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::AddRemoteService",
+                                               "CzmqSendBuf error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::AddRemoteService",
+                                               "CzmqRecvMsg error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     return ec;
 }
@@ -359,7 +365,11 @@ ECode ServiceManager::GetService(
             AutoPtr<IInterfacePack> ipack;
             ec = CoCreateInterfacePack(RPCType::Local, ipack);
             if (SUCCEEDED(ec)) {
-                IParcelable::Probe(ipack)->ReadFromParcel(parcel);
+                ec = IParcelable::Probe(ipack)->ReadFromParcel(parcel);
+                if (FAILED(ec)) {
+                    Logger_E("ServiceManager::GetService",
+                                    "ReadFromParcel failed with ec = 0x%X", ec);
+                }
 
                 String str = nullptr;
                 ec = ipack->GetServerName(str);
@@ -544,8 +554,11 @@ ECode ServiceManager::RemoveRemoteService(
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                       ZmqFunCode::RemoveService,
                                       socket, (const void *)str, strlen(str)+1);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::RemoveRemoteService",
+                                               "CzmqSendBuf error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     HANDLE hChannel;
     Integer eventCode;
@@ -619,15 +632,21 @@ ECode ServiceManager::GetRemoteService(
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                       ZmqFunCode::GetService,
                                       socket, (const void *)str, strlen(str)+1);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::GetRemoteService",
+                                               "CzmqSendBuf error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::GetRemoteService",
+                                               "CzmqRecvMsg error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     void *replyData = zmq_msg_data(&msg);
     size_t replySize = zmq_msg_size(&msg);
@@ -645,9 +664,14 @@ ECode ServiceManager::GetRemoteService(
         parcel->SetData(reinterpret_cast<HANDLE>(replyData), replySize);
 
         AutoPtr<IInterfacePack> ipack;
-        ec = CoCreateInterfacePack(RPCType::Local, ipack);
+        ec = CoCreateInterfacePack(RPCType::Remote, ipack);
         if (SUCCEEDED(ec)) {
-            IParcelable::Probe(ipack)->ReadFromParcel(parcel);
+            ec = IParcelable::Probe(ipack)->ReadFromParcel(parcel);
+            if (FAILED(ec)) {
+                Logger_E("ServiceManager::GetRemoteService",
+                                    "ReadFromParcel failed with ec = 0x%X", ec);
+                return ec;
+            }
 
             String str = nullptr;
             ec = ipack->GetServerName(str);

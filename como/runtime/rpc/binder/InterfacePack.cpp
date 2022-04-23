@@ -86,11 +86,11 @@ ECode InterfacePack::ReadFromParcel(
     HANDLE data;
     source->GetPayload(data);
     mBinder = reinterpret_cast<android::Parcel*>(data)->readStrongBinder();
-    source->ReadCoclassID(mCid);
-    source->ReadInterfaceID(mIid);
-    source->ReadBoolean(mIsParcelable);
-    source->ReadLong(mServerObjectId);
-    source->ReadString(mServerName);
+    FAIL_RETURN(source->ReadCoclassID(mCid));
+    FAIL_RETURN(source->ReadInterfaceID(mIid));
+    FAIL_RETURN(source->ReadBoolean(mIsParcelable));
+    FAIL_RETURN(source->ReadLong(mServerObjectId));
+    FAIL_RETURN(source->ReadString(mServerName));
     return NOERROR;
 }
 
@@ -100,11 +100,11 @@ ECode InterfacePack::WriteToParcel(
     HANDLE data;
     dest->GetPayload(data);
     reinterpret_cast<android::Parcel*>(data)->writeStrongBinder(mBinder);
-    dest->WriteCoclassID(mCid);
-    dest->WriteInterfaceID(mIid);
-    dest->WriteBoolean(mIsParcelable);
-    dest->WriteLong(mServerObjectId);
-    dest->WriteString(mServerName);
+    FAIL_RETURN(dest->WriteCoclassID(mCid));
+    FAIL_RETURN(dest->WriteInterfaceID(mIid));
+    FAIL_RETURN(dest->WriteBoolean(mIsParcelable));
+    FAIL_RETURN(dest->WriteLong(mServerObjectId));
+    FAIL_RETURN(dest->WriteString(mServerName));
     return NOERROR;
 }
 
