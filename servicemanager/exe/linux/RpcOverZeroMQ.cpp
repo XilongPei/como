@@ -60,9 +60,6 @@ void RpcOverZeroMQ::startTPZA_Executor()
                   strep.c_str());
     }
 
-    int timeout = -1;  // milliseconds
-    zmq_setsockopt(socket, ZMQ_RCVTIMEO, &timeout, sizeof(int));
-
     Logger::D("startTPZA_Executor", "Server: 'ServiceManager', Endpoint: %s",
                                                                  strep.c_str());
     pthread_attr_t threadAddr;
@@ -84,6 +81,7 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
 
     while (true) {
         ec = NOERROR;
+
         if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
         }
@@ -128,20 +126,23 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             parcel->ReadString(serverName);
             Integer pos = serverName.IndexOf('\n', 0);
             if (pos < 0) {
-                Logger::E("RpcOverZeroMQ",
-                  "HandleMessage() AddService, bad serverName: %s", serverName);
-                zmq_msg_close(&msg);
-                break;
+                Logger::E("RpcOverZeroMQ::HandleMessage",
+                                  "AddService, bad serverName: %s", serverName);
+                goto HandleMessage_Exit_AddService;
             }
 
-            ipack.mServerName = serverName.Substring(0, pos);
+            name = serverName.Substring(0, pos);
 
             // 4096, any big number, the max length of serverName
             // String::GetLength() cost time
-            name = serverName.Substring(pos+1, 4096);
+            ipack.mServerName = serverName.Substring(pos+1, 4096);
 
+            Logger::D("RpcOverZeroMQ::HandleMessage",
+                                     "AddService: %s, serverName: %s",
+                                     name.string(), ipack.mServerName.string());
             ec = ServiceManager::GetInstance()->AddService(name, ipack);
 
+        HandleMessage_Exit_AddService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                          ZmqFunCode::AnswerECode,
                                          socket, (const void *)&ec, sizeof(ec));
@@ -152,16 +153,19 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             break;
         }
         case ZmqFunCode::GetService: {      // 0x0202
+            Logger::E("RpcOverZeroMQ::HandleMessage",
+                                                 "GetService, %s", (char*)data);
+
             ServiceManager::InterfacePack* ipack = nullptr;
             ECode ec = NOERROR;
             HANDLE resData = reinterpret_cast<HANDLE>("");
-            Long resSize = 0;
+            Long resSize = 1;
             AutoPtr<IParcel> parcel;
 
             ec = ServiceManager::GetInstance()->GetService((char*)data, &ipack);
 
             if (FAILED(ec))
-                goto HandleMessage_Exit;
+                goto HandleMessage_Exit_GetService;
 
             if (nullptr != ipack) {
                 if (! ipack->mServerName.IsEmpty()) {
@@ -169,7 +173,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                     // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
                     ec = CoCreateParcel(RPCType::Remote, parcel);
                     if (FAILED(ec))
-                        goto HandleMessage_Exit;
+                        goto HandleMessage_Exit_GetService;
 
                     parcel->WriteCoclassID(ipack->mCid);
                     parcel->WriteInterfaceID(ipack->mIid);
@@ -181,7 +185,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                 parcel->GetDataSize(resSize);
             }
 
-        HandleMessage_Exit:
+        HandleMessage_Exit_GetService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ZmqFunCode::AnswerECode,
                                         socket, (const void *)resData, resSize);

@@ -23,4 +23,7 @@ add_subdirectory(component)
 add_subdirectory(client)
 add_subdirectory(service)
 
-add_subdirectory(serviceZMQ)
+if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
+    add_subdirectory(clientZMQ)
+    add_subdirectory(serviceZMQ)
+endif()

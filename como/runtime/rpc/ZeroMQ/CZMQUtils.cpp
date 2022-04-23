@@ -35,6 +35,7 @@ public:
 
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
 static void *comoZmqContext = nullptr;
+int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 3;
 
 /*
 int rc = zmq_ctx_shutdown(context);
@@ -124,6 +125,9 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
     }
 
     if (nullptr != socket) {
+
+        zmq_setsockopt(socket, ZMQ_RCVTIMEO, &CZMQUtils::ZMQ_RCV_TIMEOUT, sizeof(int));
+
         if (nullptr != endpoint) {
             int rc;
 
@@ -205,6 +209,9 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize)
 {
+    if (bufSize <= 0)
+        return -1;
+
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);
 
     int numberOfBytes;

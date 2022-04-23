@@ -551,8 +551,11 @@ ECode ServiceManager::RemoveRemoteService(
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (rc <= 0)
+    if (rc <= 0) {
+        Logger::E("ServiceManager::RemoveRemoteService",
+                                               "CzmqRecvMsg error, rc: %d", rc);
         return E_REMOTE_EXCEPTION;
+    }
 
     return NOERROR;
 }
@@ -614,7 +617,7 @@ ECode ServiceManager::GetRemoteService(
 
     const char *str = name.string();
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
-                                      ZmqFunCode::RemoveService,
+                                      ZmqFunCode::GetService,
                                       socket, (const void *)str, strlen(str)+1);
     if (rc <= 0)
         return E_REMOTE_EXCEPTION;

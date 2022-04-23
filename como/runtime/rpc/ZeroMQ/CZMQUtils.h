@@ -70,6 +70,9 @@ public:
     static void *CzmqFindSocket(const char *serverName);
 
     static void *CzmqSocketMonitor(const char *serverName);
+
+    // milliseconds
+    static int ZMQ_RCV_TIMEOUT;
 };
 
 } // namespace como
