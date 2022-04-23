@@ -22,7 +22,7 @@
 #include "CZMQUtils.h"
 #endif
 #include "ComoConfig.h"
-#include <stdio.h>
+
 namespace jing {
 
 AutoPtr<ServiceManager> ServiceManager::sInstance = new ServiceManager();
@@ -172,9 +172,8 @@ ECode ServiceManager::AddRemoteService(
     /**
      * Check whether we should call GiveMeAhand to setup waiting endpoint
      */
-    bool firstOne;
-    std::string strep = ComoConfig::GetZeroMQEndpoint(
-                                std::string(thisServerName.string()), firstOne);
+    std::string str(thisServerName.string());
+    std::string strep = ComoConfig::GetZeroMQEndpoint(str);
     if (strep.empty()) {
         Logger_E("ServiceManager::AddRemoteService",
                               "GetZeroMQEndpoint \"%s\" failed", strep.c_str());
@@ -184,7 +183,7 @@ ECode ServiceManager::AddRemoteService(
     // Tell ZeroMQ which port to listen to and wait for the request from the client
     // "localhost" is in ComoConfig::ServerNameEndpointMap,
     // added by ComoConfig::AddZeroMQEndpoint
-    if (! firstOne) {
+    if (thisServerName.Compare("localhost") != 0) {
         ipack->GiveMeAhand(snServManager);
     }
 

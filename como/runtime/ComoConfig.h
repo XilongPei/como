@@ -58,7 +58,7 @@ public:
     ComoConfig();
 
     static std::string AddZeroMQEndpoint(std::string serverName, std::string endpoint);
-    static std::string GetZeroMQEndpoint(std::string serverName, bool& firstOne);
+    static std::string GetZeroMQEndpoint(std::string serverName);
 
     // REM in ThreadPoolExecutor::Worker::Run():
     // The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the

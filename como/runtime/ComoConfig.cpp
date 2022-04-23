@@ -42,7 +42,7 @@ std::string ComoConfig::AddZeroMQEndpoint(std::string serverName, std::string en
     return nullptr;
 }
 
-std::string ComoConfig::GetZeroMQEndpoint(std::string serverName, bool& firstOne)
+std::string ComoConfig::GetZeroMQEndpoint(std::string serverName)
 {
     std::map<std::string, ServerNodeInfo*>::iterator iterBegin =
                                                   ServerNameEndpointMap.begin();
@@ -50,11 +50,9 @@ std::string ComoConfig::GetZeroMQEndpoint(std::string serverName, bool& firstOne
     std::map<std::string, ServerNodeInfo*>::iterator iterFind =
                                          ServerNameEndpointMap.find(serverName);
     if (iterFind != ServerNameEndpointMap.end()) {
-        firstOne = (iterBegin->first == iterFind->first) ? true  : false;
         return iterFind->second->endpoint;
     }
 
-    firstOne = false;
     return nullptr;
 }
 

@@ -52,7 +52,7 @@ CZMQChannel::CZMQChannel(
     void *socket;
 
     std::map<std::string, ServerNodeInfo*>::iterator iter =
-                                      ComoConfig::ServerNameEndpointMap.begin();
+               ComoConfig::ServerNameEndpointMap.find(std::string("localhost"));
     if (iter != ComoConfig::ServerNameEndpointMap.end()) {
         name = iter->first;
         endpoint = iter->second->endpoint;
