@@ -112,7 +112,10 @@ public:
     static pthread_cond_t pthreadCond;
 
     ThreadPoolZmqActor(int threadNum = 10);
-    static int addTask(TPZA_Executor::Worker *task);
+
+    static int addTask(
+        /* [in] */ AutoPtr<TPZA_Executor::Worker> task);
+
     static int cleanTask(int posWorkerList);
     int stopAll();
     int getTaskListSize();

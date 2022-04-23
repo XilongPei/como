@@ -367,7 +367,8 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 /*
  * return position in mWorkerList
  */
-int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
+int ThreadPoolZmqActor::addTask(
+    /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
     int i;
     struct timespec currentTime;
@@ -394,12 +395,13 @@ int ThreadPoolZmqActor::addTask(TPZA_Executor::Worker *task)
     }
     if (i < mWorkerList.size()) {
         if (nullptr != mWorkerList[i])
-            delete mWorkerList[i];
+            REFCOUNT_RELEASE(mWorkerList[i]);
         mWorkerList[i] = task;
     }
     else {
         mWorkerList.push_back(task);
     }
+    REFCOUNT_ADD(task);
 
     pthread_mutex_unlock(&pthreadMutex);
     pthread_cond_signal(&pthreadCond);
@@ -468,7 +470,7 @@ int ThreadPoolZmqActor::cleanTask(int posWorkerList)
     pthread_mutex_lock(&pthreadMutex);
 
     if (nullptr != mWorkerList[posWorkerList])
-        delete mWorkerList[posWorkerList];
+        REFCOUNT_RELEASE(mWorkerList[posWorkerList]);
 
     mWorkerList[posWorkerList] = nullptr;
     pthread_mutex_unlock(&pthreadMutex);

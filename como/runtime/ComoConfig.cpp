@@ -82,6 +82,8 @@ int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 2;
 int Logger_sLevel = 0;
 
 std::map<std::string, ServerNodeInfo*> ComoConfig::ServerNameEndpointMap;
+
+// identity of this ZeroMQ node
 std::string ComoConfig::ComoRuntimeInstanceIdentity = std::string("localhost");
 
 Mutex ComoConfig::CZMQUtils_ContextLock;
