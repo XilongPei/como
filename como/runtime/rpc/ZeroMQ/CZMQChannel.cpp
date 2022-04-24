@@ -69,7 +69,7 @@ CZMQChannel::CZMQChannel(
     else {
         // I am server, I will accept incoming connections on a socket
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                name.c_str(), endpoint.c_str(), ZMQ_REP);
+                                       name.c_str(), endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
             iter->second->inChannel++;
@@ -179,8 +179,7 @@ ECode CZMQChannel::GetComponentMetadata(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, funCodeAndCRC64, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
             Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);
@@ -227,9 +226,7 @@ ECode CZMQChannel::Invoke(
     String serverName;
     GetServerName(serverName);
     zmq_msg_t msg;
-    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
-                                                       funCodeAndCRC64, msg, 0);
+    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
 
     if (SUCCEEDED(ec)) {
         resParcel = new CZMQParcel();

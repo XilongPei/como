@@ -251,13 +251,11 @@ ECode ServiceManager::AddRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64,
-                                                                        msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::AddRemoteService",
                                        "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
-                                       rc, funCodeAndCRC64.eCode);
+                                       rc, eventCode);
         return E_REMOTE_EXCEPTION;
     }
 
@@ -562,13 +560,11 @@ ECode ServiceManager::RemoveRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64,
-                                                                        msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::RemoveRemoteService",
                                        "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
-                                       rc, funCodeAndCRC64.eCode);
+                                       rc, eventCode);
         return E_REMOTE_EXCEPTION;
     }
 
@@ -616,9 +612,8 @@ ECode ServiceManager::GetRemoteService(
         socket = iter->second->socket;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                snServManager.string(),
-                                strServerEndpoint.c_str(), ZMQ_REQ);
+        socket = CZMQUtils::CzmqGetSocket(nullptr, snServManager.string(),
+                                            strServerEndpoint.c_str(), ZMQ_REQ);
     }
 
     if (nullptr == socket) {
@@ -641,12 +636,11 @@ ECode ServiceManager::GetRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::GetRemoteService",
                                        "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
-                                       rc, funCodeAndCRC64.eCode);
+                                       rc, eventCode);
         return E_REMOTE_EXCEPTION;
     }
 

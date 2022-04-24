@@ -33,7 +33,7 @@ int main(int argv, char** argc)
     AutoPtr<IService> srv;
 
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
-                                            std::string("tcp://127.0.0.1:8081"));
+                                            std::string("tcp://127.0.0.1:8083"));
     if (std::string("localhost") != ret) {
         printf("Failed to AddZeroMQEndpoint\n");
     }

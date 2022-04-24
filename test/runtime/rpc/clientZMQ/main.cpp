@@ -246,7 +246,7 @@ TEST(ClientZmqTest, TestReleaseStub)
 int main(int argc, char **argv)
 {
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
-                                            std::string("tcp://127.0.0.1:8081"));
+                                            std::string("tcp://127.0.0.1:8083"));
     if (std::string("localhost") != ret) {
         printf("Failed to AddZeroMQEndpoint\n");
     }
