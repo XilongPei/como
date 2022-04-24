@@ -122,6 +122,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             parcel->ReadBoolean(ipack.mIsParcelable);
             parcel->ReadLong(ipack.mServerObjectId);
 
+            //@ `ZeroMQ_ServiceNameAndEndpoint`
             String serverName, name;
             parcel->ReadString(serverName);
             Integer pos = serverName.IndexOf('\n', 0);
@@ -130,7 +131,6 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                                   "AddService, bad serverName: %s", serverName);
                 goto HandleMessage_Exit_AddService;
             }
-
             name = serverName.Substring(0, pos);
 
             // 4096, any big number, the max length of serverName
@@ -183,7 +183,6 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                     parcel->WriteBoolean(ipack->mIsParcelable);
                     parcel->WriteLong(ipack->mServerObjectId);
                     parcel->WriteString(ipack->mServerName);
-printf("==serverName========= %s\n", ipack->mServerName.string());
                 }
                 parcel->GetData(resData);
                 parcel->GetDataSize(resSize);

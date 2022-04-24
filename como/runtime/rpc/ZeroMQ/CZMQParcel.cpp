@@ -749,12 +749,23 @@ ECode CZMQParcel::ReadInterface(
     ReadInteger(tag);
     if (tag == TAG_NOT_NULL) {
         AutoPtr<IInterfacePack> ipack;
-        CoCreateInterfacePack(RPCType::Local, ipack);
-        IParcelable::Probe(ipack)->ReadFromParcel(this);
-
-        ECode ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
+        ECode ec = CoCreateInterfacePack(RPCType::Local, ipack);
         if (FAILED(ec)) {
-            Logger::E("CZMQParcel", "Unmarshal the interface in ReadInterface failed.");
+            Logger::E("CZMQParcel::ReadInterface",
+                                               "CoCreateInterfacePack failed.");
+            return ec;
+        }
+
+        ec = IParcelable::Probe(ipack)->ReadFromParcel(this);
+        if (FAILED(ec)) {
+            Logger::E("CZMQParcel::ReadInterface", "ReadFromParcel failed.");
+            return ec;
+        }
+
+        ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
+        if (FAILED(ec)) {
+            Logger::E("CZMQParcel::ReadInterface",
+                            "Unmarshal the interface in ReadInterface failed.");
             return ec;
         }
 
@@ -779,11 +790,16 @@ ECode CZMQParcel::WriteInterface(
         AutoPtr<IInterfacePack> ipack;
         ECode ec = CoMarshalInterface(value, RPCType::Local, ipack);
         if (FAILED(ec)) {
-            Logger::E("CZMQParcel", "Marshal the interface in WriteInterface failed.");
+            Logger::E("CZMQParcel::WriteInterface",
+                             "Marshal the interface in WriteInterface failed.");
             return ec;
         }
 
-        IParcelable::Probe(ipack)->WriteToParcel(this);
+        ec = IParcelable::Probe(ipack)->WriteToParcel(this);
+        if (FAILED(ec)) {
+            Logger::E("CZMQParcel::WriteInterface", "WriteToParcel failed.");
+            return ec;
+        }
 
         IParcelable* p = IParcelable::Probe(value);
         if (p != nullptr) {

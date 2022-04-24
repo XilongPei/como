@@ -144,29 +144,29 @@ Exit:
 ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& thisServerName,
     /* [in] */ const String& snServManager,
-    /* [in] */ const String& name,
+    /* [in] */ const String& nameService,
     /* [in] */ IInterface* object)
 {
-    if (name.IsEmpty() || object == nullptr) {
+    if (nameService.IsEmpty() || object == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Logger_D("ServiceManager::AddRemoteService",
-             "thisServerName: %s  snServManager: %s  name: %s",
-             thisServerName.string(), snServManager.string(), name.string());
+            "thisServerName: %s  snServManager: %s  nameService: %s",
+            thisServerName.string(), snServManager.string(), nameService.string());
 
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
     if (FAILED(ec)) {
         Logger_E("ServiceManager::AddRemoteService",
                                 "Marshal the interface which named '%s' failed",
-                                name.string());
+                                nameService.string());
         return ec;
     }
 
     if ((nullptr == thisServerName) || thisServerName.IsEmpty() ||
         (nullptr == snServManager) || snServManager.IsEmpty()) {
-        return AddService(name, object);
+        return AddService(nameService, object);
     }
 
     /**
@@ -192,8 +192,8 @@ ECode ServiceManager::AddRemoteService(
      */
     // Tell others my (thisServerName) identification information as a service
     // provider so that others can find me
-    // name, hold name of Service
-    ipack->SetServerName(name + "\n" + String(strep.c_str()));
+    // nameService, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
+    ipack->SetServerName(nameService + "\n" + thisServerName + ";" + String(strep.c_str()));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -228,8 +228,8 @@ ECode ServiceManager::AddRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                snServManager.string(),
-                                strServerEndpoint.c_str(), ZMQ_REQ);
+                                            snServManager.string(),
+                                            strServerEndpoint.c_str(), ZMQ_REQ);
     }
 
     if (nullptr == socket) {

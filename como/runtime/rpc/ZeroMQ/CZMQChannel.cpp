@@ -180,6 +180,7 @@ ECode CZMQChannel::GetComponentMetadata(
     char buf[256];
     int num = 2;
 
+    // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
     ec = GetServerName(serverName);
     strncpy(buf, serverName.string(), 255);
     buf[255] = '\0';
@@ -197,7 +198,6 @@ ECode CZMQChannel::GetComponentMetadata(
                   str, word[1]);
         return E_RUNTIME_EXCEPTION;
     }
-
 
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
                     ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
