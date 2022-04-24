@@ -200,7 +200,7 @@ ECode CZMQChannel::GetComponentMetadata(
     }
 
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
-                    ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
+                    ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
     }
@@ -208,7 +208,7 @@ ECode CZMQChannel::GetComponentMetadata(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
             Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);

@@ -80,6 +80,9 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
 {
     EndpointSocket *endpointSocket;
 
+    Logger::D("CZMQUtils::CzmqGetSocket",
+              "serverName: %s,  endpoint: %s, ZMQ_REP(4)/ZMQ_REQ(3): %d",
+              serverName, endpoint, type);
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
