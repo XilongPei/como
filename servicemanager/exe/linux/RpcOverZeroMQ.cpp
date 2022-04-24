@@ -85,11 +85,6 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
         if (rc > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
         }
-        else {
-            Logger::E("RpcOverZeroMQ::threadFunc",
-                                       "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
-                                       rc, eventCode);
-        }
 
         // In the service program, the complete recv() and send() must appear in
         // pairs. Similarly, in the client program, after send(), there should
@@ -188,6 +183,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                     parcel->WriteBoolean(ipack->mIsParcelable);
                     parcel->WriteLong(ipack->mServerObjectId);
                     parcel->WriteString(ipack->mServerName);
+printf("==serverName========= %s\n", ipack->mServerName.string());
                 }
                 parcel->GetData(resData);
                 parcel->GetDataSize(resSize);

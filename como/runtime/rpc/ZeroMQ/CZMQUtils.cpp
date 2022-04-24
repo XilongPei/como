@@ -97,35 +97,9 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
     void *socket;
     if (ZMQ_REP != type) {      // I am client
         socket = zmq_socket(context, ZMQ_REQ);
-#if 0
-        if (identityLen > 254)
-            identityLen = 254;
-        if (identityLen > 0) {
-            zmq_setsockopt(socket, ZMQ_ROUTING_ID, identity, identityLen);
-        }
-        else {
-            static const char *identityDefault = "COMO";
-            zmq_setsockopt(socket, ZMQ_ROUTING_ID, identityDefault, strlen(identityDefault));
-        }
-#endif
     }
     else {                      // I am server
         socket = zmq_socket(context, ZMQ_REP);
-#if 0
-        if (identity != nullptr) {
-
-            // A routing id must be at least one byte and at most 255 bytes long.
-            // Identities starting with a zero byte are reserved for use by the
-            // ZeroMQ infrastructure.
-            char buf[256];
-            size_t len = 255;
-            if (zmq_getsockopt(socket, ZMQ_ROUTING_ID, buf, &len) != 0) {
-                Logger::E("CZMQUtils::CzmqGetSocket",
-                          "zmq_getsockopt error, errno %d %s, identity: %s",
-                          zmq_errno(), zmq_strerror(zmq_errno()), (char*)identity);
-            }
-        }
-#endif
     }
 
     if (nullptr != socket) {

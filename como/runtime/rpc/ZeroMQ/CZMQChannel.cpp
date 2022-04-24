@@ -25,6 +25,7 @@
 #include "CZMQParcel.h"
 #include "CZMQInterfacePack.h"
 #include "util/comolog.h"
+#include "util/mistring.h"
 #include "CZMQUtils.h"
 #include "ThreadPoolZmqActor.h"
 
@@ -170,6 +171,34 @@ ECode CZMQChannel::GetComponentMetadata(
     parcel->GetData(data);
     parcel->GetDataSize(size);
 
+    /**
+     * 1. Find out who asked me for GetComponentMetadata and establish a socket
+     * connection with it.
+     * 2. 'mSocket' is used to process requests, not to communicate with client
+     */
+    String serverName;
+    char buf[256];
+    int num = 2;
+
+    ec = GetServerName(serverName);
+    strncpy(buf, serverName.string(), 255);
+    buf[255] = '\0';
+
+    char *word[3];
+    char *str = MiString::WordBreak(buf, num, word, (char*)";");
+    if (nullptr == word[1])
+        word[1] = (char*)"";
+
+    // str, word[0]: serverName, word[1]: endpoint
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, str, word[1], ZMQ_REP);
+    if (nullptr == socket) {
+        Logger::E("CZMQChannel",
+                  "CzmqGetSocket error, channel name: %s, endpoint: %s",
+                  str, word[1]);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
                     ZmqFunCode::GetComponentMetadata, mSocket, (void *)data, size);
     if (-1 == rc) {
@@ -228,7 +257,7 @@ ECode CZMQChannel::Invoke(
     zmq_msg_t msg;
     int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
 
-    if (SUCCEEDED(ec)) {
+    if (SUCCEEDED(eventCode)) {
         resParcel = new CZMQParcel();
         if (nullptr != resParcel) {
             Integer hasOutArgs;
