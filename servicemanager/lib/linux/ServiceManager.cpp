@@ -228,8 +228,6 @@ ECode ServiceManager::AddRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 snServManager.string(),
                                 strServerEndpoint.c_str(), ZMQ_REQ);
     }
@@ -537,8 +535,6 @@ ECode ServiceManager::RemoveRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 snServManager.string(),
                                 strServerEndpoint.c_str(), ZMQ_REQ);
     }
@@ -615,8 +611,6 @@ ECode ServiceManager::GetRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 snServManager.string(),
                                 strServerEndpoint.c_str(), ZMQ_REQ);
     }

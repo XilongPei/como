@@ -50,8 +50,6 @@ void RpcOverZeroMQ::startTPZA_Executor()
     std::string strep = ComoConfig::GetZeroMQEndpoint("ServiceManager");
 
     socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 "ServiceManager", strep.c_str(),
                                 ZMQ_REP);
     if (nullptr == socket) {

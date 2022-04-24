@@ -75,8 +75,8 @@ void *CZMQUtils::CzmqGetContext() {
  * is routed to the _client_ that issued the last request. If the original
  * requester does not exist any more the reply is silently discarded.
  */
-void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t identityLen,
-                              const char *serverName, const char *endpoint, int type)
+void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
+                                                 const char *endpoint, int type)
 {
     EndpointSocket *endpointSocket;
 
@@ -84,7 +84,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
         std::unordered_map<std::string, EndpointSocket*>::iterator iter =
-                                            zmq_sockets.find(std::string(serverName));
+                                      zmq_sockets.find(std::string(serverName));
         if (iter != zmq_sockets.end()) {
             endpointSocket = iter->second;
             return endpointSocket->socket;
@@ -97,6 +97,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
     void *socket;
     if (ZMQ_REP != type) {      // I am client
         socket = zmq_socket(context, ZMQ_REQ);
+#if 0
         if (identityLen > 254)
             identityLen = 254;
         if (identityLen > 0) {
@@ -106,9 +107,11 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
             static const char *identityDefault = "COMO";
             zmq_setsockopt(socket, ZMQ_ROUTING_ID, identityDefault, strlen(identityDefault));
         }
+#endif
     }
     else {                      // I am server
         socket = zmq_socket(context, ZMQ_REP);
+#if 0
         if (identity != nullptr) {
 
             // A routing id must be at least one byte and at most 255 bytes long.
@@ -122,6 +125,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *identity, size_t ident
                           zmq_errno(), zmq_strerror(zmq_errno()), (char*)identity);
             }
         }
+#endif
     }
 
     if (nullptr != socket) {

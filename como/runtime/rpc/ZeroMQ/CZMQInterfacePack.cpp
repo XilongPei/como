@@ -138,8 +138,6 @@ ECode CZMQInterfacePack::GiveMeAhand(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 name.c_str(), endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;

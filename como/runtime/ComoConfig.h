@@ -82,7 +82,6 @@ public:
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
 
     static std::map<std::string, ServerNodeInfo*> ServerNameEndpointMap;
-    static std::string ComoRuntimeInstanceIdentity;
 
     static Mutex CZMQUtils_ContextLock;
 

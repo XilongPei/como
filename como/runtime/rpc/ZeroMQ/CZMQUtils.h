@@ -55,17 +55,19 @@ class CZMQUtils {
 public:
     static void *CzmqGetContext();
 
-    static void *CzmqGetSocket(void *context, const char *identity, size_t identityLen,
-                              const char *serverName, const char *endpoint, int type);
+    static void *CzmqGetSocket(void *context, const char *serverName,
+                                                const char *endpoint, int type);
 
-    static Integer CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socket, void *buf,
-                                                                size_t bufSize, Boolean wait);
+    static Integer CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode, void *socket,
+                                        void *buf, size_t bufSize, Boolean wait);
 
-    static Integer CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode, void *socket, zmq_msg_t& msg, Boolean wait);
+    static Integer CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode, void *socket,
+                                                    zmq_msg_t& msg, Boolean wait);
 
     static int CzmqCloseSocket(const char *serverName);
 
-    static Integer CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket, const void *buf, size_t bufSize);
+    static Integer CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
+                                                const void *buf, size_t bufSize);
 
     static void *CzmqFindSocket(const char *serverName);
 

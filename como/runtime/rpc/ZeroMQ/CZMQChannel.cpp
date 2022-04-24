@@ -69,8 +69,6 @@ CZMQChannel::CZMQChannel(
     else {
         // I am server, I will accept incoming connections on a socket
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                ComoConfig::ComoRuntimeInstanceIdentity.c_str(),
-                                ComoConfig::ComoRuntimeInstanceIdentity.size(),
                                 name.c_str(), endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
