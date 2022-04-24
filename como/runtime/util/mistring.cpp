@@ -114,11 +114,30 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     }
 
     return seeds;
+}
 
+char *MiString::shrink(char *dst, int dstSize, const char *src)
+{
+    int i, j = 0;
+
+    dstSize--;
+    dst[dstSize] = '\0';
+    for (i = 0;  i < dstSize - 1 ;  i++) {
+        if ('\0' == src[i]) {
+            dst[j++] = '\0';
+            break;
+        }
+
+        if (! isspace(src[i])) {
+            dst[j++] = src[i];
+        }
+    }
+    return dst;
 }
 
 } // namespace como
 
+#if 0
 int main(int argc, char *argv[])
 {
     int num = 2;
@@ -134,5 +153,10 @@ int main(int argc, char *argv[])
     como::MiString::SeperateStr(s, '\\', seeds, seedsCapacity);
     printf("%d\n%s\n%s\n%s\n", seedsCapacity, seeds[0], seeds[1], seeds[2]);
 
+    char buf1[256];
+    como::MiString::shrink(buf1, 256, (const char*)"unsigned char *src");
+    printf("shrink: %s\n", buf1);
+
     return 0;
 }
+#endif

@@ -144,29 +144,29 @@ Exit:
 ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& thisServerName,
     /* [in] */ const String& snServManager,
-    /* [in] */ const String& nameService,
+    /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
-    if (nameService.IsEmpty() || object == nullptr) {
+    if (name.IsEmpty() || object == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Logger_D("ServiceManager::AddRemoteService",
-            "thisServerName: %s  snServManager: %s  nameService: %s",
-            thisServerName.string(), snServManager.string(), nameService.string());
+            "thisServerName: %s  snServManager: %s  name: %s",
+            thisServerName.string(), snServManager.string(), name.string());
 
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
     if (FAILED(ec)) {
         Logger_E("ServiceManager::AddRemoteService",
                                 "Marshal the interface which named '%s' failed",
-                                nameService.string());
+                                name.string());
         return ec;
     }
 
     if ((nullptr == thisServerName) || thisServerName.IsEmpty() ||
         (nullptr == snServManager) || snServManager.IsEmpty()) {
-        return AddService(nameService, object);
+        return AddService(name, object);
     }
 
     /**
@@ -192,8 +192,9 @@ ECode ServiceManager::AddRemoteService(
      */
     // Tell others my (thisServerName) identification information as a service
     // provider so that others can find me
-    // nameService, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
-    ipack->SetServerName(nameService + "\n" + thisServerName + ";" + String(strep.c_str()));
+    // name, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
+    ipack->SetServerName(name + "\n" + thisServerName + ";" +
+                                                         String(strep.c_str()));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -261,7 +262,9 @@ ECode ServiceManager::AddRemoteService(
 
     return ec;
 }
+
 #else
+
 ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& thisServerName,
     /* [in] */ const String& thatServerName,

@@ -16,6 +16,7 @@
 
 #include <unordered_map>
 #include <unistd.h>
+#include "mistring.h"
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
@@ -30,6 +31,7 @@ public:
 
 public:
     void *socket;
+    std::string serverName;
     std::string endpoint;
 };
 
@@ -79,15 +81,17 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
                                                  const char *endpoint, int type)
 {
     EndpointSocket *endpointSocket;
+    char bufEndpoint[4096];
+    MiString::shrink(bufEndpoint, 4096, endpoint);
 
     Logger::D("CZMQUtils::CzmqGetSocket",
               "serverName: %s,  endpoint: %s, ZMQ_REP(4)/ZMQ_REQ(3): %d",
-              serverName, endpoint, type);
+              serverName, bufEndpoint, type);
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
         std::unordered_map<std::string, EndpointSocket*>::iterator iter =
-                                      zmq_sockets.find(std::string(serverName));
+                                     zmq_sockets.find(std::string(bufEndpoint));
         if (iter != zmq_sockets.end()) {
             endpointSocket = iter->second;
             return endpointSocket->socket;
@@ -109,26 +113,24 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
 
         zmq_setsockopt(socket, ZMQ_RCVTIMEO, &CZMQUtils::ZMQ_RCV_TIMEOUT, sizeof(int));
 
-        if (nullptr != endpoint) {
-            int rc;
+        int rc;
 
-            if (ZMQ_REP != type) {   // create outgoing connection from socket
-                rc = zmq_connect(socket, endpoint);
-                if (rc != 0) {
-                    Logger::E("CZMQUtils::CzmqGetSocket",
-                              "zmq_connect error, %s errno %d %s", endpoint,
-                              zmq_errno(), zmq_strerror(zmq_errno()));
-                    return nullptr;
-                }
+        if (ZMQ_REP != type) {   // create outgoing connection from socket
+            rc = zmq_connect(socket, bufEndpoint);
+            if (rc != 0) {
+                Logger::E("CZMQUtils::CzmqGetSocket",
+                          "zmq_connect error, %s errno %d %s", bufEndpoint,
+                          zmq_errno(), zmq_strerror(zmq_errno()));
+                return nullptr;
             }
-            else {                   // accept incoming connections on a socket
-                rc = zmq_bind(socket, endpoint);
-                if (rc != 0) {
-                    Logger::E("CZMQUtils::CzmqGetSocket",
-                              "zmq_bind error, %s errno %d %s", endpoint,
-                              zmq_errno(), zmq_strerror(zmq_errno()));
-                    return nullptr;
-                }
+        }
+        else {                   // accept incoming connections on a socket
+            rc = zmq_bind(socket, bufEndpoint);
+            if (rc != 0) {
+                Logger::E("CZMQUtils::CzmqGetSocket",
+                          "zmq_bind error, %s errno %d %s", bufEndpoint,
+                          zmq_errno(), zmq_strerror(zmq_errno()));
+                return nullptr;
             }
         }
 
@@ -139,11 +141,12 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
         }
 
         endpointSocket->socket = socket;
-        endpointSocket->endpoint = std::string(endpoint);
+        endpointSocket->serverName = std::string(serverName);
+        endpointSocket->endpoint = std::string(bufEndpoint);
         {
             Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
-            zmq_sockets.emplace(serverName, endpointSocket);
+            zmq_sockets.emplace(bufEndpoint, endpointSocket);
         }
     }
 

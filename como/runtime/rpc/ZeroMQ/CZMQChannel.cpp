@@ -191,7 +191,7 @@ ECode CZMQChannel::GetComponentMetadata(
         word[1] = (char*)"";
 
     // str, word[0]: serverName, word[1]: endpoint
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, str, word[1], ZMQ_REP);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, str, word[1], ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel",
                   "CzmqGetSocket error, channel name: %s, endpoint: %s",
@@ -219,7 +219,8 @@ ECode CZMQChannel::GetComponentMetadata(
             Integer replySize = zmq_msg_size(&msg);
             metadata = Array<Byte>::Allocate(replySize);
             if (metadata.IsNull()) {
-                Logger::E("GetComponentMetadata", "Malloc %d size metadata failed.", replySize);
+                Logger::E("GetComponentMetadata",
+                                  "Malloc %d size metadata failed.", replySize);
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
             else {
