@@ -71,8 +71,10 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
     zmq_msg_t msg;
     ECode ec;
     int numberOfBytes;
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
-    if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, ZMQ_DONTWAIT) != 0) {
+    if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, funCodeAndCRC64,
+                                                      msg, ZMQ_DONTWAIT) != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {

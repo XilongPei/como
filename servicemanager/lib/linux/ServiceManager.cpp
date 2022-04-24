@@ -251,10 +251,13 @@ ECode ServiceManager::AddRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64,
+                                                                        msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::AddRemoteService",
-                                               "CzmqRecvMsg error, rc: %d", rc);
+                                       "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
+                                       rc, funCodeAndCRC64.eCode);
         return E_REMOTE_EXCEPTION;
     }
 
@@ -559,10 +562,13 @@ ECode ServiceManager::RemoveRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64,
+                                                                        msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::RemoveRemoteService",
-                                               "CzmqRecvMsg error, rc: %d", rc);
+                                       "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
+                                       rc, funCodeAndCRC64.eCode);
         return E_REMOTE_EXCEPTION;
     }
 
@@ -635,10 +641,12 @@ ECode ServiceManager::GetRemoteService(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, funCodeAndCRC64, msg, 0);
     if (rc <= 0) {
         Logger::E("ServiceManager::GetRemoteService",
-                                               "CzmqRecvMsg error, rc: %d", rc);
+                                       "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
+                                       rc, funCodeAndCRC64.eCode);
         return E_REMOTE_EXCEPTION;
     }
 

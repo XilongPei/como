@@ -179,7 +179,8 @@ ECode CZMQChannel::GetComponentMetadata(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, funCodeAndCRC64, msg, 0);
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
             Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);
@@ -219,27 +220,31 @@ ECode CZMQChannel::Invoke(
 
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
-
-    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this), ZmqFunCode::Method_Invoke,
-                                                           mSocket, (void *)data, size);
-
+    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
+                        ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
     HANDLE hChannel;
     Integer eventCode;
     String serverName;
     GetServerName(serverName);
     zmq_msg_t msg;
-    void *socket = CZMQUtils::CzmqFindSocket(serverName.string());
-    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
+    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
+                                                       funCodeAndCRC64, msg, 0);
 
     if (SUCCEEDED(ec)) {
         resParcel = new CZMQParcel();
-
-        Integer hasOutArgs;
-        method->GetOutArgumentsNumber(hasOutArgs);
-        if (hasOutArgs) {
-            if (replySize > 0) {
-                resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
+        if (nullptr != resParcel) {
+            Integer hasOutArgs;
+            method->GetOutArgumentsNumber(hasOutArgs);
+            if (hasOutArgs) {
+                if (replySize > 0) {
+                    resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
+                }
             }
+        }
+        else {
+            Logger::E("CZMQChannel", "new CZMQParcel failed.");
+            ec = E_OUT_OF_MEMORY_ERROR;
         }
     }
     else {

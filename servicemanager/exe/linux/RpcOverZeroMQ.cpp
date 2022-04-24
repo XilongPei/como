@@ -73,15 +73,24 @@ void RpcOverZeroMQ::startTPZA_Executor()
 void *RpcOverZeroMQ::threadFunc(void *threadData)
 {
     ECode ec;
+    Integer rc;
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
+    COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
     while (true) {
         ec = NOERROR;
 
-        if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0) > 0) {
+        rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket,
+                                                       funCodeAndCRC64, msg, 0);
+        if (rc > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
+        }
+        else {
+            Logger::E("RpcOverZeroMQ::threadFunc",
+                                       "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
+                                       rc, funCodeAndCRC64.eCode);
         }
 
         // In the service program, the complete recv() and send() must appear in
