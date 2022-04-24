@@ -105,7 +105,7 @@ public:
             Rehash();
         }
 
-        Long hash = HashKey(key);
+        unsigned long long int hash = HashKey(key);
         if (0 == hash)
             return -3;
 
@@ -154,7 +154,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        Long hash = HashKey(key);
+        unsigned long long int hash = HashKey(key);
         if (0 == hash)
             return false;
 
@@ -176,7 +176,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        Long hash = HashKey(key);
+        unsigned long long int hash = HashKey(key);
         if (0 == hash)
             return Val(0);
 
@@ -198,7 +198,7 @@ public:
     {
         CompareFunc<Key> compareF;
 
-        Long hash = HashKey(key);
+        unsigned long long int hash = HashKey(key);
         if (0 == hash)
             return 0;
 
@@ -348,7 +348,7 @@ public:
     }
 
 private:
-    unsigned long HashKey(
+    unsigned long long int HashKey(
         /* [in] */ const Key& key)
     {
         HashFunc<Key> hashF;
