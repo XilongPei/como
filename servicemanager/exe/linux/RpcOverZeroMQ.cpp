@@ -154,7 +154,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
         }
         case ZmqFunCode::GetService: {      // 0x0202
             Logger::E("RpcOverZeroMQ::HandleMessage",
-                                                 "GetService, %s", (char*)data);
+                                                 "GetService: %s", (char*)data);
 
             ServiceManager::InterfacePack* ipack = nullptr;
             ECode ec = NOERROR;
