@@ -29,6 +29,7 @@
 namespace como {
 
 static struct timespec lastCheckConnExpireTime = {0, 0};
+static bool LivingWorker(TPZA_Executor::Worker *worker);
 
 //-------------------------------------------------------------------------
 // TPZA : ThreadPoolZmqActor
@@ -246,12 +247,12 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 int TPZA_Executor::RunTask(
     /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
-    return threadPool->addTask(task);
+    return threadPool->AddTask(task);
 }
 
 int TPZA_Executor::CleanTask(int posWorkerList)
 {
-    return threadPool->cleanTask(posWorkerList);
+    return threadPool->CleanTask(posWorkerList);
 }
 
 int TPZA_Executor::SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func)
@@ -299,7 +300,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                 break;
             }
         }
-
         if (iWorkerInQueue < 0) {
             struct timespec curTime;
             CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
@@ -388,6 +388,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                 for (i = iWorkerInQueue;  i < mWorkerList.size();  i++) {
                     if (LivingWorker(mWorkerList[i])) {
                         iWorkerInQueue = i;
+                        worker = mWorkerList[i];
+                        worker->mWorkerStatus = WORKER_TASK_RUNNING;
                         break;
                     }
                 }
@@ -448,7 +450,7 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 /*
  * return position in mWorkerList
  */
-int ThreadPoolZmqActor::addTask(
+int ThreadPoolZmqActor::AddTask(
     /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
     int i;
@@ -461,7 +463,7 @@ int ThreadPoolZmqActor::addTask(
         if (nullptr == mWorkerList[i])
             break;
 
-        if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
+        if (LivingWorker(mWorkerList[i]))
             continue;
 
         if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
@@ -509,8 +511,10 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
         w = mWorkerList[i];
 
         //@ `ReleaseWorkerWhenPickIt`
-        if (! isDaemon)
+        if (! isDaemon) {
+            REFCOUNT_RELEASE(mWorkerList[i]);
             mWorkerList[i] = nullptr;
+        }
     }
     else {
         w = nullptr;
@@ -524,7 +528,7 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
 /*
  * Count Worker by socket
  */
-int ThreadPoolZmqActor::countWorkerBySocket(void *socket)
+int ThreadPoolZmqActor::CountWorkerBySocket(void *socket)
 {
     int num = 0;
 
@@ -544,7 +548,7 @@ int ThreadPoolZmqActor::countWorkerBySocket(void *socket)
 }
 
 
-int ThreadPoolZmqActor::cleanTask(int posWorkerList)
+int ThreadPoolZmqActor::CleanTask(int posWorkerList)
 {
     if (posWorkerList < 0 || (posWorkerList >= mWorkerList.size()))
         return -1;
@@ -560,7 +564,7 @@ int ThreadPoolZmqActor::cleanTask(int posWorkerList)
     return posWorkerList;
 }
 
-int ThreadPoolZmqActor::stopAll()
+int ThreadPoolZmqActor::StopAll()
 {
     if (shutdown) {
         return -1;
@@ -582,7 +586,7 @@ int ThreadPoolZmqActor::stopAll()
     return 0;
 }
 
-int ThreadPoolZmqActor::getTaskListSize()
+int ThreadPoolZmqActor::GetTaskListSize()
 {
     return mWorkerList.size();
 }

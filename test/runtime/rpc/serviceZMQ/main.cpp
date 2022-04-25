@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include "ComoConfig.h"
-#include <stdio.h>
+#include "comorpc.h"
 
 using como::test::rpc::CService;
 using como::test::rpc::IService;
@@ -69,9 +69,14 @@ int main(int argv, char** argc)
                                                 String("rpcserviceZMQ"), srv);
 
     printf("==== rpc serviceZMQ wait for calling ====\n");
+
+    // waiting for network
+    CoNetworkPoll();
+#if 0
     while (true) {
         sleep(5);
     }
+#endif
 
     return 0;
 }

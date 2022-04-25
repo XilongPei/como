@@ -20,6 +20,7 @@
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
+#include <stdio.h>
 
 namespace como {
 
@@ -36,6 +37,8 @@ public:
 };
 
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
+static zmq_pollitem_t *zmq_pollitems = nullptr;
+static int zmq_pollitemNum = 0;
 static void *comoZmqContext = nullptr;
 int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 3;
 
@@ -132,6 +135,19 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
                           zmq_errno(), zmq_strerror(zmq_errno()));
                 return nullptr;
             }
+
+            int i = zmq_pollitemNum;
+            zmq_pollitemNum++;
+            zmq_pollitems = (zmq_pollitem_t*)realloc(zmq_pollitems,
+                                      sizeof(zmq_pollitem_t) * zmq_pollitemNum);
+            zmq_pollitems[i].socket = socket;
+            zmq_pollitems[i].fd = 0;
+            // For ZeroMQ sockets, at least one message may be received from the
+            // socket without blocking. For standard sockets this is equivalent
+            // to the POLLIN flag of the poll() system call and generally means
+            // that at least one byte of data may be read from fd without blocking.
+            zmq_pollitems[i].events = ZMQ_POLLIN;
+            zmq_pollitems[i].revents = 0;
         }
 
         endpointSocket = new EndpointSocket();
@@ -518,6 +534,16 @@ static void *rep_socket_monitor(void *endpointSocket)
     }
     zmq_close(socketZMQ_PAIR);
     return nullptr;
+}
+
+void CZMQUtils::CzmqPoll(pthread_cond_t& pthreadCond, bool& signal)
+{
+    while (true) {
+        zmq_poll(zmq_pollitems, zmq_pollitemNum, -1);
+        signal = true;
+        pthread_cond_signal(&pthreadCond);
+        sleep(5);
+    }
 }
 
 } // namespace como

@@ -27,7 +27,11 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     add_subdirectory(ZeroMQ)
     set(RPC_ZeroMQ_DEFINITIONS -DRPC_OVER_ZeroMQ_SUPPORT)
     add_definitions(${RPC_ZeroMQ_DEFINITIONS})
+    set(ZeroMQ_INC_DIR ${EXTERNAL_DIR}/libzmq/include)
+
     # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
+else()
+    set(ZeroMQ_INC_DIR )
 endif()
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
@@ -41,7 +45,9 @@ include_directories(
     ../
     ../type
     ../util
-    ${INC_DIR})
+    ${INC_DIR}
+    ${ZeroMQ_INC_DIR}
+)
 
 set(SOURCES
     CProxy.cpp

@@ -103,7 +103,7 @@ public:
 
     static TPZA_Executor::Worker *PickWorkerByChannelHandle(
                                                 HANDLE hChannel, bool isDaemon);
-    static int countWorkerBySocket(void *socket);
+    static int CountWorkerBySocket(void *socket);
 
 private:
     static bool shutdown;
@@ -117,12 +117,12 @@ public:
 
     ThreadPoolZmqActor(int threadNum = 10);
 
-    static int addTask(
+    static int AddTask(
         /* [in] */ AutoPtr<TPZA_Executor::Worker> task);
 
-    static int cleanTask(int posWorkerList);
-    int stopAll();
-    int getTaskListSize();
+    static int CleanTask(int posWorkerList);
+    int StopAll();
+    int GetTaskListSize();
 };
 
 } // namespace como

@@ -24,6 +24,8 @@
 #endif
 #if defined(RPC_OVER_ZeroMQ_SUPPORT)
 #include "ZeroMQ/CZMQChannelFactory.h"
+#include "ZeroMQ/CZMQUtils.h"
+#include "ZeroMQ/ThreadPoolZmqActor.h"
 #endif
 
 namespace como {
@@ -127,5 +129,23 @@ ECode CoUnmarshalInterface(
                       (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
     return factory->UnmarshalInterface(data, object);
 }
+
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+
+ECode CoNetworkPoll()
+{
+    CZMQUtils::CzmqPoll(ThreadPoolZmqActor::pthreadCond,
+                                                   ThreadPoolZmqActor::signal_);
+    return NOERROR;
+}
+
+#else
+
+ECode CoNetworkPoll()
+{
+    return NOERROR;
+}
+
+#endif
 
 } // namespace como

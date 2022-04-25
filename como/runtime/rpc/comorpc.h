@@ -52,6 +52,8 @@ EXTERN_C COM_PUBLIC ECode CoUnmarshalInterface(
     /* [in] */ RPCType type,
     /* [out] */ AutoPtr<IInterface>& object);
 
+EXTERN_C COM_PUBLIC ECode CoNetworkPoll();
+
 } // namespace como
 
 #endif // __COMO_COMORPC_H__
