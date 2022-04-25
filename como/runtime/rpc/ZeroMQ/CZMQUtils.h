@@ -72,7 +72,7 @@ public:
 
     static void *CzmqSocketMonitor(const char *serverName);
 
-    static void CzmqPoll(pthread_cond_t& pthreadCond, bool& signal);
+    static void CzmqPoll();
 
     // milliseconds
     static int ZMQ_RCV_TIMEOUT;

@@ -130,22 +130,4 @@ ECode CoUnmarshalInterface(
     return factory->UnmarshalInterface(data, object);
 }
 
-#if defined(RPC_OVER_ZeroMQ_SUPPORT)
-
-ECode CoNetworkPoll()
-{
-    CZMQUtils::CzmqPoll(ThreadPoolZmqActor::pthreadCond,
-                                                   ThreadPoolZmqActor::signal_);
-    return NOERROR;
-}
-
-#else
-
-ECode CoNetworkPoll()
-{
-    return NOERROR;
-}
-
-#endif
-
 } // namespace como

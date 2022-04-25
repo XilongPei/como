@@ -70,13 +70,9 @@ int main(int argv, char** argc)
 
     printf("==== rpc serviceZMQ wait for calling ====\n");
 
-    // waiting for network
-    CoNetworkPoll();
-#if 0
     while (true) {
         sleep(5);
     }
-#endif
 
     return 0;
 }

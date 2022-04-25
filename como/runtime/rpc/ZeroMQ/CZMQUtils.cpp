@@ -532,14 +532,9 @@ static void *rep_socket_monitor(void *endpointSocket)
     return nullptr;
 }
 
-void CZMQUtils::CzmqPoll(pthread_cond_t& pthreadCond, bool& signal)
+void CZMQUtils::CzmqPoll()
 {
-    while (true) {
-        zmq_poll(zmq_pollitems, zmq_pollitemNum, -1);
-        signal = true;
-        pthread_cond_signal(&pthreadCond);
-        sleep(5);
-    }
+    zmq_poll(zmq_pollitems, zmq_pollitemNum, -1);
 }
 
 } // namespace como

@@ -347,14 +347,19 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
         }
         if (iWorkerInQueue < 0) {
-            struct timespec curTime;
-            CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
-            while (!signal_) {
-                // The work of cleaning up the mWorkerList later may
-                // also need to be done regularly
-                pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
+            if ((size_t)threadData % 2 == 0) {
+                struct timespec curTime;
+                CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
+                while (!signal_) {
+                    // The work of cleaning up the mWorkerList later may
+                    // also need to be done regularly
+                    pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
+                }
+                signal_ = false;
             }
-            signal_ = false;
+            else {
+                CZMQUtils::CzmqPoll();
+            }
         }
         pthread_mutex_unlock(&pthreadMutex);
 
@@ -485,12 +490,12 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
         return;
     }
 
-    for (int i = 0;  i < mThreadNum;  i++) {
+    for (size_t i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
         if (pthread_create(&pthread_id[i], nullptr,
-                                ThreadPoolZmqActor::threadFunc, nullptr) != 0) {
+                                ThreadPoolZmqActor::threadFunc, (void *)i) != 0) {
             Logger::E("ThreadPoolZmqActor", "pthread_create() error");
         }
     }
