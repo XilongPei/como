@@ -188,9 +188,9 @@ ECode CZMQChannel::GetComponentMetadata(
     }
 
     Logger::D("CZMQChannel::GetComponentMetadata",
-              "Try to CzmqSendBuf to endpoint %s", serverName);
+              "Try to CzmqSendBuf to endpoint %s", serverName.string());
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
-                    ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
+                  ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
     }
