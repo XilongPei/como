@@ -110,7 +110,11 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel, true);
                     if (nullptr != w) {
                         ec = mStub->Invoke(argParcel, resParcel);
-                        w->mWorkerStatus = WORKER_TASK_FINISH;
+
+                        // It shouldn't be WORKER_TASK_FINISH.
+                        // A request ends, but the channel still needs to be.
+                        w->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+
                         resParcel->GetData(resData);
                         resParcel->GetDataSize(resSize);
                     }
@@ -186,6 +190,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
             case ZmqFunCode::Object_Release: {
                 if (hChannel == mChannel) {
                     // `ReleaseWorker` will delete this work
+                    mWorkerStatus = WORKER_TASK_FINISH;
                     return this;
                 }
 
@@ -306,6 +311,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             signal_ = false;
         }
         pthread_mutex_unlock(&pthreadMutex);
+
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
