@@ -94,13 +94,22 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     break;
                 }
 
+                Worker *w;
+                HANDLE resData;
+                Long resSize;
+
                 if (hChannel == mChannel) {
                     ec = mStub->Invoke(argParcel, resParcel);
+                    resParcel->GetData(resData);
+                    resParcel->GetDataSize(resSize);
                 }
                 else {
-                    Worker *w = ThreadPoolZmqActor::findWorkerByChannelHandle(hChannel);
+                    w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel);
                     if (nullptr != w) {
                         ec = mStub->Invoke(argParcel, resParcel);
+                        w->mWorkerStatus = WORKER_TASK_FINISH;
+                        resParcel->GetData(resData);
+                        resParcel->GetDataSize(resSize);
                     }
                     else {
                         if (nullptr != TPZA_Executor::defaultHandleMessage) {
@@ -111,16 +120,22 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                                                   "defaultHandleMessage error");
                             }
                         }
+                        resData = reinterpret_cast<HANDLE>((char*)"");
+                        resSize = 1;
+                        resParcel->GetData(resData);
+                        resParcel->GetDataSize(resSize);
                     }
                 }
 
-                HANDLE resData;
-                Long resSize;
-                resParcel->GetData(resData);
-                resParcel->GetDataSize(resSize);
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
                                        mSocket, (const void *)resData, resSize);
-                break;
+                if (hChannel == mChannel) {
+                    // `ReleaseWorker` will delete this work
+                    return this;
+                }
+
+                // `ReleaseWorker`
+                return w;
             }
 
             case ZmqFunCode::GetComponentMetadata: {
@@ -161,16 +176,23 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 Boolean b = true;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
                                              (const void *)&b, sizeof(Boolean));
-                break;
+                // `ReleaseWorker` will delete this work
+                return this;
             }
 
             case ZmqFunCode::Object_Release: {
-                if (hChannel == mChannel)
-                        return this;
+                if (hChannel == mChannel) {
+                    // `ReleaseWorker` will delete this work
+                    return this;
+                }
 
-                Worker *w = ThreadPoolZmqActor::findWorkerByChannelHandle(hChannel);
+                Worker *w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel);
                 if (nullptr == w) {
                     Logger::E("TPZA_Executor::Worker::Invoke", "bad Channel");
+                }
+                else {
+                    // `ReleaseWorker` will NOT delete this work
+                    w->mWorkerStatus = WORKER_TASK_FINISH;
                 }
                 return w;
             }
@@ -231,18 +253,50 @@ int TPZA_Executor::SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func)
     return 0;
 }
 
+static void CalWaitTime(struct timespec& curTime, int timeout_ms) {
+    clock_gettime(CLOCK_REALTIME, &curTime);
+    long nsec = curTime.tv_nsec + (timeout_ms % 1000) * 1000000;
+                                                      // 654321
+    curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
+                                           // 987654321
+    curTime.tv_nsec = nsec % 1000000000;
+                           // 987654321
+}
+
 void *ThreadPoolZmqActor::threadFunc(void *threadData)
 {
     ECode ec;
     int i;
+    int iWorkerInQueue;
 
     while (true) {
+        iWorkerInQueue = -1;
+        pthread_mutex_lock(&pthreadMutex);
+        for (i = 0;  i < mWorkerList.size();  i++) {
+            if ((nullptr != mWorkerList[i]) &&
+                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+                iWorkerInQueue = i;
+                break;
+            }
+        }
+
+        if (iWorkerInQueue < 0) {
+            struct timespec curTime;
+            CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
+            while (!signal_) {
+                // The work of cleaning up the mWorkerList later may
+                // also need to be done regularly
+                pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
+            }
+            signal_ = false;
+        }
+        pthread_mutex_unlock(&pthreadMutex);
+
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
         // check for time out connection
         // ns accuracy is not required
-        // TODO, mWorkerList.size() is not the really num in mWorkerList
         if (mWorkerList.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
                          (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
@@ -251,7 +305,8 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             pthread_mutex_lock(&pthreadMutex);
 
             for (i = 0;  (i < mWorkerList.size()) &&
-                                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus);  i++) {
+                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus);
+                         i++) {
                 if (nullptr == mWorkerList[i])
                     continue;
 
@@ -259,76 +314,71 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
                     delete mWorkerList[i];
-                    mWorkerList[i]->mWorkerStatus = WORKER_IDLE;
+                    mWorkerList[i] = nullptr;
                 }
             }
             pthread_mutex_unlock(&pthreadMutex);
         }
 
-        pthread_mutex_lock(&pthreadMutex);
+        if (iWorkerInQueue < 0)
+            continue;
 
-        for (i = 0;  i < mWorkerList.size();  i++) {
-            if ((nullptr == mWorkerList[i]) ||
+        pthread_mutex_lock(&pthreadMutex);
+        AutoPtr<TPZA_Executor::Worker> worker;
+        i = iWorkerInQueue;
+        iWorkerInQueue = -1;
+        for (;  i < mWorkerList.size();  i++) {
+            if ((nullptr != mWorkerList[i]) &&
                          (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+                iWorkerInQueue = i;
+                worker = mWorkerList[i];
+                worker->mWorkerStatus = WORKER_TASK_RUNNING;
                 break;
             }
         }
+        pthread_mutex_unlock(&pthreadMutex);
 
-        while ((i >= mWorkerList.size()) && !shutdown) {
-            if (nullptr != TPZA_Executor::defaultHandleMessage) {
-                Integer eventCode;
-                zmq_msg_t msg;
-                TPZA_Executor::defaultHandleMessage(
-                    reinterpret_cast<HANDLE>(nullptr), eventCode, nullptr, msg);
+        // There are Workers in the queue. Try to do all the Workers
+        AutoPtr<TPZA_Executor::Worker> workerRet;
+        while ((iWorkerInQueue >= 0) && !shutdown) {
+            workerRet = worker->HandleMessage();
+            if (workerRet != mWorkerList[iWorkerInQueue]) {
+                //@ `ReleaseWorker`
+                REFCOUNT_RELEASE(worker);
+                mWorkerList[iWorkerInQueue] = nullptr;
+            }
+            else {
+                //refer to `ReleaseWorkerWhenPickIt`
+                if (nullptr != workerRet)
+                    REFCOUNT_RELEASE(workerRet);
             }
 
-            /* wait 100ns, a short time, CPU is too tired.
-               Theoretically, it should be calculated as follows, but the delay
-               accuracy is not required here, so it is important to reduce the
-               amount of calculation.
+            // look for another Worker
+            iWorkerInQueue++;
+            pthread_mutex_lock(&pthreadMutex);
+            if (iWorkerInQueue < mWorkerList.size()) {
+                for (i = iWorkerInQueue;  i < mWorkerList.size();  i++) {
+                    if ((nullptr != mWorkerList[i]) &&
+                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+                        iWorkerInQueue = i;
+                        break;
+                    }
+                }
 
-               timeout_ms: the ms we want to wait
-
-            long nsec = curTime.tv_nsec + (timeout_ms % 1000) * 1000000;
-            curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
-            curTime.tv_nsec = nsec % 1000000000;
-            */
-            struct timespec curTime;
-            clock_gettime(CLOCK_REALTIME, &curTime);
-            curTime.tv_nsec += 100;
-            pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
-
-            for (i = 0;  i < mWorkerList.size();  i++) {
-                if (nullptr == mWorkerList[i])
-                    continue;
-
-                if (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)
-                    break;
+                if (i >= mWorkerList.size()) {
+                    iWorkerInQueue = -1;
+                }
             }
+            else {
+                iWorkerInQueue = -1;
+            }
+            pthread_mutex_unlock(&pthreadMutex);
         }
 
         if (shutdown) {
             pthread_mutex_unlock(&pthreadMutex);
             pthread_exit(nullptr);
             return nullptr;
-        }
-
-        if (i < mWorkerList.size()) {
-            AutoPtr<TPZA_Executor::Worker> worker = mWorkerList[i];
-            if (nullptr != worker) {
-                worker->mWorkerStatus = WORKER_TASK_RUNNING;
-                pthread_mutex_unlock(&pthreadMutex);
-                if (worker->HandleMessage() != nullptr) {
-                    delete worker;
-                    mWorkerList[i] = nullptr;
-                }
-            }
-            else {
-                pthread_mutex_unlock(&pthreadMutex);
-            }
-        }
-        else {
-            pthread_mutex_unlock(&pthreadMutex);
         }
     }
 
@@ -341,6 +391,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
 bool ThreadPoolZmqActor::shutdown = false;
 std::vector<TPZA_Executor::Worker*> ThreadPoolZmqActor::mWorkerList;   // task list
+bool ThreadPoolZmqActor::signal_;
 
 pthread_mutex_t ThreadPoolZmqActor::pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPoolZmqActor::pthreadCond = PTHREAD_COND_INITIALIZER;
@@ -363,6 +414,8 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
             Logger::E("ThreadPoolZmqActor", "pthread_create() error");
         }
     }
+
+    signal_ = false;
 }
 
 /*
@@ -381,16 +434,12 @@ int ThreadPoolZmqActor::addTask(
         if (nullptr == mWorkerList[i])
             break;
 
-        // COMO Runtime could set mWorkerStatus as WORKER_IDLE
-        if (WORKER_IDLE == mWorkerList[i]->mWorkerStatus)
-            break;
-
         if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
             continue;
 
-        if ((currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
-                    1000000000L * (currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
-                   /*987654321*/                                  ComoConfig::TPZA_TASK_EXPIRES) {
+        if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+           /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
+                                                        ComoConfig::TPZA_TASK_EXPIRES) {
             break;
         }
     }
@@ -404,8 +453,9 @@ int ThreadPoolZmqActor::addTask(
     }
     REFCOUNT_ADD(task);
 
-    pthread_mutex_unlock(&pthreadMutex);
+    signal_ = true;
     pthread_cond_signal(&pthreadCond);
+    pthread_mutex_unlock(&pthreadMutex);
 
     return i;
 }
@@ -413,7 +463,7 @@ int ThreadPoolZmqActor::addTask(
 /*
  * Find Worker by ChannelHandle, `mSocket + mChannel` is unique id of an IStub
  */
-TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hChannel)
+TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(HANDLE hChannel)
 {
     int i;
     TPZA_Executor::Worker *w;
@@ -429,13 +479,15 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::findWorkerByChannelHandle(HANDLE hCha
     }
     if (i < mWorkerList.size()) {
         w = mWorkerList[i];
+
+        //@ `ReleaseWorkerWhenPickIt`
+        mWorkerList[i] = nullptr;
     }
     else {
         w = nullptr;
     }
 
     pthread_mutex_unlock(&pthreadMutex);
-    pthread_cond_signal(&pthreadCond);
 
     return w;
 }

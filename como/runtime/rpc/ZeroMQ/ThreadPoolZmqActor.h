@@ -29,6 +29,7 @@
 
 namespace como {
 
+// If the message has been processed, returned 0
 using HANDLE_MESSAGE_FUNCTION = ECode(*)(HANDLE,Integer,void *,zmq_msg_t&);
 
 /*
@@ -46,7 +47,6 @@ using HANDLE_MESSAGE_FUNCTION = ECode(*)(HANDLE,Integer,void *,zmq_msg_t&);
 
 class ThreadPoolZmqActor;
 enum WORKER_STATUS {
-    WORKER_IDLE = 0,
     WORKER_TASK_READY,
     WORKER_TASK_RUNNING,
     WORKER_TASK_FINISH
@@ -97,8 +97,9 @@ class ThreadPoolZmqActor
 {
 public:
     static std::vector<TPZA_Executor::Worker*> mWorkerList;     // task list
+    static bool signal_;
 
-    static TPZA_Executor::Worker *findWorkerByChannelHandle(HANDLE hChannel);
+    static TPZA_Executor::Worker *PickWorkerByChannelHandle(HANDLE hChannel);
     static int countWorkerBySocket(void *socket);
 
 private:
