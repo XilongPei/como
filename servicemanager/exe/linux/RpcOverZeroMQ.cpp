@@ -49,9 +49,7 @@ void RpcOverZeroMQ::startTPZA_Executor()
 
     std::string strep = ComoConfig::GetZeroMQEndpoint("ServiceManager");
 
-    socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                "ServiceManager", strep.c_str(),
-                                ZMQ_REP);
+    socket = CZMQUtils::CzmqGetSocket(nullptr, strep.c_str(), ZMQ_REP);
     if (nullptr == socket) {
         Logger::E("startTPZA_Executor",
                   "CzmqGetSocket error, Server: 'ServiceManager', Endpoint: %s",

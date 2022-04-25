@@ -69,16 +69,15 @@ CZMQChannel::CZMQChannel(
     }
     else {
         // I am server, I will accept incoming connections on a socket
-        socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                       name.c_str(), endpoint.c_str(), ZMQ_REP);
+        socket = CZMQUtils::CzmqGetSocket(nullptr, endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
             iter->second->inChannel++;
         }
         else {
             Logger::E("CZMQChannel",
-                      "CzmqGetSocket error, channel name: %s, endpoint: %s",
-                      name.c_str(), endpoint.c_str());
+                      "CzmqGetSocket error, channel endpoint: %s",
+                      endpoint.c_str());
             return;
         }
     }
@@ -178,30 +177,18 @@ ECode CZMQChannel::GetComponentMetadata(
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
     String serverName;
-    char buf[256];
-    int num = 2;
-
     // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
     ec = GetServerName(serverName);
-    strncpy(buf, serverName.string(), 255);
-    buf[255] = '\0';
 
-    char *word[3];
-    char *str = MiString::WordBreak(buf, num, word, (char*)";");
-    if (nullptr == word[1])
-        word[1] = (char*)"";
-
-    // str, word[0]: serverName, word[1]: endpoint
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, str, word[1], ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::GetComponentMetadata",
-                  "CzmqGetSocket error, channel name: %s, endpoint: %s",
-                  str, word[1]);
+                  "CzmqGetSocket error, endpoint: %s", serverName);
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::GetComponentMetadata",
-              "Try to CzmqSendBuf to endpoint %s", word[1]);
+              "Try to CzmqSendBuf to endpoint %s", serverName);
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
                     ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
@@ -247,19 +234,37 @@ ECode CZMQChannel::Invoke(
     /* [out] */ AutoPtr<IParcel>& resParcel)
 {
     ECode ec = NOERROR;
+
+    /**
+     * 1. Find out who asked me for Invoke and establish a socket
+     * connection with it.
+     * 2. 'mSocket' is used to process requests, not to communicate with client
+     */
+    String serverName;
+    // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
+    ec = GetServerName(serverName);
+
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName.string(), ZMQ_REQ);
+    if (nullptr == socket) {
+        Logger::E("CZMQChannel::Invoke",
+                  "CzmqGetSocket error, channel endpoint: %s",
+                  serverName.string());
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    Logger::D("CZMQChannel::Invoke",
+              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+
     HANDLE data;
     Long size;
-
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
     CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
-                        ZmqFunCode::Method_Invoke, mSocket, (void *)data, size);
+                         ZmqFunCode::Method_Invoke, socket, (void *)data, size);
     HANDLE hChannel;
     Integer eventCode;
-    String serverName;
-    GetServerName(serverName);
     zmq_msg_t msg;
-    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (SUCCEEDED(eventCode)) {
         resParcel = new CZMQParcel();
@@ -268,7 +273,8 @@ ECode CZMQChannel::Invoke(
             method->GetOutArgumentsNumber(hasOutArgs);
             if (hasOutArgs) {
                 if (replySize > 0) {
-                    resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)), zmq_msg_size(&msg));
+                    resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
+                                                                zmq_msg_size(&msg));
                 }
             }
         }

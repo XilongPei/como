@@ -75,6 +75,11 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
     ECode ec;
     int numberOfBytes;
 
+#if 0
+    Logger::D("TPZA_Executor::Worker::HandleMessage",
+              "Try to CzmqRecvMsg from endpoint %s", mEndpoint.c_str());
+#endif
+
     Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
                                                              msg, ZMQ_DONTWAIT);
     if (iRet != 0) {
@@ -149,6 +154,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
                                                "new CZMQParcel return nullptr");
                     // `ReleaseWorker`, This Worker is a daemon
+                    mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     return nullptr;
                 }
 
@@ -169,11 +175,14 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 ec = mc->GetSerializedMetadata(metadata);
 
                 ReleaseCoclassID(cid);
-                if (SUCCEEDED(ec))
-                    numberOfBytes = zmq_send(mSocket, metadata.GetPayload(),
-                                                       metadata.GetLength(), 0);
-                else
-                    numberOfBytes = zmq_send(mSocket, "", 1, 0);
+                if (SUCCEEDED(ec)) {
+                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                                    metadata.GetPayload(), metadata.GetLength());
+                }
+                else {
+                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                                                                   (char*)"", 1);
+                }
 
                 // `ReleaseWorker`, This Worker is a daemon
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -185,6 +194,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
                                              (const void *)&b, sizeof(Boolean));
                 // `ReleaseWorker` will delete this work
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 return this;
             }
 
@@ -359,6 +369,11 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         // There are Workers in the queue. Try to do all the Workers
         AutoPtr<TPZA_Executor::Worker> workerRet;
         while ((iWorkerInQueue >= 0) && !shutdown) {
+
+            Logger::D("ThreadPoolZmqActor::threadFunc",
+                      "HandleMessage, endpoint:", worker->mEndpoint.c_str());
+
+            sleep(10);
 
             workerRet = worker->HandleMessage();
 

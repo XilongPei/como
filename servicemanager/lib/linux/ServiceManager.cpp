@@ -193,8 +193,7 @@ ECode ServiceManager::AddRemoteService(
     // Tell others my (thisServerName) identification information as a service
     // provider so that others can find me
     // name, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
-    ipack->SetServerName(name + "\n" + thisServerName + ";" +
-                                                         String(strep.c_str()));
+    ipack->SetServerName(name + "\n" + String(strep.c_str()));
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
@@ -229,7 +228,6 @@ ECode ServiceManager::AddRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                            snServManager.string(),
                                             strServerEndpoint.c_str(), ZMQ_REQ);
     }
 
@@ -542,8 +540,7 @@ ECode ServiceManager::RemoveRemoteService(
     }
     else {
         socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                snServManager.string(),
-                                strServerEndpoint.c_str(), ZMQ_REQ);
+                                            strServerEndpoint.c_str(), ZMQ_REQ);
     }
 
     if (nullptr == socket) {
@@ -620,7 +617,7 @@ ECode ServiceManager::GetRemoteService(
         socket = iter->second->socket;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr, snServManager.string(),
+        socket = CZMQUtils::CzmqGetSocket(nullptr,
                                             strServerEndpoint.c_str(), ZMQ_REQ);
     }
 

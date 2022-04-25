@@ -32,7 +32,6 @@ public:
 
 public:
     void *socket;
-    std::string serverName;
     std::string endpoint;
 };
 
@@ -80,16 +79,14 @@ void *CZMQUtils::CzmqGetContext() {
  * is routed to the _client_ that issued the last request. If the original
  * requester does not exist any more the reply is silently discarded.
  */
-void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
-                                                 const char *endpoint, int type)
+void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 {
     EndpointSocket *endpointSocket;
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, 4096, endpoint);
 
     Logger::D("CZMQUtils::CzmqGetSocket",
-              "serverName: %s,  endpoint: %s, ZMQ_REP(4)/ZMQ_REQ(3): %d",
-              serverName, bufEndpoint, type);
+              "endpoint: %s, ZMQ_REP(4)/ZMQ_REQ(3): %d", bufEndpoint, type);
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
@@ -157,7 +154,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *serverName,
         }
 
         endpointSocket->socket = socket;
-        endpointSocket->serverName = std::string(serverName);
         endpointSocket->endpoint = std::string(bufEndpoint);
         {
             Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);

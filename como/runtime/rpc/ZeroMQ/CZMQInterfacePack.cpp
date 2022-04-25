@@ -137,8 +137,7 @@ ECode CZMQInterfacePack::GiveMeAhand(
         iter->second->inChannel++;
     }
     else {
-        socket = CZMQUtils::CzmqGetSocket(nullptr,
-                                name.c_str(), endpoint.c_str(), ZMQ_REP);
+        socket = CZMQUtils::CzmqGetSocket(nullptr, endpoint.c_str(), ZMQ_REP);
         if (nullptr != socket) {
             iter->second->socket = socket;
             iter->second->inChannel++;
