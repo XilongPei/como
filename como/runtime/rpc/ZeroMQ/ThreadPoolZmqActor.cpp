@@ -32,9 +32,11 @@ static struct timespec lastCheckConnExpireTime = {0, 0};
 
 //-------------------------------------------------------------------------
 // TPZA : ThreadPoolZmqActor
-TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub)
+TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub,
+                                                          std::string& endpoint)
     : mStub(stub)
     , mWorkerStatus(WORKER_TASK_READY)
+    , mEndpoint(endpoint)
 {
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 
@@ -72,8 +74,9 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
     ECode ec;
     int numberOfBytes;
 
-    if (CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
-                                                      msg, ZMQ_DONTWAIT) != 0) {
+    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
+                                                             msg, ZMQ_DONTWAIT);
+    if (iRet != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
@@ -104,7 +107,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     resParcel->GetDataSize(resSize);
                 }
                 else {
-                    w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel);
+                    w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel, true);
                     if (nullptr != w) {
                         ec = mStub->Invoke(argParcel, resParcel);
                         w->mWorkerStatus = WORKER_TASK_FINISH;
@@ -129,13 +132,10 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
                                        mSocket, (const void *)resData, resSize);
-                if (hChannel == mChannel) {
-                    // `ReleaseWorker` will delete this work
-                    return this;
-                }
 
-                // `ReleaseWorker`
-                return w;
+                // `ReleaseWorker`, This Worker is a daemon
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                return nullptr;
             }
 
             case ZmqFunCode::GetComponentMetadata: {
@@ -143,7 +143,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 if (nullptr == argParcel) {
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
                                                "new CZMQParcel return nullptr");
-                    break;
+                    // `ReleaseWorker`, This Worker is a daemon
+                    return nullptr;
                 }
 
                 argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
@@ -169,7 +170,9 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 else
                     numberOfBytes = zmq_send(mSocket, "", 1, 0);
 
-                break;
+                // `ReleaseWorker`, This Worker is a daemon
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                return nullptr;
             }
 
             case ZmqFunCode::Actor_IsPeerAlive: {
@@ -186,7 +189,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     return this;
                 }
 
-                Worker *w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel);
+                Worker *w = ThreadPoolZmqActor::PickWorkerByChannelHandle(
+                                                                hChannel, true);
                 if (nullptr == w) {
                     Logger::E("TPZA_Executor::Worker::Invoke", "bad Channel");
                 }
@@ -196,7 +200,6 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 }
                 return w;
             }
-
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
                     if (TPZA_Executor::defaultHandleMessage(
@@ -205,10 +208,9 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     }
                 }
         }
-
-        mWorkerStatus = WORKER_TASK_FINISH;
     }
 
+    mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
     return nullptr;
 }
 
@@ -263,6 +265,20 @@ static void CalWaitTime(struct timespec& curTime, int timeout_ms) {
                            // 987654321
 }
 
+static bool LivingWorker(TPZA_Executor::Worker *worker)
+{
+    if (nullptr == worker)
+        return false;
+
+    switch (worker->mWorkerStatus) {
+        case WORKER_TASK_READY:
+        case WORKER_TASK_RUNNING:
+        case WORKER_TASK_DAEMON_RUNNING:
+            return true;
+    }
+    return false;
+}
+
 void *ThreadPoolZmqActor::threadFunc(void *threadData)
 {
     ECode ec;
@@ -273,8 +289,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         iWorkerInQueue = -1;
         pthread_mutex_lock(&pthreadMutex);
         for (i = 0;  i < mWorkerList.size();  i++) {
-            if ((nullptr != mWorkerList[i]) &&
-                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+            if (LivingWorker(mWorkerList[i])) {
                 iWorkerInQueue = i;
                 break;
             }
@@ -291,7 +306,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             signal_ = false;
         }
         pthread_mutex_unlock(&pthreadMutex);
-
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
@@ -305,15 +319,14 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             pthread_mutex_lock(&pthreadMutex);
 
             for (i = 0;  (i < mWorkerList.size()) &&
-                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus);
-                         i++) {
+                                         !LivingWorker(mWorkerList[i]);  i++) {
                 if (nullptr == mWorkerList[i])
                     continue;
 
                 if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
-                    delete mWorkerList[i];
+                    REFCOUNT_RELEASE(mWorkerList[i]);
                     mWorkerList[i] = nullptr;
                 }
             }
@@ -328,8 +341,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         i = iWorkerInQueue;
         iWorkerInQueue = -1;
         for (;  i < mWorkerList.size();  i++) {
-            if ((nullptr != mWorkerList[i]) &&
-                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+            if (LivingWorker(mWorkerList[i])) {
                 iWorkerInQueue = i;
                 worker = mWorkerList[i];
                 worker->mWorkerStatus = WORKER_TASK_RUNNING;
@@ -341,16 +353,26 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         // There are Workers in the queue. Try to do all the Workers
         AutoPtr<TPZA_Executor::Worker> workerRet;
         while ((iWorkerInQueue >= 0) && !shutdown) {
+
             workerRet = worker->HandleMessage();
+
             if (workerRet != mWorkerList[iWorkerInQueue]) {
-                //@ `ReleaseWorker`
-                REFCOUNT_RELEASE(worker);
-                mWorkerList[iWorkerInQueue] = nullptr;
+            // Current Worker has been processed
+                if (WORKER_TASK_DAEMON_RUNNING != worker->mWorkerStatus) {
+                    //@ `ReleaseWorker`
+                    REFCOUNT_RELEASE(worker);
+                    mWorkerList[iWorkerInQueue] = nullptr;
+                }
             }
             else {
                 //refer to `ReleaseWorkerWhenPickIt`
-                if (nullptr != workerRet)
-                    REFCOUNT_RELEASE(workerRet);
+                if (nullptr != workerRet) {
+                    // A Worker, not current Worker, has been processed
+                    if (WORKER_TASK_DAEMON_RUNNING != workerRet->mWorkerStatus)
+                        REFCOUNT_RELEASE(workerRet);
+                }
+                // else, (nullptr == workerRet),
+                // This Worker is a daemon, do nothing.
             }
 
             // look for another Worker
@@ -358,8 +380,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             pthread_mutex_lock(&pthreadMutex);
             if (iWorkerInQueue < mWorkerList.size()) {
                 for (i = iWorkerInQueue;  i < mWorkerList.size();  i++) {
-                    if ((nullptr != mWorkerList[i]) &&
-                         (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)) {
+                    if (LivingWorker(mWorkerList[i])) {
                         iWorkerInQueue = i;
                         break;
                     }
@@ -463,7 +484,8 @@ int ThreadPoolZmqActor::addTask(
 /*
  * Find Worker by ChannelHandle, `mSocket + mChannel` is unique id of an IStub
  */
-TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(HANDLE hChannel)
+TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
+                                                 HANDLE hChannel, bool isDaemon)
 {
     int i;
     TPZA_Executor::Worker *w;
@@ -481,7 +503,8 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(HANDLE hCha
         w = mWorkerList[i];
 
         //@ `ReleaseWorkerWhenPickIt`
-        mWorkerList[i] = nullptr;
+        if (! isDaemon)
+            mWorkerList[i] = nullptr;
     }
     else {
         w = nullptr;

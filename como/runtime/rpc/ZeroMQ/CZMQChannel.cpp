@@ -84,6 +84,7 @@ CZMQChannel::CZMQChannel(
     }
 
     mSocket = socket;
+    mEndpoint = endpoint;
 }
 
 ECode CZMQChannel::Apply(
@@ -193,12 +194,14 @@ ECode CZMQChannel::GetComponentMetadata(
     // str, word[0]: serverName, word[1]: endpoint
     void *socket = CZMQUtils::CzmqGetSocket(nullptr, str, word[1], ZMQ_REQ);
     if (nullptr == socket) {
-        Logger::E("CZMQChannel",
+        Logger::E("CZMQChannel::GetComponentMetadata",
                   "CzmqGetSocket error, channel name: %s, endpoint: %s",
                   str, word[1]);
         return E_RUNTIME_EXCEPTION;
     }
 
+    Logger::D("CZMQChannel::GetComponentMetadata",
+              "Try to CzmqSendBuf to endpoint %s", word[1]);
     int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
                     ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
@@ -290,12 +293,17 @@ ECode CZMQChannel::StartListening(
     /* [in] */ IStub* stub)
 {
     if (mPeer == RPCPeer::Stub) {
-        AutoPtr<TPZA_Executor::Worker> worker = new TPZA_Executor::Worker(this, stub);
+        std::string endpoint = GetEndpoint();
+        AutoPtr<TPZA_Executor::Worker> worker = new TPZA_Executor::Worker(
+                                                          this, stub, endpoint);
         if (nullptr == worker) {
-            Logger::D("CZMQChannel::StartListening", "new TPZA_Executor::Worker failed");
+            Logger::E("CZMQChannel::StartListening",
+                                            "new TPZA_Executor::Worker failed");
             return E_OUT_OF_MEMORY_ERROR;
         }
 
+        Logger::D("CZMQChannel::StartListening",
+                                             "endpoint: %s", mEndpoint.c_str());
         TPZA_Executor::GetInstance()->RunTask(worker);
     }
 

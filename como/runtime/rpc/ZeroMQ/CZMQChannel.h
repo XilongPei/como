@@ -17,6 +17,7 @@
 #ifndef __COMO_CZMQCHANNEL_H__
 #define __COMO_CZMQCHANNEL_H__
 
+#include <string>
 #include "CProxy.h"
 #include "CStub.h"
 //#include "ThreadPoolZmqActor.h"
@@ -101,6 +102,7 @@ public:
 
     inline void *GetSocket(void);
     inline void SetSocket(void *socket);
+    inline std::string& GetEndpoint(void);
 
 private:
     friend class CZMQChannelFactory;
@@ -112,6 +114,7 @@ private:
     String mName;
     String mServerName;
     void  *mSocket;
+    std::string mEndpoint;
     Boolean mStarted;
 };
 
@@ -136,6 +139,11 @@ inline void *CZMQChannel::GetSocket(void)
 inline void CZMQChannel::SetSocket(void *socket)
 {
     mSocket = socket;
+}
+
+inline std::string& CZMQChannel::GetEndpoint(void)
+{
+    return mEndpoint;
 }
 
 inline CZMQChannel* CZMQChannel::From(

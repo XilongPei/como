@@ -49,6 +49,7 @@ class ThreadPoolZmqActor;
 enum WORKER_STATUS {
     WORKER_TASK_READY,
     WORKER_TASK_RUNNING,
+    WORKER_TASK_DAEMON_RUNNING,
     WORKER_TASK_FINISH
 };
 
@@ -61,13 +62,14 @@ public:
         : public Object
     {
     public:
-        Worker(CZMQChannel *channel, AutoPtr<IStub> stub);
+        Worker(CZMQChannel *channel, AutoPtr<IStub> stub, std::string& endpoint);
         ~Worker();
 
         TPZA_Executor::Worker * HandleMessage();
 
     public:
         void *mSocket;
+        std::string mEndpoint;
         HANDLE mChannel;
         AutoPtr<IStub> mStub;
         struct timespec lastAccessTime;
@@ -99,7 +101,8 @@ public:
     static std::vector<TPZA_Executor::Worker*> mWorkerList;     // task list
     static bool signal_;
 
-    static TPZA_Executor::Worker *PickWorkerByChannelHandle(HANDLE hChannel);
+    static TPZA_Executor::Worker *PickWorkerByChannelHandle(
+                                                HANDLE hChannel, bool isDaemon);
     static int countWorkerBySocket(void *socket);
 
 private:

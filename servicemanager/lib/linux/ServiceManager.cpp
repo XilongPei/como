@@ -240,6 +240,9 @@ ECode ServiceManager::AddRemoteService(
         return E_REMOTE_EXCEPTION;
     }
 
+    Logger::D("ServiceManager::AddRemoteService",
+              "Try to CzmqSendBuf to endpoint %s", strServerEndpoint.c_str());
+
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ZmqFunCode::AddService,
                                         socket, (const void *)buffer, size);
@@ -550,6 +553,8 @@ ECode ServiceManager::RemoveRemoteService(
         return E_REMOTE_EXCEPTION;
     }
 
+    Logger::D("ServiceManager::RemoveRemoteService",
+              "Try to CzmqSendBuf to endpoint %s", strServerEndpoint.c_str());
     const char *str = name.string();
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                       ZmqFunCode::RemoveService,
@@ -625,6 +630,9 @@ ECode ServiceManager::GetRemoteService(
                         snServManager.string(), strServerEndpoint.c_str());
         return E_REMOTE_EXCEPTION;
     }
+
+    Logger::D("ServiceManager::GetRemoteService",
+              "Try to CzmqSendBuf to endpoint %s", strServerEndpoint.c_str());
 
     const char *str = name.string();
     Integer rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
