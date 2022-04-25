@@ -664,7 +664,7 @@ ECode ServiceManager::GetRemoteService(
                                     "CoCreateParcel failed with ec = 0x%X", ec);
             return ec;
         }
-printf("=================== %d\n", replySize);
+
         parcel->SetData(reinterpret_cast<HANDLE>(replyData), replySize);
 
         AutoPtr<IInterfacePack> ipack;
