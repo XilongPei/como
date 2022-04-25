@@ -244,6 +244,7 @@ void _mi_page_reclaim(mi_heap_t* heap, mi_page_t* page) {
 static mi_page_t* mi_page_fresh_alloc(mi_heap_t* heap, mi_page_queue_t* pq, size_t block_size) {
   mi_assert_internal(pq==NULL||mi_heap_contains_queue(heap, pq));
   mi_assert_internal(pq==NULL||block_size == pq->block_size);
+  //qjy : 当前heap管理的page已经不足以支持分配了，需要从segments中再分配page
   mi_page_t* page = _mi_segment_page_alloc(heap, block_size, &heap->tld->segments, &heap->tld->os);
   if (page == NULL) {
     // this may be out-of-memory, or an abandoned page was reclaimed (and in our queue)
@@ -261,7 +262,7 @@ static mi_page_t* mi_page_fresh_alloc(mi_heap_t* heap, mi_page_queue_t* pq, size
 // Get a fresh page to use
 static mi_page_t* mi_page_fresh(mi_heap_t* heap, mi_page_queue_t* pq) {
   mi_assert_internal(mi_heap_contains_queue(heap, pq));
-  mi_page_t* page = mi_page_fresh_alloc(heap, pq, pq->block_size);
+  mi_page_t* page = mi_page_fresh_alloc(heap, pq, pq->block_size); //qjy : 查找链路
   if (page==NULL) return NULL;
   mi_assert_internal(pq->block_size==mi_page_block_size(page));
   mi_assert_internal(pq==mi_page_queue(heap, mi_page_block_size(page)));
@@ -685,7 +686,7 @@ static mi_page_t* mi_page_queue_find_free_ex(mi_heap_t* heap, mi_page_queue_t* p
 
   if (page == NULL) {
     _mi_heap_collect_retired(heap, false); // perhaps make a page available
-    page = mi_page_fresh(heap, pq);
+    page = mi_page_fresh(heap, pq); // qjy：查找链路
     if (page == NULL && first_try) {
       // out-of-memory _or_ an abandoned page with free blocks was reclaimed, try once again
       page = mi_page_queue_find_free_ex(heap, pq, false);      
@@ -703,6 +704,7 @@ static mi_page_t* mi_page_queue_find_free_ex(mi_heap_t* heap, mi_page_queue_t* p
 
 // Find a page with free blocks of `size`.
 static inline mi_page_t* mi_find_free_page(mi_heap_t* heap, size_t size) {
+  // qjy : 根据对应size找到索引page队列
   mi_page_queue_t* pq = mi_page_queue(heap,size);
   mi_page_t* page = pq->first;
   if (page != NULL) {
@@ -722,6 +724,7 @@ static inline mi_page_t* mi_find_free_page(mi_heap_t* heap, size_t size) {
       return page; // fast path
     }
   }
+  // page索引队列为空时，需要查找
   return mi_page_queue_find_free_ex(heap, pq, true);
 }
 
@@ -802,6 +805,7 @@ static mi_page_t* mi_find_page(mi_heap_t* heap, size_t size) mi_attr_noexcept {
   else {
     // otherwise find a page with free blocks in our size segregated queues
     mi_assert_internal(size >= MI_PADDING_SIZE);
+    //非Huge Page的查找空闲Page
     return mi_find_free_page(heap, size);
   }
 }
@@ -820,12 +824,14 @@ void* _mi_malloc_generic(mi_heap_t* heap, size_t size) mi_attr_noexcept
   }
   mi_assert_internal(mi_heap_is_initialized(heap));
 
+  // qjy: 一些mimalloc延迟释放特性函数
   // call potential deferred free routines
   _mi_deferred_free(heap, false);
 
   // free delayed frees from other threads
   _mi_heap_delayed_free(heap);
 
+  // qjy : 在heap中找到符合size分配的对应page
   // find (or allocate) a page of the right size
   mi_page_t* page = mi_find_page(heap, size);
   if (mi_unlikely(page == NULL)) { // first time out of memory, try to collect and retry the allocation once more

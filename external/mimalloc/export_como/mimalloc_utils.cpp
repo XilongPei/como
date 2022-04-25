@@ -14,10 +14,17 @@
 // limitations under the License.
 //=========================================================================
 
-#include <mimalloc.h>
-#include "mimalloc_utils.h"
+/*
+目前改造：
+仅支持安全分区内存大小为4M大小；Mimalloc PAGE Kind = SMALL Pages(64KiB)；
+单个heap仅对应单个安全分区segment
+*/
 
-namespace como {
+#include "mimalloc.h"
+#include "mimalloc-internal.h"
+#include "mimalloc_utils.h"
+#include <stdlib.h> //function calloc
+#include <stdio.h>
 
 // defined in ComoConfig.h
 // sources in directory external/ shouldn't include COMO head file
@@ -27,11 +34,19 @@ typedef struct tagFSCP_MEM_AREA_INFO {
     size_t allocated;       // Allocated size
 } FSCP_MEM_AREA_INFO;
 
-extern "C" FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
-extern "C" int como_MimallocUtils_numFscpMemArea = 0;
-static mi_heap_t* heapsFscpMemArea = nullptr;
+extern FSCP_MEM_AREA_INFO *como_MimallocUtils_gFscpMemAreasInfo;
+extern int como_MimallocUtils_numFscpMemArea;
 
-int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
+//#define MI_SEGMENT_SIZE 4194304 //4M
+
+namespace como
+{
+    
+
+
+static mi_heap_t** heapsFscpMemArea = nullptr;
+
+int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
                                      COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree)
 {
     /*
@@ -42,34 +57,102 @@ int MimallocUtils::setupFscpMemAreas(void *MemAreasInfo, int numAreas,
             size_t allocated;       // Allocated size
         } FSCP_MEM_AREA_INFO;
     */
+
+    //todo : 前置的功能安全内存信息检查
+
     como_MimallocUtils_gFscpMemAreasInfo = (FSCP_MEM_AREA_INFO *)MemAreasInfo;
     como_MimallocUtils_numFscpMemArea = numAreas;
+    printf("setupFscpMemAreas:MemAreasInfo(%p),numAreas(%d)\n",como_MimallocUtils_gFscpMemAreasInfo,como_MimallocUtils_numFscpMemArea);
     if (numAreas > 0) {
-        heapsFscpMemArea = calloc(sizeof(mi_heap_t*), numAreas);
-        if (nullptr == heapsFscpMemArea)
+        heapsFscpMemArea = (mi_heap_t**)mi_calloc(sizeof(mi_heap_t*), numAreas); //在默认堆上分配堆管理结构
+        if (nullptr == heapsFscpMemArea) {
+            fprintf(stderr,"setupFscpMemAreas: calloc failed\n");
             return 1;
-        for (int i = 0;  i < numAreas;  i++) {
-            heapsFscpMemArea[i] = mi_heap_new();
-            heapsFscpMemArea[i]->iFscpMemArea = i;
+        }else{
+            printf("setupFscpMemAreas: heapsFscpMemArea(%p)\n",heapsFscpMemArea);
         }
-    }
 
-    mimalloc = mi_malloc;
-    mifree = mi_free;
+
+        for (int i = 0;  i < numAreas;  i++) {
+            mi_heap_t* area = mi_heap_new();;
+
+            // 该heap结构数据存储在mimalloc默认线程heap管理的内存中
+            heapsFscpMemArea[i]=area;
+
+            if (nullptr == area) {
+                fprintf(stderr,"setupFscpMemAreas: mi_heap_new failed\n");
+            }else{
+                printf("setupFscpMemAreas: mi_heap_new %p\n",area);
+            }
+
+
+            area -> iFscpMemArea = i; //todo :这种方式不太好
+        }
+
+        mimalloc = area_malloc;
+        mifree = area_free;
+    } else {
+        mimalloc =  nullptr;
+        mifree = nullptr;
+        fprintf(stderr,"setupFscpMemAreas: numAreas <= 0\n");
+        return 1;
+    }
 
     return 0;
 }
 
-
-void *MimallocUtils::area_malloc(short iMemArea, size_t size)
+// 该函数中才实际进行heap和FSCPMemArea进行对应
+void *area_malloc(short iMemArea, size_t size)
 {
-    void* p = mi_heap_malloc(heapsFscpMemArea[iMemArea], size);
+    if (como_MimallocUtils_gFscpMemAreasInfo == nullptr) {
+        // 尚未进行安全分区初始化 setupFscpMemAreas
+        fprintf(stderr,"area_malloc: FscpMemAreas don't exist\n");
+        return nullptr;
+    }
+    if (iMemArea >= como_MimallocUtils_numFscpMemArea || iMemArea < 0) {
+        // 所选分区超过当前实际安全分区数量
+        fprintf(stderr,"area_malloc: iMemArea error\n");
+        return nullptr;
+    }
+    if (size > MI_SMALL_SIZE_MAX || size <= 0){
+        // 目前只能分配小对象:128 * 8
+        fprintf(stderr,"area_malloc: size error\n");
+        return nullptr;
+    }
+
+    FSCP_MEM_AREA_INFO* nowFSCPMemArea = &como_MimallocUtils_gFscpMemAreasInfo[iMemArea];
+    if (nowFSCPMemArea == nullptr || nowFSCPMemArea->base == nullptr) {
+        // 所选安全分区实际不存在
+        fprintf(stderr,"area_malloc: FSCPMemArea No.%d dont't exist\n",iMemArea);
+        return nullptr;
+    }
+
+    if((unsigned long long)(nowFSCPMemArea->base) % MI_SEGMENT_SIZE != 0){
+        // 安全分区若要作为mimalloc的segment使用,则需要满足地址对齐
+        fprintf(stderr,"area_malloc: FSCPMemArea No.%d 's baseAddr error\n",iMemArea);
+        return nullptr;
+    }
+
+    if((nowFSCPMemArea->mem_size) != MI_SEGMENT_SIZE){
+        // 安全分区若要作为mimalloc的segment使用,大小要满足4M
+        fprintf(stderr,"area_malloc: FSCPMemArea No.%d 's size error\n",iMemArea);
+        return nullptr;
+    }
+    
+    //todo memset
+
+
+    mi_heap_t* nowHeapArea = heapsFscpMemArea[iMemArea];
+    void* p = mi_heap_malloc(nowHeapArea, size);
+    return p;
 }
 
-void MimallocUtils::area_free(short iMemArea, const void *ptr)
+void area_free(short iMemArea, const void *ptr)
 {
-    (void)(iMemArea);
-    mi_free(ptr);
+    // qjy : segment的地址为4M对齐，根据ptr可以直接找到其对应的segment并进行释放操作
+    int i = iMemArea;
+    i++;
+    mi_free((void*)ptr);
 }
 
-} // namespace como
+} // namespace name

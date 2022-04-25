@@ -174,6 +174,20 @@ void mi_collect(bool force) mi_attr_noexcept {
 /* -----------------------------------------------------------
   Heap new
 ----------------------------------------------------------- */
+mi_heap_t* mi_heap_get_default_fscp(int numArea){
+  // todo bool
+  mi_heap_fscp_init(numArea);
+  return mi_get_fscp_heap(numArea);
+} 
+
+mi_heap_t* mi_heap_get_backing_fscp(int numArea){
+  mi_heap_t* heap = mi_heap_get_default_fscp(numArea);
+  mi_assert_internal(heap!=NULL);
+  mi_heap_t* bheap = heap->tld->heap_backing;
+  mi_assert_internal(bheap!=NULL);
+  mi_assert_internal(bheap->thread_id == _mi_thread_id());
+  return bheap;
+}
 
 mi_heap_t* mi_heap_get_default(void) {
   mi_thread_init();
@@ -181,6 +195,7 @@ mi_heap_t* mi_heap_get_default(void) {
 }
 
 mi_heap_t* mi_heap_get_backing(void) {
+  // qjy : 获取主线程默认heap，mi_thread_init内部把empty改为main
   mi_heap_t* heap = mi_heap_get_default();
   mi_assert_internal(heap!=NULL);
   mi_heap_t* bheap = heap->tld->heap_backing;
@@ -189,8 +204,24 @@ mi_heap_t* mi_heap_get_backing(void) {
   return bheap;
 }
 
+mi_heap_t* mi_heap_fscp_new(int numArea){
+  if(numArea <0 ||numArea>FSCP_MEM_AREA_MAX){
+    return NULL;
+  }
+
+  if(mi_option_is_enabled(mi_option_fscp)){
+    mi_heap_t* fscpHeap = mi_heap_get_backing_fscp(numArea);
+    fscpHeap->iFscpMemArea = numArea;
+    return fscpHeap;
+  }else{
+    return NULL;
+  }
+}
+
 mi_heap_t* mi_heap_new(void) {
+  // qjy: mi_heap_get_backing获取线程默认堆，过程中做了一些mimalloc相关进程和线程初始化工作
   mi_heap_t* bheap = mi_heap_get_backing();
+  // qjy: 新heap的管理结构在默认heap管理的segment上，这里进行mi_heap_malloc，sizeof(mi_heap_t)=3064
   mi_heap_t* heap = mi_heap_malloc_tp(bheap, mi_heap_t);  // todo: OS allocate in secure mode?
   if (heap==NULL) return NULL;
   _mi_memcpy_aligned(heap, &_mi_heap_empty, sizeof(mi_heap_t));

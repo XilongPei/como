@@ -100,6 +100,24 @@ terms of the MIT license. A copy of the license can be found in the file
 extern "C" {
 #endif
 
+// --------------------------FSCP--------------------------------------
+
+typedef void* (*COMO_MALLOC)(short, size_t);
+typedef void (*FREE_MEM_FUNCTION)(short, const void*);
+
+// 提供给外部
+typedef struct tagFSCP_MEM_AREA_INFO {
+    size_t mem_size;        // Size of space to be managed
+    void  *base;            // Base address of space to be managed
+    size_t allocated;       // Allocated size
+} FSCP_MEM_AREA_INFO;
+
+mi_decl_nodiscard mi_decl_export mi_decl_restrict int setupFscpMemAreas(void *MemAreasInfo, int numAreas, COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
+mi_decl_nodiscard mi_decl_export mi_decl_restrict void *area_malloc(short iMemArea, size_t size);
+mi_decl_export void area_free(short iMemArea, const void *ptr);
+
+// --------------------------FSCP--------------------------------------
+
 // ------------------------------------------------------
 // Standard malloc interface
 // ------------------------------------------------------
@@ -154,6 +172,7 @@ mi_decl_export void mi_stats_print_out(mi_output_fun* out, void* arg) mi_attr_no
 
 mi_decl_export void mi_process_init(void)     mi_attr_noexcept;
 mi_decl_export void mi_thread_init(void)      mi_attr_noexcept;
+mi_decl_export bool mi_heap_fscp_init(int)    mi_attr_noexcept;
 mi_decl_export void mi_thread_done(void)      mi_attr_noexcept;
 mi_decl_export void mi_thread_stats_print_out(mi_output_fun* out, void* arg) mi_attr_noexcept;
 
@@ -185,6 +204,7 @@ struct mi_heap_s;
 typedef struct mi_heap_s mi_heap_t;
 
 mi_decl_nodiscard mi_decl_export mi_heap_t* mi_heap_new(void);
+mi_decl_nodiscard mi_decl_export mi_heap_t* mi_heap_fscp_new(int);
 mi_decl_export void       mi_heap_delete(mi_heap_t* heap);
 mi_decl_export void       mi_heap_destroy(mi_heap_t* heap);
 mi_decl_export mi_heap_t* mi_heap_set_default(mi_heap_t* heap);
@@ -323,6 +343,9 @@ typedef enum mi_option_e {
   mi_option_os_tag,
   mi_option_max_errors,
   mi_option_max_warnings,
+  mi_option_fscp,
+  mi_option_fscp_numArea,
+  //mi_option_fscp_init,
   _mi_option_last
 } mi_option_t;
 

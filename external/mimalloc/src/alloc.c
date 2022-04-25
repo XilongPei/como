@@ -96,13 +96,15 @@ extern inline mi_decl_restrict void* mi_malloc_small(size_t size) mi_attr_noexce
 }
 
 // The main allocation function
-extern inline mi_decl_restrict void* mi_heap_malloc(mi_heap_t* heap, size_t size) mi_attr_noexcept {
+extern inline mi_decl_restrict void* mi_heap_malloc(mi_heap_t* heap, size_t size) mi_attr_noexcept {  
   if (mi_likely(size <= MI_SMALL_SIZE_MAX)) {
+    //qjy : 申请分配的小于<1024时，走fast path进行尝试
     return mi_heap_malloc_small(heap, size);
   }
   else {
     mi_assert(heap!=NULL);
     mi_assert(heap->thread_id == 0 || heap->thread_id == _mi_thread_id()); // heaps are thread local
+    //qjy : 通用分配路径，MI_PADDING_SIZE为debug信息，非debug模式编译则为0
     void* const p = _mi_malloc_generic(heap, size + MI_PADDING_SIZE);      // note: size can overflow but it is detected in malloc_generic
     mi_assert_internal(p == NULL || mi_usable_size(p) >= size);
     #if MI_STAT>1
@@ -459,7 +461,7 @@ static inline mi_segment_t* mi_checked_ptr_segment(const void* p, const char* ms
   if (mi_unlikely(segment == NULL)) return NULL;  // checks also for (p==NULL)
 
 #if (MI_DEBUG>0)
-  if (mi_unlikely(!mi_is_in_heap_region(p))) {
+  if (mi_unlikely(!mi_is_in_heap_region(p)) && !mi_option_is_enabled(mi_option_fscp)) {
     _mi_warning_message("%s: pointer might not point to a valid heap region: %p\n"
       "(this may still be a valid very large allocation (over 64MiB))\n", msg, p);
     if (mi_likely(_mi_ptr_cookie(segment) == segment->cookie)) {

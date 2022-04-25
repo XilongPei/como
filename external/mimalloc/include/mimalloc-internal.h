@@ -7,7 +7,7 @@ terms of the MIT license. A copy of the license can be found in the file
 #pragma once
 #ifndef MIMALLOC_INTERNAL_H
 #define MIMALLOC_INTERNAL_H
-
+#include <stdio.h>  // for debug
 #include "mimalloc-types.h"
 
 #if (MI_DEBUG>0)
@@ -42,6 +42,17 @@ terms of the MIT license. A copy of the license can be found in the file
 #define mi_decl_externc  
 #endif
 
+// "mimalloc_utils.c"
+#define  FSCP_MEM_AREA_MAX  10 //最大分区数量支持到10，暂时
+#define  FSCP_MEM_BLOCK_MAX 10 //分区内的4M block数量最大支持到10，暂时
+typedef struct tagFSCP_INTERNAL_SEGMENT{
+    int areaNum;    //分区序号，-1则未被使用
+    int blockNum;   //分区内可用于segment的块数
+    void* memBase[FSCP_MEM_BLOCK_MAX];   //每块的起始地址数组，大小和地址都为4M对齐
+    bool  memBaseState[FSCP_MEM_BLOCK_MAX]; //每块的状态，是否已被使用
+    mi_heap_t* heapBelongTo; //所属的heap
+}FSCP_INTERNAL_SEGMENT;
+
 // "options.c"
 void       _mi_fputs(mi_output_fun* out, void* arg, const char* prefix, const char* message);
 void       _mi_fprintf(mi_output_fun* out, void* arg, const char* fmt, ...);
@@ -74,7 +85,7 @@ void       _mi_os_free(void* p, size_t size, mi_stats_t* stats);   // to free th
 size_t     _mi_os_good_alloc_size(size_t size);
 bool       _mi_os_has_overcommit(void);
 
-// memory.c
+// region.c
 void*      _mi_mem_alloc_aligned(size_t size, size_t alignment, bool* commit, bool* large, bool* is_pinned, bool* is_zero, size_t* id, mi_os_tld_t* tld);
 void       _mi_mem_free(void* p, size_t size, size_t id, bool fully_committed, bool any_reset, mi_os_tld_t* tld);
 
@@ -344,7 +355,11 @@ extern pthread_key_t _mi_heap_default_key;
 // This thread local variable is only used when neither MI_TLS_SLOT, MI_TLS_PTHREAD, or MI_TLS_PTHREAD_SLOT_OFS are defined.
 // However, on the Apple M1 we do use the address of this variable as the unique thread-id (issue #356).
 extern mi_decl_thread mi_heap_t* _mi_heap_default;  // default heap to allocate from
+extern mi_heap_t* _mi_heap_fscp[FSCP_MEM_AREA_MAX];
 
+static inline mi_heap_t* mi_get_fscp_heap(int numArea){
+  return _mi_heap_fscp[numArea];
+}
 
 static inline mi_heap_t* mi_get_default_heap(void) {
 #if defined(MI_TLS_SLOT)

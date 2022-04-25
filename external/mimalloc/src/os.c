@@ -668,8 +668,10 @@ static void* mi_os_mem_alloc_aligned(size_t size, size_t alignment, bool commit,
   size = _mi_align_up(size, _mi_os_page_size());
 
   // try first with a hint (this will be aligned directly on Win 10+ or BSD)
+  // qjy : 回到了底层调用mmap
   void* p = mi_os_mem_alloc(size, alignment, commit, allow_large, is_large, stats);
   if (p == NULL) return NULL;
+  fprintf(stderr,"7.1 qjy debug mi_os_mem_alloc_aligned: back from mmap (%p),(%d)\n",p,((uintptr_t)p % alignment != 0));
 
   // if not aligned, free it, overallocate, and unmap around it
   if (((uintptr_t)p % alignment != 0)) {

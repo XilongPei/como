@@ -106,6 +106,7 @@ mi_decl_cache_align const mi_heap_t _mi_heap_empty = {
 
 // the thread-local default heap for allocation
 mi_decl_thread mi_heap_t* _mi_heap_default = (mi_heap_t*)&_mi_heap_empty;
+mi_heap_t* _mi_heap_fscp[FSCP_MEM_AREA_MAX];
 
 extern mi_heap_t _mi_heap_main;
 
@@ -166,6 +167,38 @@ typedef struct mi_thread_data_s {
   mi_heap_t  heap;  // must come first due to cast in `_mi_heap_done`
   mi_tld_t   tld;
 } mi_thread_data_t;
+
+bool mi_heap_fscp_init(int numArea){
+  if(mi_option_is_enabled(mi_option_fscp)){
+    mi_thread_data_t* td = (mi_thread_data_t*)_mi_os_alloc(sizeof(mi_thread_data_t), &_mi_stats_main); // Todo: more efficient allocation?
+    if (td == NULL) {
+      // if this fails, try once more. (issue #257)
+      td = (mi_thread_data_t*)_mi_os_alloc(sizeof(mi_thread_data_t), &_mi_stats_main);
+      if (td == NULL) {
+        // really out of memory
+        _mi_error_message(ENOMEM, "unable to allocate thread local heap metadata (%zu bytes)\n", sizeof(mi_thread_data_t));
+        return false;
+      }
+    }
+    // OS allocated so already zero initialized
+    mi_tld_t*  tld = &td->tld;
+    mi_heap_t* heap = &td->heap;
+    _mi_memcpy_aligned(heap, &_mi_heap_empty, sizeof(*heap));
+    heap->thread_id = _mi_thread_id();
+    _mi_random_init(&heap->random);
+    heap->cookie  = _mi_heap_random_next(heap) | 1;
+    heap->keys[0] = _mi_heap_random_next(heap);
+    heap->keys[1] = _mi_heap_random_next(heap);
+    heap->tld = tld;
+    tld->heap_backing = heap;
+    tld->heaps = heap;
+    tld->segments.stats = &tld->stats;
+    tld->segments.os = &tld->os;
+    tld->os.stats = &tld->stats;
+    _mi_heap_fscp[numArea]=heap; 
+  }
+  return true;
+}
 
 // Initialize the thread local default heap, called from `mi_thread_init`
 static bool _mi_heap_init(void) {

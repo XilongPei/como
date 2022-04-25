@@ -16,6 +16,7 @@
 
 #ifndef __MIMALLOC_UTILS_H__
 #define __MIMALLOC_UTILS_H__
+#include <stdio.h>
 
 namespace como {
 

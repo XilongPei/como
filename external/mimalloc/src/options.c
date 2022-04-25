@@ -92,8 +92,10 @@ static mi_option_desc_t options[_mi_option_last] =
   { 0,   UNINIT, MI_OPTION(limit_os_alloc) },    // 1 = do not use OS memory for allocation (but only reserved arenas)
   { 100, UNINIT, MI_OPTION(os_tag) },            // only apple specific for now but might serve more or less related purpose
   { 16,  UNINIT, MI_OPTION(max_errors) },        // maximum errors that are output
-  { 16,  UNINIT, MI_OPTION(max_warnings) }       // maximum warnings that are output
-
+  { 16,  UNINIT, MI_OPTION(max_warnings) },      // maximum warnings that are output
+  { 0,   UNINIT, MI_OPTION(fscp) },
+  { 0,   UNINIT, MI_OPTION(fscp_numArea) },
+  //{ 0,   UNINIT, MI_OPTION(fscp_init) }
 };
 
 static void mi_option_init(mi_option_desc_t* desc);

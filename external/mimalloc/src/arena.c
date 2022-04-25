@@ -122,7 +122,10 @@ static void* mi_arena_alloc_from(mi_arena_t* arena, size_t arena_index, size_t n
                                  bool* commit, bool* large, bool* is_pinned, bool* is_zero, size_t* memid, mi_os_tld_t* tld)
 {
   mi_bitmap_index_t bitmap_index;
-  if (!mi_arena_alloc(arena, needed_bcount, &bitmap_index)) return NULL;
+  if (!mi_arena_alloc(arena, needed_bcount, &bitmap_index)){ 
+    fprintf(stderr,"mi_arena_alloc_from: mi_arena_alloc error arena(%p) arena_index(%lu)\n",arena,arena_index);
+    return NULL;
+  }
 
   // claimed it! set the dirty bits (todo: no need for an atomic op here?)
   void* p    = arena->start + (mi_bitmap_index_bit(bitmap_index)*MI_ARENA_BLOCK_SIZE);
@@ -159,6 +162,8 @@ void* _mi_arena_alloc_aligned(size_t size, size_t alignment, bool* commit, bool*
   *memid   = MI_MEMID_OS;
   *is_zero = false;
   *is_pinned = false;
+
+  fprintf(stderr,"7 qjy debug 共同路径 _mi_arena_alloc_aligned: %lu,%d,%d,%d\n",size,alignment <= MI_SEGMENT_ALIGN,size >= MI_ARENA_MIN_OBJ_SIZE,mi_atomic_load_relaxed(&mi_arena_count) > 0);
 
   // try to allocate in an arena if the alignment is small enough
   // and the object is not too large or too small.
@@ -204,6 +209,7 @@ void* _mi_arena_alloc_aligned(size_t size, size_t alignment, bool* commit, bool*
   *is_zero = true;
   *memid   = MI_MEMID_OS;  
   void* p = _mi_os_alloc_aligned(size, alignment, *commit, large, tld->stats);
+  fprintf(stderr,"8 _mi_arena_alloc_aligned: back to os alloc (%p),size(%lu)\n",p,size);
   if (p != NULL) *is_pinned = *large;
   return p;
 }
@@ -278,13 +284,18 @@ static bool mi_arena_add(mi_arena_t* arena) {
     return false;
   }
   mi_atomic_store_ptr_release(mi_arena_t,&mi_arenas[i], arena);
+  // qjy debug
+  // i = mi_atomic_increment_acq_rel(&mi_arena_count);
+  // fprintf(stderr,"mi_arena_add: mi_arena_count(%ld) arena(%p)\n",i,arena);
   return true;
 }
 
+// qjy : 管理特定的内存池以供给mimalloc使用
 bool mi_manage_os_memory(void* start, size_t size, bool is_committed, bool is_large, bool is_zero, int numa_node) mi_attr_noexcept
 {
   if (size < MI_ARENA_BLOCK_SIZE) return false;
 
+  // qjy : 如果large，则强制is_committed
   if (is_large) {
     mi_assert_internal(is_committed);
     is_committed = true;
