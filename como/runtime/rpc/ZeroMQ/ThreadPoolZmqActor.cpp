@@ -347,6 +347,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
         }
         if (iWorkerInQueue < 0) {
+            //TODO
             if ((size_t)threadData % 2 == 0) {
                 struct timespec curTime;
                 CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
@@ -358,6 +359,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                 signal_ = false;
             }
             else {
+                //TODO ???
                 CZMQUtils::CzmqPoll();
             }
         }
@@ -413,8 +415,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());
-
-            sleep(10);
 
             workerRet = worker->HandleMessage();
 
