@@ -82,8 +82,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
               "Try to CzmqRecvMsg from endpoint %s", mEndpoint.c_str());
 #endif
 
-    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
-                                                             msg, ZMQ_DONTWAIT);
+    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+
     if (iRet != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
@@ -356,12 +356,16 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                     pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
                 }
                 signal_ = false;
+                pthread_mutex_unlock(&pthreadMutex);
             }
             else {
+                pthread_mutex_unlock(&pthreadMutex);
                 CZMQUtils::CzmqPoll();
             }
         }
-        pthread_mutex_unlock(&pthreadMutex);
+        else {
+            pthread_mutex_unlock(&pthreadMutex);
+        }
 
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
@@ -413,8 +417,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());
-
-            sleep(10);
 
             workerRet = worker->HandleMessage();
 

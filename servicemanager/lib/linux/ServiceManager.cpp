@@ -184,7 +184,7 @@ ECode ServiceManager::AddRemoteService(
     // "localhost" is in ComoConfig::ServerNameEndpointMap,
     // added by ComoConfig::AddZeroMQEndpoint
     if (thisServerName.Compare("localhost") != 0) {
-        ipack->GiveMeAhand(snServManager);
+        ipack->GiveMeAhand(thisServerName);
     }
 
     /**

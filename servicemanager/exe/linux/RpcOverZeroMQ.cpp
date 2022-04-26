@@ -131,6 +131,9 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             }
             name = serverName.Substring(0, pos);
 
+            Logger::D("RpcOverZeroMQ::HandleMessage",
+                                         "AddService: %s", serverName.string());
+
             // 4096, any big number, the max length of serverName
             // String::GetLength() cost time
             ipack.mServerName = serverName.Substring(pos+1, 4096);
