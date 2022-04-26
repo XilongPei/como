@@ -96,6 +96,11 @@ ECode CZMQChannelFactory::MarshalInterface(
         return E_NOT_COMO_OBJECT_EXCEPTION;
     }
 
+    // refer to `ServerObjectId`
+    Long hash;
+    obj->GetHashCode(hash);
+    pack->SetServerObjectId(hash);
+
     if (IParcelable::Probe(object) != nullptr) {
         CoclassID cid;
         IObject::Probe(object)->GetCoclassID(cid);
@@ -130,6 +135,7 @@ ECode CZMQChannelFactory::MarshalInterface(
                 pack->mChannel = (IRPCChannel*)channel;
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
 
+                // refer to `ServerObjectId`
                 Long hash;
                 obj->GetHashCode(hash);
                 pack->SetServerObjectId(hash);

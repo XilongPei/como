@@ -70,6 +70,9 @@ public:
     ECode GetServerObjectId(
         /* [out] */ Long& serverObjectId) override;
 
+    ECode SetServerObjectId(
+        /* [in] */ Long serverObjectId) override;
+
     ECode ReadFromParcel(
         /* [in] */ IParcel* source) override;
 
@@ -87,9 +90,6 @@ public:
 
     void SetParcelable(
         /* [in] */ Boolean parcelable);
-
-    void SetServerObjectId(
-        /* [in] */ Long serverObjectId);
 
     inline static CZMQInterfacePack* From(
         /* [in] */ IInterfacePack* ipack);

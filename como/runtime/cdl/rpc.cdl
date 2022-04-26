@@ -194,6 +194,9 @@ interface IInterfacePack
     GetServerObjectId(
         [out] Long& serverObjectId);
 
+    SetServerObjectId(
+        [in] Long serverObjectId);
+
     GiveMeAhand(
         [in] String aHand);
 }

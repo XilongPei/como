@@ -78,6 +78,13 @@ ECode InterfacePack::GetServerObjectId(
     return NOERROR;
 }
 
+ECode InterfacePack::SetServerObjectId(
+    /* [out] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
 ECode InterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
@@ -135,12 +142,6 @@ void InterfacePack::SetParcelable(
     /* [in] */ Boolean parcelable)
 {
     mIsParcelable = parcelable;
-}
-
-void InterfacePack::SetServerObjectId(
-    /* [in] */ Long serverObjectId)
-{
-    mServerObjectId = serverObjectId;
 }
 
 } // namespace como

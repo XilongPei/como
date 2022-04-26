@@ -88,6 +88,13 @@ ECode CZMQInterfacePack::GetServerObjectId(
     return NOERROR;
 }
 
+ECode CZMQInterfacePack::SetServerObjectId(
+    /* [out] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
 ECode CZMQInterfacePack::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
@@ -165,12 +172,6 @@ void CZMQInterfacePack::SetParcelable(
     /* [in] */ Boolean parcelable)
 {
     mIsParcelable = parcelable;
-}
-
-void CZMQInterfacePack::SetServerObjectId(
-    /* [in] */ Long serverObjectId)
-{
-    mServerObjectId = serverObjectId;
 }
 
 } // namespace como
