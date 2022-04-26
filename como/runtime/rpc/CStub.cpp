@@ -774,6 +774,11 @@ ECode CStub::CreateObject(
         return E_INTERFACE_NOT_FOUND_EXCEPTION;
     }
 
+    // refer to `ServerObjectId`
+    Long hash;
+    obj->GetHashCode(hash);
+    channel->SetServerObjectId(hash);
+
     AutoPtr<IMetaCoclass> mc;
     obj->GetCoclass(mc);
     if (mc == nullptr) {

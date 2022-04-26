@@ -79,7 +79,9 @@ ECode CZMQChannelFactory::MarshalInterface(
     /* [in] */ IInterface* object,
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
+    Long hash;
     InterfaceID iid;
+
     object->GetInterfaceID(object, iid);
     CZMQInterfacePack* pack = new CZMQInterfacePack();
     if (nullptr == pack) {
@@ -96,11 +98,6 @@ ECode CZMQChannelFactory::MarshalInterface(
         return E_NOT_COMO_OBJECT_EXCEPTION;
     }
 
-    // refer to `ServerObjectId`
-    Long hash;
-    obj->GetHashCode(hash);
-    pack->SetServerObjectId(hash);
-
     if (IParcelable::Probe(object) != nullptr) {
         CoclassID cid;
         IObject::Probe(object)->GetCoclassID(cid);
@@ -112,14 +109,27 @@ ECode CZMQChannelFactory::MarshalInterface(
         ECode ec = FindExportObject(mType, obj, stub);
         if (SUCCEEDED(ec)) {
             CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
+
             //pack->SetDBusName(channel->mName);
+            //@ `ServerObjectId`
+            // Who reference the object {/* [in] */ IInterface* object} through
+            // {/* [out] */ AutoPtr<IInterfacePack>& ipack}, it can get the
+            // ID (ServerObjectId) of object
+            obj->GetHashCode(hash);
+            pack->SetServerObjectId(hash);
+
             pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
         }
         else {
             IProxy* proxy = IProxy::Probe(object);
             if (proxy != nullptr) {
                 CZMQChannel* channel = CZMQChannel::GetProxyChannel(proxy);
+
                 //pack->SetDBusName(channel->mName);
+                // refer to `ServerObjectId`
+                obj->GetHashCode(hash);
+                pack->SetServerObjectId(hash);
+
                 pack->SetCoclassID(((CProxy*)proxy)->GetTargetCoclassID());
             }
             else {
