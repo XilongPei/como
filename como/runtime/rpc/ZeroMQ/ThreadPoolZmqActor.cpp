@@ -82,8 +82,8 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
               "Try to CzmqRecvMsg from endpoint %s", mEndpoint.c_str());
 #endif
 
-    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket,
-                                                             msg, ZMQ_DONTWAIT);
+    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+
     if (iRet != 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
@@ -347,7 +347,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
         }
         if (iWorkerInQueue < 0) {
-            //TODO
             if ((size_t)threadData % 2 == 0) {
                 struct timespec curTime;
                 CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
@@ -357,13 +356,16 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
                     pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
                 }
                 signal_ = false;
+                pthread_mutex_unlock(&pthreadMutex);
             }
             else {
-                //TODO ???
+                pthread_mutex_unlock(&pthreadMutex);
                 CZMQUtils::CzmqPoll();
             }
         }
-        pthread_mutex_unlock(&pthreadMutex);
+        else {
+            pthread_mutex_unlock(&pthreadMutex);
+        }
 
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
