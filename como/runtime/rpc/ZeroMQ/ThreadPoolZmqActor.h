@@ -70,7 +70,7 @@ public:
     public:
         void *mSocket;
         std::string mEndpoint;
-        HANDLE mChannel;
+        Long mChannel;
         AutoPtr<IStub> mStub;
         struct timespec lastAccessTime;
         int mWorkerStatus;

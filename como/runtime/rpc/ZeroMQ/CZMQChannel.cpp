@@ -114,6 +114,20 @@ ECode CZMQChannel::GetServerName(
     return NOERROR;
 }
 
+ECode CZMQChannel::SetServerObjectId(
+        /* [out] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
+ECode CZMQChannel::GetServerObjectId(
+    /* [out] */ Long& serverObjectId)
+{
+    serverObjectId = mServerObjectId;
+    return NOERROR;
+}
+
 ECode CZMQChannel::IsPeerAlive(
     /* [out] */ Boolean& alive)
 {
@@ -189,7 +203,7 @@ ECode CZMQChannel::GetComponentMetadata(
 
     Logger::D("CZMQChannel::GetComponentMetadata",
               "Try to CzmqSendBuf to endpoint %s", serverName.string());
-    int rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
+    int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                   ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
@@ -320,6 +334,22 @@ ECode CZMQChannel::Match(
     /* [in] */ IInterfacePack* ipack,
     /* [out] */ Boolean& matched)
 {
+    IZMQInterfacePack* idpack = IZMQInterfacePack::Probe(ipack);
+    if (idpack != nullptr) {
+        IInterfacePack* pack = (IInterfacePack*)idpack;
+        Long serverObjectId;
+
+        // which server, the same machine, ServerAddress is nullptr
+        // IZMQInterfacePack::mServerName;
+        // which object
+        // IZMQInterfacePack::mServerObjectId;
+
+        pack->GetServerObjectId(serverObjectId);
+        if (serverObjectId == mServerObjectId) {
+            matched = true;
+            return NOERROR;
+        }
+    }
     matched = false;
     return NOERROR;
 }

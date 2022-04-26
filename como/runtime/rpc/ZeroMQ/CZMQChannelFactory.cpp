@@ -125,11 +125,9 @@ ECode CZMQChannelFactory::MarshalInterface(
                     ipack = nullptr;
                     return ec;
                 }
+
                 CZMQChannel* channel = CZMQChannel::GetStubChannel(stub);
-
-                // TODO
                 pack->mChannel = (IRPCChannel*)channel;
-
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
 
                 Long hash;

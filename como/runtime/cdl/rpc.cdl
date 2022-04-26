@@ -222,6 +222,12 @@ interface IRPCChannel
     SetServerName(
         [in] String serverName);
 
+    GetServerObjectId(
+        [out] Long& serverObjectId);
+
+    SetServerObjectId(
+        [in] Long serverObjectId);
+
     IsPeerAlive(
         [out] Boolean& alive);
 

@@ -1124,6 +1124,9 @@ ECode CZMQParcel::CreateObject(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CZMQParcel();
+    if (nullptr == parcel)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 

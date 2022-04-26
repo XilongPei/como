@@ -77,6 +77,12 @@ public:
     ECode SetServerName(
         /* [in] */ const String& serverName) override;
 
+    ECode GetServerObjectId(
+        /* [out] */ Long& serverObjectId) override;
+
+    ECode SetServerObjectId(
+        /* [in] */ Long serverObjectId) override;
+
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
 
@@ -131,6 +137,7 @@ private:
     RPCPeer mPeer;
     String mName;
     String mServerName; // the same machine, ServerAddress is nullptr
+    Long mServerObjectId;
     Boolean mStarted;
     Mutex mLock;
     Condition mCond;

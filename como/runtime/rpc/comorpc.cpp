@@ -79,6 +79,10 @@ ECode CoCreateProxy(
     ipack->GetServerName(serverName);
     channel->SetServerName(serverName);
 
+    Long serverObjectId;
+    ipack->GetServerObjectId(serverObjectId);
+    channel->SetServerObjectId(serverObjectId);
+
     CoclassID cid;
     ipack->GetCoclassID(cid);
     return CProxy::CreateObject(cid, channel, loader, proxy);

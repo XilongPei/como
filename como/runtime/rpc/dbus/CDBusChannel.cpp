@@ -527,6 +527,20 @@ ECode CDBusChannel::SetServerName(
     return NOERROR;
 }
 
+ECode CDBusChannel::SetServerObjectId(
+        /* [out] */ Long serverObjectId)
+{
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
+ECode CDBusChannel::GetServerObjectId(
+    /* [out] */ Long& serverObjectId)
+{
+    serverObjectId = mServerObjectId;
+    return NOERROR;
+}
+
 ECode CDBusChannel::IsPeerAlive(
     /* [out] */ Boolean& alive)
 {

@@ -53,6 +53,12 @@ public:
     ECode GetServerName(
         /* [out] */ String& serverName) override;
 
+    ECode GetServerObjectId(
+        /* [out] */ Long& serverObjectId) override;
+
+    ECode SetServerObjectId(
+        /* [in] */ Long serverObjectId) override;
+
     ECode IsPeerAlive(
         /* [out] */ Boolean& alive) override;
 
@@ -113,7 +119,8 @@ private:
     RPCPeer mPeer;
     String mName;
     String mServerName;
-    void  *mSocket;
+    Long mServerObjectId;
+    void *mSocket;
     std::string mEndpoint;
     Boolean mStarted;
 };
