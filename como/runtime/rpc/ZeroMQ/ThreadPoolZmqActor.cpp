@@ -67,6 +67,15 @@ TPZA_Executor::Worker::~Worker()
 #endif
 }
 
+static Integer SendNoerror(HANDLE hChannel, void *socket)
+{
+    HANDLE resData;
+
+    resData = reinterpret_cast<HANDLE>((char*)"");
+    return CZMQUtils::CzmqSendBuf(hChannel, NOERROR,
+                                              socket, (const void *)resData, 1);
+}
+
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 {
     HANDLE hChannel;
@@ -84,7 +93,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 
     Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
 
-    if (iRet != 0) {
+    if (iRet > 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
@@ -120,15 +129,19 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     goto HandleMessage_Method_Invoke_Break;
                 }
 
-                if (hChannel == mChannel) {
+                // TODO, fix BUG
+                // There is a problem with the algorithm for judging the service provider
+                // if (hChannel == mChannel) {
+                if (1) {
                     ec = mStub->Invoke(argParcel, resParcel);
+
                     resParcel->GetData(resData);
                     resParcel->GetDataSize(resSize);
                 }
                 else {
                     w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel, true);
                     if (nullptr != w) {
-                        ec = mStub->Invoke(argParcel, resParcel);
+                        ec = w->mStub->Invoke(argParcel, resParcel);
 
                         // It shouldn't be WORKER_TASK_FINISH.
                         // A request ends, but the channel still needs to be.
@@ -233,6 +246,8 @@ HandleMessage_GetComponentMetadata_Break:
                 if (hChannel == mChannel) {
                     // `ReleaseWorker` will delete this work
                     mWorkerStatus = WORKER_TASK_FINISH;
+
+                    SendNoerror(mChannel, mSocket);
                     return this;
                 }
 
@@ -245,6 +260,7 @@ HandleMessage_GetComponentMetadata_Break:
                     // `ReleaseWorker` will NOT delete this work
                     w->mWorkerStatus = WORKER_TASK_FINISH;
                 }
+                SendNoerror(mChannel, mSocket);
                 return w;
             }
             default:
@@ -259,7 +275,11 @@ HandleMessage_GetComponentMetadata_Break:
                         return nullptr;
                     }
                 }
+                SendNoerror(mChannel, mSocket);
         }
+    }
+    else if (iRet < 0) {
+        SendNoerror(mChannel, mSocket);
     }
 
     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
