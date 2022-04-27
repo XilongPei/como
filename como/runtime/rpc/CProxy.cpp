@@ -1931,16 +1931,6 @@ ECode CProxy::CreateObject(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IProxy>& proxy)
 {
-    return CreateObjectEx(cid, channel, loader, proxy, nullptr);
-}
-
-ECode CProxy::CreateObjectEx(
-    /* [in] */ const CoclassID& cid,
-    /* [in] */ IRPCChannel* channel,
-    /* [in] */ IClassLoader* loader,
-    /* [out] */ AutoPtr<IProxy>& proxy,
-    /* [in] */ const String& serverName)
-{
     proxy = nullptr;
 
     if (nullptr == loader) {
@@ -1991,6 +1981,11 @@ ECode CProxy::CreateObjectEx(
     if (proxyObj->mInterfaces.IsNull())
         return E_OUT_OF_MEMORY_ERROR;
 
+    Long serverObjectId;
+    channel->GetServerObjectId(serverObjectId);
+    String serverName;
+    channel->GetServerName(serverName);
+
     for (Integer i = 0; i < interfaceNumber; i++) {
         AutoPtr<InterfaceProxy> iproxy = new InterfaceProxy();
         if (nullptr == iproxy)
@@ -2003,6 +1998,7 @@ ECode CProxy::CreateObjectEx(
         iproxy->mVtable = sProxyVtable;
         iproxy->mProxyEntry = reinterpret_cast<HANDLE>(&InterfaceProxy::ProxyEntry);
         iproxy->mServerName = serverName;
+        iproxy->mServerObjectId = serverObjectId;
         proxyObj->mInterfaces[i] = iproxy;
     }
 

@@ -300,6 +300,7 @@ private:
     IMetaInterface* mTargetMetadata;
     CProxy* mOwner;
     String mServerName;
+    Long mServerObjectId;
 };
 
 extern const CoclassID CID_CProxy;
@@ -357,13 +358,6 @@ public:
         /* [in] */ IRPCChannel* channel,
         /* [in] */ IClassLoader* loader,
         /* [out] */ AutoPtr<IProxy>& proxy);
-
-    static ECode CreateObjectEx(
-        /* [in] */ const CoclassID& cid,
-        /* [in] */ IRPCChannel* channel,
-        /* [in] */ IClassLoader* loader,
-        /* [out] */ AutoPtr<IProxy>& proxy,
-        /* [in] */ const String& serverName);
 
     // I don't want all members to be encapsulated
     AutoPtr<IInterfacePack> mIpack;
