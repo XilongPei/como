@@ -99,12 +99,16 @@ ECode CZMQChannelFactory::MarshalInterface(
     }
 
     if (IParcelable::Probe(object) != nullptr) {
+    // It implements the IParcelable interface. Its method is executed on the
+    // client side. The fields that identify the service object needn't to be set.
         CoclassID cid;
         IObject::Probe(object)->GetCoclassID(cid);
         pack->SetCoclassID(cid);
         pack->SetParcelable(true);
     }
     else {
+    // It does not implement the IParcelable interface. Its method is executed
+    // on the on the server side.
         AutoPtr<IStub> stub;
         ECode ec = FindExportObject(mType, obj, stub);
         if (SUCCEEDED(ec)) {
@@ -146,7 +150,6 @@ ECode CZMQChannelFactory::MarshalInterface(
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
 
                 // refer to `ServerObjectId`
-                Long hash;
                 obj->GetHashCode(hash);
                 pack->SetServerObjectId(hash);
 

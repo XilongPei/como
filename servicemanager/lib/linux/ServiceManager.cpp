@@ -194,10 +194,8 @@ ECode ServiceManager::AddRemoteService(
     // provider so that others can find me
     // name, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
     ipack->SetServerName(name + "\n" + String(strep.c_str()));
-
-    Long hash;
-    IObject::Probe(object)->GetHashCode(hash);
-    ipack->SetServerObjectId(hash);
+    // This has been done in CoMarshalInterface.
+    //ipack->SetServerObjectId(hash);
 
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
