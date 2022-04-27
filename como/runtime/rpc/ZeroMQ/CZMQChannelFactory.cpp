@@ -215,6 +215,8 @@ ECode CZMQChannelFactory::UnmarshalInterface(
             return ec;
         }
 
+        ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
+
         ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy));
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",

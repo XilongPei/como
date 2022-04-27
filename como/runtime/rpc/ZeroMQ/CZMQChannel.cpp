@@ -257,6 +257,10 @@ ECode CZMQChannel::Invoke(
     String serverName;
     // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
     ec = GetServerName(serverName);
+    if (serverName.IsEmpty()) {
+        Logger::E("CZMQChannel::Invoke", "serverName error");
+        return E_RUNTIME_EXCEPTION;
+    }
 
     void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName.string(), ZMQ_REQ);
     if (nullptr == socket) {
