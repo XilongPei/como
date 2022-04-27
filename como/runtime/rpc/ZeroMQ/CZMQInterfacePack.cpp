@@ -77,7 +77,7 @@ ECode CZMQInterfacePack::GetServerName(
 ECode CZMQInterfacePack::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = mServerName.GetHashCode();
+    hash = reinterpret_cast<HANDLE>(this);
     return NOERROR;
 }
 

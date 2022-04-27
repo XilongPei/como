@@ -128,9 +128,6 @@ public:
         }
 
         unsigned long hash = HashKey(key);
-        if (0 == hash)
-            return -1;
-
         unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
@@ -175,9 +172,6 @@ public:
         CompareFunc<Key> compareF;
 
         unsigned long hash = HashKey(key);
-        if (0 == hash)
-            return false;
-
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -195,9 +189,6 @@ public:
         CompareFunc<Key> compareF;
 
         unsigned long hash = HashKey(key);
-        if (0 == hash)
-            return Val(0);
-
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
@@ -215,9 +206,6 @@ public:
         CompareFunc<Key> compareF;
 
         unsigned long hash = HashKey(key);
-        if (0 == hash)
-            return 0;
-
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
