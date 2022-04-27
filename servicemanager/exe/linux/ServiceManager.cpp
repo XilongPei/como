@@ -37,12 +37,15 @@ ECode ServiceManager::AddService(
     if (nullptr == ipack)
         return E_OUT_OF_MEMORY_ERROR;
 
+    // Because it involves the deep replication of objects in members, we can't
+    // simply make a memory directly copy here.
+    //emcpy(ipack, &object, sizeof(InterfacePack));
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;
     ipack->mIid = object.mIid;
     ipack->mIsParcelable = object.mIsParcelable;
-    ipack->mServerObjectId = 0;
+    ipack->mServerObjectId = object.mServerObjectId;
 
     Mutex::AutoLock lock(mServicesLock);
     if (mServices.Put(name, ipack) != 0) {
@@ -63,6 +66,9 @@ ECode ServiceManager::GetService(
 
     Mutex::AutoLock lock(mServicesLock);
     *object = mServices.Get(name);
+    if (nullptr == *object)
+        return E_NOT_FOUND_EXCEPTION;
+
     return NOERROR;
 }
 
