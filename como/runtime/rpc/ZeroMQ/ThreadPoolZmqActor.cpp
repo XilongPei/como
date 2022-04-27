@@ -129,8 +129,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
 
                 // TODO, fix BUG
                 // There is a problem with the algorithm for judging the service provider
-                // if (hChannel == mChannel) {
-                if (1) {
+                if (hChannel == mChannel) {
                     ec = mStub->Invoke(argParcel, resParcel);
 
                     resParcel->GetData(resData);

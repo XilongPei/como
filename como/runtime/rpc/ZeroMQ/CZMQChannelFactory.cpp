@@ -179,7 +179,7 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         ECode ec = CoCreateObjectInstance(cid, iid, nullptr, &object);
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
-                                  "Create the object in ReadInterface failed.");
+                              "CoCreateObjectInstance failed, ECode: 0x%X", ec);
             return ec;
         }
     }
@@ -207,7 +207,7 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
-                            "Unmarshal the interface in ReadInterface failed.");
+                                       "CoCreateProxy failed, ECode: 0x%X", ec);
             object = nullptr;
             return ec;
         }
@@ -215,7 +215,7 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy));
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
-                                "RegisterImportObject failed. ECode: 0x%X", ec);
+                                "RegisterImportObject failed, ECode: 0x%X", ec);
             object = nullptr;
             return ec;
         }

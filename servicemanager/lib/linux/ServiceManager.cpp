@@ -658,7 +658,7 @@ ECode ServiceManager::GetRemoteService(
 
     if (replyData != nullptr) {
         AutoPtr<IParcel> parcel;
-        ec = CoCreateParcel(RPCType::Local, parcel);
+        ec = CoCreateParcel(RPCType::Remote, parcel);
         if (FAILED(ec)) {
             Logger_E("ServiceManager::GetRemoteService",
                                     "CoCreateParcel failed with ec = 0x%X", ec);

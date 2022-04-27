@@ -749,7 +749,7 @@ ECode CZMQParcel::ReadInterface(
     ReadInteger(tag);
     if (tag == TAG_NOT_NULL) {
         AutoPtr<IInterfacePack> ipack;
-        ECode ec = CoCreateInterfacePack(RPCType::Local, ipack);
+        ECode ec = CoCreateInterfacePack(RPCType::Remote, ipack);
         if (FAILED(ec)) {
             Logger::E("CZMQParcel::ReadInterface",
                                                "CoCreateInterfacePack failed.");
@@ -762,7 +762,7 @@ ECode CZMQParcel::ReadInterface(
             return ec;
         }
 
-        ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
+        ec = CoUnmarshalInterface(ipack, RPCType::Remote, value);
         if (FAILED(ec)) {
             Logger::E("CZMQParcel::ReadInterface",
                             "Unmarshal the interface in ReadInterface failed.");
@@ -788,7 +788,7 @@ ECode CZMQParcel::WriteInterface(
 
     if (value != nullptr) {
         AutoPtr<IInterfacePack> ipack;
-        ECode ec = CoMarshalInterface(value, RPCType::Local, ipack);
+        ECode ec = CoMarshalInterface(value, RPCType::Remote, ipack);
         if (FAILED(ec)) {
             Logger::E("CZMQParcel::WriteInterface",
                              "Marshal the interface in WriteInterface failed.");
