@@ -718,7 +718,7 @@ ECode ServiceManager::RemoveRemoteService(
 ECode ServiceManager::GetRemoteService(
     /* [in] */ const String& snServManager,
     /* [in] */ const String& name,
-    /* [out] */ AutoPtr<IInterface>& object);
+    /* [out] */ AutoPtr<IInterface>& object)
 {
     return NOERROR;
 }
