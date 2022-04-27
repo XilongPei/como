@@ -195,6 +195,10 @@ ECode ServiceManager::AddRemoteService(
     // name, hold name of Service, `ZeroMQ_ServiceNameAndEndpoint`
     ipack->SetServerName(name + "\n" + String(strep.c_str()));
 
+    Long hash;
+    IObject::Probe(object)->GetHashCode(hash);
+    ipack->SetServerObjectId(hash);
+
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
     IParcelable::Probe(ipack)->WriteToParcel(parcel);

@@ -273,7 +273,7 @@ ECode CZMQChannel::Invoke(
     Long size;
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
-    CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(this),
+    CZMQUtils::CzmqSendBuf(mServerObjectId,
                          ZmqFunCode::Method_Invoke, socket, (void *)data, size);
     HANDLE hChannel;
     Integer eventCode;
