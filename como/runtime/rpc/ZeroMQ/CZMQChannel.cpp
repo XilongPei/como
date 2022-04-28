@@ -176,7 +176,7 @@ ECode CZMQChannel::ReleaseObject(
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (-1 != rc) {
+    if (rc > 0) {
         if (ZmqFunCode::Object_Release != eventCode) {
             Logger::E("CZMQChannel::ReleaseObject", "Bad eventCode: %d", eventCode);
             ec = E_RUNTIME_EXCEPTION;
@@ -196,8 +196,10 @@ ECode CZMQChannel::ReleaseObject(
         Logger::E("CZMQChannel::ReleaseObject", "RCZMQUtils::CzmqRecvMsg().");
     }
 
-    // Release message
-    zmq_msg_close(&msg);
+    if (rc < -1) {
+        // Release message
+        zmq_msg_close(&msg);
+    }
 
     return ec;
 }
@@ -261,7 +263,7 @@ ECode CZMQChannel::GetComponentMetadata(
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (-1 != rc) {
+    if (rc > 0) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
             Logger::E("CZMQChannel::GetComponentMetadata",
                       "Bad eventCode: %d", eventCode);
@@ -286,8 +288,10 @@ ECode CZMQChannel::GetComponentMetadata(
                   "RCZMQUtils::CzmqRecvMsg().");
     }
 
-    // Release message
-    zmq_msg_close(&msg);
+    if (rc < -1) {
+        // Release message
+        zmq_msg_close(&msg);
+    }
 
     return ec;
 }
@@ -331,34 +335,36 @@ ECode CZMQChannel::Invoke(
     HANDLE hChannel;
     Integer eventCode;
     zmq_msg_t msg;
-    int replySize = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    int rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
-    if (SUCCEEDED(eventCode)) {
-        resParcel = new CZMQParcel();
-        if (nullptr != resParcel) {
-            Integer hasOutArgs;
-            method->GetOutArgumentsNumber(hasOutArgs);
-            if (hasOutArgs) {
-                if (replySize > 0) {
+    if (rc > 0) {
+        if (SUCCEEDED(eventCode)) {
+            resParcel = new CZMQParcel();
+            if (nullptr != resParcel) {
+                Integer hasOutArgs;
+                method->GetOutArgumentsNumber(hasOutArgs);
+                if (hasOutArgs) {
                     resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
                                                                 zmq_msg_size(&msg));
                 }
             }
+            else {
+                Logger::E("CZMQChannel::Invoke", "new CZMQParcel failed.");
+                ec = E_OUT_OF_MEMORY_ERROR;
+            }
         }
         else {
-            Logger::E("CZMQChannel::Invoke", "new CZMQParcel failed.");
-            ec = E_OUT_OF_MEMORY_ERROR;
-        }
-    }
-    else {
-        if (DEBUG) {
-            Logger::D("CZMQChannel::Invoke",
-                      "Remote call failed with ec = 0x%X.", ec);
+            if (DEBUG) {
+                Logger::D("CZMQChannel::Invoke",
+                          "Remote call failed with ec = 0x%X.", ec);
+            }
         }
     }
 
-    // Release message
-    zmq_msg_close (&msg);
+    if (rc < -1) {
+        // Release message
+        zmq_msg_close(&msg);
+    }
 
     return ec;
 }

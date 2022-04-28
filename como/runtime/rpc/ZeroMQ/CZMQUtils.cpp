@@ -327,13 +327,19 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
         int rc = zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             int rc = zmq_msg_init(&msg);
+            if (0 != rc) {
+                Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_init error, %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
+                return -1;
+            }
 
             // Block until a message is available to be received from socket
             numberOfBytes = zmq_msg_recv(&msg, socket, 0);
             if (-1 == numberOfBytes) {
                 Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_recv error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
-                return -1;
+                // msg has already been zmq_msg_init
+                return -2;
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(
@@ -341,7 +347,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             if ((funCodeAndCRC64.crc64 != crc64) ||
                                    (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
-                return -1;
+                // msg has already been zmq_msg_init
+                return -3;
             }
             eventCode = funCodeAndCRC64.eCode;
             hChannel = funCodeAndCRC64.hChannel;
