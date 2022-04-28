@@ -815,4 +815,13 @@ ECode CBinderParcel::SetPayload(
     return NOERROR;
 }
 
+ECode CBinderParcel::SetServerInfo(
+    /* [in] */ const String& serverName,
+    /* [in] */ Long serverObjectId)
+{
+    mServerName = serverName;
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
 }

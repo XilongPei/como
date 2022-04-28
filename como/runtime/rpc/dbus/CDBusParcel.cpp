@@ -1114,4 +1114,13 @@ ECode CDBusParcel::CreateObject(
     return NOERROR;
 }
 
+ECode CDBusParcel::SetServerInfo(
+    /* [in] */ const String& serverName,
+    /* [in] */ Long serverObjectId)
+{
+    mServerName = serverName;
+    mServerObjectId = serverObjectId;
+    return NOERROR;
+}
+
 } // namespace como

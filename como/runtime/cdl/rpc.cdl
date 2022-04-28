@@ -152,6 +152,10 @@ interface IParcel
     SetPayload(
         [in] HANDLE payload,
         [in] Boolean release);
+
+    SetServerInfo(
+        [in] String serverName,
+        [in] Long serverObjectId);
 }
 
 [

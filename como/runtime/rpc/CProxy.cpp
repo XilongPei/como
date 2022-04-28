@@ -900,6 +900,9 @@ ECode InterfaceProxy::UnmarshalResults(
         /* [in] */ IMetaMethod* method,
         /* [in] */ IParcel* resParcel)
 {
+
+    resParcel->SetServerInfo(mServerName, mServerObjectId);
+
     Integer N;
     method->GetParameterNumber(N);
     Integer intParamIndex = 1, fpParamIndex = 0;

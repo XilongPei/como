@@ -762,6 +762,9 @@ ECode CZMQParcel::ReadInterface(
             return ec;
         }
 
+        ipack->SetServerName(mServerName);
+        ipack->SetServerObjectId(mServerObjectId);
+
         ec = CoUnmarshalInterface(ipack, RPCType::Remote, value);
         if (FAILED(ec)) {
             Logger::E("CZMQParcel::ReadInterface",
@@ -1127,6 +1130,15 @@ ECode CZMQParcel::CreateObject(
     if (nullptr == parcel)
         return E_OUT_OF_MEMORY_ERROR;
 
+    return NOERROR;
+}
+
+ECode CZMQParcel::SetServerInfo(
+    /* [in] */ const String& serverName,
+    /* [in] */ Long serverObjectId)
+{
+    mServerName = serverName;
+    mServerObjectId = serverObjectId;
     return NOERROR;
 }
 

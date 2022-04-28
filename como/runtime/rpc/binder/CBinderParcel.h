@@ -161,6 +161,10 @@ public:
         /* [in] */ HANDLE payload,
         /* [in] */ Boolean release) override;
 
+    ECode SetServerInfo(
+        /* [in] */ const String& serverName,
+        /* [in] */ Long serverObjectId);
+
     inline static CBinderParcel* From(
         /* [in] */ IParcel* parcel);
 
@@ -170,6 +174,9 @@ private:
 
     android::Parcel* mData;
     Boolean mReleaseData { true };
+
+    String mServerName;
+    Long mServerObjectId;
 };
 
 CBinderParcel* CBinderParcel::From(

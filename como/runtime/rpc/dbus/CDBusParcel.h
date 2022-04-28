@@ -172,6 +172,10 @@ public:
         /* [in] */ HANDLE payload,
         /* [in] */ Boolean release) override;
 
+    ECode SetServerInfo(
+        /* [in] */ const String& serverName,
+        /* [in] */ Long serverObjectId);
+
     static ECode CreateObject(
         /* [out] */ AutoPtr<IParcel>& parcel);
 
@@ -221,6 +225,9 @@ private:
     Long mDataCapacity;
     mutable Long mDataPos;
     Byte mBuffer[MAX_BUFFER_SIZE];
+
+    String mServerName;
+    Long mServerObjectId;
 };
 
 } // namespace como

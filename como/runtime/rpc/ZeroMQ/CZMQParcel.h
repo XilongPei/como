@@ -172,8 +172,15 @@ public:
         /* [in] */ HANDLE payload,
         /* [in] */ Boolean release) override;
 
+    ECode SetServerInfo(
+        /* [in] */ const String& serverName,
+        /* [in] */ Long serverObjectId);
+
     static ECode CreateObject(
         /* [out] */ AutoPtr<IParcel>& parcel);
+
+    inline static CZMQParcel* From(
+        /* [in] */ IParcel* parcel);
 
 private:
     ECode Read(
@@ -221,7 +228,16 @@ private:
     Long mDataCapacity;
     mutable Long mDataPos;
     Byte mBuffer[MAX_BUFFER_SIZE];
+
+    String mServerName;
+    Long mServerObjectId;
 };
+
+inline static CZMQParcel* From(
+    /* [in] */ IParcel* parcel)
+{
+    return (CZMQParcel*)parcel;
+}
 
 } // namespace como
 
