@@ -762,8 +762,11 @@ ECode CZMQParcel::ReadInterface(
             return ec;
         }
 
+        Long hash;
+        IObject *obj = IObject::Probe(value);
+        obj->GetHashCode(hash);
         ipack->SetServerName(mServerName);
-        ipack->SetServerObjectId(mServerObjectId);
+        ipack->SetServerObjectId(hash);
 
         ec = CoUnmarshalInterface(ipack, RPCType::Remote, value);
         if (FAILED(ec)) {
@@ -1134,11 +1137,9 @@ ECode CZMQParcel::CreateObject(
 }
 
 ECode CZMQParcel::SetServerInfo(
-    /* [in] */ const String& serverName,
-    /* [in] */ Long serverObjectId)
+    /* [in] */ const String& serverName)
 {
     mServerName = serverName;
-    mServerObjectId = serverObjectId;
     return NOERROR;
 }
 

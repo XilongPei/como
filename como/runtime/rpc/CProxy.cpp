@@ -901,7 +901,7 @@ ECode InterfaceProxy::UnmarshalResults(
         /* [in] */ IParcel* resParcel)
 {
 
-    resParcel->SetServerInfo(mServerName, mServerObjectId);
+    resParcel->SetServerInfo(mServerName);
 
     Integer N;
     method->GetParameterNumber(N);

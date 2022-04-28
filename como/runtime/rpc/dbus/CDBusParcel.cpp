@@ -1115,11 +1115,9 @@ ECode CDBusParcel::CreateObject(
 }
 
 ECode CDBusParcel::SetServerInfo(
-    /* [in] */ const String& serverName,
-    /* [in] */ Long serverObjectId)
+    /* [in] */ const String& serverName)
 {
     mServerName = serverName;
-    mServerObjectId = serverObjectId;
     return NOERROR;
 }
 

@@ -173,8 +173,7 @@ public:
         /* [in] */ Boolean release) override;
 
     ECode SetServerInfo(
-        /* [in] */ const String& serverName,
-        /* [in] */ Long serverObjectId);
+        /* [in] */ const String& serverName);
 
     static ECode CreateObject(
         /* [out] */ AutoPtr<IParcel>& parcel);
@@ -230,7 +229,6 @@ private:
     Byte mBuffer[MAX_BUFFER_SIZE];
 
     String mServerName;
-    Long mServerObjectId;
 };
 
 inline static CZMQParcel* From(

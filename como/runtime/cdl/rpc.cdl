@@ -154,8 +154,7 @@ interface IParcel
         [in] Boolean release);
 
     SetServerInfo(
-        [in] String serverName,
-        [in] Long serverObjectId);
+        [in] String serverName);
 }
 
 [
