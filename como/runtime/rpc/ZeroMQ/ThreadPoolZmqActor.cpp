@@ -241,23 +241,25 @@ HandleMessage_GetComponentMetadata_Break:
 
             case ZmqFunCode::Object_Release: {
                 if (hChannel == mChannel) {
+                    SendNoerror(mChannel, mSocket);
+
                     // `ReleaseWorker` will delete this work
                     mWorkerStatus = WORKER_TASK_FINISH;
-
-                    SendNoerror(mChannel, mSocket);
                     return this;
                 }
 
                 Worker *w = ThreadPoolZmqActor::PickWorkerByChannelHandle(
                                                                 hChannel, true);
                 if (nullptr == w) {
-                    Logger::E("TPZA_Executor::Worker::Invoke", "bad Channel");
+                    Logger::E("TPZA_Executor::Worker::Object_Release",
+                                                                 "bad Channel");
                 }
                 else {
+                    SendNoerror(mChannel, mSocket);
+
                     // `ReleaseWorker` will NOT delete this work
                     w->mWorkerStatus = WORKER_TASK_FINISH;
                 }
-                SendNoerror(mChannel, mSocket);
                 return w;
             }
             default:
