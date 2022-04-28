@@ -148,9 +148,58 @@ ECode CZMQChannel::ReleasePeer(
 ECode CZMQChannel::ReleaseObject(
     /* [in] */ Long objectId)
 {
-    //TODO
-    objectId = 0;
-    return NOERROR;
+    /**
+     * 1. Find out who asked me for ReleaseObject and establish a socket
+     * connection with it.
+     * 2. 'mSocket' is used to process requests, not to communicate with client
+     */
+    String serverName;
+    ECode ec = GetServerName(serverName);
+
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    if (nullptr == socket) {
+        Logger::E("CZMQChannel::ReleaseObject",
+                  "CzmqGetSocket error, endpoint: %s", serverName);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    Logger::D("CZMQChannel::ReleaseObject",
+              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+    int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
+                                             ZmqFunCode::Object_Release, socket,
+                                               (void *)&objectId, sizeof(Long));
+    if (-1 == rc) {
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    HANDLE hChannel;
+    Integer eventCode;
+    zmq_msg_t msg;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    if (-1 != rc) {
+        if (ZmqFunCode::Object_Release != eventCode) {
+            Logger::E("CZMQChannel::ReleaseObject", "Bad eventCode: %d", eventCode);
+            ec = E_RUNTIME_EXCEPTION;
+        }
+        else {
+            void* replyData = zmq_msg_data(&msg);
+            Integer replySize = zmq_msg_size(&msg);
+            if (replySize < sizeof(ECode)) {
+                ec = E_COMPONENT_IO_EXCEPTION;
+            }
+            else {
+                ec = *(ECode*)replyData;
+            }
+        }
+    }
+    else {
+        Logger::E("CZMQChannel::ReleaseObject", "RCZMQUtils::CzmqRecvMsg().");
+    }
+
+    // Release message
+    zmq_msg_close(&msg);
+
+    return ec;
 }
 
 ECode CZMQChannel::LinkToDeath(
@@ -191,7 +240,6 @@ ECode CZMQChannel::GetComponentMetadata(
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
     String serverName;
-    // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
     ec = GetServerName(serverName);
 
     void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
@@ -215,7 +263,8 @@ ECode CZMQChannel::GetComponentMetadata(
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (-1 != rc) {
         if (ZmqFunCode::GetComponentMetadata != eventCode) {
-            Logger::E("GetComponentMetadata", "Bad eventCode: %d", eventCode);
+            Logger::E("CZMQChannel::GetComponentMetadata",
+                      "Bad eventCode: %d", eventCode);
             ec = E_RUNTIME_EXCEPTION;
         }
         else {
@@ -223,8 +272,8 @@ ECode CZMQChannel::GetComponentMetadata(
             Integer replySize = zmq_msg_size(&msg);
             metadata = Array<Byte>::Allocate(replySize);
             if (metadata.IsNull()) {
-                Logger::E("GetComponentMetadata",
-                                  "Malloc %d size metadata failed.", replySize);
+                Logger::E("CZMQChannel::GetComponentMetadata",
+                          "Malloc %d size metadata failed.", replySize);
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
             else {
@@ -233,7 +282,8 @@ ECode CZMQChannel::GetComponentMetadata(
         }
     }
     else {
-        Logger::E("GetComponentMetadata", "RCZMQUtils::CzmqRecvMsg().");
+        Logger::E("CZMQChannel::GetComponentMetadata",
+                  "RCZMQUtils::CzmqRecvMsg().");
     }
 
     // Release message
@@ -255,7 +305,6 @@ ECode CZMQChannel::Invoke(
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
     String serverName;
-    // about the server name, refer to `ZeroMQ_ServiceNameAndEndpoint`
     ec = GetServerName(serverName);
     if (serverName.IsEmpty()) {
         Logger::E("CZMQChannel::Invoke", "serverName error");
@@ -297,13 +346,14 @@ ECode CZMQChannel::Invoke(
             }
         }
         else {
-            Logger::E("CZMQChannel", "new CZMQParcel failed.");
+            Logger::E("CZMQChannel::Invoke", "new CZMQParcel failed.");
             ec = E_OUT_OF_MEMORY_ERROR;
         }
     }
     else {
         if (DEBUG) {
-            Logger::D("CZMQChannel", "Remote call failed with ec = 0x%X.", ec);
+            Logger::D("CZMQChannel::Invoke",
+                      "Remote call failed with ec = 0x%X.", ec);
         }
     }
 
