@@ -196,7 +196,7 @@ ECode CZMQChannel::ReleaseObject(
         Logger::E("CZMQChannel::ReleaseObject", "RCZMQUtils::CzmqRecvMsg().");
     }
 
-    if (rc < -1) {
+    if ((rc < -1) || (rc > 0)) {
         // Release message
         zmq_msg_close(&msg);
     }
@@ -288,7 +288,7 @@ ECode CZMQChannel::GetComponentMetadata(
                   "RCZMQUtils::CzmqRecvMsg().");
     }
 
-    if (rc < -1) {
+    if ((rc < -1) || (rc > 0)) {
         // Release message
         zmq_msg_close(&msg);
     }
@@ -361,7 +361,7 @@ ECode CZMQChannel::Invoke(
         }
     }
 
-    if (rc < -1) {
+    if ((rc < -1) || (rc > 0)) {
         // Release message
         zmq_msg_close(&msg);
     }
