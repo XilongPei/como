@@ -173,11 +173,11 @@ ECode CZMQChannel::ReleaseObject(
     }
 
     HANDLE hChannel;
-    Integer eventCode;
+    ECode eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (rc > 0) {
-        if (ZmqFunCode::Object_Release != eventCode) {
+        if (FAILED(eventCode)) {
             Logger::E("CZMQChannel::ReleaseObject", "Bad eventCode: %d", eventCode);
             ec = E_RUNTIME_EXCEPTION;
         }
@@ -260,11 +260,11 @@ ECode CZMQChannel::GetComponentMetadata(
     }
 
     HANDLE hChannel;
-    Integer eventCode;
+    ECode eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
     if (rc > 0) {
-        if (ZmqFunCode::GetComponentMetadata != eventCode) {
+        if (FAILED(eventCode)) {
             Logger::E("CZMQChannel::GetComponentMetadata",
                       "Bad eventCode: %d", eventCode);
             ec = E_RUNTIME_EXCEPTION;
@@ -333,7 +333,7 @@ ECode CZMQChannel::Invoke(
     CZMQUtils::CzmqSendBuf(mServerObjectId,
                          ZmqFunCode::Method_Invoke, socket, (void *)data, size);
     HANDLE hChannel;
-    Integer eventCode;
+    ECode eventCode;
     zmq_msg_t msg;
     int rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
