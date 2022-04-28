@@ -756,17 +756,17 @@ ECode CZMQParcel::ReadInterface(
             return ec;
         }
 
+        /**
+         * When InterfaceStub::MarshalResults(), it has no server information,
+         * so the CZMQParcel here naturally has no server information, so we fill
+         * in this information when we go to the client to resolve the interface
+         */
         ec = IParcelable::Probe(ipack)->ReadFromParcel(this);
         if (FAILED(ec)) {
             Logger::E("CZMQParcel::ReadInterface", "ReadFromParcel failed.");
             return ec;
         }
-
-        Long hash;
-        IObject *obj = IObject::Probe(value);
-        obj->GetHashCode(hash);
         ipack->SetServerName(mServerName);
-        ipack->SetServerObjectId(hash);
 
         ec = CoUnmarshalInterface(ipack, RPCType::Remote, value);
         if (FAILED(ec)) {
