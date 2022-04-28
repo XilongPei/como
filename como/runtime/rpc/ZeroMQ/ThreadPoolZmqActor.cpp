@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
+#include "mutex.h"
 #include "zmq.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
@@ -262,6 +263,7 @@ HandleMessage_GetComponentMetadata_Break:
                 }
                 return w;
             }
+
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
                     if (TPZA_Executor::defaultHandleMessage(
@@ -437,7 +439,17 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());
 
-            workerRet = worker->HandleMessage();
+            EndpointSocket *eps = CZMQUtils::CzmqFindSocket(worker->mEndpoint);
+            assert(eps->socket == worker->mSocket);
+
+            if (nullptr != eps) {
+            // Do not use the same ZeroMQ socket in multiple threads, that is,
+            // socket can only be used in one thread.
+
+                pthread_mutex_lock(&(eps->mutex));
+                workerRet = worker->HandleMessage();
+                pthread_mutex_unlock(&(eps->mutex));
+            }
 
             if (workerRet != mWorkerList[iWorkerInQueue]) {
             // Current Worker has been processed

@@ -17,6 +17,8 @@
 #ifndef __CZMQUTILS_H__
 #define __CZMQUTILS_H__
 
+#include <string>
+#include <pthread.h>
 #include "zmq.h"
 #include "comotypes.h"
 #include "comoref.h"
@@ -51,6 +53,22 @@ typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
 } COMO_ZMQ_RPC_MSG_HEAD;
 #pragma pack()
 
+class EndpointSocket {
+public:
+    EndpointSocket()
+        : mutex(PTHREAD_MUTEX_INITIALIZER)
+    {}
+
+    ~EndpointSocket() {
+        int rc = zmq_close(socket);
+    }
+
+public:
+    void *socket;
+    std::string endpoint;
+    pthread_mutex_t mutex;
+};
+
 class CZMQUtils {
 public:
     static void *CzmqGetContext();
@@ -68,7 +86,7 @@ public:
     static Integer CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize);
 
-    static void *CzmqFindSocket(const char *serverName);
+    static EndpointSocket *CzmqFindSocket(std::string& endpoint);
 
     static void *CzmqSocketMonitor(const char *serverName);
 

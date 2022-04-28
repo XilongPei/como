@@ -24,17 +24,6 @@
 
 namespace como {
 
-class EndpointSocket {
-public:
-    ~EndpointSocket() {
-        int rc = zmq_close(socket);
-    }
-
-public:
-    void *socket;
-    std::string endpoint;
-};
-
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
 static zmq_pollitem_t *zmq_pollitems = nullptr;
 static int zmq_pollitemNum = 0;
@@ -362,17 +351,14 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
 }
 
 
-void *CZMQUtils::CzmqFindSocket(const char *serverName)
+EndpointSocket *CZMQUtils::CzmqFindSocket(std::string& endpoint)
 {
-    EndpointSocket *endpointSocket;
-
     Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
     std::unordered_map<std::string, EndpointSocket*>::iterator iter =
-                                        zmq_sockets.find(std::string(serverName));
+                                                     zmq_sockets.find(endpoint);
     if (iter != zmq_sockets.end()) {
-        endpointSocket = iter->second;
-        return endpointSocket->socket;
+        return iter->second;
     }
 
     return nullptr;
