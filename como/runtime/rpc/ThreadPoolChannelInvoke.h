@@ -48,7 +48,7 @@ public:
     {
     public:
         Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
-                              AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+                         AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
 
         ECode Invoke();
 
@@ -85,11 +85,11 @@ public:
     static std::vector<TPCI_Executor::Worker*> mWorkerList;     // task list
 
 private:
-    static bool shutdown;
-    static bool signal_;
     int mThreadNum;         // most thread number
     pthread_t *pthread_id;
 
+    static bool shutdown;
+    static bool signal_;
     static pthread_mutex_t m_pthreadMutex;
     static pthread_cond_t m_pthreadCond;
 

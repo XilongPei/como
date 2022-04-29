@@ -53,19 +53,17 @@ bool ThreadPoolChannelInvoke::signal_;
 
 AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 {
-    {
-        Mutex::AutoLock lock(sInstanceLock);
-        if (nullptr == sInstance) {
-            sInstance = new TPCI_Executor();
-            if (nullptr != sInstance) {
-                threadPool = new ThreadPoolChannelInvoke(
-                            ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
-            }
+    Mutex::AutoLock lock(sInstanceLock);
+    if (nullptr == sInstance) {
+        sInstance = new TPCI_Executor();
+        if (nullptr != sInstance) {
+            threadPool = new ThreadPoolChannelInvoke(
+                        ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
+        }
 
-            if (nullptr == threadPool) {
-                delete sInstance;
-                return nullptr;
-            }
+        if (nullptr == threadPool) {
+            delete sInstance;
+            return nullptr;
         }
     }
     return sInstance;
@@ -85,7 +83,6 @@ int TPCI_Executor::CleanTask(int pos)
 {
     return threadPool->cleanTask(pos);
 }
-
 
 int ThreadPoolChannelInvoke::LookingForReadyWorker()
 {
