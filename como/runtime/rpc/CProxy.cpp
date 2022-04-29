@@ -1771,7 +1771,7 @@ ECode InterfaceProxy::ProxyEntry(
                                 //123456789
 
         int pos = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
-                                                            method, inParcel, outParcel);
+                                                     method, inParcel, outParcel);
         if (pos < 0) {
             ec = FUNCTION_SAFETY_CALL_OUT_OF_MEMORY;
             goto ProxyExit;

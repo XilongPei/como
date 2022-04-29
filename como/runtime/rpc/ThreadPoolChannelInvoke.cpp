@@ -56,14 +56,24 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
         Mutex::AutoLock lock(sInstanceLock);
         if (nullptr == sInstance) {
             sInstance = new TPCI_Executor();
-            threadPool = new ThreadPoolChannelInvoke(ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
+            if (nullptr != sInstance) {
+                threadPool = new ThreadPoolChannelInvoke(
+                            ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM);
+            }
+
+            if (nullptr == threadPool) {
+                delete sInstance;
+                return nullptr;
+            }
         }
     }
     return sInstance;
 }
 
-int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
-                                    AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
+int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel,
+                                                    AutoPtr<IMetaMethod> method,
+                                                    AutoPtr<IParcel> inParcel,
+                                                    AutoPtr<IParcel> outParcel)
 {
     AutoPtr<Worker> w = new Worker(channel, method, inParcel, outParcel);
     if (nullptr == w) {
@@ -87,15 +97,13 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
         pthread_mutex_lock(&m_pthreadMutex);
 
         for (i = 0;  i < ((mWorkerList.size()) &&
-                     (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
 
         while ((i >= mWorkerList.size()) && !shutdown) {
-            pthread_mutex_unlock(&m_pthreadMutex);
             pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-            pthread_mutex_lock(&m_pthreadMutex);
 
             for (i = 0;  i < ((mWorkerList.size()) &&
-                         (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
         }
 
         if (shutdown) {
@@ -143,8 +151,8 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
-        if (pthread_create(&pthread_id[i], &threadAddr, ThreadPoolChannelInvoke::threadFunc,
-                                                                        nullptr) != 0) {
+        if (pthread_create(&pthread_id[i], &threadAddr,
+                           ThreadPoolChannelInvoke::threadFunc, nullptr) != 0) {
             Logger::E("ThreadPoolChannelInvoke", "pthread_create() error");
         }
     }

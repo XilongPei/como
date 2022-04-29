@@ -68,7 +68,7 @@ public:
     static AutoPtr<TPCI_Executor> GetInstance();
 
     int RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
-                                AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
+                         AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
 
     int CleanTask(int posWorkerList);
 
@@ -86,7 +86,7 @@ public:
 
 private:
     static bool shutdown;
-    int mThreadNum;                                             // most thread number
+    int mThreadNum;         // most thread number
     pthread_t *pthread_id;
 
     static pthread_mutex_t m_pthreadMutex;

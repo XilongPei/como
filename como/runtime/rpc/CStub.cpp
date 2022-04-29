@@ -170,9 +170,11 @@ ECode InterfaceStub::UnmarshalArguments(
                     // MarshalResults/UnmarshalArguments organization is equivalent to an
                     // intermediary. The intermediary holds the reference count of the
                     // object. Because the parameter and result conversion of COMO is not
-                    // managed by the C + + scope, the intermediary needs to manage itself.
+                    // managed by the C++ scope, the intermediary needs to manage itself.
                     // The correctness of the reference data can be guaranteed only when
                     // the control is handed over to the caller or callee
+
+                    // UnmarshalArguments, IN, parameter
                     REFCOUNT_ADD(value);
                     break;
                 }
@@ -351,6 +353,8 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
+                    //@ `REFCOUNT`
+                    // UnmarshalArguments, OUT/IN_OUT, parameter
                     if (ioAttr == IOAttribute::IN_OUT) {
                         argParcel->ReadInterface(*reinterpret_cast<AutoPtr<IInterface>*>(intf));
                     }
@@ -462,6 +466,7 @@ ECode InterfaceStub::MarshalResults(
                     IInterface* intf = reinterpret_cast<IInterface*>(addr);
 
                     //@ `REFCOUNT`
+                    // MarshalResults, IN, parameter
                     REFCOUNT_RELEASE(intf);
                     break;
                 }
@@ -568,6 +573,7 @@ ECode InterfaceStub::MarshalResults(
                     resParcel->WriteInterface(*intf);
 
                     //@ `REFCOUNT`
+                    // MarshalResults, OUT/IN_OUT, parameter
                     REFCOUNT_ADD(*intf);
                     delete intf;
                     break;
