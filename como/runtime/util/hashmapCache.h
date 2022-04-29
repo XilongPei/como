@@ -215,10 +215,7 @@ public:
     int RemoveByHash(
         /* [in] */ Long hash)
     {
-        unsigned int index = hash % mBucketSize;
-        if (0 == hash)
-            return 0;
-
+        unsigned int index = ((unsigned long long int)hash) % mBucketSize;
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {

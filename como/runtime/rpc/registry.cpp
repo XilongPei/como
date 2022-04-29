@@ -72,8 +72,11 @@ ECode RegisterExportObject(
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
         String strBuffer;
+        Long hash;
         reflHelpers::intfGetObjectInfo(object, strBuffer);
-        Logger::D("RegisterExportObject", "Object of %s\n", strBuffer.string());
+        object->GetHashCode(hash);
+        Logger::D("RegisterExportObject", "Object of %s, HashCode is 0x%X",
+                                                      strBuffer.string(), hash);
     }
 
     Mutex::AutoLock lock(registryLock);
@@ -96,6 +99,15 @@ ECode UnregisterExportObject(
     Mutex& registryLock = type == (RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        String strBuffer;
+        Long hash;
+        reflHelpers::intfGetObjectInfo(object, strBuffer);
+        object->GetHashCode(hash);
+        Logger::D("UnregisterExportObject", "Object of %s, HashCode is 0x%X",
+                                                      strBuffer.string(), hash);
+    }
+
     Mutex::AutoLock lock(registryLock);
     if (registry.ContainsKey(object)) {
         registry.Remove(object);
@@ -112,6 +124,10 @@ ECode UnregisterExportObject(
                                    sLocalExportRegistry : sRemoteExportRegistry;
     Mutex& registryLock = type == (RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        Logger::D("UnregisterExportObject", "HashCode is 0x%X", hash);
+    }
 
     Mutex::AutoLock lock(registryLock);
     if (! registry.RemoveByHash(hash))
@@ -133,6 +149,15 @@ ECode FindExportObject(
                                    sLocalExportRegistry : sRemoteExportRegistry;
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        String strBuffer;
+        Long hash;
+        reflHelpers::intfGetObjectInfo(object, strBuffer);
+        object->GetHashCode(hash);
+        Logger::D("FindExportObject", "Object of %s, HashCode is 0x%X",
+                                                      strBuffer.string(), hash);
+    }
 
     Mutex::AutoLock lock(registryLock);
     if (registry.ContainsKey(object)) {
@@ -157,6 +182,12 @@ ECode FindExportObject(
                                    sLocalExportRegistry : sRemoteExportRegistry;
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        Long objectId;
+        ipack->GetServerObjectId(objectId);
+        Logger::D("FindExportObject", "Object ServerObjectId: 0x%X", objectId);
+    }
 
     Mutex::AutoLock lock(registryLock);
     Array<IStub*> stubs = registry.GetValues();
@@ -187,6 +218,12 @@ ECode RegisterImportObject(
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
 
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        Long objectId;
+        ipack->GetServerObjectId(objectId);
+        Logger::D("RegisterImportObject", "Object ServerObjectId: 0x%X", objectId);
+    }
+
     Mutex::AutoLock lock(registryLock);
     if (0 == registry.Put(ipack, object))
         return NOERROR;
@@ -207,10 +244,11 @@ ECode UnregisterImportObject(
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
 
-    // A temporary measure, if there are not many cached objects,
-    // do not remove them first
-    if (registry.GetDataNumber() < 100)
-        return NOERROR;
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        Long objectId;
+        ipack->GetServerObjectId(objectId);
+        Logger::D("UnregisterImportObject", "Object ServerObjectId: 0x%X", objectId);
+    }
 
     Mutex::AutoLock lock(registryLock);
     if (registry.ContainsKey(ipack)) {
@@ -234,6 +272,12 @@ ECode FindImportObject(
                                    sLocalImportRegistry : sRemoteImportRegistry;
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
+
+    if (Logger::GetLevel() <= Logger::DEBUG) {
+        Long objectId;
+        ipack->GetServerObjectId(objectId);
+        Logger::D("FindImportObject", "Object ServerObjectId: 0x%X", objectId);
+    }
 
     Mutex::AutoLock lock(registryLock);
     if (registry.ContainsKey(ipack)) {

@@ -128,8 +128,6 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                     goto HandleMessage_Method_Invoke_Break;
                 }
 
-                // TODO, fix BUG
-                // There is a problem with the algorithm for judging the service provider
                 if (hChannel == mChannel) {
                     ec = mStub->Invoke(argParcel, resParcel);
 
