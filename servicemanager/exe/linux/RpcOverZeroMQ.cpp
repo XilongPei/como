@@ -158,7 +158,6 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                                                  "GetService: %s", (char*)data);
 
             ServiceManager::InterfacePack* ipack = nullptr;
-            ECode ec = NOERROR;
             HANDLE resData = reinterpret_cast<HANDLE>("");
             Long resSize = 1;
             AutoPtr<IParcel> parcel;
@@ -199,8 +198,34 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             break;
         }
         case ZmqFunCode::RemoveService: {   // 0x0203
+            // Get the unique ID of the service and clean up other management
+            // data related to it
+            ServiceManager::InterfacePack* ipack = nullptr;
+            ec = ServiceManager::GetInstance()->GetService((char*)data, &ipack);
+            if (FAILED(ec)) {
+                Logger::E("RpcOverZeroMQ::HandleMessage",
+                        "ServiceManager::RemoveService error, %s", (char*)data);
+                goto HandleMessage_Exit_RemoveService;
+            }
+
+            if (nullptr != ipack) {
+                if (! ipack->mServerName.IsEmpty()) {
+                    Logger::D("RpcOverZeroMQ::HandleMessage",
+                              "ServerObjectId: 0x%llX", ipack->mServerObjectId);
+                    ec = ThreadPoolZmqActor::CleanWorkerByChannelHandle(
+                                                        ipack->mServerObjectId);
+                    if (FAILED(ec)) {
+                        Logger::E("RpcOverZeroMQ::HandleMessage",
+                                "CleanWorkerByChannelHandle error, ECode: 0x%X",
+                                ec);
+                        goto HandleMessage_Exit_RemoveService;
+                    }
+                }
+            }
+
             ec = ServiceManager::GetInstance()->RemoveService((char*)data);
 
+HandleMessage_Exit_RemoveService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                          ZmqFunCode::AnswerECode,
                                          socket, (const void *)&ec, sizeof(ec));

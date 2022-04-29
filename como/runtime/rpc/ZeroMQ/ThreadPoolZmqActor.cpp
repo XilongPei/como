@@ -23,6 +23,7 @@
 #include "zmq.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
+#include "registry.h"
 #include "ThreadPoolZmqActor.h"
 #include "CZMQUtils.h"
 #include "CZMQParcel.h"
@@ -66,13 +67,12 @@ TPZA_Executor::Worker::~Worker()
 #endif
 }
 
-static Integer SendNoerror(HANDLE hChannel, void *socket)
+static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
 {
     HANDLE resData;
 
     resData = reinterpret_cast<HANDLE>((char*)"");
-    return CZMQUtils::CzmqSendBuf(hChannel, NOERROR,
-                                              socket, (const void *)resData, 1);
+    return CZMQUtils::CzmqSendBuf(hChannel, ec, socket, (const void *)resData, 1);
 }
 
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
@@ -235,33 +235,23 @@ HandleMessage_GetComponentMetadata_Break:
                 Boolean b = true;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
                                              (const void *)&b, sizeof(Boolean));
-                // `ReleaseWorker` will delete this work
+                // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 return this;
             }
 
             case ZmqFunCode::Object_Release: {
-                if (hChannel == mChannel) {
-                    SendNoerror(mChannel, mSocket);
-
-                    // `ReleaseWorker` will delete this work
-                    mWorkerStatus = WORKER_TASK_FINISH;
-                    return this;
+                ec = UnregisterExportObject(RPCType::Remote, mChannel);
+                if (FAILED(ec)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                       "Object_Release error, ECode: 0x%X", ec);
                 }
+                SendECode(mChannel, mSocket, ec);
 
-                Worker *w = ThreadPoolZmqActor::PickWorkerByChannelHandle(
-                                                                hChannel, true);
-                if (nullptr == w) {
-                    Logger::E("TPZA_Executor::Worker::Object_Release",
-                                                                 "bad Channel");
-                }
-                else {
-                    SendNoerror(mChannel, mSocket);
+                // `ReleaseWorker` will NOT delete this work
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
 
-                    // `ReleaseWorker` will NOT delete this work
-                    w->mWorkerStatus = WORKER_TASK_FINISH;
-                }
-                return w;
+                return this;
             }
 
             default:
@@ -276,11 +266,11 @@ HandleMessage_GetComponentMetadata_Break:
                         return nullptr;
                     }
                 }
-                SendNoerror(mChannel, mSocket);
+                SendECode(mChannel, mSocket, NOERROR);
         }
     }
     else if (iRet < 0) {
-        SendNoerror(mChannel, mSocket);
+        SendECode(mChannel, mSocket, NOERROR);
     }
 
     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -678,6 +668,37 @@ int ThreadPoolZmqActor::StopAll()
 int ThreadPoolZmqActor::GetTaskListSize()
 {
     return mWorkerList.size();
+}
+
+/*
+ * Clean Worker by ChannelHandle, `mSocket + mChannel` is unique id of an IStub
+ */
+ECode ThreadPoolZmqActor::CleanWorkerByChannelHandle(HANDLE hChannel)
+{
+    int i;
+    ECode ec = NOERROR;
+
+    pthread_mutex_lock(&pthreadMutex);
+
+    for (i = 0;  i < mWorkerList.size();  i++) {
+        if (nullptr == mWorkerList[i])
+            continue;
+
+        if (mWorkerList[i]->mChannel == hChannel)
+            break;
+    }
+    if (i < mWorkerList.size()) {
+        //@ `ReleaseWorkerWhenPickIt`
+        REFCOUNT_RELEASE(mWorkerList[i]);
+        mWorkerList[i] = nullptr;
+    }
+    else {
+        ec = E_NOT_FOUND_EXCEPTION;
+    }
+
+    pthread_mutex_unlock(&pthreadMutex);
+
+    return ec;
 }
 
 } // namespace como

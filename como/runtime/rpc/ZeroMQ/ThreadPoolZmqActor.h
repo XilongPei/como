@@ -121,6 +121,7 @@ public:
         /* [in] */ AutoPtr<TPZA_Executor::Worker> task);
 
     static int CleanTask(int posWorkerList);
+    static ECode CleanWorkerByChannelHandle(HANDLE hChannel);
     int StopAll();
     int GetTaskListSize();
 };
