@@ -49,6 +49,7 @@ ECode TPCI_Executor::Worker::Invoke()
 AutoPtr<TPCI_Executor> TPCI_Executor::sInstance = nullptr;
 Mutex TPCI_Executor::sInstanceLock;
 AutoPtr<ThreadPoolChannelInvoke> TPCI_Executor::threadPool = nullptr;
+bool ThreadPoolChannelInvoke::signal_;
 
 AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 {
@@ -70,10 +71,8 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
     return sInstance;
 }
 
-int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel,
-                                                    AutoPtr<IMetaMethod> method,
-                                                    AutoPtr<IParcel> inParcel,
-                                                    AutoPtr<IParcel> outParcel)
+int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
+                               AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
 {
     AutoPtr<Worker> w = new Worker(channel, method, inParcel, outParcel);
     if (nullptr == w) {
@@ -88,6 +87,17 @@ int TPCI_Executor::CleanTask(int pos)
 }
 
 
+int ThreadPoolChannelInvoke::LookingForReadyWorker()
+{
+    for (int i = 0;  i < mWorkerList.size();  i++) {
+        if (nullptr == mWorkerList[i])
+            return i;
+        if (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)
+            return i;
+    }
+    return -1;
+}
+
 void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 {
     ECode ec;
@@ -96,14 +106,14 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
     while (true) {
         pthread_mutex_lock(&m_pthreadMutex);
 
-        for (i = 0;  i < ((mWorkerList.size()) &&
-                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+        i = LookingForReadyWorker();
+        if (i < 0) {
+            while ((! signal_) && (! shutdown)) {
+                pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
+            }
+            signal_ = false;
 
-        while ((i >= mWorkerList.size()) && !shutdown) {
-            pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
-
-            for (i = 0;  i < ((mWorkerList.size()) &&
-                   (WORKER_TASK_READY != mWorkerList[i]->mWorkerStatus));  i++);
+            i = LookingForReadyWorker();
         }
 
         if (shutdown) {
@@ -156,6 +166,8 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
             Logger::E("ThreadPoolChannelInvoke", "pthread_create() error");
         }
     }
+
+    signal_ = false;
 }
 
 /*
@@ -195,6 +207,7 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
         mWorkerList.push_back(task);
     }
 
+    signal_ = true;
     pthread_mutex_unlock(&m_pthreadMutex);
     pthread_cond_signal(&m_pthreadCond);
 

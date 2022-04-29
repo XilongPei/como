@@ -361,7 +361,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             if ((size_t)threadData % 2 == 0) {
                 struct timespec curTime;
                 CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
-                while (!signal_) {
+                while ((! signal_) && (! shutdown)) {
                     // The work of cleaning up the mWorkerList later may
                     // also need to be done regularly
                     pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
@@ -424,7 +424,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
 
         // There are Workers in the queue. Try to do all the Workers
         AutoPtr<TPZA_Executor::Worker> workerRet;
-        while ((iWorkerInQueue >= 0) && !shutdown) {
+        while ((iWorkerInQueue >= 0) && (! shutdown)) {
 
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());

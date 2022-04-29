@@ -86,6 +86,7 @@ public:
 
 private:
     static bool shutdown;
+    static bool signal_;
     int mThreadNum;         // most thread number
     pthread_t *pthread_id;
 
@@ -94,6 +95,7 @@ private:
 
 protected:
     static void *threadFunc(void *threadData);
+    static int LookingForReadyWorker();
 
 public:
     ThreadPoolChannelInvoke(int threadNum = 10);
