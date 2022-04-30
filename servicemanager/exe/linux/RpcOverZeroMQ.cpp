@@ -20,7 +20,6 @@
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
 #include "ServiceManager.h"
-#include "ThreadPoolZmqActor.h"
 #include "RpcOverZeroMQ.h"
 
 namespace jing {
@@ -212,8 +211,8 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                 if (! ipack->mServerName.IsEmpty()) {
                     Logger::D("RpcOverZeroMQ::HandleMessage",
                               "ServerObjectId: 0x%llX", ipack->mServerObjectId);
-                    ec = ThreadPoolZmqActor::CleanWorkerByChannelHandle(
-                                                        ipack->mServerObjectId);
+                    //TODO
+                    // Delete the worker corresponding to the service
                     if (FAILED(ec)) {
                         Logger::E("RpcOverZeroMQ::HandleMessage",
                                 "CleanWorkerByChannelHandle error, ECode: 0x%X",
