@@ -650,7 +650,7 @@ ECode InterfaceStub::Invoke(
         String strBuffer2;
         reflHelpers::mmGetMethodInfo(mm, strBuffer1);
         reflHelpers::intfGetObjectInfo(mObject, strBuffer2);
-        Logger::D("CStub", "Object of %s Invoke Method: %s\n",
+        Logger::D("CStub", "Object of %s Invoke Method: %s",
                                       strBuffer2.string(), strBuffer1.string());
     }
 
