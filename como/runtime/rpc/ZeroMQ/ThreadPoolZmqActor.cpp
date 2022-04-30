@@ -380,7 +380,6 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
             else {
                 pthread_mutex_unlock(&pthreadMutex);
-printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
                 CZMQUtils::CzmqPoll();
             }
         }
