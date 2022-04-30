@@ -177,7 +177,8 @@ ECode CZMQChannel::ReleaseObject(
     rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
     if (rc > 0) {
         if (FAILED(ec)) {
-            Logger::E("CZMQChannel::ReleaseObject", "Fail, eventCode: 0x%X", ec);
+            Logger::E("CZMQChannel::ReleaseObject",
+                      "ObjectId: 0x%llX, Fail, ECode: 0x%X", objectId, ec);
         }
     }
     else {

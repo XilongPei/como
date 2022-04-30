@@ -48,8 +48,8 @@ ECode RpcHelpers::ReleaseRemoteObject(
 
     IProxy* proxy = IProxy::Probe(intfService);
     if (nullptr != proxy) {
-        // It does not implement the COMO class of IParcelable interface.
-        // The method execution is on the service server side.
+    // It does not implement the COMO class of IParcelable interface.
+    // The method execution is on the service server side.
         proxy = IProxy::Probe(obj);
         if (nullptr == proxy)
             return E_INTERFACE_NOT_FOUND_EXCEPTION;
@@ -60,20 +60,13 @@ ECode RpcHelpers::ReleaseRemoteObject(
             return ec;
 
         ipack->GetServerObjectId(hash);
-        ec = proxy->ReleaseObject(hash);
-        if (FAILED(ec))
-            return ec;
-    }
-    else {
-        // It implements the COMO class of IParcelable interface. Its method
-        // execution is executed on the client side.
-        IObject::Probe(obj)->GetHashCode(hash);
-        ec = proxy->ReleaseObject(hash);
-        if (FAILED(ec))
-            return ec;
+        return proxy->ReleaseObject(hash);
     }
 
-    return NOERROR;
+    // It implements the COMO class of IParcelable interface. Its method
+    // execution is executed on the client side.
+    IObject::Probe(obj)->GetHashCode(hash);
+    return proxy->ReleaseObject(hash);
 }
 
 } // namespace jing

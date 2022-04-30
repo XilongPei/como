@@ -106,7 +106,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                                                "new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
-                    goto HandleMessage_Method_Invoke_Break;
+                    goto HandleMessage_Method_Invoke;
                 }
 
                 ec = argParcel->SetData(reinterpret_cast<HANDLE>(
@@ -116,7 +116,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                                                     "argParcel->SetData error");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
-                    goto HandleMessage_Method_Invoke_Break;
+                    goto HandleMessage_Method_Invoke;
                 }
 
                 zmq_msg_close(&msg);
@@ -126,7 +126,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                                                "new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
-                    goto HandleMessage_Method_Invoke_Break;
+                    goto HandleMessage_Method_Invoke;
                 }
 
                 if (hChannel == mChannel) {
@@ -167,7 +167,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                         resParcel->GetDataSize(resSize);
                     }
                 }
-HandleMessage_Method_Invoke_Break:
+HandleMessage_Method_Invoke:
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
                                        mSocket, (const void *)resData, resSize);
 
@@ -187,7 +187,7 @@ HandleMessage_Method_Invoke_Break:
                     // `ReleaseWorker`, This Worker is a daemon
                     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     ec = E_OUT_OF_MEMORY_ERROR;
-                    goto HandleMessage_GetComponentMetadata_Break;
+                    goto HandleMessage_GetComponentMetadata;
                 }
 
                 argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
@@ -200,7 +200,7 @@ HandleMessage_Method_Invoke_Break:
                                "CoGetComponentMetadata error, ECode: 0x%X", ec);
                     ReleaseCoclassID(cid);
                     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-                    goto HandleMessage_GetComponentMetadata_Break;
+                    goto HandleMessage_GetComponentMetadata;
                 }
 
                 ec = mc->GetSerializedMetadata(metadata);
@@ -219,7 +219,7 @@ HandleMessage_Method_Invoke_Break:
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 return nullptr;
 
-HandleMessage_GetComponentMetadata_Break:
+HandleMessage_GetComponentMetadata:
                 resData = reinterpret_cast<HANDLE>((char*)"");
                 resSize = 1;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
@@ -240,11 +240,21 @@ HandleMessage_GetComponentMetadata_Break:
             }
 
             case ZmqFunCode::Object_Release: {
-                ec = UnregisterExportObjectByHash(RPCType::Remote, mChannel);
+                if (zmq_msg_size(&msg) < sizeof(Long)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                          "Object_Release, Bad request packet");
+                    ec = ZMQ_BAD_PACKET;
+                    goto HandleMessage_Object_Release;
+                }
+
+                ec = UnregisterExportObjectByHash(RPCType::Remote,
+                                                    *(Long*)zmq_msg_data(&msg));
                 if (FAILED(ec)) {
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
                 }
+
+HandleMessage_Object_Release:
                 SendECode(mChannel, mSocket, ec);
 
                 // `ReleaseWorker` will NOT delete this work
@@ -370,6 +380,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
             else {
                 pthread_mutex_unlock(&pthreadMutex);
+printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
                 CZMQUtils::CzmqPoll();
             }
         }

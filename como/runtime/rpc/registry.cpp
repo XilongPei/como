@@ -75,7 +75,7 @@ ECode RegisterExportObject(
         Long hash;
         reflHelpers::intfGetObjectInfo(object, strBuffer);
         object->GetHashCode(hash);
-        Logger::D("RegisterExportObject", "Object of %s, HashCode is 0x%X",
+        Logger::D("RegisterExportObject", "Object of %s, HashCode is 0x%llX",
                                                       strBuffer.string(), hash);
     }
 
@@ -104,7 +104,7 @@ ECode UnregisterExportObject(
         Long hash;
         reflHelpers::intfGetObjectInfo(object, strBuffer);
         object->GetHashCode(hash);
-        Logger::D("UnregisterExportObject", "Object of %s, HashCode is 0x%X",
+        Logger::D("UnregisterExportObject", "Object of %s, HashCode is 0x%llX",
                                                       strBuffer.string(), hash);
     }
 
@@ -126,7 +126,7 @@ ECode UnregisterExportObjectByHash(
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
-        Logger::D("UnregisterExportObject", "HashCode is 0x%X", hash);
+        Logger::D("UnregisterExportObject", "HashCode is 0x%llX", hash);
     }
 
     Mutex::AutoLock lock(registryLock);
@@ -155,7 +155,7 @@ ECode FindExportObject(
         Long hash;
         reflHelpers::intfGetObjectInfo(object, strBuffer);
         object->GetHashCode(hash);
-        Logger::D("FindExportObject", "Object of %s, HashCode is 0x%X",
+        Logger::D("FindExportObject", "Object of %s, HashCode is 0x%llX",
                                                       strBuffer.string(), hash);
     }
 
@@ -193,7 +193,7 @@ ECode FindExportObject(
     if (Logger::GetLevel() <= Logger::DEBUG) {
         Long objectId;
         ipack->GetServerObjectId(objectId);
-        Logger::D("FindExportObject", "Object ServerObjectId: 0x%X", objectId);
+        Logger::D("FindExportObject", "Object ServerObjectId: 0x%llX", objectId);
     }
 
     Mutex::AutoLock lock(registryLock);
@@ -239,7 +239,7 @@ ECode RegisterImportObject(
     if (Logger::GetLevel() <= Logger::DEBUG) {
         Long objectId;
         ipack->GetServerObjectId(objectId);
-        Logger::D("RegisterImportObject", "Object ServerObjectId: 0x%X", objectId);
+        Logger::D("RegisterImportObject", "Object ServerObjectId: 0x%llX", objectId);
     }
 
     Mutex::AutoLock lock(registryLock);
@@ -265,7 +265,7 @@ ECode UnregisterImportObject(
     if (Logger::GetLevel() <= Logger::DEBUG) {
         Long objectId;
         ipack->GetServerObjectId(objectId);
-        Logger::D("UnregisterImportObject", "Object ServerObjectId: 0x%X", objectId);
+        Logger::D("UnregisterImportObject", "Object ServerObjectId: 0x%llX", objectId);
     }
 
     Mutex::AutoLock lock(registryLock);
@@ -294,7 +294,7 @@ ECode FindImportObject(
     if (Logger::GetLevel() <= Logger::DEBUG) {
         Long objectId;
         ipack->GetServerObjectId(objectId);
-        Logger::D("FindImportObject", "Object ServerObjectId: 0x%X", objectId);
+        Logger::D("FindImportObject", "Object ServerObjectId: 0x%llX", objectId);
     }
 
     Mutex::AutoLock lock(registryLock);
