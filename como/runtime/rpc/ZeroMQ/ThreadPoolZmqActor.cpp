@@ -240,7 +240,7 @@ HandleMessage_GetComponentMetadata_Break:
             }
 
             case ZmqFunCode::Object_Release: {
-                ec = UnregisterExportObject(RPCType::Remote, mChannel);
+                ec = UnregisterExportObjectByHash(RPCType::Remote, mChannel);
                 if (FAILED(ec)) {
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);

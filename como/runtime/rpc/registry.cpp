@@ -116,7 +116,7 @@ ECode UnregisterExportObject(
     return E_NOT_FOUND_EXCEPTION;
 }
 
-ECode UnregisterExportObject(
+ECode UnregisterExportObjectByHash(
     /* [in] */ RPCType type,
     /* [in] */ Long hash)
 {

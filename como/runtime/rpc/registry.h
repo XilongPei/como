@@ -30,7 +30,7 @@ extern ECode UnregisterExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IObject* object);
 
-extern ECode UnregisterExportObject(
+extern ECode UnregisterExportObjectByHash(
     /* [in] */ RPCType type,
     /* [in] */ Long hash);
 

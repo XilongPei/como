@@ -11,3 +11,10 @@ debug
 export RPC_OVER_ZeroMQ_SUPPORT_Enable=enable
 
 
+./servicemanager/exe/linux/servicemanager
+./test/runtime/rpc/serviceZMQ/testRPCZmqSrv
+./test/runtime/rpc/clientZMQ/testRPCZmqCli
+
+./test/runtime/rpc/service/testRPCSrv
+./test/runtime/rpc/client/testRPCCli
+

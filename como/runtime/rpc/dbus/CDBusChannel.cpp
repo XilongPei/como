@@ -451,7 +451,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_get_basic(&args, &hash);
 
         if (0 != hash)
-            ec = UnregisterExportObject(RPCType::Local, hash);
+            ec = UnregisterExportObjectByHash(RPCType::Local, hash);
 
     ReleaseObjectExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
