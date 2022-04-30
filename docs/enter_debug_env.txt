@@ -1,0 +1,13 @@
+source build/envsetup.sh
+como_linux_x64
+debug
+export RPC_OVER_ZeroMQ_SUPPORT_Enable=enable
+
+
+
+source build/envsetup.sh
+como_linux_aarch64
+debug
+export RPC_OVER_ZeroMQ_SUPPORT_Enable=enable
+
+
