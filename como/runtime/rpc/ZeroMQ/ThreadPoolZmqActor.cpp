@@ -72,7 +72,8 @@ static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
     HANDLE resData;
 
     resData = reinterpret_cast<HANDLE>((char*)"");
-    return CZMQUtils::CzmqSendBuf(hChannel, ec, socket, (const void *)resData, 1);
+    return CZMQUtils::CzmqSendBuf(hChannel, ec, socket,
+                                              (const void *)&ec, sizeof(ECode));
 }
 
 TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()

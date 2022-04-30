@@ -173,23 +173,11 @@ ECode CZMQChannel::ReleaseObject(
     }
 
     HANDLE hChannel;
-    ECode eventCode;
     zmq_msg_t msg;
-    rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
     if (rc > 0) {
-        if (FAILED(eventCode)) {
-            Logger::E("CZMQChannel::ReleaseObject", "Bad eventCode: %d", eventCode);
-            ec = E_RUNTIME_EXCEPTION;
-        }
-        else {
-            void* replyData = zmq_msg_data(&msg);
-            Integer replySize = zmq_msg_size(&msg);
-            if (replySize < sizeof(ECode)) {
-                ec = E_COMPONENT_IO_EXCEPTION;
-            }
-            else {
-                ec = *(ECode*)replyData;
-            }
+        if (FAILED(ec)) {
+            Logger::E("CZMQChannel::ReleaseObject", "Fail, eventCode: 0x%X", ec);
         }
     }
     else {
