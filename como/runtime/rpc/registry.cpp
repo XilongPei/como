@@ -168,6 +168,13 @@ ECode FindExportObject(
     return E_NOT_FOUND_EXCEPTION;
 }
 
+static Boolean Cmp_PVoid(void *p1, void *p2)
+{
+    Boolean matched;
+    ((IStub*)p1)->Match((IInterfacePack*)p2, matched);
+    return matched;
+}
+
 ECode FindExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IInterfacePack* ipack,
@@ -190,6 +197,15 @@ ECode FindExportObject(
     }
 
     Mutex::AutoLock lock(registryLock);
+
+    stub = registry.GetValue(Cmp_PVoid, (void*)ipack);
+    if (nullptr != stub)
+        return NOERROR;
+
+    return E_NOT_FOUND_EXCEPTION;
+
+// old algorithm
+#if 0
     Array<IStub*> stubs = registry.GetValues();
     for (Long i = 0;  i < stubs.GetLength();  i++) {
         IStub* stubObj = stubs[i];
@@ -201,7 +217,9 @@ ECode FindExportObject(
         }
     }
     stub = nullptr;
+
     return E_NOT_FOUND_EXCEPTION;
+#endif
 }
 
 ECode RegisterImportObject(

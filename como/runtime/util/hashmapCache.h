@@ -26,6 +26,8 @@
 
 namespace como {
 
+using HashMapCacheCmp2PVoid = Boolean(*)(void*,void*);
+
 template<typename Key, typename Val>
 class HashMapCache
 {
@@ -34,6 +36,7 @@ private:
     {
         Bucket()
             : mNext(nullptr)
+            , mReferenceCount(1)
         {
             InitFunc<Key> initKeyF;
             InitFunc<Val> initValF;
@@ -56,6 +59,7 @@ private:
         Key mKey;
         Val mValue;
         struct timespec lastAccessTime;
+        mutable std::atomic<Integer> mReferenceCount;
 
         struct Bucket* mNext;
     };
@@ -176,6 +180,7 @@ public:
         while (curr != nullptr) {
             if (curr->mHash == hash && !compareF(curr->mKey, key)) {
                 clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
+                curr->mReferenceCount++;
                 return curr->mValue;
             }
             curr = curr->mNext;
@@ -201,8 +206,13 @@ public:
                 else {
                     prev->mNext = curr->mNext;
                 }
-                delete curr;
-                mCount--;
+
+                curr->mReferenceCount--;
+                if (0 == curr->mReferenceCount) {
+                    delete curr;
+                    mCount--;
+                }
+
                 return 1;
             }
             prev = curr;
@@ -226,8 +236,13 @@ public:
                 else {
                     prev->mNext = curr->mNext;
                 }
-                delete curr;
-                mCount--;
+
+                curr->mReferenceCount--;
+                if (0 == curr->mReferenceCount) {
+                    delete curr;
+                    mCount--;
+                }
+
                 return 1;
             }
             prev = curr;
@@ -285,6 +300,23 @@ public:
             }
         }
         return values;
+    }
+
+    Val GetValue(HashMapCacheCmp2PVoid fun, void* param)
+    {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+            if (mBuckets[i] != nullptr) {
+                Bucket* curr = mBuckets[i];
+                while (curr != nullptr) {
+                    if (fun(curr->mValue, param)) {
+                        curr->mReferenceCount++;
+                        return curr->mValue;
+                    }
+                    curr = curr->mNext;
+                }
+            }
+        }
+        return Val(nullptr);
     }
 
     void GetValues(String& str, HashMapWalker walker)
