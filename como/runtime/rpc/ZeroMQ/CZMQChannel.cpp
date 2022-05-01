@@ -182,6 +182,7 @@ ECode CZMQChannel::ReleaseObject(
         }
     }
     else {
+        ec = ZMQ_BAD_REPLY_DATA;
         Logger::E("CZMQChannel::ReleaseObject", "RCZMQUtils::CzmqRecvMsg().");
     }
 
@@ -273,6 +274,7 @@ ECode CZMQChannel::GetComponentMetadata(
         }
     }
     else {
+        ec = ZMQ_BAD_REPLY_DATA;
         Logger::E("CZMQChannel::GetComponentMetadata",
                   "RCZMQUtils::CzmqRecvMsg().");
     }
@@ -290,7 +292,7 @@ ECode CZMQChannel::Invoke(
     /* [in] */ IParcel* argParcel,
     /* [out] */ AutoPtr<IParcel>& resParcel)
 {
-    ECode ec = NOERROR;
+    ECode ec;
 
     /**
      * 1. Find out who asked me for Invoke and establish a socket
@@ -319,15 +321,18 @@ ECode CZMQChannel::Invoke(
     Long size;
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
-    CZMQUtils::CzmqSendBuf(mServerObjectId,
+    int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                          ZmqFunCode::Method_Invoke, socket, (void *)data, size);
+    if (-1 == rc) {
+        return E_RUNTIME_EXCEPTION;
+    }
+
     HANDLE hChannel;
-    ECode eventCode;
     zmq_msg_t msg;
-    int rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
 
     if (rc > 0) {
-        if (SUCCEEDED(eventCode)) {
+        if (SUCCEEDED(ec)) {
             resParcel = new CZMQParcel();
             if (nullptr != resParcel) {
                 Integer hasOutArgs;
@@ -428,7 +433,7 @@ ECode CZMQChannel::MonitorRuntime(
     Logger::D("CZMQChannel::MonitorRuntime",
               "Try to CzmqSendBuf to endpoint %s", serverName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
-                                             ZmqFunCode::Object_Release, socket,
+                                             ZmqFunCode::RuntimeMonitor, socket,
                                                       (void *)resData, resSize);
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
