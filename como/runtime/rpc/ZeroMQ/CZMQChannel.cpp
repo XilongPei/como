@@ -428,7 +428,7 @@ ECode CZMQChannel::MonitorRuntime(
     }
 
     HANDLE resData = reinterpret_cast<HANDLE>(request.string());
-    Long resSize = request.GetByteLength();
+    Long resSize = request.GetByteLength() + 1;
 
     Logger::D("CZMQChannel::MonitorRuntime",
               "Try to CzmqSendBuf to endpoint %s", serverName.string());
