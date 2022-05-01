@@ -157,6 +157,10 @@ public:
         /* [in] */ IInterfacePack* ipack,
         /* [out] */ Boolean& matched) override;
 
+    ECode MonitorRuntime(
+        /* [in] */ const String& request,
+        /* [out] */ String& response);
+
     static CBinderChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
 

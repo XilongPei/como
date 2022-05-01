@@ -271,6 +271,10 @@ interface IRPCChannel
     Match(
         [in] IInterfacePack* ipack,
         [out] Boolean& matched);
+
+    MonitorRuntime(
+        [in] String request,
+        [out] String& response);
 }
 
 [
@@ -329,6 +333,10 @@ interface IProxy
 
     GetIpack(
         [out] IInterfacePack&& ipack);
+
+    MonitorRuntime(
+        [in] String request,
+        [out] String& response);
 }
 
 [

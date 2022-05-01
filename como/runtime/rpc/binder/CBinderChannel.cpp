@@ -391,4 +391,11 @@ ECode CBinderChannel::Match(
     return NOERROR;
 }
 
+ECode CBinderChannel::MonitorRuntime(
+    /* [in] */ const String& request,
+    /* [out] */ String& response)
+{
+    return NOERROR;
 }
+
+} // namespace como

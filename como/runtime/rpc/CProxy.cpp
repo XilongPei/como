@@ -1919,6 +1919,14 @@ ECode CProxy::GetIpack(
     return NOERROR;
 }
 
+ECode CProxy::MonitorRuntime(
+    /* [in] */ const String& request,
+    /* [out] */ String& response)
+{
+    return mChannel->MonitorRuntime(request, response);
+}
+
+
 AutoPtr<IRPCChannel> CProxy::GetChannel()
 {
     return mChannel;

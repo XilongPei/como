@@ -97,6 +97,10 @@ public:
         /* [in] */ IInterfacePack* ipack,
         /* [out] */ Boolean& matched) override;
 
+    ECode MonitorRuntime(
+        /* [in] */ const String& request,
+        /* [out] */ String& response);
+
     static CZMQChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
 

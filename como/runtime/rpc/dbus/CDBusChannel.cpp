@@ -1034,4 +1034,11 @@ Exit:
     return ec;
 }
 
+ECode CDBusChannel::MonitorRuntime(
+    /* [in] */ const String& request,
+    /* [out] */ String& response)
+{
+    return NOERROR;
+}
+
 } // namespace como

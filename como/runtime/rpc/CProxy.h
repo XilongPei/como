@@ -349,6 +349,10 @@ public:
     ECode GetIpack(
         /* [out] */ AutoPtr<IInterfacePack>& ipack);
 
+    ECode MonitorRuntime(
+        /* [in] */ const String& request,
+        /* [out] */ String& response);
+
     AutoPtr<IRPCChannel> GetChannel();
 
     CoclassID GetTargetCoclassID();

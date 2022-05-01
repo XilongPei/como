@@ -40,6 +40,7 @@ if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
         rpc
         type
         util
+        monitor
         ${INC_DIR}
         ${COMO_SRC_DIR}/../external/mimalloc/export_como
     )

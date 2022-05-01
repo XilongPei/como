@@ -27,6 +27,7 @@ include_directories(
     ../../
     ../../type
     ../../util
+    ../../monitor
     ${INC_DIR}
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/libzmq/include

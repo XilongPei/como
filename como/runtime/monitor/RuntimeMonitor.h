@@ -18,7 +18,8 @@
 #define __COMO_RUNTIMEMONITOR_H__
 
 #include "zmq.h"
-#include "comoapi.h"
+#include "comodef.h"
+#include "comotypes.h"
 
 namespace como {
 
