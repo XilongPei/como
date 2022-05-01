@@ -27,6 +27,7 @@ add_subdirectory(type)
 add_subdirectory(util)
 
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+    add_subdirectory(monitor)
     add_subdirectory(rpc)
     add_definitions(-DCOMO_WITH_RPC)
 endif()
@@ -85,6 +86,7 @@ if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
         rpc
         type
         util
+        RuntimeMonitor
         -Wl,--no-whole-archive)
 else()
     set(COMORT_LINK_LIBS

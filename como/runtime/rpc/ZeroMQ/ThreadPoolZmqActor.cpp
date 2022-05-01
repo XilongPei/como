@@ -27,6 +27,7 @@
 #include "ThreadPoolZmqActor.h"
 #include "CZMQUtils.h"
 #include "CZMQParcel.h"
+#include "RuntimeMonitor.h"
 
 namespace como {
 
@@ -261,6 +262,29 @@ HandleMessage_Object_Release:
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
 
                 return this;
+            }
+
+            case ZmqFunCode::RuntimeMonitor: {
+                String string;
+                ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, string);
+                if (SUCCEEDED(ec)) {
+                    resData = reinterpret_cast<HANDLE>(string.string());
+                    resSize = string.GetByteLength();
+                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
+                                       mSocket, (const void *)resData, resSize);
+
+                    // `ReleaseWorker`, This Worker is a daemon
+                    mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                    return nullptr;
+                }
+
+HandleMessage_RuntimeMonitor:
+                SendECode(mChannel, mSocket, ec);
+
+                // `ReleaseWorker` will NOT delete this work
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+
+                return nullptr;
             }
 
             default:

@@ -37,6 +37,7 @@ public:
         AddService           = 0x0201,
         GetService           = 0x0202,
         RemoveService        = 0x0203,
+        RuntimeMonitor       = 0x0301,
         AnswerECode          = 0x1111
     };
 };
