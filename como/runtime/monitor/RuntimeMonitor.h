@@ -32,6 +32,24 @@ public:
 
 };
 
+#define RuntimeMonitor_Log(a)  \
+           RuntimeMonitor_Log_ __runtimeMonitor_Log_((const char*)__FUNCTION__);
+
+class COM_PUBLIC RuntimeMonitor_Log_
+{
+public:
+    // define at the first line of a Function
+    RuntimeMonitor_Log_(const char *functionName);
+
+    ~RuntimeMonitor_Log_();
+private:
+    const char *mFunctionName;
+    String mStrClassInfo;
+    String mStrInterfaceInfo;
+    String mMethodSignature;
+};
+
+
 } // namespace como
 
 using namespace como;

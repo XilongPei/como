@@ -29,9 +29,11 @@ public:
     static ECode intfGetConstantLong(AutoPtr<IMetaInterface> intf, String constName, Long& lvalue);
     static ECode mmGetMethodInfo(AutoPtr<IMetaMethod> mm, String& strBuffer);
     static ECode intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer);
-    static ECode intfGetObjectInfo(AutoPtr<IInterface> intf, char *functionName,
-                                           String& strClassInfo, String& strInterfaceInfo,
-                                           String& methodSignature);
+
+    static ECode intfGetObjectInfo(AutoPtr<IInterface> intf,
+                             const char *functionName, String& strClassInfo,
+                             String& strInterfaceInfo, String& methodSignature);
+
 };
 
 } // namespace como

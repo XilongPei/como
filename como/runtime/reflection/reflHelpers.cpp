@@ -113,9 +113,9 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer
     return NOERROR;
 }
 
-ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, char *functionName,
-                                   String& strClassInfo, String& strInterfaceInfo,
-                                   String& methodSignature)
+ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, 
+                              const char *functionName, String& strClassInfo, 
+                              String& strInterfaceInfo, String& methodSignature)
 {
     ECode ec;
 

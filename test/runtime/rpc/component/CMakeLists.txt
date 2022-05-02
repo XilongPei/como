@@ -22,7 +22,9 @@ set(COMPONENT_OBJ_DIR ${RPC_OBJ_DIR}/component)
 include_directories(
     ./
     ${INC_DIR}
-    ${COMPONENT_OBJ_DIR})
+    ${COMPONENT_OBJ_DIR}
+    ${EXTERNAL_DIR}/libzmq/include
+)
 
 set(SOURCES
     CService.cpp

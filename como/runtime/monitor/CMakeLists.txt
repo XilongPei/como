@@ -26,6 +26,7 @@ include_directories(
     ../
     ../type
     ../util
+    ../reflection
     ${INC_DIR}
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/libzmq/include

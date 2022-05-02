@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "reflHelpers.h"
 #include "RuntimeMonitor.h"
 
 namespace como {
@@ -25,6 +26,23 @@ RuntimeMonitor::RuntimeMonitor() {
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string)
 {
     return NOERROR;
+}
+
+RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
+{
+    String strClassInfo, strInterfaceInfo, methodSignature;
+
+    reflHelpers::intfGetObjectInfo((IInterface*)this, functionName, strClassInfo,
+                                              strInterfaceInfo, methodSignature);
+    mFunctionName = functionName;
+    mStrClassInfo = strClassInfo;
+    mStrInterfaceInfo = strInterfaceInfo;
+    mMethodSignature = methodSignature;
+}
+
+RuntimeMonitor_Log_::~RuntimeMonitor_Log_()
+{
+
 }
 
 } // namespace como

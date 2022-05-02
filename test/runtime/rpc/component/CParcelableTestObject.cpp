@@ -14,6 +14,9 @@
 // limitations under the License.
 //=========================================================================
 
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+#include "RuntimeMonitor.h"
+#endif
 #include "CParcelableTestObject.h"
 
 namespace como {
@@ -27,6 +30,10 @@ ECode CParcelableTestObject::TestMethod1(
     /* [in] */ Integer arg1,
     /* [out] */ Integer& result1)
 {
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+    RuntimeMonitor_Log();
+#endif
+
     result1 = arg1 + 6;
     return NOERROR;
 }
