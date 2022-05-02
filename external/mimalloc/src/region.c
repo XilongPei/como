@@ -381,7 +381,17 @@ void* _mi_mem_alloc_aligned(size_t size, size_t alignment, bool* commit, bool* l
 
   if (mi_option_is_enabled(mi_option_fscp)){
     int numArea = mi_option_get(mi_option_fscp_numArea);
-    p = fscp_segments[numArea].memBase[0];
+    for(int i=0; i<fscp_segments[numArea].blockNum; i++){
+      if(fscp_segments[numArea].memBaseState[i] == false){
+        p = fscp_segments[numArea].memBase[i];
+        fscp_segments[numArea].memBaseState[i] = true;
+        break;
+      }
+    }
+    
+    if(NULL == p){
+      _mi_warning_message("unable to allocate from region: size %zu\n", size);
+    }
     *commit = true;
     *large = false;
     *is_pinned = false;

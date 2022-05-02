@@ -169,6 +169,7 @@ typedef struct mi_thread_data_s {
 } mi_thread_data_t;
 
 bool mi_heap_fscp_init(int numArea){
+  mi_process_init(); // 重复尝试，确保init
   if(mi_option_is_enabled(mi_option_fscp)){
     mi_thread_data_t* td = (mi_thread_data_t*)_mi_os_alloc(sizeof(mi_thread_data_t), &_mi_stats_main); // Todo: more efficient allocation?
     if (td == NULL) {
@@ -196,6 +197,7 @@ bool mi_heap_fscp_init(int numArea){
     tld->segments.os = &tld->os;
     tld->os.stats = &tld->stats;
     _mi_heap_fscp[numArea]=heap; 
+    // _mi_heap_set_default_direct(heap);  所有heap虽然在同一个线程，但是在mimalloc处理视角类似不同线程中,default_heap的概念不再存在   
   }
   return true;
 }

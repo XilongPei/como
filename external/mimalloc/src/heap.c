@@ -205,7 +205,7 @@ mi_heap_t* mi_heap_get_backing(void) {
 }
 
 mi_heap_t* mi_heap_fscp_new(int numArea){
-  if(numArea <0 ||numArea>FSCP_MEM_AREA_MAX){
+  if(numArea <0 || numArea>FSCP_MEM_AREA_MAX){
     return NULL;
   }
 
