@@ -113,4 +113,45 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer
     return NOERROR;
 }
 
+ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, char *functionName,
+                                   String& strClassInfo, String& strInterfaceInfo,
+                                   String& methodSignature)
+{
+    ECode ec;
+
+    AutoPtr<IMetaCoclass> klass;
+    IObject::Probe(intf)->GetCoclass(klass);
+    if (nullptr == klass) {
+        strClassInfo = "";
+    }
+    else {
+        String name, ns;
+        klass->GetName(name);
+        klass->GetNamespace(ns);
+        strClassInfo = ns + "::" + name;
+    }
+
+    InterfaceID iid;
+    AutoPtr<IMetaInterface> imintf;
+    intf->GetInterfaceID(intf, iid);
+    klass->GetInterface(iid, imintf);
+    if (nullptr == imintf) {
+        strInterfaceInfo = "";
+    }
+    else {
+        String name, ns;
+        klass->GetName(name);
+        klass->GetNamespace(ns);
+        strInterfaceInfo = ns + "::" + name;
+    }
+
+    AutoPtr<IMetaMethod> method;
+    klass->GetMethod(functionName, nullptr/*fungnature*/, method);
+    if (nullptr != method) {
+        method->GetSignature(methodSignature);
+    }
+
+    return NOERROR;
+}
+
 } // namespace como

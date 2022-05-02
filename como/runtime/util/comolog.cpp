@@ -14,6 +14,8 @@
 // limitations under the License.
 //=========================================================================
 
+#include <sys/syscall.h>
+#include <unistd.h>
 #include "comolog.h"
 #include <cstdarg>
 #if defined(__android__)
@@ -82,7 +84,8 @@ void Logger::D(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s DEBUG %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s DEBUG %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_DEBUG, "", "", "", 0, buf, argList);
     va_end(argList);
@@ -101,7 +104,8 @@ void Logger::E(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s ERROR %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s ERROR %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_ERROR, "", "", "", 0, buf, argList);
     va_end(argList);
@@ -120,7 +124,8 @@ void Logger::V(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s VERBOSE %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s VERBOSE %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_VERBOSE, "", "", "", 0, buf, argList);
     va_end(argList);
@@ -139,7 +144,8 @@ void Logger::W(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s WARNING %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s WARNING %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_WARN, "", "", "", 0, buf, argList);
     va_end(argList);
@@ -178,7 +184,8 @@ void Logger::Log(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s LOG %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(level, tag, "", "", 0, buf, argList);
     va_end(argList);
@@ -198,7 +205,8 @@ void Logger::Log(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %s LOG %s]: %s", szSamplingTag, currentTime, tag, format);
+    snprintf(buf, sizeof(buf)-1, "[%s %d %s LOG %s]: %s", szSamplingTag,
+                                 syscall(SYS_gettid), currentTime, tag, format);
     elog_output_args(level, tag, "", "", 0, buf, argList);
 }
 
