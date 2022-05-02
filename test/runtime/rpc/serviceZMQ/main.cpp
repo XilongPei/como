@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include "ComoConfig.h"
 #include "comorpc.h"
+#include "CZMQUtils.h"
 
 using como::test::rpc::CService;
 using como::test::rpc::IService;
@@ -50,6 +51,21 @@ int main(int argv, char** argc)
         printf("Failed to AddZeroMQEndpoint\n");
     }
 
+    std::string name;
+    std::string endpoint;
+    void *socket;
+
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
+               ComoConfig::ServerNameEndpointMap.find(std::string("localhost"));
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        name = iter->first;
+        endpoint = iter->second->endpoint;
+    }
+    else {
+        Logger::E("CZMQChannel", "Hasn't register any servers");
+        return 0;
+    }
+
     ECode ec = CService::New(IID_IService, (IInterface**)&srv);
     if (FAILED(ec)) {
         printf("Failed, CService::New\n");
@@ -69,6 +85,9 @@ int main(int argv, char** argc)
                                                 String("rpcserviceZMQ"), srv);
 
     printf("==== rpc serviceZMQ wait for calling ====\n");
+
+    //TODO
+    //CZMQUtils::CzmqProxy(nullptr, endpoint.c_str(), nullptr);
 
     while (true) {
         sleep(5);

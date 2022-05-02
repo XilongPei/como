@@ -32,6 +32,8 @@ public:
 
 };
 
+// 'a' here is a placeholder. Without it, there can be no parentheses when
+// referring to this macro
 #define RuntimeMonitor_Log(a)  \
            RuntimeMonitor_Log_ __runtimeMonitor_Log_((const char*)__FUNCTION__);
 

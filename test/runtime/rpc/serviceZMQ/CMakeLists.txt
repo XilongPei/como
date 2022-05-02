@@ -22,7 +22,9 @@ set(SERVICE_OBJ_DIR ${RPC_OBJ_DIR}/serviceZMQ)
 include_directories(
     ./
     ${INC_DIR}
-    ${SERVICE_OBJ_DIR})
+    ${SERVICE_OBJ_DIR}
+    ${EXTERNAL_DIR}/libzmq/include
+)
 
 set(SOURCES
     main.cpp)

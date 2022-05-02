@@ -70,6 +70,22 @@ void *CZMQUtils::CzmqGetContext() {
  */
 void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 {
+    if (type < 0) {
+    // Workers in ZeroMQ multithreaded programming model
+        if (nullptr == context)
+            context = CzmqGetContext();
+
+        // Socket to talk to dispatcher
+        void *receiver = zmq_socket(context, ZMQ_REP);
+
+        if (nullptr == endpoint)
+            zmq_connect(receiver, "inproc://workers");
+        else
+            zmq_connect(receiver, endpoint);
+
+        return receiver;
+    }
+
     EndpointSocket *endpointSocket;
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, 4096, endpoint);
@@ -546,6 +562,41 @@ void CZMQUtils::CzmqPoll()
      * ZMQ_POLLOUT, ZMQ_POLLERR.
      */
     zmq_poll(zmq_pollitems, zmq_pollitemNum, 1000);
+}
+
+/**
+ * parameter example:
+ *      tcpEndpoint: "tcp://*:5555"
+ *      inprocEndpoint: "inproc://workers"
+ */
+int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
+                                                     const char *inprocEndpoint)
+{
+    if (nullptr == context)
+        context = CzmqGetContext();
+
+    // Socket to talk to clients
+    void *clients = zmq_socket(context, ZMQ_ROUTER);
+    zmq_bind(clients, tcpEndpoint);
+
+    // Socket to talk to workers
+    void *workers = zmq_socket(context, ZMQ_DEALER);
+
+    if (nullptr != inprocEndpoint)
+        zmq_bind(workers, inprocEndpoint);
+    else
+        zmq_bind(workers, "inproc://workers");
+
+
+    // Connect Worker threads to client threads via a queue proxy
+    zmq_proxy(clients, workers, nullptr);
+
+    // We never get here, but clean up anyhow
+    zmq_close(clients);
+    zmq_close(workers);
+    zmq_ctx_destroy(context);
+
+    return 0;
 }
 
 } // namespace como

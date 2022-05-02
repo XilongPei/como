@@ -14,7 +14,7 @@
 # limitations under the License.
 #=========================================================================
 
-set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/ZeroMQ)
+set(RPCZeroMQ_SRC_DIR ${RPC_SRC_DIR}/ZeroMQ)
 
 # libzmq is optional part of COMO
 if(NOT EXISTS "${EXTERNAL_DIR}/libzmq/include/zmq.h")
@@ -45,3 +45,13 @@ set(SOURCES
 add_library(rpc-ZeroMQ STATIC
     ${SOURCES})
 add_dependencies(rpc-ZeroMQ cdl)
+
+COPY(rpc-ZeroMQ ${RPCZeroMQ_SRC_DIR}/CZMQUtils.h ${INC_DIR})
+
+set(DEPLOY_HEADERS
+    ${RPCZeroMQ_SRC_DIR}/CZMQUtils.h
+)
+
+install(FILES
+    ${DEPLOY_HEADERS}
+    DESTINATION ${INC_DIR})

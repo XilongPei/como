@@ -22,8 +22,6 @@
 #include "zmq.h"
 #include "comotypes.h"
 #include "comoref.h"
-#include "util/arraylist.h"
-#include "util/mutex.h"
 
 namespace como {
 
@@ -93,6 +91,9 @@ public:
     static void *CzmqSocketMonitor(const char *serverName);
 
     static void CzmqPoll();
+
+    static int CzmqProxy(void *context, const char *tcpEndpoint,
+                                                    const char *inprocEndpoint);
 
     // milliseconds
     static int ZMQ_RCV_TIMEOUT;
