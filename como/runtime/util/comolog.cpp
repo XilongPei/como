@@ -33,7 +33,7 @@ namespace como {
 static Logger logger;
 
 int Logger::sLevel = DEBUG;
-char Logger::szSamplingTag[32] = {'\0'};
+char Logger::szSamplingTag[32] = {'S', '\0'};
 
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
@@ -84,7 +84,7 @@ void Logger::D(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s DEBUG %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s DEBUG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_DEBUG, "", "", "", 0, buf, argList);
@@ -104,7 +104,7 @@ void Logger::E(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s ERROR %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s ERROR %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_ERROR, "", "", "", 0, buf, argList);
@@ -124,7 +124,7 @@ void Logger::V(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s VERBOSE %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s VERBOSE %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_VERBOSE, "", "", "", 0, buf, argList);
@@ -144,7 +144,7 @@ void Logger::W(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s WARNING %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s WARNING %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_WARN, "", "", "", 0, buf, argList);
@@ -184,7 +184,7 @@ void Logger::Log(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s LOG %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(level, tag, "", "", 0, buf, argList);
@@ -205,7 +205,7 @@ void Logger::Log(
     GetLocalTimeWithMs(currentTime, 64);
 
     char buf[256];
-    snprintf(buf, sizeof(buf)-1, "[%s %d %s LOG %s]: %s", szSamplingTag,
+    snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     elog_output_args(level, tag, "", "", 0, buf, argList);
 }
