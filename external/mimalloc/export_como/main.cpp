@@ -68,12 +68,23 @@ int main(){
     FREE_MEM_FUNCTION fun2;
 
     //mi_heap_new();
-    setupFscpMemAreas(area,2,fun1,fun2);
+    int ret = setupFscpMemAreas(area,2,fun1,fun2);
+    if(ret < 0 ){
+      return 0;
+    }
     void* p = area_malloc(0,16);
     void* p2 = area_malloc(1,16);
     
-    printf("fscp area(%p) : in heap 1 malloc %p\n",start, p);
-    printf("fscp area(%p) : in heap2 mallco %p\n",start2, p2);
+    fprintf(stderr, "fscp area(%p) : in heap1 malloc %p\n",start, p);
+    fprintf(stderr,"fscp area(%p) : in heap2 malloc %p\n",start2, p2);
+    //mi_stats_print(NULL);
+
+    mi_free(p);
+    mi_free(p2);
+
+    p2 = area_malloc(1,1025);
+    fprintf(stderr,"fscp area(%p) : in heap2 malloc %p\n",start2, p2);
+    mi_free(p2);
 
   return 0;
 }
