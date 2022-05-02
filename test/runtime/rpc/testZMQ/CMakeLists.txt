@@ -14,10 +14,10 @@
 # limitations under the License.
 #=========================================================================
 
-project(RpcZmqTest CXX)
+project(testZMQ CXX)
 
-set(SERVICE_SRC_DIR ${RPC_SRC_DIR}/serviceZMQ)
-set(SERVICE_OBJ_DIR ${RPC_OBJ_DIR}/serviceZMQ)
+set(SERVICE_SRC_DIR ${RPC_SRC_DIR}/testZMQ)
+set(SERVICE_OBJ_DIR ${RPC_OBJ_DIR}/testZMQ)
 
 include_directories(
     ./
@@ -35,11 +35,11 @@ set(GENERATED_SOURCES
 IMPORT_LIBRARY(comort.so)
 IMPORT_LIBRARY(libservicemanager.so)
 
-add_executable(testRPCZmqSrv
+add_executable(testZMQ
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(testRPCZmqSrv comort.so libservicemanager.so pthread)
-add_dependencies(testRPCZmqSrv RPCTestUnit libservicemanager)
+target_link_libraries(testZMQ comort.so libservicemanager.so pthread)
+add_dependencies(testZMQ RPCTestUnit libservicemanager)
 
 add_custom_command(
     OUTPUT
@@ -51,10 +51,10 @@ add_custom_command(
         -d ${SERVICE_OBJ_DIR}
         -metadata-so "${BIN_DIR}/RPCTestUnit.so")
 
-COPY(testRPCZmqSrv ${SERVICE_OBJ_DIR}/testRPCZmqSrv ${BIN_DIR})
+COPY(testZMQ ${SERVICE_OBJ_DIR}/testZMQ ${BIN_DIR})
 
 install(FILES
-    ${SERVICE_OBJ_DIR}/testRPCZmqSrv
+    ${SERVICE_OBJ_DIR}/testZMQ
     DESTINATION ${BIN_DIR}
     PERMISSIONS
         OWNER_READ

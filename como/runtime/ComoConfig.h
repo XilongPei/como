@@ -74,6 +74,9 @@ public:
     // TPZA: Thread Pool ZMQ Actor
     static Long TPZA_TASK_EXPIRES;
 
+    static char *localhostTcpEndpoint;
+    static char *localhostInprocEndpoint;
+
     static int ThreadPoolChannelInvoke_MAX_THREAD_NUM;
     static int Logger_sLevel;
 

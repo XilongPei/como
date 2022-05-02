@@ -566,7 +566,7 @@ void CZMQUtils::CzmqPoll()
 
 /**
  * parameter example:
- *      tcpEndpoint: "tcp://*:5555"
+ *      tcpEndpoint: "tcp://127.0.0.1:5555"
  *      inprocEndpoint: "inproc://workers"
  */
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
@@ -577,7 +577,10 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
-    zmq_bind(clients, tcpEndpoint);
+    if (nullptr != tcpEndpoint)
+        zmq_bind(clients, tcpEndpoint);
+    else
+        zmq_bind(clients, "tcp://127.0.0.1:4800");
 
     // Socket to talk to workers
     void *workers = zmq_socket(context, ZMQ_DEALER);
