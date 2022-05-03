@@ -392,6 +392,11 @@ void mi_thread_stats_print_out(mi_output_fun* out, void* arg) mi_attr_noexcept {
   _mi_stats_print(mi_stats_get_default(), out, arg);
 }
 
+void mi_areaHeap_stats_print(void* out, void* heapPointer) mi_attr_noexcept {
+  // unsafe now
+  mi_heap_t* heap = (mi_heap_t*)heapPointer;
+  _mi_stats_print(&heap->tld->stats, out, NULL);
+}
 
 // ----------------------------------------------------------------
 // Basic timer for convenience; use milli-seconds to avoid doubles

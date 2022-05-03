@@ -671,7 +671,7 @@ static void* mi_os_mem_alloc_aligned(size_t size, size_t alignment, bool commit,
   // qjy : 回到了底层调用mmap
   void* p = mi_os_mem_alloc(size, alignment, commit, allow_large, is_large, stats);
   if (p == NULL) return NULL;
-  fprintf(stderr,"7.1 qjy debug mi_os_mem_alloc_aligned: back from mmap (%p),(%d)\n",p,((uintptr_t)p % alignment != 0));
+  //fprintf(stderr,"7.1 qjy debug mi_os_mem_alloc_aligned: back from mmap (%p),(%d)\n",p,((uintptr_t)p % alignment != 0));
 
   // if not aligned, free it, overallocate, and unmap around it
   if (((uintptr_t)p % alignment != 0)) {

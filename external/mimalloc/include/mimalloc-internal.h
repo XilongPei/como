@@ -43,15 +43,15 @@ terms of the MIT license. A copy of the license can be found in the file
 #endif
 
 // "mimalloc_utils.c"
-#define  FSCP_MEM_AREA_MAX  10 //最大分区数量支持到10，暂时
-#define  FSCP_MEM_BLOCK_MAX 10 //分区内的4M block数量最大支持到10，暂时
-typedef struct tagFSCP_INTERNAL_SEGMENT{
-    int areaNum;    //分区序号，-1则未被使用
-    int blockNum;   //分区内可用于segment的块数
-    void* memBase[FSCP_MEM_BLOCK_MAX];   //每块的起始地址数组，大小和地址都为4M对齐
-    bool  memBaseState[FSCP_MEM_BLOCK_MAX]; //每块的状态，是否已被使用
-    mi_heap_t* heapBelongTo; //所属的heap
-}FSCP_INTERNAL_SEGMENT;
+#define FSCP_MEM_AREA_MAX 10   //最大分区数量支持到10，暂时
+#define FSCP_MEM_BLOCK_MAX 10  //分区内的4M block数量最大支持到10，暂时
+typedef struct tagFSCP_INTERNAL_SEGMENT {
+    int areaNum;                            //分区序号，-1则未被使用
+    int blockNum;                           //分区内可用于segment的块数
+    void* memBase[FSCP_MEM_BLOCK_MAX];      //每块的起始地址数组，大小和地址都为4M对齐
+    bool memBaseState[FSCP_MEM_BLOCK_MAX];  //每块的状态，是否已被使用
+    mi_heap_t* heapBelongTo;                //所属的heap
+} FSCP_INTERNAL_SEGMENT;
 
 // "options.c"
 void       _mi_fputs(mi_output_fun* out, void* arg, const char* prefix, const char* message);

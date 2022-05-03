@@ -182,7 +182,7 @@ static bool mi_region_try_alloc_os(size_t blocks, bool commit, bool allow_large,
   bool is_pinned = false;
   size_t arena_memid = 0;
   // qjy : 一次region内存申请都是64blocks，应该是预期用于管理segment分配
-  fprintf(stderr,"6 qjy debug mi_region_try_alloc_os: go into _mi_arena_alloc_aligned size(%llu)\n",MI_REGION_SIZE);
+  //fprintf(stderr,"6 qjy debug mi_region_try_alloc_os: go into _mi_arena_alloc_aligned size(%llu)\n",MI_REGION_SIZE);
   void* const start = _mi_arena_alloc_aligned(MI_REGION_SIZE, MI_SEGMENT_ALIGN, &region_commit, &region_large, &is_pinned, &is_zero, &arena_memid, tld);
   if (start == NULL) return false;
   mi_assert_internal(!(region_large && !allow_large));
@@ -217,7 +217,7 @@ static bool mi_region_try_alloc_os(size_t blocks, bool commit, bool allow_large,
   info.x.numa_node = (short)_mi_os_numa_node(tld);
   mi_atomic_store_release(&r->info, info.value); // now make it available to others
   *region = r;
-  fprintf(stderr,"9  qjy debug mi_region_try_alloc_os: get a region (%p) arena_memid(%ld)\n",r,arena_memid);
+  //fprintf(stderr,"9  qjy debug mi_region_try_alloc_os: get a region (%p) arena_memid(%ld)\n",r,arena_memid);
   return true;
 }
 
@@ -275,7 +275,7 @@ static void* mi_region_try_alloc(size_t blocks, bool* commit, bool* large, bool*
   // try to claim in existing regions
   if (!mi_region_try_claim(numa_node, blocks, *large, &region, &bit_idx, tld)) {
     // otherwise try to allocate a fresh region and claim in there
-    fprintf(stderr,"5 qjy debug mi_region_try_alloc: go into mi_region_try_alloc_os blocks(%lu)\n",blocks);
+    //fprintf(stderr,"5 qjy debug mi_region_try_alloc: go into mi_region_try_alloc_os blocks(%lu)\n",blocks);
     if (!mi_region_try_alloc_os(blocks, *commit, *large, &region, &bit_idx, tld)) {
       // qjy : 一般不会失败，因为mi_region_try_alloc_os内部的_mi_arena_alloc_aligned最后都会fall to os
       // qjy : 会从os申请64*segment_size的region用作使用
@@ -397,11 +397,11 @@ void* _mi_mem_alloc_aligned(size_t size, size_t alignment, bool* commit, bool* l
     *is_pinned = false;
     *is_zero = true;
     *memid = 1;
-    fprintf(stderr, "4.2 qjy debug _mi_mem_alloc_aligned: segment(%p),commit(%d),large(%d),is_pinned(%d),is_zero(%d),memid(%ld),workNo(%d)\n",p,*commit,*large,*is_pinned,*is_zero,*memid,111);
+    //fprintf(stderr, "4.2 qjy debug _mi_mem_alloc_aligned: segment(%p),commit(%d),large(%d),is_pinned(%d),is_zero(%d),memid(%ld),workNo(%d)\n",p,*commit,*large,*is_pinned,*is_zero,*memid,111);
   }else{
     const size_t blocks = mi_region_block_count(size);
     if (blocks <= MI_REGION_MAX_OBJ_BLOCKS && alignment <= MI_SEGMENT_ALIGN) {
-      fprintf(stderr,"4 qjy debug _mi_mem_alloc_aligned: go into mi_region_try_alloc blocks(%lu)\n",blocks);
+      //fprintf(stderr,"4 qjy debug _mi_mem_alloc_aligned: go into mi_region_try_alloc blocks(%lu)\n",blocks);
       // qjy : mi_region_try_alloc实际内部当从region获取失败时，会继续从OS尝试。相当覆盖下面的_mi_arena_alloc_aligned
       p = mi_region_try_alloc(blocks, commit, large, is_pinned, is_zero, memid, tld);    
       if (p == NULL) {
@@ -413,7 +413,7 @@ void* _mi_mem_alloc_aligned(size_t size, size_t alignment, bool* commit, bool* l
       // qjy ： 这种无region管理分配，直接利用mmap分配4M大小，应该为早期代码
       p = _mi_arena_alloc_aligned(size, alignment, commit, large, is_pinned, is_zero, &arena_memid, tld);
       *memid = mi_memid_create_from_arena(arena_memid);
-      fprintf(stderr, "4.1 qjy debug _mi_mem_alloc_aligned: commit(%d),large(%d),is_pinned(%d),is_zero(%d),memid(%ld)\n",*commit,*large,*is_pinned,*is_zero,*memid);
+      //fprintf(stderr, "4.1 qjy debug _mi_mem_alloc_aligned: commit(%d),large(%d),is_pinned(%d),is_zero(%d),memid(%ld)\n",*commit,*large,*is_pinned,*is_zero,*memid);
     }
   }
 

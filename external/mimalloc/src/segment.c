@@ -632,9 +632,9 @@ static mi_segment_t* mi_segment_init(mi_segment_t* segment, size_t required, mi_
     size_t memid;
     bool   mem_large = (!eager_delayed && (MI_SECURE==0)); // only allow large OS pages once we are no longer lazy
     bool   is_pinned = false;
-    fprintf(stderr,"3 mi_segment_init: go into _mi_mem_alloc_aligned size(%lu)\n",segment_size);
+    //fprintf(stderr,"3 qjy mi_segment_init: go into _mi_mem_alloc_aligned size(%lu)\n",segment_size);
     segment = (mi_segment_t*)_mi_mem_alloc_aligned(segment_size, MI_SEGMENT_SIZE, &commit, &mem_large, &is_pinned, &is_zero, &memid, os_tld);
-    fprintf(stderr,"!!!mi_segment_init: commit(%d),mem_large(%d),is_pinned(%d),is_zero(%d),memid(%lu)\n",commit,mem_large,is_pinned,is_zero,memid);
+    //fprintf(stderr,"!!!mi_segment_init: qjy commit(%d),mem_large(%d),is_pinned(%d),is_zero(%d),memid(%lu)\n",commit,mem_large,is_pinned,is_zero,memid);
 
     if (segment == NULL) return NULL;  // failed to allocate
     if (!commit) {
@@ -705,7 +705,7 @@ static mi_segment_t* mi_segment_init(mi_segment_t* segment, size_t required, mi_
 情况2时，调用处mi_segment_huge_page_alloc
 */
 static mi_segment_t* mi_segment_alloc(size_t required, mi_page_kind_t page_kind, size_t page_shift, mi_segments_tld_t* tld, mi_os_tld_t* os_tld) {
-  fprintf(stderr,"2 mi_segment_alloc: go into mi_segment_init\n" );
+  //fprintf(stderr,"2 qjy mi_segment_alloc: go into mi_segment_init\n" );
   return mi_segment_init(NULL, required, page_kind, page_shift, tld, os_tld);
 }
 
@@ -1233,7 +1233,7 @@ static mi_segment_t* mi_segment_reclaim_or_alloc(mi_heap_t* heap, size_t block_s
   mi_segment_t* segment = mi_segment_cache_pop(MI_SEGMENT_SIZE, tld);
   if (segment != NULL) {
     //qjy : 获取到的segment应该是脏数据，重新init流程
-    fprintf(stderr,"qjy debug mi_segment_reclaim_or_alloc1: go into mi_segment_init\n" );
+    //fprintf(stderr,"qjy debug mi_segment_reclaim_or_alloc1: go into mi_segment_init\n" );
     mi_segment_init(segment, 0, page_kind, page_shift, tld, os_tld);
     return segment;
   }
@@ -1252,7 +1252,7 @@ static mi_segment_t* mi_segment_reclaim_or_alloc(mi_heap_t* heap, size_t block_s
   }
   // 3. otherwise allocate a fresh segment
   // qjy : 其他方式获取一个新的segment（OS分配或Region分配）
-  fprintf(stderr,"1 qjy debug mi_segment_reclaim_or_alloc2: go into mi_segment_alloc,heap(%p)\n",heap);
+  //fprintf(stderr,"1 qjy debug mi_segment_reclaim_or_alloc2: go into mi_segment_alloc,heap(%p)\n",heap);
   return mi_segment_alloc(0, page_kind, page_shift, tld, os_tld);
 }
 

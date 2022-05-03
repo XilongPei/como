@@ -105,16 +105,17 @@ extern "C" {
 typedef void* (*COMO_MALLOC)(short, size_t);
 typedef void (*FREE_MEM_FUNCTION)(short, const void*);
 
-// 提供给外部
 typedef struct tagFSCP_MEM_AREA_INFO {
-    size_t mem_size;        // Size of space to be managed
-    void  *base;            // Base address of space to be managed
-    size_t allocated;       // Allocated size
+    size_t mem_size;   // Size of space to be managed
+    void* base;        // Base address of space to be managed
+    size_t allocated;  // Allocated size
 } FSCP_MEM_AREA_INFO;
 
-mi_decl_nodiscard mi_decl_export mi_decl_restrict int setupFscpMemAreas(void *MemAreasInfo, int numAreas, COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
-mi_decl_nodiscard mi_decl_export mi_decl_restrict void *area_malloc(short iMemArea, size_t size);
-mi_decl_export void area_free(short iMemArea, const void *ptr);
+mi_decl_nodiscard mi_decl_export mi_decl_restrict int mi_setupFscpMemAreas(void* MemAreasInfo, int numAreas, COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
+mi_decl_nodiscard mi_decl_export mi_decl_restrict void* mi_area_malloc(short iMemArea, size_t size);
+mi_decl_export void mi_area_free(short iMemArea, const void* ptr);
+mi_decl_export void mi_area_info(short iMemArea);
+mi_decl_export void mi_areaHeap_stats_print(void* out, void* heapPointer) mi_attr_noexcept; 
 
 // --------------------------FSCP--------------------------------------
 

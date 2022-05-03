@@ -163,7 +163,7 @@ void* _mi_arena_alloc_aligned(size_t size, size_t alignment, bool* commit, bool*
   *is_zero = false;
   *is_pinned = false;
 
-  fprintf(stderr,"7 qjy debug 共同路径 _mi_arena_alloc_aligned: %lu,%d,%d,%d\n",size,alignment <= MI_SEGMENT_ALIGN,size >= MI_ARENA_MIN_OBJ_SIZE,mi_atomic_load_relaxed(&mi_arena_count) > 0);
+  //fprintf(stderr,"7 qjy debug 共同路径 _mi_arena_alloc_aligned: %lu,%d,%d,%d\n",size,alignment <= MI_SEGMENT_ALIGN,size >= MI_ARENA_MIN_OBJ_SIZE,mi_atomic_load_relaxed(&mi_arena_count) > 0);
 
   // try to allocate in an arena if the alignment is small enough
   // and the object is not too large or too small.

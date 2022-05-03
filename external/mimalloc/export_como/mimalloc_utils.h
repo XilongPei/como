@@ -17,14 +17,15 @@
 #ifndef __MIMALLOC_UTILS_H__
 #define __MIMALLOC_UTILS_H__
 
+#include <stddef.h>  // size_t
 namespace como {
 
-using COMO_MALLOC = void*(*)(short,size_t);
-using FREE_MEM_FUNCTION = void(*)(short,const void*);
+using COMO_MALLOC = void *(*)(short, size_t);
+using FREE_MEM_FUNCTION = void (*)(short, const void *);
 
 class MimallocUtils {
-public:
-/*  Management of memory distributed in multiple areas.
+   public:
+    /*  Management of memory distributed in multiple areas.
     FSCP: Function Safety Computing Platform
 
 The map of multiple areas memory:
@@ -37,8 +38,7 @@ The map of multiple areas memory:
     /**
      * Tell mimalloc areas information
      */
-    static int setupFscpMemAreas(void *MemAreasInfo, int numAreas,
-                                 COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree);
+    static int setupFscpMemAreas(void *MemAreasInfo, int numAreas, COMO_MALLOC &mimalloc, FREE_MEM_FUNCTION &mifree);
 
     // alloc memory from curFscpMemArea
     static void *area_malloc(short iMemArea, size_t size);
@@ -47,6 +47,6 @@ The map of multiple areas memory:
     static void area_free(short iMemArea, const void *ptr);
 };
 
-} // namespace como
+}  // namespace como
 
-#endif // __MIMALLOC_UTILS_H__
+#endif  // __MIMALLOC_UTILS_H__
