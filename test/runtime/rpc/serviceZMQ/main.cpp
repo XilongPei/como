@@ -84,10 +84,9 @@ int main(int argv, char** argc)
                                                 String("ServiceManager"),
                                                 String("rpcserviceZMQ"), srv);
 
-    printf("==== rpc serviceZMQ wait for calling ====\n");
+    printf("RPC serviceZMQ waiting for calling endpoint: %s\n", endpoint.c_str());
 
-    //TODO
-    //CZMQUtils::CzmqProxy(nullptr, endpoint.c_str(), nullptr);
+    CZMQUtils::CzmqProxy(nullptr, endpoint.c_str(), nullptr);
 
     while (true) {
         sleep(5);

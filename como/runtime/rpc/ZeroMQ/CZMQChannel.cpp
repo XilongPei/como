@@ -46,44 +46,8 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
-    , mSocket(nullptr)
 {
-    std::string name;
-    std::string endpoint;
-    void *socket;
-
-    std::map<std::string, ServerNodeInfo*>::iterator iter =
-               ComoConfig::ServerNameEndpointMap.find(std::string("localhost"));
-    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
-        name = iter->first;
-        endpoint = iter->second->endpoint;
-    }
-    else {
-        Logger::E("CZMQChannel", "Hasn't register any servers");
-        return;
-    }
-
-    if (nullptr != iter->second->socket) {
-        socket = iter->second->socket;
-        iter->second->inChannel++;
-    }
-    else {
-        // I am server, I will accept incoming connections on a socket
-        socket = CZMQUtils::CzmqGetSocket(nullptr, endpoint.c_str(), ZMQ_REP);
-        if (nullptr != socket) {
-            iter->second->socket = socket;
-            iter->second->inChannel++;
-        }
-        else {
-            Logger::E("CZMQChannel",
-                      "CzmqGetSocket error, channel endpoint: %s",
-                      endpoint.c_str());
-            return;
-        }
-    }
-
-    mSocket = socket;
-    mEndpoint = endpoint;
+    mEndpoint = ComoConfig::localhostInprocEndpoint;
 }
 
 ECode CZMQChannel::Apply(

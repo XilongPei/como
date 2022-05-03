@@ -44,7 +44,6 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub,
 {
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
 
-    mSocket = channel->GetSocket();
     Long serverObjectId;
     channel->GetServerObjectId(mChannel);
 }
@@ -55,17 +54,6 @@ TPZA_Executor::Worker::~Worker()
  * The ZeroMQ socket managed by ZeroMQ/zmq_sockets are always open. In order to
  * improve the efficiency of use, always maintain the connection with all servers.
  */
-#if 0
-    int num = ThreadPoolZmqActor::countWorkerBySocket(mSocket);
-    if (1 == num) {
-        if (zmq_close(mSocket) != 0)
-            Logger::E("TPZA_Executor::Worker::~Worker", "zmq_close() errno %d", zmq_errno());
-    }
-    else if (0 == num) {
-        Logger::E("TPZA_Executor::Worker::~Worker",
-                                "The Worker can't be found in ThreadPoolZmqActor::mWorkerList");
-    }
-#endif
 }
 
 static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
@@ -86,13 +74,20 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
     int numberOfBytes;
     HANDLE resData;
     Long resSize;
+    void *socket;
 
 #if 0
     Logger::D("TPZA_Executor::Worker::HandleMessage",
               "Try to CzmqRecvMsg from endpoint %s", mEndpoint.c_str());
 #endif
 
-    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, mSocket, msg, 0);
+    socket = CZMQUtils::CzmqPoll();
+    if (nullptr == socket) {
+        mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+        return nullptr;
+    }
+
+    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (iRet > 0) {
         clock_gettime(CLOCK_REALTIME, &lastAccessTime);
@@ -152,7 +147,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                         if (nullptr != TPZA_Executor::defaultHandleMessage) {
                             if (TPZA_Executor::defaultHandleMessage(
                                 reinterpret_cast<HANDLE>(nullptr), eventCode,
-                                                           mSocket, msg) != 0) {
+                                                           socket, msg) != 0) {
                                 Logger::E("TPZA_Executor::Worker::HandleMessage",
                                                   "defaultHandleMessage error");
                             }
@@ -170,7 +165,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                 }
 HandleMessage_Method_Invoke:
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
-                                       mSocket, (const void *)resData, resSize);
+                                       socket, (const void *)resData, resSize);
 
                 // `ReleaseWorker`, This Worker is a daemon
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -208,11 +203,11 @@ HandleMessage_Method_Invoke:
 
                 ReleaseCoclassID(cid);
                 if (SUCCEEDED(ec)) {
-                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, socket,
                                     metadata.GetPayload(), metadata.GetLength());
                 }
                 else {
-                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                    numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, socket,
                                                                    (char*)"", 1);
                 }
 
@@ -224,7 +219,7 @@ HandleMessage_GetComponentMetadata:
                 resData = reinterpret_cast<HANDLE>((char*)"");
                 resSize = 1;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
-                                       mSocket, (const void *)resData, resSize);
+                                       socket, (const void *)resData, resSize);
 
                 // `ReleaseWorker`, This Worker is a daemon
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -233,7 +228,7 @@ HandleMessage_GetComponentMetadata:
 
             case ZmqFunCode::Actor_IsPeerAlive: {
                 Boolean b = true;
-                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, mSocket,
+                numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, socket,
                                              (const void *)&b, sizeof(Boolean));
                 // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -256,7 +251,7 @@ HandleMessage_GetComponentMetadata:
                 }
 
 HandleMessage_Object_Release:
-                SendECode(mChannel, mSocket, ec);
+                SendECode(mChannel, socket, ec);
 
                 // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -271,7 +266,7 @@ HandleMessage_Object_Release:
                     resData = reinterpret_cast<HANDLE>(string.string());
                     resSize = string.GetByteLength();
                     numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
-                                       mSocket, (const void *)resData, resSize);
+                                       socket, (const void *)resData, resSize);
 
                     // `ReleaseWorker`, This Worker is a daemon
                     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -279,7 +274,7 @@ HandleMessage_Object_Release:
                 }
 
 HandleMessage_RuntimeMonitor:
-                SendECode(mChannel, mSocket, ec);
+                SendECode(mChannel, socket, ec);
 
                 // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -290,7 +285,7 @@ HandleMessage_RuntimeMonitor:
             default:
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
                     if (TPZA_Executor::defaultHandleMessage(
-                        reinterpret_cast<HANDLE>(nullptr), eventCode, mSocket, msg) != 0) {
+                        reinterpret_cast<HANDLE>(nullptr), eventCode, socket, msg) != 0) {
                         Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
                     }
                     else {
@@ -299,11 +294,11 @@ HandleMessage_RuntimeMonitor:
                         return nullptr;
                     }
                 }
-                SendECode(mChannel, mSocket, NOERROR);
+                SendECode(mChannel, socket, NOERROR);
         }
     }
     else if (iRet < 0) {
-        SendECode(mChannel, mSocket, NOERROR);
+        SendECode(mChannel, socket, NOERROR);
     }
 
     mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -391,21 +386,15 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             }
         }
         if (iWorkerInQueue < 0) {
-            if ((size_t)threadData % 2 == 0) {
-                struct timespec curTime;
-                CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
-                while ((! signal_) && (! shutdown)) {
-                    // The work of cleaning up the mWorkerList later may
-                    // also need to be done regularly
-                    pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
-                }
-                signal_ = false;
-                pthread_mutex_unlock(&pthreadMutex);
+            struct timespec curTime;
+            CalWaitTime(curTime, 1000 * 60 * 5);    // 60*5 seconds
+            while ((! signal_) && (! shutdown)) {
+                // The work of cleaning up the mWorkerList later may
+                // also need to be done regularly
+                pthread_cond_timedwait(&pthreadCond, &pthreadMutex, &curTime);
             }
-            else {
-                pthread_mutex_unlock(&pthreadMutex);
-                CZMQUtils::CzmqPoll();
-            }
+            signal_ = false;
+            pthread_mutex_unlock(&pthreadMutex);
         }
         else {
             pthread_mutex_unlock(&pthreadMutex);
@@ -462,17 +451,7 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());
 
-            EndpointSocket *eps = CZMQUtils::CzmqFindSocket(worker->mEndpoint);
-            assert(eps->socket == worker->mSocket);
-
-            if (nullptr != eps) {
-            // Do not use the same ZeroMQ socket in multiple threads, that is,
-            // socket can only be used in one thread.
-
-                pthread_mutex_lock(&(eps->mutex));
-                workerRet = worker->HandleMessage();
-                pthread_mutex_unlock(&(eps->mutex));
-            }
+            workerRet = worker->HandleMessage();
 
             if (workerRet != mWorkerList[iWorkerInQueue]) {
             // Current Worker has been processed
@@ -636,29 +615,6 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
 
     return w;
 }
-
-/*
- * Count Worker by socket
- */
-int ThreadPoolZmqActor::CountWorkerBySocket(void *socket)
-{
-    int num = 0;
-
-    pthread_mutex_lock(&pthreadMutex);
-
-    for (int i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
-            continue;
-
-        if (mWorkerList[i]->mSocket == socket)
-            num++;
-    }
-
-    pthread_mutex_unlock(&pthreadMutex);
-
-    return num;
-}
-
 
 int ThreadPoolZmqActor::CleanTask(int posWorkerList)
 {

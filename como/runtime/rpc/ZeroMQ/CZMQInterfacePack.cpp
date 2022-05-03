@@ -120,6 +120,7 @@ ECode CZMQInterfacePack::WriteToParcel(
 ECode CZMQInterfacePack::GiveMeAhand(
     /* [in] */ const String& aHand)
 {
+#if 0
     std::string name;
     std::string endpoint;
     void *socket;
@@ -152,7 +153,7 @@ ECode CZMQInterfacePack::GiveMeAhand(
     }
 
     CZMQChannel::From(mChannel)->SetSocket(socket);
-
+#endif
     return NOERROR;
 }
 

@@ -16,6 +16,7 @@
 
 #include <unordered_map>
 #include <unistd.h>
+#include "util/mutex.h"
 #include "mistring.h"
 #include "checksum.h"
 #include "ComoConfig.h"
@@ -25,8 +26,11 @@
 namespace como {
 
 static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
+
 static zmq_pollitem_t *zmq_pollitems = nullptr;
 static int zmq_pollitemNum = 0;
+static Mutex zmq_pollitemLock;
+
 static void *comoZmqContext = nullptr;
 int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 3;
 
@@ -70,22 +74,6 @@ void *CZMQUtils::CzmqGetContext() {
  */
 void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 {
-    if (type < 0) {
-    // Workers in ZeroMQ multithreaded programming model
-        if (nullptr == context)
-            context = CzmqGetContext();
-
-        // Socket to talk to dispatcher
-        void *receiver = zmq_socket(context, ZMQ_REP);
-
-        if (nullptr == endpoint)
-            zmq_connect(receiver, "inproc://workers");
-        else
-            zmq_connect(receiver, endpoint);
-
-        return receiver;
-    }
-
     EndpointSocket *endpointSocket;
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, 4096, endpoint);
@@ -120,26 +108,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 
         int rc;
 
-        int i = zmq_pollitemNum;
-        zmq_pollitemNum++;
-        zmq_pollitems = (zmq_pollitem_t*)realloc(zmq_pollitems,
-                                      sizeof(zmq_pollitem_t) * zmq_pollitemNum);
-        //
-        // ZMQ_POLLIN
-        // For ZeroMQ sockets, at least one message may be received from the
-        // socket without blocking. For standard sockets this is equivalent
-        // to the POLLIN flag of the poll() system call and generally means
-        // that at least one byte of data may be read from fd without blocking.
-        // ZMQ_POLLOUT
-        // For ZeroMQ sockets, at least one message may be sent to the socket
-        // without blocking. For standard sockets this is equivalent to the
-        // POLLOUT flag of the poll() system call and generally means that at
-        // least one byte of data may be written to fd without blocking.
-        //
-        zmq_pollitems[i].socket = socket;
-        zmq_pollitems[i].fd = 0;
-        zmq_pollitems[i].revents = 0;
-
         if (ZMQ_REP != type) {   // create outgoing connection from socket
             rc = zmq_connect(socket, bufEndpoint);
             if (rc != 0) {
@@ -148,7 +116,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
                           zmq_errno(), zmq_strerror(zmq_errno()));
                 return nullptr;
             }
-            zmq_pollitems[i].events = ZMQ_POLLOUT;
         }
         else {                   // accept incoming connections on a socket
             rc = zmq_bind(socket, bufEndpoint);
@@ -158,7 +125,6 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
                           zmq_errno(), zmq_strerror(zmq_errno()));
                 return nullptr;
             }
-            zmq_pollitems[i].events = ZMQ_POLLIN;
         }
 
         endpointSocket = new EndpointSocket();
@@ -547,8 +513,15 @@ static void *rep_socket_monitor(void *endpointSocket)
     return nullptr;
 }
 
-void CZMQUtils::CzmqPoll()
+void *CZMQUtils::CzmqPoll()
 {
+    {
+        Mutex::AutoLock lock(zmq_pollitemLock);
+        if (zmq_pollitemNum <= 0) {
+            CzmqGetSockets(nullptr, nullptr);
+        }
+    }
+
     /**
      * If none of the requested events have occurred on any zmq_pollitem_t item,
      * zmq_poll() shall wait timeout microseconds for an event to occur on any
@@ -561,7 +534,60 @@ void CZMQUtils::CzmqPoll()
      * by OR'ing a combination of the following event flags: ZMQ_POLLIN,
      * ZMQ_POLLOUT, ZMQ_POLLERR.
      */
-    zmq_poll(zmq_pollitems, zmq_pollitemNum, 1000);
+    zmq_poll(zmq_pollitems, zmq_pollitemNum, -1);
+
+    {
+        Mutex::AutoLock lock(zmq_pollitemLock);
+
+        for (int i = 0;  i < zmq_pollitemNum;  i++) {
+            if (zmq_pollitems[i].revents & ZMQ_POLLIN) {
+                zmq_pollitems[i].revents = 0;
+                return zmq_pollitems[i].socket;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
+{
+    zmq_pollitemNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
+    zmq_pollitems = (zmq_pollitem_t*)malloc(sizeof(zmq_pollitem_t) * zmq_pollitemNum);
+    if (nullptr == zmq_pollitems)
+        return -1;
+
+    if (nullptr == context)
+        context = CzmqGetContext();
+
+    for (int i = 0;  i < zmq_pollitemNum;  i++) {
+        // Socket to talk to dispatcher
+        void *socket = zmq_socket(context, ZMQ_REP);
+
+        if (nullptr == endpoint)
+            zmq_connect(socket, "inproc://workers");
+        else
+            zmq_connect(socket, endpoint);
+
+        //
+        // ZMQ_POLLIN
+        // For ZeroMQ sockets, at least one message may be received from the
+        // socket without blocking. For standard sockets this is equivalent
+        // to the POLLIN flag of the poll() system call and generally means
+        // that at least one byte of data may be read from fd without blocking.
+        // ZMQ_POLLOUT
+        // For ZeroMQ sockets, at least one message may be sent to the socket
+        // without blocking. For standard sockets this is equivalent to the
+        // POLLOUT flag of the poll() system call and generally means that at
+        // least one byte of data may be written to fd without blocking.
+        //
+        zmq_pollitems[i].socket = socket;
+        zmq_pollitems[i].fd = 0;
+        zmq_pollitems[i].revents = 0;
+        zmq_pollitems[i].events = ZMQ_POLLIN;
+    }
+
+    return 0;
 }
 
 /**

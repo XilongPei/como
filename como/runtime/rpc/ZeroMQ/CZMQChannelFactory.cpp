@@ -67,11 +67,6 @@ ECode CZMQChannelFactory::CreateChannel(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    if (CZMQChannel::From(channel)->GetSocket() == nullptr) {
-        Logger::E("CZMQChannelFactory::CreateChannel", "new CZMQChannel error");
-        return E_RUNTIME_EXCEPTION;
-    }
-
     return NOERROR;
 }
 

@@ -68,7 +68,6 @@ public:
         TPZA_Executor::Worker *HandleMessage();
 
     public:
-        void *mSocket;
         std::string mEndpoint;
         Long mChannel;
         AutoPtr<IStub> mStub;
@@ -103,11 +102,9 @@ public:
 
     static TPZA_Executor::Worker *PickWorkerByChannelHandle(
                                                 HANDLE hChannel, bool isDaemon);
-    static int CountWorkerBySocket(void *socket);
-
 private:
     static bool shutdown;
-    int mThreadNum;                                             // most thread number
+    int mThreadNum;         // most thread number
     pthread_t *pthread_id;
 
 public:

@@ -73,7 +73,7 @@ Long ComoConfig::TPZA_TASK_EXPIRES              = 1000000000L * 30; // ns, 30s
 int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;
 CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 
-int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 1;
+int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 5;
 
 char *ComoConfig::localhostTcpEndpoint = (char*)"tcp://127.0.0.1:8083";
 char *ComoConfig::localhostInprocEndpoint = (char*)"inproc://workers";

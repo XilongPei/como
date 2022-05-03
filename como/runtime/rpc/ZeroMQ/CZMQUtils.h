@@ -55,10 +55,6 @@ typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
 
 class EndpointSocket {
 public:
-    EndpointSocket()
-        : mutex(PTHREAD_MUTEX_INITIALIZER)
-    {}
-
     ~EndpointSocket() {
         int rc = zmq_close(socket);
     }
@@ -66,7 +62,6 @@ public:
 public:
     void *socket;
     std::string endpoint;
-    pthread_mutex_t mutex;
 };
 
 class CZMQUtils {
@@ -90,10 +85,12 @@ public:
 
     static void *CzmqSocketMonitor(const char *serverName);
 
-    static void CzmqPoll();
+    static void *CzmqPoll();
 
     static int CzmqProxy(void *context, const char *tcpEndpoint,
                                                     const char *inprocEndpoint);
+
+    static int CzmqGetSockets(void *context, const char *endpoint);
 
     // milliseconds
     static int ZMQ_RCV_TIMEOUT;

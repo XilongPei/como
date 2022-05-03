@@ -110,8 +110,6 @@ public:
     inline static CZMQChannel* From(
         /* [in] */ IRPCChannel* iRpcChannel);
 
-    inline void *GetSocket(void);
-    inline void SetSocket(void *socket);
     inline std::string& GetEndpoint(void);
 
 private:
@@ -124,7 +122,6 @@ private:
     String mName;
     String mServerName;
     Long mServerObjectId;
-    void *mSocket;
     std::string mEndpoint;
     Boolean mStarted;
 };
@@ -140,16 +137,6 @@ inline CZMQChannel* CZMQChannel::GetStubChannel(
     /* [in] */ IStub* stub)
 {
     return (CZMQChannel*)((CStub*)stub)->GetChannel().Get();
-}
-
-inline void *CZMQChannel::GetSocket(void)
-{
-    return mSocket;
-}
-
-inline void CZMQChannel::SetSocket(void *socket)
-{
-    mSocket = socket;
 }
 
 inline std::string& CZMQChannel::GetEndpoint(void)
