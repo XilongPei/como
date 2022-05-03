@@ -109,7 +109,7 @@ TPZA_Executor::Worker *TPZA_Executor::Worker::HandleMessage()
                                        zmq_msg_data(&msg)), zmq_msg_size(&msg));
                 if (FAILED(ec)) {
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
-                                                    "argParcel->SetData error");
+                                     "Method_Invoke, argParcel->SetData error");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
                     goto HandleMessage_Method_Invoke;
@@ -186,8 +186,15 @@ HandleMessage_Method_Invoke:
                     goto HandleMessage_GetComponentMetadata;
                 }
 
-                argParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
-                                                            zmq_msg_size(&msg));
+                ec = argParcel->SetData(reinterpret_cast<HANDLE>(
+                                       zmq_msg_data(&msg)), zmq_msg_size(&msg));
+
+                if (FAILED(ec)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                              "GetComponentMetadata, argParcel->SetData error");
+                    goto HandleMessage_GetComponentMetadata;
+                }
+
                 CoclassID cid;
                 argParcel->ReadCoclassID(cid);
                 ec = CoGetComponentMetadata(*cid.mCid, nullptr, mc);
@@ -216,6 +223,7 @@ HandleMessage_Method_Invoke:
                 return nullptr;
 
 HandleMessage_GetComponentMetadata:
+                zmq_msg_close(&msg);
                 resData = reinterpret_cast<HANDLE>((char*)"");
                 resSize = 1;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec,
@@ -230,6 +238,7 @@ HandleMessage_GetComponentMetadata:
                 Boolean b = true;
                 numberOfBytes = CZMQUtils::CzmqSendBuf(mChannel, ec, socket,
                                              (const void *)&b, sizeof(Boolean));
+                zmq_msg_close(&msg);
                 // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 return this;
@@ -245,18 +254,54 @@ HandleMessage_GetComponentMetadata:
 
                 ec = UnregisterExportObjectByHash(RPCType::Remote,
                                                     *(Long*)zmq_msg_data(&msg));
+
                 if (FAILED(ec)) {
                     Logger::E("TPZA_Executor::Worker::HandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
                 }
 
 HandleMessage_Object_Release:
+                zmq_msg_close(&msg);
                 SendECode(mChannel, socket, ec);
 
                 // `ReleaseWorker` will NOT delete this work
                 mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
 
-                return this;
+                return nullptr;
+            }
+
+            case ZmqFunCode::ReleasePeer: {
+                Worker *w;
+
+                if (zmq_msg_size(&msg) < sizeof(Long)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                             "ReleasePeer, Bad request packet");
+                    ec = ZMQ_BAD_PACKET;
+                    goto HandleMessage_Object_Release;
+                }
+
+                ec = UnregisterExportObjectByHash(RPCType::Remote,
+                                                    *(Long*)zmq_msg_data(&msg));
+
+                w = ThreadPoolZmqActor::PickWorkerByChannelHandle(hChannel, false);
+                if (nullptr != w) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                 "ReleasePeer PickWorkerByChannelHandle error");
+                }
+
+                if (FAILED(ec)) {
+                    Logger::E("TPZA_Executor::Worker::HandleMessage",
+                                          "ReleasePeer error, ECode: 0x%X", ec);
+                }
+
+HandleMessage_Object_ReleasePeer:
+                zmq_msg_close(&msg);
+                SendECode(mChannel, socket, ec);
+
+                // `ReleaseWorker` will NOT delete this work
+                mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+
+                return nullptr;
             }
 
             case ZmqFunCode::RuntimeMonitor: {
@@ -274,6 +319,7 @@ HandleMessage_Object_Release:
                 }
 
 HandleMessage_RuntimeMonitor:
+                zmq_msg_close(&msg);
                 SendECode(mChannel, socket, ec);
 
                 // `ReleaseWorker` will NOT delete this work
@@ -294,10 +340,14 @@ HandleMessage_RuntimeMonitor:
                         return nullptr;
                     }
                 }
+                zmq_msg_close(&msg);
                 SendECode(mChannel, socket, NOERROR);
         }
     }
     else if (iRet < 0) {
+        if (iRet < -1)
+            zmq_msg_close(&msg);
+
         SendECode(mChannel, socket, NOERROR);
     }
 
@@ -445,32 +495,12 @@ void *ThreadPoolZmqActor::threadFunc(void *threadData)
         pthread_mutex_unlock(&pthreadMutex);
 
         // There are Workers in the queue. Try to do all the Workers
-        AutoPtr<TPZA_Executor::Worker> workerRet;
         while ((iWorkerInQueue >= 0) && (! shutdown)) {
 
             Logger::D("ThreadPoolZmqActor::threadFunc",
                       "HandleMessage, endpoint: %s", worker->mEndpoint.c_str());
 
-            workerRet = worker->HandleMessage();
-
-            if (workerRet != mWorkerList[iWorkerInQueue]) {
-            // Current Worker has been processed
-                if (WORKER_TASK_DAEMON_RUNNING != worker->mWorkerStatus) {
-                    //@ `ReleaseWorker`
-                    REFCOUNT_RELEASE(worker);
-                    mWorkerList[iWorkerInQueue] = nullptr;
-                }
-            }
-            else {
-                //refer to `ReleaseWorkerWhenPickIt`
-                if (nullptr != workerRet) {
-                    // A Worker, not current Worker, has been processed
-                    if (WORKER_TASK_DAEMON_RUNNING != workerRet->mWorkerStatus)
-                        REFCOUNT_RELEASE(workerRet);
-                }
-                // else, (nullptr == workerRet),
-                // This Worker is a daemon, do nothing.
-            }
+            worker->HandleMessage();
 
             // look for another Worker
             iWorkerInQueue++;

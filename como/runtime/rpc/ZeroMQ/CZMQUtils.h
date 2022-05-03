@@ -32,6 +32,7 @@ public:
         Method_Invoke        = 0x0101,
         Actor_IsPeerAlive    = 0x0102,
         Object_Release       = 0x0103,
+        ReleasePeer          = 0x0104,
         AddService           = 0x0201,
         GetService           = 0x0202,
         RemoveService        = 0x0203,
