@@ -112,7 +112,7 @@ ECode CBinderChannelFactory::MarshalInterface(
                 CBinderChannel* channel = CBinderChannel::GetStubChannel(stub);
                 pack->SetAndroidBinder(channel->mBinder);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
-                RegisterExportObject(mType, IObject::Probe(object), stub);
+                RegisterExportObject(mType, IObject::Probe(object), stub, 0);
             }
         }
     }
@@ -166,7 +166,10 @@ ECode CBinderChannelFactory::UnmarshalInterface(
             return ec;
         }
 
-        RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        Long serverObjectId;
+        ipack->GetServerObjectId(serverObjectId);
+
+        RegisterImportObject(mType, ipack, IObject::Probe(proxy), serverObjectId);
 
         InterfaceID iid;
         ipack->GetInterfaceID(iid);

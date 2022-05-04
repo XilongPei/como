@@ -58,6 +58,7 @@ private:
         unsigned long mHash;
         Key mKey;
         Val mValue;
+        Long mlValue;
         struct timespec lastAccessTime;
         mutable std::atomic<Integer> mReferenceCount;
 
@@ -99,7 +100,8 @@ public:
 
     int Put(
         /* [in] */ const Key& key,
-        /* [in] */ Val value)
+        /* [in] */ Val value,
+        /* [in] */ Long lvalue)
     {
         CompareFunc<Key> compareF;
         AssignFunc<Key> assignKeyF;
@@ -119,6 +121,7 @@ public:
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
+            b->mlValue = lvalue;
             mBuckets[index] = b;
             mCount++;
             clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));
@@ -129,6 +132,7 @@ public:
             while (prev != nullptr) {
                 if (!compareF(prev->mKey, key)) {
                     assignValF(&prev->mValue, value, this);
+                    prev->mlValue = lvalue;
                     return 0;
                 }
                 else if (prev->mNext == nullptr) {
@@ -143,6 +147,7 @@ public:
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
             assignValF(&b->mValue, value, this);
+            b->mlValue = lvalue;
             prev->mNext = b;
             mCount++;
             clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));

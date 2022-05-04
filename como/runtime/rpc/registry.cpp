@@ -59,7 +59,8 @@ static Mutex sRemoteImportRegistryLock;
 ECode RegisterExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IObject* object,
-    /* [in] */ IStub* stub)
+    /* [in] */ IStub* stub,
+    /* [in] */ Long value)
 {
     if (object == nullptr || stub == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -80,7 +81,7 @@ ECode RegisterExportObject(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (0 != registry.Put(object, stub))
+    if (0 != registry.Put(object, stub, value))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
     return NOERROR;
@@ -225,7 +226,8 @@ ECode FindExportObject(
 ECode RegisterImportObject(
     /* [in] */ RPCType type,
     /* [in] */ IInterfacePack* ipack,
-    /* [in] */ IObject* object)
+    /* [in] */ IObject* object,
+    /* [in] */ Long value)
 {
     if (ipack == nullptr || object == nullptr) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -243,7 +245,7 @@ ECode RegisterImportObject(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (0 == registry.Put(ipack, object))
+    if (0 == registry.Put(ipack, object, value))
         return NOERROR;
 
     return E_OUT_OF_MEMORY_ERROR;

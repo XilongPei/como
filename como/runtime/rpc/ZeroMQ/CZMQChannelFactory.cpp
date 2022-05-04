@@ -148,7 +148,7 @@ ECode CZMQChannelFactory::MarshalInterface(
                 obj->GetHashCode(hash);
                 pack->SetServerObjectId(hash);
 
-                ec = RegisterExportObject(mType, obj, stub);
+                ec = RegisterExportObject(mType, obj, stub, hash);
                 if (FAILED(ec)) {
                     Logger::E("CZMQChannelFactory::MarshalInterface",
                                                 "RegisterExportObject failed.");
@@ -212,7 +212,11 @@ ECode CZMQChannelFactory::UnmarshalInterface(
 
         ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
 
-        ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy));
+        Long serverObjectId;
+        ipack->GetServerObjectId(serverObjectId);
+
+        ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy),
+                                                                serverObjectId);
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
                                 "RegisterImportObject failed, ECode: 0x%X", ec);

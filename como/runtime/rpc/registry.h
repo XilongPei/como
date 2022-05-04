@@ -24,7 +24,8 @@ namespace como {
 extern ECode RegisterExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IObject* object,
-    /* [in] */ IStub* stub);
+    /* [in] */ IStub* stub,
+    /* [in] */ Long value);
 
 extern ECode UnregisterExportObject(
     /* [in] */ RPCType type,
@@ -47,7 +48,8 @@ extern ECode FindExportObject(
 extern ECode RegisterImportObject(
     /* [in] */ RPCType type,
     /* [in] */ IInterfacePack* ipack,
-    /* [in] */ IObject* object);
+    /* [in] */ IObject* object,
+    /* [in] */ Long value);
 
 extern ECode UnregisterImportObject(
     /* [in] */ RPCType type,
