@@ -51,6 +51,13 @@ void *CZMQUtils::CzmqGetContext() {
     return comoZmqContext;
 }
 
+void *CZMQUtils::CzmqGetPollitemsSocket(int idSocket)
+{
+    if ((idSocket >= 0) && (idSocket < zmq_pollitemNum))
+        return zmq_pollitems[idSocket].socket;
+    return nullptr;
+}
+
 /**
  * ZMQ_REQ
  * ^^^^^^^
@@ -563,6 +570,8 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
     for (int i = 0;  i < zmq_pollitemNum;  i++) {
         // Socket to talk to dispatcher
         void *socket = zmq_socket(context, ZMQ_REP);
+        if (nullptr == socket)
+            return -1;
 
         if (nullptr == endpoint)
             zmq_connect(socket, "inproc://workers");

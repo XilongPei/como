@@ -69,6 +69,8 @@ class CZMQUtils {
 public:
     static void *CzmqGetContext();
 
+    static void *CzmqGetPollitemsSocket(int idSocket);
+
     static void *CzmqGetSocket(void *context, const char *endpoint, int type);
 
     static Integer CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,

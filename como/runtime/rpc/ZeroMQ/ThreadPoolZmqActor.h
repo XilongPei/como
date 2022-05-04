@@ -65,8 +65,6 @@ public:
         Worker(CZMQChannel *channel, AutoPtr<IStub> stub, std::string& endpoint);
         ~Worker();
 
-        TPZA_Executor::Worker *HandleMessage();
-
     public:
         std::string mEndpoint;
         Long mChannel;
@@ -105,10 +103,12 @@ public:
 private:
     static bool shutdown;
     int mThreadNum;         // most thread number
-    pthread_t *pthread_id;
+    pthread_t  pthread_id_Manager;
+    pthread_t *pthread_id_HandleMessage;
 
 public:
-    static void *threadFunc(void *threadData);
+    static void *threadManager(void *threadData);
+    static void *threadHandleMessage(void *threadData);
     static pthread_mutex_t pthreadMutex;
     static pthread_cond_t pthreadCond;
 
