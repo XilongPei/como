@@ -67,14 +67,13 @@ static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
 
 void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 {
-    HANDLE hChannel;
-    Integer eventCode;
+    void     *socket;
+    HANDLE    hChannel;
+    Integer   eventCode;
     zmq_msg_t msg;
-    ECode ec;
-    int numberOfBytes;
-    HANDLE resData;
-    Long resSize;
-    void *socket;
+    ECode     ec;
+    HANDLE    resData;
+    Long      resSize;
     TPZA_Executor::Worker *worker;
 
 #if 0
@@ -143,7 +142,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
 HandleMessage_Method_Invoke:
                 zmq_msg_close(&msg);
-                numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
 
                 // `ReleaseWorker`, This Worker is a daemon
@@ -198,11 +197,11 @@ HandleMessage_Method_Invoke:
 
                 ReleaseCoclassID(cid);
                 if (SUCCEEDED(ec)) {
-                    numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                            socket, metadata.GetPayload(), metadata.GetLength());
                 }
                 else {
-                    numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                                           socket, (char*)"", 1);
                 }
 
@@ -214,8 +213,8 @@ HandleMessage_GetComponentMetadata:
                 zmq_msg_close(&msg);
                 resData = reinterpret_cast<HANDLE>((char*)"");
                 resSize = 1;
-                numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
-                                       socket, (const void *)resData, resSize);
+                CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                                        socket, (const void *)resData, resSize);
 
                 // `ReleaseWorker`, This Worker is a daemon
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -232,8 +231,8 @@ HandleMessage_GetComponentMetadata:
                 }
 
                 Boolean b = true;
-                numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
-                                      socket, (const void *)&b, sizeof(Boolean));
+                CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
+                                     socket, (const void *)&b, sizeof(Boolean));
                 zmq_msg_close(&msg);
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 break;
@@ -256,7 +255,6 @@ HandleMessage_GetComponentMetadata:
 
                 ec = UnregisterExportObjectByHash(RPCType::Remote,
                                                     *(Long*)zmq_msg_data(&msg));
-
                 if (FAILED(ec)) {
                     Logger::E("threadHandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
@@ -319,7 +317,7 @@ HandleMessage_Object_ReleasePeer:
                 if (SUCCEEDED(ec)) {
                     resData = reinterpret_cast<HANDLE>(string.string());
                     resSize = string.GetByteLength();
-                    numberOfBytes = CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
                 }
 
@@ -336,23 +334,26 @@ HandleMessage_RuntimeMonitor:
             default:
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if (nullptr == worker) {
-                    zmq_msg_close(&msg);
                     SendECode(0, socket, ZMQ_BAD_PACKET);
-                    break;
+                    goto HandleMessage_Default;
                 }
 
                 if (nullptr != TPZA_Executor::defaultHandleMessage) {
                     if (TPZA_Executor::defaultHandleMessage(
-                        reinterpret_cast<HANDLE>(nullptr), eventCode, socket, msg) != 0) {
-                        Logger::E("TPZA_Executor::Worker::Invoke", "bad eventCode");
+                                   reinterpret_cast<HANDLE>(nullptr), eventCode,
+                                                            socket, msg) != 0) {
+                        Logger::E("threadHandleMessage",
+                                                  "defaultHandleMessage error");
                     }
                     else {
                         // defaultHandleMessage will call CzmqSendBuf
                         worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                        goto HandleMessage_Default;
                     }
                 }
-                zmq_msg_close(&msg);
                 SendECode(worker->mChannel, socket, NOERROR);
+HandleMessage_Default:
+                zmq_msg_close(&msg);
         }
     }
     else if (iRet < 0) {
@@ -469,6 +470,9 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
                 if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
+                    //@ `ReleaseWorker`
+                    // If a Worker has not been accessed for a long time or has
+                    // been actively released, it will be REFCOUNT_RELEASE
                     REFCOUNT_RELEASE(mWorkerList[i]);
                     mWorkerList[i] = nullptr;
                 }
@@ -590,7 +594,7 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
     if (i < mWorkerList.size()) {
         w = mWorkerList[i];
 
-        //@ `ReleaseWorkerWhenPickIt`
+        // `ReleaseWorker`
         if (! isDaemon) {
             REFCOUNT_RELEASE(mWorkerList[i]);
             mWorkerList[i] = nullptr;
