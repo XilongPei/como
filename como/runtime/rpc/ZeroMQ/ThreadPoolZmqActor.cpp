@@ -282,8 +282,7 @@ HandleMessage_Object_Release:
                     goto HandleMessage_Object_Release;
                 }
 
-                ec = UnregisterExportObjectByHash(RPCType::Remote,
-                                                    *(Long*)zmq_msg_data(&msg));
+                ec = UnregisterExportObjectByChannel(RPCType::Remote, hChannel);
                 if (FAILED(ec)) {
                     Logger::E("threadHandleMessage",
                                           "ReleasePeer error, ECode: 0x%X", ec);
@@ -292,9 +291,6 @@ HandleMessage_Object_Release:
 HandleMessage_Object_ReleasePeer:
                 zmq_msg_close(&msg);
                 SendECode(worker->mChannel, socket, ec);
-
-                // `ReleaseWorker` will NOT delete this work
-                worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
 
                 break;
             }

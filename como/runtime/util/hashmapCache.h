@@ -369,6 +369,28 @@ public:
         }
     }
 
+    int RemoveByValue(Long value)
+    {
+        int num = 0;
+
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+            if (mBuckets[i] != nullptr) {
+                Bucket* curr = mBuckets[i];
+                while (curr != nullptr) {
+                    if (curr->mlValue == value) {
+                        Bucket* next = curr->mNext;
+                        delete curr;
+                        mCount--;
+                        num++;
+                        curr = next;
+                    }
+                    curr = curr->mNext;
+                }
+            }
+        }
+        return num;
+    }
+
 private:
     unsigned long long int HashKey(
         /* [in] */ const Key& key)

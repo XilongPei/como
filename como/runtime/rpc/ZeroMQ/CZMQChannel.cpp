@@ -104,7 +104,7 @@ ECode CZMQChannel::ReleasePeer(
     /* [out] */ Boolean& alive)
 {
     /**
-     * 1. Find out who asked me for ReleaseObject and establish a socket
+     * 1. Find out who asked me for ReleasePeer and establish a socket
      * connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */

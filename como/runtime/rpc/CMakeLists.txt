@@ -62,9 +62,11 @@ add_library(rpc STATIC
 add_dependencies(rpc cdl)
 
 COPY(rpc ${RPC_SRC_DIR}/comorpc.h ${INC_DIR})
+COPY(rpc ${RPC_SRC_DIR}/registry.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${RPC_SRC_DIR}/comorpc.h
+    ${RPC_SRC_DIR}/registry.h
     ${RPC_SRC_DIR}/ThreadPoolChannelInvoke.h
 )
 

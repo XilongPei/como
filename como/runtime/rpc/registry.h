@@ -35,6 +35,10 @@ extern ECode UnregisterExportObjectByHash(
     /* [in] */ RPCType type,
     /* [in] */ Long hash);
 
+extern ECode UnregisterExportObjectByChannel(
+    /* [in] */ RPCType type,
+    /* [in] */ Long channel);
+
 extern ECode FindExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IObject* object,
@@ -59,6 +63,10 @@ extern ECode FindImportObject(
     /* [in] */ RPCType type,
     /* [in] */ IInterfacePack* ipack,
     /* [out] */ AutoPtr<IObject>& object);
+
+extern ECode UnregisterImportObjectByChannel(
+    /* [in] */ RPCType type,
+    /* [in] */ Long channel);
 
 extern ECode WalkExportObject(
     /* [in] */ RPCType type,

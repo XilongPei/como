@@ -33,6 +33,10 @@ public:
     static ECode ReleaseRemoteObject(
         /* [in] */ IInterface* intfService,
         /* [in] */ IInterface* obj);
+
+    static ECode ReleaseImportObject(
+        /* [in] */ IInterface* intfService,
+        /* [in] */ IInterface* obj);
 };
 
 } // namespace jing
