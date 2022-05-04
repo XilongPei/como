@@ -202,6 +202,7 @@ HandleMessage_Method_Invoke:
 
                 // `ReleaseWorker`, This Worker is a daemon
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
                 break;
 
 HandleMessage_GetComponentMetadata:
@@ -226,6 +227,8 @@ HandleMessage_GetComponentMetadata:
                                  socket, (const void *)&alive, sizeof(Boolean));
                 zmq_msg_close(&msg);
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+
                 break;
             }
 
@@ -250,6 +253,7 @@ HandleMessage_Object_Release:
 
                 // `ReleaseWorker` will NOT delete this work
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
 
                 break;
             }
