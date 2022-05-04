@@ -43,8 +43,6 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub,
     , mEndpoint(endpoint)
 {
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
-
-    Long serverObjectId;
     channel->GetServerObjectId(mChannel);
 }
 
@@ -58,9 +56,6 @@ TPZA_Executor::Worker::~Worker()
 
 static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
 {
-    HANDLE resData;
-
-    resData = reinterpret_cast<HANDLE>((char*)"");
     return CZMQUtils::CzmqSendBuf(hChannel, ec, socket,
                                               (const void *)&ec, sizeof(ECode));
 }
@@ -105,6 +100,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                                                "new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
+                    ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_Method_Invoke;
                 }
 
@@ -124,6 +120,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                                                "new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
+                    ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_Method_Invoke;
                 }
 
@@ -133,6 +130,8 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                 // A request ends, but the channel still needs to be.
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
 
+                // Even if worker->mStub->Invoke fails, the following two
+                // behaviors of taking the return value of Invoke work normally.
                 resParcel->GetData(resData);
                 resParcel->GetDataSize(resSize);
 
@@ -207,10 +206,8 @@ HandleMessage_Method_Invoke:
 
 HandleMessage_GetComponentMetadata:
                 zmq_msg_close(&msg);
-                resData = reinterpret_cast<HANDLE>((char*)"");
-                resSize = 1;
                 CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
-                                        socket, (const void *)resData, resSize);
+                                                          socket, (char*)"", 1);
 
                 // `ReleaseWorker`, This Worker is a daemon
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
@@ -218,17 +215,15 @@ HandleMessage_GetComponentMetadata:
             }
 
             case ZmqFunCode::Actor_IsPeerAlive: {
+                Boolean alive = true;
+
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if (nullptr == worker) {
-                    SendECode(0, socket, E_NOT_FOUND_EXCEPTION);
-                    zmq_msg_close(&msg);
-                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-                    break;
+                    alive = false;
                 }
 
-                Boolean b = true;
                 CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
-                                     socket, (const void *)&b, sizeof(Boolean));
+                                 socket, (const void *)&alive, sizeof(Boolean));
                 zmq_msg_close(&msg);
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 break;
@@ -236,15 +231,8 @@ HandleMessage_GetComponentMetadata:
 
             case ZmqFunCode::Object_Release: {
                 worker = PickWorkerByChannelHandle(hChannel, true);
-                if (nullptr == worker) {
+                if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
                     Logger::E("threadHandleMessage", "Bad channel value");
-                    ec = ZMQ_BAD_PACKET;
-                    goto HandleMessage_Object_Release;
-                }
-
-                if (zmq_msg_size(&msg) < sizeof(Long)) {
-                    Logger::E("threadHandleMessage",
-                                          "Object_Release, Bad request packet");
                     ec = ZMQ_BAD_PACKET;
                     goto HandleMessage_Object_Release;
                 }
@@ -267,19 +255,16 @@ HandleMessage_Object_Release:
             }
 
             case ZmqFunCode::ReleasePeer: {
-                worker = PickWorkerByChannelHandle(hChannel, false);
-                if (nullptr != worker) {
-                    Logger::E("threadHandleMessage",
-                                 "ReleasePeer PickWorkerByChannelHandle error");
-                    ec = ZMQ_BAD_PACKET;
-                    goto HandleMessage_Object_Release;
-                }
 
-                if (zmq_msg_size(&msg) < sizeof(Long)) {
-                    Logger::E("threadHandleMessage",
-                                             "ReleasePeer, Bad request packet");
+                // `ReleaseWorker` will DELETE this work
+                // PickWorkerByChannelHandle(hChannel, false); The 'false' here
+                // means it is not a daemon, life ends here.
+
+                worker = PickWorkerByChannelHandle(hChannel, false);
+                if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
+                    Logger::E("threadHandleMessage", "Bad channel value");
                     ec = ZMQ_BAD_PACKET;
-                    goto HandleMessage_Object_Release;
+                    goto HandleMessage_Object_ReleasePeer;
                 }
 
                 ec = UnregisterExportObjectByChannel(RPCType::Remote, hChannel);

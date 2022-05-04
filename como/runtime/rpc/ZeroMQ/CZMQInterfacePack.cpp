@@ -120,6 +120,9 @@ ECode CZMQInterfacePack::WriteToParcel(
 ECode CZMQInterfacePack::GiveMeAhand(
     /* [in] */ const String& aHand)
 {
+    //TODO
+    // Requests that do not come from the default port need to be forwarded to
+    // the default port
 #if 0
     std::string name;
     std::string endpoint;
