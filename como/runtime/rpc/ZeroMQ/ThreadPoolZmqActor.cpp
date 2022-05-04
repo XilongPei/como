@@ -74,21 +74,17 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     ECode     ec;
     HANDLE    resData;
     Long      resSize;
+    Integer   iRet;
     TPZA_Executor::Worker *worker;
 
-#if 0
-    Logger::D("threadHandleMessage",
-              "Try to CzmqRecvMsg from endpoint %s", mEndpoint.c_str());
-#endif
-
-  while (true) {
     socket = CZMQUtils::CzmqGetPollitemsSocket((int)(Long)threadData);
     if (nullptr == socket) {
         Logger::E("threadHandleMessage", "socket is nullptr");
-        continue;
+        return nullptr;
     }
 
-    Integer iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
+  while (true) {
+    iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (iRet > 0) {
         switch (eventCode) {
