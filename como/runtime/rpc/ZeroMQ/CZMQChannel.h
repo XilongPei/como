@@ -60,6 +60,7 @@ public:
         /* [in] */ Long serverObjectId) override;
 
     ECode IsPeerAlive(
+        /* [in, out] */ Long& lvalue,
         /* [out] */ Boolean& alive) override;
 
     ECode ReleasePeer(

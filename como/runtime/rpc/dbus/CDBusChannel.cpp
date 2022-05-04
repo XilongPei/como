@@ -542,6 +542,7 @@ ECode CDBusChannel::GetServerObjectId(
 }
 
 ECode CDBusChannel::IsPeerAlive(
+    /* [in, out] */ Long& lvalue,
     /* [out] */ Boolean& alive)
 {
     ECode ec = NOERROR;

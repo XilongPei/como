@@ -327,6 +327,7 @@ public:
         /* [out] */ AutoPtr<IMetaCoclass>& target) override;
 
     ECode IsStubAlive(
+        /* [in, out] */ Long& lvalue,
         /* [out] */ Boolean& alive) override;
 
     ECode ReleaseStub(

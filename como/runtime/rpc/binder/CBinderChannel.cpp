@@ -212,6 +212,7 @@ ECode CBinderChannel::SetServerName(
 }
 
 ECode CBinderChannel::IsPeerAlive(
+    /* [in, out] */ Long& lvalue,
     /* [out] */ Boolean& alive)
 {
     alive = mBinder->isBinderAlive() ? true : false;

@@ -41,6 +41,7 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub,
     : mStub(stub)
     , mWorkerStatus(WORKER_TASK_READY)
     , mEndpoint(endpoint)
+    , state(0)
 {
     clock_gettime(CLOCK_REALTIME, &lastAccessTime);
     channel->GetServerObjectId(mChannel);
@@ -216,15 +217,25 @@ HandleMessage_GetComponentMetadata:
             }
 
             case ZmqFunCode::Actor_IsPeerAlive: {
-                Boolean alive = true;
+                #pragma pack(1)
+                struct PeerState {
+                    Long state;
+                    Boolean alive;
+                };
+                #pragma pack()
+                PeerState peerState;
+                peerState.alive = true;
+                peerState.state = worker->state;
 
                 worker = PickWorkerByChannelHandle(hChannel, true);
-                if (nullptr == worker) {
-                    alive = false;
+                if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
+                    peerState.alive = false;
                 }
 
+                worker->state = *(Long*)zmq_msg_data(&msg);
+
                 CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
-                                 socket, (const void *)&alive, sizeof(Boolean));
+                           socket, (const void *)&peerState, sizeof(peerState));
                 zmq_msg_close(&msg);
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));

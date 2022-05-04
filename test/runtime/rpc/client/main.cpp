@@ -194,7 +194,8 @@ TEST(RPCTest, TestIsStubAlive)
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
     Boolean alive;
-    proxy->IsStubAlive(alive);
+    Long channelState = 1239;
+    proxy->IsStubAlive(channelState, alive);
     EXPECT_TRUE(alive);
 }
 

@@ -1878,9 +1878,10 @@ ECode CProxy::GetTargetCoclass(
 }
 
 ECode CProxy::IsStubAlive(
+    /* [in, out] */ Long& lvalue,
     /* [out] */ Boolean& alive)
 {
-    return mChannel->IsPeerAlive(alive);
+    return mChannel->IsPeerAlive(lvalue, alive);
 }
 
 ECode CProxy::ReleaseStub(

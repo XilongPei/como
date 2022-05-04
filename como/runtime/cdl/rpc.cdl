@@ -235,6 +235,7 @@ interface IRPCChannel
         [in] Long serverObjectId);
 
     IsPeerAlive(
+        [in, out] Long& state,
         [out] Boolean& alive);
 
     ReleasePeer(
@@ -312,6 +313,7 @@ interface IProxy
         [out] IMetaCoclass&& target);
 
     IsStubAlive(
+        [in, out] Long& state,
         [out] Boolean& alive);
 
     ReleaseStub(

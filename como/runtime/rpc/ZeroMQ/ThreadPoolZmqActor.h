@@ -71,6 +71,8 @@ public:
         AutoPtr<IStub> mStub;
         struct timespec lastAccessTime;
         int mWorkerStatus;
+
+        Long state;
     };
 
 public:

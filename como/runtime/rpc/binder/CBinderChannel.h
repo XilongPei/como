@@ -120,6 +120,7 @@ public:
         /* [in] */ const String& serverName) override;
 
     ECode IsPeerAlive(
+        /* [in, out] */ Long& lvalue,
         /* [out] */ Boolean& alive) override;
 
     ECode ReleasePeer(

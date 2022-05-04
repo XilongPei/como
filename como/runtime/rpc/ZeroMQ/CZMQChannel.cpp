@@ -93,10 +93,66 @@ ECode CZMQChannel::GetServerObjectId(
 }
 
 ECode CZMQChannel::IsPeerAlive(
+    /* [in, out] */ Long& lvalue,
     /* [out] */ Boolean& alive)
 {
-    ECode ec = NOERROR;
-    alive = true;
+    /**
+     * 1. Find out who asked me for ReleasePeer and establish a socket
+     * connection with it.
+     * 2. 'mSocket' is used to process requests, not to communicate with client
+     */
+    String serverName;
+    ECode ec = GetServerName(serverName);
+
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    if (nullptr == socket) {
+        Logger::E("CZMQChannel::ReleasePeer",
+                  "CzmqGetSocket error, endpoint: %s", serverName);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    Logger::D("CZMQChannel::ReleasePeer",
+              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+    int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
+                                        ZmqFunCode::ReleasePeer, socket,
+                                                 (void *)&lvalue, sizeof(Long));
+    if (-1 == rc) {
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    HANDLE hChannel;
+    zmq_msg_t msg;
+    rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
+    if (rc > 0) {
+        #pragma pack(1)
+        struct PeerState {
+            Long state;
+            Boolean alive;
+        };
+        #pragma pack()
+        PeerState* peerState;
+
+        if (SUCCEEDED(ec) && (zmq_msg_size(&msg) == sizeof(PeerState))) {
+            peerState = (PeerState*)zmq_msg_data(&msg);
+            lvalue = peerState->state;
+            alive = peerState->alive;
+        }
+        else {
+            alive = false;
+            Logger::E("CZMQChannel::ReleasePeer",
+                    "ObjectId: 0x%llX, Fail, ECode: 0x%X", mServerObjectId, ec);
+        }
+    }
+    else {
+        ec = ZMQ_BAD_REPLY_DATA;
+        Logger::E("CZMQChannel::ReleasePeer", "RCZMQUtils::CzmqRecvMsg().");
+    }
+
+    if ((rc < -1) || (rc > 0)) {
+        // Release message
+        zmq_msg_close(&msg);
+    }
+
     return ec;
 }
 
