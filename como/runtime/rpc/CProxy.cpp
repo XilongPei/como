@@ -903,6 +903,10 @@ ECode InterfaceProxy::UnmarshalResults(
 
     resParcel->SetServerInfo(mServerName);
 
+    Long hash;
+    mOwner->GetHashCode(hash);
+    resParcel->SetProxyInfo(hash);
+
     Integer N;
     method->GetParameterNumber(N);
     Integer intParamIndex = 1, fpParamIndex = 0;
@@ -2025,7 +2029,10 @@ void CProxy::OnLastStrongRef(
     if (nullptr == mIpack)
         return;
 
-    UnregisterImportObject(RPCType::Local, mIpack);
+    Long proxyId;
+    mIpack->GetProxyInfo(proxyId);
+    UnregisterImportObjectByChannel(RPCType::Local, proxyId);
+
     Object::OnLastStrongRef(id);
 }
 

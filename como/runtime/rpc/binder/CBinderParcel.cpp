@@ -702,10 +702,22 @@ ECode CBinderParcel::ReadInterface(
     Integer tag = mData->readInt32();
     if (tag == TAG_NOT_NULL) {
         AutoPtr<IInterfacePack> ipack;
-        CoCreateInterfacePack(RPCType::Local, ipack);
-        IParcelable::Probe(ipack)->ReadFromParcel(this);
+        ECode ec = CoCreateInterfacePack(RPCType::Local, ipack);
+        if (FAILED(ec)) {
+            Logger::E("CBinderParcel::ReadInterface",
+                                               "CoCreateInterfacePack failed.");
+            return ec;
+        }
 
-        ECode ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
+        ec = IParcelable::Probe(ipack)->ReadFromParcel(this);
+        if (FAILED(ec)) {
+            Logger::E("CBinderParcel::ReadInterface", "ReadFromParcel failed.");
+            return ec;
+        }
+        ipack->SetServerName(mServerName);
+        ipack->SetProxyInfo(mProxyId);
+
+        ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
         if (FAILED(ec)) {
             Logger::E("CBinderParcel", "Unmarshal the interface in ReadInterface failed.");
             return ec;
@@ -822,4 +834,11 @@ ECode CBinderParcel::SetServerInfo(
     return NOERROR;
 }
 
+ECode CBinderParcel::SetProxyInfo(
+    /* [in] */ Long proxyId)
+{
+    mProxyId = proxyId;
+    return NOERROR;
 }
+
+} // namespace como

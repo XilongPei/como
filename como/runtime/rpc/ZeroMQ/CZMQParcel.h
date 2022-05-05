@@ -173,7 +173,10 @@ public:
         /* [in] */ Boolean release) override;
 
     ECode SetServerInfo(
-        /* [in] */ const String& serverName);
+        /* [in] */ const String& serverName) override;
+
+    ECode SetProxyInfo(
+        /* [in] */ Long proxyId) override;
 
     static ECode CreateObject(
         /* [out] */ AutoPtr<IParcel>& parcel);
@@ -229,6 +232,7 @@ private:
     Byte mBuffer[MAX_BUFFER_SIZE];
 
     String mServerName;
+    Long   mProxyId;
 };
 
 inline static CZMQParcel* From(

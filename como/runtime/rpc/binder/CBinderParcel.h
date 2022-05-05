@@ -162,7 +162,10 @@ public:
         /* [in] */ Boolean release) override;
 
     ECode SetServerInfo(
-        /* [in] */ const String& serverName);
+        /* [in] */ const String& serverName) override;
+
+    ECode SetProxyInfo(
+        /* [in] */ Long proxyId) override;
 
     inline static CBinderParcel* From(
         /* [in] */ IParcel* parcel);
@@ -175,6 +178,7 @@ private:
     Boolean mReleaseData { true };
 
     String mServerName;
+    Long   mProxyId;
 };
 
 CBinderParcel* CBinderParcel::From(

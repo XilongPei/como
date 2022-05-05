@@ -747,10 +747,22 @@ ECode CDBusParcel::ReadInterface(
     ReadInteger(tag);
     if (tag == TAG_NOT_NULL) {
         AutoPtr<IInterfacePack> ipack;
-        CoCreateInterfacePack(RPCType::Local, ipack);
-        IParcelable::Probe(ipack)->ReadFromParcel(this);
+        ECode ec = CoCreateInterfacePack(RPCType::Local, ipack);
+        if (FAILED(ec)) {
+            Logger::E("CDBusParcel::ReadInterface",
+                                               "CoCreateInterfacePack failed.");
+            return ec;
+        }
 
-        ECode ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
+        ec = IParcelable::Probe(ipack)->ReadFromParcel(this);
+        if (FAILED(ec)) {
+            Logger::E("CDBusParcel::ReadInterface", "ReadFromParcel failed.");
+            return ec;
+        }
+        ipack->SetServerName(mServerName);
+        ipack->SetProxyInfo(mProxyId);
+
+        ec = CoUnmarshalInterface(ipack, RPCType::Local, value);
         if (FAILED(ec)) {
             Logger::E("CDBusParcel::ReadInterface",
               "Unmarshal the interface in ReadInterface failed. ECode: 0x%X", ec);
@@ -1118,6 +1130,13 @@ ECode CDBusParcel::SetServerInfo(
     /* [in] */ const String& serverName)
 {
     mServerName = serverName;
+    return NOERROR;
+}
+
+ECode CDBusParcel::SetProxyInfo(
+    /* [in] */ Long proxyId)
+{
+    mProxyId = proxyId;
     return NOERROR;
 }
 

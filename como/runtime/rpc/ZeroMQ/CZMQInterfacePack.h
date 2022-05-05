@@ -64,6 +64,12 @@ public:
     ECode GetServerName(
         /* [out] */ String& serverName) override;
 
+    ECode SetProxyInfo(
+        /* [in] */ Long proxyId) override;
+
+    ECode GetProxyInfo(
+        /* [out] */ Long& proxyId) override;
+
     ECode GetHashCode(
         /* [out] */ Long& hash) override;
 
@@ -103,6 +109,7 @@ private:
     Boolean mIsParcelable { false };
     String mServerName;     // the same machine, ServerAddress is nullptr
     Long mServerObjectId;
+    Long mProxyId;
 };
 
 CZMQInterfacePack* CZMQInterfacePack::From(

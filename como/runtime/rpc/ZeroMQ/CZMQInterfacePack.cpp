@@ -74,6 +74,20 @@ ECode CZMQInterfacePack::GetServerName(
     return NOERROR;
 }
 
+ECode CZMQInterfacePack::SetProxyInfo(
+    /* [in] */ Long proxyId)
+{
+    mProxyId = proxyId;
+    return NOERROR;
+}
+
+ECode CZMQInterfacePack::GetProxyInfo(
+    /* [out] */ Long& proxyId)
+{
+    proxyId = mProxyId;
+    return NOERROR;
+}
+
 ECode CZMQInterfacePack::GetHashCode(
     /* [out] */ Long& hash)
 {

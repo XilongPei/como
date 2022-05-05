@@ -66,6 +66,20 @@ ECode InterfacePack::GetServerName(
     return NOERROR;
 }
 
+ECode InterfacePack::SetProxyInfo(
+    /* [in] */ Long proxyId)
+{
+    mProxyId = proxyId;
+    return NOERROR;
+}
+
+ECode InterfacePack::GetProxyInfo(
+    /* [out] */ Long& proxyId)
+{
+    proxyId = mProxyId;
+    return NOERROR;
+}
+
 ECode InterfacePack::GetHashCode(
     /* [out] */ Long& hash)
 {

@@ -767,6 +767,7 @@ ECode CZMQParcel::ReadInterface(
             return ec;
         }
         ipack->SetServerName(mServerName);
+        ipack->SetProxyInfo(mProxyId);
 
         ec = CoUnmarshalInterface(ipack, RPCType::Remote, value);
         if (FAILED(ec)) {
@@ -1140,6 +1141,13 @@ ECode CZMQParcel::SetServerInfo(
     /* [in] */ const String& serverName)
 {
     mServerName = serverName;
+    return NOERROR;
+}
+
+ECode CZMQParcel::SetProxyInfo(
+    /* [in] */ Long proxyId)
+{
+    mProxyId = proxyId;
     return NOERROR;
 }
 

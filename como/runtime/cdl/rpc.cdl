@@ -155,6 +155,9 @@ interface IParcel
 
     SetServerInfo(
         [in] String serverName);
+
+    SetProxyInfo(
+        [in] Long proxyId);
 }
 
 [
@@ -190,6 +193,12 @@ interface IInterfacePack
 
     GetServerName(
         [out] String& serverName);
+
+    SetProxyInfo(
+        [in] Long proxyId);
+
+    GetProxyInfo(
+        [out] Long& proxyId);
 
     GetHashCode(
         [out] Long& hash);
