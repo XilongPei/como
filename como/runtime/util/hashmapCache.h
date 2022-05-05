@@ -380,9 +380,12 @@ public:
                 while (curr != nullptr) {
                     if (curr->mlValue == value) {
                         Bucket* next = curr->mNext;
-                        delete curr;
-                        mCount--;
-                        num++;
+                        curr->mReferenceCount--;
+                        if (0 == curr->mReferenceCount) {
+                            delete curr;
+                            mCount--;
+                            num++;
+                        }
                         curr = next;
                     }
                     if (curr != nullptr)
