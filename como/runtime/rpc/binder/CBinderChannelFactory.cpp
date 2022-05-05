@@ -169,7 +169,10 @@ ECode CBinderChannelFactory::UnmarshalInterface(
         Long serverObjectId;
         ipack->GetServerObjectId(serverObjectId);
 
-        RegisterImportObject(mType, ipack, IObject::Probe(proxy), serverObjectId);
+        Long hash;
+        IObject *obj = IObject::Probe(proxy);
+        obj->GetHashCode(hash);
+        ec = RegisterImportObject(mType, ipack, obj, hash);
 
         InterfaceID iid;
         ipack->GetInterfaceID(iid);

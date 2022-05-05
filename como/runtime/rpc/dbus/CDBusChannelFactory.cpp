@@ -197,8 +197,10 @@ ECode CDBusChannelFactory::UnmarshalInterface(
         Long serverObjectId;
         ipack->GetServerObjectId(serverObjectId);
 
-        ec = RegisterImportObject(mType, ipack, IObject::Probe(proxy),
-                                                                serverObjectId);
+        Long hash;
+        IObject *obj = IObject::Probe(proxy);
+        obj->GetHashCode(hash);
+        ec = RegisterImportObject(mType, ipack, obj, hash);
         if (FAILED(ec)) {
             Logger::E("CDBusChannelFactory::UnmarshalInterface",
                                 "RegisterImportObject failed. ECode: 0x%X", ec);
