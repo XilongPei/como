@@ -90,7 +90,8 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if (nullptr == worker) {
                     zmq_msg_close(&msg);
-                    Logger::E("threadHandleMessage", "Bad channel value");
+                    Logger::E("threadHandleMessage",
+                                            "Method_Invoke, Bad channel value");
                     SendECode(0, socket, ZMQ_BAD_PACKET);
                     break;
                 }
@@ -98,7 +99,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
                 if (nullptr == argParcel) {
                     Logger::E("threadHandleMessage",
-                                               "new CZMQParcel return nullptr");
+                                "Method_Invoke, new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
                     ec = E_OUT_OF_MEMORY_ERROR;
@@ -118,7 +119,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                 resParcel = new CZMQParcel();
                 if (nullptr == resParcel) {
                     Logger::E("threadHandleMessage",
-                                               "new CZMQParcel return nullptr");
+                                "Method_Invoke, new CZMQParcel return nullptr");
                     resData = reinterpret_cast<HANDLE>((char*)"");
                     resSize = 1;
                     ec = E_OUT_OF_MEMORY_ERROR;
@@ -154,7 +155,8 @@ HandleMessage_Method_Invoke:
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if (nullptr == worker) {
                     zmq_msg_close(&msg);
-                    Logger::E("threadHandleMessage", "Bad channel value");
+                    Logger::E("threadHandleMessage",
+                                     "GetComponentMetadata, Bad channel value");
                     SendECode(0, socket, E_NOT_FOUND_EXCEPTION);
                     break;
                 }
@@ -162,7 +164,7 @@ HandleMessage_Method_Invoke:
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
                 if (nullptr == argParcel) {
                     Logger::E("threadHandleMessage",
-                                               "new CZMQParcel return nullptr");
+                         "GetComponentMetadata, new CZMQParcel return nullptr");
                     // `ReleaseWorker`, This Worker is a daemon
                     worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     ec = E_OUT_OF_MEMORY_ERROR;
@@ -246,11 +248,13 @@ HandleMessage_GetComponentMetadata:
             case ZmqFunCode::Object_Release: {
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
-                    Logger::E("threadHandleMessage", "Bad channel value");
+                    Logger::E("threadHandleMessage",
+                                            "Object_Release, Bad channel value");
                     ec = ZMQ_BAD_PACKET;
                     goto HandleMessage_Object_Release;
                 }
 
+                // At this time, the Channel object may be released itself.
                 ec = UnregisterExportObjectByHash(RPCType::Remote,
                                                     *(Long*)zmq_msg_data(&msg));
                 if (FAILED(ec)) {
@@ -258,13 +262,13 @@ HandleMessage_GetComponentMetadata:
                                        "Object_Release error, ECode: 0x%X", ec);
                 }
 
-HandleMessage_Object_Release:
-                zmq_msg_close(&msg);
-                SendECode(worker->mChannel, socket, ec);
-
                 // `ReleaseWorker` will NOT delete this work
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+
+HandleMessage_Object_Release:
+                zmq_msg_close(&msg);
+                SendECode(hChannel, socket, ec);
 
                 break;
             }
@@ -277,7 +281,8 @@ HandleMessage_Object_Release:
 
                 worker = PickWorkerByChannelHandle(hChannel, false);
                 if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
-                    Logger::E("threadHandleMessage", "Bad channel value");
+                    Logger::E("threadHandleMessage",
+                                                "ReleasePeer, Bad channel value");
                     ec = ZMQ_BAD_PACKET;
                     goto HandleMessage_Object_ReleasePeer;
                 }
@@ -290,7 +295,7 @@ HandleMessage_Object_Release:
 
 HandleMessage_Object_ReleasePeer:
                 zmq_msg_close(&msg);
-                SendECode(worker->mChannel, socket, ec);
+                SendECode(hChannel, socket, ec);
 
                 break;
             }
@@ -300,7 +305,8 @@ HandleMessage_Object_ReleasePeer:
 
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if (nullptr == worker) {
-                    Logger::E("threadHandleMessage", "Bad channel value");
+                    Logger::E("threadHandleMessage",
+                                           "RuntimeMonitor, Bad channel value");
                     ec = ZMQ_BAD_PACKET;
                     goto HandleMessage_RuntimeMonitor;
                 }

@@ -363,7 +363,8 @@ public:
                         mCount--;
                         curr = next;
                     }
-                    curr = curr->mNext;
+                    if (curr != nullptr)
+                        curr = curr->mNext;
                 }
             }
         }
@@ -384,7 +385,8 @@ public:
                         num++;
                         curr = next;
                     }
-                    curr = curr->mNext;
+                    if (curr != nullptr)
+                        curr = curr->mNext;
                 }
             }
         }

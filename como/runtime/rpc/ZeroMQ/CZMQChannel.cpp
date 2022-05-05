@@ -114,7 +114,7 @@ ECode CZMQChannel::IsPeerAlive(
     Logger::D("CZMQChannel::ReleasePeer",
               "Try to CzmqSendBuf to endpoint %s", serverName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
-                                        ZmqFunCode::ReleasePeer, socket,
+                                        ZmqFunCode::Actor_IsPeerAlive, socket,
                                                  (void *)&lvalue, sizeof(Long));
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;

@@ -198,6 +198,10 @@ TEST(ClientZmqTest, TestIsStubAlive)
     Long channelState = 1239;
     proxy->IsStubAlive(channelState, alive);
     EXPECT_TRUE(alive);
+    channelState = 4800;
+    proxy->IsStubAlive(channelState, alive);
+    EXPECT_TRUE(alive);
+    EXPECT_EQ(1239, channelState);
 }
 
 TEST(ClientZmqTest, TestReleaseObject)
