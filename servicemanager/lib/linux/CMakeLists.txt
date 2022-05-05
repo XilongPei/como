@@ -49,6 +49,7 @@ else()
     )
     set(RPC_ZeroMQ_SOURCES
         ${COMO_RUNTIME_DIR}/rpc/registry.cpp
+        ${COMO_RUNTIME_DIR}/util/mutex.cpp
     )
     set(RPC_ZeroMQ_LIBS "")
     set(RPC_ZeroMQ_DEFINITIONS "")
