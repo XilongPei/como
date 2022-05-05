@@ -327,7 +327,6 @@ ECode FindImportObject(
     return E_NOT_FOUND_EXCEPTION;
 }
 
-
 ECode UnregisterImportObjectByChannel(
     /* [in] */ RPCType type,
     /* [in] */ Long channel)

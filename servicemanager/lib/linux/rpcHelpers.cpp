@@ -17,7 +17,6 @@
 #include <comolog.h>
 #include <comoapi.h>
 #include <comosp.h>
-#include <registry.h>
 #include "ServiceManager.h"
 #include "rpcHelpers.h"
 
@@ -91,13 +90,13 @@ ECode RpcHelpers::ReleaseImportObject(
             return ec;
 
         ipack->GetServerObjectId(hash);
-        return UnregisterImportObjectByChannel(RPCType::Remote, hash);
+        return como::CoUnregisterImportObject(RPCType::Remote, hash);
     }
 
     // It implements the COMO class of IParcelable interface. Its method
     // execution is executed on the client side.
     IObject::Probe(obj)->GetHashCode(hash);
-    return UnregisterImportObjectByChannel(RPCType::Remote, hash);
+    return como::CoUnregisterImportObject(RPCType::Remote, hash);
 
     return proxy->ReleaseObject(hash);
 }

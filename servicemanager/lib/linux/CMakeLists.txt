@@ -43,14 +43,8 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     set(RPC_ZeroMQ_DEFINITIONS -DRPC_OVER_ZeroMQ_SUPPORT)
     # ^^^^^^ COMO Over ZeroMQ Support ^^^^^^
 else()
-    set(RPC_ZeroMQ_INC
-        ${COMO_RUNTIME_DIR}
-        ${COMO_RUNTIME_DIR}/rpc
-    )
-    set(RPC_ZeroMQ_SOURCES
-        ${COMO_RUNTIME_DIR}/rpc/registry.cpp
-        ${COMO_RUNTIME_DIR}/util/mutex.cpp
-    )
+    set(RPC_ZeroMQ_INC "")
+    set(RPC_ZeroMQ_SOURCES "")
     set(RPC_ZeroMQ_LIBS "")
     set(RPC_ZeroMQ_DEFINITIONS "")
 endif()

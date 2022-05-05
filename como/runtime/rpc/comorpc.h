@@ -52,6 +52,10 @@ EXTERN_C COM_PUBLIC ECode CoUnmarshalInterface(
     /* [in] */ RPCType type,
     /* [out] */ AutoPtr<IInterface>& object);
 
+EXTERN_C COM_PUBLIC ECode CoUnregisterImportObject(
+    /* [in] */ RPCType type,
+    /* [in] */ Long channel);
+
 } // namespace como
 
 #endif // __COMO_COMORPC_H__

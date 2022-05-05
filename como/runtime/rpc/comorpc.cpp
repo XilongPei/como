@@ -27,6 +27,7 @@
 #include "ZeroMQ/CZMQUtils.h"
 #include "ZeroMQ/ThreadPoolZmqActor.h"
 #endif
+#include "registry.h"
 
 namespace como {
 
@@ -132,6 +133,13 @@ ECode CoUnmarshalInterface(
     AutoPtr<IRPCChannelFactory> factory =
                       (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
     return factory->UnmarshalInterface(data, object);
+}
+
+ECode CoUnregisterImportObject(
+    /* [in] */ RPCType type,
+    /* [in] */ Long channel)
+{
+    return UnregisterImportObjectByChannel(type, channel);
 }
 
 } // namespace como
