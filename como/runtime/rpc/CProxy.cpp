@@ -453,7 +453,7 @@ void Init_Proxy_Entry()
             PROT_READ | PROT_WRITE | PROT_EXEC,
             MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
     if (PROXY_ENTRY == 0) {
-        Logger::E("CProxy", "Mmap PROXY_ENTRY failed.\n");
+        Logger::E("CProxy", "Mmap PROXY_ENTRY failed");
         return;
     }
 
@@ -568,9 +568,9 @@ ECode InterfaceProxy::MarshalArguments(
     Integer N;
     method->GetParameterNumber(N);
     Integer intParamIndex = 1, fpParamIndex = 0;
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
-        method->GetParameter(i, param);
+        FAIL_RETURN(method->GetParameter(i, param));
         AutoPtr<IMetaType> type;
         param->GetType(type);
         TypeKind kind;
@@ -658,7 +658,7 @@ ECode InterfaceProxy::MarshalArguments(
                             elemKind == TypeKind::ComponentID ||
                             elemKind == TypeKind::InterfaceID ||
                             elemKind == TypeKind::HANDLE) {
-                        Logger::E("CProxy", "Invalid [in] Array(%d), param index: %d.\n", elemKind, i);
+                        Logger::E("CProxy", "Invalid [in] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
 
@@ -680,7 +680,7 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -776,7 +776,7 @@ ECode InterfaceProxy::MarshalArguments(
                             elemKind == TypeKind::ComponentID ||
                             elemKind == TypeKind::InterfaceID ||
                             elemKind == TypeKind::HANDLE) {
-                        Logger::E("CProxy", "Invalid [in, out] Array(%d), param index: %d.\n", elemKind, i);
+                        Logger::E("CProxy", "Invalid [in, out] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
 
@@ -798,7 +798,7 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in, out] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [in, out] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -831,7 +831,7 @@ ECode InterfaceProxy::MarshalArguments(
                             elemKind == TypeKind::ComponentID ||
                             elemKind == TypeKind::InterfaceID ||
                             elemKind == TypeKind::HANDLE) {
-                        Logger::E("CProxy", "Invalid [out] Array(%d), param index: %d.\n", elemKind, i);
+                        Logger::E("CProxy", "Invalid [out] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
                     intParamIndex++;
@@ -843,7 +843,7 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [out] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [out] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -862,7 +862,7 @@ ECode InterfaceProxy::MarshalArguments(
                             elemKind == TypeKind::ComponentID ||
                             elemKind == TypeKind::InterfaceID ||
                             elemKind == TypeKind::HANDLE) {
-                        Logger::E("CProxy", "Invalid [out, callee] Array(%d), param index: %d.\n", elemKind, i);
+                        Logger::E("CProxy", "Invalid [out, callee] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
                     intParamIndex++;
@@ -886,7 +886,7 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [out, callee] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [out, callee] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -896,9 +896,9 @@ ECode InterfaceProxy::MarshalArguments(
 }
 
 ECode InterfaceProxy::UnmarshalResults(
-        /* [in] */ Registers& regs,
-        /* [in] */ IMetaMethod* method,
-        /* [in] */ IParcel* resParcel)
+    /* [in] */ Registers& regs,
+    /* [in] */ IMetaMethod* method,
+    /* [in] */ IParcel* resParcel)
 {
 
     resParcel->SetServerInfo(mServerName);
@@ -909,10 +909,10 @@ ECode InterfaceProxy::UnmarshalResults(
 
     Integer N;
     method->GetParameterNumber(N);
-    Integer intParamIndex = 1, fpParamIndex = 0;
-    for (Integer i = 0; i < N; i++) {
+    Integer intParamIndex = 1,  fpParamIndex = 0;
+    for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
-        method->GetParameter(i, param);
+        FAIL_RETURN(method->GetParameter(i, param));
         AutoPtr<IMetaType> type;
         param->GetType(type);
         TypeKind kind;
@@ -944,7 +944,7 @@ ECode InterfaceProxy::UnmarshalResults(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -1046,7 +1046,7 @@ ECode InterfaceProxy::UnmarshalResults(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in, out] or [out] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [in, out] or [out] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -1075,7 +1075,7 @@ ECode InterfaceProxy::UnmarshalResults(
                 case TypeKind::InterfaceID:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [out, callee] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CProxy", "Invalid [out, callee] type(%d), param index: %d", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
