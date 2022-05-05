@@ -26,9 +26,11 @@ add_subdirectory(reflection)
 add_subdirectory(type)
 add_subdirectory(util)
 
+set(RuntimeMonitorLib )
 if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
     if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         add_subdirectory(monitor)
+        set(RuntimeMonitorLib RuntimeMonitor)
     endif()
     add_subdirectory(rpc)
     add_definitions(-DCOMO_WITH_RPC)
@@ -89,7 +91,7 @@ if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
         rpc
         type
         util
-        RuntimeMonitor
+        ${RuntimeMonitorLib}
         -Wl,--no-whole-archive)
 else()
     set(COMORT_LINK_LIBS
