@@ -28,36 +28,20 @@ RuntimeMonitor::RuntimeMonitor() {
 static int handler(void* user, const char* section, const char* name, const char* value)
 {
     if (/*strcmp(section, "") == 0 && */strcmp(name, "ExportObject") == 0) {
-        (*(int*)user) = 1;
+        WalkExportObject(RPCType::Remote, *(String*)user);
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "ImportObject") == 0) {
-        (*(int*)user) = 2;
+        WalkImportObject(RPCType::Remote, *(String*)user);
     }
-    else {
-        (*(int*)user) = atoi(value);
-    }
+
     return 1;
 }
 
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string)
 {
-    int command;
-
     // parse monitor commands
-    if (ini_parse_string((const char*)zmq_msg_data(&msg), handler, &command) < 0) {
-        command = 0;
-    }
-
-    string = String("");
-    switch (command) {
-        case 1: {
-            WalkExportObject(RPCType::Remote, string);
-            break;
-        }
-        case 2: {
-            WalkImportObject(RPCType::Remote, string);
-            break;
-        }
+    if (ini_parse_string((const char*)zmq_msg_data(&msg), handler, &string) < 0) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     return NOERROR;

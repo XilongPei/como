@@ -353,7 +353,7 @@ static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub)
     String name, ns;
     klass->GetName(name);
     klass->GetNamespace(ns);
-    str += ("Namespace=" + ns + ";Name=" + name);
+    str += ("Namespace=" + ns + ";Name=" + name + "\n");
 }
 
 static void ImportRegistryWalker(String& str, IInterfacePack* intfPack, IObject* obj)
