@@ -28,8 +28,11 @@ class COM_PUBLIC RuntimeMonitor
 public:
     RuntimeMonitor();
 
+    ECode StartRuntimeMonitor();
+
     static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string);
 
+    static constexpr int RM_LOG_BUFFER_SIZE = 4096;
 };
 
 #define RuntimeMonitor_Log()  \
@@ -42,16 +45,8 @@ public:
     RuntimeMonitor_Log_(const char *functionName);
 
     ~RuntimeMonitor_Log_();
-private:
-    const char *mFunctionName;
-    String mStrClassInfo;
-    String mStrInterfaceInfo;
-    String mMethodSignature;
 };
 
-
 } // namespace como
-
-using namespace como;
 
 #endif // __COMO_RUNTIMEMONITOR_H__

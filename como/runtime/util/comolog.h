@@ -63,6 +63,11 @@ public:
     static void SetSamplingTag(
         /* [in] */ const char *szSamplingTag_);
 
+    static void Monitor(
+        /* [out] */ char *buffer,
+        /* [in] */  int bufSize,
+        /* [in] */  const char* tag);
+
 public:
     /* refer to external/EasyLogger/easylogger/inc/elog.h
     #define ELOG_LVL_ASSERT                      0

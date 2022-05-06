@@ -15,14 +15,33 @@
 //=========================================================================
 
 #include "ini.h"
+#include "comolog.h"
 #include "reflHelpers.h"
-#include "RuntimeMonitor.h"
 #include "registry.h"
+#include "CircleBuffer.h"
+#include "RuntimeMonitor.h"
 
 namespace como {
 
+CircleBuffer<char> *logCircleBuf;
+
 RuntimeMonitor::RuntimeMonitor() {
     //
+}
+
+ECode RuntimeMonitor::StartRuntimeMonitor()
+{
+    logCircleBuf = new CircleBuffer<char>(RM_LOG_BUFFER_SIZE);
+    if (nullptr != logCircleBuf) {
+        ECode ec = ECode_CircleBuffer(logCircleBuf);
+        if (FAILED(ec)) {
+            return ec;
+        }
+    }
+    else
+        return E_OUT_OF_MEMORY_ERROR;
+
+    return NOERROR;
 }
 
 static int handler(void* user, const char* section, const char* name, const char* value)
@@ -32,6 +51,9 @@ static int handler(void* user, const char* section, const char* name, const char
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "ImportObject") == 0) {
         WalkImportObject(RPCType::Remote, *(String*)user);
+    }
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "log") == 0) {
+        logCircleBuf->ReadString(*(String*)user);
     }
 
     return 1;
@@ -53,15 +75,15 @@ RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
 
     reflHelpers::intfGetObjectInfo((IInterface*)this, functionName, strClassInfo,
                                               strInterfaceInfo, methodSignature);
-    mFunctionName = functionName;
-    mStrClassInfo = strClassInfo;
-    mStrInterfaceInfo = strInterfaceInfo;
-    mMethodSignature = methodSignature;
+    char buffer[256];
+    Logger::Monitor(buffer, sizeof(buffer), "tag");
+    String string = buffer;
+    string += "coclass:" + strClassInfo + " interface:" + strInterfaceInfo +
+              " method:" + functionName + " signature:" + methodSignature  + "\n";
+    logCircleBuf->Write(string);
 }
 
 RuntimeMonitor_Log_::~RuntimeMonitor_Log_()
-{
-
-}
+{}
 
 } // namespace como

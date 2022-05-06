@@ -249,4 +249,17 @@ static void GetLocalTimeWithMs(char *currentTime, size_t maxChars)
     snprintf(currentTime, maxChars, "%s.%03d %s", ymdhms, milli, timezone);
 }
 
+void Logger::Monitor(
+    /* [out] */ char *buffer,
+    /* [in] */  int bufSize,
+    /* [in] */  const char* tag)
+{
+    va_list argList;
+    char currentTime[64];
+    GetLocalTimeWithMs(currentTime, 64);
+
+    snprintf(buffer, bufSize-1, "[%s %ld %s %s]", szSamplingTag,
+                                         syscall(SYS_gettid), currentTime, tag);
+}
+
 } // namespace como

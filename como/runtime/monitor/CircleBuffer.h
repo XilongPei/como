@@ -22,8 +22,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "comotypes.h"
 
 namespace como {
+
+#define ECode_CircleBuffer(circleBuf)  circleBuf->ec
 
 template<typename T>
 class CircleBuffer
@@ -34,9 +37,14 @@ public:
         m_nBufSize = size;
         m_nReadPos = 0;
         m_nWritePos = 0;
-        m_pBuf = new T[m_nBufSize];
         m_bEmpty = true;
         m_bFull = false;
+
+        m_pBuf = new T[m_nBufSize];
+        if (nullptr == m_pBuf)
+            ec = NOERROR;
+        else
+            ec = E_OUT_OF_MEMORY_ERROR;
     }
 
     ~CircleBuffer()
@@ -81,7 +89,7 @@ public:
         }
     }
 
-    int Write(T* buf, int count)
+    int Write(const T* buf, int count)
     {
         if (count <= 0)
             return 0;
@@ -300,6 +308,20 @@ public:
         }
     }
 
+    int Write(const String &string)
+    {
+        return Write((const char*)string, string.GetByteLength());
+    }
+
+    int ReadString(String &string) {
+        int len = GetLength();
+        ECode ec = string.Reserve(len + 1);
+        if (FAILED(ec))
+            return -1;
+
+        return Read((char*)(const char*)string, len);
+    }
+
     int GetReadPos()
     {
         return m_nReadPos;
@@ -309,6 +331,9 @@ public:
     {
         return m_nWritePos;
     }
+
+public:
+    ECode ec;
 
 private:
     bool m_bEmpty, m_bFull;
