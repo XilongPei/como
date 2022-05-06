@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "comotypes.h"
+#include "mutex.h"
 
 namespace como {
 
@@ -75,6 +76,8 @@ public:
 
     int GetLength()
     {
+        Mutex::AutoLock lock(m_Lock);
+
         if (m_bEmpty) {
             return 0;
         }
@@ -91,6 +94,8 @@ public:
 
     int Write(const T* buf, int count)
     {
+        Mutex::AutoLock lock(m_Lock);
+
         if (count <= 0)
             return 0;
 
@@ -212,6 +217,8 @@ public:
 
     int Read(T* buf, int count)
     {
+        Mutex::AutoLock lock(m_Lock);
+
         if (count <= 0)
             return 0;
 
@@ -337,11 +344,12 @@ public:
 
 private:
     bool m_bEmpty, m_bFull;
-    T * m_pBuf = nullptr;
+    T * m_pBuf;
     size_t m_nBufSize;
     int m_nReadPos;
     int m_nWritePos;
 
+    Mutex m_Lock;
 };
 
 } // namespace como
