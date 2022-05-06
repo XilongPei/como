@@ -508,7 +508,6 @@ ECode CZMQChannel::MonitorRuntime(
         if (FAILED(ec)) {
             Logger::E("CZMQChannel::MonitorRuntime", "ECode: 0x%X", ec);
         }
-
         response = String((char*)zmq_msg_data(&msg), zmq_msg_size(&msg));
     }
     else {

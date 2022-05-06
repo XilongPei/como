@@ -102,8 +102,12 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
-    if (string != nullptr && byteSize >= 0 && byteSize <= strlen(string)) {
+    Integer len = strlen(string);
+    if ((string != nullptr) && (byteSize >= 0) && (byteSize <= len)) {
         mString = AllocFromUTF8(string, byteSize);
+    }
+    else {
+        mString = AllocFromUTF8(string, len);
     }
 }
 

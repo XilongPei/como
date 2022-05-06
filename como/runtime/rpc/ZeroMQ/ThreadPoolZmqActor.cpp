@@ -301,10 +301,10 @@ HandleMessage_Object_ReleasePeer:
             }
 
             case ZmqFunCode::RuntimeMonitor: {
-                String string;
+                String string = String("");
 
                 worker = PickWorkerByChannelHandle(hChannel, true);
-                if (nullptr == worker) {
+                if ((nullptr == worker) || (zmq_msg_size(&msg) < 1)) {
                     Logger::E("threadHandleMessage",
                                            "RuntimeMonitor, Bad channel value");
                     ec = ZMQ_BAD_PACKET;
@@ -314,9 +314,13 @@ HandleMessage_Object_ReleasePeer:
                 ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, string);
                 if (SUCCEEDED(ec)) {
                     resData = reinterpret_cast<HANDLE>(string.string());
-                    resSize = string.GetByteLength();
+                    resSize = string.GetByteLength() + 1;
                     CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
+                    zmq_msg_close(&msg);
+                    // `ReleaseWorker` will NOT delete this work
+                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                    break;
                 }
 
 HandleMessage_RuntimeMonitor:
