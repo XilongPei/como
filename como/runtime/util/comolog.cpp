@@ -89,8 +89,7 @@ void Logger::D(
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s DEBUG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
-    elog_output_args(ELOG_LVL_DEBUG, "", "", "", 0, buf, argList);
-    //elog_output_args_simple(ELOG_LVL_DEBUG, buf, g_loggerWriteLog, argList);
+    elog_output_args_simple(ELOG_LVL_DEBUG, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -110,7 +109,7 @@ void Logger::E(
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s ERROR %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
-    elog_output_args(ELOG_LVL_ERROR, "", "", "", 0, buf, argList);
+    elog_output_args_simple(ELOG_LVL_ERROR, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -130,7 +129,7 @@ void Logger::V(
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s VERBOSE %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
-    elog_output_args(ELOG_LVL_VERBOSE, "", "", "", 0, buf, argList);
+    elog_output_args_simple(ELOG_LVL_VERBOSE, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -150,7 +149,7 @@ void Logger::W(
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s WARNING %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
-    elog_output_args(ELOG_LVL_WARN, "", "", "", 0, buf, argList);
+    elog_output_args_simple(ELOG_LVL_WARN, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -190,7 +189,7 @@ void Logger::Log(
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
-    elog_output_args(level, tag, "", "", 0, buf, argList);
+    elog_output_args_simple(level, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -210,7 +209,7 @@ void Logger::Log(
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
                                  syscall(SYS_gettid), currentTime, tag, format);
-    elog_output_args(level, tag, "", "", 0, buf, argList);
+    elog_output_args_simple(level, buf, g_loggerWriteLog, argList);
 }
 
 void Logger::SetLevel(
