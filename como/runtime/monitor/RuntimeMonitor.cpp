@@ -102,6 +102,12 @@ ECode RuntimeMonitor::GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeM
     return NOERROR;
 }
 
+int RuntimeMonitor::WriteLog(const char *log, size_t strLen)
+{
+    //TODO
+    return logCircleBuf->Write(log, strLen+1);
+}
+
 Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod)
 {
     return (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);

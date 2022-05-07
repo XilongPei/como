@@ -53,6 +53,8 @@ public:
     static RTM_InvokeMethod *WriteRtmInvokeMethod(Long serverObjectId,
                                      Integer in_out,
                                      Integer methodIndexPlus4, IParcel *parcel);
+    static int WriteLog(const char *log, size_t strLen);
+
 };
 
 #define RuntimeMonitor_Log()  \

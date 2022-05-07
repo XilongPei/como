@@ -564,6 +564,112 @@ void elog_output(uint8_t level, const char *tag, const char *file, const char *f
 }
 
 /* args point to the first variable parameter */
+void elog_output_args_simple(uint8_t level, const char *format,
+                                 ElogLoggerWriteLog funWriteLog, va_list args) {
+    extern const char *elog_port_get_time(void);
+    extern const char *elog_port_get_p_info(void);
+    extern const char *elog_port_get_t_info(void);
+
+    size_t log_len = 0, newline_len = strlen(ELOG_NEWLINE_SIGN);
+    char line_num[ELOG_LINE_NUM_MAX_LEN + 1] = { 0 };
+    char tag_sapce[ELOG_FILTER_TAG_MAX_LEN / 2 + 1] = { 0 };
+    // va_list args;
+    int fmt_result;
+
+    ELOG_ASSERT(level <= ELOG_LVL_VERBOSE);
+
+    /* check output enabled */
+    if (!elog.output_enabled) {
+        return;
+    }
+    /* level filter */
+    if (level > elog.filter.level) {
+        return;
+    }
+
+    /* args point to the first variable parameter */
+    // va_start(args, format);
+    /* lock output */
+    elog_output_lock();
+
+#ifdef ELOG_COLOR_ENABLE
+    /* add CSI start sign and color info */
+    if (elog.text_color_enabled) {
+        log_len += elog_strcpy(log_len, log_buf + log_len, CSI_START);
+        log_len += elog_strcpy(log_len, log_buf + log_len, color_output_info[level]);
+    }
+#endif
+
+    /* package level info */
+    if (get_fmt_enabled(level, ELOG_FMT_LVL)) {
+        log_len += elog_strcpy(log_len, log_buf + log_len, level_output_info[level]);
+    }
+    /* package other log data to buffer. '\0' must be added in the end by vsnprintf. */
+    fmt_result = vsnprintf(log_buf + log_len, ELOG_LINE_BUF_SIZE - log_len, format, args);
+
+    // va_end(args);
+    /* calculate log length */
+    if ((log_len + fmt_result <= ELOG_LINE_BUF_SIZE) && (fmt_result > -1)) {
+        log_len += fmt_result;
+    } else {
+        /* using max length */
+        log_len = ELOG_LINE_BUF_SIZE;
+    }
+
+    /* overflow check and reserve some space for CSI end sign and newline sign */
+#ifdef ELOG_COLOR_ENABLE
+    if (log_len + (sizeof(CSI_END) - 1) + newline_len > ELOG_LINE_BUF_SIZE) {
+        /* using max length */
+        log_len = ELOG_LINE_BUF_SIZE;
+        /* reserve some space for CSI end sign */
+        log_len -= (sizeof(CSI_END) - 1);
+#else
+    if (log_len + newline_len > ELOG_LINE_BUF_SIZE) {
+        /* using max length */
+        log_len = ELOG_LINE_BUF_SIZE;
+#endif /* ELOG_COLOR_ENABLE */
+        /* reserve some space for newline sign */
+        log_len -= newline_len;
+    }
+    /* keyword filter */
+    if (elog.filter.keyword[0] != '\0') {
+        /* add string end sign */
+        log_buf[log_len] = '\0';
+        /* find the keyword */
+        if (!strstr(log_buf, elog.filter.keyword)) {
+            /* unlock output */
+            elog_output_unlock();
+            return;
+        }
+    }
+
+#ifdef ELOG_COLOR_ENABLE
+    /* add CSI end sign */
+    if (elog.text_color_enabled) {
+        log_len += elog_strcpy(log_len, log_buf + log_len, CSI_END);
+    }
+#endif
+
+    /* package newline sign */
+    log_len += elog_strcpy(log_len, log_buf + log_len, ELOG_NEWLINE_SIGN);
+    /* output log */
+#if defined(ELOG_ASYNC_OUTPUT_ENABLE)
+    extern void elog_async_output(uint8_t level, const char *log, size_t size);
+    elog_async_output(level, log_buf, log_len);
+#elif defined(ELOG_BUF_OUTPUT_ENABLE)
+    extern void elog_buf_output(const char *log, size_t size);
+    elog_buf_output(log_buf, log_len);
+#else
+    elog_port_output(log_buf, log_len);
+#endif
+    if (NULL != funWriteLog)
+        funWriteLog(log_buf, log_len);
+
+    /* unlock output */
+    elog_output_unlock();
+}
+
+/* args point to the first variable parameter */
 void elog_output_args(uint8_t level, const char *tag, const char *file, const char *func,
         const long line, const char *format, va_list args) {
     extern const char *elog_port_get_time(void);

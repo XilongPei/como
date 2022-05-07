@@ -22,6 +22,8 @@
 
 namespace como {
 
+using LoggerWriteLog = int(*)(const char *, size_t);
+
 class COM_PUBLIC Logger
 {
 public:
@@ -67,6 +69,8 @@ public:
         /* [out] */ char *buffer,
         /* [in] */  int bufSize,
         /* [in] */  const char* tag);
+
+    static void SetLoggerWriteLog(LoggerWriteLog loggerWriteLog);
 
 public:
     /* refer to external/EasyLogger/easylogger/inc/elog.h

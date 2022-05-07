@@ -30,6 +30,8 @@
 
 namespace como {
 
+static LoggerWriteLog g_loggerWriteLog = nullptr;
+
 static Logger logger;
 
 int Logger::sLevel = DEBUG;
@@ -88,6 +90,7 @@ void Logger::D(
                                  syscall(SYS_gettid), currentTime, tag, format);
     va_start(argList, format);
     elog_output_args(ELOG_LVL_DEBUG, "", "", "", 0, buf, argList);
+    //elog_output_args_simple(ELOG_LVL_DEBUG, buf, g_loggerWriteLog, argList);
     va_end(argList);
 }
 
@@ -260,6 +263,11 @@ void Logger::Monitor(
 
     snprintf(buffer, bufSize-1, "[%s %ld %s %s]", szSamplingTag,
                                          syscall(SYS_gettid), currentTime, tag);
+}
+
+void Logger::SetLoggerWriteLog(LoggerWriteLog loggerWriteLog)
+{
+    g_loggerWriteLog = loggerWriteLog;
 }
 
 } // namespace como

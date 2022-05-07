@@ -39,6 +39,8 @@
 extern "C" {
 #endif
 
+typedef int (*ElogLoggerWriteLog)(const char *, size_t);
+
 /* output log's level */
 #define ELOG_LVL_ASSERT                      0
 #define ELOG_LVL_ERROR                       1
@@ -272,6 +274,8 @@ void *elog_memcpy(void *dst, const void *src, size_t count);
 void elog_output_args(uint8_t level, const char *tag, const char *file, const char *func,
         const long line, const char *format, va_list args);
 
+void elog_output_args_simple(uint8_t level, const char *format,
+                                  ElogLoggerWriteLog funWriteLog, va_list args);
 
 #ifdef __cplusplus
 }
