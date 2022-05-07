@@ -36,6 +36,7 @@ include_directories(
 
 set(SOURCES
     RuntimeMonitor.cpp
+    CpuCoreUtils.cpp
 )
 
 add_library(RuntimeMonitor STATIC
@@ -43,9 +44,11 @@ add_library(RuntimeMonitor STATIC
 add_dependencies(RuntimeMonitor cdl)
 
 COPY(RuntimeMonitor ${MONITOR_SRC_DIR}/RuntimeMonitor.h ${INC_DIR})
+COPY(RuntimeMonitor ${MONITOR_SRC_DIR}/CpuCoreUtils.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${MONITOR_SRC_DIR}/RuntimeMonitor.h
+    ${MONITOR_SRC_DIR}/CpuCoreUtils.h
 )
 
 install(FILES
