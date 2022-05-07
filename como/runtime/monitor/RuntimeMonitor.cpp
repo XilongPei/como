@@ -104,17 +104,18 @@ ECode RuntimeMonitor::GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeM
 
 Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod)
 {
-    return (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) - sizeof(Byte*);
+    return (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
 }
 
 
 RTM_InvokeMethod *RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId,
+                                      Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel)
 {
     Long sizeParcel;
     parcel->GetDataSize(sizeParcel);
 
-    Long len = sizeof(RTM_InvokeMethod) - sizeof(Byte*) + sizeParcel;
+    Long len = sizeof(RTM_InvokeMethod) + sizeParcel;
     RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
     if (nullptr == rtm_InvokeMethod)
         return nullptr;
@@ -123,9 +124,10 @@ RTM_InvokeMethod *RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId,
 
     rtm_InvokeMethod->serverObjectId = serverObjectId;
     rtm_InvokeMethod->methodIndexPlus4 = methodIndexPlus4;
+    rtm_InvokeMethod->in_out = in_out;
 
     HANDLE parcelData;
-    Byte *p = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) - sizeof(Byte*);
+    Byte *p = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
     parcel->GetData(parcelData);
     memcpy(p, (Byte*)parcelData, sizeParcel);
 

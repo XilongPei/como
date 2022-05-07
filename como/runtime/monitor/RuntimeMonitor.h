@@ -23,13 +23,16 @@
 
 namespace como {
 
+#pragma pack(4)
 typedef struct tagRTM_InvokeMethod {
-    Long            length; // total length of this struct
+    Long            length;             // total length of this struct
     struct timespec time;
     Long            serverObjectId;
     Integer         methodIndexPlus4;
-    Byte           *parcel;
+    Integer         in_out;             // 0: in; 1: out
+                                        // from here, Byte *parcel;
 } RTM_InvokeMethod;
+#pragma pack()
 
 class COM_PUBLIC RuntimeMonitor
 {
@@ -48,6 +51,7 @@ public:
     static Byte *GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod);
 
     static RTM_InvokeMethod *WriteRtmInvokeMethod(Long serverObjectId,
+                                     Integer in_out,
                                      Integer methodIndexPlus4, IParcel *parcel);
 };
 

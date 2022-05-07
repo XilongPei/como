@@ -1746,7 +1746,7 @@ ECode InterfaceProxy::ProxyEntry(
 
     //TODO monitor
     /*
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId, 0,
                                                      methodIndex + 4, inParcel);
     */
 
@@ -1808,7 +1808,7 @@ ECode InterfaceProxy::ProxyEntry(
 
     //TODO monitor
     /*
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId, 1,
                                                     methodIndex + 4, outParcel);
     */
 
