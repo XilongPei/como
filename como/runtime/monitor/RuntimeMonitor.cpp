@@ -25,6 +25,7 @@
 namespace como {
 
 CircleBuffer<char> *logCircleBuf;
+CircleBuffer<char> *loggerOutputCircleBuf;
 
 RuntimeMonitor::RuntimeMonitor() {
     //
@@ -42,6 +43,19 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
     else
         return E_OUT_OF_MEMORY_ERROR;
 
+    loggerOutputCircleBuf = new CircleBuffer<char>(RM_LOG_BUFFER_SIZE);
+    if (nullptr != loggerOutputCircleBuf) {
+        ECode ec = ECode_CircleBuffer(loggerOutputCircleBuf);
+        if (FAILED(ec)) {
+            return ec;
+        }
+    }
+    else
+        return E_OUT_OF_MEMORY_ERROR;
+
+    // Collect the logs generated during COMO running for monitoring by RuntimeMonitor
+    Logger::SetLoggerWriteLog(RuntimeMonitor::WriteLog);
+
     return NOERROR;
 }
 
@@ -53,8 +67,11 @@ static int handler(void* user, const char* section, const char* name, const char
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "ImportObject") == 0) {
         WalkImportObject(RPCType::Remote, *(String*)user);
     }
-    else if (/*strcmp(section, "") == 0 && */strcmp(name, "log") == 0) {
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "RTM_log") == 0) {
         logCircleBuf->ReadString(*(String*)user);
+    }
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "COMO_Logger") == 0) {
+        loggerOutputCircleBuf->ReadString(*(String*)user);
     }
 
     return 1;
@@ -106,8 +123,7 @@ ECode RuntimeMonitor::GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeM
 
 int RuntimeMonitor::WriteLog(const char *log, size_t strLen)
 {
-    //TODO
-    return logCircleBuf->Write(log, strLen+1);
+    return loggerOutputCircleBuf->Write(log, strLen+1);
 }
 
 Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod)
