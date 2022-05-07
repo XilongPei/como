@@ -23,6 +23,14 @@
 
 namespace como {
 
+typedef struct tagRTM_InvokeMethod {
+    Long            length; // total length of this struct
+    struct timespec time;
+    Long            serverObjectId;
+    Integer         methodIndexPlus4;
+    Byte           *parcel;
+} RTM_InvokeMethod;
+
 class COM_PUBLIC RuntimeMonitor
 {
 public:
@@ -33,6 +41,14 @@ public:
     static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string);
 
     static constexpr int RM_LOG_BUFFER_SIZE = 4096;
+
+    static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
+                                 IInterface *intf, AutoPtr<IMetaMethod>& method);
+
+    static Byte *GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod);
+
+    static RTM_InvokeMethod *WriteRtmInvokeMethod(Long serverObjectId,
+                                     Integer methodIndexPlus4, IParcel *parcel);
 };
 
 #define RuntimeMonitor_Log()  \

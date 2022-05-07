@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <time.h>
 #include "ini.h"
 #include "comolog.h"
 #include "reflHelpers.h"
@@ -85,5 +86,50 @@ RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
 
 RuntimeMonitor_Log_::~RuntimeMonitor_Log_()
 {}
+
+ECode RuntimeMonitor::GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
+                                       IInterface *intf, AutoPtr<IMetaMethod>& method)
+{
+    InterfaceID iid;
+    intf->GetInterfaceID(intf, iid);
+
+    AutoPtr<IMetaCoclass> klass;
+    IObject::Probe(intf)->GetCoclass(klass);
+    AutoPtr<IMetaInterface> imintf;
+    klass->GetInterface(iid, imintf);
+    imintf->GetMethod(rtm_InvokeMethod->methodIndexPlus4, method);
+
+    return NOERROR;
+}
+
+Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod)
+{
+    return (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) - sizeof(Byte*);
+}
+
+
+RTM_InvokeMethod *RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId,
+                                      Integer methodIndexPlus4, IParcel *parcel)
+{
+    Long sizeParcel;
+    parcel->GetDataSize(sizeParcel);
+
+    Long len = sizeof(RTM_InvokeMethod) - sizeof(Byte*) + sizeParcel;
+    RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
+    if (nullptr == rtm_InvokeMethod)
+        return nullptr;
+
+    clock_gettime(CLOCK_REALTIME, &(rtm_InvokeMethod->time));
+
+    rtm_InvokeMethod->serverObjectId = serverObjectId;
+    rtm_InvokeMethod->methodIndexPlus4 = methodIndexPlus4;
+
+    HANDLE parcelData;
+    Byte *p = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) - sizeof(Byte*);
+    parcel->GetData(parcelData);
+    memcpy(p, (Byte*)parcelData, sizeParcel);
+
+    return rtm_InvokeMethod;
+}
 
 } // namespace como

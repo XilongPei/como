@@ -43,6 +43,7 @@
 #include <ThreadPoolChannelInvoke.h>
 #endif
 #include "registry.h"
+#include "RuntimeMonitor.h"
 
 namespace como {
 
@@ -1743,6 +1744,12 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
+    //TODO monitor
+    /*
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+                                                     methodIndex + 4, inParcel);
+    */
+
     if (! thisObj->mServerName.IsEmpty()) {
         // remote process call
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
@@ -1798,6 +1805,12 @@ ECode InterfaceProxy::ProxyEntry(
 
 #endif
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
+
+    //TODO monitor
+    /*
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+                                                    methodIndex + 4, outParcel);
+    */
 
 ProxyExit:
     if (DEBUG) {
