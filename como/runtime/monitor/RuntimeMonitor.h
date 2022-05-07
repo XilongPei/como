@@ -17,7 +17,9 @@
 #ifndef __COMO_RUNTIMEMONITOR_H__
 #define __COMO_RUNTIMEMONITOR_H__
 
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "zmq.h"
+#endif
 #include "comodef.h"
 #include "comotypes.h"
 
@@ -41,7 +43,9 @@ public:
 
     ECode StartRuntimeMonitor();
 
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
     static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string);
+#endif
 
     static constexpr int RM_LOG_BUFFER_SIZE = 4096;
 

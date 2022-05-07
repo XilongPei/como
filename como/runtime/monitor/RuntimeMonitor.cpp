@@ -60,6 +60,7 @@ static int handler(void* user, const char* section, const char* name, const char
     return 1;
 }
 
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string)
 {
     // parse monitor commands
@@ -69,6 +70,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string)
 
     return NOERROR;
 }
+#endif
 
 RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
 {
