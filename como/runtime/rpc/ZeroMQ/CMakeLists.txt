@@ -21,6 +21,10 @@ if(NOT EXISTS "${EXTERNAL_DIR}/libzmq/include/zmq.h")
     message(FATAL_ERROR "external/libzmq hasn't been built")
 endif()
 
+if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
+    add_definitions(-DRPC_OVER_ZeroMQ_SUPPORT)
+endif()
+
 include_directories(
     ./
     ../
