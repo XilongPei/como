@@ -159,8 +159,8 @@ public:
         /* [out] */ Boolean& matched) override;
 
     ECode MonitorRuntime(
-        /* [in] */ const String& request,
-        /* [out] */ String& response);
+        /* [in] */ const Array<Byte>& request,
+        /* [out] */ Array<Byte>& response) override;
 
     static CBinderChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);

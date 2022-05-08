@@ -351,8 +351,8 @@ public:
         /* [out] */ AutoPtr<IInterfacePack>& ipack);
 
     ECode MonitorRuntime(
-        /* [in] */ const String& request,
-        /* [out] */ String& response);
+        /* [in] */ const Array<Byte>& request,
+        /* [out] */ Array<Byte>& response) override;
 
     AutoPtr<IRPCChannel> GetChannel();
 

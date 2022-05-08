@@ -34,8 +34,14 @@ typedef struct tagRTM_InvokeMethod {
     Long            serverObjectId;
     Integer         methodIndexPlus4;
     Integer         in_out;             // 0: in; 1: out
-                                        // from here, Byte *parcel;
+    Byte            parcel[0];          // from here, Byte *parcel;
 } RTM_InvokeMethod;
+
+typedef struct tagRTM_Command {
+    Long            length;             // total length of this struct
+    Integer         command;
+    Byte            parcel[0];          // from here, Byte *;
+} RTM_Command;
 #pragma pack()
 
 class COM_PUBLIC RuntimeMonitor
@@ -46,7 +52,7 @@ public:
     ECode StartRuntimeMonitor();
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
-    static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string);
+    static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer);
 #endif
 
     static constexpr int RM_LOG_BUFFER_SIZE = 4096;
@@ -54,8 +60,6 @@ public:
 
     static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                  IInterface *intf, AutoPtr<IMetaMethod>& method);
-
-    static Byte *GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod);
 
     static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
                                       InterfaceID iid, Integer in_out,

@@ -63,17 +63,22 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
 
 static int handler(void* user, const char* section, const char* name, const char* value)
 {
+    String string;
     if (/*strcmp(section, "") == 0 && */strcmp(name, "ExportObject") == 0) {
-        WalkExportObject(RPCType::Remote, *(String*)user);
+        WalkExportObject(RPCType::Remote, string);
+        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "ImportObject") == 0) {
-        WalkImportObject(RPCType::Remote, *(String*)user);
+        WalkImportObject(RPCType::Remote, string);
+        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "RTM_log") == 0) {
-        logCircleBuf->ReadString(*(String*)user);
+        logCircleBuf->ReadString(string);
+        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "COMO_Logger") == 0) {
-        loggerOutputCircleBuf->ReadString(*(String*)user);
+        loggerOutputCircleBuf->ReadString(string);
+        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "InvokeMethod") == 0) {
         if (! rtmInvokeMethodQueue.empty()) {
@@ -85,8 +90,10 @@ static int handler(void* user, const char* section, const char* name, const char
 }
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
-ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, String& string)
+ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer)
 {
+    String string;
+
     // parse monitor commands
     if (ini_parse_string((const char*)zmq_msg_data(&msg), handler, &string) < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -132,12 +139,6 @@ int RuntimeMonitor::WriteLog(const char *log, size_t strLen)
 {
     return loggerOutputCircleBuf->Write(log, strLen+1);
 }
-
-Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod)
-{
-    return (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
-}
-
 
 ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
                                       InterfaceID iid, Integer in_out,

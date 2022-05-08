@@ -283,8 +283,8 @@ interface IRPCChannel
         [out] Boolean& matched);
 
     MonitorRuntime(
-        [in] String request,
-        [out] String& response);
+        [in] Array<Byte> request,
+        [out] Array<Byte>& response);
 }
 
 [
@@ -346,8 +346,8 @@ interface IProxy
         [out] IInterfacePack&& ipack);
 
     MonitorRuntime(
-        [in] String request,
-        [out] String& response);
+        [in] Array<Byte> request,
+        [out] Array<Byte>& response);
 }
 
 [

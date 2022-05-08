@@ -301,7 +301,7 @@ HandleMessage_Object_ReleasePeer:
             }
 
             case ZmqFunCode::RuntimeMonitor: {
-                String string = String("");
+                Array<Byte> resBuffer;
 
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if ((nullptr == worker) || (zmq_msg_size(&msg) < 1)) {
@@ -311,10 +311,10 @@ HandleMessage_Object_ReleasePeer:
                     goto HandleMessage_RuntimeMonitor;
                 }
 
-                ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, string);
+                ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, resBuffer);
                 if (SUCCEEDED(ec)) {
-                    resData = reinterpret_cast<HANDLE>(string.string());
-                    resSize = string.GetByteLength() + 1;
+                    resData = reinterpret_cast<HANDLE>(resBuffer.GetPayload());
+                    resSize = resBuffer.GetLength();
                     CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
                     zmq_msg_close(&msg);

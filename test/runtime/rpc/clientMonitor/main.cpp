@@ -45,11 +45,13 @@ TEST(ClientZmqTest, TestMonitorRuntime)
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
 
-    String request = String("ExportObject=1");
-    String response;
+    Array<Byte> response;
+    Array<Byte> request;
+    const char *str = (const char *)"ExportObject=1";
+    request.Copy((Byte*)str, strlen(str)+1);
 
     ECode ec = proxy->MonitorRuntime(request, response);
-    printf("Monitor Response:\n%s\n", response.string());
+    printf("Monitor Response:\n%s\n", response.GetPayload());
     EXPECT_EQ(0, ec);
 }
 

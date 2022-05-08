@@ -471,8 +471,8 @@ ECode CZMQChannel::Match(
 }
 
 ECode CZMQChannel::MonitorRuntime(
-    /* [in] */ const String& request,
-    /* [out] */ String& response)
+    /* [in] */ const Array<Byte>& request,
+    /* [out] */ Array<Byte>& response)
 {
     /**
      * 1. Find out who asked me for ReleaseObject and establish a socket
@@ -489,8 +489,8 @@ ECode CZMQChannel::MonitorRuntime(
         return E_RUNTIME_EXCEPTION;
     }
 
-    HANDLE resData = reinterpret_cast<HANDLE>(request.string());
-    Long resSize = request.GetByteLength() + 1;
+    HANDLE resData = reinterpret_cast<HANDLE>(request.GetPayload());
+    Long resSize = request.GetLength() + 1;
 
     Logger::D("CZMQChannel::MonitorRuntime",
               "Try to CzmqSendBuf to endpoint %s", serverName.string());
@@ -508,7 +508,7 @@ ECode CZMQChannel::MonitorRuntime(
         if (FAILED(ec)) {
             Logger::E("CZMQChannel::MonitorRuntime", "ECode: 0x%X", ec);
         }
-        response = String((char*)zmq_msg_data(&msg), zmq_msg_size(&msg));
+        response.Copy((Byte*)zmq_msg_data(&msg), zmq_msg_size(&msg));
     }
     else {
         Logger::E("CZMQChannel::MonitorRuntime", "RCZMQUtils::CzmqRecvMsg().");
