@@ -313,6 +313,11 @@ HandleMessage_Object_ReleasePeer:
 
                 ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, resBuffer);
                 if (SUCCEEDED(ec)) {
+                    if (nullptr == resBuffer.GetPayload()) {
+                        ec = E_OUT_OF_MEMORY_ERROR;
+                        goto HandleMessage_RuntimeMonitor;
+                    }
+
                     resData = reinterpret_cast<HANDLE>(resBuffer.GetPayload());
                     resSize = resBuffer.GetLength();
                     CZMQUtils::CzmqSendBuf(worker->mChannel, ec,

@@ -44,6 +44,13 @@ typedef struct tagRTM_Command {
 } RTM_Command;
 #pragma pack()
 
+
+class RTM_CommandType {
+public:
+    static constexpr int COMMAND_BY_STRING = 1;
+    static constexpr int COMMAND_InvokeMethod = 2;
+};
+
 class COM_PUBLIC RuntimeMonitor
 {
 public:
@@ -65,6 +72,8 @@ public:
                                       InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel);
     static int WriteLog(const char *log, size_t strLen);
+
+    static RTM_Command* GenRtmCommand(Integer command, const char *cstr);
 
 };
 

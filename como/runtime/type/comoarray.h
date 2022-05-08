@@ -23,6 +23,13 @@
 
 namespace como {
 
+/**
+ * 1. After `arr = new Array<?>()`, object is constructed, test whether the
+ * construction is successful by whether arr->IsNull() is true or false.
+ *
+ * 2. Array manages memory by reference counting, because its memory comes from
+ * SharedBuffer
+ */
 template<typename T>
 class Array : public Triple
 {

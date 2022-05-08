@@ -21,6 +21,7 @@
 #include <rpcHelpers.h>
 #include <gtest/gtest.h>
 #include "ComoConfig.h"
+#include "RuntimeMonitor.h"
 #include <stdio.h>
 
 using como::test::rpc::CID_CService;
@@ -45,10 +46,14 @@ TEST(ClientZmqTest, TestMonitorRuntime)
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
 
+    RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
+                                             RTM_CommandType::COMMAND_BY_STRING,
+                                             (const char *)"ExportObject=1");
+
     Array<Byte> response;
     Array<Byte> request;
-    const char *str = (const char *)"ExportObject=1";
-    request.Copy((Byte*)str, strlen(str)+1);
+    request.Copy((Byte*)rtmCommand, rtmCommand->length);
+    free(rtmCommand);
 
     ECode ec = proxy->MonitorRuntime(request, response);
     printf("Monitor Response:\n%s\n", response.GetPayload());

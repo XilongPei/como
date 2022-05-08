@@ -63,40 +63,74 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
 
 static int handler(void* user, const char* section, const char* name, const char* value)
 {
-    String string;
     if (/*strcmp(section, "") == 0 && */strcmp(name, "ExportObject") == 0) {
-        WalkExportObject(RPCType::Remote, string);
-        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
+        WalkExportObject(RPCType::Remote, *(String*)user);
     }
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "ImportObject") == 0) {
-        WalkImportObject(RPCType::Remote, string);
-        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
+        WalkImportObject(RPCType::Remote, *(String*)user);
     }
-    else if (/*strcmp(section, "") == 0 && */strcmp(name, "RTM_log") == 0) {
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "RtmLog") == 0) {
+        String string;
         logCircleBuf->ReadString(string);
-        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
+        *(String*)user += string;
     }
-    else if (/*strcmp(section, "") == 0 && */strcmp(name, "COMO_Logger") == 0) {
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "ComoLogger") == 0) {
+        String string;
         loggerOutputCircleBuf->ReadString(string);
-        ((Array<Byte>*)user)->Copy((Byte*)(const char*)string, string.GetByteLength());
+        *(String*)user += string;
     }
-    else if (/*strcmp(section, "") == 0 && */strcmp(name, "InvokeMethod") == 0) {
-        if (! rtmInvokeMethodQueue.empty()) {
-            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
-            rtmInvokeMethodQueue.pop_front();
-        }
-    }
+
     return 1;
 }
 
+/**
+ * RTM_CommandType::COMMAND_BY_STRING:
+ *      RtmLog:
+ *          RuntimeMonitor_Log(), RuntimeMonitor_Log_()
+ *      ComoLogger:
+ *          Logger::E(), Logger::D(), Logger::V()
+ *      ImportObject:
+ *          registry.sLocalImportRegistry, registry.sRemoteImportRegistry
+ * RTM_CommandType::COMMAND_InvokeMethod
+ *      RuntimeMonitor::WriteRtmInvokeMethod()
+ */
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer)
 {
     String string;
+    RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
+    switch (rtmCommand->command) {
+        case RTM_CommandType::COMMAND_BY_STRING: {
+            String string;
 
-    // parse monitor commands
-    if (ini_parse_string((const char*)zmq_msg_data(&msg), handler, &string) < 0) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            // parse monitor commands
+            if (ini_parse_string((const char*)rtmCommand->parcel, handler, &string) < 0) {
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+
+            Integer len = string.GetByteLength() + 1;
+            resBuffer = Array<Byte>(len);
+            if (! resBuffer.IsNull()) {
+                // resBuffer.Copy works very slowly
+                memcpy(resBuffer.GetPayload(), (const char*)string, len);
+            }
+
+            break;
+        }
+        case RTM_CommandType::COMMAND_InvokeMethod: {
+            if (! rtmInvokeMethodQueue.empty()) {
+                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
+
+                resBuffer = Array<Byte>(rtmMethod->length);
+                if (! resBuffer.IsNull()) {
+                    // resBuffer.Copy works very slowly
+                    memcpy(resBuffer.GetPayload(), (const char*)string, rtmMethod->length);
+
+                    rtmInvokeMethodQueue.pop_front();
+                }
+            }
+            break;
+        }
     }
 
     return NOERROR;
@@ -173,6 +207,17 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     rtmInvokeMethodQueue.push_back(rtm_InvokeMethod);
 
     return NOERROR;
+}
+
+RTM_Command* RuntimeMonitor::GenRtmCommand(Integer command, const char *cstr)
+{
+    Integer len = strlen(cstr) + 1;
+    RTM_Command *rtmCommand = (RTM_Command*)malloc(sizeof(RTM_Command) + len);
+    if (nullptr != rtmCommand) {
+        rtmCommand->command = command;
+        memcpy(rtmCommand->parcel, cstr, len);
+    }
+    return rtmCommand;
 }
 
 } // namespace como
