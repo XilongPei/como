@@ -92,23 +92,41 @@ public:
         }
     }
 
+    /**
+     * Write data to the CircleBuffer. If the remaining space in the CircleBuffer
+     * is insufficient, give up some data in the CircleBuffer to make room for
+     * new content.
+     */
     int Write(const T* buf, int count)
     {
         Mutex::AutoLock lock(m_Lock);
 
-        if (count <= 0)
+        if ((count <= 0) || (count >= m_nReadPos))
             return 0;
+
+        // GetLength() first
+        int length;
+        if (m_bEmpty)
+            length = 0;
+        else if (m_bFull)
+            length = m_nBufSize;
+        else if (m_nReadPos < m_nWritePos)
+            length = m_nWritePos - m_nReadPos;
+        else
+            length = m_nBufSize - m_nReadPos + m_nWritePos;
+
+        if (m_nBufSize - length < count) {
+            // clear some buffer to hold new content
+            if (DiscardedRead(count) < count)
+                return 0;
+        }
 
         m_bEmpty = false;
-
-        if (m_bFull) {
-            return 0;
-        }
 
         // When the buffer is empty
         if (m_nReadPos == m_nWritePos) {
             /* memory model
-                    (empty)                    m_nReadPos                (empty)
+                    (empty)      m_nReadPos                (empty)
              |-----------------------|-----------------------------------------|
                                  m_nWritePos                             m_nBufSize
              */
@@ -118,7 +136,7 @@ public:
                 memcpy(m_pBuf + m_nWritePos, buf, count);
                 // Move tail position
                 m_nWritePos += count;
-                m_bFull = (m_nWritePos == m_nReadPos);
+                m_bFull = false;
                 return count;
             }
             else {
@@ -135,17 +153,17 @@ public:
 
                 // Open up new memory along the end and write the remaining data
                 memcpy(m_pBuf, buf + leftcount, m_nWritePos);
-                m_bFull = (m_nWritePos == m_nReadPos);
+                m_bFull = false;
 
-                return leftcount + m_nWritePos;
+                return false;
             }
         }
         // There is space left, and the write pointer is in front of the read pointer
         else if (m_nReadPos < m_nWritePos) {
             /* memory model
-             (empty)                        (data)                  (empty)
-             |-------------------|------------------------|--------------------|
-                            m_nReadPos                m_nWritePos       (leftcount)
+             (empty)                    (data)                  (empty)
+             |-------------------|------------------|--------------------------|
+                            m_nReadPos         m_nWritePos     (leftcount)
              */
             // Calculate the remaining buffer size (from the write position to
             // the end of the buffer)
@@ -155,7 +173,7 @@ public:
                 memcpy(m_pBuf + m_nWritePos, buf, count);
 
                 m_nWritePos += count;
-                m_bFull = (m_nReadPos == m_nWritePos);
+                m_bFull = false;
                 assert(m_nReadPos <= m_nBufSize);
                 assert(m_nWritePos <= m_nBufSize);
                 return count;
@@ -175,6 +193,12 @@ public:
                 // full and the redundant data will be discarded.
                 m_nWritePos = (m_nReadPos >= count - leftcount) ?
                                                  count - leftcount : m_nReadPos;
+                m_bFull = (m_nReadPos == m_nWritePos);
+                if (m_bFull) {
+                    DiscardedRead(count);
+                    m_nWritePos = (m_nReadPos >= count - leftcount) ?
+                                                     count - leftcount : m_nReadPos;
+                }
 
                 // Open up new memory along the end and write the remaining data
                 memcpy(m_pBuf, buf + leftcount, m_nWritePos);
@@ -189,14 +213,14 @@ public:
             /* memory model
              (unread)                 (read)                     (unread)
              |-------------------|----------------------------|----------------|
-                            m_nWritePos        (leftcount)    m_nReadPos
+                            m_nWritePos    (leftcount)    m_nReadPos
              */
             int leftcount = m_nReadPos - m_nWritePos;
             if (leftcount > count) {
                 // There is enough spare space for storage
                 memcpy(m_pBuf + m_nWritePos, buf, count);
                 m_nWritePos += count;
-                m_bFull = (m_nReadPos == m_nWritePos);
+                m_bFull = false;
                 assert(m_nReadPos <= m_nBufSize);
                 assert(m_nWritePos <= m_nBufSize);
                 return count;
@@ -206,6 +230,13 @@ public:
                 // shall be discarded
                 memcpy(m_pBuf + m_nWritePos, buf, leftcount);
                 m_nWritePos += leftcount;
+
+                m_bFull = (m_nReadPos == m_nWritePos);
+                if (m_bFull) {
+                    DiscardedRead(count);
+                    m_nWritePos += leftcount;
+                }
+
                 m_bFull = (m_nReadPos == m_nWritePos);
                 assert(m_bFull);
                 assert(m_nReadPos <= m_nBufSize);
@@ -231,7 +262,7 @@ public:
         // When buffer if full
         if (m_nReadPos == m_nWritePos) {
             /* memory model
-                    (data)                    m_nReadPos                (data)
+                    (data)       m_nReadPos                (data)
              |------------------------|----------------------------------------|
                                  m_nWritePos         m_nBufSize
              */
@@ -255,8 +286,8 @@ public:
                 return leftcount + m_nReadPos;
             }
         }
-        // Write pointer before (unread data is continuous)
         else if (m_nReadPos < m_nWritePos) {
+        // Write pointer before (unread data is continuous)
             /* memory model
              (read)                 (unread)                      (read)
              |-------------------|------------------------|--------------------|
@@ -272,6 +303,7 @@ public:
             return icount;
         }
         else {
+        // Read pointer in front
             /* memory model
              (unread)                (read)                      (unread)
              |-------------------|--------------------|----_-------------------|
@@ -281,8 +313,7 @@ public:
             int leftcount = m_nBufSize - m_nReadPos;
             // The data to be read out is continuous and on the right of the
             // reading pointer m_nReadPos<=count<=m_nBufSize
-            if (leftcount > count)
-            {
+            if (leftcount > count) {
                 memcpy(buf, m_pBuf + m_nReadPos, count);
                 m_nReadPos += count;
                 m_bEmpty = (m_nReadPos == m_nWritePos);
@@ -307,6 +338,88 @@ public:
 
                 // Read the data to the left of the write pointer
                 memcpy(buf, m_pBuf, m_nReadPos);
+                m_bEmpty = (m_nReadPos == m_nWritePos);
+                assert(m_nReadPos <= m_nBufSize);
+                assert(m_nWritePos <= m_nBufSize);
+                return leftcount + m_nReadPos;
+            }
+        }
+    }
+
+    int DiscardedRead(int count)
+    {
+        if (count > m_nBufSize)
+            return -1;
+
+        // When buffer if full
+        if (m_nReadPos == m_nWritePos) {
+            /* memory model
+                    (data)       m_nReadPos                (data)
+             |------------------------|----------------------------------------|
+                                 m_nWritePos         m_nBufSize
+             */
+            int leftcount = m_nBufSize - m_nReadPos;
+            if (leftcount > count) {
+                m_nReadPos += count;
+                m_bEmpty = (m_nReadPos == m_nWritePos);
+                return count;
+            }
+            else {
+                // If the area to the left of the write pointer can read out the
+                // remaining data, it will be shifted to the `count - leftcount`
+                // position. Otherwise, it will be offset to the write pointer
+                // position, indicating that the cache is empty
+                m_nReadPos = (m_nWritePos > count - leftcount) ?
+                                                count - leftcount : m_nWritePos;
+                m_bEmpty = (m_nReadPos == m_nWritePos);
+                return leftcount + m_nReadPos;
+            }
+        }
+        else if (m_nReadPos < m_nWritePos) {
+        // Write pointer before (unread data is continuous)
+            /* memory model
+             (read)                 (unread)                      (read)
+             |-------------------|------------------------|--------------------|
+                            m_nReadPos                m_nWritePos         m_nBufSize
+             */
+            int leftcount = m_nWritePos - m_nReadPos;
+            int icount = (leftcount > count) ? count : leftcount;
+            m_nReadPos += icount;
+            m_bEmpty = (m_nReadPos == m_nWritePos);
+            assert(m_nReadPos <= m_nBufSize);
+            assert(m_nWritePos <= m_nBufSize);
+            return icount;
+        }
+        else {
+        // Read pointer in front
+            /* memory model
+             (unread)                (read)                      (unread)
+             |-------------------|--------------------|----_-------------------|
+                            m_nWritePos           m_nReadPos              m_nBufSize
+
+             */
+            int leftcount = m_nBufSize - m_nReadPos;
+            // The data to be read out is continuous and on the right of the
+            // reading pointer m_nReadPos<=count<=m_nBufSize
+            if (leftcount > count) {
+                m_nReadPos += count;
+                m_bEmpty = (m_nReadPos == m_nWritePos);
+                assert(m_nReadPos <= m_nBufSize);
+                assert(m_nWritePos <= m_nBufSize);
+                return count;
+            }
+            // The data to be read out is discontinuous, which is on the right
+            // of the read pointer and the left of the write pointer respectively
+            else {
+                // Move the position of the read pointe. If the area to the left
+                // of the write pointer can read out the remaining data, it will
+                // be offset to the `cont-leftcount` position,
+                // Otherwise, it will be offset to the write pointer position,
+                // indicating that the cache is empty and the redundant data
+                // will be discarded
+                m_nReadPos = (m_nWritePos >= count - leftcount) ?
+                                                count - leftcount : m_nWritePos;
+
                 m_bEmpty = (m_nReadPos == m_nWritePos);
                 assert(m_nReadPos <= m_nBufSize);
                 assert(m_nWritePos <= m_nBufSize);
