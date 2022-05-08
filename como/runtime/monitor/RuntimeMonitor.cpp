@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include <time.h>
+#include "queue"
 #include "ini.h"
 #include "comolog.h"
 #include "reflHelpers.h"
@@ -24,8 +25,9 @@
 
 namespace como {
 
-CircleBuffer<char> *logCircleBuf;
-CircleBuffer<char> *loggerOutputCircleBuf;
+CircleBuffer<char> *logCircleBuf = nullptr;
+CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
+std::deque<RTM_InvokeMethod*> rtmInvokeMethodQueue(RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
 
 RuntimeMonitor::RuntimeMonitor() {
     //
@@ -73,7 +75,12 @@ static int handler(void* user, const char* section, const char* name, const char
     else if (/*strcmp(section, "") == 0 && */strcmp(name, "COMO_Logger") == 0) {
         loggerOutputCircleBuf->ReadString(*(String*)user);
     }
-
+    else if (/*strcmp(section, "") == 0 && */strcmp(name, "InvokeMethod") == 0) {
+        if (! rtmInvokeMethodQueue.empty()) {
+            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
+            rtmInvokeMethodQueue.pop_front();
+        }
+    }
     return 1;
 }
 
@@ -132,8 +139,8 @@ Byte *RuntimeMonitor::GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMetho
 }
 
 
-RTM_InvokeMethod *RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId,
-                                      Integer in_out,
+ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
+                                      InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel)
 {
     Long sizeParcel;
@@ -142,20 +149,29 @@ RTM_InvokeMethod *RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId,
     Long len = sizeof(RTM_InvokeMethod) + sizeParcel;
     RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
     if (nullptr == rtm_InvokeMethod)
-        return nullptr;
+        return E_OUT_OF_MEMORY_ERROR;
 
     clock_gettime(CLOCK_REALTIME, &(rtm_InvokeMethod->time));
-
+    rtm_InvokeMethod->length = len;
     rtm_InvokeMethod->serverObjectId = serverObjectId;
-    rtm_InvokeMethod->methodIndexPlus4 = methodIndexPlus4;
+    rtm_InvokeMethod->coclassID_mUuid = cid.mUuid;
+    rtm_InvokeMethod->interfaceID_mUuid = iid.mUuid;
     rtm_InvokeMethod->in_out = in_out;
+    rtm_InvokeMethod->methodIndexPlus4 = methodIndexPlus4;
 
     HANDLE parcelData;
     Byte *p = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
     parcel->GetData(parcelData);
     memcpy(p, (Byte*)parcelData, sizeParcel);
 
-    return rtm_InvokeMethod;
+    if (rtmInvokeMethodQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
+        RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
+        free(rtmMethod);
+        rtmInvokeMethodQueue.pop_front();
+    }
+    rtmInvokeMethodQueue.push_back(rtm_InvokeMethod);
+
+    return NOERROR;
 }
 
 } // namespace como

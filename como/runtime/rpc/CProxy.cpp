@@ -1745,10 +1745,11 @@ ECode InterfaceProxy::ProxyEntry(
     }
 
     //TODO monitor
-    /*
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId, 0,
-                                                     methodIndex + 4, inParcel);
-    */
+
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+                                         thisObj->mOwner->mCid, thisObj->mIid,
+                                         0, methodIndex + 4, inParcel);
+
 
     if (! thisObj->mServerName.IsEmpty()) {
         // remote process call
@@ -1808,8 +1809,9 @@ ECode InterfaceProxy::ProxyEntry(
 
     //TODO monitor
     /*
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId, 1,
-                                                    methodIndex + 4, outParcel);
+    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+                                         thisObj->mOwner->mCid, thisObj->mIid,
+                                         1, methodIndex + 4, inParcel);
     */
 
 ProxyExit:

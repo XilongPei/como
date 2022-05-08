@@ -29,6 +29,8 @@ namespace como {
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
     struct timespec time;
+    UUID            coclassID_mUuid;
+    UUID            interfaceID_mUuid;
     Long            serverObjectId;
     Integer         methodIndexPlus4;
     Integer         in_out;             // 0: in; 1: out
@@ -48,15 +50,16 @@ public:
 #endif
 
     static constexpr int RM_LOG_BUFFER_SIZE = 4096;
+    static constexpr int RTM_INVOKEMETHOD_QUEUE_SIZE = 512;
 
     static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                  IInterface *intf, AutoPtr<IMetaMethod>& method);
 
     static Byte *GetRtmInvokeMethodParcel(RTM_InvokeMethod *rtm_InvokeMethod);
 
-    static RTM_InvokeMethod *WriteRtmInvokeMethod(Long serverObjectId,
-                                     Integer in_out,
-                                     Integer methodIndexPlus4, IParcel *parcel);
+    static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
+                                      InterfaceID iid, Integer in_out,
+                                      Integer methodIndexPlus4, IParcel *parcel);
     static int WriteLog(const char *log, size_t strLen);
 
 };
