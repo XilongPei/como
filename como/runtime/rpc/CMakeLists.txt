@@ -45,6 +45,7 @@ include_directories(
     ../
     ../type
     ../util
+    ../monitor
     ${INC_DIR}
     ${ZeroMQ_INC_DIR}
 )

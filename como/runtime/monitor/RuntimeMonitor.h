@@ -17,6 +17,7 @@
 #ifndef __COMO_RUNTIMEMONITOR_H__
 #define __COMO_RUNTIMEMONITOR_H__
 
+#include <queue>
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "zmq.h"
 #endif
@@ -26,8 +27,11 @@
 namespace como {
 
 enum class RTM_CommandType {
-    COMMAND_BY_STRING = 1,
-    COMMAND_InvokeMethod = 2,
+    CMD_BY_STRING                      = 0x11,
+    CMD_InvokeMethod                   = 0x12,
+    CMD_Client_Activate_InvokeMethod   = 0x21,
+    CMD_Client_Deactivate_InvokeMethod = 0x22,
+    CMD_Client_InvokeMethod            = 0x23,
 };
 
 #pragma pack(4)
@@ -72,6 +76,8 @@ public:
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, const char *cstr);
+
+    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodQueue;
 
 };
 

@@ -1949,6 +1949,35 @@ ECode CProxy::MonitorRuntime(
     /* [in] */ const Array<Byte>& request,
     /* [out] */ Array<Byte>& response)
 {
+    String string;
+    RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
+    switch (rtmCommand->command) {
+        case RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
+            mMonitorInvokeMethod = true;
+            return NOERROR;
+        }
+
+        case RTM_CommandType::CMD_Client_Deactivate_InvokeMethod: {
+            mMonitorInvokeMethod = false;
+            return NOERROR;
+        }
+
+        case RTM_CommandType::CMD_Client_InvokeMethod: {
+            if (! RuntimeMonitor::rtmInvokeMethodQueue.empty()) {
+                RTM_InvokeMethod *rtmMethod = RuntimeMonitor::rtmInvokeMethodQueue.front();
+
+                response = Array<Byte>(rtmMethod->length);
+                if (! response.IsNull()) {
+                    // response.Copy works very slowly
+                    memcpy(response.GetPayload(), (const char*)string, rtmMethod->length);
+
+                    RuntimeMonitor::rtmInvokeMethodQueue.pop_front();
+                }
+            }
+            return NOERROR;
+        }
+    }
+
     return mChannel->MonitorRuntime(request, response);
 }
 

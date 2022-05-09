@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include <time.h>
-#include "queue"
 #include "ini.h"
 #include "comolog.h"
 #include "reflHelpers.h"
@@ -27,7 +26,8 @@ namespace como {
 
 CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
-std::deque<RTM_InvokeMethod*> rtmInvokeMethodQueue(RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
+std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodQueue(
+                                    RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
 
 RuntimeMonitor::RuntimeMonitor() {
     //
@@ -100,7 +100,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
     String string;
     RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
     switch (rtmCommand->command) {
-        case RTM_CommandType::COMMAND_BY_STRING: {
+        case RTM_CommandType::CMD_BY_STRING: {
             String string;
 
             // parse monitor commands
@@ -117,7 +117,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
 
             break;
         }
-        case RTM_CommandType::COMMAND_InvokeMethod: {
+        case RTM_CommandType::CMD_InvokeMethod: {
             if (! rtmInvokeMethodQueue.empty()) {
                 RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
 

@@ -47,8 +47,8 @@ TEST(ClientZmqTest, TestMonitorRuntime)
     EXPECT_TRUE(proxy != nullptr);
 
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
-                                             RTM_CommandType::COMMAND_BY_STRING,
-                                             (const char *)"ExportObject=1");
+                                                 RTM_CommandType::CMD_BY_STRING,
+                                                (const char *)"ExportObject=1");
 
     Array<Byte> response;
     Array<Byte> request;

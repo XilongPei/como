@@ -374,6 +374,8 @@ private:
     IMetaCoclass* mTargetMetadata;
     Array<InterfaceProxy*> mInterfaces;
     AutoPtr<IRPCChannel> mChannel;
+
+    bool mMonitorInvokeMethod;
 };
 
 } // namespace como
