@@ -20,11 +20,22 @@
 
 namespace como {
 
+/* TripleHexDump() output:
+
+"array_var":["
+  0000  20 54 68 69 73 20 63 6c 61 73 73 20 69 73 20 75   This class is u
+  0010  73 65 64 20 74 6f 20 63 72 65 61 74 65 20 61 20  sed to create a
+  0020  68 65 78 20 64 75 6d 70 20 6f 66 20 61 6e 79 20  hex dump of any
+  0030  63 6f 6e 74 69 67 75 6f 75 73 20 6d 65 6d 6f 72  contiguous memor
+  0040  79 20 61 72 65 61 2e 20 54 68 65 20 68 65 78 20  y area. The hex
+"]
+*/
 static String& TripleHexDump(Triple& triple, String& strBuffer)
 {
     const int perLine = 16;
 
     strBuffer.Reserve(triple.mSize * 4);
+    strBuffer = "[\"\n";
 
     int i;
     unsigned char buff[perLine + 1];
@@ -60,24 +71,34 @@ static String& TripleHexDump(Triple& triple, String& strBuffer)
     }
 
     // And print the final ASCII buffer.
-    strBuffer += String::Format("  %s\n", buff);
+    strBuffer += String::Format("  %s\n\"]\n", buff);
 
     return strBuffer;
 }
 
-#define MakeParamString(str)    (paramName + "=" + str)
+#define MakeParamString(str)    ("\"" + paramName + "\":" + str)
 
 /**
  * refer to InterfaceProxy::MarshalArguments in CProxy.cpp
+ *
+ * The output data conforms to JSON specification
  */
 ECode MarshalUtils::UnMarshalArguments(
     /* [in] */ IMetaMethod* method,
     /* [in] */ IParcel* argParcel,
     /* [out] */ String& strBuffer)
 {
+    // `sizeof(Integer)` * 3 corresponds to the three statements in CProxy.cpp
+    //
+    // inParcel->WriteInteger(RPC_MAGIC_NUMBER);
+    // inParcel->WriteInteger(thisObj->mIndex);
+    // inParcel->WriteInteger(methodIndex + 4);
+    //
+    argParcel->SetDataPosition(sizeof(Integer) * 3);
+
     String methodName;
     method->GetName(methodName);
-    strBuffer += (methodName + "(");
+    strBuffer += ("{\"" + methodName + "\":{");
 
     Integer N;
     method->GetParameterNumber(N);
@@ -100,13 +121,19 @@ ECode MarshalUtils::UnMarshalArguments(
                 case TypeKind::Char: {
                     Char value;
                     argParcel->ReadChar(value);
-                    strBuffer += MakeParamString(String::Format("%c", value));
+                    if ('"' != value)
+                        strBuffer += MakeParamString(String::Format("\"%c\"", value));
+                    else
+                        strBuffer += MakeParamString("\"\\\"\"");
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte value;
                     argParcel->ReadByte(value);
-                    strBuffer += MakeParamString(String::Format("%c", value));
+                    if ('"' != value)
+                        strBuffer += MakeParamString(String::Format("\"%c\"", value));
+                    else
+                        strBuffer += MakeParamString("\"\\\"\"");
                     break;
                 }
                 case TypeKind::Short: {
@@ -137,6 +164,7 @@ ECode MarshalUtils::UnMarshalArguments(
                     Double value;
                     argParcel->ReadDouble(value);
                     strBuffer += MakeParamString(String::Format("%f", value));
+                    break;
                 }
                 case TypeKind::Boolean: {
                     Boolean value;
@@ -193,27 +221,35 @@ ECode MarshalUtils::UnMarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    strBuffer += MakeParamString("nullptr");
+                    strBuffer += MakeParamString("null");
             } // switch
-        } // if
+        }
+        else {
+            strBuffer += MakeParamString("null");
+        }
 
         if (i < (N - 1))
             strBuffer += ",";
     } //for
 
-    strBuffer += ")";
+    strBuffer += "}}";
 
     return NOERROR;
 }
 
+/**
+ * The output data conforms to JSON specification
+ */
 ECode MarshalUtils::UnUnmarshalResults(
     /* [in] */ IMetaMethod* method,
     /* [in] */ IParcel* resParcel,
     /* [out] */ String& strBuffer)
 {
+    resParcel->SetDataPosition(0);
+
     String methodName;
     method->GetName(methodName);
-    strBuffer += (methodName + "(");
+    strBuffer += ("{\"" + methodName + "\":{");
 
     Integer N;
     method->GetParameterNumber(N);
@@ -236,13 +272,19 @@ ECode MarshalUtils::UnUnmarshalResults(
                 case TypeKind::Char: {
                     Char value;
                     resParcel->ReadChar(value);
-                    strBuffer += MakeParamString(String::Format("%c", value));
+                    if ('"' != value)
+                        strBuffer += MakeParamString(String::Format("\"%c\"", value));
+                    else
+                        strBuffer += MakeParamString("\"\\\"\"");
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte value;
                     resParcel->ReadByte(value);
-                    strBuffer += MakeParamString(String::Format("%c", value));
+                    if ('"' != value)
+                        strBuffer += MakeParamString(String::Format("\"%c\"", value));
+                    else
+                        strBuffer += MakeParamString("\"\\\"\"");
                     break;
                 }
                 case TypeKind::Short: {
@@ -273,6 +315,7 @@ ECode MarshalUtils::UnUnmarshalResults(
                     Double value;
                     resParcel->ReadDouble(value);
                     strBuffer += MakeParamString(String::Format("%f", value));
+                    break;
                 }
                 case TypeKind::Boolean: {
                     Boolean value;
@@ -367,10 +410,18 @@ ECode MarshalUtils::UnUnmarshalResults(
                 case TypeKind::InterfaceID:
                 case TypeKind::Triple:
                 default:
-                    strBuffer += MakeParamString("nullptr");
-            }
-        } // switch
+                    strBuffer += MakeParamString("null");
+            } // switch
+        }
+        else {
+            strBuffer += MakeParamString("null");
+        }
+
+        if (i < (N - 1))
+            strBuffer += ",";
     } // for
+
+    strBuffer += "}}";
 
     return NOERROR;
 }
