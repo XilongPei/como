@@ -101,7 +101,8 @@ public:
     {
         Mutex::AutoLock lock(m_Lock);
 
-        if ((count <= 0) || (count >= m_nReadPos))
+        // Only data less than half the capacity can be written
+        if ((count <= 0) || ((count + count) >= m_nBufSize))
             return 0;
 
         // GetLength() first
@@ -155,7 +156,7 @@ public:
                 memcpy(m_pBuf, buf + leftcount, m_nWritePos);
                 m_bFull = false;
 
-                return false;
+                return leftcount + m_nWritePos;
             }
         }
         // There is space left, and the write pointer is in front of the read pointer
@@ -190,22 +191,24 @@ public:
                 // pointer can put down the remaining data, it will be offset to
                 // the `cont - leftcount` position, Otherwise, it will be shifted
                 // to the read pointer position, indicating that the cache is
-                // full and the redundant data will be discarded.
+                // full and the redundant data will NOT be discarded,
+                // so DiscardedRead(), then recall function Write()
                 m_nWritePos = (m_nReadPos >= count - leftcount) ?
                                                  count - leftcount : m_nReadPos;
-                m_bFull = (m_nReadPos == m_nWritePos);
-                if (m_bFull) {
-                    DiscardedRead(count);
-                    m_nWritePos = (m_nReadPos >= count - leftcount) ?
-                                                     count - leftcount : m_nReadPos;
-                }
-
                 // Open up new memory along the end and write the remaining data
                 memcpy(m_pBuf, buf + leftcount, m_nWritePos);
                 m_bFull = (m_nReadPos == m_nWritePos);
                 assert(m_nReadPos <= m_nBufSize);
                 assert(m_nWritePos <= m_nBufSize);
-                return leftcount + m_nWritePos;
+
+                if (m_bFull) {
+                    DiscardedRead(count);
+                    return Write(buf + (leftcount + m_nWritePos), \
+                                             count - (leftcount + m_nWritePos));
+                }
+                else {
+                    return leftcount + m_nWritePos;
+                }
             }
         }
         // The read pointer precedes the write pointer
@@ -227,7 +230,8 @@ public:
             }
             else {
                 // When the remaining space is insufficient, the following data
-                // shall be discarded
+                // shall NOT be discarded, so DiscardedRead(), then recall
+                // function Write()
                 memcpy(m_pBuf + m_nWritePos, buf, leftcount);
                 m_nWritePos += leftcount;
 
@@ -235,13 +239,15 @@ public:
                 if (m_bFull) {
                     DiscardedRead(count);
                     m_nWritePos += leftcount;
+                    return Write(buf + leftcount, count - leftcount);
                 }
-
-                m_bFull = (m_nReadPos == m_nWritePos);
-                assert(m_bFull);
-                assert(m_nReadPos <= m_nBufSize);
-                assert(m_nWritePos <= m_nBufSize);
-                return leftcount;
+                else {
+                    m_bFull = (m_nReadPos == m_nWritePos);
+                    assert(m_bFull);
+                    assert(m_nReadPos <= m_nBufSize);
+                    assert(m_nWritePos <= m_nBufSize);
+                    return leftcount;
+                }
             }
         }
     }
