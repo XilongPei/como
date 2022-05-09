@@ -25,6 +25,11 @@
 
 namespace como {
 
+enum class RTM_CommandType {
+    COMMAND_BY_STRING = 1,
+    COMMAND_InvokeMethod = 2,
+};
+
 #pragma pack(4)
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
@@ -39,17 +44,10 @@ typedef struct tagRTM_InvokeMethod {
 
 typedef struct tagRTM_Command {
     Long            length;             // total length of this struct
-    Integer         command;
+    RTM_CommandType command;
     Byte            parcel[0];          // from here, Byte *;
 } RTM_Command;
 #pragma pack()
-
-
-class RTM_CommandType {
-public:
-    static constexpr int COMMAND_BY_STRING = 1;
-    static constexpr int COMMAND_InvokeMethod = 2;
-};
 
 class COM_PUBLIC RuntimeMonitor
 {
@@ -73,7 +71,7 @@ public:
                                       Integer methodIndexPlus4, IParcel *parcel);
     static int WriteLog(const char *log, size_t strLen);
 
-    static RTM_Command* GenRtmCommand(Integer command, const char *cstr);
+    static RTM_Command* GenRtmCommand(RTM_CommandType command, const char *cstr);
 
 };
 

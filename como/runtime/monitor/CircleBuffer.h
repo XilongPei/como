@@ -29,6 +29,12 @@ namespace como {
 
 #define ECode_CircleBuffer(circleBuf)  circleBuf->ec
 
+/**
+ * A reasonable state is that there is always more than half of the space here,
+ * so that the writing speed can be guaranteed. Because normal control logic is
+ * the most important, monitor is an auxiliary means.
+ * Discard the old data so that the new data can be saved in time.
+ */
 template<typename T>
 class CircleBuffer
 {
@@ -238,7 +244,6 @@ public:
                 m_bFull = (m_nReadPos == m_nWritePos);
                 if (m_bFull) {
                     DiscardedRead(count);
-                    m_nWritePos += leftcount;
                     return Write(buf + leftcount, count - leftcount);
                 }
                 else {

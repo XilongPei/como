@@ -36,6 +36,7 @@ include_directories(
 set(SOURCES
     RuntimeMonitor.cpp
     CpuCoreUtils.cpp
+    MarshalUtils.cpp
 )
 
 add_library(RuntimeMonitor STATIC

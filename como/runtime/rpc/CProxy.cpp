@@ -572,12 +572,15 @@ ECode InterfaceProxy::MarshalArguments(
     for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
         FAIL_RETURN(method->GetParameter(i, param));
+
         AutoPtr<IMetaType> type;
-        param->GetType(type);
-        TypeKind kind;
-        type->GetTypeKind(kind);
         IOAttribute ioAttr;
+        TypeKind kind;
+
+        param->GetType(type);
         param->GetIOAttribute(ioAttr);
+        type->GetTypeKind(kind);
+
         if (ioAttr == IOAttribute::IN) {
             switch (kind) {
                 case TypeKind::Char: {
@@ -914,12 +917,15 @@ ECode InterfaceProxy::UnmarshalResults(
     for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
         FAIL_RETURN(method->GetParameter(i, param));
+
         AutoPtr<IMetaType> type;
-        param->GetType(type);
-        TypeKind kind;
-        type->GetTypeKind(kind);
         IOAttribute ioAttr;
+        TypeKind kind;
+
+        param->GetType(type);
         param->GetIOAttribute(ioAttr);
+        type->GetTypeKind(kind);
+
         if (ioAttr == IOAttribute::IN) {
             switch (kind) {
                 case TypeKind::Char:

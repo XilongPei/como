@@ -209,7 +209,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     return NOERROR;
 }
 
-RTM_Command* RuntimeMonitor::GenRtmCommand(Integer command, const char *cstr)
+RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, const char *cstr)
 {
     Integer len = strlen(cstr) + 1;
     RTM_Command *rtmCommand = (RTM_Command*)malloc(sizeof(RTM_Command) + len);
