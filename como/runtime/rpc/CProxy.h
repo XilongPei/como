@@ -293,14 +293,15 @@ private:
     friend class CProxy;
 
     static constexpr Boolean DEBUG = false;
-    HANDLE* mVtable;     // must be the first member
-    HANDLE mProxyEntry;  // must be the second member
-    Integer mIndex;      // Interface sequence number
-    InterfaceID mIid;
+    HANDLE*         mVtable;        // must be the first member
+    HANDLE          mProxyEntry;    // must be the second member
+    Integer         mIndex;         // Interface sequence number
+    InterfaceID     mIid;
     IMetaInterface* mTargetMetadata;
-    CProxy* mOwner;
-    String mServerName;
-    Long mServerObjectId;
+    CProxy*         mOwner;
+    String          mServerName;
+    Long            mServerObjectId;
+    Long            mTimeout;
 };
 
 extern const CoclassID CID_CProxy;
@@ -370,10 +371,10 @@ public:
 private:
     friend class InterfaceProxy;
 
-    CoclassID mCid;
-    IMetaCoclass* mTargetMetadata;
-    Array<InterfaceProxy*> mInterfaces;
-    AutoPtr<IRPCChannel> mChannel;
+    CoclassID               mCid;
+    IMetaCoclass*           mTargetMetadata;
+    Array<InterfaceProxy*>  mInterfaces;
+    AutoPtr<IRPCChannel>    mChannel;
 
     bool mMonitorInvokeMethod;
 };

@@ -26,7 +26,9 @@ namespace como {
 
 CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
-std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodQueue(
+std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue(
+                                    RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
+std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue(
                                     RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
 
 RuntimeMonitor::RuntimeMonitor() {
@@ -100,7 +102,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
     String string;
     RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
     switch (rtmCommand->command) {
-        case RTM_CommandType::CMD_BY_STRING: {
+        case (Short)RTM_CommandType::CMD_BY_STRING: {
             String string;
 
             // parse monitor commands
@@ -117,16 +119,16 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
 
             break;
         }
-        case RTM_CommandType::CMD_InvokeMethod: {
-            if (! rtmInvokeMethodQueue.empty()) {
-                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
+        case (Short)RTM_CommandType::CMD_Server_InvokeMethod: {
+            if (! rtmInvokeMethodClientQueue.empty()) {
+                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
 
                 resBuffer = Array<Byte>(rtmMethod->length);
                 if (! resBuffer.IsNull()) {
                     // resBuffer.Copy works very slowly
                     memcpy(resBuffer.GetPayload(), (const char*)string, rtmMethod->length);
 
-                    rtmInvokeMethodQueue.pop_front();
+                    rtmInvokeMethodClientQueue.pop_front();
                 }
             }
             break;
@@ -199,22 +201,24 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     parcel->GetData(parcelData);
     memcpy(p, (Byte*)parcelData, sizeParcel);
 
-    if (rtmInvokeMethodQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
-        RTM_InvokeMethod *rtmMethod = rtmInvokeMethodQueue.front();
+    if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
+        RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
         free(rtmMethod);
-        rtmInvokeMethodQueue.pop_front();
+        rtmInvokeMethodClientQueue.pop_front();
     }
-    rtmInvokeMethodQueue.push_back(rtm_InvokeMethod);
+    rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
 
     return NOERROR;
 }
 
-RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, const char *cstr)
+RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
+                                                               const char *cstr)
 {
     Integer len = strlen(cstr) + 1;
     RTM_Command *rtmCommand = (RTM_Command*)malloc(sizeof(RTM_Command) + len);
     if (nullptr != rtmCommand) {
-        rtmCommand->command = command;
+        rtmCommand->command = (Short)command;
+        rtmCommand->param = param;
         memcpy(rtmCommand->parcel, cstr, len);
     }
     return rtmCommand;

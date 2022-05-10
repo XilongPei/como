@@ -1718,24 +1718,8 @@ ECode InterfaceProxy::ProxyEntry(
 
     ECode ec;
     AutoPtr<IParcel> inParcel, outParcel;
-
-#ifdef COMO_FUNCTION_SAFETY
-    AutoPtr<IMetaInterface> intf;
-    method->GetInterface(intf);
-
-    Long lvalue;
-    ec = reflHelpers::intfGetConstantLong(intf, String("timeout"), lvalue);
-    if (FAILED(ec)) {
-        if (E_TYPE_MISMATCH_EXCEPTION == ec) {
-            Logger::E("CProxy", "Wrong timeout datatype");
-            goto ProxyExit;
-        } else {
-            lvalue = 0;
-        }
-    }
-#endif
-
     RPCType type;
+
     thisObj->mOwner->mChannel->GetRPCType(type);
     ec = CoCreateParcel(type, inParcel);
     if (FAILED(ec)) {
@@ -1750,12 +1734,11 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
-    //TODO monitor
-
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+    if (thisObj->mOwner->mMonitorInvokeMethod) {
+        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
                                          thisObj->mOwner->mCid, thisObj->mIid,
                                          0, methodIndex + 4, inParcel);
-
+    }
 
     if (! thisObj->mServerName.IsEmpty()) {
         // remote process call
@@ -1772,7 +1755,7 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 #else
-    if (0 == lvalue) {
+    if (0 == mTimeout) {
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
         if (FAILED(ec)) {
             goto ProxyExit;
@@ -1782,10 +1765,10 @@ ECode InterfaceProxy::ProxyEntry(
         struct timespec curTime;
         clock_gettime(CLOCK_REALTIME, &curTime);
 
-        Long nsec = curTime.tv_nsec + lvalue % 1000000;
+        Long nsec = curTime.tv_nsec + mTimeout % 1000000;
                                               //123456
-        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + lvalue / 1000000000;
-                                                //123456789           //123456789
+        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + mTimeout / 1000000000;
+                                                //123456789             //123456789
         curTime.tv_nsec = nsec % 1000000000;
                                 //123456789
 
@@ -1813,12 +1796,11 @@ ECode InterfaceProxy::ProxyEntry(
 #endif
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
-    //TODO monitor
-    /*
-    RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
-                                         thisObj->mOwner->mCid, thisObj->mIid,
-                                         1, methodIndex + 4, inParcel);
-    */
+    if (thisObj->mOwner->mMonitorInvokeMethod) {
+        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+                                            thisObj->mOwner->mCid, thisObj->mIid,
+                                            1, methodIndex + 4, inParcel);
+    }
 
 ProxyExit:
     if (DEBUG) {
@@ -1952,26 +1934,28 @@ ECode CProxy::MonitorRuntime(
     String string;
     RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
     switch (rtmCommand->command) {
-        case RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
+        case (Short)RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
             mMonitorInvokeMethod = true;
             return NOERROR;
         }
 
-        case RTM_CommandType::CMD_Client_Deactivate_InvokeMethod: {
+        case (Short)RTM_CommandType::CMD_Client_Deactivate_InvokeMethod: {
             mMonitorInvokeMethod = false;
             return NOERROR;
         }
 
-        case RTM_CommandType::CMD_Client_InvokeMethod: {
-            if (! RuntimeMonitor::rtmInvokeMethodQueue.empty()) {
-                RTM_InvokeMethod *rtmMethod = RuntimeMonitor::rtmInvokeMethodQueue.front();
+        case (Short)RTM_CommandType::CMD_Client_InvokeMethod: {
+            if (! RuntimeMonitor::rtmInvokeMethodClientQueue.empty()) {
+                RTM_InvokeMethod *rtmMethod =
+                             RuntimeMonitor::rtmInvokeMethodClientQueue.front();
 
                 response = Array<Byte>(rtmMethod->length);
                 if (! response.IsNull()) {
                     // response.Copy works very slowly
-                    memcpy(response.GetPayload(), (const char*)string, rtmMethod->length);
+                    memcpy(response.GetPayload(), (const char*)string,
+                                                             rtmMethod->length);
 
-                    RuntimeMonitor::rtmInvokeMethodQueue.pop_front();
+                    RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
                 }
             }
             return NOERROR;
@@ -2036,6 +2020,7 @@ ECode CProxy::CreateObject(
     proxyObj->mTargetMetadata = mc;
     proxyObj->mChannel = channel;
     proxyObj->mIpack = nullptr;
+    proxyObj->mMonitorInvokeMethod = false;
 
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
@@ -2067,6 +2052,18 @@ ECode CProxy::CreateObject(
         iproxy->mServerName = serverName;
         iproxy->mServerObjectId = serverObjectId;
         proxyObj->mInterfaces[i] = iproxy;
+#ifdef COMO_FUNCTION_SAFETY
+        ec = reflHelpers::intfGetConstantLong(iproxy->mTargetMetadata,
+                                            String("timeout"), iproxy->mTimeout);
+        if (FAILED(ec)) {
+            if (E_TYPE_MISMATCH_EXCEPTION == ec) {
+                Logger::E("CProxy", "Wrong timeout datatype");
+                iproxy->timeout = 0;
+            } else {
+                iproxy->timeout = 0;
+            }
+        }
+#endif
     }
 
     proxy = proxyObj;

@@ -26,12 +26,17 @@
 
 namespace como {
 
+// align to Short type
 enum class RTM_CommandType {
-    CMD_BY_STRING                      = 0x11,
-    CMD_InvokeMethod                   = 0x12,
-    CMD_Client_Activate_InvokeMethod   = 0x21,
-    CMD_Client_Deactivate_InvokeMethod = 0x22,
-    CMD_Client_InvokeMethod            = 0x23,
+    CMD_BY_STRING                      = 0x0001,
+
+    CMD_Server_Activate_InvokeMethod   = 0x0101,
+    CMD_Server_Deactivate_InvokeMethod = 0x0102,
+    CMD_Server_InvokeMethod            = 0x0103,
+
+    CMD_Client_Activate_InvokeMethod   = 0x0201,
+    CMD_Client_Deactivate_InvokeMethod = 0x0202,
+    CMD_Client_InvokeMethod            = 0x0203,
 };
 
 #pragma pack(4)
@@ -48,7 +53,8 @@ typedef struct tagRTM_InvokeMethod {
 
 typedef struct tagRTM_Command {
     Long            length;             // total length of this struct
-    RTM_CommandType command;
+    Short           command;
+    Short           param;
     Byte            parcel[0];          // from here, Byte *;
 } RTM_Command;
 #pragma pack()
@@ -75,9 +81,11 @@ public:
                                       Integer methodIndexPlus4, IParcel *parcel);
     static int WriteLog(const char *log, size_t strLen);
 
-    static RTM_Command* GenRtmCommand(RTM_CommandType command, const char *cstr);
+    static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
+                                                              const char *cstr);
 
-    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodQueue;
+    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
+    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
 
 };
 
