@@ -138,7 +138,7 @@ String::String(
 {
     ECode ec = WriteCharArray(charArray, start, charArray.GetLength());
     if (FAILED(ec))
-        Logger::E("String", "String failed: %x", ec);
+        Logger::E("String", "String failed: 0x%X", ec);
 }
 
 String::String(
@@ -150,7 +150,7 @@ String::String(
 {
     ECode ec = WriteCharArray(charArray, start, length);
     if (FAILED(ec))
-        Logger::E("String", "String failed: %x", ec);
+        Logger::E("String", "String failed: 0x%X", ec);
 }
 
 String::String(

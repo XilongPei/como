@@ -455,7 +455,7 @@ ECode InterfaceStub::MarshalResults(
         ECode ec = method->GetParameter(i, param);
         if (FAILED(ec)) {
             Logger::E("InterfaceStub::MarshalResults",
-                                 "method->GetParameter() error, ECode: %d", ec);
+                               "method->GetParameter() error, ECode: 0x%X", ec);
             return ec;
         }
 
@@ -925,7 +925,7 @@ ECode CStub::CreateObject(
             interfaces[i]->GetNamespace(ns);
             interfaces[i]->GetName(name);
             Logger::E("CStub", "Object does not have \"%s::%s\" interface.",
-                                                        ns.string(), name.string());
+                                                    ns.string(), name.string());
             // rollback this transaction
             for (Integer j = 0;  j < i;  j++)
                 delete stubObj->mInterfaces[j];

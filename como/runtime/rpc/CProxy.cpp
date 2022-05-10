@@ -1931,6 +1931,9 @@ ECode CProxy::MonitorRuntime(
     /* [in] */ const Array<Byte>& request,
     /* [out] */ Array<Byte>& response)
 {
+    if (request.GetLength() < sizeof(RTM_Command))
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     String string;
     RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
     switch (rtmCommand->command) {
@@ -1962,6 +1965,7 @@ ECode CProxy::MonitorRuntime(
         }
     }
 
+    // Monitoring command cannot be handled by client, send it to the server.
     return mChannel->MonitorRuntime(request, response);
 }
 
