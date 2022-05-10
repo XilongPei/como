@@ -299,8 +299,6 @@ private:
     InterfaceID     mIid;
     IMetaInterface* mTargetMetadata;
     CProxy*         mOwner;
-    String          mServerName;
-    Long            mServerObjectId;
     Long            mTimeout;
 };
 
@@ -367,6 +365,8 @@ public:
 
     // I don't want all members to be encapsulated
     AutoPtr<IInterfacePack> mIpack;
+    String                  mServerName;
+    Long                    mServerObjectId;
 
 private:
     friend class InterfaceProxy;

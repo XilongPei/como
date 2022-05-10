@@ -905,7 +905,7 @@ ECode InterfaceProxy::UnmarshalResults(
     /* [in] */ IParcel* resParcel)
 {
 
-    resParcel->SetServerInfo(mServerName);
+    resParcel->SetServerInfo(mOwner->mServerName);
 
     Long hash;
     mOwner->GetHashCode(hash);
@@ -1735,12 +1735,12 @@ ECode InterfaceProxy::ProxyEntry(
     }
 
     if (thisObj->mOwner->mMonitorInvokeMethod) {
-        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mOwner->mServerObjectId,
                                          thisObj->mOwner->mCid, thisObj->mIid,
                                          0, methodIndex + 4, inParcel, 0);
     }
 
-    if (! thisObj->mServerName.IsEmpty()) {
+    if (! thisObj->mOwner->mServerName.IsEmpty()) {
         // remote process call
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
         if (SUCCEEDED(ec)) {
@@ -1797,7 +1797,7 @@ ECode InterfaceProxy::ProxyEntry(
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
     if (thisObj->mOwner->mMonitorInvokeMethod) {
-        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
+        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mOwner->mServerObjectId,
                                             thisObj->mOwner->mCid, thisObj->mIid,
                                             1, methodIndex + 4, inParcel, 0);
     }
@@ -2048,10 +2048,8 @@ ECode CProxy::CreateObject(
     if (proxyObj->mInterfaces.IsNull())
         return E_OUT_OF_MEMORY_ERROR;
 
-    Long serverObjectId;
-    channel->GetServerObjectId(serverObjectId);
-    String serverName;
-    channel->GetServerName(serverName);
+    channel->GetServerName(proxyObj->mServerName);
+    channel->GetServerObjectId(proxyObj->mServerObjectId);
 
     for (Integer i = 0; i < interfaceNumber; i++) {
         AutoPtr<InterfaceProxy> iproxy = new InterfaceProxy();
@@ -2064,17 +2062,15 @@ ECode CProxy::CreateObject(
         iproxy->mTargetMetadata->GetInterfaceID(iproxy->mIid);
         iproxy->mVtable = sProxyVtable;
         iproxy->mProxyEntry = reinterpret_cast<HANDLE>(&InterfaceProxy::ProxyEntry);
-        iproxy->mServerName = serverName;
-        iproxy->mServerObjectId = serverObjectId;
         proxyObj->mInterfaces[i] = iproxy;
 #ifdef COMO_FUNCTION_SAFETY
         ec = reflHelpers::intfGetConstantLong(iproxy->mTargetMetadata,
-                                            String("timeout"), iproxy->mTimeout);
+                                           String("timeout"), iproxy->mTimeout);
         if (FAILED(ec)) {
             if (E_TYPE_MISMATCH_EXCEPTION == ec) {
                 Logger::E("CProxy", "Wrong timeout datatype");
             }
-            iproxy->timeout = 0;
+            iproxy->mTimeout = 0;
         }
 #endif
     }
