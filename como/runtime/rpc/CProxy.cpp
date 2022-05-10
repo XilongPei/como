@@ -2020,7 +2020,20 @@ ECode CProxy::CreateObject(
     proxyObj->mTargetMetadata = mc;
     proxyObj->mChannel = channel;
     proxyObj->mIpack = nullptr;
-    proxyObj->mMonitorInvokeMethod = false;
+
+    Long lvalue;
+    ec = reflHelpers::coclassGetConstantLong(mc, String("monitor"), lvalue);
+    if (FAILED(ec)) {
+        // If it is an error such as the definition cannot be found, it is normal
+        if (E_TYPE_MISMATCH_EXCEPTION == ec) {
+            Logger::E("CProxy", "Wrong monitor datatype");
+        }
+        proxyObj->mMonitorInvokeMethod = false;
+    }
+    else {
+        proxyObj->mMonitorInvokeMethod = true;
+    }
+
 
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
@@ -2058,10 +2071,8 @@ ECode CProxy::CreateObject(
         if (FAILED(ec)) {
             if (E_TYPE_MISMATCH_EXCEPTION == ec) {
                 Logger::E("CProxy", "Wrong timeout datatype");
-                iproxy->timeout = 0;
-            } else {
-                iproxy->timeout = 0;
             }
+            iproxy->timeout = 0;
         }
 #endif
     }

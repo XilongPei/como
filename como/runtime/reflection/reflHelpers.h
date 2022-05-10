@@ -25,9 +25,17 @@ namespace como {
 
 class reflHelpers {
 public:
-    static ECode constantGetLong(AutoPtr<IMetaConstant> constt, String constName, Long& lvalue);
-    static ECode intfGetConstantLong(AutoPtr<IMetaInterface> intf, String constName, Long& lvalue);
+    static ECode constantGetLong(AutoPtr<IMetaConstant> constt,
+                                                String constName, Long& lvalue);
+
+    static ECode intfGetConstantLong(AutoPtr<IMetaInterface> intf,
+                                                String constName, Long& lvalue);
+
+    static ECode coclassGetConstantLong(AutoPtr<IMetaCoclass> mc,
+                                                String constName, Long& lvalue);
+
     static ECode mmGetMethodInfo(AutoPtr<IMetaMethod> mm, String& strBuffer);
+
     static ECode intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer);
 
     static ECode intfGetObjectInfo(AutoPtr<IInterface> intf,

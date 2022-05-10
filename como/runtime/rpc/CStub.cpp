@@ -661,12 +661,18 @@ ECode InterfaceStub::Invoke(
         return ec;
     }
 
+    //TODO monitor
+
     ECode ret = mm->Invoke(mObject, argList);
     if (SUCCEEDED(ret)) {
         ec = MarshalResults(mm, argList, resParcel);
         if (FAILED(ec)) {
             Logger::E("CStub", "MarshalResults failed with ec is 0x%X.", ec);
+            argList = nullptr;
+            resParcel = nullptr;
+            return ec;
         }
+        //TODO monitor
     }
     else {
         argList = nullptr;
@@ -811,6 +817,11 @@ ECode CStub::CreateObject(
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
     Array<IMetaInterface*> interfaces(interfaceNumber);
+    if (interfaces.IsNull()) {
+        Logger::E("CStub", "GetAllInterfaces failed, Array is NULL");
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     ECode ec = mc->GetAllInterfaces(interfaces);
     if (FAILED(ec)) {
         Logger::E("CStub", "GetAllInterfaces failed with ec is 0x%X", ec);
@@ -818,7 +829,12 @@ ECode CStub::CreateObject(
     }
 
     stubObj->mInterfaces = Array<InterfaceStub*>(interfaceNumber);
-    for (Integer i = 0; i < interfaceNumber; i++) {
+    if (stubObj->mInterfaces.IsNull()) {
+        Logger::E("CStub", "Array<InterfaceStub*> is NULL");
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    for (Integer i = 0;  i < interfaceNumber;  i++) {
         AutoPtr<InterfaceStub> istub = new InterfaceStub();
         if (nullptr == istub) {
             // rollback this transaction
@@ -833,7 +849,7 @@ ECode CStub::CreateObject(
         istub->mTargetMetadata = interfaces[i];
         istub->mTargetMetadata->GetInterfaceID(istub->mIid);
         istub->mObject = object->Probe(istub->mIid);
-        if (istub->mObject == nullptr) {
+        if (nullptr == istub->mObject) {
             String name, ns;
             interfaces[i]->GetNamespace(ns);
             interfaces[i]->GetName(name);

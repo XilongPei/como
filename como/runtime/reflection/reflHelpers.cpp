@@ -18,7 +18,8 @@
 
 namespace como {
 
-ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt, String constName, Long& lvalue)
+ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt,
+                                                 String constName, Long& lvalue)
 {
     ECode ec = NOERROR;
     AutoPtr<IMetaValue> value;
@@ -70,14 +71,24 @@ ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt, String constNa
     return ec;
 }
 
-ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf, String constName, Long& lvalue)
+ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf,
+                                                 String constName, Long& lvalue)
 {
-    if (nullptr == intf)
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-
     ECode ec;
     AutoPtr<IMetaConstant> constt;
     ec = intf->GetConstant(constName, constt);
+    if (FAILED(ec) || (nullptr == constt))
+        return ec;
+
+    return constantGetLong(constt, constName, lvalue);
+}
+
+ECode reflHelpers::coclassGetConstantLong(AutoPtr<IMetaCoclass> mc,
+                                                 String constName, Long& lvalue)
+{
+    ECode ec;
+    AutoPtr<IMetaConstant> constt;
+    ec = mc->GetConstant(constName, constt);
     if (FAILED(ec) || (nullptr == constt))
         return ec;
 
@@ -113,7 +124,7 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, String& strBuffer
     return NOERROR;
 }
 
-ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf, 
+ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf,
                               const char *functionName, String& strClassInfo, 
                               String& strInterfaceInfo, String& methodSignature)
 {

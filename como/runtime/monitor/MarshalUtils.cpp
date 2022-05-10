@@ -107,9 +107,9 @@ static String& TripleHexDump(Triple& triple, String& strBuffer, int elemSize)
 #define MakeParamString(str)    ("\"" + paramName + "\":" + str)
 
 /**
- * refer to InterfaceProxy::MarshalArguments in CProxy.cpp
- *
- * The output data conforms to JSON specification
+ * 1. refer to InterfaceProxy::MarshalArguments in CProxy.cpp
+ * 2. After UnMarshalArguments(), the argParcel->GetDataPosition is NOT 0
+ * 3. The output data conforms to JSON specification
  */
 ECode MarshalUtils::UnMarshalArguments(
     /* [in] */ IMetaMethod* method,
@@ -267,7 +267,8 @@ ECode MarshalUtils::UnMarshalArguments(
 }
 
 /**
- * The output data conforms to JSON specification
+ * 1. After UnUnmarshalResults(), the resParcel->GetDataPosition is NOT 0
+ * 2. The output data conforms to JSON specification
  */
 ECode MarshalUtils::UnUnmarshalResults(
     /* [in] */ IMetaMethod* method,
