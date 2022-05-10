@@ -34,6 +34,10 @@ public:
     CArgumentList(
         /* [in] */ const Array<IMetaParameter*>& parameters);
 
+    CArgumentList(
+        /* [in] */ const Array<IMetaParameter*>& parameters,
+        /* [in] */ Integer hasOutArguments);
+
     ~CArgumentList();
 
     COMO_INTERFACE_DECL();
@@ -314,6 +318,10 @@ public:
         /* [in] */ Integer index,
         /* [out] */ HANDLE& addr) override;
 
+    inline static CArgumentList* From(IArgumentList* argList);
+
+    inline Long* GetOutParamBuffer(int iOutParam);
+
 private:
     void Init(
         /* [in] */ const Array<IMetaParameter*>& parameters);
@@ -333,6 +341,13 @@ private:
     Integer mParameterNumber;
     ParameterInfo* mParameterInfos = nullptr;
     Byte* mParameterBuffer = nullptr;
+
+    Integer mHasOutArguments;
+
+    // `SMALL_PARAM_BUFFER`
+    // The [out] parameter whose size is less than Long is directly stored in
+    // this area.
+    Long mOutParameterBuffer[0];
 };
 
 Integer CArgumentList::GetParameterNumber()
@@ -348,6 +363,18 @@ ParameterInfo* CArgumentList::GetParameterInfos()
 Byte* CArgumentList::GetParameterBuffer()
 {
     return mParameterBuffer;
+}
+
+Long *CArgumentList::GetOutParamBuffer(int iOutParam)
+{
+    if (iOutParam < mHasOutArguments)
+        return &mOutParameterBuffer[iOutParam];
+    return nullptr;
+}
+
+CArgumentList* CArgumentList::From(IArgumentList* argList)
+{
+    return (CArgumentList*)argList;
 }
 
 } // namespace como

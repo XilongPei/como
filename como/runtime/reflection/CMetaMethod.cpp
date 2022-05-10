@@ -155,9 +155,18 @@ ECode CMetaMethod::CreateArgumentList(
 {
     FAIL_RETURN(BuildAllParameters());
 
-    argList = new CArgumentList(mParameters);
-    if (nullptr == argList)
+    // `SMALL_PARAM_BUFFER`
+    void* addr;
+    addr = calloc(sizeof(CArgumentList) + sizeof(Long) * mHasOutArguments, 1);
+    if (nullptr == addr)
         return E_OUT_OF_MEMORY_ERROR;
+
+    CArgumentList *cArgList = new(addr) CArgumentList(mParameters, mHasOutArguments);
+    if (nullptr == cArgList->GetParameterBuffer()) {
+        free(addr);
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+    argList = (IArgumentList*)cArgList;
 
     return NOERROR;
 }

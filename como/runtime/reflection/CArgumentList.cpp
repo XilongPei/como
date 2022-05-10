@@ -25,6 +25,16 @@ COMO_INTERFACE_IMPL_LIGHT_1(CArgumentList, LightRefBase, IArgumentList)
 CArgumentList::CArgumentList(
     /* [in] */ const Array<IMetaParameter*>& parameters)
     : mParameterNumber(parameters.GetLength())
+    , mHasOutArguments(0)
+{
+    Init(parameters);
+}
+
+CArgumentList::CArgumentList(
+    /* [in] */ const Array<IMetaParameter*>& parameters,
+    /* [in] */ Integer hasOutArguments)
+    : mParameterNumber(parameters.GetLength())
+    , mHasOutArguments(hasOutArguments)
 {
     Init(parameters);
 }
@@ -1480,7 +1490,8 @@ void CArgumentList::Init(
     Integer bufferPos = 8; // for this pointer
 
     if (mParameterNumber > 0) {
-        mParameterInfos = reinterpret_cast<ParameterInfo*>(malloc(sizeof(ParameterInfo) * mParameterNumber));
+        mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(
+                                      sizeof(ParameterInfo), mParameterNumber));
         if (mParameterInfos == nullptr) {
             Logger::E("CArgumentList", "Out of memory.");
             return;
@@ -1491,7 +1502,7 @@ void CArgumentList::Init(
         }
     }
 
-    mParameterBuffer = reinterpret_cast<Byte*>(malloc(sizeof(Byte) * bufferPos));
+    mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), bufferPos));
 }
 
 void CArgumentList::InitParameterInfo(

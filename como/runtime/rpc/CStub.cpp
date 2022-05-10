@@ -34,6 +34,7 @@
 #include "CStub.h"
 #include "registry.h"
 #include "reflection/reflHelpers.h"
+#include "reflection/CArgumentList.h"
 #include "RuntimeMonitor.h"
 
 namespace como {
@@ -59,25 +60,29 @@ ECode InterfaceStub::UnmarshalArguments(
     if (FAILED(ec))
         return ec;
 
+    Integer iOutParam = 0;
+    CArgumentList* cArglist = CArgumentList::From(argList);
+
     Integer N;
     method->GetParameterNumber(N);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
         ECode ec = method->GetParameter(i, param);
         if (FAILED(ec)) {
             Logger::E("InterfaceStub::UnmarshalArguments",
-                                 "method->GetParameter() error, ECode: %d", ec);
+                               "method->GetParameter() error, ECode: 0x%X", ec);
             return ec;
         }
 
         AutoPtr<IMetaType> type;
-        // just an assignment, needn't to check the return value
-        param->GetType(type);
-
         TypeKind kind;
-        type->GetTypeKind(kind);
         IOAttribute ioAttr;
+
+        // just an assignment, needn't to check the return value
         param->GetIOAttribute(ioAttr);
+        param->GetType(type);
+        type->GetTypeKind(kind);
+
         if (ioAttr == IOAttribute::IN) {
             switch (kind) {
                 case TypeKind::Char: {
@@ -192,7 +197,13 @@ ECode InterfaceStub::UnmarshalArguments(
         else if (ioAttr == IOAttribute::IN_OUT || ioAttr == IOAttribute::OUT) {
             switch (kind) {
                 case TypeKind::Char: {
-                    Char* value = new Char;
+                    //@ `SMALL_PARAM_BUFFER`
+                    //
+                    // The [out] parameter whose size is less than Long is
+                    // directly stored in GetOutParamBuffer(),
+                    // CArgumentList::mOutParameterBuffer
+                    //Char* value = new Char;
+                    Char* value = (Char*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Char() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -205,7 +216,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Byte: {
-                    Byte* value = new Byte;
+                    // `SMALL_PARAM_BUFFER`
+                    //Byte* value = new Byte;
+                    Byte* value = (Byte*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Byte() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -218,7 +231,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Short: {
-                    Short* value = new Short;
+                    // `SMALL_PARAM_BUFFER`
+                    //Short* value = new Short;
+                    Short* value = (Short*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Short() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -231,7 +246,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Integer: {
-                    Integer* value = new Integer;
+                    // `SMALL_PARAM_BUFFER`
+                    //Integer* value = new Integer;
+                    Integer* value = (Integer*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -244,7 +261,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Long: {
-                    Long* value = new Long;
+                    // `SMALL_PARAM_BUFFER`
+                    //Long* value = new Long;
+                    Long* value = cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Long() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -257,7 +276,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Float: {
-                    Float* value = new Float;
+                    // `SMALL_PARAM_BUFFER`
+                    //Float* value = new Float;
+                    Float* value = (Float*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Float() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -270,7 +291,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Double: {
-                    Double* value = new Double;
+                    // `SMALL_PARAM_BUFFER`
+                    //Double* value = new Double;
+                    Double* value = (Double*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Double() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -283,7 +306,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Boolean: {
-                    Boolean* value = new Boolean;
+                    // `SMALL_PARAM_BUFFER`
+                    //Boolean* value = new Boolean;
+                    Boolean* value = (Boolean*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Boolean() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -309,7 +334,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::ECode: {
-                    ECode* value = new ECode;
+                    // `SMALL_PARAM_BUFFER`
+                    //ECode* value = new ECode;
+                    ECode* value = (ECode*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new ECode() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -322,7 +349,9 @@ ECode InterfaceStub::UnmarshalArguments(
                     break;
                 }
                 case TypeKind::Enum: {
-                    Integer* value = new Integer;
+                    // `SMALL_PARAM_BUFFER`
+                    //Integer* value = new Integer;
+                    Integer* value = (Integer*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
                         Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
                         return E_OUT_OF_MEMORY_ERROR;
@@ -419,7 +448,7 @@ ECode InterfaceStub::MarshalResults(
     Integer N;
 
     method->GetParameterNumber(N);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         AutoPtr<IMetaParameter> param;
         ECode ec = method->GetParameter(i, param);
         if (FAILED(ec)) {
@@ -429,13 +458,14 @@ ECode InterfaceStub::MarshalResults(
         }
 
         AutoPtr<IMetaType> type;
-        // just an assignment, needn't to check the return value
-        param->GetType(type);
-
         TypeKind kind;
-        type->GetTypeKind(kind);
         IOAttribute ioAttr;
+
+        // just an assignment, needn't to check the return value
         param->GetIOAttribute(ioAttr);
+        param->GetType(type);
+        type->GetTypeKind(kind);
+
         if (ioAttr == IOAttribute::IN) {
             switch (kind) {
                 case TypeKind::Char:
@@ -488,56 +518,64 @@ ECode InterfaceStub::MarshalResults(
                     argList->GetArgumentAddress(i, addr);
                     Char* value = reinterpret_cast<Char*>(addr);
                     resParcel->WriteChar(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Byte: {
                     argList->GetArgumentAddress(i, addr);
                     Byte* value = reinterpret_cast<Byte*>(addr);
                     resParcel->WriteByte(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Short: {
                     argList->GetArgumentAddress(i, addr);
                     Short* value = reinterpret_cast<Short*>(addr);
                     resParcel->WriteShort(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Integer: {
                     argList->GetArgumentAddress(i, addr);
                     Integer* value = reinterpret_cast<Integer*>(addr);
                     resParcel->WriteInteger(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Long: {
                     argList->GetArgumentAddress(i, addr);
                     Long* value = reinterpret_cast<Long*>(addr);
                     resParcel->WriteLong(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Float: {
                     argList->GetArgumentAddress(i, addr);
                     Float* value = reinterpret_cast<Float*>(addr);
                     resParcel->WriteFloat(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Double: {
                     argList->GetArgumentAddress(i, addr);
                     Double* value = reinterpret_cast<Double*>(addr);
                     resParcel->WriteDouble(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Boolean: {
                     argList->GetArgumentAddress(i, addr);
                     Boolean* value = reinterpret_cast<Boolean*>(addr);
                     resParcel->WriteBoolean(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::String: {
@@ -551,21 +589,23 @@ ECode InterfaceStub::MarshalResults(
                     argList->GetArgumentAddress(i, addr);
                     ECode* value = reinterpret_cast<ECode*>(addr);
                     resParcel->WriteECode(*value);
-                    delete value;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete value;
                     break;
                 }
                 case TypeKind::Enum: {
                     argList->GetArgumentAddress(i, addr);
                     Integer* value = reinterpret_cast<Integer*>(addr);
                     resParcel->WriteEnumeration(*value);
-                    delete value;
+                    //delete value;
                     break;
                 }
                 case TypeKind::Array: {
                     argList->GetArgumentAddress(i, addr);
                     Triple* t = reinterpret_cast<Triple*>(addr);
                     resParcel->WriteArray(*t);
-                    delete t;
+                    // `SMALL_PARAM_BUFFER`
+                    //delete t;
                     break;
                 }
                 case TypeKind::Interface: {
@@ -662,12 +702,12 @@ ECode InterfaceStub::Invoke(
         return ec;
     }
 
-    //TODO monitor
+    // RuntimeMonitor
     if (mOwner->mMonitorInvokeMethod) {
         Long serverObjectId;
         mOwner->mChannel->GetServerObjectId(serverObjectId);
         ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId, mOwner->mCid,
-                                                mIid, 0, methodIndex, argParcel, 1);
+                                            mIid, 0, methodIndex, argParcel, 1);
     }
 
     ECode ret = mm->Invoke(mObject, argList);
@@ -680,12 +720,12 @@ ECode InterfaceStub::Invoke(
             return ec;
         }
 
-        //TODO monitor
+        // RuntimeMonitor
         if (mOwner->mMonitorInvokeMethod) {
             Long serverObjectId;
             mOwner->mChannel->GetServerObjectId(serverObjectId);
-            ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId, mOwner->mCid,
-                                                    mIid, 1, methodIndex, argParcel, 1);
+            ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId,
+                              mOwner->mCid, mIid, 1, methodIndex, argParcel, 1);
         }
     }
     else {
