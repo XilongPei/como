@@ -322,6 +322,8 @@ public:
 
     inline Long* GetOutParamBuffer(int iOutParam);
 
+    Integer mHotCode;
+
 private:
     void Init(
         /* [in] */ const Array<IMetaParameter*>& parameters);

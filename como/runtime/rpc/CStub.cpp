@@ -34,6 +34,7 @@
 #include "CStub.h"
 #include "registry.h"
 #include "reflection/reflHelpers.h"
+#include "reflection/CMetaMethod.h"
 #include "reflection/CArgumentList.h"
 #include "RuntimeMonitor.h"
 
@@ -62,6 +63,7 @@ ECode InterfaceStub::UnmarshalArguments(
 
     Integer iOutParam = 0;
     CArgumentList* cArglist = CArgumentList::From(argList);
+    cArglist->mHotCode = CMetaMethod::From(method)->mHotCode;
 
     Integer N;
     method->GetParameterNumber(N);
@@ -701,6 +703,8 @@ ECode InterfaceStub::Invoke(
         Logger::E("CStub", "Invoke UnmarshalArguments failed with ec is 0x%X.", ec);
         return ec;
     }
+
+    CMetaMethod::From(mm)->mHotCode = 1;
 
     // RuntimeMonitor
     if (mOwner->mMonitorInvokeMethod) {

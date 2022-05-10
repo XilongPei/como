@@ -53,6 +53,7 @@ CMetaMethod::CMetaMethod(
     , mParameters(mMetadata->mParameterNumber)
     , mHasOutArguments(0)
     , mMethodAddr(0)
+    , mHotCode(0)
 {
     // there is no metadata in this component for external method
     if (miObj->mMetadata->mProperties & TYPE_EXTERNAL)

@@ -90,6 +90,10 @@ public:
     ECode GetOpaque(
         /* [out] */ HANDLE &opaque) override;
 
+    inline static CMetaMethod* From(IMetaMethod* method);
+
+    Integer mHotCode;
+
 private:
     ECode BuildAllParameters();
 
@@ -114,6 +118,11 @@ public:
     HANDLE mMethodAddr;
     HANDLE mVobj;
 };
+
+CMetaMethod* CMetaMethod::From(IMetaMethod* method)
+{
+    return (CMetaMethod*)method;
+}
 
 } // namespace como
 
