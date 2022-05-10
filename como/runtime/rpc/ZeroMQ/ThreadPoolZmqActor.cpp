@@ -302,6 +302,7 @@ HandleMessage_Object_ReleasePeer:
 
             case ZmqFunCode::RuntimeMonitor: {
                 Array<Byte> resBuffer;
+                RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
 
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if ((nullptr == worker) || (zmq_msg_size(&msg) < 1)) {
@@ -309,6 +310,18 @@ HandleMessage_Object_ReleasePeer:
                                            "RuntimeMonitor, Bad channel value");
                     ec = ZMQ_BAD_PACKET;
                     goto HandleMessage_RuntimeMonitor;
+                }
+
+                switch (rtmCommand->command) {
+                    case (Short)RTM_CommandType::CMD_Server_Activate_InvokeMethod: {
+                        CStub::From(worker->mStub)->mMonitorInvokeMethod = true;
+                        goto HandleMessage_RuntimeMonitor;
+                    }
+
+                    case (Short)RTM_CommandType::CMD_Server_Deactivate_InvokeMethod: {
+                        CStub::From(worker->mStub)->mMonitorInvokeMethod = false;
+                        goto HandleMessage_RuntimeMonitor;
+                    }
                 }
 
                 ec = RuntimeMonitor::RuntimeMonitorMsgProcessor(msg, resBuffer);

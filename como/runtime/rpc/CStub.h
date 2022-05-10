@@ -108,6 +108,11 @@ public:
         /* [in] */ IRPCChannel* channel,
         /* [out] */ AutoPtr<IStub>& stub);
 
+    inline static CStub* From(
+        /* [in] */ IStub* istub);
+
+    bool mMonitorInvokeMethod;
+
 private:
     friend class InterfaceStub;
 
@@ -119,6 +124,12 @@ private:
     Array<InterfaceStub*> mInterfaces;
     AutoPtr<IRPCChannel> mChannel;
 };
+
+CStub* CStub::From(
+    /* [in] */ IStub* istub)
+{
+    return (CStub*)istub;
+}
 
 } // namespace como
 

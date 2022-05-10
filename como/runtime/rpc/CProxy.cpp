@@ -1737,7 +1737,7 @@ ECode InterfaceProxy::ProxyEntry(
     if (thisObj->mOwner->mMonitorInvokeMethod) {
         RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
                                          thisObj->mOwner->mCid, thisObj->mIid,
-                                         0, methodIndex + 4, inParcel);
+                                         0, methodIndex + 4, inParcel, 0);
     }
 
     if (! thisObj->mServerName.IsEmpty()) {
@@ -1799,7 +1799,7 @@ ECode InterfaceProxy::ProxyEntry(
     if (thisObj->mOwner->mMonitorInvokeMethod) {
         RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mServerObjectId,
                                             thisObj->mOwner->mCid, thisObj->mIid,
-                                            1, methodIndex + 4, inParcel);
+                                            1, methodIndex + 4, inParcel, 0);
     }
 
 ProxyExit:
@@ -1965,7 +1965,6 @@ ECode CProxy::MonitorRuntime(
     return mChannel->MonitorRuntime(request, response);
 }
 
-
 AutoPtr<IRPCChannel> CProxy::GetChannel()
 {
     return mChannel;
@@ -2033,7 +2032,6 @@ ECode CProxy::CreateObject(
     else {
         proxyObj->mMonitorInvokeMethod = true;
     }
-
 
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);

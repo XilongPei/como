@@ -78,7 +78,9 @@ public:
 
     static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
                                       InterfaceID iid, Integer in_out,
-                                      Integer methodIndexPlus4, IParcel *parcel);
+                                      Integer methodIndexPlus4, IParcel *parcel,
+                                      Integer whichQueue);
+
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,

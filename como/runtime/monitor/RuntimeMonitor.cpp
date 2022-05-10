@@ -176,9 +176,14 @@ int RuntimeMonitor::WriteLog(const char *log, size_t strLen)
     return loggerOutputCircleBuf->Write(log, strLen+1);
 }
 
+/**
+ * in_out: 0, in; 1, out
+ * whichQueue: 0, rtmInvokeMethodClientQueue; 1, rtmInvokeMethodServerQueue
+ */
 ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
                                       InterfaceID iid, Integer in_out,
-                                      Integer methodIndexPlus4, IParcel *parcel)
+                                      Integer methodIndexPlus4, IParcel *parcel,
+                                      Integer whichQueue)
 {
     Long sizeParcel;
     parcel->GetDataSize(sizeParcel);
@@ -201,12 +206,22 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     parcel->GetData(parcelData);
     memcpy(p, (Byte*)parcelData, sizeParcel);
 
-    if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
-        RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
-        free(rtmMethod);
-        rtmInvokeMethodClientQueue.pop_front();
+    if (0 == whichQueue) {
+        if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
+            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
+            free(rtmMethod);
+            rtmInvokeMethodClientQueue.pop_front();
+        }
+        rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
     }
-    rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
+    else {
+        if (rtmInvokeMethodServerQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
+            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();
+            free(rtmMethod);
+            rtmInvokeMethodServerQueue.pop_front();
+        }
+        rtmInvokeMethodServerQueue.push_back(rtm_InvokeMethod);
+    }
 
     return NOERROR;
 }

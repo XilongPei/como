@@ -74,6 +74,9 @@ ECode reflHelpers::constantGetLong(AutoPtr<IMetaConstant> constt,
 ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf,
                                                  String constName, Long& lvalue)
 {
+    if (nullptr == intf)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     ECode ec;
     AutoPtr<IMetaConstant> constt;
     ec = intf->GetConstant(constName, constt);
@@ -86,6 +89,9 @@ ECode reflHelpers::intfGetConstantLong(AutoPtr<IMetaInterface> intf,
 ECode reflHelpers::coclassGetConstantLong(AutoPtr<IMetaCoclass> mc,
                                                  String constName, Long& lvalue)
 {
+    if (nullptr == mc)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     ECode ec;
     AutoPtr<IMetaConstant> constt;
     ec = mc->GetConstant(constName, constt);

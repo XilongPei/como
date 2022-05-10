@@ -34,6 +34,7 @@
 #include "CStub.h"
 #include "registry.h"
 #include "reflection/reflHelpers.h"
+#include "RuntimeMonitor.h"
 
 namespace como {
 
@@ -662,6 +663,12 @@ ECode InterfaceStub::Invoke(
     }
 
     //TODO monitor
+    if (mOwner->mMonitorInvokeMethod) {
+        Long serverObjectId;
+        mOwner->mChannel->GetServerObjectId(serverObjectId);
+        ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId, mOwner->mCid,
+                                                mIid, 0, methodIndex, argParcel, 1);
+    }
 
     ECode ret = mm->Invoke(mObject, argList);
     if (SUCCEEDED(ret)) {
@@ -672,7 +679,14 @@ ECode InterfaceStub::Invoke(
             resParcel = nullptr;
             return ec;
         }
+
         //TODO monitor
+        if (mOwner->mMonitorInvokeMethod) {
+            Long serverObjectId;
+            mOwner->mChannel->GetServerObjectId(serverObjectId);
+            ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId, mOwner->mCid,
+                                                    mIid, 1, methodIndex, argParcel, 1);
+        }
     }
     else {
         argList = nullptr;
@@ -748,7 +762,7 @@ ECode CStub::Invoke(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Integer interfaceIndex, methodIndex;
+    Integer interfaceIndex;
     argParcel->ReadInteger(interfaceIndex);
     if (interfaceIndex < 0 || interfaceIndex >= mInterfaces.GetLength()) {
         Logger::E("CStub", "InterfaceIndex %d is invalid.", interfaceIndex);
@@ -814,6 +828,19 @@ ECode CStub::CreateObject(
     stubObj->mTargetMetadata = mc;
     stubObj->mChannel = channel;
 
+    Long lvalue;
+    ECode ec = reflHelpers::coclassGetConstantLong(mc, String("monitor"), lvalue);
+    if (FAILED(ec)) {
+        // If it is an error such as the definition cannot be found, it is normal
+        if (E_TYPE_MISMATCH_EXCEPTION == ec) {
+            Logger::E("CStub", "Wrong monitor datatype");
+        }
+        stubObj->mMonitorInvokeMethod = false;
+    }
+    else {
+        stubObj->mMonitorInvokeMethod = true;
+    }
+
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
     Array<IMetaInterface*> interfaces(interfaceNumber);
@@ -822,7 +849,7 @@ ECode CStub::CreateObject(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    ECode ec = mc->GetAllInterfaces(interfaces);
+    ec = mc->GetAllInterfaces(interfaces);
     if (FAILED(ec)) {
         Logger::E("CStub", "GetAllInterfaces failed with ec is 0x%X", ec);
         return ec;
