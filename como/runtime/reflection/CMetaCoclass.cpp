@@ -102,7 +102,7 @@ ECode CMetaCoclass::GetAllConstructors(
         return NOERROR;
     }
 
-    BuildAllConstructors();
+    FAIL_RETURN(BuildAllConstructors());
 
     Integer N = MIN(mConstructors.GetLength(), constrs.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -120,7 +120,7 @@ ECode CMetaCoclass::GetConstructor(
         return NOERROR;
     }
 
-    BuildAllConstructors();
+    FAIL_RETURN(BuildAllConstructors());
 
     if (signature.IsEmpty() && (mConstructors.GetLength() == 1)) {
         constr = mConstructors[0];
@@ -154,9 +154,7 @@ ECode CMetaCoclass::GetAllInterfaces(
         return NOERROR;
     }
 
-    ECode ec = BuildAllInterfaces();
-    if (FAILED(ec))
-        return ec;
+    FAIL_RETURN(BuildAllInterfaces());
 
     Integer N = MIN(mInterfaces.GetLength(), intfs.GetLength());
     for (Integer i = 0;  i < N;  i++) {
@@ -176,7 +174,7 @@ ECode CMetaCoclass::GetInterface(
         return NOERROR;
     }
 
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
 
     for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
         IMetaInterface* miObj = mInterfaces[i];
@@ -196,7 +194,7 @@ ECode CMetaCoclass::GetInterface(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ AutoPtr<IMetaInterface>& intf)
 {
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
 
     for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
         IMetaInterface* miObj = mInterfaces[i];
@@ -220,7 +218,7 @@ ECode CMetaCoclass::ContainsInterface(
         return NOERROR;
     }
 
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
 
     for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
         IMetaInterface* miObj = mInterfaces[i];
@@ -384,7 +382,7 @@ ECode CMetaCoclass::CreateObject(
     return factory->CreateObject(iid, object);
 }
 
-void CMetaCoclass::BuildAllConstructors()
+ECode CMetaCoclass::BuildAllConstructors()
 {
     if (mConstructors[0] == nullptr) {
         Mutex::AutoLock lock(mConstructorsLock);
@@ -395,10 +393,15 @@ void CMetaCoclass::BuildAllConstructors()
                 MetaMethod* mm = mi->mMethods[i];
                 AutoPtr<IMetaConstructor> mcObj = new CMetaConstructor(
                                                                this, mi, i, mm);
+                if (nullptr == mcObj)
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 mConstructors.Set(i, mcObj);
             }
         }
     }
+
+    return NOERROR;
 }
 
 ECode CMetaCoclass::BuildAllInterfaces()
@@ -522,7 +525,7 @@ ECode CMetaCoclass::GetConstantNumber(
 ECode CMetaCoclass::GetAllConstants(
     /* [out] */ Array<IMetaConstant*>& consts)
 {
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -540,7 +543,7 @@ ECode CMetaCoclass::GetConstant(
         return NOERROR;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     for (Integer i = 0; i < mConstants.GetLength(); i++) {
         String mcName;
@@ -563,13 +566,13 @@ ECode CMetaCoclass::GetConstant(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     constt = mConstants[index];
     return NOERROR;
 }
 
-void CMetaCoclass::BuildAllConstants()
+ECode CMetaCoclass::BuildAllConstants()
 {
     if (nullptr == mConstants[0]) {
         Mutex::AutoLock lock(mConstantsLock);
@@ -579,9 +582,13 @@ void CMetaCoclass::BuildAllConstants()
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
                 if (nullptr != mcObj)
                     mConstants.Set(i, mcObj);
+                else
+                    return E_OUT_OF_MEMORY_ERROR;
             }
         }
     }
+
+    return NOERROR;
 }
 
 } // namespace como

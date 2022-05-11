@@ -86,7 +86,7 @@ ECode CMetaInterface::GetConstantNumber(
 ECode CMetaInterface::GetAllConstants(
     /* [out] */ Array<IMetaConstant*>& consts)
 {
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -104,7 +104,7 @@ ECode CMetaInterface::GetConstant(
         return NOERROR;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     for (Integer i = 0; i < mConstants.GetLength(); i++) {
         String mcName;
@@ -127,7 +127,7 @@ ECode CMetaInterface::GetConstant(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     constt = mConstants[index];
     return NOERROR;

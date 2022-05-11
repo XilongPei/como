@@ -46,16 +46,16 @@ CMetaComponent::CMetaComponent(
     , mCoclassIdMap(mMetadata->mCoclassNumber)
     , mCoclassesAlreadyBuilt(false)
     , mEnumerations(mMetadata->mEnumerationNumber -
-            mMetadata->mExternalEnumerationNumber)
+                                          mMetadata->mExternalEnumerationNumber)
     , mEnumerationNameMap(mMetadata->mEnumerationNumber -
-            mMetadata->mExternalEnumerationNumber)
+                                          mMetadata->mExternalEnumerationNumber)
     , mEnumerationsAlreadyBuilt(false)
     , mInterfaces(mMetadata->mInterfaceNumber -
-            mMetadata->mExternalInterfaceNumber)
+                                            mMetadata->mExternalInterfaceNumber)
     , mInterfaceNameMap(mMetadata->mInterfaceNumber -
-            mMetadata->mExternalInterfaceNumber)
+                                            mMetadata->mExternalInterfaceNumber)
     , mInterfaceIdMap(mMetadata->mInterfaceNumber -
-            mMetadata->mExternalInterfaceNumber)
+                                            mMetadata->mExternalInterfaceNumber)
     , mInterfacesAlreadyBuilt(false)
     , mOpaque(0)
 {
@@ -99,7 +99,7 @@ ECode CMetaComponent::GetAllConstants(
         return NOERROR;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -118,7 +118,7 @@ ECode CMetaComponent::GetConstant(
         return NOERROR;
     }
 
-    BuildAllConstants();
+    FAIL_RETURN(BuildAllConstants());
 
     constt = mConstantNameMap.Get(name);
     return NOERROR;
@@ -138,7 +138,7 @@ ECode CMetaComponent::GetAllCoclasses(
         return NOERROR;
     }
 
-    BuildAllCoclasses();
+    FAIL_RETURN(BuildAllCoclasses());
 
     Integer N = MIN(mCoclasses.GetLength(), klasses.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -157,7 +157,7 @@ ECode CMetaComponent::GetCoclass(
         return NOERROR;
     }
 
-    BuildAllCoclasses();
+    FAIL_RETURN(BuildAllCoclasses());
 
     klass = mCoclassNameMap.Get(fullName);
     return NOERROR;
@@ -167,7 +167,7 @@ ECode CMetaComponent::GetCoclass(
     /* [in] */ const CoclassID& cid,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
-    BuildAllCoclasses();
+    FAIL_RETURN(BuildAllCoclasses());
 
     klass = mCoclassIdMap.Get(cid.mUuid);
     return NOERROR;
@@ -187,7 +187,7 @@ ECode CMetaComponent::GetAllEnumerations(
         return NOERROR;
     }
 
-    BuildAllEnumerations();
+    FAIL_RETURN(BuildAllEnumerations());
 
     Integer N = MIN(mEnumerations.GetLength(), enumns.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -206,7 +206,7 @@ ECode CMetaComponent::GetEnumeration(
         return NOERROR;
     }
 
-    BuildAllEnumerations();
+    FAIL_RETURN(BuildAllEnumerations());
 
     enumn = mEnumerationNameMap.Get(fullName);
     return NOERROR;
@@ -226,7 +226,7 @@ ECode CMetaComponent::GetAllInterfaces(
         return NOERROR;
     }
 
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
 
     Integer N = MIN(mInterfaces.GetLength(), intfs.GetLength());
     for (Integer i = 0; i < N; i++) {
@@ -245,7 +245,7 @@ ECode CMetaComponent::GetInterface(
         return NOERROR;
     }
 
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
 
     metaIntf = mInterfaceNameMap.Get(fullName);
     return NOERROR;
@@ -255,7 +255,7 @@ ECode CMetaComponent::GetInterface(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ AutoPtr<IMetaInterface>& metaIntf)
 {
-    BuildAllInterfaces();
+    FAIL_RETURN(BuildAllInterfaces());
     metaIntf = mInterfaceIdMap.Get(iid.mUuid);
     return NOERROR;
 }
@@ -313,10 +313,10 @@ ECode CMetaComponent::LoadComponent(
 
 ECode CMetaComponent::Preload()
 {
-    BuildAllConstants();
-    BuildAllEnumerations();
-    BuildAllInterfaces();
-    BuildAllCoclasses();
+    FAIL_RETURN(BuildAllConstants());
+    FAIL_RETURN(BuildAllEnumerations());
+    FAIL_RETURN(BuildAllInterfaces());
+    FAIL_RETURN(BuildAllCoclasses());
     return NOERROR;
 }
 

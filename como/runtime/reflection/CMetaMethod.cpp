@@ -59,8 +59,7 @@ CMetaMethod::CMetaMethod(
     if (miObj->mMetadata->mProperties & TYPE_EXTERNAL)
         mReturnType = nullptr;
     else
-        mReturnType = new CMetaType(mc,
-                mc->mTypes[mm->mReturnTypeIndex]);
+        mReturnType = new CMetaType(mc, mc->mTypes[mm->mReturnTypeIndex]);
 }
 
 ECode CMetaMethod::GetInterface(

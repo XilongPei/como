@@ -125,11 +125,11 @@ public:
         /* [out] */ AutoPtr<IMetaConstant>& constt) override;
 
 private:
-    void BuildAllConstructors();
+    ECode BuildAllConstructors();
 
     ECode BuildAllInterfaces();
 
-    void BuildAllConstants();
+    ECode BuildAllConstants();
 
     ECode BuildAllMethods();
 
