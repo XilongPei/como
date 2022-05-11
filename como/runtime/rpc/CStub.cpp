@@ -559,7 +559,9 @@ ECode InterfaceStub::MarshalResults(
                 }
                 case TypeKind::String: {
                     argList->GetArgumentAddress(i, addr);
-                    resParcel->WriteString(*(reinterpret_cast<String*>(addr)));
+                    String* value = reinterpret_cast<String*>(addr);
+                    resParcel->WriteString(*value);
+                    delete value;
                     break;
                 }
                 case TypeKind::ECode: {
