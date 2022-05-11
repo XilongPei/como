@@ -115,12 +115,17 @@ ECode CMetaCoclass::GetConstructor(
     /* [in] */ const String& signature,
     /* [out] */ AutoPtr<IMetaConstructor>& constr)
 {
-    if (signature.IsEmpty() || mConstructors.IsEmpty()) {
+    if (mConstructors.IsEmpty()) {
         constr = nullptr;
         return NOERROR;
     }
 
     BuildAllConstructors();
+
+    if (signature.IsEmpty() && (mConstructors.GetLength() == 1)) {
+        constr = mConstructors[0];
+        return NOERROR;
+    }
 
     for (Integer i = 0; i < mConstructors.GetLength(); i++) {
         IMetaConstructor* mc = mConstructors[i];
