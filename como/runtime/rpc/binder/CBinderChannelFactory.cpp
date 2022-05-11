@@ -161,18 +161,23 @@ ECode CBinderChannelFactory::UnmarshalInterface(
         AutoPtr<IProxy> proxy;
         ec = CoCreateProxy(ipack, mType, nullptr, proxy);
         if (FAILED(ec)) {
-            Logger::E("CBinderChannelFactory", "Unmarshal the interface in ReadInterface failed.");
+            Logger::E("CBinderChannelFactory",
+                                       "CoCreateProxy failed. ECode: 0x%X", ec);
             object = nullptr;
             return ec;
         }
 
-        Long serverObjectId;
-        ipack->GetServerObjectId(serverObjectId);
+        ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
 
-        Long hash;
         IObject *obj = IObject::Probe(proxy);
-        obj->GetHashCode(hash);
-        ec = RegisterImportObject(mType, ipack, obj, hash);
+        Long channelId;
+        ipack->GetProxyInfo(channelId);
+        if (0 == channelId) {
+        // Service itself, there is no ProxyInfo at this time
+            obj->GetHashCode(channelId);
+        }
+
+        ec = RegisterImportObject(mType, ipack, obj, channelId);
 
         InterfaceID iid;
         ipack->GetInterfaceID(iid);

@@ -378,6 +378,7 @@ ECode ServiceManager::GetService(
 
                 String str = nullptr;
                 ec = ipack->GetServerName(str);
+                ipack->SetProxyInfo(0);
                 if ((nullptr == str) || str.IsEmpty()) {
                     ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
                 }
@@ -681,6 +682,7 @@ ECode ServiceManager::GetRemoteService(
 
             String str = nullptr;
             ec = ipack->GetServerName(str);
+            ipack->SetProxyInfo(0);
             if ((nullptr == str) || str.IsEmpty()) {
                 ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
             }

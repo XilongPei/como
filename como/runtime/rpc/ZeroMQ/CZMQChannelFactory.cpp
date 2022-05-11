@@ -212,10 +212,15 @@ ECode CZMQChannelFactory::UnmarshalInterface(
 
         ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
 
-        Long hash;
         IObject *obj = IObject::Probe(proxy);
-        obj->GetHashCode(hash);
-        ec = RegisterImportObject(mType, ipack, obj, hash);
+        Long channelId;
+        ipack->GetProxyInfo(channelId);
+        if (0 == channelId) {
+        // Service itself, there is no ProxyInfo at this time
+            obj->GetHashCode(channelId);
+        }
+
+        ec = RegisterImportObject(mType, ipack, obj, channelId);
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
                                 "RegisterImportObject failed, ECode: 0x%X", ec);
