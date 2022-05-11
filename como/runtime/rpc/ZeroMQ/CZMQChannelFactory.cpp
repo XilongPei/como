@@ -212,9 +212,6 @@ ECode CZMQChannelFactory::UnmarshalInterface(
 
         ((CProxy*)(IProxy*)proxy)->mIpack = ipack;
 
-        Long serverObjectId;
-        ipack->GetServerObjectId(serverObjectId);
-
         Long hash;
         IObject *obj = IObject::Probe(proxy);
         obj->GetHashCode(hash);
