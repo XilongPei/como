@@ -289,16 +289,17 @@ ECode CMetaConstructor::CreateObject(
     /* [out] */ AutoPtr<IInterface>& object)
 {
     AutoPtr<IClassObject> clsObj;
-    ECode ec = CoAcquireClassFactory(mOwner->mCid,
-            mOwner->mOwner->mLoader, clsObj);
+    ECode ec = CoAcquireClassFactory(mOwner->mCid, mOwner->mOwner->mLoader, clsObj);
     if (FAILED(ec)) {
         object = nullptr;
         return ec;
     }
-    argList->SetInputArgumentOfInterfaceID(
-            mParameters.GetLength(), IID_IInterface);
-    argList->SetOutputArgumentOfInterface(
-            mParameters.GetLength() + 1, reinterpret_cast<HANDLE>(&object));
+
+    FAIL_RETURN(argList->SetInputArgumentOfInterfaceID(
+                                  mParameters.GetLength() - 2, IID_IInterface));
+    FAIL_RETURN(argList->SetOutputArgumentOfInterface(
+               mParameters.GetLength() - 1, reinterpret_cast<HANDLE>(&object)));
+
     return Invoke(clsObj, argList);
 }
 

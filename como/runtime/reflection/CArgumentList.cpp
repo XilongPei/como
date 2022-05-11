@@ -36,6 +36,7 @@ CArgumentList::CArgumentList(
     /* [in] */ Integer hasOutArguments)
     : mParameterNumber(parameters.GetLength())
     , mHasOutArguments(hasOutArguments)
+    , mHotCode(0)
 {
     Init(parameters);
 }
@@ -1616,8 +1617,10 @@ ECode CArgumentList::GetArgumentAddress(
     /* [in] */ Integer index,
     /* [out] */ HANDLE& addr)
 {
-    if (index < 0 || index >= mParameterNumber) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    if (UNLIKELY(! mHotCode)) {
+        if (index < 0 || index >= mParameterNumber) {
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
     }
 
     addr = Get<HANDLE>(mParameterBuffer, mParameterInfos[index].mPos);

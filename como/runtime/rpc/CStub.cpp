@@ -481,6 +481,7 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::ECode:
                 case TypeKind::Enum:
                     break;
+
                 case TypeKind::String: {
                     argList->GetArgumentAddress(i, addr);
                     String* value = reinterpret_cast<String*>(addr);
@@ -518,96 +519,64 @@ ECode InterfaceStub::MarshalResults(
             switch (kind) {
                 case TypeKind::Char: {
                     argList->GetArgumentAddress(i, addr);
-                    Char* value = reinterpret_cast<Char*>(addr);
-                    resParcel->WriteChar(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteChar(*(reinterpret_cast<Char*>(addr)));
                     break;
                 }
                 case TypeKind::Byte: {
                     argList->GetArgumentAddress(i, addr);
-                    Byte* value = reinterpret_cast<Byte*>(addr);
-                    resParcel->WriteByte(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteByte(*(reinterpret_cast<Byte*>(addr)));
                     break;
                 }
                 case TypeKind::Short: {
                     argList->GetArgumentAddress(i, addr);
-                    Short* value = reinterpret_cast<Short*>(addr);
-                    resParcel->WriteShort(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteShort(*(reinterpret_cast<Short*>(addr)));
                     break;
                 }
                 case TypeKind::Integer: {
                     argList->GetArgumentAddress(i, addr);
-                    Integer* value = reinterpret_cast<Integer*>(addr);
-                    resParcel->WriteInteger(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteInteger(*(reinterpret_cast<Integer*>(addr)));
                     break;
                 }
                 case TypeKind::Long: {
                     argList->GetArgumentAddress(i, addr);
-                    Long* value = reinterpret_cast<Long*>(addr);
-                    resParcel->WriteLong(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteLong(*(reinterpret_cast<Long*>(addr)));
                     break;
                 }
                 case TypeKind::Float: {
                     argList->GetArgumentAddress(i, addr);
-                    Float* value = reinterpret_cast<Float*>(addr);
-                    resParcel->WriteFloat(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteFloat(*(reinterpret_cast<Float*>(addr)));
                     break;
                 }
                 case TypeKind::Double: {
                     argList->GetArgumentAddress(i, addr);
-                    Double* value = reinterpret_cast<Double*>(addr);
-                    resParcel->WriteDouble(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteDouble(*(reinterpret_cast<Double*>(addr)));
                     break;
                 }
                 case TypeKind::Boolean: {
                     argList->GetArgumentAddress(i, addr);
-                    Boolean* value = reinterpret_cast<Boolean*>(addr);
-                    resParcel->WriteBoolean(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteBoolean(*(reinterpret_cast<Boolean*>(addr)));
                     break;
                 }
                 case TypeKind::String: {
                     argList->GetArgumentAddress(i, addr);
-                    String* value = reinterpret_cast<String*>(addr);
-                    resParcel->WriteString(*value);
-                    delete value;
+                    resParcel->WriteString(*(reinterpret_cast<String*>(addr)));
                     break;
                 }
                 case TypeKind::ECode: {
                     argList->GetArgumentAddress(i, addr);
-                    ECode* value = reinterpret_cast<ECode*>(addr);
-                    resParcel->WriteECode(*value);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete value;
+                    resParcel->WriteECode(*(reinterpret_cast<ECode*>(addr)));
                     break;
                 }
                 case TypeKind::Enum: {
                     argList->GetArgumentAddress(i, addr);
-                    Integer* value = reinterpret_cast<Integer*>(addr);
-                    resParcel->WriteEnumeration(*value);
-                    //delete value;
+                    resParcel->WriteEnumeration(*(reinterpret_cast<Integer*>(addr)));
                     break;
                 }
                 case TypeKind::Array: {
                     argList->GetArgumentAddress(i, addr);
                     Triple* t = reinterpret_cast<Triple*>(addr);
                     resParcel->WriteArray(*t);
-                    // `SMALL_PARAM_BUFFER`
-                    //delete t;
+                    delete t;
                     break;
                 }
                 case TypeKind::Interface: {
