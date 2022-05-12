@@ -26,10 +26,8 @@ namespace como {
 
 CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
-std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue(
-                                    RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
-std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue(
-                                    RuntimeMonitor::RTM_INVOKEMETHOD_QUEUE_SIZE);
+std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue;
+std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue;
 
 RuntimeMonitor::RuntimeMonitor() {
     //
@@ -121,13 +119,13 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
         }
         case (Short)RTM_CommandType::CMD_Server_InvokeMethod: {
             if (! rtmInvokeMethodServerQueue.empty()) {
-                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();
+                RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
 
-                if (nullptr != rtmMethod) {
-                    resBuffer = Array<Byte>(rtmMethod->length);
+                if (nullptr != rtm_InvokeMethod) {
+                    resBuffer = Array<Byte>(rtm_InvokeMethod->length);
                     if (! resBuffer.IsNull()) {
                         // resBuffer.Copy works very slowly
-                        memcpy(resBuffer.GetPayload(), rtmMethod, rtmMethod->length);
+                        memcpy(resBuffer.GetPayload(), rtm_InvokeMethod, rtm_InvokeMethod->length);
 
                         rtmInvokeMethodServerQueue.pop_front();
                     }
@@ -178,19 +176,44 @@ int RuntimeMonitor::WriteLog(const char *log, size_t strLen)
     return loggerOutputCircleBuf->Write(log, strLen+1);
 }
 
+static ECode SerializeComponentID(
+    /* [in] */ const ComponentID* cid,
+    /* [out] */ Array<Byte>& arrCid)
+{
+    const char* mUri_ = cid->mUri;
+    if (mUri_== nullptr) {
+        mUri_ = "";
+    }
+
+    Array<Byte> arrCid_(sizeof(ComponentID) + strlen(mUri_) + 1);
+    Byte *pByte = arrCid_.GetPayload();
+    if (nullptr == pByte)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    memcpy(pByte, &cid, sizeof(ComponentID));
+    strcpy((char*)(pByte + sizeof(ComponentID)), mUri_);
+
+    arrCid = arrCid_;
+
+    return NOERROR;
+}
+
 /**
  * in_out: 0, in; 1, out
  * whichQueue: 0, rtmInvokeMethodClientQueue; 1, rtmInvokeMethodServerQueue
  */
-ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
+ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId,
                                       InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
                                       Integer whichQueue)
 {
+    Array<Byte> arrCid;
+    SerializeComponentID(clsId.mCid, arrCid);
+
     Long sizeParcel;
     parcel->GetDataSize(sizeParcel);
 
-    Long len = sizeof(RTM_InvokeMethod) + sizeParcel;
+    Long len = sizeof(RTM_InvokeMethod) + sizeParcel + arrCid.GetLength();
     RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
     if (nullptr == rtm_InvokeMethod)
         return E_OUT_OF_MEMORY_ERROR;
@@ -198,15 +221,18 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     clock_gettime(CLOCK_REALTIME, &(rtm_InvokeMethod->time));
     rtm_InvokeMethod->length = len;
     rtm_InvokeMethod->serverObjectId = serverObjectId;
-    rtm_InvokeMethod->coclassID_mUuid = cid.mUuid;
+    rtm_InvokeMethod->coclassID = clsId;
     rtm_InvokeMethod->interfaceID_mUuid = iid.mUuid;
     rtm_InvokeMethod->in_out = in_out;
     rtm_InvokeMethod->methodIndexPlus4 = methodIndexPlus4;
 
     HANDLE parcelData;
-    Byte *p = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
+    Byte *pByte = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod);
     parcel->GetData(parcelData);
-    memcpy(p, (Byte*)parcelData, sizeParcel);
+    memcpy(pByte, (Byte*)parcelData, sizeParcel);
+
+    pByte += sizeParcel;
+    memcpy(pByte, (Byte*)arrCid.GetPayload(), arrCid.GetLength());
 
     if (0 == whichQueue) {
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
@@ -226,6 +252,22 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
     }
 
     return NOERROR;
+}
+
+RTM_InvokeMethod* RuntimeMonitor::DeserializeRtmInvokeMethod(
+                                             RTM_InvokeMethod *rtm_InvokeMethod)
+{
+    Long dataSize = 0;
+
+    /*
+    IParcel *resParcel = new CZMQParcel::CZMQParcel();
+    resParcel->SetData((Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod));
+    parcel->GetDataSize(dataSize);
+    */
+    Byte* pByte = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) + dataSize;
+    rtm_InvokeMethod->coclassID.mCid = (ComponentID*)pByte;
+    *(HANDLE*)&(rtm_InvokeMethod->coclassID.mCid->mUri) = (HANDLE)pByte + sizeof(ComponentID);
+    return rtm_InvokeMethod;
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,

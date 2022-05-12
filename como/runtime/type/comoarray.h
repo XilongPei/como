@@ -274,7 +274,8 @@ Long Array<T>::Copy(
     /* [in] */ T const* srcData,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr) return 0;
+    if (srcData == nullptr)
+        return 0;
 
     Long N = MIN(mSize, length);
     if (mData == srcData) {
@@ -294,7 +295,8 @@ Long Array<T>::Copy(
     /* [in] */ T const* srcData,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr) return 0;
+    if (srcData == nullptr)
+        return 0;
 
     Long N = MIN(mSize - thisPos, length);
     if (mData == srcData && thisPos == 0) {
@@ -323,7 +325,8 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr) return 0;
+    if (srcData == nullptr)
+        return 0;
 
     Long N = MIN(mSize - thisPos, length);
     if (mData == srcData && thisPos == srcPos) {
@@ -350,8 +353,7 @@ template<typename T>
 Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 
@@ -372,8 +374,7 @@ Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long length)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 
@@ -395,8 +396,7 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 
@@ -417,8 +417,7 @@ Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ const Array<T>& srcArray)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 
@@ -448,8 +447,7 @@ Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long length)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 
@@ -480,8 +478,7 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if (srcArray.mData == nullptr ||
-            srcArray.mSize == 0) {
+    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
         return 0;
     }
 

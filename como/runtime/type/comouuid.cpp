@@ -84,11 +84,7 @@ ComponentID CloneComponentID(
 
     value = cid;
     if (cid.mUri != nullptr) {
-        Integer size = strlen(cid.mUri);
-        value.mUri = (const char*)malloc(size + 1);
-        if (value.mUri != nullptr) {
-            memcpy(const_cast<char*>(value.mUri), cid.mUri, size + 1);
-        }
+        value.mUri = strdup(cid.mUri);
     }
 
     return value;

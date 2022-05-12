@@ -103,8 +103,17 @@ typedef struct tagRTM_InvokeMethod {
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
     EXPECT_NE(nullptr, rtmInvokeMethod);
 
-    String str = DumpUUID(rtmInvokeMethod->coclassID_mUuid);
+    RuntimeMonitor::DeserializeRtmInvokeMethod(rtmInvokeMethod);
+
+    String str = DumpUUID(rtmInvokeMethod->coclassID.mUuid);
     printf("RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
+    str = DumpUUID(rtmInvokeMethod->coclassID.mCid->mUuid);
+    printf("RTM_InvokeMethod ComponentID mUuid: %s\n", str.string());
+    printf("RTM_InvokeMethod ComponentID mUri: %s\n", rtmInvokeMethod->coclassID.mCid->mUri);
+
+    AutoPtr<IMetaCoclass> mc;
+    ec = CoGetCoclassMetadata(rtmInvokeMethod->coclassID, nullptr, mc);
+
     EXPECT_EQ(0, ec);
 }
 
@@ -118,14 +127,16 @@ TEST(ClientMonitor, TestCMD_Client_InvokeMethod)
                                     RTM_CommandType::CMD_Client_InvokeMethod, 0,
                                                               (const char *)"");
     Array<Byte> response;
-    Array<Byte> request;
+    Array<Byte> request(rtmCommand->length);
     request.Copy((Byte*)rtmCommand, rtmCommand->length);
     free(rtmCommand);
 
     ECode ec = proxy->MonitorRuntime(request, response);
 
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
-    String str = DumpUUID(rtmInvokeMethod->coclassID_mUuid);
+    EXPECT_NE(nullptr, rtmInvokeMethod);
+
+    String str = DumpUUID(rtmInvokeMethod->coclassID.mUuid);
     printf("RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
     EXPECT_EQ(0, ec);
 }

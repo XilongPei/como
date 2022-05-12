@@ -43,7 +43,7 @@ enum class RTM_CommandType {
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
     struct timespec time;
-    UUID            coclassID_mUuid;
+    CoclassID       coclassID;
     UUID            interfaceID_mUuid;
     Long            serverObjectId;
     Integer         methodIndexPlus4;
@@ -76,10 +76,13 @@ public:
     static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                  IInterface *intf, AutoPtr<IMetaMethod>& method);
 
-    static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
+    static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId,
                                       InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
                                       Integer whichQueue);
+
+    static RTM_InvokeMethod* DeserializeRtmInvokeMethod(
+                                            RTM_InvokeMethod *rtm_InvokeMethod);
 
     static int WriteLog(const char *log, size_t strLen);
 
