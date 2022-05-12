@@ -120,15 +120,17 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             break;
         }
         case (Short)RTM_CommandType::CMD_Server_InvokeMethod: {
-            if (! rtmInvokeMethodClientQueue.empty()) {
-                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
+            if (! rtmInvokeMethodServerQueue.empty()) {
+                RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();
 
-                resBuffer = Array<Byte>(rtmMethod->length);
-                if (! resBuffer.IsNull()) {
-                    // resBuffer.Copy works very slowly
-                    memcpy(resBuffer.GetPayload(), (const char*)string, rtmMethod->length);
+                if (nullptr != rtmMethod) {
+                    resBuffer = Array<Byte>(rtmMethod->length);
+                    if (! resBuffer.IsNull()) {
+                        // resBuffer.Copy works very slowly
+                        memcpy(resBuffer.GetPayload(), rtmMethod, rtmMethod->length);
 
-                    rtmInvokeMethodClientQueue.pop_front();
+                        rtmInvokeMethodServerQueue.pop_front();
+                    }
                 }
             }
             break;

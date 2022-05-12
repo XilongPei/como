@@ -1934,7 +1934,6 @@ ECode CProxy::MonitorRuntime(
     if (request.GetLength() < sizeof(RTM_Command))
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
-    String string;
     RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
     switch (rtmCommand->command) {
         case (Short)RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
@@ -1955,8 +1954,7 @@ ECode CProxy::MonitorRuntime(
                 response = Array<Byte>(rtmMethod->length);
                 if (! response.IsNull()) {
                     // response.Copy works very slowly
-                    memcpy(response.GetPayload(), (const char*)string,
-                                                             rtmMethod->length);
+                    memcpy(response.GetPayload(), rtmMethod, rtmMethod->length);
 
                     RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
                 }

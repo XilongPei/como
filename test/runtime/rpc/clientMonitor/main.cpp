@@ -62,7 +62,7 @@ TEST(ClientMonitor, TestMonitorRuntime)
                                                 (const char *)"ExportObject=1");
 
     Array<Byte> response;
-    Array<Byte> request;
+    Array<Byte> request(rtmCommand->length);
     request.Copy((Byte*)rtmCommand, rtmCommand->length);
     free(rtmCommand);
 
@@ -80,8 +80,10 @@ TEST(ClientMonitor, TestCMD_Server_InvokeMethod)
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
                                     RTM_CommandType::CMD_Server_InvokeMethod, 0,
                                                               (const char *)"");
+    EXPECT_NE(nullptr, rtmCommand);
+
     Array<Byte> response;
-    Array<Byte> request;
+    Array<Byte> request(rtmCommand->length);
     request.Copy((Byte*)rtmCommand, rtmCommand->length);
     free(rtmCommand);
 
@@ -99,6 +101,8 @@ typedef struct tagRTM_InvokeMethod {
 } RTM_InvokeMethod;
 */
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
+    EXPECT_NE(nullptr, rtmInvokeMethod);
+
     String str = DumpUUID(rtmInvokeMethod->coclassID_mUuid);
     printf("RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
     EXPECT_EQ(0, ec);
