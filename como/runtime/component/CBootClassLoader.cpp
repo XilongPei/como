@@ -201,10 +201,8 @@ ECode CBootClassLoader::FindComponent(
     }
 
     String uri(compId.mUri);
-    if (mDebug) {
-        Logger::D(TAG, "The uri of the component which will be loaded is \"%s\".",
-                uri.string());
-    }
+    Logger::D(TAG, "The uri of the component which will be loaded is \"%s\".",
+                                                                  uri.string());
 
     Integer index = uri.LastIndexOf("/");
     String compFile = index != -1 ? uri.Substring(index + 1) : uri;
@@ -219,10 +217,8 @@ ECode CBootClassLoader::FindComponent(
         String filePath = mComponentPath.Get(i) + "/" + compFile;
         fd = fopen(filePath.string(), "rb");
         if (fd != nullptr) {
-            if (mDebug) {
-                Logger::D(TAG, "Find \"%\" component in directory \"%s\".",
-                        compFile.string(), mComponentPath.Get(i).string());
-            }
+            Logger::D(TAG, "Find \"%\" component in directory \"%s\".",
+                             compFile.string(), mComponentPath.Get(i).string());
             compPath = filePath;
             break;
         }

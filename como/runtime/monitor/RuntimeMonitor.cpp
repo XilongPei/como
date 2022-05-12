@@ -190,7 +190,7 @@ static ECode SerializeComponentID(
     if (nullptr == pByte)
         return E_OUT_OF_MEMORY_ERROR;
 
-    memcpy(pByte, &cid, sizeof(ComponentID));
+    memcpy(pByte, cid, sizeof(ComponentID));
     strcpy((char*)(pByte + sizeof(ComponentID)), mUri_);
 
     arrCid = arrCid_;

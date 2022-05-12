@@ -88,7 +88,6 @@ private:
     static AutoPtr<IClassLoader> sInstance;
     static AutoPtr<IClassLoader> sSystemClassLoader;
 
-    Boolean mDebug = false;
     ArrayList<String> mComponentPath;
     HashMap<UUID, IMetaComponent*> mComponents;
     HashMap<String, IMetaComponent*> mComponentPaths;
