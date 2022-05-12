@@ -21,7 +21,9 @@
 #include "reflHelpers.h"
 #include "registry.h"
 #include "CircleBuffer.h"
+#include "comorpc.h"
 #include "RuntimeMonitor.h"
+#include "MarshalUtils.h"
 
 namespace como {
 
@@ -300,7 +302,23 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     method->GetSignature(methodSignature);
     strBuffer += "\"Method\":\"" + strMethod + "{" + methodSignature + "}\"";
 
-    strBuffer += "}";
+    strBuffer += "}\n";
+
+    String strArgBuffer;
+    AutoPtr<IParcel> parcel;
+    CoCreateParcel(RPCType::Remote, parcel);
+
+    Long len = rtm_InvokeMethod->length - sizeof(ComponentID) -
+                                 strlen(rtm_InvokeMethod->coclassID.mCid->mUri);
+
+    parcel->SetData((HANDLE)rtm_InvokeMethod->parcel, len);
+
+    if (rtm_InvokeMethod->in_out == 0)
+        MarshalUtils::UnMarshalArguments(method, parcel, strArgBuffer);
+    else
+        MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer);
+
+    strBuffer += strArgBuffer;
 
     return NOERROR;
 }
