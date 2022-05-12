@@ -680,10 +680,10 @@ ECode ServiceManager::GetRemoteService(
                 return ec;
             }
 
-            String str = nullptr;
+            String str;
             ec = ipack->GetServerName(str);
             ipack->SetProxyInfo(0);
-            if ((nullptr == str) || str.IsEmpty()) {
+            if (str.IsEmpty()) {
                 ec = CoUnmarshalInterface(ipack, RPCType::Local, object);
             }
             else {

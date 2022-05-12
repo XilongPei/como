@@ -163,7 +163,7 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf,
     }
 
     AutoPtr<IMetaMethod> method;
-    klass->GetMethod(functionName, nullptr/*fungnature*/, method);
+    klass->GetMethod(functionName, nullptr/*function signature*/, method);
     if (nullptr != method) {
         method->GetSignature(methodSignature);
     }

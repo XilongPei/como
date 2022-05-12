@@ -84,6 +84,9 @@ public:
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
+                                            const Byte *buffer, int bufferSize);
+
+    static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
                                                               const char *cstr);
 
     static std::deque<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;

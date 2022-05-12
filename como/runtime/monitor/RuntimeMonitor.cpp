@@ -227,11 +227,26 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& cid,
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
+                                             const Byte *buffer, int bufferSize)
+{
+    Integer len = sizeof(RTM_Command) + bufferSize;
+    RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
+    if (nullptr != rtmCommand) {
+        rtmCommand->length = len;
+        rtmCommand->command = (Short)command;
+        rtmCommand->param = param;
+        memcpy(rtmCommand->parcel, buffer, bufferSize);
+    }
+    return rtmCommand;
+}
+
+RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
                                                                const char *cstr)
 {
     Integer len = strlen(cstr) + 1;
     RTM_Command *rtmCommand = (RTM_Command*)malloc(sizeof(RTM_Command) + len);
     if (nullptr != rtmCommand) {
+        rtmCommand->length = sizeof(RTM_Command) + len;
         rtmCommand->command = (Short)command;
         rtmCommand->param = param;
         memcpy(rtmCommand->parcel, cstr, len);

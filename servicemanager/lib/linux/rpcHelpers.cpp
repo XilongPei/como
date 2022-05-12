@@ -75,11 +75,26 @@ ECode RpcHelpers::ReleaseImportObject(
 {
     ECode ec;
     Long hash;
+    Long channelId;
 
     IProxy* proxy = IProxy::Probe(intfService);
     if (nullptr != proxy) {
     // It does not implement the COMO class of IParcelable interface.
     // The method execution is on the service server side.
+
+        if (nullptr == obj) {
+        // Release(REFCOUNT_RELEASE) all ImportObjects include intfService
+            AutoPtr<como::IInterfacePack> ipack;
+            ec = proxy->GetIpack(ipack);
+            if (FAILED(ec))
+                return ec;
+
+            ipack->GetProxyInfo(channelId);
+
+            return como::CoUnregisterImportObject(RPCType::Remote, channelId);
+        }
+
+        // Release one ImportObject
         proxy = IProxy::Probe(obj);
         if (nullptr == proxy)
             return E_INTERFACE_NOT_FOUND_EXCEPTION;
@@ -89,8 +104,9 @@ ECode RpcHelpers::ReleaseImportObject(
         if (FAILED(ec))
             return ec;
 
-        ipack->GetServerObjectId(hash);
-        return como::CoUnregisterImportObject(RPCType::Remote, hash);
+        ipack->GetProxyInfo(channelId);
+
+        return como::CoUnregisterImportObject(RPCType::Remote, channelId);
     }
 
     // It implements the COMO class of IParcelable interface. Its method
