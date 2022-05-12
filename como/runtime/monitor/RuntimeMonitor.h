@@ -84,6 +84,9 @@ public:
     static RTM_InvokeMethod* DeserializeRtmInvokeMethod(
                                             RTM_InvokeMethod *rtm_InvokeMethod);
 
+    static ECode DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
+                                                             String& strBuffer);
+
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,

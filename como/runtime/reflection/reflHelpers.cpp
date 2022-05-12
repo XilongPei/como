@@ -157,8 +157,8 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf,
     }
     else {
         String name, ns;
-        klass->GetName(name);
-        klass->GetNamespace(ns);
+        imintf->GetName(name);
+        imintf->GetNamespace(ns);
         strInterfaceInfo = ns + "::" + name;
     }
 

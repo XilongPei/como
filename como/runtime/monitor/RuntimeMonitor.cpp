@@ -15,7 +15,8 @@
 //=========================================================================
 
 #include <time.h>
-#include "ini.h"
+#include <ini.h>
+#include <comoapi.h>
 #include "comolog.h"
 #include "reflHelpers.h"
 #include "registry.h"
@@ -259,10 +260,49 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
 RTM_InvokeMethod* RuntimeMonitor::DeserializeRtmInvokeMethod(
                                              RTM_InvokeMethod *rtm_InvokeMethod)
 {
-    HANDLE hp = (HANDLE)rtm_InvokeMethod + (HANDLE)rtm_InvokeMethod->coclassID.mCid;
-    rtm_InvokeMethod->coclassID.mCid = (ComponentID*)hp;
-    *(HANDLE*)&(rtm_InvokeMethod->coclassID.mCid->mUri) = hp + sizeof(ComponentID);
+    if ((HANDLE)rtm_InvokeMethod->coclassID.mCid < (HANDLE)rtm_InvokeMethod->length) {
+        HANDLE hp = (HANDLE)rtm_InvokeMethod + (HANDLE)rtm_InvokeMethod->coclassID.mCid;
+        rtm_InvokeMethod->coclassID.mCid = (ComponentID*)hp;
+        *(HANDLE*)&(rtm_InvokeMethod->coclassID.mCid->mUri) = hp + sizeof(ComponentID);
+    }
     return rtm_InvokeMethod;
+}
+
+ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
+                                                               String& strBuffer)
+{
+    AutoPtr<IMetaCoclass> klass;
+    ECode ec = CoGetCoclassMetadata(rtm_InvokeMethod->coclassID, nullptr, klass);
+    if (FAILED(ec))
+        return ec;
+
+    InterfaceID iid;
+    AutoPtr<IMetaInterface> intf;
+    AutoPtr<IMetaMethod> method;
+    String name, ns;
+
+    strBuffer = "{";
+
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    strBuffer += "\"Coclass\":\"" + ns + "::" + name + "\",";
+
+    memcpy(&iid, &(rtm_InvokeMethod->interfaceID_mUuid), sizeof(UUID));
+    klass->GetInterface(iid, intf);
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    strBuffer += "\"interface\":\"" + ns + "::" + name + "\",";
+
+    intf->GetMethod(rtm_InvokeMethod->methodIndexPlus4, method);
+    String strMethod;
+    String methodSignature;
+    method->GetName(strMethod);
+    method->GetSignature(methodSignature);
+    strBuffer += "\"Method\":\"" + strMethod + "{" + methodSignature + "}\"";
+
+    strBuffer += "}";
+
+    return NOERROR;
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,

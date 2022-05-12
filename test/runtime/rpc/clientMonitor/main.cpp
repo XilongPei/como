@@ -113,8 +113,9 @@ typedef struct tagRTM_InvokeMethod {
     printf("    TestCMD_Server_InvokeMethod: RTM_InvokeMethod ComponentID mUri: %s\n",
                                                             rtmInvokeMethod->coclassID.mCid->mUri);
 
-    AutoPtr<IMetaCoclass> mc;
-    ec = CoGetCoclassMetadata(rtmInvokeMethod->coclassID, nullptr, mc);
+    String strBuffer;
+    RuntimeMonitor::DumpRtmInvokeMethod(rtmInvokeMethod, strBuffer);
+    printf("DumpRtmInvokeMethod: %s\n", strBuffer.string());
 
     EXPECT_EQ(0, ec);
 }
