@@ -233,6 +233,8 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
 
     pByte += sizeParcel;
     memcpy(pByte, (Byte*)arrCid.GetPayload(), arrCid.GetLength());
+    rtm_InvokeMethod->coclassID.mCid = (ComponentID*)(sizeof(RTM_InvokeMethod) +
+                                                                    sizeParcel);
 
     if (0 == whichQueue) {
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
@@ -257,16 +259,9 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
 RTM_InvokeMethod* RuntimeMonitor::DeserializeRtmInvokeMethod(
                                              RTM_InvokeMethod *rtm_InvokeMethod)
 {
-    Long dataSize = 0;
-
-    /*
-    IParcel *resParcel = new CZMQParcel::CZMQParcel();
-    resParcel->SetData((Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod));
-    parcel->GetDataSize(dataSize);
-    */
-    Byte* pByte = (Byte*)rtm_InvokeMethod + sizeof(RTM_InvokeMethod) + dataSize;
-    rtm_InvokeMethod->coclassID.mCid = (ComponentID*)pByte;
-    *(HANDLE*)&(rtm_InvokeMethod->coclassID.mCid->mUri) = (HANDLE)pByte + sizeof(ComponentID);
+    HANDLE hp = (HANDLE)rtm_InvokeMethod + (HANDLE)rtm_InvokeMethod->coclassID.mCid;
+    rtm_InvokeMethod->coclassID.mCid = (ComponentID*)hp;
+    *(HANDLE*)&(rtm_InvokeMethod->coclassID.mCid->mUri) = hp + sizeof(ComponentID);
     return rtm_InvokeMethod;
 }
 

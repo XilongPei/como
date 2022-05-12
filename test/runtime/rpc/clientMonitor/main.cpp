@@ -106,10 +106,12 @@ typedef struct tagRTM_InvokeMethod {
     RuntimeMonitor::DeserializeRtmInvokeMethod(rtmInvokeMethod);
 
     String str = DumpUUID(rtmInvokeMethod->coclassID.mUuid);
-    printf("RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
+    printf("    TestCMD_Server_InvokeMethod: RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
+
     str = DumpUUID(rtmInvokeMethod->coclassID.mCid->mUuid);
-    printf("RTM_InvokeMethod ComponentID mUuid: %s\n", str.string());
-    printf("RTM_InvokeMethod ComponentID mUri: %s\n", rtmInvokeMethod->coclassID.mCid->mUri);
+    printf("    TestCMD_Server_InvokeMethod: RTM_InvokeMethod ComponentID mUuid: %s\n", str.string());
+    printf("    TestCMD_Server_InvokeMethod: RTM_InvokeMethod ComponentID mUri: %s\n",
+                                                            rtmInvokeMethod->coclassID.mCid->mUri);
 
     AutoPtr<IMetaCoclass> mc;
     ec = CoGetCoclassMetadata(rtmInvokeMethod->coclassID, nullptr, mc);
@@ -136,8 +138,16 @@ TEST(ClientMonitor, TestCMD_Client_InvokeMethod)
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
     EXPECT_NE(nullptr, rtmInvokeMethod);
 
+    RuntimeMonitor::DeserializeRtmInvokeMethod(rtmInvokeMethod);
+
     String str = DumpUUID(rtmInvokeMethod->coclassID.mUuid);
-    printf("RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
+    printf("    TestCMD_Client_InvokeMethod, RTM_InvokeMethod coclassID_mUuid: %s\n", str.string());
+
+    str = DumpUUID(rtmInvokeMethod->coclassID.mCid->mUuid);
+    printf("    TestCMD_Client_InvokeMethod, RTM_InvokeMethod ComponentID mUuid: %s\n", str.string());
+    printf("    TestCMD_Client_InvokeMethod, RTM_InvokeMethod ComponentID mUri: %s\n",
+                                                            rtmInvokeMethod->coclassID.mCid->mUri);
+
     EXPECT_EQ(0, ec);
 }
 
