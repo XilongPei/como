@@ -221,7 +221,11 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
     if (nullptr == rtm_InvokeMethod)
         return E_OUT_OF_MEMORY_ERROR;
 
-    clock_gettime(CLOCK_REALTIME, &(rtm_InvokeMethod->time));
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    // The time from January 1, 1970. Unit: microseconds
+    rtm_InvokeMethod->time = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+
     rtm_InvokeMethod->length = len;
     rtm_InvokeMethod->serverObjectId = serverObjectId;
     rtm_InvokeMethod->coclassID = clsId;
@@ -238,7 +242,6 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
     memcpy(pByte, (Byte*)arrCid.GetPayload(), arrCid.GetLength());
     rtm_InvokeMethod->coclassID.mCid = (ComponentID*)(sizeof(RTM_InvokeMethod) +
                                                                     sizeParcel);
-
     if (0 == whichQueue) {
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
             RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
@@ -278,12 +281,29 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     if (FAILED(ec))
         return ec;
 
+    strBuffer = "{";
+
+    struct timeval curTime;
+    curTime.tv_sec = rtm_InvokeMethod->time / 1000000;
+    curTime.tv_usec = rtm_InvokeMethod->time % 1000000;
+    int milli = curTime.tv_usec / 1000;
+
+    // 2021-11-30 12:34:56
+    char ymdhms[20];
+    // The +hhmm or -hhmm numeric timezone
+    char timezone[8];
+    struct tm nowTime;
+    char currentTime[64];
+    localtime_r(&curTime.tv_sec, &nowTime);
+    strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
+    strftime(timezone, sizeof(timezone), "%z", &nowTime);
+    snprintf(currentTime, sizeof(currentTime), "\"time\"=\"%s.%03d %s\",", ymdhms, milli, timezone);
+    strBuffer += currentTime;
+
     InterfaceID iid;
     AutoPtr<IMetaInterface> intf;
     AutoPtr<IMetaMethod> method;
     String name, ns;
-
-    strBuffer = "{";
 
     klass->GetName(name);
     klass->GetNamespace(ns);
@@ -308,8 +328,9 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     AutoPtr<IParcel> parcel;
     CoCreateParcel(RPCType::Remote, parcel);
 
-    Long len = rtm_InvokeMethod->length - sizeof(ComponentID) -
-                                 strlen(rtm_InvokeMethod->coclassID.mCid->mUri);
+    Long len = rtm_InvokeMethod->length -
+                          (sizeof(RTM_InvokeMethod) + sizeof(ComponentID) + 1) -
+                          strlen(rtm_InvokeMethod->coclassID.mCid->mUri);
 
     parcel->SetData((HANDLE)rtm_InvokeMethod->parcel, len);
 

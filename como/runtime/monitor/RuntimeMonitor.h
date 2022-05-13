@@ -42,7 +42,7 @@ enum class RTM_CommandType {
 #pragma pack(4)
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
-    struct timespec time;
+    Long            time;               // Unit: microseconds, from January 1, 1970.
     CoclassID       coclassID;
     UUID            interfaceID_mUuid;
     Long            serverObjectId;
