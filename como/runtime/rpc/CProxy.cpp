@@ -35,6 +35,7 @@
 #include "rpc/CProxy.h"
 #include "util/comolog.h"
 #include "reflection/reflHelpers.h"
+#include "reflection/CMetaMethod.h"
 #include <sys/mman.h>
 #ifdef COMO_FUNCTION_SAFETY
 #include <time.h>
@@ -566,12 +567,17 @@ ECode InterfaceProxy::MarshalArguments(
     /* [in] */ IMetaMethod* method,
     /* [in] */ IParcel* argParcel)
 {
-    Integer N;
-    method->GetParameterNumber(N);
     Integer intParamIndex = 1, fpParamIndex = 0;
+    CMetaMethod* cMethod = CMetaMethod::From(method);
+    Integer N = cMethod->mParameters.GetLength();
+    if (N > 0) {
+        // Help me to call BuildAllParameters once.
+        Integer outArgs;
+        method->GetOutArgumentsNumber(outArgs);
+    }
+
     for (Integer i = 0;  i < N;  i++) {
-        AutoPtr<IMetaParameter> param;
-        FAIL_RETURN(method->GetParameter(i, param));
+        IMetaParameter* param = cMethod->mParameters[i];
 
         AutoPtr<IMetaType> type;
         IOAttribute ioAttr;
@@ -911,12 +917,17 @@ ECode InterfaceProxy::UnmarshalResults(
     mOwner->GetHashCode(hash);
     resParcel->SetProxyInfo(hash);
 
-    Integer N;
-    method->GetParameterNumber(N);
-    Integer intParamIndex = 1,  fpParamIndex = 0;
+    Integer intParamIndex = 1, fpParamIndex = 0;
+    CMetaMethod* cMethod = CMetaMethod::From(method);
+    Integer N = cMethod->mParameters.GetLength();
+    if (N > 0) {
+        // Help me to call BuildAllParameters once.
+        Integer outArgs;
+        method->GetOutArgumentsNumber(outArgs);
+    }
+
     for (Integer i = 0;  i < N;  i++) {
-        AutoPtr<IMetaParameter> param;
-        FAIL_RETURN(method->GetParameter(i, param));
+        IMetaParameter* param = cMethod->mParameters[i];
 
         AutoPtr<IMetaType> type;
         IOAttribute ioAttr;

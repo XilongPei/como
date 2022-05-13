@@ -65,16 +65,16 @@ ECode InterfaceStub::UnmarshalArguments(
     CArgumentList* cArglist = CArgumentList::From(argList);
     cArglist->mHotCode = CMetaMethod::From(method)->mHotCode;
 
-    Integer N;
-    method->GetParameterNumber(N);
+    CMetaMethod* cMethod = CMetaMethod::From(method);
+    Integer N = cMethod->mParameters.GetLength();
+    if (N > 0) {
+        // Help me to call BuildAllParameters once.
+        Integer outArgs;
+        method->GetOutArgumentsNumber(outArgs);
+    }
+
     for (Integer i = 0;  i < N;  i++) {
-        AutoPtr<IMetaParameter> param;
-        ECode ec = method->GetParameter(i, param);
-        if (FAILED(ec)) {
-            Logger::E("InterfaceStub::UnmarshalArguments",
-                               "method->GetParameter() error, ECode: 0x%X", ec);
-            return ec;
-        }
+        IMetaParameter* param = cMethod->mParameters[i];
 
         AutoPtr<IMetaType> type;
         TypeKind kind;
@@ -447,17 +447,17 @@ ECode InterfaceStub::MarshalResults(
     /* [out] */ AutoPtr<IParcel>& resParcel)
 {
     HANDLE addr;
-    Integer N;
 
-    method->GetParameterNumber(N);
+    CMetaMethod* cMethod = CMetaMethod::From(method);
+    Integer N = cMethod->mParameters.GetLength();
+    if (N > 0) {
+        // Help me to call BuildAllParameters once.
+        Integer outArgs;
+        method->GetOutArgumentsNumber(outArgs);
+    }
+
     for (Integer i = 0;  i < N;  i++) {
-        AutoPtr<IMetaParameter> param;
-        ECode ec = method->GetParameter(i, param);
-        if (FAILED(ec)) {
-            Logger::E("InterfaceStub::MarshalResults",
-                               "method->GetParameter() error, ECode: 0x%X", ec);
-            return ec;
-        }
+        IMetaParameter* param = cMethod->mParameters[i];
 
         AutoPtr<IMetaType> type;
         TypeKind kind;
