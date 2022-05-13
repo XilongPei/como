@@ -540,7 +540,7 @@ ECode CMetaCoclass::GetConstant(
 {
     if (name.IsEmpty() || mConstants.IsEmpty()) {
         constt = nullptr;
-        return NOERROR;
+        return E_CONST_NOT_FOUND_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllConstants());
@@ -554,7 +554,7 @@ ECode CMetaCoclass::GetConstant(
         }
     }
     constt = nullptr;
-    return NOERROR;
+    return E_CONST_NOT_FOUND_EXCEPTION;
 }
 
 ECode CMetaCoclass::GetConstant(

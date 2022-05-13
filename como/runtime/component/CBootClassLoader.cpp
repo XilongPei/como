@@ -217,7 +217,7 @@ ECode CBootClassLoader::FindComponent(
         String filePath = mComponentPath.Get(i) + "/" + compFile;
         fd = fopen(filePath.string(), "rb");
         if (fd != nullptr) {
-            Logger::D(TAG, "Find \"%\" component in directory \"%s\".",
+            Logger::D(TAG, "Find \"%s\" component in directory \"%s\"",
                              compFile.string(), mComponentPath.Get(i).string());
             compPath = filePath;
             break;

@@ -103,6 +103,9 @@ typedef struct tagRTM_InvokeMethod {
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
     EXPECT_NE(nullptr, rtmInvokeMethod);
 
+    if (nullptr == rtmInvokeMethod)
+        return;
+
     RuntimeMonitor::DeserializeRtmInvokeMethod(rtmInvokeMethod);
 
     String str = DumpUUID(rtmInvokeMethod->coclassID.mUuid);
@@ -138,6 +141,9 @@ TEST(ClientMonitor, TestCMD_Client_InvokeMethod)
 
     RTM_InvokeMethod *rtmInvokeMethod = (RTM_InvokeMethod*)response.GetPayload();
     EXPECT_NE(nullptr, rtmInvokeMethod);
+
+    if (nullptr == rtmInvokeMethod)
+        return;
 
     RuntimeMonitor::DeserializeRtmInvokeMethod(rtmInvokeMethod);
 
