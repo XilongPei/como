@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include <time.h>
+#include <stdlib.h>
 #include <ini.h>
 #include <comoapi.h>
 #include "comolog.h"
@@ -150,9 +151,13 @@ RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
                                               strInterfaceInfo, methodSignature);
     char buffer[256];
     Logger::Monitor(buffer, sizeof(buffer), "RM_log_");
-    String string = buffer;
-    string += "coclass:" + strClassInfo + " interface:" + strInterfaceInfo +
-              " method:" + functionName + " signature:" + methodSignature  + "\n";
+    String string = "{\"tag\":\"";
+    string += buffer;
+    string += "\",\"coclass\":\""   + strClassInfo +
+              "\",\"interface\":\"" + strInterfaceInfo +
+              "\",\"method\":\""    + functionName +
+              "\",\"signature\":\"" + methodSignature  +
+              "\"}\n";
     logCircleBuf->Write(string);
 }
 
@@ -281,7 +286,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     if (FAILED(ec))
         return ec;
 
-    strBuffer = "{";
+    strBuffer = "{\"tag\":\"RM_IM_\",";
 
     struct timeval curTime;
     curTime.tv_sec = rtm_InvokeMethod->time / 1000000;
@@ -293,12 +298,15 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     // The +hhmm or -hhmm numeric timezone
     char timezone[8];
     struct tm nowTime;
-    char currentTime[64];
+    char buf[64];
     localtime_r(&curTime.tv_sec, &nowTime);
     strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
     strftime(timezone, sizeof(timezone), "%z", &nowTime);
-    snprintf(currentTime, sizeof(currentTime), "\"time\"=\"%s.%03d %s\",", ymdhms, milli, timezone);
-    strBuffer += currentTime;
+    snprintf(buf, sizeof(buf), "\"time\":\"%s.%03d %s\",", ymdhms, milli, timezone);
+    strBuffer += buf;
+
+    snprintf(buf, sizeof(buf), "\"direction\":%d,", rtm_InvokeMethod->in_out);
+    strBuffer += buf;
 
     InterfaceID iid;
     AutoPtr<IMetaInterface> intf;
@@ -307,7 +315,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     klass->GetName(name);
     klass->GetNamespace(ns);
-    strBuffer += "\"Coclass\":\"" + ns + "::" + name + "\",";
+    strBuffer += "\"coclass\":\"" + ns + "::" + name + "\",";
 
     memcpy(&iid, &(rtm_InvokeMethod->interfaceID_mUuid), sizeof(UUID));
     klass->GetInterface(iid, intf);
@@ -320,9 +328,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     String methodSignature;
     method->GetName(strMethod);
     method->GetSignature(methodSignature);
-    strBuffer += "\"Method\":\"" + strMethod + "{" + methodSignature + "}\"";
-
-    strBuffer += "}\n";
+    strBuffer += "\"method\":\"" + strMethod + "{" + methodSignature + "}\",";
 
     String strArgBuffer;
     AutoPtr<IParcel> parcel;
@@ -339,7 +345,9 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     else
         MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer);
 
-    strBuffer += strArgBuffer;
+    strBuffer += "\"parcel\":" + strArgBuffer;
+
+    strBuffer += "}\n";
 
     return NOERROR;
 }
