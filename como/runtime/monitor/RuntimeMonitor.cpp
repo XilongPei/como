@@ -149,7 +149,7 @@ RuntimeMonitor_Log_::RuntimeMonitor_Log_(const char *functionName)
     reflHelpers::intfGetObjectInfo((IInterface*)this, functionName, strClassInfo,
                                               strInterfaceInfo, methodSignature);
     char buffer[256];
-    Logger::Monitor(buffer, sizeof(buffer), "tag");
+    Logger::Monitor(buffer, sizeof(buffer), "RM_log_");
     String string = buffer;
     string += "coclass:" + strClassInfo + " interface:" + strInterfaceInfo +
               " method:" + functionName + " signature:" + methodSignature  + "\n";
