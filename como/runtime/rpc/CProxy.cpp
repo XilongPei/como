@@ -1963,6 +1963,8 @@ ECode CProxy::MonitorRuntime(
         }
 
         case (Short)RTM_CommandType::CMD_Client_InvokeMethod: {
+            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
+
             if (! RuntimeMonitor::rtmInvokeMethodClientQueue.empty()) {
                 RTM_InvokeMethod *rtmMethod =
                              RuntimeMonitor::rtmInvokeMethodClientQueue.front();

@@ -21,6 +21,7 @@
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "zmq.h"
 #endif
+#include "mutex.h"
 #include "comodef.h"
 #include "comotypes.h"
 
@@ -97,6 +98,8 @@ public:
 
     static std::deque<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
     static std::deque<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
+    static Mutex rtmInvokeMethodServerQueue_Lock;
+    static Mutex rtmInvokeMethodClientQueue_Lock;
 
 };
 

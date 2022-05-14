@@ -32,6 +32,8 @@ CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
 std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue;
 std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue;
+Mutex RuntimeMonitor::rtmInvokeMethodServerQueue_Lock;
+Mutex RuntimeMonitor::rtmInvokeMethodClientQueue_Lock;
 
 RuntimeMonitor::RuntimeMonitor() {
     //
@@ -122,6 +124,8 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             break;
         }
         case (Short)RTM_CommandType::CMD_Server_InvokeMethod: {
+            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+
             if (! rtmInvokeMethodServerQueue.empty()) {
                 RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
 
@@ -129,8 +133,8 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
                     resBuffer = Array<Byte>(rtm_InvokeMethod->length);
                     if (! resBuffer.IsNull()) {
                         // resBuffer.Copy works very slowly
-                        memcpy(resBuffer.GetPayload(), rtm_InvokeMethod, rtm_InvokeMethod->length);
-
+                        memcpy(resBuffer.GetPayload(), rtm_InvokeMethod,
+                                                      rtm_InvokeMethod->length);
                         rtmInvokeMethodServerQueue.pop_front();
                     }
                 }
