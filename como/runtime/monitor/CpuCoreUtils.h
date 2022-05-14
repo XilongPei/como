@@ -21,9 +21,19 @@ namespace como {
 
 class CpuCoreUtils {
 public:
-
     static int SetThreadAffinity(pthread_t thread, int iCore);
     static int SetProcessAffinity(pid_t pid, int iCore);
+    static unsigned long GetCpuTotalOccupy();
+
+    // return ms, millisecond
+    static unsigned long GetCpuProcOccupy(unsigned int pid);
+
+    // CPU usage percentage
+    static float GetProcCpu(unsigned int pid);
+
+    static unsigned int GetProcMem(unsigned int pid);
+    static unsigned int GetProcVirtualmem(unsigned int pid);
+    static int GetPidByNameAndUser(const char* process_name, const char* user = nullptr);
 };
 
 } // namespace como

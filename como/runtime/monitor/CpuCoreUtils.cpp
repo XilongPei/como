@@ -14,6 +14,10 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
@@ -42,6 +46,217 @@ int CpuCoreUtils::SetProcessAffinity(pid_t pid, int iCore)
     CPU_SET(iCore, &cpuset);
 
     return sched_setaffinity(pid, sizeof(cpuset), &cpuset);
+}
+
+// proc - process information pseudo-file system, https://linux.die.net/man/5/proc
+
+#define VMRSS_LINE 17
+#define VMSIZE_LINE 13
+#define PROCESS_ITEM 14
+
+typedef struct {
+    unsigned long user;
+    unsigned long nice;
+    unsigned long system;
+    unsigned long idle;
+} TotalCpuOccupy;
+
+typedef struct {
+    unsigned int pid;
+    unsigned long utime;  //user time
+    unsigned long stime;  //kernel time
+    unsigned long cutime; //all user time
+    unsigned long cstime; //all dead time
+} ProcCpuOccupy;
+
+// Gets the pointer to the beginning of item n
+static const char* get_items(const char*buffer , unsigned int item)
+{
+    const char *p = buffer;
+
+    int len = strlen(buffer);
+    int count = 0;
+
+    for (int i = 0; i < len; i++) {
+        if (' ' == *p) {
+            count ++;
+            if (count == item - 1) {
+                p++;
+                break;
+            }
+        }
+        p++;
+    }
+
+    return p;
+}
+
+// Get total CPU time
+unsigned long CpuCoreUtils::GetCpuTotalOccupy()
+{
+    FILE *fd;
+    char buff[1024] = {0};
+    TotalCpuOccupy t;
+
+    fd = fopen("/proc/stat", "r");
+    if (nullptr == fd) {
+        return 0;
+    }
+
+    fgets(buff, sizeof(buff), fd);
+    char name[64] = {0};
+    sscanf(buff, "%s %ld %ld %ld %ld", name, &t.user, &t.nice, &t.system, &t.idle);
+    fclose(fd);
+
+    return (t.user + t.nice + t.system + t.idle);
+}
+
+// Gets the CPU time of the process
+unsigned long CpuCoreUtils::GetCpuProcOccupy(unsigned int pid) {
+
+    char file_name[64] = {0};
+    ProcCpuOccupy t;
+    FILE *fd;
+    char line_buff[1024] = {0};
+    sprintf(file_name, "/proc/%d/stat", pid);
+
+    fd = fopen(file_name, "r");
+    if (nullptr == fd) {
+        return 0;
+    }
+
+    fgets(line_buff, sizeof(line_buff), fd);
+
+    sscanf(line_buff, "%u", &t.pid);
+    const char *q = get_items(line_buff, PROCESS_ITEM);
+/**
+ * return ms
+ *
+ * utime %lu
+ * Amount of time that this process has been scheduled in user mode, measured in
+ * clock ticks (divide by sysconf(_SC_CLK_TCK)). This includes guest time,
+ * guest_time (time spent running a virtual CPU, see below), so that applications
+ * that are not aware of the guest time field do not lose that time from their
+ * calculations.
+ *
+ * stime %lu
+ * Amount of time that this process has been scheduled in kernel mode, measured
+ * in clock ticks (divide by sysconf(_SC_CLK_TCK)).
+ *
+ * cutime %ld
+ * Amount of time that this process's waited-for children have been scheduled in
+ * user mode, measured in clock ticks (divide by sysconf(_SC_CLK_TCK)).
+ * This includes guest time, cguest_time (time spent running a virtual CPU).
+ *
+ * cstime %ld
+ * Amount of time that this process's waited-for children have been scheduled in
+ * kernel mode, measured in clock ticks (divide by sysconf(_SC_CLK_TCK)).
+*/
+    sscanf(q, "%ld %ld %ld %ld", &t.utime, &t.stime, &t.cutime, &t.cstime);
+    fclose(fd);
+
+    return (t.utime + t.stime + t.cutime + t.cstime) * 1000 / sysconf(_SC_CLK_TCK);
+}
+
+// Get CPU usage
+float CpuCoreUtils::GetProcCpu(unsigned int pid)
+{
+    unsigned long totalcputime1, totalcputime2;
+    unsigned long procputime1, procputime2;
+
+    totalcputime1 = GetCpuTotalOccupy();
+    procputime1 = GetCpuProcOccupy(pid);
+
+    usleep(200000);
+
+    totalcputime2 = GetCpuTotalOccupy();
+    procputime2 = GetCpuProcOccupy(pid);
+
+    float pcpu = 0.0;
+    if (0 != totalcputime2 - totalcputime1) {
+        pcpu = 100.0 * (procputime2 - procputime1) / (totalcputime2 - totalcputime1);
+    }
+
+    return pcpu;
+}
+
+// Get the memory occupied by the process
+unsigned int CpuCoreUtils::GetProcMem(unsigned int pid)
+{
+    char file_name[64] = {0};
+    FILE *fd;
+    char line_buff[512] = {0};
+    sprintf(file_name, "/proc/%d/status", pid);
+
+    fd = fopen(file_name, "r");
+    if (nullptr == fd) {
+        return 0;
+    }
+
+    char name[64];
+    int vmrss;
+    for (int i = 0; i < VMRSS_LINE - 1; i++) {
+        fgets(line_buff, sizeof(line_buff), fd);
+    }
+
+    fgets(line_buff, sizeof(line_buff), fd);
+    sscanf(line_buff, "%s %d", name, &vmrss);
+    fclose(fd);
+
+    return vmrss;
+}
+
+// Get virtual memory occupied by process
+unsigned int CpuCoreUtils::GetProcVirtualmem(unsigned int pid)
+{
+    char file_name[64] = {0};
+    FILE *fd;
+    char line_buff[512] = {0};
+    sprintf(file_name, "/proc/%d/status", pid);
+
+    fd = fopen(file_name, "r");
+    if (nullptr == fd) {
+        return 0;
+    }
+
+    char name[64];
+    int vmsize;
+    for (int i = 0; i < VMSIZE_LINE - 1; i++) {
+        fgets(line_buff, sizeof(line_buff), fd);
+    }
+
+    fgets(line_buff, sizeof(line_buff), fd);
+    sscanf(line_buff, "%s %d", name, &vmsize);
+    fclose(fd);
+
+    return vmsize;
+}
+
+// Get Process ID by process_name
+int CpuCoreUtils::GetPidByNameAndUser(const char* process_name, const char* user)
+{
+    if (nullptr == user) {
+        user = getlogin();
+    }
+
+    char cmd[512];
+    if (user) {
+        sprintf(cmd, "pgrep %s -u %s", process_name, user);
+    }
+
+    FILE *pstr = popen(cmd, "r");
+
+    if (pstr == nullptr) {
+        return 0;
+    }
+
+    char buff[512];
+    memset(buff, 0, sizeof(buff));
+    if (NULL == fgets(buff, 512, pstr)) {
+        return 0;
+    }
+
+    return atoi(buff);
 }
 
 } // namespace como
@@ -82,5 +297,18 @@ main(int argc, char *argv[])
            printf("    CPU %d\n", j);
 
    exit(EXIT_SUCCESS);
+}
+#endif
+
+#if 0
+int main(int argc, char *argv[])
+{
+    unsigned int pid = atoi(argv[1]);
+
+    printf("pid=%d\n", pid);
+    printf("pcpu=%f\n", GetProcCpu(pid));
+    printf("procmem=%d\n", GetProcMem(pid));
+    printf("virtualmem=%d\n", GetProcVirtualmem(pid));
+    return 0;
 }
 #endif
