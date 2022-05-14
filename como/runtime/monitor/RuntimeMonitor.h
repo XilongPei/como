@@ -34,6 +34,7 @@ enum class RTM_CommandType {
     CMD_Server_Activate_InvokeMethod   = 0x0101,
     CMD_Server_Deactivate_InvokeMethod = 0x0102,
     CMD_Server_InvokeMethod            = 0x0103,
+    CMD_Server_CpuMemoryStatus         = 0x0104,
 
     CMD_Client_Activate_InvokeMethod   = 0x0201,
     CMD_Client_Deactivate_InvokeMethod = 0x0202,
@@ -59,11 +60,11 @@ typedef struct tagRTM_Command {
     Byte            parcel[0];          // from here, Byte *;
 } RTM_Command;
 
-typedef struct tagRTM_CpuMemoryStat {
+typedef struct tagRTM_CpuMemoryStatus {
     Float           cpuUsagePercent;    // CPU usage percentage
     Long            totalAllocdSpace;   // Total allocated space (uordblks)
     Long            totalFreeSpace;     // Total free space (fordblks)
-} RTM_CpuMemoryStat;
+} RTM_CpuMemoryStatus;
 
 #pragma pack()
 

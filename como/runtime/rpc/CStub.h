@@ -118,7 +118,7 @@ private:
 
     AutoPtr<IObject>      mTarget;
     CoclassID             mCid;
-    IMetaCoclass        * mTargetMetadata;
+    IMetaCoclass         *mTargetMetadata;
     Array<InterfaceStub*> mInterfaces;
     AutoPtr<IRPCChannel>  mChannel;
 };

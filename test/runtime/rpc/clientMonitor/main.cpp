@@ -158,6 +158,43 @@ TEST(ClientMonitor, TestCMD_Client_InvokeMethod)
     EXPECT_EQ(0, ec);
 }
 
+TEST(ClientMonitor, TestCMD_Server_CpuMemoryStatus)
+{
+    EXPECT_TRUE(SERVICE != nullptr);
+    IProxy* proxy = IProxy::Probe(SERVICE);
+    EXPECT_TRUE(proxy != nullptr);
+
+    RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
+                                    RTM_CommandType::CMD_Server_CpuMemoryStatus, 0,
+                                                              (const char *)"");
+    EXPECT_NE(nullptr, rtmCommand);
+
+    Array<Byte> response;
+    Array<Byte> request(rtmCommand->length);
+    request.Copy((Byte*)rtmCommand, rtmCommand->length);
+    free(rtmCommand);
+
+    ECode ec = proxy->MonitorRuntime(request, response);
+/*
+typedef struct tagRTM_CpuMemoryStatus {
+    Float           cpuUsagePercent;    // CPU usage percentage
+    Long            totalAllocdSpace;   // Total allocated space (uordblks)
+    Long            totalFreeSpace;     // Total free space (fordblks)
+} RTM_CpuMemoryStatus;
+*/
+    RTM_CpuMemoryStatus *status = (RTM_CpuMemoryStatus*)response.GetPayload();
+    EXPECT_NE(nullptr, status);
+
+    if (nullptr == status)
+        return;
+
+    printf("cpuUsagePercent: %f\n", status->cpuUsagePercent);
+    printf("totalAllocdSpace: %lld\n", status->totalAllocdSpace);
+    printf("totalFreeSpace: %lld\n", status->totalFreeSpace);
+
+    EXPECT_EQ(0, ec);
+}
+
 int main(int argc, char **argv)
 {
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),

@@ -70,6 +70,19 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
     return NOERROR;
 }
 
+static RTM_CpuMemoryStatus GetRtmCpuMemoryStatus()
+{
+    RTM_CpuMemoryStatus status;
+    status.cpuUsagePercent = CpuCoreUtils::GetProcCpuUsagePercent(getpid());
+
+    struct mallinfo mi;
+    mi = mallinfo();
+    status.totalAllocdSpace = mi.uordblks;
+    status.totalFreeSpace = mi.fordblks;
+
+    return status;
+}
+
 static int handler(void* user, const char* section, const char* name, const char* value)
 {
     if (/*strcmp(section, "") == 0 && */strcmp(name, "ExportObject") == 0) {
@@ -144,6 +157,17 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             }
             break;
         }
+        case (Short)RTM_CommandType::CMD_Server_CpuMemoryStatus: {
+            RTM_CpuMemoryStatus status = GetRtmCpuMemoryStatus();
+            resBuffer = Array<Byte>(sizeof(RTM_CpuMemoryStatus));
+            if (! resBuffer.IsNull()) {
+                // resBuffer.Copy works very slowly
+                memcpy(resBuffer.GetPayload(), &status,
+                                                   sizeof(RTM_CpuMemoryStatus));
+            }
+
+            break;
+        }
     }
 
     return NOERROR;
@@ -211,19 +235,6 @@ static ECode SerializeComponentID(
     arrCid = arrCid_;
 
     return NOERROR;
-}
-
-static RTM_CpuMemoryStat GetRtmCpuMemoryStat()
-{
-    RTM_CpuMemoryStat stat;
-    stat.cpuUsagePercent = CpuCoreUtils::GetProcCpuUsagePercent(getpid());
-
-    struct mallinfo mi;
-    mi = mallinfo();
-    stat.totalAllocdSpace = mi.uordblks;
-    stat.totalFreeSpace = mi.fordblks;
-
-    return stat;
 }
 
 /**
