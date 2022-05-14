@@ -252,6 +252,8 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
     rtm_InvokeMethod->coclassID.mCid = (ComponentID*)(sizeof(RTM_InvokeMethod) +
                                                                     sizeParcel);
     if (0 == whichQueue) {
+        Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
+
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
             RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
             free(rtmMethod);
@@ -260,6 +262,8 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
         rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
     }
     else {
+        Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+
         if (rtmInvokeMethodServerQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
             RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();
             free(rtmMethod);
