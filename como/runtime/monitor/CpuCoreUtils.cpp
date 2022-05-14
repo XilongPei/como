@@ -159,7 +159,7 @@ unsigned long CpuCoreUtils::GetCpuProcOccupy(unsigned int pid) {
 }
 
 // Get CPU usage
-float CpuCoreUtils::GetProcCpu(unsigned int pid)
+float CpuCoreUtils::GetProcCpuUsagePercent(unsigned int pid)
 {
     unsigned long totalcputime1, totalcputime2;
     unsigned long procputime1, procputime2;

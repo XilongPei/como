@@ -68,10 +68,10 @@ private:
 private:
     friend class CStub;
 
-    InterfaceID mIid;
-    IMetaInterface* mTargetMetadata;
-    IInterface* mObject;
-    CStub* mOwner;
+    InterfaceID     mIid;
+    IMetaInterface *mTargetMetadata;
+    IInterface     *mObject;
+    CStub          *mOwner;
 };
 
 extern const CoclassID CID_CStub;
@@ -116,13 +116,11 @@ public:
 private:
     friend class InterfaceStub;
 
-    static constexpr Boolean DEBUG = false;
-
-    AutoPtr<IObject> mTarget;
-    CoclassID mCid;
-    IMetaCoclass* mTargetMetadata;
+    AutoPtr<IObject>      mTarget;
+    CoclassID             mCid;
+    IMetaCoclass        * mTargetMetadata;
     Array<InterfaceStub*> mInterfaces;
-    AutoPtr<IRPCChannel> mChannel;
+    AutoPtr<IRPCChannel>  mChannel;
 };
 
 CStub* CStub::From(

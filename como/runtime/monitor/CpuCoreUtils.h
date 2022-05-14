@@ -29,7 +29,7 @@ public:
     static unsigned long GetCpuProcOccupy(unsigned int pid);
 
     // CPU usage percentage
-    static float GetProcCpu(unsigned int pid);
+    static float GetProcCpuUsagePercent(unsigned int pid);
 
     static unsigned int GetProcMem(unsigned int pid);
     static unsigned int GetProcVirtualmem(unsigned int pid);

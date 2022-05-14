@@ -14,8 +14,10 @@
 // limitations under the License.
 //=========================================================================
 
+#include <malloc.h>
 #include <time.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <ini.h>
 #include <comoapi.h>
 #include "comolog.h"
@@ -25,6 +27,7 @@
 #include "comorpc.h"
 #include "RuntimeMonitor.h"
 #include "MarshalUtils.h"
+#include "CpuCoreUtils.h"
 
 namespace como {
 
@@ -208,6 +211,19 @@ static ECode SerializeComponentID(
     arrCid = arrCid_;
 
     return NOERROR;
+}
+
+static RTM_CpuMemoryStat GetRtmCpuMemoryStat()
+{
+    RTM_CpuMemoryStat stat;
+    stat.cpuUsagePercent = CpuCoreUtils::GetProcCpuUsagePercent(getpid());
+
+    struct mallinfo mi;
+    mi = mallinfo();
+    stat.totalAllocdSpace = mi.uordblks;
+    stat.totalFreeSpace = mi.fordblks;
+
+    return stat;
 }
 
 /**

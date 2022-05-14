@@ -58,6 +58,13 @@ typedef struct tagRTM_Command {
     Short           param;
     Byte            parcel[0];          // from here, Byte *;
 } RTM_Command;
+
+typedef struct tagRTM_CpuMemoryStat {
+    Float           cpuUsagePercent;    // CPU usage percentage
+    Long            totalAllocdSpace;   // Total allocated space (uordblks)
+    Long            totalFreeSpace;     // Total free space (fordblks)
+} RTM_CpuMemoryStat;
+
 #pragma pack()
 
 class COM_PUBLIC RuntimeMonitor

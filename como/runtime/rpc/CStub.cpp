@@ -833,10 +833,7 @@ ECode CStub::CreateObject(
 
     CoclassID cid;
     mc->GetCoclassID(cid);
-
-    if (DEBUG) {
-        Logger::D("CStub", "Object's CoclassID is %s", DumpUUID(cid.mUuid).string());
-    }
+    Logger::D("CStub", "Object's CoclassID is %s", DumpUUID(cid.mUuid).string());
 
     AutoPtr<CStub> stubObj = new CStub();
     if (nullptr == stubObj)
