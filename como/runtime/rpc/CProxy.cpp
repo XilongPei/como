@@ -575,6 +575,8 @@ ECode InterfaceProxy::MarshalArguments(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
+    else
+        return NOERROR;
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];
@@ -910,21 +912,24 @@ ECode InterfaceProxy::UnmarshalResults(
     /* [in] */ IMetaMethod* method,
     /* [in] */ IParcel* resParcel)
 {
-
-    resParcel->SetServerInfo(mOwner->mServerName);
-
-    Long hash;
-    mOwner->GetHashCode(hash);
-    resParcel->SetProxyInfo(hash);
-
-    Integer intParamIndex = 1, fpParamIndex = 0;
     CMetaMethod* cMethod = CMetaMethod::From(method);
     Integer N = cMethod->mParameters.GetLength();
     if (N > 0) {
         // Help me to call BuildAllParameters once.
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
+        if (outArgs <= 0)
+            return NOERROR;
     }
+    else
+        return NOERROR;
+
+    Long hash;
+    mOwner->GetHashCode(hash);
+    resParcel->SetProxyInfo(hash);
+    resParcel->SetServerInfo(mOwner->mServerName);
+
+    Integer intParamIndex = 1, fpParamIndex = 0;
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];

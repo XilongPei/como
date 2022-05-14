@@ -72,6 +72,8 @@ ECode InterfaceStub::UnmarshalArguments(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
+    else
+        return NOERROR;
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];
@@ -455,6 +457,8 @@ ECode InterfaceStub::MarshalResults(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
+    else
+        return NOERROR;
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];
