@@ -68,7 +68,7 @@ private:
 public:
 
     // Walker for struct Bucket
-    using HashMapWalker = void(*)(String&,Key,Val);
+    using HashMapWalker = void(*)(String&,Key,Val,struct timespec&);
 
     HashMapCache(
         /* [in] */ unsigned int size = 50)
@@ -330,7 +330,7 @@ public:
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
-                    walker(str, curr->mKey, curr->mValue);
+                    walker(str, curr->mKey, curr->mValue, curr->lastAccessTime);
                     curr = curr->mNext;
                 }
             }

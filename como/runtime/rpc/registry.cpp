@@ -346,30 +346,47 @@ ECode UnregisterImportObjectByChannel(
     return NOERROR;
 }
 
-static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub)
+static void timespecToString(struct timespec& ts, const char *buffer, int bufSize)
 {
-    AutoPtr<IMetaCoclass> klass;
-    obj->GetCoclass(klass);
-    String name, ns;
-    klass->GetName(name);
-    klass->GetNamespace(ns);
-    str += ("Namespace=" + ns + ";Name=" + name + "\n");
+    Long microseconds = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+    snprintf((char*)buffer, bufSize, "%lld", microseconds);
 }
 
-static void ImportRegistryWalker(String& str, IInterfacePack* intfPack, IObject* obj)
+static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub,
+                                                struct timespec& lastAccessTime)
 {
+    char buf[32];
+    timespecToString(lastAccessTime, buf, sizeof(buf));
+
     AutoPtr<IMetaCoclass> klass;
     obj->GetCoclass(klass);
     String name, ns;
     klass->GetName(name);
     klass->GetNamespace(ns);
-    str += ("Namespace=" + ns + ";Name=" + name);
+    str += ("{\"Namespace\":\"" + ns + "\",\"CoclassName\":\"" + name + "\"" +
+                                           ",\"LastAccessTime\":" + buf + "},");
+}
+
+static void ImportRegistryWalker(String& str, IInterfacePack* intfPack,
+                                  IObject* obj, struct timespec& lastAccessTime)
+{
+    char buf[32];
+    timespecToString(lastAccessTime, buf, sizeof(buf));
+
+    AutoPtr<IMetaCoclass> klass;
+    obj->GetCoclass(klass);
+    String name, ns;
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    str += ("{\"Namespace\":\"" + ns + "\",\"CoclassName\":\"" + name + "\",");
 
     InterfaceID iid;
     String serverName;
     intfPack->GetInterfaceID(iid);
     intfPack->GetServerName(serverName);
-    str += (";InterfaceID=" + DumpUUID(iid.mUuid) + ";ServerName=" + serverName);
+    str += ("\"InterfaceID\":\"" + DumpUUID(iid.mUuid) +
+                                          "\",\"ServerName\":\"" + serverName +
+                                          ",\"LastAccessTime\":" + buf + "},");
 }
 
 ECode WalkExportObject(
@@ -381,8 +398,19 @@ ECode WalkExportObject(
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
+    strBuffer = "[";
     Mutex::AutoLock lock(registryLock);
     registry.GetValues(strBuffer, ExportRegistryWalker);
+
+    if (strBuffer.GetByteLength() > 1) {
+        // replace the last ',' with ']'
+        char* str = (char*)strBuffer.string();
+        str[strBuffer.GetByteLength() - 1] = ']';
+    }
+    else {
+        strBuffer += "]";
+    }
+
     return NOERROR;
 }
 
@@ -395,8 +423,19 @@ ECode WalkImportObject(
     Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
 
+    strBuffer = "[";
     Mutex::AutoLock lock(registryLock);
     registry.GetValues(strBuffer, ImportRegistryWalker);
+
+    if (strBuffer.GetByteLength() > 1) {
+        // replace the last ',' with ']'
+        char* str = (char*)strBuffer.string();
+        str[strBuffer.GetByteLength() - 1] = ']';
+    }
+    else {
+        strBuffer += "]";
+    }
+
     return NOERROR;
 }
 
