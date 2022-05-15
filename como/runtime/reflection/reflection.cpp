@@ -127,7 +127,11 @@ ECode CoGetComponentMetadataFromFile(
 
     MetadataSerializer serializer;
     serializer.Deserialize(reinterpret_cast<uintptr_t>(data));
+
     mc = new CMetaComponent(loader, component, (MetaComponent*)data);
+    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface))
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -174,7 +178,11 @@ ECode CoGetComponentMetadataFromBytes(
 
     MetadataSerializer serializer;
     serializer.Deserialize(reinterpret_cast<uintptr_t>(data));
+
     mc = new CMetaComponent(loader, component, (MetaComponent*)data);
+    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface))
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 

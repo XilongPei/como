@@ -135,9 +135,9 @@ public:
         /* [in] */ IMetaComponent* comp);
 
 private:
-    void LoadAllClassObjectGetters();
+    ECode LoadAllClassObjectGetters();
 
-    void BuildIInterface();
+    ECode BuildIInterface();
 
     void ReleaseResources();
 

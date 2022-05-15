@@ -62,8 +62,15 @@ CMetaComponent::CMetaComponent(
     mCid.mUuid = metadata->mUuid;
     mCid.mUri = mUri.string();
 
-    LoadAllClassObjectGetters();
-    BuildIInterface();
+    ECode ec;
+    ec = LoadAllClassObjectGetters();
+    if (FAILED(ec)) {
+        mIInterface = nullptr;
+    }
+    ec = BuildIInterface();
+    if (FAILED(ec)) {
+        mIInterface = nullptr;
+    }
 }
 
 CMetaComponent::~CMetaComponent()
@@ -534,21 +541,29 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
     return mInterfaceNameMap.Get(fullName);
 }
 
-void CMetaComponent::LoadAllClassObjectGetters()
+ECode CMetaComponent::LoadAllClassObjectGetters()
 {
     if (mComponent->mSoGetAllClassObjects != nullptr) {
         Integer N;
         ClassObjectGetter* getters = mComponent->mSoGetAllClassObjects(N);
+        if (nullptr == getters)
+            return E_OUT_OF_MEMORY_ERROR;
+
         for (Integer i = 0;  i < N;  i++) {
             const CoclassID& cid = getters[i].mCid;
             mClassObjects.Put(cid.mUuid, &getters[i]);
         }
     }
+
+    return NOERROR;
 }
 
-void CMetaComponent::BuildIInterface()
+ECode CMetaComponent::BuildIInterface()
 {
     CMetaInterface* miObj = new CMetaInterface();
+    if (nullptr == miObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     miObj->mOwner = this;
     miObj->mIid = IID_IInterface;
     miObj->mName = "IInterface";
@@ -557,6 +572,9 @@ void CMetaComponent::BuildIInterface()
 
     // AddRef
     CMetaMethod* mmObj = new CMetaMethod();
+    if (nullptr == miObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mmObj->mOwner = miObj;
     mmObj->mIndex = 0;
     mmObj->mName = "AddRef";
@@ -580,22 +598,34 @@ void CMetaComponent::BuildIInterface()
 
     // Release
     mmObj = new CMetaMethod();
+    if (nullptr == mmObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mmObj->mOwner = miObj;
     mmObj->mIndex = 1;
     mmObj->mName = "Release";
     mmObj->mSignature = "(H)I";
     mmObj->mParameters = Array<IMetaParameter*>(1);
     mpObj = new CMetaParameter();
+    if (nullptr == mpObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mpObj->mOwner = mmObj;
     mpObj->mName = "id";
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::HANDLE;
     mtObj->mName = "HANDLE";
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::Integer;
     mtObj->mName = "Integer";
     mmObj->mReturnType = mtObj;
@@ -603,22 +633,34 @@ void CMetaComponent::BuildIInterface()
 
     // Probe
     mmObj = new CMetaMethod();
+    if (nullptr == mmObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mmObj->mOwner = miObj;
     mmObj->mIndex = 2;
     mmObj->mName = "Probe";
     mmObj->mSignature = "(U)Lcomo/IInterface*";
     mmObj->mParameters = Array<IMetaParameter*>(1);
     mpObj = new CMetaParameter();
+    if (nullptr == mpObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mpObj->mOwner = mmObj;
     mpObj->mName = "iid";
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::InterfaceID;
     mtObj->mName = "InterfaceID";
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::Interface;
     mtObj->mName = "IInterface";
     mtObj->mMode = TypeModification::POINTER;
@@ -627,40 +669,60 @@ void CMetaComponent::BuildIInterface()
 
     // GetInterfaceID
     mmObj = new CMetaMethod();
+    if (nullptr == mmObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mmObj->mOwner = miObj;
     mmObj->mIndex = 3;
     mmObj->mName = "GetInterfaceID";
     mmObj->mSignature = "(Lcomo/IInterface*U&)E";
     mmObj->mParameters = Array<IMetaParameter*>(2);
     mpObj = new CMetaParameter();
+    if (nullptr == mpObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mpObj->mOwner = mmObj;
     mpObj->mName = "object";
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::Interface;
     mtObj->mName = "IInterface";
     mtObj->mMode = TypeModification::POINTER;
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mpObj = new CMetaParameter();
+    if (nullptr == mpObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mpObj->mOwner = mmObj;
     mpObj->mName = "iid";
     mpObj->mIndex = 1;
     mpObj->mIOAttr = IOAttribute::OUT;
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::InterfaceID;
     mtObj->mName = "InterfaceID";
     mtObj->mMode = TypeModification::REFERENCE;
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(1, mpObj);
     mtObj = new CMetaType();
+    if (nullptr == mtObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::ECode;
     mtObj->mName = "ECode";
     mmObj->mReturnType = mtObj;
     miObj->mMethods.Set(3, mmObj);
 
     mIInterface = miObj;
+
+    return NOERROR;
 }
 
 void CMetaComponent::ReleaseResources()

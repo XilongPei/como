@@ -74,7 +74,7 @@ ECode CBootClassLoader::LoadComponent(
     void* handle = dlopen(path.string(), RTLD_NOW);
     if (handle == nullptr) {
         Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
-                path.string(), strerror(errno));
+                                                path.string(), strerror(errno));
         component = nullptr;
         return E_COMPONENT_IO_EXCEPTION;
     }
@@ -91,7 +91,7 @@ ECode CBootClassLoader::LoadComponent(
     }
 
     ECode ec = CoGetComponentMetadataFromFile(
-            reinterpret_cast<HANDLE>(handle), this, component);
+                             reinterpret_cast<HANDLE>(handle), this, component);
     if (FAILED(ec)) {
         dlclose(handle);
         component = nullptr;
@@ -145,7 +145,7 @@ ECode CBootClassLoader::LoadComponent(
     void* handle = dlopen(compPath.string(), RTLD_NOW);
     if (handle == nullptr) {
         Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
-                compPath.string(), strerror(errno));
+                                            compPath.string(), strerror(errno));
         component = nullptr;
         return E_COMPONENT_IO_EXCEPTION;
     }
@@ -374,8 +374,7 @@ ECode CBootClassLoader::LoadMetadata(
         return NOERROR;
     }
 
-    MetaComponent* mmc = reinterpret_cast<MetaComponent*>(
-            metadata.GetPayload());
+    MetaComponent* mmc = reinterpret_cast<MetaComponent*>(metadata.GetPayload());
 
     if (mmc->mMagic != COMO_MAGIC) {
         Logger::E("CBootClassLoader", "Metadata info is bad.");
@@ -391,8 +390,7 @@ ECode CBootClassLoader::LoadMetadata(
         }
     }
 
-    ECode ec = CoGetComponentMetadataFromBytes(
-            metadata, this, component);
+    ECode ec = CoGetComponentMetadataFromBytes(metadata, this, component);
     if (FAILED(ec)) {
         component = nullptr;
         return ec;
@@ -476,6 +474,7 @@ ECode CBootClassLoader::GetParent(
 void CBootClassLoader::InitComponentPath()
 {
     String cpath(getenv("LIB_PATH"));
+
     if (!cpath.IsEmpty()) {
         Integer index = cpath.IndexOf(":");
         while (index != -1) {
@@ -489,8 +488,10 @@ void CBootClassLoader::InitComponentPath()
     }
     else {
         char* cwd = getcwd(nullptr, 0);
-        mComponentPath.Add(cwd);
-        free(cwd);
+        if (nullptr != cwd) {
+            mComponentPath.Add(cwd);
+            free(cwd);
+        }
     }
 }
 
