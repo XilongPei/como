@@ -382,7 +382,7 @@ ECode CMetaComponent::BuildAllConstants()
         MetaConstant* mc = mMetadata->mConstants[i];
         String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
         AutoPtr<CMetaConstant> mcObj = new CMetaConstant(mMetadata, mc);
-        if (nullptr != mcObj) {
+        if ((nullptr != mcObj) && (nullptr != mcObj->mValue)) {
             mConstants.Set(i, mcObj);
             mConstantNameMap.Put(fullName, mcObj);
         }
@@ -581,16 +581,25 @@ ECode CMetaComponent::BuildIInterface()
     mmObj->mSignature = "(H)I";
     mmObj->mParameters = Array<IMetaParameter*>(1);
     CMetaParameter* mpObj = new CMetaParameter();
+    if (nullptr == mpObj) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mpObj->mOwner = mmObj;
     mpObj->mName = "id";
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     CMetaType* mtObj = new CMetaType();
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::HANDLE;
     mtObj->mName = "HANDLE";
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mtObj = new CMetaType();
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
     mtObj->mKind = TypeKind::Integer;
     mtObj->mName = "Integer";
     mmObj->mReturnType = mtObj;
@@ -615,7 +624,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::HANDLE;
@@ -623,7 +632,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::Integer;
@@ -650,7 +659,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::InterfaceID;
@@ -658,7 +667,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(0, mpObj);
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::Interface;
@@ -686,7 +695,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mIndex = 0;
     mpObj->mIOAttr = IOAttribute::IN;
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::Interface;
@@ -703,7 +712,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mIndex = 1;
     mpObj->mIOAttr = IOAttribute::OUT;
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::InterfaceID;
@@ -712,7 +721,7 @@ ECode CMetaComponent::BuildIInterface()
     mpObj->mType = mtObj;
     mmObj->mParameters.Set(1, mpObj);
     mtObj = new CMetaType();
-    if (nullptr == mtObj) {
+    if ((nullptr == mtObj) || (nullptr == mtObj->mName)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mtObj->mKind = TypeKind::ECode;

@@ -34,8 +34,16 @@ CMetaConstant::CMetaConstant(
     , mNamespace(mk->mNamespace)
 {
     mType = new CMetaType(mc, mc->mTypes[mk->mTypeIndex]);
-    if (nullptr == mType)
+    if ((nullptr == mType) || (nullptr == CMetaType::From(mType)->mName)) {
         Logger::E("CMetaConstant::CMetaConstant", "new CMetaType failed.");
+
+        if (nullptr != mType)
+            delete mType;
+
+        // The caller uses mValue to determine whether the construct is wrong
+        mValue = nullptr;
+        return;
+    }
 
     mValue = BuildValue(mType);
 }

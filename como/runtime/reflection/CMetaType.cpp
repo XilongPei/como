@@ -50,6 +50,10 @@ CMetaType::CMetaType(
     mName = BuildName(mc, mt);
     if (mKind == TypeKind::Array && mt->mIndex != 0) {
         mElementType = new CMetaType(mc, mc->mTypes[mt->mIndex]);
+        if (nullptr == mElementType) {
+            // The caller uses mName to determine whether the construct is wrong
+            mName = nullptr;
+        }
     }
 }
 

@@ -40,8 +40,9 @@ CMetaParameter::CMetaParameter(
 {
     mIOAttr = BuildIOAttribute(mp->mProperties);
     mType = new CMetaType(mc, mc->mTypes[mp->mTypeIndex]);
-    if (nullptr == mType) {
+    if ((nullptr == mType) || (nullptr == CMetaType::From(mType)->mName)) {
         Logger::E("CMetaParameter::CMetaParameter", "new CMetaType error");
+        mType = nullptr;
     }
 }
 

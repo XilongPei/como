@@ -267,7 +267,7 @@ ECode CMetaInterface::BuildAllConstants()
             for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
-                if (nullptr == mcObj)
+                if ((nullptr == mcObj) || (nullptr == mcObj->mValue))
                     return E_OUT_OF_MEMORY_ERROR;
 
                 mConstants.Set(i, mcObj);

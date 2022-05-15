@@ -48,6 +48,9 @@ public:
     ECode GetTypeModification(
         /* [out] */ TypeModification& mode) override;
 
+    inline static CMetaType* From(
+        /* [in] */ IMetaType* comp);
+
 private:
     String BuildName(
         /* [in] */ MetaComponent* mc,
@@ -63,6 +66,12 @@ public:
 private:
     static const char* TAG;
 };
+
+CMetaType* CMetaType::From(
+    /* [in] */ IMetaType* comp)
+{
+    return (CMetaType*)comp;
+}
 
 } // namespace como
 

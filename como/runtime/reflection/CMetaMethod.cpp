@@ -58,8 +58,14 @@ CMetaMethod::CMetaMethod(
     // there is no metadata in this component for external method
     if (miObj->mMetadata->mProperties & TYPE_EXTERNAL)
         mReturnType = nullptr;
-    else
+    else {
         mReturnType = new CMetaType(mc, mc->mTypes[mm->mReturnTypeIndex]);
+        if ((nullptr != mReturnType) &&
+                             (nullptr == CMetaType::From(mReturnType)->mName)) {
+            delete mReturnType;
+            mReturnType = nullptr;
+        }
+    }
 }
 
 ECode CMetaMethod::GetInterface(
@@ -322,7 +328,7 @@ ECode CMetaMethod::BuildAllParameters()
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
                                                 mOwner->mOwner->mMetadata, this,
                                                   mMetadata->mParameters[i], i);
-                if (nullptr == mpObj)
+                if ((nullptr == mpObj) || (nullptr == mpObj->mType))
                     return E_OUT_OF_MEMORY_ERROR;
 
                 mParameters.Set(i, mpObj);

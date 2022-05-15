@@ -326,7 +326,7 @@ ECode CMetaConstructor::BuildAllParameters()
                 MetaParameter* mp = mMetadata->mParameters[i];
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
                                         mOwner->mOwner->mMetadata, this, mp, i);
-                if (nullptr == mpObj) {
+                if ((nullptr == mpObj) || (nullptr == mpObj->mType)) {
                     for (Integer j = 0;  j < i;  j++)
                         delete mParameters[j];
                     return E_OUT_OF_MEMORY_ERROR;
