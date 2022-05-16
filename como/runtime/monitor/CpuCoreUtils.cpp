@@ -239,28 +239,26 @@ int CpuCoreUtils::GetPidByNameAndUser(const char* process_name, const char* user
         user = getlogin();
     }
 
-    char cmd[512];
+    char buff[512];
     if (nullptr != user) {
-        sprintf(cmd, "pgrep %s -u %s", process_name, user);
+        sprintf(buff, "pgrep %s -u %s", process_name, user);
     }
     else {
-        sprintf(cmd, "pgrep %s", process_name);
+        sprintf(buff, "pgrep %s", process_name);
     }
 
-    FILE *pstr = popen(cmd, "r");
-
-    if (pstr == nullptr) {
+    FILE *pstr = popen(buff, "r");
+    if (nullptr == pstr) {
         return 0;
     }
 
-    char buff[512];
     memset(buff, 0, sizeof(buff));
-    if (NULL == fgets(buff, 512, pstr)) {
+    if (nullptr == fgets(buff, 512, pstr)) {
+        pclose(pstr);
         return 0;
     }
 
-    fclose(pstr);
-
+    pclose(pstr);
     return atoi(buff);
 }
 

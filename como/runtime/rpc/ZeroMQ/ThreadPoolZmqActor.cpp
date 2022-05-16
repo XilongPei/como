@@ -234,14 +234,17 @@ HandleMessage_GetComponentMetadata:
                     peerState.alive = false;
                 }
 
-                worker->state = *(Long*)zmq_msg_data(&msg);
-
                 CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
                            socket, (const void *)&peerState, sizeof(peerState));
                 zmq_msg_close(&msg);
 
-                if (nullptr != worker)
+                if (nullptr != worker) {
+                    // Remember the Identifier (a Long type data) passed in the
+                    // client request
+                    worker->state = *(Long*)zmq_msg_data(&msg);
+
                     worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                }
 
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
 

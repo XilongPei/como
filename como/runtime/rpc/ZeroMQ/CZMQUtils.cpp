@@ -192,7 +192,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize)
 {
-    if (bufSize <= 0)
+    if (bufSize == 0)
         return -1;
 
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);

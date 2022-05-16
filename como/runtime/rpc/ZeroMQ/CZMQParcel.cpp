@@ -271,8 +271,11 @@ ECode CZMQParcel::ReadComponentID(
     }
 
     const char* uri = (const char*)ReadInplace(size + 1);
+    if (nullptr == uri)
+        return E_OUT_OF_MEMORY_ERROR;
+
     value.mUri = (const char*)malloc(size + 1);
-    if (value.mUri != nullptr) {
+    if (nullptr != value.mUri) {
         memcpy(const_cast<char*>(value.mUri), uri, size + 1);
     }
     return NOERROR;
@@ -887,8 +890,8 @@ ECode CZMQParcel::Read(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    if ((mDataPos + ALIGN4(len)) >= mDataPos && (mDataPos + ALIGN4(len)) <= mDataSize
-            && len <= ALIGN4(len)) {
+    if ((mDataPos + ALIGN4(len)) >= mDataPos &&
+                  (mDataPos + ALIGN4(len)) <= mDataSize && len <= ALIGN4(len)) {
         memcpy(outData, mData + mDataPos, len);
         mDataPos += ALIGN4(len);
         return NOERROR;
@@ -903,8 +906,8 @@ const void* CZMQParcel::ReadInplace(
         return nullptr;
     }
 
-    if ((mDataPos + ALIGN4(len)) >= mDataPos && (mDataPos + ALIGN4(len)) <= mDataSize
-            && len <= ALIGN4(len)) {
+    if ((mDataPos + ALIGN4(len)) >= mDataPos &&
+                  (mDataPos + ALIGN4(len)) <= mDataSize && len <= ALIGN4(len)) {
         const void* data = mData + mDataPos;
         mDataPos += ALIGN4(len);
         return data;

@@ -112,7 +112,7 @@ public:
             return 0;
 
         // GetLength() first
-        int length;
+        unsigned int length;
         if (m_bEmpty)
             length = 0;
         else if (m_bFull)
