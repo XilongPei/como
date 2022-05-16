@@ -471,8 +471,9 @@ static void *rep_socket_monitor(void *endpointSocket)
             }
             else {
                 iter = zmq_sockets.begin();
+                EndpointSocket *epSocket = (EndpointSocket*)(iter->second);
+                endpoint = epSocket->endpoint.c_str();
             }
-
         }
 
         rc = zmq_connect(socketZMQ_PAIR, endpoint);
@@ -506,7 +507,7 @@ static void *rep_socket_monitor(void *endpointSocket)
             default:
                 if (zmq_errno() != EAGAIN) {
                     // this socket is invalid, close it
-                    CZMQUtils::CzmqCloseSocket(((EndpointSocket*)endpointSocket)->endpoint.c_str());
+                    CZMQUtils::CzmqCloseSocket(endpoint);
                 }
         }
 

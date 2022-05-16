@@ -38,6 +38,8 @@ CMetaMethod::CMetaMethod()
     , mIndex(0)
     , mHasOutArguments(0)
     , mOpaque(0)
+    , mMethodAddr(0)
+    , mHotCode(0)
 {}
 
 CMetaMethod::CMetaMethod(
@@ -52,6 +54,7 @@ CMetaMethod::CMetaMethod(
     , mSignature(mm->mSignature)
     , mParameters(mMetadata->mParameterNumber)
     , mHasOutArguments(0)
+    , mOpaque(0)
     , mMethodAddr(0)
     , mHotCode(0)
 {

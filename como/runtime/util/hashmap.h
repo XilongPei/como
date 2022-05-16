@@ -24,6 +24,8 @@
 
 namespace como {
 
+using HashMapCacheCmp2PVoid = Boolean(*)(void*,void*);
+
 static const int prime_list[11] =
 {
     5ul,    11ul,   23ul,   53ul,   97ul,   193ul,
@@ -242,6 +244,22 @@ public:
             }
         }
         mCount = 0;
+    }
+
+    Val GetValue(HashMapCacheCmp2PVoid fun, void* param)
+    {
+        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+            if (mBuckets[i] != nullptr) {
+                Bucket* curr = mBuckets[i];
+                while (curr != nullptr) {
+                    if (fun(curr->mValue, param)) {
+                        return curr->mValue;
+                    }
+                    curr = curr->mNext;
+                }
+            }
+        }
+        return Val(nullptr);
     }
 
     Array<Val> GetValues()

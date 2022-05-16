@@ -34,6 +34,7 @@ TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod>
     , mOutParcel(outParcel)
     , mWorkerStatus(WORKER_TASK_READY)
     , mCond(PTHREAD_COND_INITIALIZER)
+    , ec(NOERROR)
 {
     pthread_mutex_init(&mMutex, NULL);
     clock_gettime(CLOCK_REALTIME, &mCreateTime);
@@ -97,7 +98,6 @@ int ThreadPoolChannelInvoke::LookingForReadyWorker()
 
 void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
 {
-    ECode ec;
     int i;
 
     while (true) {
@@ -132,7 +132,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
         pthread_cond_signal(&(w->mCond));
     }
 
-    return reinterpret_cast<void*>(ec);
+    return reinterpret_cast<void*>(NOERROR);
 }
 
 //-------------------------------------------------------------------------

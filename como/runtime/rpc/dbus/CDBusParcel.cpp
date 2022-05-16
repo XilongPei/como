@@ -47,10 +47,11 @@ COMO_OBJECT_IMPL(CDBusParcel);
 
 CDBusParcel::CDBusParcel()
     : mError(NOERROR)
-    , mData(mBuffer)
+    , mData(mBuffer)        // mBuffer points to the space within the object
     , mDataSize(0)
     , mDataCapacity(MAX_BUFFER_SIZE)
     , mDataPos(0)
+    , mProxyId(0)
 {}
 
 CDBusParcel::~CDBusParcel()

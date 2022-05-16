@@ -42,6 +42,8 @@ CMetaParameter::CMetaParameter(
     mType = new CMetaType(mc, mc->mTypes[mp->mTypeIndex]);
     if ((nullptr == mType) || (nullptr == CMetaType::From(mType)->mName)) {
         Logger::E("CMetaParameter::CMetaParameter", "new CMetaType error");
+
+        // The caller uses mType to determine whether the construct is wrong
         mType = nullptr;
     }
 }

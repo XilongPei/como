@@ -26,8 +26,6 @@
 
 namespace como {
 
-using HashMapCacheCmp2PVoid = Boolean(*)(void*,void*);
-
 template<typename Key, typename Val>
 class HashMapCache
 {

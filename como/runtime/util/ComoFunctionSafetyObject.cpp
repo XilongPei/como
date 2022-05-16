@@ -69,6 +69,7 @@ SoelfComoFunctionSafetyObject::~SoelfComoFunctionSafetyObject()
 ComoFunctionSafetyObject::ComoFunctionSafetyObject()
     : mIsValid(0)
     , mChecksum(0)
+    , mExpires(0)
 {}
 
 static int handler(void* user, const char* section, const char* name, const char* value)
@@ -214,10 +215,11 @@ CFSO_VECTOR::~CFSO_VECTOR()
 unsigned int CFSO_VECTOR::cfso_allocate()
 {
     ComoFunctionSafetyObject *newData = (ComoFunctionSafetyObject *)realloc(_data,
-                                            sizeof(ComoFunctionSafetyObject*) * (_size + extra));
+                             sizeof(ComoFunctionSafetyObject*) * (_size + extra));
 
     if (nullptr == newData) {
         _extra = 0;
+        _data = nullptr;
         Logger::D("CFSO_VECTOR::cfso_allocate", "realloc error");
     }
     else {

@@ -140,6 +140,7 @@ ECode reflHelpers::intfGetObjectInfo(AutoPtr<IInterface> intf,
     IObject::Probe(intf)->GetCoclass(klass);
     if (nullptr == klass) {
         strClassInfo = "";
+        return NOERROR;
     }
     else {
         String name, ns;

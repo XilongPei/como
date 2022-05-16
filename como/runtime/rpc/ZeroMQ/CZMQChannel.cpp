@@ -46,6 +46,7 @@ CZMQChannel::CZMQChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
+    , mServerObjectId(0)
 {
     mEndpoint = ComoConfig::localhostInprocEndpoint;
 }

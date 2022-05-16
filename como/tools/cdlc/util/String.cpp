@@ -349,9 +349,10 @@ bool String::Equals(
         return true;
     }
 
-    if (string == nullptr) {
+    if (mString == nullptr || string == nullptr) {
         return false;
     }
+
     if (GetLength() != strlen(string)) {
         return false;
     }
@@ -363,6 +364,10 @@ bool String::Equals(
 {
     if (mString == nullptr && other.mString == nullptr) {
         return true;
+    }
+
+    if (mString == nullptr || other.mString == nullptr) {
+        return false;
     }
 
     if (GetLength() != other.GetLength()) {
@@ -381,9 +386,10 @@ bool String::EqualsIgnoreCase(
         return true;
     }
 
-    if (string == nullptr) {
+    if (mString == nullptr || string == nullptr) {
         return false;
     }
+
     if (GetLength() != strlen(string)) {
         return false;
     }
@@ -395,6 +401,10 @@ bool String::EqualsIgnoreCase(
 {
     if (mString == nullptr && other.mString == nullptr) {
         return true;
+    }
+
+    if (mString == nullptr || other.mString == nullptr) {
+        return false;
     }
 
     if (GetLength() != other.GetLength()) {

@@ -240,8 +240,11 @@ int CpuCoreUtils::GetPidByNameAndUser(const char* process_name, const char* user
     }
 
     char cmd[512];
-    if (user) {
+    if (nullptr != user) {
         sprintf(cmd, "pgrep %s -u %s", process_name, user);
+    }
+    else {
+        sprintf(cmd, "pgrep %s", process_name);
     }
 
     FILE *pstr = popen(cmd, "r");
@@ -255,6 +258,8 @@ int CpuCoreUtils::GetPidByNameAndUser(const char* process_name, const char* user
     if (NULL == fgets(buff, 512, pstr)) {
         return 0;
     }
+
+    fclose(pstr);
 
     return atoi(buff);
 }

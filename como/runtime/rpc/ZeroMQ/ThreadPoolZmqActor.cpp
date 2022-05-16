@@ -239,7 +239,10 @@ HandleMessage_GetComponentMetadata:
                 CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
                            socket, (const void *)&peerState, sizeof(peerState));
                 zmq_msg_close(&msg);
-                worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+
+                if (nullptr != worker)
+                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
 
                 break;
@@ -452,7 +455,6 @@ static bool LivingWorker(TPZA_Executor::Worker *worker)
 
 void *ThreadPoolZmqActor::threadManager(void *threadData)
 {
-    ECode ec;
     int i;
     int iWorkerInQueue;
 
@@ -506,7 +508,7 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
         }
     }
 
-    return reinterpret_cast<void*>(ec);
+    return reinterpret_cast<void*>(NOERROR);
 }
 
 //-------------------------------------------------------------------------

@@ -166,7 +166,7 @@ ECode CBootClassLoader::LoadComponent(
     }
 
     ec = CoGetComponentMetadataFromFile(
-            reinterpret_cast<HANDLE>(handle), this, component);
+                             reinterpret_cast<HANDLE>(handle), this, component);
     if (FAILED(ec)) {
         dlclose(handle);
         component = nullptr;
@@ -445,21 +445,47 @@ ECode CBootClassLoader::LoadCoclass(
     return E_CLASS_NOT_FOUND_EXCEPTION;
 }
 
+static Boolean Cmp_PVoid(void *p1, void *p2)
+{
+    AutoPtr<IMetaInterface> intf;
+    ((IMetaComponent*)p1)->GetInterface(*(String*)p2, intf);
+    if (nullptr != intf)
+        return true;
+
+    return false;
+}
+
 ECode CBootClassLoader::LoadInterface(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaInterface>& intf)
 {
+
+    Mutex::AutoLock lock(mComponentsLock);
+
+    IMetaComponent* component;
+    component = mComponents.GetValue(Cmp_PVoid, (void*)&fullName);
+    if (nullptr != component) {
+        component->GetInterface(fullName, intf);
+        if (intf != nullptr) {
+            return NOERROR;
+        }
+    }
+
+// old algorithm
+#if 0
     Array<IMetaComponent*> components;
     {
         Mutex::AutoLock lock(mComponentsLock);
         components = mComponents.GetValues();
     }
+
     for (Integer i = 0; i < components.GetLength(); i++) {
         components[i]->GetInterface(fullName, intf);
         if (intf != nullptr) {
             return NOERROR;
         }
     }
+#endif
     intf = nullptr;
     return E_INTERFACE_NOT_FOUND_EXCEPTION;
 }

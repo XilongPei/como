@@ -48,8 +48,10 @@ char* EMPTY_STRING = nullptr;
 extern void Init_EMPTY_STRING()
 {
     SharedBuffer* buf = SharedBuffer::Alloc(1);
-    EMPTY_STRING = (char*)buf->GetData();
-    EMPTY_STRING[0] = '\0';
+    if (nullptr != buf) {
+        EMPTY_STRING = (char*)buf->GetData();
+        EMPTY_STRING[0] = '\0';
+    }
 }
 
 extern void Uninit_EMPTY_STRING()
@@ -102,12 +104,14 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
-    Integer len = strlen(string);
-    if ((string != nullptr) && (byteSize >= 0) && (byteSize <= len)) {
-        mString = AllocFromUTF8(string, byteSize);
-    }
-    else {
-        mString = AllocFromUTF8(string, len);
+    if (string != nullptr) {
+        Integer len = strlen(string);
+        if ((byteSize >= 0) && (byteSize <= len)) {
+            mString = AllocFromUTF8(string, byteSize);
+        }
+        else {
+            mString = AllocFromUTF8(string, len);
+        }
     }
 }
 
