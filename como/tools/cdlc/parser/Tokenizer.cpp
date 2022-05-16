@@ -290,6 +290,8 @@ TokenInfo Tokenizer::ReadToken(
                 tokenInfo.mTokenFilePath = mReader->GetCurrentFilePath();
                 tokenInfo.mTokenLineNo = lineNo;
                 tokenInfo.mTokenColumnNo = columnNo;
+                mCurrentTokenInfo = std::move(tokenInfo);
+                return mCurrentTokenInfo;
             }
             case ';': {
                 TokenInfo tokenInfo(Token::SEMICOLON,

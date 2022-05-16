@@ -234,8 +234,9 @@ HandleMessage_GetComponentMetadata:
                     peerState.alive = false;
                 }
 
-                CZMQUtils::CzmqSendBuf(worker->mChannel, NOERROR,
-                           socket, (const void *)&peerState, sizeof(peerState));
+                CZMQUtils::CzmqSendBuf(hChannel, NOERROR, socket,
+                                   (const void *)&peerState, sizeof(peerState));
+
                 zmq_msg_close(&msg);
 
                 if (nullptr != worker) {

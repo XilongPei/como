@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <math.h>
 #include "ast/MultiplicativeExpression.h"
 #include "ast/Namespace.h"
 
@@ -109,11 +110,11 @@ float MultiplicativeExpression::FloatValue()
                 return leftValue * rightValue;
             }
             case OPERATOR_DIVIDE: {
-                return rightValue != 0 ? leftValue / rightValue : 0;
+                return fabs(rightValue) > 1e-10 ? leftValue / rightValue : 0.0;
             }
             case OPERATOR_MODULO:
             default: {
-                return 0;
+                return 0.0;
             }
         }
     }
@@ -155,11 +156,11 @@ double MultiplicativeExpression::DoubleValue()
                 return leftValue * rightValue;
             }
             case OPERATOR_DIVIDE: {
-                return rightValue != 0 ? leftValue / rightValue : 0;
+                return fabs(rightValue) > 1e-10 ? leftValue / rightValue : 0.0;
             }
             case OPERATOR_MODULO:
             default: {
-                return 0;
+                return 0.0;
             }
         }
     }
