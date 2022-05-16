@@ -407,10 +407,33 @@ ECode CBootClassLoader::LoadMetadata(
     return NOERROR;
 }
 
+static Boolean Cmp_PVoid_Coclass_fullName(void *p1, void *p2)
+{
+    AutoPtr<IMetaCoclass> klass;
+    ((IMetaComponent*)p1)->GetCoclass(*(String*)p2, klass);
+    if (nullptr != klass)
+        return true;
+
+    return false;
+}
+
 ECode CBootClassLoader::LoadCoclass(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
+    Mutex::AutoLock lock(mComponentsLock);
+
+    IMetaComponent* component;
+    component = mComponents.GetValue(Cmp_PVoid_Coclass_fullName, (void*)&fullName);
+    if (nullptr != component) {
+        component->GetCoclass(fullName, klass);
+        if (klass != nullptr) {
+            return NOERROR;
+        }
+    }
+
+// old algorithm
+#if 0
     Array<IMetaComponent*> components;
     {
         Mutex::AutoLock lock(mComponentsLock);
@@ -422,14 +445,38 @@ ECode CBootClassLoader::LoadCoclass(
             return NOERROR;
         }
     }
+#endif
     klass = nullptr;
     return E_CLASS_NOT_FOUND_EXCEPTION;
+}
+
+static Boolean Cmp_PVoid_Coclass_cid(void *p1, void *p2)
+{
+    AutoPtr<IMetaCoclass> klass;
+    ((IMetaComponent*)p1)->GetCoclass(*(CoclassID*)p2, klass);
+    if (nullptr != klass)
+        return true;
+
+    return false;
 }
 
 ECode CBootClassLoader::LoadCoclass(
     /* [in] */ const CoclassID& cid,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
+    Mutex::AutoLock lock(mComponentsLock);
+
+    IMetaComponent* component;
+    component = mComponents.GetValue(Cmp_PVoid_Coclass_cid, (void*)&cid);
+    if (nullptr != component) {
+        component->GetCoclass(cid, klass);
+        if (klass != nullptr) {
+            return NOERROR;
+        }
+    }
+
+// old algorithm
+#if 0
     Array<IMetaComponent*> components;
     {
         Mutex::AutoLock lock(mComponentsLock);
@@ -441,6 +488,7 @@ ECode CBootClassLoader::LoadCoclass(
             return NOERROR;
         }
     }
+#endif
     klass = nullptr;
     return E_CLASS_NOT_FOUND_EXCEPTION;
 }
