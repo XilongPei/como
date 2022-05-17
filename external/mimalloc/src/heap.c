@@ -20,10 +20,12 @@ terms of the MIT license. A copy of the license can be found in the file
 ----------------------------------------------------------- */
 
 // return `true` if ok, `false` to break
-typedef bool (heap_page_visitor_fun)(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* arg1, void* arg2);
+typedef bool (heap_page_visitor_fun)(mi_heap_t* heap, mi_page_queue_t* pq,
+                                        mi_page_t* page, void* arg1, void* arg2);
 
 // Visit all pages in a heap; returns `false` if break was called.
-static bool mi_heap_visit_pages(mi_heap_t* heap, heap_page_visitor_fun* fn, void* arg1, void* arg2)
+static bool mi_heap_visit_pages(mi_heap_t* heap, heap_page_visitor_fun* fn,
+                                                        void* arg1, void* arg2)
 {
     if (heap == NULL || heap->page_count == 0) return 0;
 
@@ -36,10 +38,14 @@ static bool mi_heap_visit_pages(mi_heap_t* heap, heap_page_visitor_fun* fn, void
         mi_page_queue_t* pq = &heap->pages[i];
         mi_page_t* page = pq->first;
         while (page != NULL) {
-            mi_page_t* next = page->next; // save next in case the page gets removed from the queue
+            // save next in case the page gets removed from the queue
+            mi_page_t* next = page->next;
+
             mi_assert_internal(mi_page_heap(page) == heap);
+
             count++;
-            if (!fn(heap, pq, page, arg1, arg2)) return false;
+            if (!fn(heap, pq, page, arg1, arg2))
+                return false;
             page = next; // and continue
         }
     }
@@ -49,7 +55,8 @@ static bool mi_heap_visit_pages(mi_heap_t* heap, heap_page_visitor_fun* fn, void
 
 
 #if MI_DEBUG>=2
-static bool mi_heap_page_is_valid(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* arg1, void* arg2) {
+static bool mi_heap_page_is_valid(mi_heap_t* heap, mi_page_queue_t* pq,
+                                      mi_page_t* page, void* arg1, void* arg2) {
     MI_UNUSED(arg1);
     MI_UNUSED(arg2);
     MI_UNUSED(pq);
@@ -69,8 +76,6 @@ static bool mi_heap_is_valid(mi_heap_t* heap) {
 #endif
 
 
-
-
 /* -----------------------------------------------------------
   "Collect" pages by migrating `local_free` and `thread_free`
   lists and freeing empty pages. This is done when a thread
@@ -85,7 +90,8 @@ typedef enum mi_collect_e {
 } mi_collect_t;
 
 
-static bool mi_heap_page_collect(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* arg_collect, void* arg2 ) {
+static bool mi_heap_page_collect(mi_heap_t* heap, mi_page_queue_t* pq,
+                                 mi_page_t* page, void* arg_collect, void* arg2 ) {
     MI_UNUSED(arg2);
     MI_UNUSED(heap);
     mi_assert_internal(mi_heap_page_is_valid(heap, pq, page, NULL, NULL));
@@ -103,7 +109,8 @@ static bool mi_heap_page_collect(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t
     return true; // don't break
 }
 
-static bool mi_heap_page_never_delayed_free(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* arg1, void* arg2) {
+static bool mi_heap_page_never_delayed_free(mi_heap_t* heap, mi_page_queue_t* pq,
+                                            mi_page_t* page, void* arg1, void* arg2) {
     MI_UNUSED(arg1);
     MI_UNUSED(arg2);
     MI_UNUSED(heap);
@@ -145,7 +152,8 @@ static void mi_heap_collect_ex(mi_heap_t* heap, mi_collect_t collect)
 
     // collect all pages owned by this thread
     mi_heap_visit_pages(heap, &mi_heap_page_collect, &collect, NULL);
-    mi_assert_internal( collect != MI_ABANDON || mi_atomic_load_ptr_acquire(mi_block_t, &heap->thread_delayed_free) == NULL );
+    mi_assert_internal( collect != MI_ABANDON ||
+        mi_atomic_load_ptr_acquire(mi_block_t, &heap->thread_delayed_free) == NULL );
 
     // collect segment caches
     if (collect >= MI_FORCE) {
@@ -223,7 +231,9 @@ mi_heap_t* mi_heap_new(void) {
     mi_heap_t* bheap = mi_heap_get_backing();
     // qjy: 新heap的管理结构在默认heap管理的segment上，这里进行mi_heap_malloc，sizeof(mi_heap_t)=3064
     mi_heap_t* heap = mi_heap_malloc_tp(bheap, mi_heap_t);  // todo: OS allocate in secure mode?
-    if (heap == NULL) return NULL;
+    if (heap == NULL)
+        return NULL;
+
     _mi_memcpy_aligned(heap, &_mi_heap_empty, sizeof(mi_heap_t));
     heap->tld = bheap->tld;
     heap->thread_id = _mi_thread_id();
@@ -231,7 +241,10 @@ mi_heap_t* mi_heap_new(void) {
     heap->cookie  = _mi_heap_random_next(heap) | 1;
     heap->keys[0] = _mi_heap_random_next(heap);
     heap->keys[1] = _mi_heap_random_next(heap);
-    heap->no_reclaim = true;  // don't reclaim abandoned pages or otherwise destroy is unsafe
+
+    // don't reclaim abandoned pages or otherwise destroy is unsafe
+    heap->no_reclaim = true;
+
     // push on the thread local heaps list
     heap->next = heap->tld->heaps;
     heap->tld->heaps = heap;
@@ -264,8 +277,11 @@ static void mi_heap_reset_pages(mi_heap_t* heap) {
 static void mi_heap_free(mi_heap_t* heap) {
     mi_assert(heap != NULL);
     mi_assert_internal(mi_heap_is_initialized(heap));
-    if (heap == NULL || !mi_heap_is_initialized(heap)) return;
-    if (mi_heap_is_backing(heap)) return; // dont free the backing heap
+
+    if (heap == NULL || !mi_heap_is_initialized(heap))
+        return;
+    if (mi_heap_is_backing(heap))
+        return; // dont free the backing heap
 
     // reset default
     if (mi_heap_is_default(heap)) {
@@ -282,8 +298,12 @@ static void mi_heap_free(mi_heap_t* heap) {
     }
     mi_assert_internal(curr == heap);
     if (curr == heap) {
-        if (prev != NULL) { prev->next = heap->next; }
-        else { heap->tld->heaps = heap->next; }
+        if (prev != NULL) {
+            prev->next = heap->next;
+        }
+        else {
+            heap->tld->heaps = heap->next;
+        }
     }
     mi_assert_internal(heap->tld->heaps != NULL);
 
@@ -434,8 +454,6 @@ mi_heap_t* mi_heap_set_default(mi_heap_t* heap) {
 }
 
 
-
-
 /* -----------------------------------------------------------
   Analysis
 ----------------------------------------------------------- */
@@ -456,8 +474,8 @@ bool mi_heap_contains_block(mi_heap_t* heap, const void* p) {
     return (heap == mi_heap_of_block(p));
 }
 
-
-static bool mi_heap_page_check_owned(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* p, void* vfound) {
+static bool mi_heap_page_check_owned(mi_heap_t* heap, mi_page_queue_t* pq,
+                                        mi_page_t* page, void* p, void* vfound) {
     MI_UNUSED(heap);
     MI_UNUSED(pq);
     bool* found = (bool*)vfound;
@@ -493,7 +511,8 @@ typedef struct mi_heap_area_ex_s {
     mi_page_t*     page;
 } mi_heap_area_ex_t;
 
-static bool mi_heap_area_visit_blocks(const mi_heap_area_ex_t* xarea, mi_block_visit_fun* visitor, void* arg) {
+static bool mi_heap_area_visit_blocks(const mi_heap_area_ex_t* xarea,
+                                        mi_block_visit_fun* visitor, void* arg) {
     mi_assert(xarea != NULL);
     if (xarea == NULL) return true;
     const mi_heap_area_t* area = &xarea->area;
@@ -521,13 +540,18 @@ static bool mi_heap_area_visit_blocks(const mi_heap_area_ex_t* xarea, mi_block_v
     memset(free_map, 0, sizeof(free_map));
 
     size_t free_count = 0;
-    for (mi_block_t* block = page->free; block != NULL; block = mi_block_next(page, block)) {
+    for (mi_block_t* block = page->free;  block != NULL;
+                                            block = mi_block_next(page, block)) {
         free_count++;
+
         mi_assert_internal((uint8_t*)block >= pstart && (uint8_t*)block < (pstart + psize));
+
         size_t offset = (uint8_t*)block - pstart;
         mi_assert_internal(offset % bsize == 0);
+
         size_t blockidx = offset / bsize;  // Todo: avoid division?
         mi_assert_internal( blockidx < MI_MAX_BLOCKS);
+
         size_t bitidx = (blockidx / sizeof(uintptr_t));
         size_t bit = blockidx - (bitidx * sizeof(uintptr_t));
         free_map[bitidx] |= ((uintptr_t)1 << bit);
@@ -546,7 +570,8 @@ static bool mi_heap_area_visit_blocks(const mi_heap_area_ex_t* xarea, mi_block_v
         else if ((m & ((uintptr_t)1 << bit)) == 0) {
             used_count++;
             uint8_t* block = pstart + (i * bsize);
-            if (!visitor(mi_page_heap(page), area, block, bsize, arg)) return false;
+            if (!visitor(mi_page_heap(page), area, block, bsize, arg))
+                return false;
         }
     }
     mi_assert_internal(page->used == used_count);
@@ -556,7 +581,8 @@ static bool mi_heap_area_visit_blocks(const mi_heap_area_ex_t* xarea, mi_block_v
 typedef bool (mi_heap_area_visit_fun)(const mi_heap_t* heap, const mi_heap_area_ex_t* area, void* arg);
 
 
-static bool mi_heap_visit_areas_page(mi_heap_t* heap, mi_page_queue_t* pq, mi_page_t* page, void* vfun, void* arg) {
+static bool mi_heap_visit_areas_page(mi_heap_t* heap, mi_page_queue_t* pq,
+                                        mi_page_t* page, void* vfun, void* arg) {
     MI_UNUSED(heap);
     MI_UNUSED(pq);
     mi_heap_area_visit_fun* fun = (mi_heap_area_visit_fun*)vfun;
@@ -573,8 +599,12 @@ static bool mi_heap_visit_areas_page(mi_heap_t* heap, mi_page_queue_t* pq, mi_pa
 
 // Visit all heap pages as areas
 static bool mi_heap_visit_areas(const mi_heap_t* heap, mi_heap_area_visit_fun* visitor, void* arg) {
-    if (visitor == NULL) return false;
-    return mi_heap_visit_pages((mi_heap_t*)heap, &mi_heap_visit_areas_page, (void*)(visitor), arg); // note: function pointer to void* :-{
+    if (visitor == NULL)
+        return false;
+
+    // note: function pointer to void* :-{
+    return mi_heap_visit_pages((mi_heap_t*)heap, &mi_heap_visit_areas_page,
+                                                            (void*)(visitor), arg);
 }
 
 // Just to pass arguments
@@ -586,7 +616,9 @@ typedef struct mi_visit_blocks_args_s {
 
 static bool mi_heap_area_visitor(const mi_heap_t* heap, const mi_heap_area_ex_t* xarea, void* arg) {
     mi_visit_blocks_args_t* args = (mi_visit_blocks_args_t*)arg;
-    if (!args->visitor(heap, &xarea->area, NULL, xarea->area.block_size, args->arg)) return false;
+    if (!args->visitor(heap, &xarea->area, NULL, xarea->area.block_size, args->arg))
+        return false;
+
     if (args->visit_blocks) {
         return mi_heap_area_visit_blocks(xarea, args->visitor, args->arg);
     }
@@ -596,7 +628,8 @@ static bool mi_heap_area_visitor(const mi_heap_t* heap, const mi_heap_area_ex_t*
 }
 
 // Visit all blocks in a heap
-bool mi_heap_visit_blocks(const mi_heap_t* heap, bool visit_blocks, mi_block_visit_fun* visitor, void* arg) {
+bool mi_heap_visit_blocks(const mi_heap_t* heap, bool visit_blocks,
+                                        mi_block_visit_fun* visitor, void* arg) {
     mi_visit_blocks_args_t args = { visit_blocks, visitor, arg };
     return mi_heap_visit_areas(heap, &mi_heap_area_visitor, &args);
 }

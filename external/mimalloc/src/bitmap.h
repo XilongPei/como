@@ -24,7 +24,7 @@ between the fields. (This is used in arena allocation)
   Bitmap definition
 ----------------------------------------------------------- */
 
-#define MI_BITMAP_FIELD_BITS   (8*MI_SIZE_SIZE)
+#define MI_BITMAP_FIELD_BITS   (8 * MI_SIZE_SIZE)
 #define MI_BITMAP_FIELD_FULL   (~((size_t)0))   // all bits set
 
 // An atomic bitmap of `size_t` fields
@@ -61,22 +61,30 @@ static inline size_t mi_bitmap_index_bit(mi_bitmap_index_t bitmap_idx) {
 
 // Try to atomically claim a sequence of `count` bits in a single
 // field at `idx` in `bitmap`. Returns `true` on success.
-bool _mi_bitmap_try_find_claim_field(mi_bitmap_t bitmap, size_t idx, const size_t count, mi_bitmap_index_t* bitmap_idx);
+bool _mi_bitmap_try_find_claim_field(mi_bitmap_t bitmap, size_t idx,
+                                     const size_t count, mi_bitmap_index_t* bitmap_idx);
 
 // Starts at idx, and wraps around to search in all `bitmap_fields` fields.
 // For now, `count` can be at most MI_BITMAP_FIELD_BITS and will never cross fields.
-bool _mi_bitmap_try_find_from_claim(mi_bitmap_t bitmap, const size_t bitmap_fields, const size_t start_field_idx, const size_t count, mi_bitmap_index_t* bitmap_idx);
+bool _mi_bitmap_try_find_from_claim(mi_bitmap_t bitmap, const size_t bitmap_fields,
+        const size_t start_field_idx, const size_t count, mi_bitmap_index_t* bitmap_idx);
 
 // Set `count` bits at `bitmap_idx` to 0 atomically
 // Returns `true` if all `count` bits were 1 previously.
-bool mi_bitmap_unclaim(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
+bool mi_bitmap_unclaim(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count,
+                                                    mi_bitmap_index_t bitmap_idx);
 
 // Set `count` bits at `bitmap_idx` to 1 atomically
-// Returns `true` if all `count` bits were 0 previously. `any_zero` is `true` if there was at least one zero bit.
-bool _mi_bitmap_claim(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx, bool* any_zero);
+// Returns `true` if all `count` bits were 0 previously.
+// `any_zero` is `true` if there was at least one zero bit.
+bool _mi_bitmap_claim(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count,
+                                    mi_bitmap_index_t bitmap_idx, bool* any_zero);
 
-bool _mi_bitmap_is_claimed(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
-bool _mi_bitmap_is_any_claimed(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
+bool _mi_bitmap_is_claimed(mi_bitmap_t bitmap, size_t bitmap_fields,
+                                    size_t count, mi_bitmap_index_t bitmap_idx);
+
+bool _mi_bitmap_is_any_claimed(mi_bitmap_t bitmap, size_t bitmap_fields,
+                                    size_t count, mi_bitmap_index_t bitmap_idx);
 
 
 //--------------------------------------------------------------------------
@@ -86,17 +94,23 @@ bool _mi_bitmap_is_any_claimed(mi_bitmap_t bitmap, size_t bitmap_fields, size_t 
 
 // Find `count` bits of zeros and set them to 1 atomically; returns `true` on success.
 // Starts at idx, and wraps around to search in all `bitmap_fields` fields.
-bool _mi_bitmap_try_find_from_claim_across(mi_bitmap_t bitmap, const size_t bitmap_fields, const size_t start_field_idx, const size_t count, mi_bitmap_index_t* bitmap_idx);
+bool _mi_bitmap_try_find_from_claim_across(mi_bitmap_t bitmap, const size_t bitmap_fields,
+        const size_t start_field_idx, const size_t count, mi_bitmap_index_t* bitmap_idx);
 
 // Set `count` bits at `bitmap_idx` to 0 atomically
 // Returns `true` if all `count` bits were 1 previously.
-bool _mi_bitmap_unclaim_across(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
+bool _mi_bitmap_unclaim_across(mi_bitmap_t bitmap, size_t bitmap_fields,
+                                            size_t count, mi_bitmap_index_t bitmap_idx);
 
 // Set `count` bits at `bitmap_idx` to 1 atomically
 // Returns `true` if all `count` bits were 0 previously. `any_zero` is `true` if there was at least one zero bit.
-bool _mi_bitmap_claim_across(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx, bool* pany_zero);
+bool _mi_bitmap_claim_across(mi_bitmap_t bitmap, size_t bitmap_fields,
+                            size_t count, mi_bitmap_index_t bitmap_idx, bool* pany_zero);
 
-bool _mi_bitmap_is_claimed_across(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
-bool _mi_bitmap_is_any_claimed_across(mi_bitmap_t bitmap, size_t bitmap_fields, size_t count, mi_bitmap_index_t bitmap_idx);
+bool _mi_bitmap_is_claimed_across(mi_bitmap_t bitmap, size_t bitmap_fields,
+                                            size_t count, mi_bitmap_index_t bitmap_idx);
+
+bool _mi_bitmap_is_any_claimed_across(mi_bitmap_t bitmap, size_t bitmap_fields,
+                                            size_t count, mi_bitmap_index_t bitmap_idx);
 
 #endif

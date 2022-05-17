@@ -25,7 +25,8 @@ terms of the MIT license. A copy of the license can be found in the file
 
 // Fast allocation in a page: just pop from the free list.
 // Fall back to generic allocation only if the list is empty.
-extern inline void* _mi_page_malloc(mi_heap_t* heap, mi_page_t* page, size_t size) mi_attr_noexcept {
+extern inline void* _mi_page_malloc(mi_heap_t* heap, mi_page_t* page,
+                                                        size_t size) mi_attr_noexcept {
     mi_assert_internal(page->xblock_size == 0 || mi_page_block_size(page) >= size);
     mi_block_t* const block = page->free;
     if (mi_unlikely(block == NULL)) {
@@ -38,7 +39,9 @@ extern inline void* _mi_page_malloc(mi_heap_t* heap, mi_page_t* page, size_t siz
     mi_assert_internal(page->free == NULL || _mi_ptr_page(page->free) == page);
 
 #if (MI_DEBUG>0)
-    if (!page->is_zero) { memset(block, MI_DEBUG_UNINIT, size); }
+    if (!page->is_zero) {
+        memset(block, MI_DEBUG_UNINIT, size);
+    }
 #elif (MI_SECURE!=0)
     block->next = 0;  // don't leak internal data
 #endif
@@ -56,21 +59,29 @@ extern inline void* _mi_page_malloc(mi_heap_t* heap, mi_page_t* page, size_t siz
 #endif
 
 #if (MI_PADDING > 0) && defined(MI_ENCODE_FREELIST)
-    mi_padding_t* const padding = (mi_padding_t*)((uint8_t*)block + mi_page_usable_block_size(page));
+    mi_padding_t* const padding = (mi_padding_t*)((uint8_t*)block +
+                                                        mi_page_usable_block_size(page));
     ptrdiff_t delta = ((uint8_t*)padding - (uint8_t*)block - (size - MI_PADDING_SIZE));
-    mi_assert_internal(delta >= 0 && mi_page_usable_block_size(page) >= (size - MI_PADDING_SIZE + delta));
+    mi_assert_internal(delta >= 0 && mi_page_usable_block_size(page) >=
+                                                        (size - MI_PADDING_SIZE + delta));
     padding->canary = (uint32_t)(mi_ptr_encode(page, block, page->keys));
     padding->delta  = (uint32_t)(delta);
     uint8_t* fill = (uint8_t*)padding - delta;
-    const size_t maxpad = (delta > MI_MAX_ALIGN_SIZE ? MI_MAX_ALIGN_SIZE : delta); // set at most N initial padding bytes
-    for (size_t i = 0; i < maxpad; i++) { fill[i] = MI_DEBUG_PADDING; }
+
+    const size_t maxpad = (delta > MI_MAX_ALIGN_SIZE ? MI_MAX_ALIGN_SIZE : delta);
+                          // set at most N initial padding bytes
+
+    for (size_t i = 0; i < maxpad; i++) {
+        fill[i] = MI_DEBUG_PADDING;
+    }
 #endif
 
     return block;
 }
 
 // allocate a small block
-extern inline mi_decl_restrict void* mi_heap_malloc_small(mi_heap_t* heap, size_t size) mi_attr_noexcept {
+extern inline mi_decl_restrict void* mi_heap_malloc_small(mi_heap_t* heap,
+                                                        size_t size) mi_attr_noexcept {
     mi_assert(heap != NULL);
     mi_assert(heap->thread_id == 0 || heap->thread_id == _mi_thread_id()); // heaps are thread local
     mi_assert(size <= MI_SMALL_SIZE_MAX);
@@ -84,7 +95,9 @@ extern inline mi_decl_restrict void* mi_heap_malloc_small(mi_heap_t* heap, size_
     mi_assert_internal(p == NULL || mi_usable_size(p) >= size);
 #if MI_STAT>1
     if (p != NULL) {
-        if (!mi_heap_is_initialized(heap)) { heap = mi_get_default_heap(); }
+        if (!mi_heap_is_initialized(heap)) {
+            heap = mi_get_default_heap();
+        }
         mi_heap_stat_increase(heap, malloc, mi_usable_size(p));
     }
 #endif
@@ -105,11 +118,14 @@ extern inline mi_decl_restrict void* mi_heap_malloc(mi_heap_t* heap, size_t size
         mi_assert(heap != NULL);
         mi_assert(heap->thread_id == 0 || heap->thread_id == _mi_thread_id()); // heaps are thread local
         //qjy : 通用分配路径，MI_PADDING_SIZE为debug信息，非debug模式编译则为0
-        void* const p = _mi_malloc_generic(heap, size + MI_PADDING_SIZE);      // note: size can overflow but it is detected in malloc_generic
+        void* const p = _mi_malloc_generic(heap, size + MI_PADDING_SIZE);
+                            // note: size can overflow but it is detected in malloc_generic
         mi_assert_internal(p == NULL || mi_usable_size(p) >= size);
 #if MI_STAT>1
         if (p != NULL) {
-            if (!mi_heap_is_initialized(heap)) { heap = mi_get_default_heap(); }
+            if (!mi_heap_is_initialized(heap)) {
+                heap = mi_get_default_heap();
+            }
             mi_heap_stat_increase(heap, malloc, mi_usable_size(p));
         }
 #endif
@@ -120,7 +136,6 @@ extern inline mi_decl_restrict void* mi_heap_malloc(mi_heap_t* heap, size_t size
 extern inline mi_decl_restrict void* mi_malloc(size_t size) mi_attr_noexcept {
     return mi_heap_malloc(mi_get_default_heap(), size);
 }
-
 
 void _mi_block_zero_init(const mi_page_t* page, void* p, size_t size) {
     // note: we need to initialize the whole usable block size to zero, not just the requested size,
@@ -173,7 +188,8 @@ mi_decl_restrict void* mi_zalloc(size_t size) mi_attr_noexcept {
 
 #if (MI_ENCODE_FREELIST && (MI_SECURE>=4 || MI_DEBUG!=0))
 // linear check if the free list contains a specific element
-static bool mi_list_contains(const mi_page_t* page, const mi_block_t* list, const mi_block_t* elem) {
+static bool mi_list_contains(const mi_page_t* page, const mi_block_t* list,
+                                                                const mi_block_t* elem) {
     while (list != NULL) {
         if (elem == list) return true;
         list = mi_block_next(page, list);
@@ -181,21 +197,25 @@ static bool mi_list_contains(const mi_page_t* page, const mi_block_t* list, cons
     return false;
 }
 
-static mi_decl_noinline bool mi_check_is_double_freex(const mi_page_t* page, const mi_block_t* block) {
+static mi_decl_noinline bool mi_check_is_double_freex(const mi_page_t* page,
+                                                                const mi_block_t* block) {
     // The decoded value is in the same page (or NULL).
     // Walk the free lists to verify positively if it is already freed
     if (mi_list_contains(page, page->free, block) ||
             mi_list_contains(page, page->local_free, block) ||
             mi_list_contains(page, mi_page_thread_free(page), block))
     {
-        _mi_error_message(EAGAIN, "double free detected of block %p with size %zu\n", block, mi_page_block_size(page));
+        _mi_error_message(EAGAIN, "double free detected of block %p with size %zu\n",
+                                                        block, mi_page_block_size(page));
         return true;
     }
     return false;
 }
 
 static inline bool mi_check_is_double_free(const mi_page_t* page, const mi_block_t* block) {
-    mi_block_t* n = mi_block_nextx(page, block, page->keys); // pretend it is freed, and get the decoded first field
+    mi_block_t* n = mi_block_nextx(page, block, page->keys);
+                    // pretend it is freed, and get the decoded first field
+
     if (((uintptr_t)n & (MI_INTPTR_SIZE - 1)) == 0 && // quick check: aligned pointer?
             (n == NULL || mi_is_in_same_page(block, n))) // quick check: in same page or NULL?
     {
@@ -218,11 +238,13 @@ static inline bool mi_check_is_double_free(const mi_page_t* page, const mi_block
 // ---------------------------------------------------------------------------
 
 #if (MI_PADDING>0) && defined(MI_ENCODE_FREELIST)
-static bool mi_page_decode_padding(const mi_page_t* page, const mi_block_t* block, size_t* delta, size_t* bsize) {
+static bool mi_page_decode_padding(const mi_page_t* page, const mi_block_t* block,
+                                                            size_t* delta, size_t* bsize) {
     *bsize = mi_page_usable_block_size(page);
     const mi_padding_t* const padding = (mi_padding_t*)((uint8_t*)block + *bsize);
     *delta = padding->delta;
-    return ((uint32_t)mi_ptr_encode(page, block, page->keys) == padding->canary && *delta <= *bsize);
+    return (((uint32_t)mi_ptr_encode(page, block, page->keys) == padding->canary) &&
+                                                                        (*delta <= *bsize));
 }
 
 // Return the exact usable size of a block.
@@ -234,16 +256,19 @@ static size_t mi_page_usable_size_of(const mi_page_t* page, const mi_block_t* bl
     return (ok ? bsize - delta : 0);
 }
 
-static bool mi_verify_padding(const mi_page_t* page, const mi_block_t* block, size_t* size, size_t* wrong) {
+static bool mi_verify_padding(const mi_page_t* page, const mi_block_t* block,
+                                                        size_t* size, size_t* wrong) {
     size_t bsize;
     size_t delta;
     bool ok = mi_page_decode_padding(page, block, &delta, &bsize);
     *size = *wrong = bsize;
-    if (!ok) return false;
+    if (!ok)
+        return false;
     mi_assert_internal(bsize >= delta);
     *size = bsize - delta;
     uint8_t* fill = (uint8_t*)block + bsize - delta;
-    const size_t maxpad = (delta > MI_MAX_ALIGN_SIZE ? MI_MAX_ALIGN_SIZE : delta); // check at most the first N padding bytes
+    const size_t maxpad = (delta > MI_MAX_ALIGN_SIZE ? MI_MAX_ALIGN_SIZE : delta);
+                                                // check at most the first N padding bytes
     for (size_t i = 0; i < maxpad; i++) {
         if (fill[i] != MI_DEBUG_PADDING) {
             *wrong = bsize - delta + i;
@@ -257,7 +282,9 @@ static void mi_check_padding(const mi_page_t* page, const mi_block_t* block) {
     size_t size;
     size_t wrong;
     if (!mi_verify_padding(page, block, &size, &wrong)) {
-        _mi_error_message(EFAULT, "buffer overflow in heap block %p of size %zu: write after %zu bytes\n", block, size, wrong );
+        _mi_error_message(EFAULT,
+                "buffer overflow in heap block %p of size %zu: write after %zu bytes\n",
+                                                                    block, size, wrong );
     }
 }
 
@@ -270,9 +297,13 @@ static void mi_padding_shrink(const mi_page_t* page, const mi_block_t* block, co
     size_t delta;
     bool ok = mi_page_decode_padding(page, block, &delta, &bsize);
     mi_assert_internal(ok);
-    if (!ok || (bsize - delta) >= min_size) return;  // usually already enough space
+    if (!ok || (bsize - delta) >= min_size)
+        return;  // usually already enough space
+
     mi_assert_internal(bsize >= min_size);
-    if (bsize < min_size) return;  // should never happen
+    if (bsize < min_size)
+        return;  // should never happen
+
     size_t new_delta = (bsize - min_size);
     mi_assert_internal(new_delta < bsize);
     mi_padding_t* padding = (mi_padding_t*)((uint8_t*)block + bsize);
@@ -349,7 +380,9 @@ static mi_decl_noinline void _mi_free_block_mt(mi_page_t* page, mi_block_t* bloc
     // The padding check may access the non-thread-owned page for the key values.
     // that is safe as these are constant and the page won't be freed (as the block is not freed yet).
     mi_check_padding(page, block);
-    mi_padding_shrink(page, block, sizeof(mi_block_t)); // for small size, ensure we can fit the delayed thread pointers without triggering overflow detection
+    mi_padding_shrink(page, block, sizeof(mi_block_t));
+                     // for small size, ensure we can fit the delayed thread pointers
+                     // without triggering overflow detection
 #if (MI_DEBUG!=0)
     memset(block, MI_DEBUG_FREED, mi_usable_size(block));
 #endif
@@ -362,14 +395,16 @@ static mi_decl_noinline void _mi_free_block_mt(mi_page_t* page, mi_block_t* bloc
         return;
     }
 
-    // Try to put the block on either the page-local thread free list, or the heap delayed free list.
+    // Try to put the block on either the page-local thread free list, or the
+    // heap delayed free list.
     mi_thread_free_t tfreex;
     bool use_delayed;
     mi_thread_free_t tfree = mi_atomic_load_relaxed(&page->xthread_free);
     do {
         use_delayed = (mi_tf_delayed(tfree) == MI_USE_DELAYED_FREE);
         if (mi_unlikely(use_delayed)) {
-            // unlikely: this only happens on the first concurrent free in a page that is in the full list
+            // unlikely: this only happens on the first concurrent free in a page
+            // that is in the full list
             tfreex = mi_tf_set_delayed(tfree, MI_DELAYED_FREEING);
         }
         else {
@@ -380,15 +415,19 @@ static mi_decl_noinline void _mi_free_block_mt(mi_page_t* page, mi_block_t* bloc
     } while (!mi_atomic_cas_weak_release(&page->xthread_free, &tfree, tfreex));
 
     if (mi_unlikely(use_delayed)) {
-        // racy read on `heap`, but ok because MI_DELAYED_FREEING is set (see `mi_heap_delete` and `mi_heap_collect_abandon`)
+        // racy read on `heap`, but ok because MI_DELAYED_FREEING is set
+        // (see `mi_heap_delete` and `mi_heap_collect_abandon`)
         mi_heap_t* const heap = (mi_heap_t*)(mi_atomic_load_acquire(&page->xheap)); //mi_page_heap(page);
         mi_assert_internal(heap != NULL);
         if (heap != NULL) {
-            // add to the delayed free list of this heap. (do this atomically as the lock only protects heap memory validity)
-            mi_block_t* dfree = mi_atomic_load_ptr_relaxed(mi_block_t, &heap->thread_delayed_free);
+            // add to the delayed free list of this heap. (do this atomically as
+            // the lock only protects heap memory validity)
+            mi_block_t* dfree = mi_atomic_load_ptr_relaxed(mi_block_t,
+                                                            &heap->thread_delayed_free);
             do {
                 mi_block_set_nextx(heap, block, dfree, heap->keys);
-            } while (!mi_atomic_cas_ptr_weak_release(mi_block_t, &heap->thread_delayed_free, &dfree, block));
+            } while (!mi_atomic_cas_ptr_weak_release(mi_block_t,
+                                            &heap->thread_delayed_free, &dfree, block));
         }
 
         // and reset the MI_DELAYED_FREEING flag
@@ -429,7 +468,8 @@ static inline void _mi_free_block(mi_page_t* page, bool local, mi_block_t* block
 
 
 // Adjust a block that was allocated aligned, to the actual start of the block in the page.
-mi_block_t* _mi_page_ptr_unalign(const mi_segment_t* segment, const mi_page_t* page, const void* p) {
+mi_block_t* _mi_page_ptr_unalign(const mi_segment_t* segment,
+                                                const mi_page_t* page, const void* p) {
     mi_assert_internal(page != NULL && p != NULL);
     const size_t diff   = (uint8_t*)p - _mi_page_start(segment, page, NULL);
     const size_t adjust = (diff % mi_page_block_size(page));
@@ -437,9 +477,11 @@ mi_block_t* _mi_page_ptr_unalign(const mi_segment_t* segment, const mi_page_t* p
 }
 
 
-static void mi_decl_noinline mi_free_generic(const mi_segment_t* segment, bool local, void* p) mi_attr_noexcept {
+static void mi_decl_noinline mi_free_generic(const mi_segment_t* segment,
+                                                bool local, void* p) mi_attr_noexcept {
     mi_page_t* const page = _mi_segment_page_of(segment, p);
-    mi_block_t* const block = (mi_page_has_aligned(page) ? _mi_page_ptr_unalign(segment, page, p) : (mi_block_t*)p);
+    mi_block_t* const block = (mi_page_has_aligned(page) ?
+                                _mi_page_ptr_unalign(segment, page, p) : (mi_block_t*)p);
     mi_stat_free(page, block);
     _mi_free_block(page, local, block);
 }
@@ -488,9 +530,13 @@ void mi_free(void* p) mi_attr_noexcept
     mi_page_t* const page = _mi_segment_page_of(segment, p);
     mi_block_t* const block = (mi_block_t*)p;
 
-    if (mi_likely(tid == mi_atomic_load_relaxed(&segment->thread_id) && page->flags.full_aligned == 0)) {  // the thread id matches and it is not a full page, nor has aligned blocks
+    if (mi_likely(tid == mi_atomic_load_relaxed(&segment->thread_id) &&
+                                                            page->flags.full_aligned == 0)) {
+                 // the thread id matches and it is not a full page, nor has aligned blocks
         // local, and not full or aligned
-        if (mi_unlikely(mi_check_is_double_free(page, block))) return;
+        if (mi_unlikely(mi_check_is_double_free(page, block)))
+            return;
+
         mi_check_padding(page, block);
         mi_stat_free(page, block);
 #if (MI_DEBUG!=0)
@@ -498,7 +544,8 @@ void mi_free(void* p) mi_attr_noexcept
 #endif
         mi_block_set_next(page, block, page->local_free);
         page->local_free = block;
-        if (mi_unlikely(--page->used == 0)) {   // using this expression generates better code than: page->used--; if (mi_page_all_free(page))
+        if (mi_unlikely(--page->used == 0)) {
+        // using this expression generates better code than: page->used--; if (mi_page_all_free(page))
             _mi_page_retire(page);
         }
     }
@@ -534,9 +581,11 @@ bool _mi_free_delayed_block(mi_block_t* block) {
 // Bytes available in a block
 static size_t _mi_usable_size(const void* p, const char* msg) mi_attr_noexcept {
     const mi_segment_t* const segment = mi_checked_ptr_segment(p, msg);
-    if (segment == NULL) return 0;
+    if (segment == NULL)
+        return 0;
     const mi_page_t* const page = _mi_segment_page_of(segment, p);
     const mi_block_t* block = (const mi_block_t*)p;
+
     if (mi_unlikely(mi_page_has_aligned(page))) {
         block = _mi_page_ptr_unalign(segment, page, p);
         size_t size = mi_page_usable_size_of(page, block);
@@ -593,7 +642,8 @@ void mi_free_aligned(void* p, size_t alignment) mi_attr_noexcept {
     mi_free(p);
 }
 
-extern inline mi_decl_restrict void* mi_heap_calloc(mi_heap_t* heap, size_t count, size_t size) mi_attr_noexcept {
+extern inline mi_decl_restrict void* mi_heap_calloc(mi_heap_t* heap, size_t count,
+                                                        size_t size) mi_attr_noexcept {
     size_t total;
     if (mi_count_size_overflow(count, size, &total)) return NULL;
     return mi_heap_zalloc(heap, total);
@@ -604,7 +654,8 @@ mi_decl_restrict void* mi_calloc(size_t count, size_t size) mi_attr_noexcept {
 }
 
 // Uninitialized `calloc`
-extern mi_decl_restrict void* mi_heap_mallocn(mi_heap_t* heap, size_t count, size_t size) mi_attr_noexcept {
+extern mi_decl_restrict void* mi_heap_mallocn(mi_heap_t* heap, size_t count,
+                                                        size_t size) mi_attr_noexcept {
     size_t total;
     if (mi_count_size_overflow(count, size, &total)) return NULL;
     return mi_heap_malloc(heap, total);
@@ -623,7 +674,9 @@ void* mi_expand(void* p, size_t newsize) mi_attr_noexcept {
 }
 
 void* _mi_heap_realloc_zero(mi_heap_t* heap, void* p, size_t newsize, bool zero) {
-    if (p == NULL) return _mi_heap_malloc_zero(heap, newsize, zero);
+    if (p == NULL)
+        return _mi_heap_malloc_zero(heap, newsize, zero);
+
     size_t size = _mi_usable_size(p, "mi_realloc");
     if (newsize <= size && newsize >= (size / 2)) {
         return p;  // reallocation still fits and not more than 50% waste
@@ -650,7 +703,6 @@ void* mi_heap_reallocn(mi_heap_t* heap, void* p, size_t count, size_t size) mi_a
     if (mi_count_size_overflow(count, size, &total)) return NULL;
     return mi_heap_realloc(heap, p, total);
 }
-
 
 // Reallocate but free `p` on errors
 void* mi_heap_reallocf(mi_heap_t* heap, void* p, size_t newsize) mi_attr_noexcept {
@@ -712,12 +764,20 @@ mi_decl_restrict char* mi_strdup(const char* s) mi_attr_noexcept {
 
 // `strndup` using mi_malloc
 mi_decl_restrict char* mi_heap_strndup(mi_heap_t* heap, const char* s, size_t n) mi_attr_noexcept {
-    if (s == NULL) return NULL;
-    const char* end = (const char*)memchr(s, 0, n);  // find end of string in the first `n` characters (returns NULL if not found)
-    const size_t m = (end != NULL ? (size_t)(end - s) : n);  // `m` is the minimum of `n` or the end-of-string
+    if (s == NULL)
+        return NULL;
+
+    // find end of string in the first `n` characters (returns NULL if not found)
+    const char* end = (const char*)memchr(s, 0, n);
+
+    // `m` is the minimum of `n` or the end-of-string
+    const size_t m = (end != NULL ? (size_t)(end - s) : n);
+
     mi_assert_internal(m <= n);
     char* t = (char*)mi_heap_malloc(heap, m + 1);
-    if (t == NULL) return NULL;
+    if (t == NULL)
+        return NULL;
+
     _mi_memcpy(t, s, m);
     t[m] = 0;
     return t;
@@ -734,15 +794,18 @@ mi_decl_restrict char* mi_strndup(const char* s, size_t n) mi_attr_noexcept {
 #define PATH_MAX MAX_PATH
 #endif
 #include <windows.h>
-mi_decl_restrict char* mi_heap_realpath(mi_heap_t* heap, const char* fname, char* resolved_name) mi_attr_noexcept {
+mi_decl_restrict char* mi_heap_realpath(mi_heap_t* heap, const char* fname,
+                                                char* resolved_name) mi_attr_noexcept {
     // todo: use GetFullPathNameW to allow longer file names
     char buf[PATH_MAX];
-    DWORD res = GetFullPathNameA(fname, PATH_MAX, (resolved_name == NULL ? buf : resolved_name), NULL);
+    DWORD res = GetFullPathNameA(fname, PATH_MAX, (resolved_name == NULL ? buf :
+                                                                resolved_name), NULL);
     if (res == 0) {
         errno = GetLastError(); return NULL;
     }
     else if (res > PATH_MAX) {
-        errno = EINVAL; return NULL;
+        errno = EINVAL;
+        return NULL;
     }
     else if (resolved_name != NULL) {
         return resolved_name;
@@ -799,57 +862,57 @@ but we call `exit` instead (i.e. not returning).
 -------------------------------------------------------*/
 
 #ifdef __cplusplus
-#include <new>
-static bool mi_try_new_handler(bool nothrow) {
-#if defined(_MSC_VER) || (__cplusplus >= 201103L)
-    std::new_handler h = std::get_new_handler();
-#else
-    std::new_handler h = std::set_new_handler();
-    std::set_new_handler(h);
-#endif
-    if (h == NULL) {
-        _mi_error_message(ENOMEM, "out of memory in 'new'");
-        if (!nothrow) {
-            throw std::bad_alloc();
+    #include <new>
+    static bool mi_try_new_handler(bool nothrow) {
+    #if defined(_MSC_VER) || (__cplusplus >= 201103L)
+        std::new_handler h = std::get_new_handler();
+    #else
+        std::new_handler h = std::set_new_handler();
+        std::set_new_handler(h);
+    #endif
+        if (h == NULL) {
+            _mi_error_message(ENOMEM, "out of memory in 'new'");
+            if (!nothrow) {
+                throw std::bad_alloc();
+            }
+            return false;
         }
-        return false;
-    }
-    else {
-        h();
-        return true;
-    }
-}
-#else
-typedef void (*std_new_handler_t)(void);
-
-#if (defined(__GNUC__) || defined(__clang__))
-std_new_handler_t __attribute((weak)) _ZSt15get_new_handlerv(void) {
-    return NULL;
-}
-static std_new_handler_t mi_get_new_handler(void) {
-    return _ZSt15get_new_handlerv();
-}
-#else
-// note: on windows we could dynamically link to `?get_new_handler@std@@YAP6AXXZXZ`.
-static std_new_handler_t mi_get_new_handler() {
-    return NULL;
-}
-#endif
-
-static bool mi_try_new_handler(bool nothrow) {
-    std_new_handler_t h = mi_get_new_handler();
-    if (h == NULL) {
-        _mi_error_message(ENOMEM, "out of memory in 'new'");
-        if (!nothrow) {
-            abort();  // cannot throw in plain C, use abort
+        else {
+            h();
+            return true;
         }
-        return false;
     }
-    else {
-        h();
-        return true;
+#else
+    typedef void (*std_new_handler_t)(void);
+
+    #if (defined(__GNUC__) || defined(__clang__))
+        std_new_handler_t __attribute((weak)) _ZSt15get_new_handlerv(void) {
+            return NULL;
+        }
+        static std_new_handler_t mi_get_new_handler(void) {
+            return _ZSt15get_new_handlerv();
+        }
+    #else
+        // note: on windows we could dynamically link to `?get_new_handler@std@@YAP6AXXZXZ`.
+        static std_new_handler_t mi_get_new_handler() {
+            return NULL;
+        }
+    #endif
+
+    static bool mi_try_new_handler(bool nothrow) {
+        std_new_handler_t h = mi_get_new_handler();
+        if (h == NULL) {
+            _mi_error_message(ENOMEM, "out of memory in 'new'");
+            if (!nothrow) {
+                abort();  // cannot throw in plain C, use abort
+            }
+            return false;
+        }
+        else {
+            h();
+            return true;
+        }
     }
-}
 #endif
 
 static mi_decl_noinline void* mi_try_new(size_t size, bool nothrow ) {
@@ -862,13 +925,15 @@ static mi_decl_noinline void* mi_try_new(size_t size, bool nothrow ) {
 
 mi_decl_restrict void* mi_new(size_t size) {
     void* p = mi_malloc(size);
-    if (mi_unlikely(p == NULL)) return mi_try_new(size, false);
+    if (mi_unlikely(p == NULL))
+        return mi_try_new(size, false);
     return p;
 }
 
 mi_decl_restrict void* mi_new_nothrow(size_t size) mi_attr_noexcept {
     void* p = mi_malloc(size);
-    if (mi_unlikely(p == NULL)) return mi_try_new(size, true);
+    if (mi_unlikely(p == NULL))
+        return mi_try_new(size, true);
     return p;
 }
 
@@ -893,7 +958,8 @@ mi_decl_restrict void* mi_new_aligned_nothrow(size_t size, size_t alignment) mi_
 mi_decl_restrict void* mi_new_n(size_t count, size_t size) {
     size_t total;
     if (mi_unlikely(mi_count_size_overflow(count, size, &total))) {
-        mi_try_new_handler(false);  // on overflow we invoke the try_new_handler once to potentially throw std::bad_alloc
+        // on overflow we invoke the try_new_handler once to potentially throw std::bad_alloc
+        mi_try_new_handler(false);
         return NULL;
     }
     else {
@@ -912,7 +978,9 @@ void* mi_new_realloc(void* p, size_t newsize) {
 void* mi_new_reallocn(void* p, size_t newcount, size_t size) {
     size_t total;
     if (mi_unlikely(mi_count_size_overflow(newcount, size, &total))) {
-        mi_try_new_handler(false);  // on overflow we invoke the try_new_handler once to potentially throw std::bad_alloc
+        // on overflow we invoke the try_new_handler once to potentially throw
+        // std::bad_alloc
+        mi_try_new_handler(false);
         return NULL;
     }
     else {

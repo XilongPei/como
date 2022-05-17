@@ -29,7 +29,8 @@ terms of the MIT license. A copy of the license can be found in the file
 ----------------------------------------------------------- */
 
 // Index a block in a page
-static inline mi_block_t* mi_page_block_at(const mi_page_t* page, void* page_start, size_t block_size, size_t i) {
+static inline mi_block_t* mi_page_block_at(const mi_page_t* page, void* page_start,
+                                                        size_t block_size, size_t i) {
     MI_UNUSED(page);
     mi_assert_internal(page != NULL);
     mi_assert_internal(i <= page->reserved);
@@ -127,7 +128,8 @@ void _mi_page_use_delayed_free(mi_page_t* page, mi_delayed_t delay, bool overrid
     mi_delayed_t     old_delay;
     mi_thread_free_t tfree;
     do {
-        tfree = mi_atomic_load_acquire(&page->xthread_free); // note: must acquire as we can break/repeat this loop and not do a CAS;
+        // note: must acquire as we can break/repeat this loop and not do a CAS;
+        tfree = mi_atomic_load_acquire(&page->xthread_free);
         tfreex = mi_tf_set_delayed(tfree, delay);
         old_delay = mi_tf_delayed(tfree);
         if (mi_unlikely(old_delay == MI_DELAYED_FREEING)) {
@@ -174,7 +176,8 @@ static void _mi_page_thread_free_collect(mi_page_t* page)
         count++;
         tail = next;
     }
-    // if `count > max_count` there was a memory corruption (possibly infinite list due to double multi-threaded free)
+    // if `count > max_count` there was a memory corruption (possibly infinite
+    // list due to double multi-threaded free)
     if (count > max_count) {
         _mi_error_message(EFAULT, "corrupted thread-free list\n");
         return; // the thread-free items cannot be freed
@@ -276,7 +279,8 @@ static mi_page_t* mi_page_fresh(mi_heap_t* heap, mi_page_queue_t* pq) {
 void _mi_heap_delayed_free(mi_heap_t* heap) {
     // take over the list (note: no atomic exchange since it is often NULL)
     mi_block_t* block = mi_atomic_load_ptr_relaxed(mi_block_t, &heap->thread_delayed_free);
-    while (block != NULL && !mi_atomic_cas_ptr_weak_acq_rel(mi_block_t, &heap->thread_delayed_free, &block, NULL)) { /* nothing */ };
+    while (block != NULL && !mi_atomic_cas_ptr_weak_acq_rel(mi_block_t,
+                        &heap->thread_delayed_free, &block, NULL)) { /* nothing */ };
 
     // and free them all
     while (block != NULL) {
@@ -288,7 +292,8 @@ void _mi_heap_delayed_free(mi_heap_t* heap) {
             mi_block_t* dfree = mi_atomic_load_ptr_relaxed(mi_block_t, &heap->thread_delayed_free);
             do {
                 mi_block_set_nextx(heap, block, dfree, heap->keys);
-            } while (!mi_atomic_cas_ptr_weak_release(mi_block_t, &heap->thread_delayed_free, &dfree, block));
+            } while (!mi_atomic_cas_ptr_weak_release(mi_block_t,
+                                    &heap->thread_delayed_free, &dfree, block));
         }
         block = next;
     }
@@ -320,7 +325,9 @@ static void mi_page_to_full(mi_page_t* page, mi_page_queue_t* pq) {
 
     if (mi_page_is_in_full(page)) return;
     mi_page_queue_enqueue_from(&mi_page_heap(page)->pages[MI_BIN_FULL], pq, page);
-    _mi_page_free_collect(page, false); // try to collect right away in case another thread freed just before MI_USE_DELAYED_FREE was set
+
+    // try to collect right away in case another thread freed just before MI_USE_DELAYED_FREE was set
+    _mi_page_free_collect(page, false);
 }
 
 
@@ -346,7 +353,9 @@ void _mi_page_abandon(mi_page_t* page, mi_page_queue_t* pq) {
 
 #if MI_DEBUG>1
     // check there are no references left..
-    for (mi_block_t* block = (mi_block_t*)pheap->thread_delayed_free; block != NULL; block = mi_block_nextx(pheap, block, pheap->keys)) {
+    for (mi_block_t* block = (mi_block_t*)pheap->thread_delayed_free;
+                            block != NULL;
+                            block = mi_block_nextx(pheap, block, pheap->keys)) {
         mi_assert_internal(_mi_ptr_page(block) != page);
     }
 #endif
@@ -404,14 +413,21 @@ void _mi_page_retire(mi_page_t* page) mi_attr_noexcept {
     if (mi_likely(page->xblock_size <= MI_MAX_RETIRE_SIZE && !mi_page_is_in_full(page))) {
         if (pq->last == page && pq->first == page) { // the only page in the queue?
             mi_stat_counter_increase(_mi_stats_main.page_no_retire, 1);
-            page->retire_expire = (page->xblock_size <= MI_SMALL_OBJ_SIZE_MAX ? MI_RETIRE_CYCLES : MI_RETIRE_CYCLES / 4);
+            page->retire_expire = (page->xblock_size <= MI_SMALL_OBJ_SIZE_MAX ?
+                                            MI_RETIRE_CYCLES : MI_RETIRE_CYCLES / 4);
             mi_heap_t* heap = mi_page_heap(page);
             mi_assert_internal(pq >= heap->pages);
+
             const size_t index = pq - heap->pages;
             mi_assert_internal(index < MI_BIN_FULL && index < MI_BIN_HUGE);
-            if (index < heap->page_retired_min) heap->page_retired_min = index;
-            if (index > heap->page_retired_max) heap->page_retired_max = index;
+
+            if (index < heap->page_retired_min)
+                heap->page_retired_min = index;
+            if (index > heap->page_retired_max)
+                heap->page_retired_max = index;
+
             mi_assert_internal(mi_page_all_free(page));
+
             return; // dont't free after all
         }
     }
@@ -459,7 +475,8 @@ void _mi_heap_collect_retired(mi_heap_t* heap, bool force) {
 #define MI_MAX_SLICES       (1UL << MI_MAX_SLICE_SHIFT)
 #define MI_MIN_SLICES       (2)
 
-static void mi_page_free_list_extend_secure(mi_heap_t* const heap, mi_page_t* const page, const size_t bsize, const size_t extend, mi_stats_t* const stats) {
+static void mi_page_free_list_extend_secure(mi_heap_t* const heap, mi_page_t* const page,
+                    const size_t bsize, const size_t extend, mi_stats_t* const stats) {
     MI_UNUSED(stats);
 #if (MI_SECURE<=2)
     mi_assert_internal(page->free == NULL);
@@ -484,7 +501,9 @@ static void mi_page_free_list_extend_secure(mi_heap_t* const heap, mi_page_t* co
         blocks[i] = mi_page_block_at(page, page_area, bsize, page->capacity + i * slice_extend);
         counts[i] = slice_extend;
     }
-    counts[slice_count - 1] += (extend % slice_count); // final slice holds the modulus too (todo: distribute evenly?)
+
+    // final slice holds the modulus too (todo: distribute evenly?)
+    counts[slice_count - 1] += (extend % slice_count);
 
     // and initialize the free list by randomly threading through them
     // set up first element
@@ -494,21 +513,30 @@ static void mi_page_free_list_extend_secure(mi_heap_t* const heap, mi_page_t* co
     mi_block_t* const free_start = blocks[current];
     // and iterate through the rest; use `random_shuffle` for performance
     uintptr_t rnd = _mi_random_shuffle(r | 1); // ensure not 0
+
     for (size_t i = 1; i < extend; i++) {
         // call random_shuffle only every INTPTR_SIZE rounds
         const size_t round = i % MI_INTPTR_SIZE;
-        if (round == 0) rnd = _mi_random_shuffle(rnd);
+        if (round == 0)
+            rnd = _mi_random_shuffle(rnd);
+
         // select a random next slice index
         size_t next = ((rnd >> 8 * round) & (slice_count - 1));
-        while (counts[next] == 0) {                          // ensure it still has space
+        while (counts[next] == 0) {                 // ensure it still has space
             next++;
-            if (next == slice_count) next = 0;
+            if (next == slice_count)
+                next = 0;
         }
+
         // and link the current block to it
         counts[next]--;
         mi_block_t* const block = blocks[current];
-        blocks[current] = (mi_block_t*)((uint8_t*)block + bsize);  // bump to the following block
-        mi_block_set_next(page, block, blocks[next]);   // and set next; note: we may have `current == next`
+
+        // bump to the following block
+        blocks[current] = (mi_block_t*)((uint8_t*)block + bsize);
+
+        // and set next; note: we may have `current == next`
+        mi_block_set_next(page, block, blocks[next]);
         current = next;
     }
     // prepend to the free list (usually NULL)
@@ -516,7 +544,8 @@ static void mi_page_free_list_extend_secure(mi_heap_t* const heap, mi_page_t* co
     page->free = free_start;
 }
 
-static mi_decl_noinline void mi_page_free_list_extend( mi_page_t* const page, const size_t bsize, const size_t extend, mi_stats_t* const stats)
+static mi_decl_noinline void mi_page_free_list_extend( mi_page_t* const page,
+                    const size_t bsize, const size_t extend, mi_stats_t* const stats)
 {
     MI_UNUSED(stats);
 #if (MI_SECURE <= 2)
@@ -767,12 +796,15 @@ static mi_page_t* mi_huge_page_alloc(mi_heap_t* heap, size_t size) {
     mi_assert_internal(_mi_bin(block_size) == MI_BIN_HUGE);
     mi_page_t* page = mi_page_fresh_alloc(heap, NULL, block_size);
     if (page != NULL) {
-        const size_t bsize = mi_page_block_size(page);  // note: not `mi_page_usable_block_size` as `size` includes padding already
+        // note: not `mi_page_usable_block_size` as `size` includes padding already
+        const size_t bsize = mi_page_block_size(page);
         mi_assert_internal(bsize >= size);
         mi_assert_internal(mi_page_immediate_available(page));
         mi_assert_internal(_mi_page_segment(page)->page_kind == MI_PAGE_HUGE);
         mi_assert_internal(_mi_page_segment(page)->used == 1);
-        mi_assert_internal(_mi_page_segment(page)->thread_id == 0); // abandoned, not in the huge queue
+
+        // abandoned, not in the huge queue
+        mi_assert_internal(_mi_page_segment(page)->thread_id == 0);
         mi_page_set_heap(page, NULL);
 
         if (bsize > MI_HUGE_OBJ_SIZE_MAX) {
@@ -787,14 +819,16 @@ static mi_page_t* mi_huge_page_alloc(mi_heap_t* heap, size_t size) {
     return page;
 }
 
-
 // Allocate a page
 // Note: in debug mode the size includes MI_PADDING_SIZE and might have overflowed.
 static mi_page_t* mi_find_page(mi_heap_t* heap, size_t size) mi_attr_noexcept {
     // huge allocation?
-    const size_t req_size = size - MI_PADDING_SIZE;  // correct for padding_size in case of an overflow on `size`
+    // correct for padding_size in case of an overflow on `size`
+    const size_t req_size = size - MI_PADDING_SIZE;
+
     if (mi_unlikely(req_size > (MI_LARGE_OBJ_SIZE_MAX - MI_PADDING_SIZE) )) {
-        if (mi_unlikely(req_size > PTRDIFF_MAX)) {  // we don't allocate more than PTRDIFF_MAX (see <https://sourceware.org/ml/libc-announce/2019/msg00001.html>)
+        if (mi_unlikely(req_size > PTRDIFF_MAX)) {
+        // we don't allocate more than PTRDIFF_MAX (see <https://sourceware.org/ml/libc-announce/2019/msg00001.html>)
             _mi_error_message(EOVERFLOW, "allocation request is too large (%zu bytes)\n", req_size);
             return NULL;
         }
@@ -820,7 +854,9 @@ void* _mi_malloc_generic(mi_heap_t* heap, size_t size) mi_attr_noexcept
     if (mi_unlikely(!mi_heap_is_initialized(heap))) {
         mi_thread_init(); // calls `_mi_heap_init` in turn
         heap = mi_get_default_heap();
-        if (mi_unlikely(!mi_heap_is_initialized(heap))) { return NULL; }
+        if (mi_unlikely(!mi_heap_is_initialized(heap))) {
+            return NULL;
+        }
     }
     mi_assert_internal(mi_heap_is_initialized(heap));
 
@@ -834,13 +870,16 @@ void* _mi_malloc_generic(mi_heap_t* heap, size_t size) mi_attr_noexcept
     // qjy : 在heap中找到符合size分配的对应page
     // find (or allocate) a page of the right size
     mi_page_t* page = mi_find_page(heap, size);
-    if (mi_unlikely(page == NULL)) { // first time out of memory, try to collect and retry the allocation once more
+    if (mi_unlikely(page == NULL)) {
+    // first time out of memory, try to collect and retry the allocation once more
         mi_heap_collect(heap, true /* force */);
         page = mi_find_page(heap, size);
     }
 
-    if (mi_unlikely(page == NULL)) { // out of memory
-        const size_t req_size = size - MI_PADDING_SIZE;  // correct for padding_size in case of an overflow on `size`
+    if (mi_unlikely(page == NULL)) {
+    // out of memory
+        // correct for padding_size in case of an overflow on `size`
+        const size_t req_size = size - MI_PADDING_SIZE;
         _mi_error_message(ENOMEM, "unable to allocate memory (%zu bytes)\n", req_size);
         return NULL;
     }

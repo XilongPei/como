@@ -1,10 +1,9 @@
 #include "mimalloc_utils.h"
 #include <mimalloc.h>
 
-
-
 namespace como {
-int MimallocUtils::setupFscpMemAreas(void* MemAreasInfo, int numAreas, COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree) {
+int MimallocUtils::setupFscpMemAreas(void* MemAreasInfo, int numAreas,
+                            COMO_MALLOC& mimalloc, FREE_MEM_FUNCTION& mifree) {
     int ret = setupFscpMemAreas(MemAreasInfo, numAreas, mimalloc, mifree);
     return ret;
 }
