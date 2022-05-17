@@ -32,7 +32,7 @@ int main(int argv, char** argc)
 
     ECode ec = CService::New(IID_IService, (IInterface**)&srv);
     if (FAILED(ec)) {
-        printf("Failed, CService::New\n");
+        printf("Failed, CService::New, ECode: 0x%X\n", ec);
         return 1;
     }
 

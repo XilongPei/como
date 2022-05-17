@@ -109,7 +109,7 @@ ECode CoGetComponentMetadataFromFile(
     component->mMetadataWrapper = metadata;
 
     MetaComponent* mmc = reinterpret_cast<MetaComponent*>(
-            component->mMetadataWrapper->mMetadata);
+                                        component->mMetadataWrapper->mMetadata);
 
     if (mmc->mMagic != COMO_MAGIC) {
         Logger::E("COMORT", "Metadata info is bad.");
@@ -161,7 +161,7 @@ ECode CoGetComponentMetadataFromBytes(
     memcpy(&(component->mMetadataWrapper->mMetadata), bytes.GetPayload(), bytes.GetLength());
 
     MetaComponent* mmc = reinterpret_cast<MetaComponent*>(
-            component->mMetadataWrapper->mMetadata);
+                                        component->mMetadataWrapper->mMetadata);
 
     if (mmc->mMagic != COMO_MAGIC) {
         Logger::E("COMORT", "Metadata info is bad.");

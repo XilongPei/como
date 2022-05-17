@@ -370,7 +370,7 @@ ECode CBootClassLoader::LoadMetadata(
     /* [in] */ const Array<Byte>& metadata,
     /* [out] */ AutoPtr<IMetaComponent>& component)
 {
-    if (metadata.IsEmpty() || metadata.GetLength() < 0) {
+    if (metadata.IsEmpty()) {
         return NOERROR;
     }
 
@@ -432,20 +432,6 @@ ECode CBootClassLoader::LoadCoclass(
         }
     }
 
-// old algorithm
-#if 0
-    Array<IMetaComponent*> components;
-    {
-        Mutex::AutoLock lock(mComponentsLock);
-        components = mComponents.GetValues();
-    }
-    for (Integer i = 0; i < components.GetLength(); i++) {
-        components[i]->GetCoclass(fullName, klass);
-        if (klass != nullptr) {
-            return NOERROR;
-        }
-    }
-#endif
     klass = nullptr;
     return E_CLASS_NOT_FOUND_EXCEPTION;
 }
@@ -475,20 +461,6 @@ ECode CBootClassLoader::LoadCoclass(
         }
     }
 
-// old algorithm
-#if 0
-    Array<IMetaComponent*> components;
-    {
-        Mutex::AutoLock lock(mComponentsLock);
-        components = mComponents.GetValues();
-    }
-    for (Integer i = 0; i < components.GetLength(); i++) {
-        components[i]->GetCoclass(cid, klass);
-        if (klass != nullptr) {
-            return NOERROR;
-        }
-    }
-#endif
     klass = nullptr;
     return E_CLASS_NOT_FOUND_EXCEPTION;
 }
@@ -519,21 +491,6 @@ ECode CBootClassLoader::LoadInterface(
         }
     }
 
-// old algorithm
-#if 0
-    Array<IMetaComponent*> components;
-    {
-        Mutex::AutoLock lock(mComponentsLock);
-        components = mComponents.GetValues();
-    }
-
-    for (Integer i = 0; i < components.GetLength(); i++) {
-        components[i]->GetInterface(fullName, intf);
-        if (intf != nullptr) {
-            return NOERROR;
-        }
-    }
-#endif
     intf = nullptr;
     return E_INTERFACE_NOT_FOUND_EXCEPTION;
 }
@@ -549,14 +506,14 @@ void CBootClassLoader::InitComponentPath()
 {
     String cpath(getenv("LIB_PATH"));
 
-    if (!cpath.IsEmpty()) {
+    if (! cpath.IsEmpty()) {
         Integer index = cpath.IndexOf(":");
         while (index != -1) {
             mComponentPath.Add(cpath.Substring(0, index - 1));
             cpath = cpath.Substring(index + 1);
             index = cpath.IndexOf(":");
         }
-        if (!cpath.IsEmpty()) {
+        if (! cpath.IsEmpty()) {
             mComponentPath.Add(cpath);
         }
     }

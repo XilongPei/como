@@ -312,7 +312,7 @@ ECode CMetaComponent::LoadComponent(
         mComponent->mSoCanUnload = component->mSoCanUnload;
         mComponent->mMetadataWrapper = component->mMetadataWrapper;
 
-        LoadAllClassObjectGetters();
+        FAIL_RETURN(LoadAllClassObjectGetters());
     }
 
     return NOERROR;
@@ -410,11 +410,11 @@ ECode CMetaComponent::BuildAllCoclasses()
         return NOERROR;
     }
 
-    for (Integer i = 0; i < mMetadata->mCoclassNumber; i++) {
+    for (Integer i = 0;  i < mMetadata->mCoclassNumber;  i++) {
         MetaCoclass* mc = mMetadata->mCoclasses[i];
         String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
         AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(this, mMetadata, mc);
-        if (nullptr != mcObj) {
+        if ((nullptr != mcObj) && (! fullName.IsEmpty())) {
             mCoclasses.Set(i, mcObj);
             mCoclassNameMap.Put(fullName, mcObj);
             mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj);
@@ -445,14 +445,14 @@ ECode CMetaComponent::BuildAllEnumerations()
     }
 
     Integer index = 0;
-    for (Integer i = 0; i < mMetadata->mEnumerationNumber; i++) {
+    for (Integer i = 0;  i < mMetadata->mEnumerationNumber;  i++) {
         MetaEnumeration* me = mMetadata->mEnumerations[i];
         if (me->mProperties & TYPE_EXTERNAL) {
             continue;
         }
         String fullName = String::Format("%s::%s", me->mNamespace, me->mName);
         AutoPtr<CMetaEnumeration> meObj = new CMetaEnumeration(this, mMetadata, me);
-        if (nullptr != meObj) {
+        if ((nullptr != meObj) && (! fullName.IsEmpty())) {
             mEnumerations.Set(index, meObj);
             mEnumerationNameMap.Put(fullName, meObj);
             index++;
@@ -483,15 +483,15 @@ ECode CMetaComponent::BuildAllInterfaces()
     }
 
     Integer index = 0;
-    for (Integer i = 0; i < mMetadata->mInterfaceNumber; i++) {
+    for (Integer i = 0;  i < mMetadata->mInterfaceNumber;  i++) {
         MetaInterface* mi = mMetadata->mInterfaces[i];
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
         }
         String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
-        if (!mInterfaceNameMap.ContainsKey(fullName)) {
+        if (! mInterfaceNameMap.ContainsKey(fullName)) {
             AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
-            if (nullptr != miObj) {
+            if ((nullptr != miObj) && (! fullName.IsEmpty())) {
                 mInterfaces.Set(index, miObj);
                 mInterfaceNameMap.Put(fullName, miObj);
                 mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
@@ -516,6 +516,8 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
 
     MetaInterface* mi = mMetadata->mInterfaces[index];
     String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
+    if (fullName.IsEmpty())
+        return nullptr;
 
     if (! mInterfaceNameMap.ContainsKey(fullName)) {
         Mutex::AutoLock lock(mInterfacesLock);
