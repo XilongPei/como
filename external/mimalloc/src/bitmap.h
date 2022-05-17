@@ -36,23 +36,23 @@ typedef size_t mi_bitmap_index_t;
 
 // Create a bit index.
 static inline mi_bitmap_index_t mi_bitmap_index_create(size_t idx, size_t bitidx) {
-  mi_assert_internal(bitidx < MI_BITMAP_FIELD_BITS);
-  return (idx*MI_BITMAP_FIELD_BITS) + bitidx;
+    mi_assert_internal(bitidx < MI_BITMAP_FIELD_BITS);
+    return (idx * MI_BITMAP_FIELD_BITS) + bitidx;
 }
 
 // Get the field index from a bit index.
 static inline size_t mi_bitmap_index_field(mi_bitmap_index_t bitmap_idx) {
-  return (bitmap_idx / MI_BITMAP_FIELD_BITS);
+    return (bitmap_idx / MI_BITMAP_FIELD_BITS);
 }
 
 // Get the bit index in a bitmap field
 static inline size_t mi_bitmap_index_bit_in_field(mi_bitmap_index_t bitmap_idx) {
-  return (bitmap_idx % MI_BITMAP_FIELD_BITS);
+    return (bitmap_idx % MI_BITMAP_FIELD_BITS);
 }
 
 // Get the full bit index
 static inline size_t mi_bitmap_index_bit(mi_bitmap_index_t bitmap_idx) {
-  return bitmap_idx;
+    return bitmap_idx;
 }
 
 /* -----------------------------------------------------------

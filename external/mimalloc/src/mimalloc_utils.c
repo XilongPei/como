@@ -132,7 +132,7 @@ void* mi_area_malloc(short iMemArea, size_t size) {
         _mi_error_message(ERANGE, "iMemArea out of range\n");
         return NULL;
     }
-    if (size > MI_LARGE_OBJ_SIZE_MAX || size <= 0) {
+    if (size > MI_LARGE_OBJ_SIZE_MAX || 0 == size) {
         _mi_error_message(ERANGE, "size out of range\n");
         return NULL;
     }
