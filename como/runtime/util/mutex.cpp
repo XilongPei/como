@@ -39,8 +39,6 @@
 #include <linux/futex.h>
 #include <sys/syscall.h>
 
-#include <cstdio>
-
 namespace como {
 
 pid_t GetTid()
@@ -94,6 +92,7 @@ static void InitTimeSpec(
 
     // Catch rollover.
     if (ts->tv_nsec >= 1000000000L) {
+                     // 987654321
         ts->tv_sec++;
         ts->tv_nsec -= 1000000000L;
     }
@@ -205,8 +204,7 @@ Boolean Condition::TimedWait(
             // A signal or ConditionVariable::Signal/Broadcast has come in.
         }
         else {
-            Logger::E("Condition",
-                    "timed futex wait failed");
+            Logger::E("Condition", "timed futex wait failed");
         }
     }
     mGuard.Lock();

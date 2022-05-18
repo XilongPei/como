@@ -45,6 +45,7 @@ set(SOURCES
     mutex.cpp
     ${EXTERNAL_DIR}/cityhash/export_como/cityhash.cc
     mistring.cpp
+    mac.cpp
     ${EXTERNAL_DIR}/inih/ini.c
 )
 
