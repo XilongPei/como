@@ -103,7 +103,8 @@ bool _mi_bitmap_unclaim_across(mi_bitmap_t bitmap, size_t bitmap_fields,
                                             size_t count, mi_bitmap_index_t bitmap_idx);
 
 // Set `count` bits at `bitmap_idx` to 1 atomically
-// Returns `true` if all `count` bits were 0 previously. `any_zero` is `true` if there was at least one zero bit.
+// Returns `true` if all `count` bits were 0 previously. `any_zero` is `true` if
+// there was at least one zero bit.
 bool _mi_bitmap_claim_across(mi_bitmap_t bitmap, size_t bitmap_fields,
                             size_t count, mi_bitmap_index_t bitmap_idx, bool* pany_zero);
 

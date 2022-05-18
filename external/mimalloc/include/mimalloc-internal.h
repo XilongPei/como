@@ -316,19 +316,29 @@ extern bool _mi_process_is_initialized;
 mi_heap_t*  _mi_heap_main_get(void);    // statically allocated main backing heap
 
 #if defined(MI_MALLOC_OVERRIDE)
-#if defined(__APPLE__) // macOS
-#define MI_TLS_SLOT               89  // seems unused? 
-// #define MI_TLS_RECURSE_GUARD 1
-// other possible unused ones are 9, 29, __PTK_FRAMEWORK_JAVASCRIPTCORE_KEY4 (94), __PTK_FRAMEWORK_GC_KEY9 (112) and __PTK_FRAMEWORK_OLDGC_KEY9 (89)
-// see <https://github.com/rweichler/substrate/blob/master/include/pthread_machdep.h>
-#elif defined(__OpenBSD__)
-// use end bytes of a name; goes wrong if anyone uses names > 23 characters (ptrhread specifies 16)
-// see <https://github.com/openbsd/src/blob/master/lib/libc/include/thread_private.h#L371>
-#define MI_TLS_PTHREAD_SLOT_OFS   (6*sizeof(int) + 4*sizeof(void*) + 24)
-#elif defined(__DragonFly__)
-#warning "mimalloc is not working correctly on DragonFly yet."
-//#define MI_TLS_PTHREAD_SLOT_OFS   (4 + 1*sizeof(void*))  // offset `uniqueid` (also used by gdb?) <https://github.com/DragonFlyBSD/DragonFlyBSD/blob/master/lib/libthread_xu/thread/thr_private.h#L458>
-#endif
+    #if defined(__APPLE__) // macOS
+        #define MI_TLS_SLOT               89  // seems unused?
+        // #define MI_TLS_RECURSE_GUARD 1
+        /**
+         * other possible unused ones are 9, 29, __PTK_FRAMEWORK_JAVASCRIPTCORE_KEY4 (94),
+         * __PTK_FRAMEWORK_GC_KEY9 (112) and __PTK_FRAMEWORK_OLDGC_KEY9 (89)
+         * see <https://github.com/rweichler/substrate/blob/master/include/pthread_machdep.h>
+         */
+    #elif defined(__OpenBSD__)
+        /**
+         * use end bytes of a name; goes wrong if anyone uses names > 23
+         * characters (ptrhread specifies 16)
+         * see <https://github.com/openbsd/src/blob/master/lib/libc/include/thread_private.h#L371>
+         */
+        #define MI_TLS_PTHREAD_SLOT_OFS   (6 * sizeof(int) + 4 * sizeof(void*) + 24)
+    #elif defined(__DragonFly__)
+        #warning "mimalloc is not working correctly on DragonFly yet."
+        /**
+         * #define MI_TLS_PTHREAD_SLOT_OFS   (4 + 1*sizeof(void*))
+         * // offset `uniqueid` (also used by gdb?)
+         * <https://github.com/DragonFlyBSD/DragonFlyBSD/blob/master/lib/libthread_xu/thread/thr_private.h#L458>
+         */
+    #endif
 #endif
 
 #if defined(MI_TLS_SLOT)
@@ -350,10 +360,14 @@ static inline mi_heap_t** mi_tls_pthread_heap_slot(void) {
 extern pthread_key_t _mi_heap_default_key;
 #endif
 
-// Default heap to allocate from (if not using TLS- or pthread slots).
-// Do not use this directly but use through `mi_heap_get_default()` (or the unchecked `mi_get_default_heap`).
-// This thread local variable is only used when neither MI_TLS_SLOT, MI_TLS_PTHREAD, or MI_TLS_PTHREAD_SLOT_OFS are defined.
-// However, on the Apple M1 we do use the address of this variable as the unique thread-id (issue #356).
+/**
+ * Default heap to allocate from (if not using TLS- or pthread slots).
+ * Do not use this directly but use through `mi_heap_get_default()` (or the
+ * unchecked `mi_get_default_heap`). This thread local variable is only used
+ * when neither MI_TLS_SLOT, MI_TLS_PTHREAD, or MI_TLS_PTHREAD_SLOT_OFS are
+ * defined. However, on the Apple M1 we do use the address of this variable as
+ * the unique thread-id (issue #356).
+ */
 extern mi_decl_thread mi_heap_t* _mi_heap_default;  // default heap to allocate from
 extern mi_heap_t* _mi_heap_fscp[FSCP_MEM_AREA_MAX];
 
@@ -364,18 +378,23 @@ static inline mi_heap_t* mi_get_fscp_heap(int numArea) {
 static inline mi_heap_t* mi_get_default_heap(void) {
 #if defined(MI_TLS_SLOT)
     mi_heap_t* heap = (mi_heap_t*)mi_tls_slot(MI_TLS_SLOT);
-    if (mi_unlikely(heap == NULL)) { heap = (mi_heap_t*)&_mi_heap_empty; } //_mi_heap_empty_get(); }
+    if (mi_unlikely(heap == NULL)) {
+        heap = (mi_heap_t*)&_mi_heap_empty;
+    } //_mi_heap_empty_get(); }
+
     return heap;
 #elif defined(MI_TLS_PTHREAD_SLOT_OFS)
     mi_heap_t* heap = *mi_tls_pthread_heap_slot();
     return (mi_unlikely(heap == NULL) ? (mi_heap_t*)&_mi_heap_empty : heap);
 #elif defined(MI_TLS_PTHREAD)
-    mi_heap_t* heap = (mi_unlikely(_mi_heap_default_key == (pthread_key_t)(-1)) ? _mi_heap_main_get() : (mi_heap_t*)pthread_getspecific(_mi_heap_default_key));
+    mi_heap_t* heap = (mi_unlikely(_mi_heap_default_key == (pthread_key_t)(-1))
+                        ? _mi_heap_main_get()
+                        : (mi_heap_t*)pthread_getspecific(_mi_heap_default_key));
     return (mi_unlikely(heap == NULL) ? (mi_heap_t*)&_mi_heap_empty : heap);
 #else
-#if defined(MI_TLS_RECURSE_GUARD)
+    #if defined(MI_TLS_RECURSE_GUARD)
     if (mi_unlikely(!_mi_process_is_initialized)) return _mi_heap_main_get();
-#endif
+    #endif
     return _mi_heap_default;
 #endif
 }
@@ -934,21 +953,20 @@ static inline void _mi_memcpy(void* dst, const void* src, size_t n) {
 // -------------------------------------------------------------------------------
 
 #if (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__)
-// On GCC/CLang we provide a hint that the pointers are word aligned.
-#include <string.h>
-static inline void _mi_memcpy_aligned(void* dst, const void* src, size_t n) {
-    mi_assert_internal(((uintptr_t)dst % MI_INTPTR_SIZE == 0) && ((uintptr_t)src % MI_INTPTR_SIZE == 0));
-    void* adst = __builtin_assume_aligned(dst, MI_INTPTR_SIZE);
-    const void* asrc = __builtin_assume_aligned(src, MI_INTPTR_SIZE);
-    memcpy(adst, asrc, n);
-}
+    // On GCC/CLang we provide a hint that the pointers are word aligned.
+    #include <string.h>
+    static inline void _mi_memcpy_aligned(void* dst, const void* src, size_t n) {
+        mi_assert_internal(((uintptr_t)dst % MI_INTPTR_SIZE == 0) && ((uintptr_t)src % MI_INTPTR_SIZE == 0));
+        void* adst = __builtin_assume_aligned(dst, MI_INTPTR_SIZE);
+        const void* asrc = __builtin_assume_aligned(src, MI_INTPTR_SIZE);
+        memcpy(adst, asrc, n);
+    }
 #else
-// Default fallback on `_mi_memcpy`
-static inline void _mi_memcpy_aligned(void* dst, const void* src, size_t n) {
-    mi_assert_internal(((uintptr_t)dst % MI_INTPTR_SIZE == 0) && ((uintptr_t)src % MI_INTPTR_SIZE == 0));
-    _mi_memcpy(dst, src, n);
-}
+    // Default fallback on `_mi_memcpy`
+    static inline void _mi_memcpy_aligned(void* dst, const void* src, size_t n) {
+        mi_assert_internal(((uintptr_t)dst % MI_INTPTR_SIZE == 0) && ((uintptr_t)src % MI_INTPTR_SIZE == 0));
+        _mi_memcpy(dst, src, n);
+    }
 #endif
-
 
 #endif
