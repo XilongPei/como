@@ -116,13 +116,15 @@ ECode MarshalUtils::UnMarshalArguments(
     /* [in] */ IParcel* argParcel,
     /* [out] */ String& strBuffer)
 {
-    // `sizeof(Integer)` * 3 corresponds to the three statements in CProxy.cpp
+    // `8 * 3` corresponds to the four statements in CProxy.cpp
+    // The data in parcel is 8-byte aligned
     //
     // inParcel->WriteInteger(RPC_MAGIC_NUMBER);
     // inParcel->WriteInteger(thisObj->mIndex);
     // inParcel->WriteInteger(methodIndex + 4);
+    // inParcel->WriteLong(Mac::GetUuid64(uuid64));
     //
-    argParcel->SetDataPosition(sizeof(Integer) * 3);
+    argParcel->SetDataPosition(8 * 3);
 
     String methodName;
     method->GetName(methodName);
@@ -275,7 +277,13 @@ ECode MarshalUtils::UnUnmarshalResults(
     /* [in] */ IParcel* resParcel,
     /* [out] */ String& strBuffer)
 {
-    resParcel->SetDataPosition(0);
+    // `8 * 2` corresponds to the two statements in CStub.cpp
+    // The data in parcel is 8-byte aligned
+    //
+    // resParcel->WriteInteger(RPC_MAGIC_NUMBER);
+    // resParcel->WriteLong(uuid64);
+    //
+    resParcel->SetDataPosition(8 * 2);
 
     String methodName;
     method->GetName(methodName);

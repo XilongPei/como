@@ -925,10 +925,13 @@ ECode InterfaceProxy::UnmarshalResults(
     else
         return NOERROR;
 
-    Integer magic;
-    Long uuid64;
-    resParcel->ReadInteger(magic);
-    resParcel->ReadLong(uuid64);
+    // `8 * 2` corresponds to the two statements in CStub.cpp
+    // The data in parcel is 8-byte aligned
+    //
+    // resParcel->WriteInteger(RPC_MAGIC_NUMBER);
+    // resParcel->WriteLong(uuid64);
+    //
+    resParcel->SetDataPosition(8 * 2);
 
     Long hash;
     mOwner->GetHashCode(hash);
@@ -1751,13 +1754,14 @@ ECode InterfaceProxy::ProxyEntry(
     inParcel->WriteInteger(RPC_MAGIC_NUMBER);
     inParcel->WriteInteger(thisObj->mIndex);
     inParcel->WriteInteger(methodIndex + 4);
+
+    Long uuid64;
+    inParcel->WriteLong(Mac::GetUuid64(uuid64));
+
     ec = thisObj->MarshalArguments(regs, method, inParcel);
     if (FAILED(ec)) {
         goto ProxyExit;
     }
-
-    Long uuid64;
-    inParcel->WriteLong(Mac::GetUuid64(uuid64));
 
     if (thisObj->mOwner->mMonitorInvokeMethod) {
         RuntimeMonitor::WriteRtmInvokeMethod(uuid64,

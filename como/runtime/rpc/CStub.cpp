@@ -656,6 +656,7 @@ ECode InterfaceStub::Invoke(
         Logger::E("CStub", "MethodIndex %d is invalid.", methodIndex);
         return E_RUNTIME_EXCEPTION;
     }
+
     AutoPtr<IMetaMethod> mm;
     ECode ec = mTargetMetadata->GetMethod(methodIndex, mm);
     if (FAILED(ec)) {
