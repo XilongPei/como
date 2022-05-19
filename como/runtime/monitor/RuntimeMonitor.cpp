@@ -327,7 +327,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     strBuffer = "{\"tag\":\"RM_IM_\",";
 
-    snprintf(buf, sizeof(buf), "\"id\":%lld,", rtm_InvokeMethod->uuid64);
+    snprintf(buf, sizeof(buf), "\"id\":%llu,", (unsigned long long)rtm_InvokeMethod->uuid64);
     strBuffer += buf;
 
     struct timeval curTime;
