@@ -44,6 +44,7 @@ enum class RTM_CommandType {
 #pragma pack(4)
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
+    Long            uuid64;
     Long            time;               // Unit: microseconds, from January 1, 1970.
     CoclassID       coclassID;
     UUID            interfaceID_mUuid;
@@ -85,7 +86,8 @@ public:
     static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                  IInterface *intf, AutoPtr<IMetaMethod>& method);
 
-    static ECode WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId,
+    static ECode WriteRtmInvokeMethod(Long uuid64,
+                                      Long serverObjectId, CoclassID& clsId,
                                       InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
                                       Integer whichQueue);

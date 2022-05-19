@@ -22,11 +22,13 @@
 namespace como {
 
 class Mac {
-    Long GetMacAddress(Long& lMacAddr);
+public:
 
-    Long GetThisServiceId(Long& lMacAddr, unsigned short port);
+    static Long GetMacAddress(Long& lMacAddr);
 
-    Long GetUuid64(Long& uuid64);
+    static Long GetThisServiceId(Long& lMacAddr, unsigned short port);
+
+    static Long GetUuid64(Long& uuid64);
 };
 
 } // namespace como

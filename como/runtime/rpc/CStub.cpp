@@ -663,6 +663,9 @@ ECode InterfaceStub::Invoke(
         return ec;
     }
 
+    Long uuid64;
+    resParcel->ReadLong(uuid64);
+
     if (Logger::GetLevel() <= Logger::DEBUG) {
         String strBuffer1;
         String strBuffer2;
@@ -685,12 +688,15 @@ ECode InterfaceStub::Invoke(
     if (mOwner->mMonitorInvokeMethod) {
         Long serverObjectId;
         mOwner->mChannel->GetServerObjectId(serverObjectId);
-        ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId, mOwner->mCid,
-                                            mIid, 0, methodIndex, argParcel, 1);
+        ec = RuntimeMonitor::WriteRtmInvokeMethod(uuid64, serverObjectId,
+                              mOwner->mCid, mIid, 0, methodIndex, argParcel, 1);
     }
 
     ECode ret = mm->Invoke(mObject, argList);
     if (SUCCEEDED(ret)) {
+        resParcel->WriteInteger(RPC_MAGIC_NUMBER);
+        resParcel->WriteLong(uuid64);
+
         ec = MarshalResults(mm, argList, resParcel);
         if (FAILED(ec)) {
             Logger::E("CStub", "MarshalResults failed with ec is 0x%X.", ec);
@@ -703,7 +709,7 @@ ECode InterfaceStub::Invoke(
         if (mOwner->mMonitorInvokeMethod) {
             Long serverObjectId;
             mOwner->mChannel->GetServerObjectId(serverObjectId);
-            ec = RuntimeMonitor::WriteRtmInvokeMethod(serverObjectId,
+            ec = RuntimeMonitor::WriteRtmInvokeMethod(uuid64, serverObjectId,
                               mOwner->mCid, mIid, 1, methodIndex, argParcel, 1);
         }
     }

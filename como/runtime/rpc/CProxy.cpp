@@ -45,6 +45,7 @@
 #endif
 #include "registry.h"
 #include "RuntimeMonitor.h"
+#include "mac.h"
 
 namespace como {
 
@@ -924,6 +925,11 @@ ECode InterfaceProxy::UnmarshalResults(
     else
         return NOERROR;
 
+    Integer magic;
+    Long uuid64;
+    resParcel->ReadInteger(magic);
+    resParcel->ReadLong(uuid64);
+
     Long hash;
     mOwner->GetHashCode(hash);
     resParcel->SetProxyInfo(hash);
@@ -1750,8 +1756,12 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
+    Long uuid64;
+    inParcel->WriteLong(Mac::GetUuid64(uuid64));
+
     if (thisObj->mOwner->mMonitorInvokeMethod) {
-        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mOwner->mServerObjectId,
+        RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
+                                         thisObj->mOwner->mServerObjectId,
                                          thisObj->mOwner->mCid, thisObj->mIid,
                                          0, methodIndex + 4, inParcel, 0);
     }
@@ -1813,9 +1823,10 @@ ECode InterfaceProxy::ProxyEntry(
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
     if (thisObj->mOwner->mMonitorInvokeMethod) {
-        RuntimeMonitor::WriteRtmInvokeMethod(thisObj->mOwner->mServerObjectId,
-                                            thisObj->mOwner->mCid, thisObj->mIid,
-                                            1, methodIndex + 4, inParcel, 0);
+        RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
+                                             thisObj->mOwner->mServerObjectId,
+                                             thisObj->mOwner->mCid, thisObj->mIid,
+                                             1, methodIndex + 4, inParcel, 0);
     }
 
 ProxyExit:

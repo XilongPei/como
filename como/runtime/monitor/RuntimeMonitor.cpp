@@ -241,7 +241,8 @@ static ECode SerializeComponentID(
  * in_out: 0, in; 1, out
  * whichQueue: 0, rtmInvokeMethodClientQueue; 1, rtmInvokeMethodServerQueue
  */
-ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId,
+ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
+                                      Long serverObjectId, CoclassID& clsId,
                                       InterfaceID iid, Integer in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
                                       Integer whichQueue)
@@ -263,6 +264,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long serverObjectId, CoclassID& clsId
     rtm_InvokeMethod->time = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
 
     rtm_InvokeMethod->length = len;
+    rtm_InvokeMethod->uuid64 = uuid64;
     rtm_InvokeMethod->serverObjectId = serverObjectId;
     rtm_InvokeMethod->coclassID = clsId;
     rtm_InvokeMethod->interfaceID_mUuid = iid.mUuid;
@@ -316,12 +318,17 @@ RTM_InvokeMethod* RuntimeMonitor::DeserializeRtmInvokeMethod(
 ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                                                String& strBuffer)
 {
+    char buf[64];
+
     AutoPtr<IMetaCoclass> klass;
     ECode ec = CoGetCoclassMetadata(rtm_InvokeMethod->coclassID, nullptr, klass);
     if (FAILED(ec))
         return ec;
 
     strBuffer = "{\"tag\":\"RM_IM_\",";
+
+    snprintf(buf, sizeof(buf), "\"id\":%lld,", rtm_InvokeMethod->uuid64);
+    strBuffer += buf;
 
     struct timeval curTime;
     curTime.tv_sec = rtm_InvokeMethod->time / 1000000;
@@ -333,7 +340,6 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     // The +hhmm or -hhmm numeric timezone
     char timezone[8];
     struct tm nowTime;
-    char buf[64];
     localtime_r(&curTime.tv_sec, &nowTime);
     strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
     strftime(timezone, sizeof(timezone), "%z", &nowTime);
