@@ -19,9 +19,12 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <time.h>
 #include "mac.h"
 
 namespace como {
+
+static Long g_lMacAddr = 0;
 
 Long Mac::GetMacAddress(Long& lMacAddr)
 {
@@ -46,12 +49,18 @@ Long Mac::GetMacAddress(Long& lMacAddr)
             if (! (ifr.ifr_flags & IFF_LOOPBACK)) {     // don't count loopback
                 if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) {
                     memcpy(&lMacAddr, ifr.ifr_hwaddr.sa_data, 6);
-                    break;
+                    return lMacAddr;
                 }
             }
         }
         else { /* handle error */ }
     }
+
+    struct timespec tsTime;
+    clock_gettime(CLOCK_REALTIME, &tsTime);
+
+    srand(tsTime.tv_nsec);
+    lMacAddr = rand();
 
     return 0;
 }
@@ -64,7 +73,24 @@ Long Mac::GetThisServiceId(Long& lMacAddr, unsigned short port)
     return lMacAddr;
 }
 
+Long Mac::GetUuid64(Long& uuid64)
+{
+    struct timespec tsTime;
+    clock_gettime(CLOCK_REALTIME, &tsTime);
+
+    // millisecond
+    uuid64 = tsTime.tv_sec * 1000 + tsTime.tv_nsec / 1000000;
+                                                   // 654321
+    if (0 == g_lMacAddr)
+        Mac::GetMacAddress(g_lMacAddr);
+
+    uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFF);
+                                          // 4 3 2 1
+    return uuid64;
+}
+
 } // namespace como
+
 
 #if 0
 int main()

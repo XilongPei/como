@@ -25,6 +25,8 @@ class Mac {
     Long GetMacAddress(Long& lMacAddr);
 
     Long GetThisServiceId(Long& lMacAddr, unsigned short port);
+
+    Long GetUuid64(Long& uuid64);
 };
 
 } // namespace como
