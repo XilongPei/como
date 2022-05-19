@@ -664,7 +664,7 @@ ECode InterfaceStub::Invoke(
     }
 
     Long uuid64;
-    resParcel->ReadLong(uuid64);
+    argParcel->ReadLong(uuid64);
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
         String strBuffer1;

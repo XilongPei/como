@@ -26,6 +26,13 @@ namespace como {
 
 static Long g_lMacAddr = 0;
 
+/**
+ * The first three bytes (upper 24 bits) of MAC are assigned to different
+ * manufacturers by the registration management organization RA of IEEE, also
+ * known as "Organizational Unique Identifier (OUI)". The last three bytes
+ * (lower 24 bits) are assigned to the adapter interface produced by each
+ * manufacturer, which is called extended identifier (uniqueness).
+ */
 Long Mac::GetMacAddress(Long& lMacAddr)
 {
     struct ifreq ifr;

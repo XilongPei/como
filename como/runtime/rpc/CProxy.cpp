@@ -1770,6 +1770,25 @@ ECode InterfaceProxy::ProxyEntry(
         // remote process call
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
         if (SUCCEEDED(ec)) {
+            if (thisObj->mOwner->mMonitorInvokeMethod) {
+                Integer magicParcel;
+                Long uuid64Parcel;
+
+                outParcel->ReadInteger(magicParcel);
+                outParcel->ReadLong(uuid64Parcel);
+                outParcel->SetDataPosition(0);
+
+                if ((magicParcel != RPC_MAGIC_NUMBER) || (uuid64Parcel != uuid64)) {
+                    Logger::E("CProxy", "Bad result packet: Magic Number: 0x%x, ID: %lld",
+                                                                magicParcel, uuid64Parcel);
+                }
+
+                RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
+                                                     thisObj->mOwner->mServerObjectId,
+                                                     thisObj->mOwner->mCid, thisObj->mIid,
+                                                     1, methodIndex + 4, outParcel, 0);
+            }
+
             ec = thisObj->UnmarshalResults(regs, method, outParcel);
         }
         goto ProxyExit;
@@ -1818,16 +1837,28 @@ ECode InterfaceProxy::ProxyEntry(
             goto ProxyExit;
         }
     }
-
 #endif
-    ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
     if (thisObj->mOwner->mMonitorInvokeMethod) {
+        Integer magicParcel;
+        Long uuid64Parcel;
+
+        outParcel->ReadInteger(magicParcel);
+        outParcel->ReadLong(uuid64Parcel);
+        outParcel->SetDataPosition(0);
+
+        if ((magicParcel != RPC_MAGIC_NUMBER) || (uuid64Parcel != uuid64)) {
+            Logger::E("CProxy", "Bad result packet: Magic Number: 0x%x, ID: %lld",
+                                                        magicParcel, uuid64Parcel);
+        }
+
         RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
                                              thisObj->mOwner->mServerObjectId,
                                              thisObj->mOwner->mCid, thisObj->mIid,
-                                             1, methodIndex + 4, inParcel, 0);
+                                             1, methodIndex + 4, outParcel, 0);
     }
+
+    ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
 ProxyExit:
     if (DEBUG) {
