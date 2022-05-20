@@ -348,8 +348,9 @@ ECode UnregisterImportObjectByChannel(
 
 static void timespecToString(struct timespec& ts, const char *buffer, int bufSize)
 {
-    Long microseconds = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
-    snprintf((char*)buffer, bufSize, "%lld", microseconds);
+    Long millisecond = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+                                                     // 654321
+    snprintf((char*)buffer, bufSize, "%lld", millisecond);
 }
 
 static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub,
