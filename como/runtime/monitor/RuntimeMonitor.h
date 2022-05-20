@@ -28,7 +28,7 @@
 namespace como {
 
 // align to Short type
-enum class RTM_CommandType {
+enum RTM_CommandType {
     CMD_BY_STRING                      = 0x0001,
 
     CMD_Server_Activate_InvokeMethod   = 0x0101,
