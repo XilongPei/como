@@ -100,6 +100,10 @@ public:
         /* [in] */ Long srcPos,
         /* [in] */ Long length);
 
+    Long CopyRaw(
+        /* [in] */ Byte const* srcData,
+        /* [in] */ Long byteLength);
+
     void Set(
         /* [in] */ Long index,
         /* [in] */ T value);
@@ -500,6 +504,16 @@ Long Array<T>::Copy(
         }
     }
     return N;
+}
+
+template<typename T>
+Long Array<T>::CopyRaw(
+    /* [in] */ Byte const* srcData,
+    /* [in] */ Long byteLength)
+{
+    Long byteSize = MIN(byteLength, sizeof(T) * mSize);
+    memcpy(static_cast<Byte*>(mData), srcData, byteSize);
+    return byteSize;
 }
 
 template<typename T>

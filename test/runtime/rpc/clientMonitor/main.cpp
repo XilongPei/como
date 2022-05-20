@@ -123,7 +123,7 @@ TEST(ClientMonitor, TestMonitorRuntime)
 
     Array<Byte> response;
     Array<Byte> request(rtmCommand->length);
-    request.Copy((Byte*)rtmCommand, rtmCommand->length);
+    request.CopyRaw((Byte*)rtmCommand, rtmCommand->length);
     free(rtmCommand);
 
     ECode ec = proxy->MonitorRuntime(request, response);
