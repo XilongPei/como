@@ -122,7 +122,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
     String string;
     RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
     switch (rtmCommand->command) {
-        case (Short)RTM_CommandType::CMD_BY_STRING: {
+        case RTM_CommandType::CMD_BY_STRING: {
             String string;
 
             // parse monitor commands
@@ -139,7 +139,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
 
             break;
         }
-        case (Short)RTM_CommandType::CMD_Server_InvokeMethod: {
+        case RTM_CommandType::CMD_Server_InvokeMethod: {
             Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
 
             if (! rtmInvokeMethodServerQueue.empty()) {
@@ -152,12 +152,37 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
                         memcpy(resBuffer.GetPayload(), rtm_InvokeMethod,
                                                       rtm_InvokeMethod->length);
                         rtmInvokeMethodServerQueue.pop_front();
+                        free(rtm_InvokeMethod);
                     }
                 }
             }
             break;
         }
-        case (Short)RTM_CommandType::CMD_Server_CpuMemoryStatus: {
+        case RTM_CommandType::CMD_Server_Dump_InvokeMethod: {
+            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+
+            String strBuffer;
+            while(! rtmInvokeMethodServerQueue.empty()) {
+                RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
+
+                String str;
+                ECode ec = DumpRtmInvokeMethod(rtm_InvokeMethod, str);
+                if (SUCCEEDED(ec))
+                    strBuffer += str;
+                else
+                    break;
+
+                rtmInvokeMethodServerQueue.pop_front();
+                free(rtm_InvokeMethod);
+            }
+
+            resBuffer = Array<Byte>(strBuffer.GetByteLength()+1);
+            if (! resBuffer.IsNull()) {
+                resBuffer.CopyRaw((Byte*)strBuffer.string(), strBuffer.GetByteLength()+1);
+            }
+            break;
+        }
+        case RTM_CommandType::CMD_Server_CpuMemoryStatus: {
             RTM_CpuMemoryStatus status = GetRtmCpuMemoryStatus();
             resBuffer = Array<Byte>(sizeof(RTM_CpuMemoryStatus));
             if (! resBuffer.IsNull()) {
@@ -400,7 +425,7 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
     if (nullptr != rtmCommand) {
         rtmCommand->length = len;
-        rtmCommand->command = (Short)command;
+        rtmCommand->command = command;
         rtmCommand->param = param;
         memcpy(rtmCommand->parcel, buffer, bufferSize);
     }
@@ -414,7 +439,7 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
     if (nullptr != rtmCommand) {
         rtmCommand->length = len;
-        rtmCommand->command = (Short)command;
+        rtmCommand->command = command;
         rtmCommand->param = param;
         strcpy((char*)rtmCommand->parcel, cstr);
     }
@@ -430,7 +455,7 @@ ECode RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     if (! arrayRtmCommand.IsNull()) {
         RTM_Command *rtmCommand = (RTM_Command*)arrayRtmCommand.GetPayload();
         rtmCommand->length = len;
-        rtmCommand->command = (Short)command;
+        rtmCommand->command = command;
         rtmCommand->param = param;
         memcpy(rtmCommand->parcel, buffer, bufferSize);
         return NOERROR;
@@ -447,7 +472,7 @@ ECode RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     if (! arrayRtmCommand.IsNull()) {
         RTM_Command *rtmCommand = (RTM_Command*)arrayRtmCommand.GetPayload();
         rtmCommand->length = len;
-        rtmCommand->command = (Short)command;
+        rtmCommand->command = command;
         rtmCommand->param = param;
         strcpy((char*)rtmCommand->parcel, cstr);
         return NOERROR;

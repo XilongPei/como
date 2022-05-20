@@ -1998,17 +1998,17 @@ ECode CProxy::MonitorRuntime(
 
     RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
     switch (rtmCommand->command) {
-        case (Short)RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
+        case RTM_CommandType::CMD_Client_Activate_InvokeMethod: {
             mMonitorInvokeMethod = true;
             return NOERROR;
         }
 
-        case (Short)RTM_CommandType::CMD_Client_Deactivate_InvokeMethod: {
+        case RTM_CommandType::CMD_Client_Deactivate_InvokeMethod: {
             mMonitorInvokeMethod = false;
             return NOERROR;
         }
 
-        case (Short)RTM_CommandType::CMD_Client_InvokeMethod: {
+        case RTM_CommandType::CMD_Client_InvokeMethod: {
             Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
 
             if (! RuntimeMonitor::rtmInvokeMethodClientQueue.empty()) {
@@ -2021,7 +2021,34 @@ ECode CProxy::MonitorRuntime(
                     memcpy(response.GetPayload(), rtmMethod, rtmMethod->length);
 
                     RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
+                    free(rtmMethod);
                 }
+            }
+            return NOERROR;
+        }
+
+        case RTM_CommandType::CMD_Client_Dump_InvokeMethod: {
+            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
+
+            String strBuffer;
+            while(! RuntimeMonitor::rtmInvokeMethodClientQueue.empty()) {
+                RTM_InvokeMethod *rtm_InvokeMethod =
+                                RuntimeMonitor::rtmInvokeMethodClientQueue.front();
+
+                String str;
+                ECode ec = RuntimeMonitor::DumpRtmInvokeMethod(rtm_InvokeMethod, str);
+                if (SUCCEEDED(ec))
+                    strBuffer += str;
+                else
+                    break;
+
+                RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
+                free(rtm_InvokeMethod);
+            }
+
+            response = Array<Byte>(strBuffer.GetByteLength()+1);
+            if (! response.IsNull()) {
+                response.CopyRaw((Byte*)strBuffer.string(), strBuffer.GetByteLength()+1);
             }
             return NOERROR;
         }
@@ -2053,6 +2080,10 @@ ECode CProxy::CreateObject(
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
+    /**
+     * First load the coclass locally. If the loading is unsuccessful, obtain
+     * the component metadata from the server side.
+     */
     AutoPtr<IMetaCoclass> mc;
     ECode ec = loader->LoadCoclass(cid, mc);
     if (FAILED(ec)) {

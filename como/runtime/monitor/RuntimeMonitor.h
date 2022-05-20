@@ -34,11 +34,14 @@ enum class RTM_CommandType {
     CMD_Server_Activate_InvokeMethod   = 0x0101,
     CMD_Server_Deactivate_InvokeMethod = 0x0102,
     CMD_Server_InvokeMethod            = 0x0103,
-    CMD_Server_CpuMemoryStatus         = 0x0104,
+    CMD_Server_Dump_InvokeMethod       = 0x0104,
 
     CMD_Client_Activate_InvokeMethod   = 0x0201,
     CMD_Client_Deactivate_InvokeMethod = 0x0202,
     CMD_Client_InvokeMethod            = 0x0203,
+    CMD_Client_Dump_InvokeMethod       = 0x0204,
+
+    CMD_Server_CpuMemoryStatus         = 0x0301,
 };
 
 #pragma pack(4)
@@ -56,7 +59,7 @@ typedef struct tagRTM_InvokeMethod {
 
 typedef struct tagRTM_Command {
     Long            length;             // total length of this struct
-    Short           command;
+    RTM_CommandType command:16;
     Short           param;
     Byte            parcel[0];          // from here, Byte *;
 } RTM_Command;

@@ -319,12 +319,12 @@ HandleMessage_Object_ReleasePeer:
                 }
 
                 switch (rtmCommand->command) {
-                    case (Short)RTM_CommandType::CMD_Server_Activate_InvokeMethod: {
+                    case RTM_CommandType::CMD_Server_Activate_InvokeMethod: {
                         CStub::From(worker->mStub)->mMonitorInvokeMethod = true;
                         goto HandleMessage_RuntimeMonitor;
                     }
 
-                    case (Short)RTM_CommandType::CMD_Server_Deactivate_InvokeMethod: {
+                    case RTM_CommandType::CMD_Server_Deactivate_InvokeMethod: {
                         CStub::From(worker->mStub)->mMonitorInvokeMethod = false;
                         goto HandleMessage_RuntimeMonitor;
                     }
