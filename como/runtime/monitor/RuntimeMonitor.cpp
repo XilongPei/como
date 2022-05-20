@@ -410,15 +410,50 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
                                                                const char *cstr)
 {
-    Integer len = strlen(cstr) + 1;
-    RTM_Command *rtmCommand = (RTM_Command*)malloc(sizeof(RTM_Command) + len);
+    Integer len = sizeof(RTM_Command) + strlen(cstr) + 1;
+    RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
     if (nullptr != rtmCommand) {
-        rtmCommand->length = sizeof(RTM_Command) + len;
+        rtmCommand->length = len;
         rtmCommand->command = (Short)command;
         rtmCommand->param = param;
-        memcpy(rtmCommand->parcel, cstr, len);
+        strcpy((char*)rtmCommand->parcel, cstr);
     }
     return rtmCommand;
+}
+
+ECode RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
+                                            const Byte *buffer, int bufferSize,
+                                            Array<Byte>& arrayRtmCommand)
+{
+    Integer len = sizeof(RTM_Command) + bufferSize;
+    arrayRtmCommand = Array<Byte>::Allocate(len);
+    if (! arrayRtmCommand.IsNull()) {
+        RTM_Command *rtmCommand = (RTM_Command*)arrayRtmCommand.GetPayload();
+        rtmCommand->length = len;
+        rtmCommand->command = (Short)command;
+        rtmCommand->param = param;
+        memcpy(rtmCommand->parcel, buffer, bufferSize);
+        return NOERROR;
+    }
+
+    return E_OUT_OF_MEMORY_ERROR;
+}
+
+ECode RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
+                                const char *cstr, Array<Byte>& arrayRtmCommand)
+{
+    Integer len = sizeof(RTM_Command) + strlen(cstr) + 1;
+    arrayRtmCommand = Array<Byte>::Allocate(len);
+    if (! arrayRtmCommand.IsNull()) {
+        RTM_Command *rtmCommand = (RTM_Command*)arrayRtmCommand.GetPayload();
+        rtmCommand->length = len;
+        rtmCommand->command = (Short)command;
+        rtmCommand->param = param;
+        strcpy((char*)rtmCommand->parcel, cstr);
+        return NOERROR;
+    }
+
+    return E_OUT_OF_MEMORY_ERROR;
 }
 
 } // namespace como

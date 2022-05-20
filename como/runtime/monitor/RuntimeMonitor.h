@@ -106,6 +106,13 @@ public:
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
                                                               const char *cstr);
 
+    static ECode GenRtmCommand(RTM_CommandType command, Short param,
+                                            const Byte *buffer, int bufferSize,
+                                            Array<Byte>& arrayRtmCommand);
+
+    static ECode GenRtmCommand(RTM_CommandType command, Short param,
+                                const char *cstr, Array<Byte>& arrayRtmCommand);
+
     static std::deque<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
     static std::deque<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
     static Mutex rtmInvokeMethodServerQueue_Lock;

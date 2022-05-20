@@ -40,6 +40,66 @@ TEST(ClientMonitor, TestGetRPCService)
     EXPECT_TRUE(SERVICE != nullptr);
 }
 
+TEST(ClientMonitor, TestCMD_Client_Activate_InvokeMethod)
+{
+    EXPECT_TRUE(SERVICE != nullptr);
+    IProxy* proxy = IProxy::Probe(SERVICE);
+    EXPECT_TRUE(proxy != nullptr);
+
+    Array<Byte> request;
+
+    // CMD_Client_Activate_InvokeMethod
+    // ------------------------------------------------------
+    ECode ec = RuntimeMonitor::GenRtmCommand(
+                           RTM_CommandType::CMD_Client_Activate_InvokeMethod, 0,
+                                                     (const char *)"", request);
+    EXPECT_EQ(NOERROR, ec);
+
+    Array<Byte> response;
+    ec = proxy->MonitorRuntime(request, response);
+    EXPECT_EQ(NOERROR, ec);
+
+    // CMD_Client_Deactivate_InvokeMethod
+    // ------------------------------------------------------
+    ec = RuntimeMonitor::GenRtmCommand(
+                           RTM_CommandType::CMD_Client_Deactivate_InvokeMethod, 0,
+                                                     (const char *)"", request);
+    EXPECT_EQ(NOERROR, ec);
+
+    ec = proxy->MonitorRuntime(request, response);
+    EXPECT_EQ(NOERROR, ec);
+}
+
+TEST(ClientMonitor, TestCMD_Server_Activate_InvokeMethod)
+{
+    EXPECT_TRUE(SERVICE != nullptr);
+    IProxy* proxy = IProxy::Probe(SERVICE);
+    EXPECT_TRUE(proxy != nullptr);
+
+    Array<Byte> request;
+
+    // CMD_Server_Activate_InvokeMethod
+    // ------------------------------------------------------
+    ECode ec = RuntimeMonitor::GenRtmCommand(
+                           RTM_CommandType::CMD_Server_Activate_InvokeMethod, 0,
+                                                     (const char *)"", request);
+    EXPECT_EQ(NOERROR, ec);
+
+    Array<Byte> response;
+    ec = proxy->MonitorRuntime(request, response);
+    EXPECT_EQ(NOERROR, ec);
+
+    // CMD_Server_Deactivate_InvokeMethod
+    // ------------------------------------------------------
+    ec = RuntimeMonitor::GenRtmCommand(
+                           RTM_CommandType::CMD_Server_Deactivate_InvokeMethod, 0,
+                                                     (const char *)"", request);
+    EXPECT_EQ(NOERROR, ec);
+
+    ec = proxy->MonitorRuntime(request, response);
+    EXPECT_EQ(NOERROR, ec);
+}
+
 TEST(ClientMonitor, TestCallTestMethod4)
 {
     EXPECT_TRUE(SERVICE != nullptr);
