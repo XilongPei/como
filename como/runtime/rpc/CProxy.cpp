@@ -2015,13 +2015,15 @@ ECode CProxy::MonitorRuntime(
                 RTM_InvokeMethod *rtmMethod =
                              RuntimeMonitor::rtmInvokeMethodClientQueue.front();
 
-                response = Array<Byte>(rtmMethod->length);
-                if (! response.IsNull()) {
-                    // response.Copy works very slowly
-                    memcpy(response.GetPayload(), rtmMethod, rtmMethod->length);
+                if (nullptr != rtmMethod) {
+                    response = Array<Byte>(rtmMethod->length);
+                    if (! response.IsNull()) {
+                        // response.Copy works very slowly
+                        memcpy(response.GetPayload(), rtmMethod, rtmMethod->length);
 
-                    RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
-                    free(rtmMethod);
+                        RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
+                        free(rtmMethod);
+                    }
                 }
             }
             return NOERROR;
@@ -2030,20 +2032,35 @@ ECode CProxy::MonitorRuntime(
         case RTM_CommandType::CMD_Client_Dump_InvokeMethod: {
             Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
 
-            String strBuffer;
+            String strBuffer = "[";
+
             while(! RuntimeMonitor::rtmInvokeMethodClientQueue.empty()) {
-                RTM_InvokeMethod *rtm_InvokeMethod =
+                RTM_InvokeMethod *rtmMethod =
                                 RuntimeMonitor::rtmInvokeMethodClientQueue.front();
 
-                String str;
-                ECode ec = RuntimeMonitor::DumpRtmInvokeMethod(rtm_InvokeMethod, str);
-                if (SUCCEEDED(ec))
-                    strBuffer += str;
-                else
-                    break;
+                if (nullptr != rtmMethod) {
+                    RuntimeMonitor::DeserializeRtmInvokeMethod(rtmMethod);
+
+                    String str;
+                    ECode ec = RuntimeMonitor::DumpRtmInvokeMethod(rtmMethod, str);
+                    if (SUCCEEDED(ec))
+                        strBuffer += (str + ",");
+                    else
+                        break;
+
+                    free(rtmMethod);
+                }
 
                 RuntimeMonitor::rtmInvokeMethodClientQueue.pop_front();
-                free(rtm_InvokeMethod);
+            }
+
+            if (strBuffer.GetByteLength() > 1) {
+                // replace the last ',' with ']'
+                char* str = (char*)strBuffer.string();
+                str[strBuffer.GetByteLength() - 1] = ']';
+            }
+            else {
+                strBuffer += "]";
             }
 
             response = Array<Byte>(strBuffer.GetByteLength()+1);

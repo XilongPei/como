@@ -161,19 +161,34 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
         case RTM_CommandType::CMD_Server_Dump_InvokeMethod: {
             Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
 
-            String strBuffer;
+            String strBuffer = "[";
+
             while(! rtmInvokeMethodServerQueue.empty()) {
                 RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
 
-                String str;
-                ECode ec = DumpRtmInvokeMethod(rtm_InvokeMethod, str);
-                if (SUCCEEDED(ec))
-                    strBuffer += str;
-                else
-                    break;
+                if (nullptr != rtm_InvokeMethod) {
+                    DeserializeRtmInvokeMethod(rtm_InvokeMethod);
+
+                    String str;
+                    ECode ec = DumpRtmInvokeMethod(rtm_InvokeMethod, str);
+                    if (SUCCEEDED(ec))
+                        strBuffer += (str + ",");
+                    else
+                        break;
+
+                    free(rtm_InvokeMethod);
+                }
 
                 rtmInvokeMethodServerQueue.pop_front();
-                free(rtm_InvokeMethod);
+            }
+
+            if (strBuffer.GetByteLength() > 1) {
+                // replace the last ',' with ']'
+                char* str = (char*)strBuffer.string();
+                str[strBuffer.GetByteLength() - 1] = ']';
+            }
+            else {
+                strBuffer += "]";
             }
 
             resBuffer = Array<Byte>(strBuffer.GetByteLength()+1);
@@ -287,7 +302,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     clock_gettime(CLOCK_REALTIME, &ts);
     // The time from January 1, 1970. Unit: microseconds
     rtm_InvokeMethod->time = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
-
+                                       // 654321
     rtm_InvokeMethod->length = len;
     rtm_InvokeMethod->uuid64 = uuid64;
     rtm_InvokeMethod->serverObjectId = serverObjectId;
@@ -413,7 +428,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     strBuffer += "\"parcel\":" + strArgBuffer;
 
-    strBuffer += "}\n";
+    strBuffer += "}";
 
     return NOERROR;
 }
