@@ -283,9 +283,9 @@ static ECode SerializeComponentID(
  */
 ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
                                       Long serverObjectId, CoclassID& clsId,
-                                      InterfaceID iid, Integer in_out,
+                                      InterfaceID iid, RTM_ParamTransDirection in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
-                                      Integer whichQueue)
+                                      RTM_WhichQueue whichQueue)
 {
     Array<Byte> arrCid;
     SerializeComponentID(clsId.mCid, arrCid);
@@ -320,7 +320,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     memcpy(pByte, (Byte*)arrCid.GetPayload(), arrCid.GetLength());
     rtm_InvokeMethod->coclassID.mCid = (ComponentID*)(sizeof(RTM_InvokeMethod) +
                                                                     sizeParcel);
-    if (0 == whichQueue) {
+    if (RTM_WhichQueue::InvokeMethodClientQueue == whichQueue) {
         Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
 
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
@@ -421,7 +421,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     parcel->SetData((HANDLE)rtm_InvokeMethod->parcel, len);
 
-    if (rtm_InvokeMethod->in_out == 0)
+    if (rtm_InvokeMethod->in_out == RTM_ParamTransDirection::CALL_METHOD)
         MarshalUtils::UnMarshalArguments(method, parcel, strArgBuffer);
     else
         MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer);

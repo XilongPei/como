@@ -1767,7 +1767,9 @@ ECode InterfaceProxy::ProxyEntry(
         RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
                                          thisObj->mOwner->mServerObjectId,
                                          thisObj->mOwner->mCid, thisObj->mIid,
-                                         0, methodIndex + 4, inParcel, 0);
+                                         RTM_ParamTransDirection::CALL_METHOD,
+                                         methodIndex + 4, inParcel,
+                                         RTM_WhichQueue::InvokeMethodClientQueue);
     }
 
     if (! thisObj->mOwner->mServerName.IsEmpty()) {
@@ -1788,9 +1790,11 @@ ECode InterfaceProxy::ProxyEntry(
                 }
 
                 RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
-                                                     thisObj->mOwner->mServerObjectId,
-                                                     thisObj->mOwner->mCid, thisObj->mIid,
-                                                     1, methodIndex + 4, outParcel, 0);
+                                    thisObj->mOwner->mServerObjectId,
+                                    thisObj->mOwner->mCid, thisObj->mIid,
+                                    RTM_ParamTransDirection::RETURN_FROM_METHOD,
+                                    methodIndex + 4, outParcel,
+                                    RTM_WhichQueue::InvokeMethodClientQueue);
             }
 
             ec = thisObj->UnmarshalResults(regs, method, outParcel);
@@ -1857,9 +1861,11 @@ ECode InterfaceProxy::ProxyEntry(
         }
 
         RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
-                                             thisObj->mOwner->mServerObjectId,
-                                             thisObj->mOwner->mCid, thisObj->mIid,
-                                             1, methodIndex + 4, outParcel, 0);
+                            thisObj->mOwner->mServerObjectId,
+                            thisObj->mOwner->mCid, thisObj->mIid,
+                            RTM_ParamTransDirection::RETURN_FROM_METHOD,
+                            methodIndex + 4, outParcel,
+                            RTM_WhichQueue::InvokeMethodClientQueue);
     }
 
     ec = thisObj->UnmarshalResults(regs, method, outParcel);

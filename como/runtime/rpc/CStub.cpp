@@ -690,7 +690,10 @@ ECode InterfaceStub::Invoke(
         Long serverObjectId;
         mOwner->mChannel->GetServerObjectId(serverObjectId);
         ec = RuntimeMonitor::WriteRtmInvokeMethod(uuid64, serverObjectId,
-                              mOwner->mCid, mIid, 0, methodIndex, argParcel, 1);
+                              mOwner->mCid, mIid,
+                              RTM_ParamTransDirection::CALL_METHOD,
+                              methodIndex, argParcel,
+                              RTM_WhichQueue::InvokeMethodServerQueue);
     }
 
     ECode ret = mm->Invoke(mObject, argList);
@@ -710,8 +713,12 @@ ECode InterfaceStub::Invoke(
         if (mOwner->mMonitorInvokeMethod) {
             Long serverObjectId;
             mOwner->mChannel->GetServerObjectId(serverObjectId);
+
             ec = RuntimeMonitor::WriteRtmInvokeMethod(uuid64, serverObjectId,
-                              mOwner->mCid, mIid, 1, methodIndex, argParcel, 1);
+                                  mOwner->mCid, mIid,
+                                  RTM_ParamTransDirection::RETURN_FROM_METHOD,
+                                  methodIndex, resParcel,
+                                  RTM_WhichQueue::InvokeMethodServerQueue);
         }
     }
     else {

@@ -44,6 +44,17 @@ enum RTM_CommandType {
     CMD_Server_CpuMemoryStatus         = 0x0301,
 };
 
+// align to Short type
+enum RTM_ParamTransDirection {
+    CALL_METHOD                        = 0x0001,
+    RETURN_FROM_METHOD                 = 0x0002,
+};
+
+enum RTM_WhichQueue {
+    InvokeMethodClientQueue            = 0x1,
+    InvokeMethodServerQueue            = 0x2,
+};
+
 #pragma pack(4)
 typedef struct tagRTM_InvokeMethod {
     Long            length;             // total length of this struct
@@ -53,7 +64,8 @@ typedef struct tagRTM_InvokeMethod {
     UUID            interfaceID_mUuid;
     Long            serverObjectId;
     Integer         methodIndexPlus4;
-    Integer         in_out;             // 0: in; 1: out
+    RTM_ParamTransDirection in_out:8;
+    Byte            reserved[3];
     Byte            parcel[0];          // from here, Byte *parcel;
 } RTM_InvokeMethod;
 
@@ -91,9 +103,9 @@ public:
 
     static ECode WriteRtmInvokeMethod(Long uuid64,
                                       Long serverObjectId, CoclassID& clsId,
-                                      InterfaceID iid, Integer in_out,
+                                      InterfaceID iid, RTM_ParamTransDirection in_out,
                                       Integer methodIndexPlus4, IParcel *parcel,
-                                      Integer whichQueue);
+                                      RTM_WhichQueue whichQueue);
 
     static RTM_InvokeMethod* DeserializeRtmInvokeMethod(
                                             RTM_InvokeMethod *rtm_InvokeMethod);
