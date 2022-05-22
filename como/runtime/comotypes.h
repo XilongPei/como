@@ -134,7 +134,7 @@ namespace como {
 COM_PUBLIC extern String DumpUUID(
     /* [in] */ const UUID& id);
 
-COM_PUBLIC extern Integer HashUUID(
+COM_PUBLIC extern Long HashUUID(
     /* [in] */ const UUID& key);
 
 COM_PUBLIC extern CoclassID CloneCoclassID(
@@ -590,7 +590,7 @@ struct CompareFunc<UUID>
 template<typename T>
 struct HashFunc
 {
-    Integer operator()(
+    Long operator()(
         /* [in] */ const T& data)
     {
         return data;
@@ -600,7 +600,7 @@ struct HashFunc
 template<>
 struct HashFunc<String>
 {
-    inline Integer operator()(
+    inline Long operator()(
         /* [in] */ const String& data)
     {
         return data.GetHashCode();
@@ -610,7 +610,7 @@ struct HashFunc<String>
 template<>
 struct HashFunc<UUID>
 {
-    inline Integer operator()(
+    inline Long operator()(
         /* [in] */ const UUID& data)
     {
         return HashUUID(data);

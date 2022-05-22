@@ -31,9 +31,25 @@ String DumpUUID(
     return uuidStr;
 }
 
-Integer HashUUID(
+Long HashUUID(
     /* [in] */ const UUID& key)
 {
+    /**
+     * Take the lower 8 bytes (a Long) of UUID
+     *
+     * struct UUID
+     * {
+     *     unsigned int        mData1;
+     *     unsigned short      mData2;
+     *     unsigned short      mData3;
+     *     unsigned short      mData4;      2 bytes
+     *     unsigned char       mData5[6];   6 bytes
+     * };
+     */
+    return *(Long *)&(key.mData4);
+
+// old algorithm
+#if 0
     // BKDR Hash Function
     int seed = 31; // 31 131 1313 13131 131313 etc..
     unsigned int hash = 0;
@@ -43,6 +59,7 @@ Integer HashUUID(
         hash = hash * seed + string[i];
     }
     return (hash & 0x7FFFFFFF);
+#endif
 }
 
 CoclassID CloneCoclassID(
