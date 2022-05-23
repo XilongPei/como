@@ -142,7 +142,7 @@ ECode CoGetComponentMetadataFromBytes(
 {
     mc = nullptr;
 
-    if (bytes.IsEmpty() || bytes.GetLength() < 0) {
+    if (bytes.IsEmpty()) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -152,6 +152,7 @@ ECode CoGetComponentMetadataFromBytes(
         Logger::E("COMORT", "Malloc ComoComponent failed.");
         return E_OUT_OF_MEMORY_ERROR;
     }
+
     component->mSoHandle = nullptr;
     component->mSoGetClassObject = nullptr;
     component->mSoGetAllClassObjects = nullptr;

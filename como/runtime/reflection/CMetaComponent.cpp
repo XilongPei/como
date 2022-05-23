@@ -294,6 +294,13 @@ ECode CMetaComponent::LoadComponent(
     Boolean onlyMetadata;
     IsOnlyMetadata(onlyMetadata);
     if (onlyMetadata) {
+
+        /**
+         * Are there any problems with the program that used the metadata
+         * (stored in mComponent) before?
+         * No, because this is only metadata. The reflection program is the
+         * interpretation of these data. Reflectors are not coupled with data.
+         */
         if (mComponent != nullptr) {
             free(mComponent);
         }

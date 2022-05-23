@@ -2104,8 +2104,9 @@ ECode CProxy::CreateObject(
     }
 
     /**
-     * First load the coclass locally. If the loading is unsuccessful, obtain
-     * the component metadata from the server side.
+     * First load the coclass from local cache (CBootClassLoader::mComponents).
+     * If the loading is unsuccessful, obtain the component metadata from the
+     * server side.
      */
     AutoPtr<IMetaCoclass> mc;
     ECode ec = loader->LoadCoclass(cid, mc);
@@ -2124,7 +2125,7 @@ ECode CProxy::CreateObject(
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
 
-        ec = loader->LoadCoclass(cid, mc);
+        ec = component->GetCoclass(cid, mc);
         if (FAILED(ec)) {
             Logger::E("CProxy", "Get IMetaCoclass failed. ECode: 0x%X", ec);
             return E_CLASS_NOT_FOUND_EXCEPTION;
