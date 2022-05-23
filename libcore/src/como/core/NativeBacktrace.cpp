@@ -125,6 +125,10 @@ String DumpBacktrace(
             char* demangled_symbol = __cxa_demangle(symbol, nullptr, nullptr, nullptr);
             const char* best_name = (demangled_symbol != nullptr) ? demangled_symbol : symbol;
 
+            /* The result of `buf` is similar to this:
+                #0  pc 0x7f635454d795 ./lib/libdebug/libdebug.so (libdebugfunccrash+0x1b)
+                #1  pc 0x7f635454d7b3 ./lib/libdebug/libdebug.so (libdebugfunc5+0x15)
+            */
             snprintf(buf, sizeof(buf),
                     "          #%02zd  pc %" PAD_PTR "  %s (%s+%" PRIuPTR ")\n", frame_num,
                     rel_pc, soname, best_name, frames[frame_num] - offset);
