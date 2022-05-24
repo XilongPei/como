@@ -188,7 +188,7 @@ target_link_libraries(libcore
     ${MATH_BIG_NUMBER_LIB}
     dl
     pthread
-##    unwind
+    unwind
     icuuc
     icui18n
 #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)

@@ -75,7 +75,8 @@ ECode StackTrace::PrintStackTrace(
 
 ECode StackTrace::FillInStackTrace()
 {
-    mFrameCount = GetBacktrace(mFrames.GetPayload(), mFrames.GetLength());
+    mFrameCount = GetBacktrace(mFrames.GetPayload(), mFrameSps.GetPayload(),
+                                                            mFrames.GetLength());
     return NOERROR;
 }
 
@@ -93,9 +94,11 @@ Array<IStackTraceElement*> StackTrace::GetOurStackTrace()
     if (mFrameCount > 0) {
         Array<IStackTraceElement*> frameElements(mFrameCount);
 
-        DumpBacktrace(mFrames.GetPayload(), mFrameCount, frameElements);
+        DumpBacktrace(mFrames.GetPayload(), mFrameSps.GetPayload(), mFrameCount,
+                                                                    frameElements);
         VOLATILE_SET(mStackTrace, mFrameCount);
     }
+
     return mStackTrace;
 }
 

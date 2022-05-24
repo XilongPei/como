@@ -14,6 +14,24 @@
 // limitations under the License.
 //=========================================================================
 
+/**
+ * https://www.nongnu.org/libunwind/man/libunwind(3).html
+ * Normally, libunwind supports both local and remote unwinding. However, if you
+ * tell libunwind that your program only needs local unwinding, then a special
+ * implementation can be selected which may run much faster than the generic
+ * implementation which supports both kinds of unwinding. To select this optimized
+ * version, simply define the macro UNW_LOCAL_ONLY before including the headerfile
+ * <libunwind.h>. It is perfectly OK for a single program to employ both local-only
+ * and generic unwinding. That is, whether or not UNW_LOCAL_ONLY is defined is a
+ * choice that each source-file (compilation-unit) can make on its own.
+ * Independent of the setting(s) of UNW_LOCAL_ONLY, you'll always link the same
+ * library into the program (normally -lunwind). Furthermore, the portion of
+ * libunwind that manages unwind-info for dynamically generated code is not affected
+ * by the setting of UNW_LOCAL_ONLY.
+ */
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
+
 #include <dlfcn.h>
 #include <unwind.h>
 #include <inttypes.h>
@@ -33,11 +51,14 @@ static MapData sMapData;
 struct stack_crawl_state_t
 {
     uintptr_t* frames;
+    uintptr_t* frameSps;
     size_t frame_count;
     size_t cur_frame = 0;
 
-    stack_crawl_state_t(uintptr_t* frames, size_t frame_count)
-        : frames(frames), frame_count(frame_count)
+    stack_crawl_state_t(uintptr_t* frames_, uintptr_t* frameSps_, size_t frame_count_)
+        : frames(frames_)
+        , frameSps(frameSps_)
+        , frame_count(frame_count_)
     {}
 };
 
@@ -46,6 +67,10 @@ static _Unwind_Reason_Code trace_function(_Unwind_Context* context, void* arg)
     stack_crawl_state_t* state = static_cast<stack_crawl_state_t*>(arg);
 
     uintptr_t ip = _Unwind_GetIP(context);
+
+    uintptr_t sp;
+    unw_cursor_t *cursor = (unw_cursor_t *)context;
+    unw_get_reg(cursor, UNW_REG_SP, &sp);
 
     // The instruction pointer is pointing at the instruction after the return
     // call on all architectures.
@@ -80,21 +105,24 @@ static _Unwind_Reason_Code trace_function(_Unwind_Context* context, void* arg)
 #endif
     }
 
+    state->frameSps[state->cur_frame++] = sp;
     state->frames[state->cur_frame++] = ip;
     return (state->cur_frame >= state->frame_count) ? _URC_END_OF_STACK : _URC_NO_REASON;
 }
 
 size_t GetBacktrace(
     /* [in] */ uintptr_t* frames,
+    /* [in] */ uintptr_t* frameSps,
     /* [in] */ size_t frameCount)
 {
-    stack_crawl_state_t state(frames, frameCount);
+    stack_crawl_state_t state(frames, frameSps, frameCount);
     _Unwind_Backtrace(trace_function, &state);
     return state.cur_frame;
 }
 
 int DumpBacktrace(
     /* [in] */ const uintptr_t* frames,
+    /* [in] */ const uintptr_t* frameSps,
     /* [in] */ size_t frame_count,
     /* [out] */ Array<IStackTraceElement*>& frameElements)
 {
@@ -121,26 +149,38 @@ int DumpBacktrace(
             soname = "<unknown>";
         }
 
+        ECode ec;
         IStackTraceElement *element;
+
+        /**
+         * g++ compiler, the first parameter of the function on aarch64 and x64
+         * architecture is placed in the first position of the caller's stack?
+         * Taking x64 as an example, the caller pushes the value of x0 register
+         * onto the stack, and the callee puts his first parameter into x0 register.
+         *
+         * the first parameter of C++ is thisPointer
+         */
+        HANDLE thisPointer = reinterpret_cast<HANDLE>(frameSps[frame_num]);
 
         if (symbol != nullptr) {
             char* demangled_symbol = __cxa_demangle(symbol, nullptr, nullptr, nullptr);
             const char* best_name = (demangled_symbol != nullptr) ? demangled_symbol : symbol;
 
-            CStackTraceElement::New(frame_num, rel_pc, soname, best_name,
-                                    frames[frame_num] - offset, 0,
-                                    IID_IStackTraceElement, (IInterface**)&element);
-
-            frameElements[frame_num] = element;
+            ec = CStackTraceElement::New(frame_num, rel_pc, soname, best_name,
+                                         frames[frame_num] - offset, thisPointer,
+                                         IID_IStackTraceElement, (IInterface**)&element);
             free(demangled_symbol);
         }
         else {
-            CStackTraceElement::New(frame_num, rel_pc, soname, "<nosymbol>",
-                                    0, 0,
-                                    IID_IStackTraceElement, (IInterface**)&element);
-
-            frameElements[frame_num] = element;
+            ec = CStackTraceElement::New(frame_num, rel_pc, soname, "<nosymbol>",
+                                         0, thisPointer,
+                                         IID_IStackTraceElement, (IInterface**)&element);
         }
+
+        if (FAILED(ec))
+            return -1;
+
+        frameElements[frame_num] = element;
     }
 
     return frame_num;

@@ -131,6 +131,7 @@ private:
     String mDetailMessage;
     VOLATILE Array<IStackTraceElement*> mStackTrace;
     Array<uintptr_t> mFrames = Array<uintptr_t>(MAX_FRAME_DEPTH);
+    Array<uintptr_t> mFrameSps = Array<uintptr_t>(MAX_FRAME_DEPTH);
     Integer mFrameCount = 0;
 };
 

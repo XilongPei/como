@@ -53,10 +53,12 @@ namespace core {
 
 size_t GetBacktrace(
     /* [in] */ uintptr_t* frames,
+    /* [in] */ uintptr_t* frameSps,
     /* [in] */ size_t frameCount);
 
 int DumpBacktrace(
     /* [in] */ const uintptr_t* frames,
+    /* [in] */ const uintptr_t* frameSps,
     /* [in] */ size_t frame_count,
     /* [out] */ Array<IStackTraceElement*>& frameElements);
 
