@@ -35,22 +35,26 @@ public:
     COMO_INTERFACE_DECL();
 
     ECode Constructor(
-        /* [in] */ const String& no,
-        /* [in] */ const String& pc,
+        /* [in] */ Integer no,
+        /* [in] */ HANDLE pc,
         /* [in] */ const String& soname,
-        /* [in] */ const String& symbol);
+        /* [in] */ const String& symbol,
+        /* [in] */ HANDLE relOffset,
+        /* [in] */ HANDLE thisPointer);
 
     ECode ToString(
         /* [out] */ String& desc) override;
 
 private:
-    String mNo;
-    String mPC;
-    String mSoname;
-    String mSymbol;
+    int        mNo;
+    uintptr_t  mPC;
+    String     mSoname;
+    String     mSymbol;
+    uintptr_t  mRelOffset;
+    uintptr_t  mThisPointer;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSTACKTRACEELEMENT_H__

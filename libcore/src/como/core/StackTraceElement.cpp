@@ -14,11 +14,15 @@
 // limitations under the License.
 //=========================================================================
 
+#include <inttypes.h>
+#include <stdio.h>
 #include "como/core/CStringBuilder.h"
 #include "como/core/StackTraceElement.h"
 #include <comosp.h>
 
 using como::io::IID_ISerializable;
+
+#define PAD_PTR "016" PRIxPTR
 
 namespace como {
 namespace core {
@@ -26,34 +30,43 @@ namespace core {
 COMO_INTERFACE_IMPL_2(StackTraceElement, SyncObject, IStackTraceElement, ISerializable);
 
 ECode StackTraceElement::Constructor(
-    /* [in] */ const String& no,
-    /* [in] */ const String& pc,
+    /* [in] */ Integer no,
+    /* [in] */ HANDLE pc,
     /* [in] */ const String& soname,
-    /* [in] */ const String& symbol)
+    /* [in] */ const String& symbol,
+    /* [in] */ HANDLE relOffset,
+    /* [in] */ HANDLE thisPointer)
 {
     mNo = no;
     mPC = pc;
     mSoname = soname;
     mSymbol = symbol;
+    mRelOffset = relOffset;
+    mThisPointer = thisPointer;
     return NOERROR;
 }
 
 ECode StackTraceElement::ToString(
     /* [out] */ String& desc)
 {
-    AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(mNo);
-    sb->Append(String("  "));
-    sb->Append(mPC);
-    sb->Append(U' ');
-    sb->Append(mSoname);
-    if (!mSymbol.IsEmpty()) {
-        sb->Append(U' ');
-        sb->Append(mSymbol);
+    char buf[1024];
+    if (mSymbol != nullptr) {
+        /* The result of `buf` is similar to this:
+            #0  pc 0x7f635454d795 ./lib/libdebug/libdebug.so (libdebugfunccrash+0x1b)
+            #1  pc 0x7f635454d7b3 ./lib/libdebug/libdebug.so (libdebugfunc5+0x15)
+        */
+        snprintf(buf, sizeof(buf),
+                            "#%02d  pc %" PAD_PTR "  %s (%s+%" PRIuPTR ")\n", mNo,
+                            mPC, mSoname.string(), mSymbol.string(), mRelOffset);
     }
-    return sb->ToString(desc);
+    else {
+        snprintf(buf, sizeof(buf),
+                            "#%02d  pc %" PAD_PTR "  %s\n", mNo, mPC, mSoname.string());
+    }
+    desc = buf;
+
+    return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -14,14 +14,13 @@
 // limitations under the License.
 //=========================================================================
 
-#include "como/core/NativeBacktrace.h"
-#include "como/core/NativeMapData.h"
 #include <dlfcn.h>
+#include <unwind.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <unwind.h>
-
-#define PAD_PTR "016" PRIxPTR
+#include "como/core/NativeBacktrace.h"
+#include "como/core/NativeMapData.h"
+#include "como/core/CStackTraceElement.h"
 
 extern "C" char* __cxa_demangle(const char*, char*, size_t*, int*);
 
@@ -94,13 +93,14 @@ size_t GetBacktrace(
     return state.cur_frame;
 }
 
-String DumpBacktrace(
+int DumpBacktrace(
     /* [in] */ const uintptr_t* frames,
-    /* [in] */ size_t frame_count)
+    /* [in] */ size_t frame_count,
+    /* [out] */ Array<IStackTraceElement*>& frameElements)
 {
-    String str;
+    int frame_num;
 
-    for (size_t frame_num = 0; frame_num < frame_count; frame_num++) {
+    for (int frame_num = 0;  frame_num < frame_count;  frame_num++) {
         uintptr_t offset = 0;
         const char* symbol = nullptr;
 
@@ -120,29 +120,31 @@ String DumpBacktrace(
         if (soname == nullptr) {
             soname = "<unknown>";
         }
-        char buf[1024];
+
+        IStackTraceElement *element;
+
         if (symbol != nullptr) {
             char* demangled_symbol = __cxa_demangle(symbol, nullptr, nullptr, nullptr);
             const char* best_name = (demangled_symbol != nullptr) ? demangled_symbol : symbol;
 
-            /* The result of `buf` is similar to this:
-                #0  pc 0x7f635454d795 ./lib/libdebug/libdebug.so (libdebugfunccrash+0x1b)
-                #1  pc 0x7f635454d7b3 ./lib/libdebug/libdebug.so (libdebugfunc5+0x15)
-            */
-            snprintf(buf, sizeof(buf),
-                    "          #%02zd  pc %" PAD_PTR "  %s (%s+%" PRIuPTR ")\n", frame_num,
-                    rel_pc, soname, best_name, frames[frame_num] - offset);
+            CStackTraceElement::New(frame_num, rel_pc, soname, best_name,
+                                    frames[frame_num] - offset, 0,
+                                    IID_IStackTraceElement, (IInterface**)&element);
+
+            frameElements[frame_num] = element;
             free(demangled_symbol);
         }
         else {
-            snprintf(buf, sizeof(buf),
-                    "          #%02zd  pc %" PAD_PTR "  %s\n", frame_num, rel_pc, soname);
+            CStackTraceElement::New(frame_num, rel_pc, soname, "<nosymbol>",
+                                    0, 0,
+                                    IID_IStackTraceElement, (IInterface**)&element);
+
+            frameElements[frame_num] = element;
         }
-        str += buf;
     }
 
-    return str;
+    return frame_num;
 }
 
-}
-}
+} // namespace core
+} // namespace como

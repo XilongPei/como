@@ -91,54 +91,13 @@ ECode StackTrace::GetStackTrace(
 Array<IStackTraceElement*> StackTrace::GetOurStackTrace()
 {
     if (mFrameCount > 0) {
-        String backtrace = DumpBacktrace(mFrames.GetPayload(), mFrameCount);
-        VOLATILE_SET(mStackTrace, Array<IStackTraceElement*>(mFrameCount));
-        Integer fromIdx = 0;
-        Integer lrIdx = backtrace.IndexOf(U'\n', fromIdx);
-        Integer count = 0;
-        while (lrIdx != -1 && count < mFrameCount) {
-            String line = backtrace.Substring(fromIdx, lrIdx).Trim();
-            mStackTrace.Set(count++, ParseElement(line));
-            fromIdx = lrIdx + 1;
-            lrIdx = backtrace.IndexOf(U'\n', fromIdx);
-        }
+        Array<IStackTraceElement*> frameElements(mFrameCount);
+
+        DumpBacktrace(mFrames.GetPayload(), mFrameCount, frameElements);
+        VOLATILE_SET(mStackTrace, mFrameCount);
     }
     return mStackTrace;
 }
 
-AutoPtr<IStackTraceElement> StackTrace::ParseElement(
-    /* [in] */ const String& info)
-{
-    if (info.IsEmpty()) {
-        return nullptr;
-    }
-
-    Integer fromIdx = 0;
-    Integer idx = info.IndexOf("  ", fromIdx);
-    if (idx == -1) {
-        return nullptr;
-    }
-    String no = info.Substring(0, idx);
-    fromIdx = idx + 5;
-    idx = info.IndexOf(" ", fromIdx);
-    if (idx == -1) {
-        return nullptr;
-    }
-    String pc = info.Substring(fromIdx, idx);
-    fromIdx = idx + 2;
-    idx = info.IndexOf(" ", fromIdx);
-    String soname = idx != -1 ? info.Substring(fromIdx, idx) : info.Substring(fromIdx);
-    if (soname.IsEmpty()) {
-        return nullptr;
-    }
-    String symbol;
-    if (idx != -1) {
-        symbol = info.Substring(idx + 1);
-    }
-    AutoPtr<IStackTraceElement> element;
-    CStackTraceElement::New(no, pc, soname, symbol, IID_IStackTraceElement, (IInterface**)&element);
-    return element;
-}
-
-}
-}
+} // namespace como
+} // namespace core

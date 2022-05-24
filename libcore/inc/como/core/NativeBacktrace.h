@@ -46,6 +46,7 @@
 #define __COMO_CORE_NATIVEBACKTRACE_H__
 
 #include <comotypes.h>
+#include "como/core/StackTraceElement.h"
 
 namespace como {
 namespace core {
@@ -54,11 +55,12 @@ size_t GetBacktrace(
     /* [in] */ uintptr_t* frames,
     /* [in] */ size_t frameCount);
 
-String DumpBacktrace(
+int DumpBacktrace(
     /* [in] */ const uintptr_t* frames,
-    /* [in] */ size_t frame_count);
+    /* [in] */ size_t frame_count,
+    /* [out] */ Array<IStackTraceElement*>& frameElements);
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEBACKTRACE_H__

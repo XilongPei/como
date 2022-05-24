@@ -125,9 +125,6 @@ private:
 
     Array<IStackTraceElement*> GetOurStackTrace();
 
-    AutoPtr<IStackTraceElement> ParseElement(
-        /* [in] */ const String& info);
-
 private:
     static constexpr Integer MAX_FRAME_DEPTH = 64;
 

@@ -159,10 +159,12 @@ coclass CStackTrace
 coclass CStackTraceElement
 {
     Constructor(
-        [in] String no,
-        [in] String pc,
-        [in] String soname,
-        [in] String symbol);
+        [in] Integer no,
+        [in] HANDLE  pc,
+        [in] String  soname,
+        [in] String  symbol,
+        [in] HANDLE  relOffset,
+        [in] HANDLE  thisPointer);
 
     interface IStackTraceElement;
     interface ISerializable;
