@@ -62,7 +62,7 @@ Boolean NativeRuntime::Create()
         return false;
     }
     sInstance = new NativeRuntime();
-    if (!sInstance->Init()) {
+    if ((nullptr == sInstance) || !sInstance->Init()) {
         sInstance = nullptr;
         return false;
     }
@@ -122,8 +122,13 @@ Boolean NativeRuntime::Init()
     mMaxSpinsBeforeThinLockInflation = NativeMonitor::kDefaultMaxSpinsBeforeThinLockInflation;
 
     mMonitorList = new NativeMonitorList;
+    if (nullptr == mMonitorList)
+        return false;
+
     mMonitorPool = NativeMonitorPool::Create();
     mThreadList = new NativeThreadList(NativeThreadList::kDefaultThreadSuspendTimeout);
+    if (nullptr == mThreadList)
+        return false;
 
     // Change the implicit checks flags based on runtime architecture.
     switch (kRuntimeISA) {
@@ -166,5 +171,5 @@ NativeRuntimeCallbacks* NativeRuntime::GetRuntimeCallbacks()
     return mCallbacks.get();
 }
 
-}
-}
+} // namespace core
+} // namespace como

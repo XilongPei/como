@@ -353,7 +353,7 @@ private:
 class Locks
 {
 public:
-    static void Init();
+    static ECode Init();
 
     // A barrier is used to synchronize the GC/Debugger thread with mutator threads. When GC/Debugger
     // thread wants to suspend all mutator threads, it needs to wait for all mutator threads to pass

@@ -69,7 +69,7 @@ public:
 private:
     NativeMonitorPool();
 
-    void AllocateChunk();
+    ECode AllocateChunk();
 
     // Release all chunks and metadata. This is done on shutdown, where threads have been destroyed,
     // so ignore thead-safety analysis.
@@ -213,7 +213,7 @@ inline constexpr size_t NativeMonitorPool::ChunkListCapacity(
     return kInitialChunkStorage << index;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEMONITORPOOL_H__

@@ -31,7 +31,7 @@ NativeMonitorPool::NativeMonitorPool()
     AllocateChunk();
 }
 
-void NativeMonitorPool::AllocateChunk()
+ECode NativeMonitorPool::AllocateChunk()
 {
     CHECK(mFirstFree == nullptr);
 
@@ -42,6 +42,9 @@ void NativeMonitorPool::AllocateChunk()
         }
         mCurrentChunkListCapacity = ChunkListCapacity(mCurrentChunkListIndex);
         uintptr_t* newList = new uintptr_t[mCurrentChunkListCapacity]();
+        if (nullptr == newList)
+            return E_OUT_OF_MEMORY_ERROR;
+
         CHECK(mMonitorChunks[mCurrentChunkListIndex] == nullptr);
         mMonitorChunks[mCurrentChunkListIndex] = newList;
         mNumChunks = 0;
@@ -56,23 +59,29 @@ void NativeMonitorPool::AllocateChunk()
     mNumChunks++;
 
     // Set up the free list
-    NativeMonitor* last = reinterpret_cast<NativeMonitor*>(reinterpret_cast<uintptr_t>(chunk) +
-                                             (kChunkCapacity - 1) * kAlignedMonitorSize);
+    NativeMonitor* last = reinterpret_cast<NativeMonitor*>(
+                                        reinterpret_cast<uintptr_t>(chunk) +
+                                        (kChunkCapacity - 1) * kAlignedMonitorSize);
     last->mNextFree = nullptr;
     // Eagerly compute id.
-    last->mMonitorId = OffsetToMonitorId(mCurrentChunkListIndex* (kMaxListSize * kChunkSize)
-            + (mNumChunks - 1) * kChunkSize + (kChunkCapacity - 1) * kAlignedMonitorSize);
+    last->mMonitorId = OffsetToMonitorId(mCurrentChunkListIndex *
+                            (kMaxListSize * kChunkSize) + (mNumChunks - 1) *
+                            kChunkSize + (kChunkCapacity - 1) * kAlignedMonitorSize);
+
     for (size_t i = 0; i < kChunkCapacity - 1; ++i) {
-        NativeMonitor* before = reinterpret_cast<NativeMonitor*>(reinterpret_cast<uintptr_t>(last) -
-                kAlignedMonitorSize);
+        NativeMonitor* before = reinterpret_cast<NativeMonitor*>(
+                        reinterpret_cast<uintptr_t>(last) - kAlignedMonitorSize);
         before->mNextFree = last;
         // Derive monitor_id from last.
-        before->mMonitorId = OffsetToMonitorId(MonitorIdToOffset(last->mMonitorId) -
-                kAlignedMonitorSize);
+        before->mMonitorId = OffsetToMonitorId(
+                        MonitorIdToOffset(last->mMonitorId) - kAlignedMonitorSize);
         last = before;
     }
+
     CHECK(last == reinterpret_cast<NativeMonitor*>(chunk));
     mFirstFree = last;
+
+    return NOERROR;
 }
 
 void NativeMonitorPool::FreeInternal()
@@ -84,7 +93,8 @@ void NativeMonitorPool::FreeInternal()
         for (size_t j = 0; j < ChunkListCapacity(i); ++j) {
             if (i < mCurrentChunkListIndex || j < mNumChunks) {
                 CHECK(mMonitorChunks[i][j] != 0);
-                mAllocator.deallocate(reinterpret_cast<uint8_t*>(mMonitorChunks[i][j]), kChunkSize);
+                mAllocator.deallocate(reinterpret_cast<uint8_t*>(
+                                            mMonitorChunks[i][j]), kChunkSize);
             }
             else {
                 CHECK(mMonitorChunks[i][j] == 0);
@@ -114,7 +124,7 @@ NativeMonitor* NativeMonitorPool::CreateMonitorInPool(
 
     // Initialize it.
     NativeMonitor* monitor = new(monUninitialized)
-            NativeMonitor(self, owner, obj, id);
+                                            NativeMonitor(self, owner, obj, id);
 
     return monitor;
 }
@@ -161,5 +171,5 @@ NativeMonitor* NativeMonitorPool::LookupMonitor(
     return reinterpret_cast<NativeMonitor*>(base + offset_in_chunk);
 }
 
-}
-}
+} // namespace core
+} // namespace como

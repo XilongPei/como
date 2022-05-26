@@ -67,5 +67,5 @@ String NativeObject::PrettyTypeOf()
     return ns + name;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -14,13 +14,14 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdarg.h>
+#include <errno.h>
+#include <linux/futex.h>
 #include "como/core/globals.h"
 #include "como/core/NativeMutex.h"
 #include "como/core/NativeThread.h"
 #include "como/core/NativeTimeUtils.h"
 #include <comolog.h>
-#include <errno.h>
-#include <linux/futex.h>
 
 namespace como {
 namespace core {
@@ -58,8 +59,8 @@ void BaseMutex::RegisterAsLocked(
     if (UNLIKELY(self == nullptr)) {
         return;
     }
-    // Don't record monitors as they are outside the scope of analysis. They may be inspected off of
-    // the monitor list.
+    // Don't record monitors as they are outside the scope of analysis.
+    // They may be inspected off of the monitor list.
     if (mLevel != kMonitorLock) {
         self->SetHeldMutex(mLevel, this);
     }
@@ -116,19 +117,22 @@ void NativeMutex::ExclusiveLock(
     /* [in] */ NativeThread* self)
 {
     CHECK(self == nullptr || self == NativeThread::Current());
+
     if (!mRecursive || !IsExclusiveHeld(self)) {
         Boolean done = false;
         do {
             int32_t curState = mState.LoadRelaxed();
             if (LIKELY(curState == 0)) {
-                // Change state from 0 to 1 and impose load/store ordering appropriate for lock acquisition.
+                // Change state from 0 to 1 and impose load/store ordering
+                // appropriate for lock acquisition.
                 done = mState.CompareExchangeWeakAcquire(0 /* cur_state */, 1 /* new state */);
             }
             else {
                 mNumContenders++;
                 if (futex(mState.Address(), FUTEX_WAIT, 1, nullptr, nullptr, 0) != 0) {
-                    // EAGAIN and EINTR both indicate a spurious failure, try again from the beginning.
-                    // We don't use TEMP_FAILURE_RETRY so we can intentionally retry to acquire the lock.
+                    // EAGAIN and EINTR both indicate a spurious failure, try
+                    // again from the beginning. We don't use TEMP_FAILURE_RETRY
+                    // so we can intentionally retry to acquire the lock.
                     if ((errno != EAGAIN) && (errno != EINTR)) {
                         Logger::E("NativeMutex", "futex wait failed for %s", mName.string());
                     }
@@ -155,10 +159,12 @@ void NativeMutex::ExclusiveUnlock(
             if (LIKELY(curState == 1)) {
                 // We're no longer the owner.
                 mExclusiveOwner = 0;
-                // Change state to 0 and impose load/store ordering appropriate for lock release.
+                // Change state to 0 and impose load/store ordering appropriate
+                // for lock release.
                 // Note, the relaxed loads below musn't reorder before the CompareExchange.
-                // TODO: the ordering here is non-trivial as state is split across 3 fields, fix by placing
-                // a status bit into the state on contention.
+                // TODO: the ordering here is non-trivial as state is split
+                // across 3 fields, fix by placing a status bit into the state
+                // on contention.
                 done =  mState.CompareExchangeWeakSequentiallyConsistent(curState, 0 /* new state */);
                 if (LIKELY(done)) {
                     // Wake a contender.
@@ -168,7 +174,8 @@ void NativeMutex::ExclusiveUnlock(
                 }
             }
             else {
-                Logger::E("NativeMutex", "Unexpected state_ in unlock %d for %s", curState, mName.string());
+                Logger::E("NativeMutex", "Unexpected state_ in unlock %d for %s",
+                                                            curState, mName.string());
             }
         } while(!done);
     }
@@ -211,16 +218,17 @@ void NativeConditionVariable::Broadcast(
     /* [in] */ NativeThread* self)
 {
     CHECK(self == nullptr || self == NativeThread::Current());
-    // TODO: enable below, there's a race in thread creation that causes false failures currently.
-    // guard_.AssertExclusiveHeld(self);
+    // TODO: enable below, there's a race in thread creation that causes false
+    // failures currently. guard_.AssertExclusiveHeld(self);
     CHECK(mGuard.GetExclusiveOwnerTid() == SafeGetTid(self));
     if (mNumWaiters > 0) {
         mSequence++;  // Indicate the broadcast occurred.
         Boolean done = false;
         do {
             int32_t curSequence = mSequence.LoadRelaxed();
-            // Requeue waiters onto mutex. The waiter holds the contender count on the mutex high ensuring
-            // mutex unlocks will awaken the requeued waiter thread.
+            // Requeue waiters onto mutex. The waiter holds the contender count
+            // on the mutex high ensuring mutex unlocks will awaken the requeued
+            // waiter thread.
             done = futex(mSequence.Address(), FUTEX_CMP_REQUEUE, 0,
                        reinterpret_cast<const timespec*>(std::numeric_limits<int32_t>::max()),
                        mGuard.mState.Address(), curSequence) != -1;
@@ -238,13 +246,18 @@ void NativeConditionVariable::Signal(
     /* [in] */ NativeThread* self)
 {
     CHECK(self == nullptr || self == NativeThread::Current());
+
     mGuard.AssertExclusiveHeld(self);
     if (mNumWaiters > 0) {
         mSequence++; // Indicate a signal occurred.
-        // Futex wake 1 waiter who will then come and in contend on mutex. It'd be nice to requeue them
-        // to avoid this, however, requeueing can only move all waiters.
+
+        // Futex wake 1 waiter who will then come and in contend on mutex.
+        // It'd be nice to requeue them to avoid this, however, requeueing can
+        // only move all waiters.
         int numWoken = futex(mSequence.Address(), FUTEX_WAKE, 1, nullptr, nullptr, 0);
-        // Check something was woken or else we changed sequence_ before they had chance to wait.
+
+        // Check something was woken or else we changed sequence_ before they
+        // had chance to wait.
         CHECK((numWoken == 0) || (numWoken == 1));
     }
 }
@@ -260,14 +273,18 @@ void NativeConditionVariable::WaitHoldingLocks(
     /* [in] */ NativeThread* self)
 {
     CHECK(self == nullptr || self == Thread::Current());
+
     mGuard.AssertExclusiveHeld(self);
+
     unsigned int oldRecursionCount = mGuard.mRecursionCount;
+
     mNumWaiters++;
     // Ensure the Mutex is contended so that requeued threads are awoken.
     mGuard.mNumContenders++;
     mGuard.mRecursionCount = 1;
     int32_t curSequence = mSequence.LoadRelaxed();
     mGuard.ExclusiveUnlock(self);
+
     if (futex(mSequence.Address(), FUTEX_WAIT, curSequence, nullptr, nullptr, 0) != 0) {
         // Futex failed, check it is an expected error.
         // EAGAIN == EWOULDBLK, so we let the caller try again.
@@ -291,12 +308,16 @@ Boolean NativeConditionVariable::TimedWait(
     /* [in] */ int32_t ns)
 {
     CHECK(self == nullptr || self == Thread::Current());
+
     Boolean timedOut = false;
     mGuard.AssertExclusiveHeld(self);
     mGuard.CheckSafeToWait(self);
+
     unsigned int oldRecursionCount = mGuard.mRecursionCount;
+
     timespec rel_ts;
     InitTimeSpec(false, CLOCK_REALTIME, ms, ns, &rel_ts);
+
     mNumWaiters++;
     // Ensure the Mutex is contended so that requeued threads are awoken.
     mGuard.mNumContenders++;
@@ -337,33 +358,83 @@ NativeMutex* Locks::sAllocatedThreadIdsLock = nullptr;
 NativeMutex* Locks::sModifyLdtLock = nullptr;
 NativeMutex* Locks::sThreadSuspendCountLock = nullptr;
 
-void Locks::Init()
+static int CheckSomeVoidP(int cnt, ...)
+{
+    void *vp;
+
+    va_list argptr;
+    va_start(argptr, cnt);
+
+    int num = 0;
+    for (int i = 0;  i < cnt;  i++) {
+        vp = va_arg(argptr, void*);
+        if (nullptr != vp) {
+            num++;
+        }
+    }
+    va_end(argptr);
+
+    return num;
+}
+
+static void FreeSomeVoidP(int cnt, ...)
+{
+    void *vp;
+
+    va_list argptr;
+    va_start(argptr, cnt);
+
+    for (int i = 0;  i < cnt;  i++) {
+        vp = va_arg(argptr, void*);
+        if (nullptr != vp) {
+            free(vp);
+        }
+    }
+    va_end(argptr);
+}
+
+ECode Locks::Init()
 {
     CHECK(sMutatorLock == nullptr);
     sMutatorLock = new NativeMutatorMutex(String("mutator lock"), kMutatorLock);
 
     CHECK(sRuntimeShutdownLock == nullptr);
-    sRuntimeShutdownLock = new NativeMutex(String("runtime shutdown lock"), kRuntimeShutdownLock);
-
+    sRuntimeShutdownLock = new NativeMutex(String("runtime shutdown lock"),
+                                                            kRuntimeShutdownLock);
     CHECK(sThreadListLock == nullptr);
     sThreadListLock = new NativeMutex(String("thread list lock"), kThreadListLock);
 
     CHECK(sAllocatedMonitorIdsLock == nullptr);
-    sAllocatedMonitorIdsLock = new NativeMutex(String("allocated monitor ids lock"), kMonitorPoolLock);
+    sAllocatedMonitorIdsLock = new NativeMutex(String("allocated monitor ids lock"),
+                                                                    kMonitorPoolLock);
 
     CHECK(sAllocatedThreadIdsLock == nullptr);
-    sAllocatedThreadIdsLock = new NativeMutex(String("allocated thread ids lock"), kAllocatedThreadIdsLock);
-
+    sAllocatedThreadIdsLock = new NativeMutex(String("allocated thread ids lock"),
+                                                            kAllocatedThreadIdsLock);
     if (kRuntimeISA == kX86_64) {
         CHECK(sModifyLdtLock == nullptr);
         sModifyLdtLock = new NativeMutex(String("modify_ldt lock"), kModifyLdtLock);
     }
 
     CHECK(sThreadSuspendCountLock == nullptr);
-    sThreadSuspendCountLock = new NativeMutex(String("thread suspend count lock"), kThreadSuspendCountLock);
+    sThreadSuspendCountLock = new NativeMutex(String("thread suspend count lock"),
+                                                            kThreadSuspendCountLock);
+    sThreadExitCond = new NativeConditionVariable(
+                            String("thread exit condition variable"), *sThreadListLock);
 
-    sThreadExitCond = new NativeConditionVariable(String("thread exit condition variable"), *sThreadListLock);
+    if (CheckSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
+                              sThreadListLock, sAllocatedMonitorIdsLock,
+                              sAllocatedThreadIdsLock, sModifyLdtLock,
+                              sThreadSuspendCountLock, sThreadExitCond) != 8) {
+        FreeSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
+                                      sThreadListLock, sAllocatedMonitorIdsLock,
+                                      sAllocatedThreadIdsLock, sModifyLdtLock,
+                                      sThreadSuspendCountLock, sThreadExitCond);
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como
