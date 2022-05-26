@@ -100,12 +100,17 @@ ECode Hashtable::GetKeys(
     /* [out] */ AutoPtr<IEnumeration>& keys)
 {
     AutoLock lock(this);
+
     if (mCount == 0) {
         keys = Collections::GetEmptyEnumeration();
     }
     else {
         keys = new Enumerator(this, KEYS, false);
     }
+
+    if (nullptr == keys)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -113,12 +118,17 @@ ECode Hashtable::GetElements(
     /* [out] */ AutoPtr<IEnumeration>& elements)
 {
     AutoLock lock(this);
+
     if (mCount ==  0) {
         elements = Collections::GetEmptyEnumeration();
     }
     else {
         elements = new Enumerator(this, VALUES, false);
     }
+
+    if (nullptr == elements)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -131,8 +141,9 @@ ECode Hashtable::Contains(
     }
 
     AutoLock lock(this);
-    for (Integer i = mTable.GetLength() - 1; i >= 0; i--) {
-        for (HashtableEntry* e = mTable[i]; e != nullptr; e = e->mNext) {
+
+    for (Integer i = mTable.GetLength() - 1;  i >= 0;  i--) {
+        for (HashtableEntry* e = mTable[i];  e != nullptr;  e = e->mNext) {
             if (Object::Equals(e->mValue, value)) {
                 result = true;
                 return NOERROR;
@@ -155,9 +166,10 @@ ECode Hashtable::ContainsKey(
     /* [out] */ Boolean& result)
 {
     AutoLock lock(this);
+
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mTable.GetLength();
-    for (HashtableEntry* e = mTable[index]; e != nullptr; e = e->mNext) {
+    for (HashtableEntry* e = mTable[index];  e != nullptr;  e = e->mNext) {
         if ((e->mHash == hash) && Object::Equals(e->mKey, key)) {
             result = true;
             return NOERROR;
@@ -172,9 +184,10 @@ ECode Hashtable::Get(
     /* [out] */ AutoPtr<IInterface>& value)
 {
     AutoLock lock(this);
+
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mTable.GetLength();
-    for (HashtableEntry* e = mTable[index]; e != nullptr; e = e->mNext) {
+    for (HashtableEntry* e = mTable[index];  e != nullptr;  e = e->mNext) {
         if ((e->mHash == hash) && Object::Equals(e->mKey, key)) {
             value = e->mValue;
             return NOERROR;
@@ -204,7 +217,7 @@ void Hashtable::Rehash()
     mThreshold = (Integer)Math::Min(newCapacity * mLoadFactor, (Float)MAX_ARRAY_SIZE + 1);
     mTable = newMap;
 
-    for (Integer i = oldCapacity - 1; i > 0; i--) {
+    for (Integer i = oldCapacity - 1;  i > 0;  i--) {
         for (HashtableEntry* old = oldMap[i]; old != nullptr;) {
             HashtableEntry* e = old;
             old = old->mNext;
@@ -216,7 +229,7 @@ void Hashtable::Rehash()
     }
 }
 
-void Hashtable::AddEntry(
+ECode Hashtable::AddEntry(
     /* [in] */ Integer hash,
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* value,
@@ -234,8 +247,13 @@ void Hashtable::AddEntry(
 
     HashtableEntry* e = mTable[index];
     AutoPtr<HashtableEntry> entry = new HashtableEntry(hash, key, value, e);
+    if (nullptr == entry)
+        return E_OUT_OF_MEMORY_ERROR;
+
     mTable.Set(index, entry);
     mCount++;
+
+    return NOERROR;
 }
 
 ECode Hashtable::Put(
@@ -248,11 +266,12 @@ ECode Hashtable::Put(
     }
 
     AutoLock lock(this);
+
     // Makes sure the key is not already in the hashtable.
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mTable.GetLength();
     HashtableEntry* entry = mTable[index];
-    for (; entry != nullptr; entry = entry->mNext) {
+    for (;  entry != nullptr;  entry = entry->mNext) {
         if ((entry->mHash == hash) && Object::Equals(entry->mKey, key)) {
             if (prevValue != nullptr) {
                 *prevValue = entry->mValue;
@@ -264,7 +283,9 @@ ECode Hashtable::Put(
     }
 
     AddEntry(hash, key, value, index);
-    if (prevValue != nullptr) *prevValue = nullptr;
+    if (prevValue != nullptr)
+        *prevValue = nullptr;
+
     return NOERROR;
 }
 
@@ -273,10 +294,11 @@ ECode Hashtable::Remove(
     /* [out] */ IInterface** prevValue)
 {
     AutoLock lock(this);
+
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mTable.GetLength();
     AutoPtr<HashtableEntry> e = mTable[index];
-    for (HashtableEntry* prev = nullptr; e != nullptr; prev = e, e = e->mNext) {
+    for (HashtableEntry* prev = nullptr;  e != nullptr;  prev = e, e = e->mNext) {
         if ((e->mHash == hash) && Object::Equals(e->mKey, key)) {
             mModCount++;
             if (prev != nullptr) {
@@ -294,7 +316,9 @@ ECode Hashtable::Remove(
             return NOERROR;
         }
     }
-    if (prevValue != nullptr) *prevValue = nullptr;
+    if (prevValue != nullptr)
+        *prevValue = nullptr;
+
     return NOERROR;
 }
 
@@ -302,6 +326,7 @@ ECode Hashtable::PutAll(
     /* [in] */ IMap* m)
 {
     AutoLock lock(this);
+
     AutoPtr<ISet> entries;
     m->GetEntrySet(entries);
     AutoPtr<IIterator> it;
@@ -315,17 +340,20 @@ ECode Hashtable::PutAll(
         IMapEntry::Probe(obj)->GetValue(value);
         FAIL_RETURN(Put(key, value));
     }
+
     return NOERROR;
 }
 
 ECode Hashtable::Clear()
 {
     AutoLock lock(this);
+
     mModCount++;
-    for (Integer index = mTable.GetLength() - 1; index >= 0; index--) {
+    for (Integer index = mTable.GetLength() - 1;  index >= 0;  index--) {
         mTable.Set(index, nullptr);
     }
     mCount = 0;
+
     return NOERROR;
 }
 
@@ -333,6 +361,7 @@ ECode Hashtable::CloneImpl(
     /* [out] */ IHashtable* newObj)
 {
     AutoLock lock(this);
+
     Hashtable* t = (Hashtable*)newObj;
 
     t->mCount = mCount;
@@ -340,7 +369,7 @@ ECode Hashtable::CloneImpl(
     t->mLoadFactor = mLoadFactor;
 
     t->mTable = Array<HashtableEntry*>(mTable.GetLength());
-    for (Integer i = mTable.GetLength() - 1; i >=0; i--) {
+    for (Integer i = mTable.GetLength() - 1;  i >=0;  i--) {
         if (mTable[i] != nullptr) {
             t->mTable.Set(i, mTable[i]->Clone());
         }
@@ -362,13 +391,14 @@ ECode Hashtable::ToString(
     }
 
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+
     AutoPtr<ISet> entries;
     GetEntrySet(entries);
     AutoPtr<IIterator> it;
     entries->GetIterator(it);
 
-    sb->Append(U'{');
+    sb->Append('{');
     for (Integer i = 0; ; i++) {
         AutoPtr<IInterface> e;
         it->Next(e);
@@ -376,16 +406,18 @@ ECode Hashtable::ToString(
         IMapEntry::Probe(e)->GetKey(key);
         IMapEntry::Probe(e)->GetValue(value);
         sb->Append(IInterface::Equals(key, (IHashtable*)this) ?
-                String("(this Map)") : Object::ToString(key));
+                                String("(this Map)") : Object::ToString(key));
         sb->Append(Object::Equals(value, (IHashtable*)this) ?
-                String("(this Map") : Object::ToString(value));
+                                String("(this Map") : Object::ToString(value));
 
         if (i == max) {
-            sb->Append(U'}');
+            sb->Append('}');
             return sb->ToString(str);
         }
         sb->Append(String(", "));
     }
+
+    return NOERROR;
 }
 
 ECode Hashtable::GetKeySet(
@@ -394,6 +426,9 @@ ECode Hashtable::GetKeySet(
     VOLATILE_GET(AutoPtr<ISet> keySet, mKeySet);
     if (keySet == nullptr) {
         keySet = Collections::CreateSynchronizedSet(new KeySet(this), this);
+        if (nullptr == keySet)
+            return E_OUT_OF_MEMORY_ERROR;
+
         VOLATILE_SET(mKeySet, keySet);
     }
     keys = std::move(keySet);
@@ -406,6 +441,9 @@ ECode Hashtable::GetEntrySet(
     VOLATILE_GET(AutoPtr<ISet> entrySet, mEntrySet);
     if (entrySet == nullptr) {
         entrySet = Collections::CreateSynchronizedSet(new EntrySet(this), this);
+        if (nullptr == entrySet)
+            return E_OUT_OF_MEMORY_ERROR;
+
         VOLATILE_SET(mEntrySet, entrySet);
     }
     entries = std::move(entrySet);
@@ -418,7 +456,10 @@ ECode Hashtable::GetValues(
     VOLATILE_GET(AutoPtr<ICollection> valueColl, mValues);
     if (valueColl == nullptr) {
         valueColl = Collections::CreateSynchronizedCollection(
-                new ValueCollection(this), this);
+                                                new ValueCollection(this), this);
+        if (nullptr == valueColl)
+            return E_OUT_OF_MEMORY_ERROR;
+
         VOLATILE_SET(mValues, valueColl);
     }
     values = std::move(valueColl);
@@ -430,6 +471,7 @@ ECode Hashtable::Equals(
     /* [out] */ Boolean& result)
 {
     AutoLock lock(this);
+
     if (IInterface::Equals(obj, (IHashtable*)this)) {
         result = true;
         return NOERROR;
@@ -462,7 +504,7 @@ ECode Hashtable::Equals(
             AutoPtr<IInterface> v1;
             Boolean contains;
             if ((t->Get(key, v1), v1 != nullptr) ||
-                (t->ContainsKey(key, contains), !contains)) {
+                                (t->ContainsKey(key, contains), !contains)) {
                 result = false;
                 return NOERROR;
             }
@@ -530,7 +572,7 @@ ECode Hashtable::PutIfAbsent(
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mTable.GetLength();
     HashtableEntry* entry = mTable[index];
-    for (; entry != nullptr; entry = entry->mNext) {
+    for (;  entry != nullptr;  entry = entry->mNext) {
         if ((entry->mHash == hash) && Object::Equals(entry->mKey, key)) {
             IInterface* old = entry->mValue;
             if (old == nullptr) {
@@ -560,6 +602,10 @@ ECode Hashtable::KeySet::GetIterator(
     else {
         it = new Enumerator(mOwner, KEYS, true);
     }
+
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -586,6 +632,7 @@ ECode Hashtable::KeySet::Remove(
     AutoPtr<IInterface> prevValue;
     mOwner->Remove(obj, &prevValue);
     *contained = prevValue != nullptr;
+
     return NOERROR;
 }
 
@@ -605,6 +652,10 @@ ECode Hashtable::EntrySet::GetIterator(
     else {
         it = new Enumerator(mOwner, ENTRIES, true);
     }
+
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -630,7 +681,7 @@ ECode Hashtable::EntrySet::Contains(
     Integer hash = Object::GetHashCode(key);
     Integer index = (hash & 0x7FFFFFFF) % mOwner->mTable.GetLength();
 
-    for (HashtableEntry* e = mOwner->mTable[index]; e != nullptr; e = e->mNext) {
+    for (HashtableEntry* e = mOwner->mTable[index];  e != nullptr;  e = e->mNext) {
         if (e->mHash == hash && Object::Equals(e, entry)) {
             result = true;
             return NOERROR;
@@ -658,7 +709,7 @@ ECode Hashtable::EntrySet::Remove(
     Integer index = (hash & 0x7FFFFFFF) % mOwner->mTable.GetLength();
 
     AutoPtr<HashtableEntry> e = mOwner->mTable[index];
-    for (HashtableEntry* prev = nullptr; e != nullptr; prev = e, e = e->mNext) {
+    for (HashtableEntry* prev = nullptr;  e != nullptr;  prev = e, e = e->mNext) {
         if (e->mHash == hash && Object::Equals(e, entry)) {
             mOwner->mModCount++;
             if (prev != nullptr) {
@@ -730,7 +781,7 @@ COMO_INTERFACE_IMPL_LIGHT_1(Hashtable::HashtableEntry, LightRefBase, IMapEntry);
 AutoPtr<Hashtable::HashtableEntry> Hashtable::HashtableEntry::Clone()
 {
     return new HashtableEntry(mHash, mKey, mValue,
-            (mNext == nullptr ? nullptr : mNext->Clone()));
+                                (mNext == nullptr ? nullptr : mNext->Clone()));
 }
 
 ECode Hashtable::HashtableEntry::GetKey(
@@ -802,7 +853,7 @@ ECode Hashtable::Enumerator::HasMoreElements(
 {
     AutoPtr<HashtableEntry> e = mEntry;
     Integer i = mIndex;
-    while (e == nullptr && i > 0) {
+    while ((e == nullptr) && (i > 0)) {
         e = mTable[--i];
     }
     mEntry = e;
@@ -816,7 +867,7 @@ ECode Hashtable::Enumerator::NextElement(
 {
     AutoPtr<HashtableEntry> et = mEntry;
     Integer i = mIndex;
-    while (et == nullptr && i > 0) {
+    while ((et == nullptr) && (i > 0)) {
         et = mTable[--i];
     }
     mEntry = et;
@@ -824,8 +875,7 @@ ECode Hashtable::Enumerator::NextElement(
     if (et != nullptr) {
         HashtableEntry* e = mLastReturned = mEntry;
         mEntry = e->mNext;
-        object = mType == KEYS ? e->mKey : (
-                mType == VALUES ? e->mValue : e);
+        object = mType == KEYS ? e->mKey : (mType == VALUES ? e->mValue : e);
         return NOERROR;
     }
     return E_NO_SUCH_ELEMENT_EXCEPTION;
@@ -859,11 +909,12 @@ ECode Hashtable::Enumerator::Remove()
     }
 
     AutoLock lock(mOwner);
+
     Array<HashtableEntry*>& tab = mOwner->mTable;
     Integer index = (mLastReturned->mHash & 0x7FFFFFFF) % tab.GetLength();
 
     HashtableEntry* e = tab[index];
-    for (HashtableEntry* prev = nullptr; e != nullptr; prev = e, e = e->mNext) {
+    for (HashtableEntry* prev = nullptr;  e != nullptr;  prev = e, e = e->mNext) {
         if (e == mLastReturned) {
             mOwner->mModCount++;
             mExpectedModCount++;
@@ -881,5 +932,5 @@ ECode Hashtable::Enumerator::Remove()
     return E_CONCURRENT_MODIFICATION_EXCEPTION;
 }
 
-}
-}
+} // namespace util
+} // namespace como

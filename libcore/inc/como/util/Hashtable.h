@@ -329,7 +329,7 @@ protected:
         /* [out] */ IHashtable* newObj);
 
 private:
-    void AddEntry(
+    ECode AddEntry(
         /* [in] */ Integer hash,
         /* [in] */ IInterface* key,
         /* [in] */ IInterface* value,

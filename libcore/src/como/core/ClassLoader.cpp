@@ -33,9 +33,12 @@ COMO_INTERFACE_IMPL_1(ClassLoader, SyncObject, IClassLoader);
 ECode ClassLoader::Constructor(
     /* [in] */ IClassLoader* parent)
 {
+    mLoadedCoclasses = nullptr;
+    mLoadedInterfaces = nullptr;
+
     mParent = parent;
-    CHashMap::New(IID_IHashMap, (IInterface**)&mLoadedCoclasses);
-    CHashMap::New(IID_IHashMap, (IInterface**)&mLoadedInterfaces);
+    FAIL_RETURN(CHashMap::New(IID_IHashMap, (IInterface**)&mLoadedCoclasses));
+    FAIL_RETURN(CHashMap::New(IID_IHashMap, (IInterface**)&mLoadedInterfaces));
     return NOERROR;
 }
 
@@ -165,5 +168,5 @@ AutoPtr<IClassLoader> ClassLoader::SystemClassLoader::GetInstance()
     return sLoader;
 }
 
-}
-}
+} // namespace core
+} // namespace como

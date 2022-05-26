@@ -206,7 +206,7 @@ public:
     virtual ECode Reverse();
 
 private:
-    void EnsureCapacityInternal(
+    ECode EnsureCapacityInternal(
         /* [in] */ Integer minimumCapacity);
 
     Integer NewCapacity(
@@ -240,7 +240,7 @@ Boolean AbstractStringBuilder::IsASCII(
     return (c & 0x80) == 0;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_ABSTRACTSTRINGBUILDER_H__

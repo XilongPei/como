@@ -284,7 +284,11 @@ ECode CStringBuilder::ToString(
         str = "";
         return NOERROR;
     }
+
     str = String(mValue, mByteCount);
+    if (str.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -363,5 +367,5 @@ ECode CStringBuilder::SubSequence(
     return AbstractStringBuilder::SubSequence(start, end, subcsq);
 }
 
-}
-}
+} // namespace core
+} // namespace como

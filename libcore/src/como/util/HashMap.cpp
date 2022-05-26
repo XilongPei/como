@@ -510,6 +510,9 @@ ECode HashMap::GetValues(
     AutoPtr<ICollection> vs = mValues;
     if (vs == nullptr) {
         vs = new Values(this);
+        if (nullptr == vs)
+            return E_OUT_OF_MEMORY_ERROR;
+
         mValues = vs;
     }
     values = std::move(vs);
@@ -521,6 +524,8 @@ ECode HashMap::GetEntrySet(
 {
     if (mEntrySet == nullptr) {
         mEntrySet = new EntrySet(this);
+        if (nullptr == mEntrySet)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = mEntrySet;
     return NOERROR;
@@ -556,7 +561,7 @@ Float HashMap::GetLoadFactor()
 Integer HashMap::GetCapacity()
 {
     return !mTable.IsNull() ? mTable.GetLength() :
-            (mThreshold > 0) ? mThreshold : DEFAULT_INITIAL_CAPACITY;
+                    (mThreshold > 0) ? mThreshold : DEFAULT_INITIAL_CAPACITY;
 }
 
 AutoPtr<HashMap::Node> HashMap::NewNode(
@@ -690,8 +695,7 @@ ECode HashMap::Node::Equals(
         AutoPtr<IInterface> key, value;
         e->GetKey(key);
         e->GetValue(value);
-        if (Object::Equals(mKey, key) &&
-                Object::Equals(mValue, value)) {
+        if (Object::Equals(mKey, key) && Object::Equals(mValue, value)) {
             result = true;
             return NOERROR;
         }
@@ -786,6 +790,9 @@ ECode HashMap::EntrySet::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new EntryIterator(mOwner);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -814,8 +821,7 @@ ECode HashMap::EntrySet::Remove(
         AutoPtr<IInterface> key, value;
         e->GetKey(key);
         e->GetKey(value);
-        AutoPtr<Node> node = mOwner->RemoveNode(
-                Hash(key), key, value, true, true);
+        AutoPtr<Node> node = mOwner->RemoveNode(Hash(key), key, value, true, true);
         if (contained != nullptr) {
             *contained = node != nullptr;
         }
@@ -934,5 +940,5 @@ ECode HashMap::EntryIterator::Next(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

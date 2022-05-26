@@ -1614,5 +1614,5 @@ ECode Collections::ReverseComparator2::GetHashCode(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

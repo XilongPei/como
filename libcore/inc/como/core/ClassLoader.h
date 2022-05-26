@@ -117,7 +117,7 @@ inline AutoPtr<IClassLoader> ClassLoader::GetSystemClassLoader()
     return SystemClassLoader::GetInstance();
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CLASSLOADER_H__

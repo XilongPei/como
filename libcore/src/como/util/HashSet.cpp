@@ -36,8 +36,7 @@ AutoPtr<IInterface> HashSet::GetPRESENT()
 
 ECode HashSet::Constructor()
 {
-    CHashMap::New(IID_IHashMap, (IInterface**)&mMap);
-    return NOERROR;
+    return CHashMap::New(IID_IHashMap, (IInterface**)&mMap);
 }
 
 ECode HashSet::Constructor(
@@ -46,7 +45,7 @@ ECode HashSet::Constructor(
     Integer size;
     c->GetSize(size);
     CHashMap::New(Math::Max((Integer)(size / .75f) + 1, 16),
-            IID_IHashMap, (IInterface**)&mMap);
+                                            IID_IHashMap, (IInterface**)&mMap);
     AddAll(c);
     return NOERROR;
 }
@@ -55,16 +54,13 @@ ECode HashSet::Constructor(
     /* [in] */ Integer initialCapacity,
     /* [in] */ Float loadFactor)
 {
-    CHashMap::New(initialCapacity, loadFactor,
-            IID_IHashMap, (IInterface**)&mMap);
-    return NOERROR;
+    return CHashMap::New(initialCapacity, loadFactor, IID_IHashMap, (IInterface**)&mMap);
 }
 
 ECode HashSet::Constructor(
     /* [in] */ Integer initialCapacity)
 {
-    CHashMap::New(initialCapacity, IID_IHashMap, (IInterface**)&mMap);
-    return NOERROR;
+    return CHashMap::New(initialCapacity, IID_IHashMap, (IInterface**)&mMap);
 }
 
 ECode HashSet::Constructor(
@@ -72,9 +68,8 @@ ECode HashSet::Constructor(
     /* [in] */ Float loadFactor,
     /* [in] */ Boolean dummy)
 {
-    CLinkedHashMap::New(initialCapacity, loadFactor,
-            IID_IHashMap, (IInterface**)&mMap);
-    return NOERROR;
+    return CLinkedHashMap::New(initialCapacity, loadFactor,
+                                            IID_IHashMap, (IInterface**)&mMap);
 }
 
 ECode HashSet::GetIterator(
@@ -197,5 +192,5 @@ ECode HashSet::ToArray(
     return AbstractSet::ToArray(iid, objs);
 }
 
-}
-}
+} // namespace util
+} // namespace como

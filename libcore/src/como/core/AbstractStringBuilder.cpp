@@ -37,6 +37,7 @@ ECode AbstractStringBuilder::Constructor(
     mValue = (char*)malloc(capacity);
     if (mValue == nullptr) {
         Logger::E("AbstractStringBuilder", "Malloc mValue failed.");
+        return E_OUT_OF_MEMORY_ERROR;
     }
     mCapacity = capacity;
     return NOERROR;
@@ -60,12 +61,12 @@ ECode AbstractStringBuilder::EnsureCapacity(
     /* [in] */ Integer minimumCapacity)
 {
     if (minimumCapacity > 0) {
-        EnsureCapacityInternal(minimumCapacity);
+        FAIL_RETURN(EnsureCapacityInternal(minimumCapacity));
     }
     return NOERROR;
 }
 
-void AbstractStringBuilder::EnsureCapacityInternal(
+ECode AbstractStringBuilder::EnsureCapacityInternal(
     /* [in] */ Integer minimumCapacity)
 {
     if (minimumCapacity - mCapacity > 0) {
@@ -74,12 +75,13 @@ void AbstractStringBuilder::EnsureCapacityInternal(
         mValue = (char*)malloc(newCapacity);
         if (mValue == nullptr) {
             Logger::E("AbstractStringBuilder", "Malloc mValue failed.");
-            return;
+            return E_OUT_OF_MEMORY_ERROR;
         }
         memcpy(mValue, oldValue, mCapacity);
         mCapacity = newCapacity;
         free(oldValue);
     }
+    return NOERROR;
 }
 
 Integer AbstractStringBuilder::NewCapacity(
@@ -118,7 +120,7 @@ ECode AbstractStringBuilder::SetLength(
     if (newLength < 0) {
         return E_STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    EnsureCapacityInternal(newLength - mCount + mCapacity);
+    FAIL_RETURN(EnsureCapacityInternal(newLength - mCount + mCapacity));
 
     if (mCount < newLength) {
         memset(mValue + mByteCount, 0, newLength - mCount);
@@ -235,7 +237,7 @@ ECode AbstractStringBuilder::SetCharAt(
         if (index == 0) {
             if (chByteSize > byteSize) {
                 ptrdiff_t offset = p - mValue;
-                EnsureCapacityInternal(mByteCount + chByteSize - byteSize);
+                FAIL_RETURN(EnsureCapacityInternal(mByteCount + chByteSize - byteSize));
                 p = mValue + offset;
             }
             else if (chByteSize < byteSize) {
@@ -259,7 +261,7 @@ ECode AbstractStringBuilder::Append(
         return AppendNull();
     }
     Integer len = str.GetByteLength();
-    EnsureCapacityInternal(mByteCount + len);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + len));
     memcpy(mValue + mByteCount, str.string(), len);
     mCount += str.GetLength();
     mByteCount += len;
@@ -292,11 +294,11 @@ ECode AbstractStringBuilder::Append(
 ECode AbstractStringBuilder::AppendNull()
 {
     Integer c = mByteCount;
-    EnsureCapacityInternal(c + 4);
-    mValue[c++] = U'n';
-    mValue[c++] = U'u';
-    mValue[c++] = U'l';
-    mValue[c++] = U'l';
+    FAIL_RETURN(EnsureCapacityInternal(c + 4));
+    mValue[c++] = 'n';
+    mValue[c++] = 'u';
+    mValue[c++] = 'l';
+    mValue[c++] = 'l';
     mByteCount = c;
     mCount += 4;
     return NOERROR;
@@ -327,7 +329,7 @@ ECode AbstractStringBuilder::Append(
     /* [in] */ const Array<Char>& str)
 {
     Integer len = str.GetLength();
-    EnsureCapacityInternal(mByteCount + len * 4);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + len * 4));
     for (Integer i = 0; i < len; i++) {
         Append(str[i]);
     }
@@ -343,7 +345,7 @@ ECode AbstractStringBuilder::Append(
         (offset + len > str.GetLength())) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    EnsureCapacityInternal(mByteCount + len * 4);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + len * 4));
     for (Integer i = offset; i < offset + len; i++) {
         Append(str[i]);
     }
@@ -354,20 +356,20 @@ ECode AbstractStringBuilder::Append(
     /* [in] */ Boolean b)
 {
     if (b) {
-        EnsureCapacityInternal(mByteCount + 4);
-        mValue[mByteCount++] = U't';
-        mValue[mByteCount++] = U'r';
-        mValue[mByteCount++] = U'u';
-        mValue[mByteCount++] = U'e';
+        FAIL_RETURN(EnsureCapacityInternal(mByteCount + 4));
+        mValue[mByteCount++] = 't';
+        mValue[mByteCount++] = 'r';
+        mValue[mByteCount++] = 'u';
+        mValue[mByteCount++] = 'e';
         mCount += 4;
     }
     else {
-        EnsureCapacityInternal(mByteCount + 5);
-        mValue[mByteCount++] = U'f';
-        mValue[mByteCount++] = U'a';
-        mValue[mByteCount++] = U'l';
-        mValue[mByteCount++] = U's';
-        mValue[mByteCount++] = U'e';
+        FAIL_RETURN(EnsureCapacityInternal(mByteCount + 5));
+        mValue[mByteCount++] = 'f';
+        mValue[mByteCount++] = 'a';
+        mValue[mByteCount++] = 'l';
+        mValue[mByteCount++] = 's';
+        mValue[mByteCount++] = 'e';
         mCount += 5;
     }
     return NOERROR;
@@ -377,7 +379,7 @@ ECode AbstractStringBuilder::Append(
     /* [in] */ Char c)
 {
     Integer byteSize = String::GetByteSize(c);
-    EnsureCapacityInternal(mByteCount + byteSize);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + byteSize));
     String::WriteUTF8Bytes(mValue + mByteCount, c, byteSize);
     mCount++;
     mByteCount += byteSize;
@@ -517,7 +519,7 @@ ECode AbstractStringBuilder::Replace(
 
     Integer len = str.GetByteLength();
     Integer newByteCount = mByteCount + len - (byteEnd - byteStart);
-    EnsureCapacityInternal(newByteCount);
+    FAIL_RETURN(EnsureCapacityInternal(newByteCount));
 
     memmove(mValue + byteStart + len, mValue + byteEnd, mByteCount - byteEnd);
     memcpy(mValue + byteStart, str.string(), len);
@@ -593,7 +595,7 @@ ECode AbstractStringBuilder::Insert(
     for (Integer i = 0; i < len; i++) {
         totalByteSize = String::GetByteSize(str[offset + i]);
     }
-    EnsureCapacityInternal(mByteCount + totalByteSize);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + totalByteSize));
 
     Integer byteSize;
     const char* p = mValue;
@@ -641,7 +643,7 @@ ECode AbstractStringBuilder::Insert(
         string = "null";
     }
     Integer len = string.GetByteLength();
-    EnsureCapacityInternal(mByteCount + len);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + len));
 
     Integer byteSize;
     const char* p = mValue;
@@ -715,7 +717,7 @@ ECode AbstractStringBuilder::Insert(
     /* [in] */ Char c)
 {
     Integer totalByteSize = String::GetByteSize(c);
-    EnsureCapacityInternal(mByteCount + totalByteSize);
+    FAIL_RETURN(EnsureCapacityInternal(mByteCount + totalByteSize));
 
     Integer byteSize;
     const char* p = mValue;
@@ -850,5 +852,5 @@ ECode AbstractStringBuilder::Reverse()
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

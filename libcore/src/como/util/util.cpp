@@ -61,10 +61,12 @@ ECode CArrayList::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CArrayList, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CArrayList), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CArrayList* newObj = new(addr) CArrayList();
     ec = ArrayList::CloneImpl(newObj);
@@ -72,11 +74,13 @@ ECode CArrayList::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CArrayList"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -89,10 +93,12 @@ ECode CDate::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CDate, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CDate), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CDate* newObj = new(addr) CDate();
     ec = Date::CloneImpl(newObj);
@@ -100,11 +106,13 @@ ECode CDate::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CDate"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -135,6 +143,7 @@ ECode CGregorianCalendar::Clone(
     newObj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -153,10 +162,12 @@ ECode CGregorianCalendar::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CGregorianCalendar, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CGregorianCalendar), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CGregorianCalendar* _obj = new(addr) CGregorianCalendar();
     ec = _obj->Constructor(year, month, dayOfMonth, hourOfDay, minute, second, millis);
@@ -164,11 +175,13 @@ ECode CGregorianCalendar::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 
@@ -183,10 +196,12 @@ ECode CGregorianCalendar::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CGregorianCalendar, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CGregorianCalendar), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CGregorianCalendar* _obj = new(addr) CGregorianCalendar();
     ec = _obj->Constructor(zone, locale, flag);
@@ -194,11 +209,13 @@ ECode CGregorianCalendar::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 
@@ -211,10 +228,12 @@ ECode CGregorianCalendar::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CGregorianCalendar, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CGregorianCalendar), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CGregorianCalendar* _obj = new(addr) CGregorianCalendar();
     ec = _obj->Constructor(milliseconds);
@@ -222,11 +241,13 @@ ECode CGregorianCalendar::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CGregorianCalendar"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 
@@ -239,7 +260,8 @@ ECode CHashMap::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CHashMap, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CHashMap), 1);
     if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
@@ -250,11 +272,13 @@ ECode CHashMap::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -267,10 +291,12 @@ ECode CHashSet::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CHashSet, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CHashSet), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CHashSet* newObj = new(addr) CHashSet();
     ec = HashSet::CloneImpl(newObj);
@@ -278,11 +304,13 @@ ECode CHashSet::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -295,10 +323,12 @@ ECode CHashtable::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CHashtable, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CHashtable), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CHashtable* newObj = new(addr) CHashtable();
     ec = Hashtable::CloneImpl(newObj);
@@ -306,11 +336,13 @@ ECode CHashtable::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CHashtable"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -323,10 +355,12 @@ ECode CLinkedHashMap::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLinkedHashMap, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLinkedHashMap), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLinkedHashMap* newObj = new(addr) CLinkedHashMap();
     ec = LinkedHashMap::CloneImpl(newObj);
@@ -334,11 +368,13 @@ ECode CLinkedHashMap::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedHashMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -351,10 +387,12 @@ ECode CLinkedHashSet::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLinkedHashSet, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLinkedHashSet), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLinkedHashSet* newObj = new(addr) CLinkedHashSet();
     ec = LinkedHashSet::CloneImpl(newObj);
@@ -362,11 +400,13 @@ ECode CLinkedHashSet::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedHashSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -379,10 +419,12 @@ ECode CLinkedList::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLinkedList, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLinkedList), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLinkedList* newObj = new(addr) CLinkedList();
     ec = LinkedList::CloneImpl(newObj);
@@ -390,11 +432,13 @@ ECode CLinkedList::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLinkedList"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -407,10 +451,12 @@ ECode CLocale::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLocale, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLocale), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLocale* newObj = new(addr) CLocale();
     ec = Locale::CloneImpl(newObj);
@@ -418,11 +464,13 @@ ECode CLocale::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CLocale"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -432,10 +480,12 @@ ECode CLocale::New(
 {
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLocale, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLocale), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLocale* _obj = new(addr) CLocale();
 
@@ -444,6 +494,7 @@ ECode CLocale::New(
     _obj->AttachMetadata(comp, String("como::util::CLocale"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 };
 
@@ -455,10 +506,12 @@ ECode CLocale::New(
 {
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CLocale, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CLocale), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CLocale* _obj = new(addr) CLocale();
     ec = _obj->Constructor(baseLocale, extensions);
@@ -466,11 +519,13 @@ ECode CLocale::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CLocale"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 };
 
@@ -485,10 +540,12 @@ ECode CProperties::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CProperties, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CProperties), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CProperties* newObj = new(addr) CProperties();
     ec = Properties::CloneImpl(newObj);
@@ -496,11 +553,13 @@ ECode CProperties::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CProperties"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -518,10 +577,12 @@ ECode CSimpleTimeZone::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CSimpleTimeZone, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CSimpleTimeZone), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CSimpleTimeZone* newObj = new(addr) CSimpleTimeZone();
     ec = SimpleTimeZone::CloneImpl(newObj);
@@ -529,11 +590,13 @@ ECode CSimpleTimeZone::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CSimpleTimeZone"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -543,18 +606,25 @@ ECode CSimpleTimeZone::New(
 {
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CSimpleTimeZone, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CSimpleTimeZone), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CSimpleTimeZone* _obj = new(addr) CSimpleTimeZone();
+    if (_obj == nullptr)  {
+        free(addr);
+        return E_OUT_OF_MEMORY_ERROR;
+    }
 
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CSimpleTimeZone"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 };
 
@@ -569,10 +639,12 @@ ECode CTreeMap::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CTreeMap, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CTreeMap), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CTreeMap* newObj = new(addr) CTreeMap();
     ec = CTreeMap::CloneImpl(newObj);
@@ -580,11 +652,13 @@ ECode CTreeMap::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CTreeMap"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -597,10 +671,12 @@ ECode CTreeSet::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CTreeSet, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CTreeSet), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CTreeSet* newObj = new(addr) CTreeSet();
     ec = CTreeSet::CloneImpl(newObj);
@@ -608,11 +684,13 @@ ECode CTreeSet::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CTreeSet"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -623,10 +701,12 @@ ECode CTreeSet::New(
 {
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CTreeSet, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CTreeSet), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CTreeSet* _obj = new(addr) CTreeSet();
     ec = _obj->Constructor(m);
@@ -634,11 +714,13 @@ ECode CTreeSet::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::util::CTreeSet"));
     *object = _obj->Probe(iid);
     REFCOUNT_ADD(*object);
+
     return NOERROR;
 }
 
@@ -651,10 +733,12 @@ ECode CVector::Clone(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CVector, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CVector), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CVector* newObj = new(addr) CVector();
     ec = CVector::CloneImpl(newObj);
@@ -662,11 +746,13 @@ ECode CVector::Clone(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     newObj->AttachMetadata(comp, String("como::util::CVector"));
     *obj = newObj->Probe(iid);
     REFCOUNT_ADD(*obj);
+
     return NOERROR;
 }
 
@@ -677,7 +763,7 @@ COMO_OBJECT_IMPL(CGregorian);
 COMO_OBJECT_IMPL(CJulianCalendar);
 COMO_OBJECT_IMPL(CLocalGregorianCalendar);
 
-}
+} // namespace calendar
 
 namespace concurrent {
 
@@ -690,8 +776,8 @@ COMO_OBJECT_IMPL(CAtomicBoolean);
 COMO_OBJECT_IMPL(CAtomicInteger);
 COMO_OBJECT_IMPL(CAtomicLong);
 
-}
-}
+} // namespace atomic
+} // namespace concurrent
 
-}
-}
+} // namespace util
+} // namespace como
