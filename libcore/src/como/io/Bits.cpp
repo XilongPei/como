@@ -443,5 +443,5 @@ Integer Bits::PageSize()
     return sPageSize;
 }
 
-}
-}
+} // namespace io
+} // namespace como

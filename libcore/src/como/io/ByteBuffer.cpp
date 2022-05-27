@@ -80,6 +80,9 @@ ECode ByteBuffer::AllocateDirect(
     }
 
     AutoPtr<DirectByteBuffer::MemoryRef> memoryRef = new DirectByteBuffer::MemoryRef(capacity);
+    if (nullptr == memoryRef)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return CDirectByteBuffer::New(capacity, memoryRef, IID_IByteBuffer, (IInterface**)buffer);
 }
 
@@ -94,6 +97,9 @@ ECode ByteBuffer::Allocate(
     }
 
     AutoPtr<HeapByteBuffer> hbb = new HeapByteBuffer();
+    if (nullptr == hbb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hbb->Constructor(capacity, capacity));
     *buffer = hbb;
     REFCOUNT_ADD(*buffer);
@@ -109,6 +115,9 @@ ECode ByteBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<HeapByteBuffer> hbb = new HeapByteBuffer();
+    if (nullptr == hbb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hbb->Constructor(array, offset, length));
     *buffer = hbb;
     REFCOUNT_ADD(*buffer);
@@ -200,7 +209,8 @@ ECode ByteBuffer::Put(
         if (!direct) {
             dstOffset += mOffset;
         }
-        memmove(reinterpret_cast<void*>(dstAddr + dstOffset), reinterpret_cast<void*>(srcAddr + srcOffset), n);
+        memmove(reinterpret_cast<void*>(dstAddr + dstOffset),
+                                reinterpret_cast<void*>(srcAddr + srcOffset), n);
     }
     Integer limit;
     srcObj->GetLimit(limit);
@@ -278,7 +288,8 @@ ECode ByteBuffer::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuffer> sb;
-    CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb));
+
     sb->Append(Object::GetCoclassName(this));
     sb->Append(String("[pos="));
     Integer value;
@@ -397,7 +408,7 @@ ECode ByteBuffer::SetOrder(
 {
     mBigEndian = (bo == ByteOrder::GetBIG_ENDIAN());
     mNativeByteOrder = (mBigEndian ==
-            (Bits::ByteOrder() == ByteOrder::GetBIG_ENDIAN()));
+                            (Bits::ByteOrder() == ByteOrder::GetBIG_ENDIAN()));
     return NOERROR;
 }
 
@@ -414,5 +425,5 @@ ECode ByteBuffer::SetAccessible(
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-}
-}
+} // namespace io
+} // namespace como

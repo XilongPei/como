@@ -73,8 +73,7 @@ void ByteArrayOutputStream::Grow(
 Integer ByteArrayOutputStream::HugeCapacity(
     /* [in] */ Integer minCapacity)
 {
-    return (minCapacity > MAX_ARRAY_SIZE) ?
-            IInteger::MAX_VALUE : MAX_ARRAY_SIZE;
+    return (minCapacity > MAX_ARRAY_SIZE) ? IInteger::MAX_VALUE : MAX_ARRAY_SIZE;
 }
 
 ECode ByteArrayOutputStream::Write(
@@ -154,5 +153,5 @@ ECode ByteArrayOutputStream::Close()
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

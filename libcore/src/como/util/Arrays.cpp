@@ -456,8 +456,11 @@ ECode Arrays::CopyOf(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Array<Byte> copy(newLength);
+    if (copy.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer N = Math::Min((Integer)original.GetLength(), newLength);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         copy[i] = original[i];
     }
     *newArray = copy;
@@ -475,8 +478,11 @@ ECode Arrays::CopyOf(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Array<Integer> copy(newLength);
+    if (copy.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer N = Math::Min((Integer)original.GetLength(), newLength);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         copy[i] = original[i];
     }
     *newArray = copy;
@@ -494,8 +500,11 @@ ECode Arrays::CopyOf(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Array<Double> copy(newLength);
+    if (copy.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer N = Math::Min((Integer)original.GetLength(), newLength);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         copy[i] = original[i];
     }
     *newArray = copy;
@@ -513,8 +522,11 @@ ECode Arrays::CopyOf(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Array<String> copy(newLength);
+    if (copy.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer N = Math::Min((Integer)original.GetLength(), newLength);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         copy[i] = original[i];
     }
     *newArray = copy;
@@ -532,8 +544,11 @@ ECode Arrays::CopyOf(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Array<IInterface*> copy(newLength);
+    if (copy.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer N = Math::Min((Integer)original.GetLength(), newLength);
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         copy.Set(i, original[i]);
     }
     *newArray = copy;

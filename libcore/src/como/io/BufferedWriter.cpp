@@ -44,6 +44,9 @@ ECode BufferedWriter::Constructor(
     }
     mOut = out;
     mCb = Array<Char>(sz);
+    if (mCb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     mNChars = sz;
     mNextChar = 0;
 
@@ -64,7 +67,10 @@ ECode BufferedWriter::FlushBuffer()
 {
     AutoLock lock(mLock);
     FAIL_RETURN(EnsureOpen());
-    if (mNextChar == 0) return NOERROR;
+
+    if (mNextChar == 0)
+        return NOERROR;
+
     FAIL_RETURN(mOut->Write(mCb, 0, mNextChar));
     mNextChar = 0;
     return NOERROR;
@@ -75,6 +81,7 @@ ECode BufferedWriter::Write(
 {
     AutoLock lock(mLock);
     FAIL_RETURN(EnsureOpen());
+
     if (mNextChar >= mNChars) {
         FAIL_RETURN(FlushBuffer());
     }
@@ -89,8 +96,9 @@ ECode BufferedWriter::Write(
 {
     AutoLock lock(mLock);
     FAIL_RETURN(EnsureOpen());
+
     if ((off < 0) || (off > buffer.GetLength()) || (len < 0) ||
-        ((off + len) > buffer.GetLength()) || ((off + len) < 0)) {
+                      ((off + len) > buffer.GetLength()) || ((off + len) < 0)) {
         return como::core::E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
     else if (len == 0) {
@@ -157,11 +165,12 @@ ECode BufferedWriter::Close()
     if (mOut == nullptr) {
         return NOERROR;
     }
-    FlushBuffer();
+
+    FAIL_RETURN(FlushBuffer());
     mOut = nullptr;
     mCb.Clear();
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

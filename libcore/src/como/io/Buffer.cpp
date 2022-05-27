@@ -247,5 +247,5 @@ ECode Buffer::CheckBounds(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

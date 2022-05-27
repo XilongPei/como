@@ -33,8 +33,10 @@ ECode ByteBufferAsFloatBuffer::Constructor(
     /* [in] */ IByteOrder* order)
 {
     FAIL_RETURN(FloatBuffer::Constructor(mark, pos, lim, cap));
+
     AutoPtr<IByteBuffer> newBB;
-    bb->Duplicate(newBB);
+    FAIL_RETURN(bb->Duplicate(newBB));
+
     mBB = (ByteBuffer*)newBB.Get();
     bb->IsReadOnly(mIsReadOnly);
     if (Object::InstanceOf(bb, CID_CDirectByteBuffer)) {
@@ -130,7 +132,8 @@ ECode ByteBufferAsFloatBuffer::Put(
     /* [in] */ Float f)
 {
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
+
     return Put(index, f);
 }
 
@@ -178,9 +181,11 @@ ECode ByteBufferAsFloatBuffer::Compact()
     Integer rem = (pos <= lim ? lim - pos : 0);
     if (!Object::InstanceOf(mBB, CID_CDirectByteBuffer)) {
         AutoPtr<IArrayHolder> holder;
-        mBB->GetArray(holder);
+        FAIL_RETURN(mBB->GetArray(holder));
+
         Array<Byte> bytes;
-        holder->GetArray(&bytes);
+        FAIL_RETURN(holder->GetArray(&bytes));
+
         bytes.Copy(Ix(0), bytes, Ix(pos), rem << 2);
     }
     else {
@@ -215,5 +220,5 @@ ECode ByteBufferAsFloatBuffer::GetOrder(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

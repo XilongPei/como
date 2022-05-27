@@ -34,8 +34,10 @@ ECode ByteBufferAsCharBuffer::Constructor(
     /* [in] */ IByteOrder* order)
 {
     FAIL_RETURN(CharBuffer::Constructor(mark, pos, lim, cap));
+
     AutoPtr<IByteBuffer> newBB;
-    bb->Duplicate(newBB);
+    FAIL_RETURN(bb->Duplicate(newBB));
+
     mBB = (ByteBuffer*)newBB.Get();
     bb->IsReadOnly(mIsReadOnly);
     if (Object::InstanceOf(bb, CID_CDirectByteBuffer)) {
@@ -57,7 +59,11 @@ ECode ByteBufferAsCharBuffer::Slice(
     Integer rem = (pos <= lim ? lim - pos : 0);
     Integer off = (pos << 2) + mOffset;
     CHECK(off >= 0);
+
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(mBB, -1, 0, rem, rem, off, mOrder));
     buffer = (ICharBuffer*)bb.Get();
     return NOERROR;
@@ -70,9 +76,13 @@ ECode ByteBufferAsCharBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(
-            mBB, MarkValue(), pos, lim, cap, mOffset, mOrder));
+                            mBB, MarkValue(), pos, lim, cap, mOffset, mOrder));
     buffer = (ICharBuffer*)bb.Get();
     return NOERROR;
 }
@@ -86,7 +96,11 @@ ECode ByteBufferAsCharBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(
             (ByteBuffer*)rb.Get(), MarkValue(), pos, lim, cap, mOffset, mOrder));
     buffer = (ICharBuffer*)bb.Get();
@@ -138,7 +152,8 @@ ECode ByteBufferAsCharBuffer::Put(
     /* [in] */ Char c)
 {
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
+
     return Put(index, c);
 }
 
@@ -186,9 +201,11 @@ ECode ByteBufferAsCharBuffer::Compact()
     Integer rem = (pos <= lim ? lim - pos : 0);
     if (!Object::InstanceOf(mBB, CID_CDirectByteBuffer)) {
         AutoPtr<IArrayHolder> holder;
-        mBB->GetArray(holder);
+        FAIL_RETURN(mBB->GetArray(holder));
+
         Array<Byte> bytes;
-        holder->GetArray(&bytes);
+        FAIL_RETURN(holder->GetArray(&bytes));
+
         bytes.Copy(Ix(0), bytes, Ix(pos), rem << 2);
     }
     else {
@@ -258,8 +275,11 @@ ECode ByteBufferAsCharBuffer::SubSequence(
     Integer cap;
     GetCapacity(cap);
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(
-            mBB, -1, pos + start, pos + end, cap, mOffset, mOrder));
+                        mBB, -1, pos + start, pos + end, cap, mOffset, mOrder));
     subcsq = (ICharSequence*)bb.Get();
     return NOERROR;
 }
@@ -271,5 +291,5 @@ ECode ByteBufferAsCharBuffer::GetOrder(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

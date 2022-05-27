@@ -33,8 +33,10 @@ ECode ByteBufferAsShortBuffer::Constructor(
     /* [in] */ IByteOrder* order)
 {
     FAIL_RETURN(ShortBuffer::Constructor(mark, pos, lim, cap));
+
     AutoPtr<IByteBuffer> newBB;
-    bb->Duplicate(newBB);
+    FAIL_RETURN(bb->Duplicate(newBB));
+
     mBB = (ByteBuffer*)newBB.Get();
     bb->IsReadOnly(mIsReadOnly);
     if (Object::InstanceOf(bb, CID_CDirectByteBuffer)) {
@@ -57,6 +59,9 @@ ECode ByteBufferAsShortBuffer::Slice(
     Integer off = (pos << 1) + mOffset;
     CHECK(off >= 0);
     AutoPtr<ByteBufferAsShortBuffer> bb = new ByteBufferAsShortBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(mBB, -1, 0, rem, rem, off, mOrder));
     buffer = (IShortBuffer*)bb.Get();
     return NOERROR;
@@ -70,8 +75,10 @@ ECode ByteBufferAsShortBuffer::Duplicate(
     GetLimit(lim);
     GetCapacity(cap);
     AutoPtr<ByteBufferAsShortBuffer> bb = new ByteBufferAsShortBuffer();
-    FAIL_RETURN(bb->Constructor(
-            mBB, MarkValue(), pos, lim, cap, mOffset, mOrder));
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(bb->Constructor(mBB, MarkValue(), pos, lim, cap, mOffset, mOrder));
     buffer = (IShortBuffer*)bb.Get();
     return NOERROR;
 }
@@ -86,6 +93,9 @@ ECode ByteBufferAsShortBuffer::AsReadOnlyBuffer(
     GetLimit(lim);
     GetCapacity(cap);
     AutoPtr<ByteBufferAsShortBuffer> bb = new ByteBufferAsShortBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(
             (ByteBuffer*)rb.Get(), MarkValue(), pos, lim, cap, mOffset, mOrder));
     buffer = (IShortBuffer*)bb.Get();
@@ -130,7 +140,8 @@ ECode ByteBufferAsShortBuffer::Put(
     /* [in] */ Short s)
 {
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
+
     return Put(index, s);
 }
 
@@ -178,9 +189,11 @@ ECode ByteBufferAsShortBuffer::Compact()
     Integer rem = (pos <= lim ? lim - pos : 0);
     if (!Object::InstanceOf(mBB, CID_CDirectByteBuffer)) {
         AutoPtr<IArrayHolder> holder;
-        mBB->GetArray(holder);
+        FAIL_RETURN(mBB->GetArray(holder));
+
         Array<Byte> bytes;
-        holder->GetArray(&bytes);
+        FAIL_RETURN(holder->GetArray(&bytes));
+
         bytes.Copy(Ix(0), bytes, Ix(pos), rem << 1);
     }
     else {
@@ -215,5 +228,5 @@ ECode ByteBufferAsShortBuffer::GetOrder(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como
