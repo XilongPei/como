@@ -26,5 +26,5 @@ ECode RuntimeFactory::GetRuntime(
     return Runtime::GetRuntime(runtime);
 }
 
-}
-}
+} // namespace core
+} // namespace como

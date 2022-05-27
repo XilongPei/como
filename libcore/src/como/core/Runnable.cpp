@@ -21,5 +21,5 @@ namespace core {
 
 COMO_INTERFACE_IMPL_1(Runnable, SyncObject, IRunnable);
 
-}
-}
+} // namespace core
+} // namespace como

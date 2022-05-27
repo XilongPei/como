@@ -36,5 +36,5 @@ void NativeRuntimeCallbacks::ThreadDeath(
     }
 }
 
-}
-}
+} // namespace core
+} // namespace como

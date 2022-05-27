@@ -34,6 +34,10 @@ COMO_INTERFACE_IMPL_1(Runtime, SyncObject, IRuntime);
 
 Runtime::Runtime()
 {
+    // Judge whether the construction is successful by judging whether
+    // mShutdownHooks is nullptr
+    mShutdownHooks = nullptr;
+
     CArrayList::New(IID_IList, (IInterface**)&mShutdownHooks);
 }
 
@@ -49,6 +53,9 @@ ECode Runtime::GetRuntime(
     VALIDATE_NOT_NULL(runtime);
 
     static AutoPtr<IRuntime> sCurrentRuntime = new Runtime();
+    if (nullptr == sCurrentRuntime)
+        return E_OUT_OF_MEMORY_ERROR;
+
     *runtime = sCurrentRuntime;
     REFCOUNT_ADD(*runtime);
     return NOERROR;
@@ -122,5 +129,5 @@ ECode Runtime::AvailableProcessors(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

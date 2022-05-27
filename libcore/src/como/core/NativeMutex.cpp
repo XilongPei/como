@@ -21,7 +21,8 @@
 #include "como/core/NativeMutex.h"
 #include "como/core/NativeThread.h"
 #include "como/core/NativeTimeUtils.h"
-#include <comolog.h>
+#include "comolog.h"
+#include "como/util/MemUtils.h"
 
 namespace como {
 namespace core {
@@ -358,41 +359,6 @@ NativeMutex* Locks::sAllocatedThreadIdsLock = nullptr;
 NativeMutex* Locks::sModifyLdtLock = nullptr;
 NativeMutex* Locks::sThreadSuspendCountLock = nullptr;
 
-static int CheckSomeVoidP(int cnt, ...)
-{
-    void *vp;
-
-    va_list argptr;
-    va_start(argptr, cnt);
-
-    int num = 0;
-    for (int i = 0;  i < cnt;  i++) {
-        vp = va_arg(argptr, void*);
-        if (nullptr != vp) {
-            num++;
-        }
-    }
-    va_end(argptr);
-
-    return num;
-}
-
-static void FreeSomeVoidP(int cnt, ...)
-{
-    void *vp;
-
-    va_list argptr;
-    va_start(argptr, cnt);
-
-    for (int i = 0;  i < cnt;  i++) {
-        vp = va_arg(argptr, void*);
-        if (nullptr != vp) {
-            free(vp);
-        }
-    }
-    va_end(argptr);
-}
-
 ECode Locks::Init()
 {
     CHECK(sMutatorLock == nullptr);
@@ -422,11 +388,11 @@ ECode Locks::Init()
     sThreadExitCond = new NativeConditionVariable(
                             String("thread exit condition variable"), *sThreadListLock);
 
-    if (CheckSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
+    if (como::util::MemUtils::CheckSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
                               sThreadListLock, sAllocatedMonitorIdsLock,
                               sAllocatedThreadIdsLock, sModifyLdtLock,
                               sThreadSuspendCountLock, sThreadExitCond) != 8) {
-        FreeSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
+        como::util::MemUtils::FreeSomeVoidP(8, sMutatorLock, sRuntimeShutdownLock,
                                       sThreadListLock, sAllocatedMonitorIdsLock,
                                       sAllocatedThreadIdsLock, sModifyLdtLock,
                                       sThreadSuspendCountLock, sThreadExitCond);

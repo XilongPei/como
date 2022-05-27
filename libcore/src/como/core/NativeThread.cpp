@@ -63,14 +63,16 @@ NativeThread::NativeThread(
 {
     mWaitMutex = new NativeMutex(String("a thread wait mutex"));
     mWaitCond = new NativeConditionVariable(
-            String("a thread wait condition variable"), *mWaitMutex);
+                        String("a thread wait condition variable"), *mWaitMutex);
     mTlsPtr.mName = new String(kThreadNameDuringStartup);
 
     static_assert((sizeof(NativeThread) % 4) == 0,
-                "NativeThread has a size which is not a multiple of 4.");
+                        "NativeThread has a size which is not a multiple of 4.");
+
     mTls32.mStateAndFlags.mAsStruct.mFlags = 0;
     mTls32.mStateAndFlags.mAsStruct.mState = kNative;
     memset(&mTlsPtr.mHeldMutexes[0], 0, sizeof(mTlsPtr.mHeldMutexes));
+
     for (uint32_t i = 0; i < kMaxSuspendBarriers; ++i) {
         mTlsPtr.mActiveSuspendBarriers[i] = nullptr;
     }
@@ -1161,7 +1163,8 @@ Boolean NativeThread::ProtectStack(
     Logger::V("NativeThread", "Protecting stack at %p", pregion);
     if (mprotect(pregion, kStackOverflowProtectedSize, PROT_NONE) == -1) {
         if (fatalOnError) {
-            Logger::E("NativeThread", "Unable to create protected region in stack for implicit overflow check. "
+            Logger::E("NativeThread",
+                    "Unable to create protected region in stack for implicit overflow check. "
                     "Reason: %s size: %lu", strerror(errno), kStackOverflowProtectedSize);
         }
         return false;
@@ -1176,5 +1179,5 @@ Boolean NativeThread::UnprotectStack()
     return mprotect(pregion, kStackOverflowProtectedSize, PROT_READ | PROT_WRITE) == 0;
 }
 
-}
-}
+} // namespace core
+} // namespace como

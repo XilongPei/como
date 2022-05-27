@@ -22,6 +22,7 @@ MKDIR(deploy_libcore_util_headers ${INC_DIR}/como/util/calendar)
 MKDIR(deploy_libcore_util_headers ${INC_DIR}/como/util/regex)
 
 COPY(deploy_libcore_util_headers ${LIBCORE_COMO_INC_DIR}/util/Arrays.h ${INC_DIR}/como/util)
+COPY(deploy_libcore_util_headers ${LIBCORE_COMO_INC_DIR}/util/XMLUtils.h ${INC_DIR}/como/util)
 COPY(deploy_libcore_util_headers ${LIBCORE_COMO_INC_DIR}/util/CalendarFactory.h ${INC_DIR}/como/util)
 COPY(deploy_libcore_util_headers ${LIBCORE_COMO_INC_DIR}/util/EmptyArray.h ${INC_DIR}/como/util)
 COPY(deploy_libcore_util_headers ${LIBCORE_COMO_INC_DIR}/util/LocaleFactory.h ${INC_DIR}/como/util)

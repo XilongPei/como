@@ -79,6 +79,5 @@ ScopedThreadStateChange::~ScopedThreadStateChange()
     }
 }
 
-
-}
-}
+} // namespace core
+} // namespace como

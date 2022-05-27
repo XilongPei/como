@@ -68,8 +68,7 @@ void NativeThreadList::Resume(
 {
     NativeThread* self = NativeThread::Current();
     CHECK(thread != self);
-    Logger::V("NativeThreadList", "Resume(%p) starting...",
-            reinterpret_cast<void*>(thread));
+    Logger::V("NativeThreadList", "Resume(%p) starting...", reinterpret_cast<void*>(thread));
 
     {
         // To check Contains.
@@ -78,10 +77,10 @@ void NativeThreadList::Resume(
         NativeMutex::AutoLock lock2(self, *Locks::sThreadSuspendCountLock);
         CHECK(thread->IsSuspended());
         if (!Contains(thread)) {
-            // We only expect threads within the thread-list to have been suspended otherwise we can't
-            // stop such threads from delete-ing themselves.
+            // We only expect threads within the thread-list to have been suspended
+            // otherwise we can't stop such threads from delete-ing themselves.
             Logger::E("NativeThreadList", "Resume(%p) thread not within thread list",
-                    reinterpret_cast<void*>(thread));
+                                                        reinterpret_cast<void*>(thread));
             return;
         }
         Boolean updated = thread->ModifySuspendCount(self, -1, nullptr, forDebugger);
@@ -90,7 +89,7 @@ void NativeThreadList::Resume(
 
     {
         Logger::V("NativeThreadList", "Resume(%p) waking others",
-                reinterpret_cast<void*>(thread));
+                                                    reinterpret_cast<void*>(thread));
         NativeMutex::AutoLock lock(self, *Locks::sThreadSuspendCountLock);
         NativeThread::sResumeCond->Broadcast(self);
     }
@@ -423,5 +422,5 @@ void NativeThreadList::ReleaseThreadId(
     mAllocatedIds.reset(id);
 }
 
-}
-}
+} // namespace core
+} // namespace como

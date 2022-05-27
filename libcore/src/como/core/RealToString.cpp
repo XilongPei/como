@@ -205,10 +205,10 @@ void RealToString::FreeFormatExponential(
 {
     Integer digitIndex = 0;
     if (!positive) {
-        sb->Append(U'-');
+        sb->Append('-');
     }
-    sb->Append((Char)(U'0' + sDigits[digitIndex++]));
-    sb->Append(U'.');
+    sb->Append((Char)('0' + sDigits[digitIndex++]));
+    sb->Append('.');
 
     Integer k = sFirstK;
     Integer exponent = k;
@@ -217,13 +217,13 @@ void RealToString::FreeFormatExponential(
         if (digitIndex >= sDigitCount) {
             break;
         }
-        sb->Append((Char)(U'0' + sDigits[digitIndex++]));
+        sb->Append((Char)('0' + sDigits[digitIndex++]));
     }
 
     if (k == exponent - 1) {
-        sb->Append(U'0');
+        sb->Append('0');
     }
-    sb->Append(U'E');
+    sb->Append('E');
     sb->Append(StringUtils::ToString(exponent));
 }
 
@@ -233,26 +233,26 @@ void RealToString::FreeFormat(
 {
     Integer digitIndex = 0;
     if (!positive) {
-        sb->Append(U'-');
+        sb->Append('-');
     }
     Integer k = sFirstK;
     if (k < 0) {
-        sb->Append(U'0');
-        sb->Append(U'.');
+        sb->Append('0');
+        sb->Append('.');
         for (Integer i = k + 1; i < 0; ++i) {
-            sb->Append(U'0');
+            sb->Append('0');
         }
     }
     Integer U = sDigits[digitIndex++];
     do {
         if (U != -1) {
-            sb->Append((Char)(U'0' + U));
+            sb->Append((Char)('0' + U));
         }
         else if (k >= -1) {
-            sb->Append(U'0');
+            sb->Append('0');
         }
         if (k == 0) {
-            sb->Append(U'.');
+            sb->Append('.');
         }
         k--;
         U = digitIndex < sDigitCount ? sDigits[digitIndex++] : -1;
@@ -548,5 +548,5 @@ void RealToString::LongDigitGenerator(
     }
 }
 
-}
-}
+} // namespace core
+} // namespace como

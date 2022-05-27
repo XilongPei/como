@@ -66,6 +66,7 @@ set(SOURCES
     TreeSet.cpp
     Vector.cpp
     XMLUtils.cpp
+    MemUtils.cpp
     util.cpp)
 
 add_library(como_util STATIC

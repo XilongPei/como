@@ -69,10 +69,11 @@ void InitTimeSpec(
 
     // Catch rollover.
     if (ts->tv_nsec >= 1000000000L) {
+                     // 987654321
         ts->tv_sec++;
         ts->tv_nsec -= 1000000000L;
     }
 }
 
-}
-}
+} // namespace core
+} // namespace como
