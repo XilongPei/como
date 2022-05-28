@@ -108,7 +108,11 @@ NativeThread* NativeThreadList::SuspendThreadByPeer(
     *timedOut = false;
     NativeThread* suspendedThread = nullptr;
     NativeThread* const self = NativeThread::Current();
+    if (nullptr == self)
+        return nullptr;
+
     Logger::V("NativeThreadList", "SuspendThreadByPeer starting");
+
     while (true) {
         NativeThread* thread;
         {
@@ -209,6 +213,9 @@ NativeThread* NativeThreadList::SuspendThreadByThreadId(
     *timedOut = false;
     NativeThread* suspendedThread = nullptr;
     NativeThread* const self = NativeThread::Current();
+    if (nullptr == self)
+        return nullptr;
+
     CHECK(threadId != kInvalidThreadId);
     Logger::V("NativeThreadList", "SuspendThreadByThreadId starting");
     while (true) {

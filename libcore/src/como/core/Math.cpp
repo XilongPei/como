@@ -112,8 +112,8 @@ Float Math::Max(
     /* [in] */ Float a,
     /* [in] */ Float b)
 {
-    if (a != a) {
-        // a is NaN
+    if (isnan(a) || isnan(b)) {
+        // a or b is NaN
         return a;
     }
     if ((a == 0.0f) &&
@@ -129,8 +129,8 @@ Double Math::Max(
     /* [in] */ Double a,
     /* [in] */ Double b)
 {
-    if (a != a) {
-        // a is NaN
+    if (isnan(a) || isnan(b)) {
+        // a or b is NaN
         return a;
     }
     if ((a == 0.0) &&
@@ -163,8 +163,8 @@ Double Math::Min(
     /* [in] */ Double a,
     /* [in] */ Double b)
 {
-    if (a != a) {
-        // a is NaN
+    if (isnan(a) || isnan(b)) {
+        // a or b is NaN
         return a;
     }
     if ((a == 0.0) &&
@@ -495,5 +495,5 @@ Integer Math::Compare(
              1));                          // (0.0, -0.0) or (NaN, !NaN)
 }
 
-}
-}
+} // namespace core
+} // namespace como

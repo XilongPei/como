@@ -627,6 +627,9 @@ void Thread::NativeSetName(
     /* [in] */ const String& newName)
 {
     NativeThread* self = NativeThread::Current();
+    if (nullptr == self)
+        return;
+
     if (this == self->GetPeerThread()) {
         self->SetThreadName(newName);
         return;

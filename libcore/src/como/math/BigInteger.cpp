@@ -412,6 +412,9 @@ ECode BigInteger::Abs(
     /* [out] */ AutoPtr<IBigInteger>& value)
 {
     AutoPtr<BigInt> bigInt = GetBigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     if (bigInt->Sign() >= 0) {
         value = (IBigInteger*)this;
         return NOERROR;
@@ -426,6 +429,9 @@ ECode BigInteger::Negate(
     /* [out] */ AutoPtr<IBigInteger>& value)
 {
     AutoPtr<BigInt> bigInt = GetBigInt();
+    if (nullptr == bigInt)
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer sign = bigInt->Sign();
     if (sign == 0) {
         value = (IBigInteger*)this;
@@ -442,6 +448,9 @@ ECode BigInteger::Add(
     /* [out] */ AutoPtr<IBigInteger>& result)
 {
     AutoPtr<BigInt> lhs = GetBigInt();
+    if (nullptr == lhs)
+        return E_OUT_OF_MEMORY_ERROR;
+
     AutoPtr<BigInt> rhs = From(value)->GetBigInt();
     if (rhs->Sign() == 0) {
         result = (IBigInteger*)this;
@@ -460,6 +469,9 @@ ECode BigInteger::Subtract(
     /* [out] */ AutoPtr<IBigInteger>& result)
 {
     AutoPtr<BigInt> lhs = GetBigInt();
+    if (nullptr == lhs)
+        return E_OUT_OF_MEMORY_ERROR;
+
     AutoPtr<BigInt> rhs = From(value)->GetBigInt();
     if (rhs->Sign() == 0) {
         result = (IBigInteger*)this;
@@ -710,8 +722,8 @@ ECode BigInteger::LongValue(
     }
     PrepareRepresentation();
     Long lv = mNumberLength > 1 ?
-            ((Long) mDigits[1]) << 32 | (mDigits[0] & 0xFFFFFFFFLL) :
-            mDigits[0] & 0xFFFFFFFFLL;
+                    ((Long) mDigits[1]) << 32 | (mDigits[0] & 0xFFFFFFFFLL) :
+                    mDigits[0] & 0xFFFFFFFFLL;
     value = mSign * lv;
     return NOERROR;
 }
@@ -827,9 +839,8 @@ ECode BigInteger::Gcd(
     /* [out] */ AutoPtr<IBigInteger>& result)
 {
     result = nullptr;
-    return CBigInteger::New(BigInt::Gcd(
-            GetBigInt(), From(value)->GetBigInt()),
-            IID_IBigInteger, (IInterface**)&result);
+    return CBigInteger::New(BigInt::Gcd(GetBigInt(), From(value)->GetBigInt()),
+                                        IID_IBigInteger, (IInterface**)&result);
 }
 
 ECode BigInteger::Multiply(
@@ -838,8 +849,8 @@ ECode BigInteger::Multiply(
 {
     result = nullptr;
     return CBigInteger::New(BigInt::Product(
-            GetBigInt(), From(value)->GetBigInt()),
-            IID_IBigInteger, (IInterface**)&result);
+                                        GetBigInt(), From(value)->GetBigInt()),
+                                        IID_IBigInteger, (IInterface**)&result);
 }
 
 ECode BigInteger::Pow(
@@ -852,7 +863,7 @@ ECode BigInteger::Pow(
     }
     value = nullptr;
     return CBigInteger::New(BigInt::Exp(GetBigInt(), exp),
-            IID_IBigInteger, (IInterface**)&value);
+                                        IID_IBigInteger, (IInterface**)&value);
 }
 
 ECode BigInteger::DivideAndRemainder(
@@ -931,7 +942,7 @@ ECode BigInteger::ModInverse(
     }
     result = nullptr;
     return CBigInteger::New(BigInt::ModInverse(GetBigInt(), From(m)->GetBigInt()),
-            IID_IBigInteger, (IInterface**)&result);
+                                          IID_IBigInteger, (IInterface**)&result);
 }
 
 ECode BigInteger::ModPow(
@@ -958,8 +969,8 @@ ECode BigInteger::ModPow(
     }
     result = nullptr;
     return CBigInteger::New(BigInt::ModExp(From(base)->GetBigInt(),
-            From(exponent)->GetBigInt(), From(modulus)->GetBigInt()),
-            IID_IBigInteger, (IInterface**)&result);
+                        From(exponent)->GetBigInt(), From(modulus)->GetBigInt()),
+                        IID_IBigInteger, (IInterface**)&result);
 }
 
 ECode BigInteger::Mod(
@@ -1021,10 +1032,14 @@ ECode BigInteger::TwosComplement(
     Integer bitLen;
     BitLength(bitLen);
     Integer iThis = GetFirstNonzeroDigit();
+
     Integer bytesLen = (bitLen >> 3) + 1;
     /* Puts the little-endian int array representing the magnitude
      * of this BigInteger into the big-endian byte array. */
     Array<Byte> bytes(bytesLen);
+    if (bytes.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer firstByteNumber = 0;
     Integer highBytes;
     Integer bytesInInteger = 4;
@@ -1155,7 +1170,8 @@ ECode BigInteger::ParseFromString(
     for (Integer substrStart = startChar; substrStart < endChar;
             substrStart = substrEnd, substrEnd = substrStart + charsPerInt) {
         Integer bigRadixDigit;
-        FAIL_RETURN(StringUtils::ParseInteger(value.Substring(substrStart, substrEnd), radix, bigRadixDigit));
+        FAIL_RETURN(StringUtils::ParseInteger(value.Substring(substrStart,
+                                                substrEnd), radix, bigRadixDigit));
         Integer newDigit = MultiplyByInteger(digits, digits, digitIndex, bigRadix);
         newDigit += InplaceAdd(digits, digitIndex, bigRadixDigit);
         digits[digitIndex++] = newDigit;

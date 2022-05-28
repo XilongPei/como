@@ -402,7 +402,7 @@ void NativeThread::InitCpu()
 
 NativeThread* NativeThread::Current()
 {
-    if (!sIsStarted) {
+    if (! sIsStarted) {
         return nullptr;
     }
     else {
@@ -434,6 +434,9 @@ NativeThread* NativeThread::Attach(
         else {
             NativeRuntime::Current()->StartThreadBirth();
             self = new NativeThread(asDaemon);
+            if (nullptr == self)
+                return nullptr;
+
             Boolean initSuccess = self->Init(runtime->GetThreadList());
             NativeRuntime::Current()->EndThreadBirth();
             if (!initSuccess) {
@@ -514,16 +517,15 @@ ECode NativeThread::CreatePeer(
     Boolean threadIsDaemon = asDaemon;
 
     AutoPtr<IThread> peer;
-    CThread::New(reinterpret_cast<HANDLE>(this), IID_IThread, (IInterface**)&peer);
+    FAIL_RETURN(CThread::New(reinterpret_cast<HANDLE>(this), IID_IThread,
+                                                            (IInterface**)&peer));
     {
         ScopedObjectAccess soa(this);
         mTlsPtr.mOPeer = reinterpret_cast<NativeObject*>(
-                Thread::From(peer)->mNativeObject);
+                                                Thread::From(peer)->mNativeObject);
     }
-    ECode ec = Thread::From(peer)->Constructor(threadGroup, name, threadPriority, threadIsDaemon);
-    if (FAILED(ec)) {
-        return ec;
-    }
+    FAIL_RETURN(Thread::From(peer)->Constructor(threadGroup, name, threadPriority,
+                                                                  threadIsDaemon));
     threadGroup->Add(peer);
 
     NativeThread* self = this;
@@ -599,15 +601,15 @@ Boolean NativeThread::InitStackHwm()
     // 8K) + the protected region size (4K) + another page (4K).  Typically this will
     // be 8+4+4 = 16K.  The thread won't be able to do much with this stack even the GC takes
     // between 8K and 12K.
-    uint32_t minStack = GetStackOverflowReservedBytes(kRuntimeISA) + kStackOverflowProtectedSize
-            + 4 * KB;
+    uint32_t minStack = GetStackOverflowReservedBytes(kRuntimeISA) +
+                                                kStackOverflowProtectedSize + 4 * KB;
     if (readStackSize <= minStack) {
         Logger::E("NativeThread", "Attempt to attach a thread with a too-small stack");
         return false;
     }
 
     Logger::V("NativeThread", "Native stack is at %p (%lu with %lu guard)",
-            readStackBase, readStackSize, readGuardSize);
+                                        readStackBase, readStackSize, readGuardSize);
 
     // Set stack_end_ to the bottom of the stack saving space of stack overflows
 

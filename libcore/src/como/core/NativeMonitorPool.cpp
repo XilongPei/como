@@ -51,6 +51,9 @@ ECode NativeMonitorPool::AllocateChunk()
     }
 
     void* chunk = mAllocator.allocate(kChunkSize);
+    if (nullptr == chunk)
+        return E_OUT_OF_MEMORY_ERROR;
+
     CHECK(chunk != nullptr);
     CHECK(reinterpret_cast<uintptr_t>(chunk) % kMonitorAlignment == 0);
 
@@ -113,7 +116,8 @@ NativeMonitor* NativeMonitorPool::CreateMonitorInPool(
 
     // Enough space, or need to resize?
     if (mFirstFree == nullptr) {
-        AllocateChunk();
+        if (FAILED(AllocateChunk()))
+            return nullptr;
     }
 
     NativeMonitor* monUninitialized = mFirstFree;

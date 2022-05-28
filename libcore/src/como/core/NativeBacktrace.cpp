@@ -128,7 +128,7 @@ int DumpBacktrace(
 {
     int frame_num;
 
-    for (int frame_num = 0;  frame_num < frame_count;  frame_num++) {
+    for (frame_num = 0;  frame_num < frame_count;  frame_num++) {
         uintptr_t offset = 0;
         const char* symbol = nullptr;
 

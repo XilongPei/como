@@ -271,9 +271,9 @@ ECode BigDecimal::Constructor(
     Integer counter = 0;
     Boolean wasNonZero = false;
     // Accumulating all digits until a possible decimal point
-    for (; (offset <= last) && (in[offset] != U'.') && (in[offset] != U'e') &&
-                                               (in[offset] != U'E'); offset++) {
-        if (!wasNonZero) {
+    for (;  (offset <= last) && (in[offset] != U'.') && (in[offset] != U'e') &&
+                                               (in[offset] != U'E');  offset++) {
+        if (! wasNonZero) {
             if (in[offset] == U'0') {
                 counter++;
             }

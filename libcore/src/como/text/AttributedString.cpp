@@ -562,15 +562,21 @@ Integer AttributedString::EnsureRunBreak(
     AutoPtr<IVector> newRunAttributes;
     AutoPtr<IVector> newRunAttributeValues;
 
+    ECode ec;
     if (copyAttrs) {
         AutoPtr<IVector> oldRunAttributes = mRunAttributes[runIndex - 1];
         AutoPtr<IVector> oldRunAttributeValues = mRunAttributeValues[runIndex - 1];
         if (oldRunAttributes != nullptr) {
-            CVector::New(ICollection::Probe(oldRunAttributes), IID_IVector, (IInterface**)&newRunAttributes);
+            ec = CVector::New(ICollection::Probe(oldRunAttributes), IID_IVector,
+                                                (IInterface**)&newRunAttributes);
         }
         if (oldRunAttributeValues != nullptr) {
-            CVector::New(ICollection::Probe(oldRunAttributeValues), IID_IVector, (IInterface**)&newRunAttributeValues);
+            ec = CVector::New(ICollection::Probe(oldRunAttributeValues),
+                                IID_IVector, (IInterface**)&newRunAttributeValues);
         }
+
+        if (FAILED(ec))
+            return -1;
     }
 
     // now actually break up the run

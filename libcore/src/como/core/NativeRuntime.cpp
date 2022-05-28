@@ -77,6 +77,8 @@ Boolean NativeRuntime::Start()
 
     // Restore main thread state to kNative as expected by native code.
     NativeThread* self = NativeThread::Current();
+    if (nullptr == self)
+        return false;
 
     self->TransitionFromRunnableToSuspended(kNative);
 

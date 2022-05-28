@@ -1196,5 +1196,5 @@ Float StringToReal::StringExponentPair::SpecialValue()
     return mNegative ? -0.0f : 0.0f;
 }
 
-}
-}
+} // namespace core
+} // namespace como
