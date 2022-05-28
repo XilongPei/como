@@ -68,6 +68,9 @@ ECode DoubleBuffer::Allocate(
     }
 
     AutoPtr<HeapDoubleBuffer> hdb = new HeapDoubleBuffer();
+    if (nullptr == hdb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hdb->Constructor(capacity, capacity));
     *buffer = hdb;
     REFCOUNT_ADD(*buffer);
@@ -83,6 +86,9 @@ ECode DoubleBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<HeapDoubleBuffer> hdb = new HeapDoubleBuffer();
+    if (nullptr == hdb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hdb->Constructor(array, offset, length));
     *buffer = hdb;
     REFCOUNT_ADD(*buffer);
@@ -148,6 +154,7 @@ ECode DoubleBuffer::Put(
     /* [in] */ Integer length)
 {
     FAIL_RETURN(CheckBounds(offset, length, src.GetLength()));
+
     Integer remaining;
     if (Remaining(remaining), length > remaining) {
         return E_BUFFER_OVERFLOW_EXCEPTION;
@@ -202,7 +209,8 @@ ECode DoubleBuffer::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuffer> sb;
-    CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb));
+
     sb->Append(Object::GetCoclassName(this));
     sb->Append(String("[pos="));
     Integer value;
@@ -263,7 +271,7 @@ ECode DoubleBuffer::Equals(
         Double thisd, otherd;
         Get(i, thisd);
         other->Get(j, otherd);
-        if (!Equals(thisd, otherd)) {
+        if (! Equals(thisd, otherd)) {
             same = false;
             return NOERROR;
         }
@@ -310,5 +318,5 @@ ECode DoubleBuffer::CompareTo(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

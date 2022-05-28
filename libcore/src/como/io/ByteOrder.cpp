@@ -46,5 +46,5 @@ AutoPtr<IByteOrder> ByteOrder::GetLITTLE_ENDIAN()
     return LITTLE_ENDIAN_;
 }
 
-}
-}
+} // namespace io
+} // namespace como

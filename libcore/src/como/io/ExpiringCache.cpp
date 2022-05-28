@@ -79,7 +79,7 @@ String ExpiringCache::Get(
     return String();
 }
 
-void ExpiringCache::Put(
+ECode ExpiringCache::Put(
     /* [in] */ const String& key,
     /* [in] */ const String& val)
 {
@@ -95,8 +95,13 @@ void ExpiringCache::Put(
     }
     else {
         entry = new Entry(System::GetCurrentTimeMillis(), val);
+        if (nullptr == entry)
+            return E_OUT_OF_MEMORY_ERROR;
+
         mMap->Put(CoreUtils::Box(key), entry);
     }
+
+    return NOERROR;
 }
 
 void ExpiringCache::Clear()
@@ -148,5 +153,5 @@ void ExpiringCache::Cleanup()
 
 COMO_INTERFACE_IMPL_LIGHT_1(ExpiringCache::Entry, LightRefBase, IInterface);
 
-}
-}
+} // namespace io
+} // namespace como

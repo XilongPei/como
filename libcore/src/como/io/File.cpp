@@ -62,7 +62,7 @@ Boolean File::IsInvalid()
 {
     if (mStatus == PathStatus::UNKNOWN) {
         mStatus = (mPath.IndexOf(U'\0') < 0) ? PathStatus::CHECKED
-                                            : PathStatus::INVALID;
+                                             : PathStatus::INVALID;
     }
     return mStatus == PathStatus::INVALID;
 }
@@ -563,7 +563,7 @@ ECode File::ListFiles(
     Array<IFile*> fs(n);
     for (Integer i = 0; i < n; i++) {
         AutoPtr<IFile> f;
-        CFile::New(ss[i], this, IID_IFile, (IInterface**)&f);
+        FAIL_RETURN(CFile::New(ss[i], this, IID_IFile, (IInterface**)&f));
         fs.Set(i, f);
     }
     *files = fs;
@@ -589,7 +589,7 @@ ECode File::ListFiles(
         if (filter == nullptr ||
                 (filter->Accept(this, ss[i], accepted), accepted)) {
             AutoPtr<IFile> f;
-            CFile::New(ss[i], this, IID_IFile, (IInterface**)&f);
+            FAIL_RETURN(CFile::New(ss[i], this, IID_IFile, (IInterface**)&f));
             v->Add(f);
         }
     }
@@ -609,13 +609,12 @@ ECode File::ListFiles(
         return NOERROR;
     }
     AutoPtr<IList> v;
-    CArrayList::New(IID_IList, (IInterface**)&v);
-    for (Integer i = 0; i < ss.GetLength(); i++) {
+    FAIL_RETURN(CArrayList::New(IID_IList, (IInterface**)&v));
+    for (Integer i = 0;  i < ss.GetLength();  i++) {
         AutoPtr<IFile> f;
-        CFile::New(ss[i], this, IID_IFile, (IInterface**)&f);
+        FAIL_RETURN(CFile::New(ss[i], this, IID_IFile, (IInterface**)&f));
         Boolean accepted;
-        if (filter == nullptr ||
-                (filter->Accept(f, accepted), accepted)) {
+        if (filter == nullptr || (filter->Accept(f, accepted), accepted)) {
             v->Add(f);
         }
     }
@@ -826,7 +825,8 @@ ECode File::GetTotalSpace(
     AutoPtr<ISecurityManager> security = System::GetSecurityManager();
     if (security != nullptr) {
         AutoPtr<IPermission> perm;
-        CRuntimePermission::New(String("getFileSystemAttributes"), IID_IPermission, (IInterface**)&perm);
+        FAIL_RETURN(CRuntimePermission::New(String("getFileSystemAttributes"),
+                                         IID_IPermission, (IInterface**)&perm));
         FAIL_RETURN(security->CheckPermission(perm));
         FAIL_RETURN(security->CheckRead(mPath));
     }
@@ -843,7 +843,8 @@ ECode File::GetFreeSpace(
     AutoPtr<ISecurityManager> security = System::GetSecurityManager();
     if (security != nullptr) {
         AutoPtr<IPermission> perm;
-        CRuntimePermission::New(String("getFileSystemAttributes"), IID_IPermission, (IInterface**)&perm);
+        FAIL_RETURN(CRuntimePermission::New(String("getFileSystemAttributes"),
+                                         IID_IPermission, (IInterface**)&perm));
         FAIL_RETURN(security->CheckPermission(perm));
         FAIL_RETURN(security->CheckRead(mPath));
     }
@@ -860,7 +861,8 @@ ECode File::GetUsableSpace(
     AutoPtr<ISecurityManager> security = System::GetSecurityManager();
     if (security != nullptr) {
         AutoPtr<IPermission> perm;
-        CRuntimePermission::New(String("getFileSystemAttributes"), IID_IPermission, (IInterface**)&perm);
+        FAIL_RETURN(CRuntimePermission::New(String("getFileSystemAttributes"),
+                                         IID_IPermission, (IInterface**)&perm));
         FAIL_RETURN(security->CheckPermission(perm));
         FAIL_RETURN(security->CheckRead(mPath));
     }
@@ -890,7 +892,7 @@ ECode File::CreateTempFile(
     if (tmpdir == nullptr) {
         String dir;
         FAIL_RETURN(System::GetProperty("como.io.tmpdir", ".", dir));
-        CFile::New(dir, IID_IFile, (IInterface**)&tmpdir);
+        FAIL_RETURN(CFile::New(dir, IID_IFile, (IInterface**)&tmpdir));
     }
 
     Integer attrs;
@@ -977,5 +979,5 @@ ECode File::TempDirectory::GenerateFile(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

@@ -338,6 +338,7 @@ ECode Hashtable::PutAll(
         AutoPtr<IInterface> key, value;
         IMapEntry::Probe(obj)->GetKey(key);
         IMapEntry::Probe(obj)->GetValue(value);
+
         FAIL_RETURN(Put(key, value));
     }
 

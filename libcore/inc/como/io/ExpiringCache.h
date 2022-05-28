@@ -83,7 +83,7 @@ public:
     String Get(
         /* [in] */ const String& key);
 
-    void Put(
+    ECode Put(
         /* [in] */ const String& key,
         /* [in] */ const String& val);
 
@@ -103,7 +103,7 @@ private:
     static constexpr Integer MAX_ENTRIES = 200;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_EXPIRINGCACHE_H__

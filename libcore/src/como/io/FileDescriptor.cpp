@@ -102,9 +102,12 @@ AutoPtr<IFileDescriptor> FileDescriptor::DupFd(
     int nfd = TEMP_FAILURE_RETRY(fcntl(fd, F_DUPFD_CLOEXEC, 0));
     CHECK(nfd != -1);
     AutoPtr<IFileDescriptor> fdObj;
-    CFileDescriptor::New(nfd, IID_IFileDescriptor, (IInterface**)&fdObj);
+    ECode ec = CFileDescriptor::New(nfd, IID_IFileDescriptor, (IInterface**)&fdObj);
+    if (FAILED(ec))
+        return nullptr;
+
     return fdObj;
 }
 
-}
-}
+} // namespace io
+} // namespace como

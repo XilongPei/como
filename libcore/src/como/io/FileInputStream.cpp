@@ -70,7 +70,7 @@ ECode FileInputStream::Constructor(
 {
     AutoPtr<IFile> f;
     if (!name.IsNull()) {
-        CFile::New(name, IID_IFile, (IInterface**)&f);
+        FAIL_RETURN(CFile::New(name, IID_IFile, (IInterface**)&f));
     }
     return Constructor(f);
 }
@@ -93,7 +93,8 @@ ECode FileInputStream::Constructor(
         Logger::E("FileInputStream", "Invalid file path");
         return E_FILE_NOT_FOUND_EXCEPTION;
     }
-    CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&mFd);
+
+    FAIL_RETURN(CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&mFd));
     mIsFdOwner = true;
     mPath = name;
 
@@ -138,6 +139,9 @@ ECode FileInputStream::Read(
     /* [out] */ Integer& value)
 {
     Array<Byte> b(1);
+    if (b.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer n;
     FAIL_RETURN(Read(b, 0, 1, n));
     value = n != -1 ? b[0] & 0xff : -1;
@@ -303,5 +307,5 @@ ECode FileInputStream::GetChannel(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

@@ -93,7 +93,9 @@ void DeleteOnExitHook::RunHooks()
     }
 
     AutoPtr<IArrayList> toBeDeleted;
-    CArrayList::New(ICollection::Probe(theFiles), IID_IArrayList, (IInterface**)&toBeDeleted);
+    ECode ec = CArrayList::New(ICollection::Probe(theFiles), IID_IArrayList, (IInterface**)&toBeDeleted);
+    if (FAILED(ec))
+        return;
 
     Collections::Reverse(IList::Probe(toBeDeleted));
     AutoPtr<IIterator> it;
@@ -104,10 +106,13 @@ void DeleteOnExitHook::RunHooks()
         it->Next(obj);
         String filename = CoreUtils::Unbox(ICharSequence::Probe(obj));
         AutoPtr<IFile> f;
-        CFile::New(filename, IID_IFile, (IInterface**)&f);
+        ec = CFile::New(filename, IID_IFile, (IInterface**)&f);
+        if (FAILED(ec))
+            return;
+
         f->Delete();
     }
 }
 
-}
-}
+} // namespace io
+} // namespace como

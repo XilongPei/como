@@ -48,11 +48,11 @@ Boolean FileSystem::GetBooleanProperty(
 ECode FileSystem::StaticInitialize()
 {
     sUseCanonCaches = GetBooleanProperty("como.io.useCanonCaches",
-            sUseCanonCaches);
+                                                                sUseCanonCaches);
     sUseCanonPrefixCache = GetBooleanProperty("como.io.useCanonPrefixCache",
-            sUseCanonPrefixCache);
+                                                            sUseCanonPrefixCache);
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

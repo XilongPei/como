@@ -76,7 +76,7 @@ void NativeThreadList::Resume(
         // To check IsSuspended.
         NativeMutex::AutoLock lock2(self, *Locks::sThreadSuspendCountLock);
         CHECK(thread->IsSuspended());
-        if (!Contains(thread)) {
+        if (! Contains(thread)) {
             // We only expect threads within the thread-list to have been suspended
             // otherwise we can't stop such threads from delete-ing themselves.
             Logger::E("NativeThreadList", "Resume(%p) thread not within thread list",

@@ -71,9 +71,13 @@ ECode CharBuffer::Allocate(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<HeapCharBuffer> hcb = new HeapCharBuffer();
+    if (nullptr == hcb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hcb->Constructor(capacity, capacity));
     *buffer = (ICharBuffer*)hcb.Get();
     REFCOUNT_ADD(*buffer);
+
     return NOERROR;
 }
 
@@ -86,9 +90,13 @@ ECode CharBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<HeapCharBuffer> hcb = new HeapCharBuffer();
+    if (nullptr == hcb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hcb->Constructor(array, offset, length));
     *buffer = (ICharBuffer*)hcb.Get();
     REFCOUNT_ADD(*buffer);
+
     return NOERROR;
 }
 
@@ -109,8 +117,10 @@ ECode CharBuffer::Read(
         number = -1;
         return NOERROR;
     }
+
     Integer targetRemaining;
     IBuffer::Probe(target)->Remaining(targetRemaining);
+
     Integer n = Math::Min(remaining, targetRemaining);
     Integer limit;
     GetLimit(limit);
@@ -124,6 +134,7 @@ ECode CharBuffer::Read(
     }
     SetLimit(limit);
     number = n;
+
     return NOERROR;
 }
 
@@ -136,9 +147,13 @@ ECode CharBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<StringCharBuffer> scb = new StringCharBuffer();
+    if (nullptr == scb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(scb->Constructor(csq, start, end));
     *buffer = (ICharBuffer*)scb.Get();
     REFCOUNT_ADD(*buffer);
+
     return NOERROR;
 }
 
@@ -327,7 +342,7 @@ ECode CharBuffer::Equals(
     Integer i, j;
     GetLimit(i);
     other->GetLimit(j);
-    for (i = i - 1, j = j - 1; i >= p; i--, j--) {
+    for (i = i - 1, j = j - 1;  i >= p;  i--, j--) {
         Char thisC, otherC;
         Get(i, thisC);
         other->Get(j, otherC);
@@ -414,7 +429,7 @@ ECode CharBuffer::Append(
 {
     AutoPtr<ICharSequence> cs = csq;
     if (cs == nullptr) {
-        CString::New("null", IID_ICharSequence, (IInterface**)&cs);
+        FAIL_RETURN(CString::New("null", IID_ICharSequence, (IInterface**)&cs));
     }
     AutoPtr<ICharSequence> subcsq;
     cs->SubSequence(start, end, subcsq);
@@ -427,5 +442,5 @@ ECode CharBuffer::Append(
     return Put(c);
 }
 
-}
-}
+} // namespace io
+} // namespace como

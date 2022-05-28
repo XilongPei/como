@@ -137,7 +137,8 @@ ECode ByteBufferAsLongBuffer::Put(
     /* [in] */ Long l)
 {
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
+
     return Put(index, l);
 }
 

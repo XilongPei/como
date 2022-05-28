@@ -50,5 +50,5 @@ ECode ByteBufferFactory::Wrap(
     return ByteBuffer::Wrap(array, buffer);
 }
 
-}
-}
+} // namespace io
+} // namespace como

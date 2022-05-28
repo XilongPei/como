@@ -158,6 +158,9 @@ ECode FileOutputStream::Write(
     /* [in] */ Integer byte)
 {
     Array<Byte> buf(1);
+    if (buf.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     buf[0] = (Byte)byte;
     return Write(buf, 0, 1);
 }
@@ -227,11 +230,12 @@ ECode FileOutputStream::GetChannel(
     AutoLock lock(this);
 
     if (mChannel == nullptr) {
-        mChannel = FileChannelImpl::Open(mFd, mPath, false, true, mAppend, (IFileOutputStream*)this);
+        mChannel = FileChannelImpl::Open(mFd, mPath, false, true, mAppend,
+                                         (IFileOutputStream*)this);
     }
     channel = mChannel;
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

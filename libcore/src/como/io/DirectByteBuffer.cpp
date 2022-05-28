@@ -80,6 +80,9 @@ ECode DirectByteBuffer::Constructor(
 {
     FAIL_RETURN(MappedByteBuffer::Constructor(-1, 0, cap, cap));
     mMemoryRef = new MemoryRef(addr);
+    if (nullptr == mMemoryRef)
+        return E_OUT_OF_MEMORY_ERROR;
+
     mAddress = addr;
     return NOERROR;
 }
@@ -93,6 +96,9 @@ ECode DirectByteBuffer::Constructor(
     FAIL_RETURN(MappedByteBuffer::Constructor(-1, 0, cap, cap, fd));
     mIsReadOnly = isReadOnly;
     mMemoryRef = new MemoryRef(addr);
+    if (nullptr == mMemoryRef)
+        return E_OUT_OF_MEMORY_ERROR;
+
     mAddress = addr;
     return NOERROR;
 }
@@ -134,7 +140,7 @@ ECode DirectByteBuffer::GetAttachment(
 ECode DirectByteBuffer::Slice(
     /* [out] */ AutoPtr<IByteBuffer>& buffer)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -143,12 +149,14 @@ ECode DirectByteBuffer::Slice(
     Integer lim;
     GetLimit(lim);
     CHECK(pos <= lim);
+
     Integer rem = (pos <= lim ? lim - pos : 0);
     Integer off = pos + mOffset;
     CHECK(off >= 0);
+
     buffer = nullptr;
     return CDirectByteBuffer::New(mMemoryRef, -1, 0, rem, rem, off, mIsReadOnly,
-            IID_IByteBuffer, (IInterface**)&buffer);
+                                  IID_IByteBuffer, (IInterface**)&buffer);
 }
 
 ECode DirectByteBuffer::Duplicate(
@@ -165,8 +173,8 @@ ECode DirectByteBuffer::Duplicate(
     Integer cap;
     GetCapacity(cap);
     buffer = nullptr;
-    return CDirectByteBuffer::New(mMemoryRef, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly,
-            IID_IByteBuffer, (IInterface**)&buffer);
+    return CDirectByteBuffer::New(mMemoryRef, MarkValue(), pos, lim, cap, mOffset,
+                            mIsReadOnly, IID_IByteBuffer, (IInterface**)&buffer);
 }
 
 ECode DirectByteBuffer::AsReadOnlyBuffer(
@@ -183,8 +191,8 @@ ECode DirectByteBuffer::AsReadOnlyBuffer(
     Integer cap;
     GetCapacity(cap);
     buffer = nullptr;
-    return CDirectByteBuffer::New(mMemoryRef, MarkValue(), pos, lim, cap, mOffset, true,
-            IID_IByteBuffer, (IInterface**)&buffer);
+    return CDirectByteBuffer::New(mMemoryRef, MarkValue(), pos, lim, cap, mOffset,
+                                    true, IID_IByteBuffer, (IInterface**)&buffer);
 }
 
 ECode DirectByteBuffer::GetAddress(
@@ -209,7 +217,7 @@ Byte DirectByteBuffer::Get(
 ECode DirectByteBuffer::Get(
     /* [out] */ Byte& b)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -223,7 +231,7 @@ ECode DirectByteBuffer::Get(
     /* [in] */ Integer i,
     /* [out] */ Byte& b)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -238,16 +246,18 @@ ECode DirectByteBuffer::Get(
     /* [in] */ Integer offset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     FAIL_RETURN(CheckBounds(offset, length, dst.GetLength()));
+
     Integer pos;
     GetPosition(pos);
     Integer lim;
     GetLimit(lim);
     CHECK(pos <=  lim);
+
     Integer rem = (pos <= lim ? lim - pos : 0);
     if (length > rem) {
         return E_BUFFER_UNDERFLOW_EXCEPTION;
@@ -267,7 +277,7 @@ void DirectByteBuffer::Put(
 ECode DirectByteBuffer::Put(
     /* [in] */ Byte b)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -284,7 +294,7 @@ ECode DirectByteBuffer::Put(
     /* [in] */ Integer i,
     /* [in] */ Byte b)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -301,7 +311,7 @@ ECode DirectByteBuffer::Put(
     /* [in] */ Integer offset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -309,11 +319,13 @@ ECode DirectByteBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     FAIL_RETURN(CheckBounds(offset, length, src.GetLength()));
+
     Integer pos;
     GetPosition(pos);
     Integer lim;
     GetLimit(lim);
     CHECK(pos <= lim);
+
     Integer rem = (pos <= lim ? lim - pos : 0);
     if (length > rem) {
         return E_BUFFER_OVERFLOW_EXCEPTION;
@@ -325,7 +337,7 @@ ECode DirectByteBuffer::Put(
 
 ECode DirectByteBuffer::Compact()
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -337,6 +349,7 @@ ECode DirectByteBuffer::Compact()
     Integer lim;
     GetLimit(lim);
     CHECK(pos <= lim);
+
     Integer rem = (pos <= lim ? lim - pos : 0);
     Integer remaining;
     Remaining(remaining);
@@ -381,7 +394,7 @@ ECode DirectByteBuffer::_Put(
 ECode DirectByteBuffer::GetChar(
     /* [out] */ Char& c)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -400,7 +413,7 @@ ECode DirectByteBuffer::GetChar(
     /* [in] */ Integer index,
     /* [out] */ Char& c)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -413,7 +426,7 @@ ECode DirectByteBuffer::GetCharUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Char& c)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -427,7 +440,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -445,7 +458,7 @@ void DirectByteBuffer::PutChar(
 ECode DirectByteBuffer::PutChar(
     /* [in] */ Char value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -462,7 +475,7 @@ ECode DirectByteBuffer::PutChar(
     /* [in] */ Integer index,
     /* [in] */ Char value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -478,7 +491,7 @@ ECode DirectByteBuffer::PutCharUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Char value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -492,7 +505,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -507,16 +520,21 @@ ECode DirectByteBuffer::AsCharBuffer(
         Logger::E("DirectByteBuffer", "buffer has been freed");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     Integer off, lim;
     GetPosition(off);
     GetLimit(lim);
     CHECK(off <= lim);
+
     Integer rem = (off <= lim ? lim - off : 0);
     Integer size = rem >> 2;
     AutoPtr<IByteOrder> order;
     GetOrder(order);
 
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (ICharBuffer*)bb.Get();
     return NOERROR;
@@ -531,7 +549,7 @@ Short DirectByteBuffer::GetShort(
 ECode DirectByteBuffer::GetShort(
     /* [out] */ Short& s)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -545,7 +563,7 @@ ECode DirectByteBuffer::GetShort(
     /* [in] */ Integer index,
     /* [out] */ Short& s)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -558,7 +576,7 @@ ECode DirectByteBuffer::GetShortUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Short& value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -572,7 +590,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -590,7 +608,7 @@ void DirectByteBuffer::PutShort(
 ECode DirectByteBuffer::PutShort(
     /* in] */ Short value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -607,7 +625,7 @@ ECode DirectByteBuffer::PutShort(
     /* [in] */ Integer index,
     /* [in] */ Short value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -623,7 +641,7 @@ ECode DirectByteBuffer::PutShortUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Short value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -637,7 +655,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -652,16 +670,21 @@ ECode DirectByteBuffer::AsShortBuffer(
         Logger::E("DirectByteBuffer", "buffer has been freed");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     Integer off, lim;
     GetPosition(off);
     GetLimit(lim);
     CHECK(off <= lim);
+
     Integer rem = (off <= lim ? lim - off : 0);
     Integer size = rem >> 1;
     AutoPtr<IByteOrder> order;
     GetOrder(order);
 
     AutoPtr<ByteBufferAsShortBuffer> bb = new ByteBufferAsShortBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IShortBuffer*)bb.Get();
     return NOERROR;
@@ -676,7 +699,7 @@ Integer DirectByteBuffer::GetInteger(
 ECode DirectByteBuffer::GetInteger(
     /* [out] */ Integer& i)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -690,7 +713,7 @@ ECode DirectByteBuffer::GetInteger(
     /* [in] */ Integer index,
     /* [out] */ Integer& i)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -703,7 +726,7 @@ ECode DirectByteBuffer::GetIntegerUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Integer& value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -717,7 +740,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -735,7 +758,7 @@ void DirectByteBuffer::PutInteger(
 ECode DirectByteBuffer::PutInteger(
     /* [in] */ Integer value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -752,7 +775,7 @@ ECode DirectByteBuffer::PutInteger(
     /* [in] */ Integer index,
     /* [in] */ Integer value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -768,7 +791,7 @@ ECode DirectByteBuffer::PutIntegerUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Integer value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -782,7 +805,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -807,6 +830,9 @@ ECode DirectByteBuffer::AsIntegerBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsIntegerBuffer> bb = new ByteBufferAsIntegerBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IIntegerBuffer*)bb.Get();
     return NOERROR;
@@ -821,7 +847,7 @@ Long DirectByteBuffer::GetLong(
 ECode DirectByteBuffer::GetLong(
     /* [out] */ Long& l)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -835,7 +861,7 @@ ECode DirectByteBuffer::GetLong(
     /* [in] */ Integer index,
     /* [out] */ Long& l)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -848,7 +874,7 @@ ECode DirectByteBuffer::GetLongUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Long& value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -862,7 +888,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -880,7 +906,7 @@ void DirectByteBuffer::PutLong(
 ECode DirectByteBuffer::PutLong(
     /* [in] */ Long value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -897,7 +923,7 @@ ECode DirectByteBuffer::PutLong(
     /* [in] */ Integer index,
     /* [in] */ Long value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -913,7 +939,7 @@ ECode DirectByteBuffer::PutLongUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Long value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -927,7 +953,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -942,16 +968,21 @@ ECode DirectByteBuffer::AsLongBuffer(
         Logger::E("DirectByteBuffer", "buffer has been freed");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     Integer off, lim;
     GetPosition(off);
     GetLimit(lim);
     CHECK(off <= lim);
+
     Integer rem = (off <= lim ? lim - off : 0);
     Integer size = rem >> 3;
     AutoPtr<IByteOrder> order;
     GetOrder(order);
 
     AutoPtr<ByteBufferAsLongBuffer> bb = new ByteBufferAsLongBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (ILongBuffer*)bb.Get();
     return NOERROR;
@@ -967,7 +998,7 @@ Float DirectByteBuffer::GetFloat(
 ECode DirectByteBuffer::GetFloat(
     /* [out] */ Float& f)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -981,7 +1012,7 @@ ECode DirectByteBuffer::GetFloat(
     /* [in] */ Integer index,
     /* [out] */ Float& f)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -994,7 +1025,7 @@ ECode DirectByteBuffer::GetFloatUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Float& value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1008,7 +1039,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1027,7 +1058,7 @@ void DirectByteBuffer::PutFloat(
 ECode DirectByteBuffer::PutFloat(
     /* [in] */ Float value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1044,7 +1075,7 @@ ECode DirectByteBuffer::PutFloat(
     /* [in] */ Integer index,
     /* [in] */ Float value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1060,7 +1091,7 @@ ECode DirectByteBuffer::PutFloatUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Float value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1074,7 +1105,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1089,16 +1120,21 @@ ECode DirectByteBuffer::AsFloatBuffer(
         Logger::E("DirectByteBuffer", "buffer has been freed");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     Integer off, lim;
     GetPosition(off);
     GetLimit(lim);
     CHECK(off <= lim);
+
     Integer rem = (off <= lim ? lim - off : 0);
     Integer size = rem >> 2;
     AutoPtr<IByteOrder> order;
     GetOrder(order);
 
     AutoPtr<ByteBufferAsFloatBuffer> bb = new ByteBufferAsFloatBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IFloatBuffer*)bb.Get();
     return NOERROR;
@@ -1114,7 +1150,7 @@ Double DirectByteBuffer::GetDouble(
 ECode DirectByteBuffer::GetDouble(
     /* [out] */ Double& d)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1128,7 +1164,7 @@ ECode DirectByteBuffer::GetDouble(
     /* [in] */ Integer index,
     /* [out] */ Double& d)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1141,7 +1177,7 @@ ECode DirectByteBuffer::GetDoubleUnchecked(
     /* [in] */ Integer index,
     /* [out] */ Double& value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1155,7 +1191,7 @@ ECode DirectByteBuffer::GetUnchecked(
     /* [in] */ Integer dstOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1174,7 +1210,7 @@ void DirectByteBuffer::PutDouble(
 ECode DirectByteBuffer::PutDouble(
     /* [in] */ Double value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1191,7 +1227,7 @@ ECode DirectByteBuffer::PutDouble(
     /* [in] */ Integer index,
     /* [in] */ Double value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1207,7 +1243,7 @@ ECode DirectByteBuffer::PutDoubleUnchecked(
     /* [in] */ Integer index,
     /* [in] */ Double value)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1221,7 +1257,7 @@ ECode DirectByteBuffer::PutUnchecked(
     /* [in] */ Integer srcOffset,
     /* [in] */ Integer length)
 {
-    if (!mMemoryRef->mIsAccessible) {
+    if (! mMemoryRef->mIsAccessible) {
         Logger::E("DirectByteBuffer", "buffer is inaccessible");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1240,12 +1276,16 @@ ECode DirectByteBuffer::AsDoubleBuffer(
     GetPosition(off);
     GetLimit(lim);
     CHECK(off <= lim);
+
     Integer rem = (off <= lim ? lim - off : 0);
     Integer size = rem >> 3;
     AutoPtr<IByteOrder> order;
     GetOrder(order);
 
     AutoPtr<ByteBufferAsDoubleBuffer> bb = new ByteBufferAsDoubleBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IDoubleBuffer*)bb.Get();
     return NOERROR;
@@ -1265,5 +1305,5 @@ ECode DirectByteBuffer::SetAccessible(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como
