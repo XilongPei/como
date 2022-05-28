@@ -60,6 +60,6 @@ ECode PatternFactory::Quote(
     return Pattern::Quote(s, pattStr);
 }
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como

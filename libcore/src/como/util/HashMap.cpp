@@ -118,7 +118,7 @@ void HashMap::PutMapEntries(
         if (mTable.IsNull()) {
             Float ft = ((Float)s / mLoadFactor) + 1.0f;
             Integer t = ((ft < (Float)MAXIMUM_CAPACITY) ?
-                         (Integer)ft : MAXIMUM_CAPACITY);
+                                                (Integer)ft : MAXIMUM_CAPACITY);
             if (t > mThreshold) {
                 mThreshold = TableSizeFor(t);
             }
@@ -722,6 +722,9 @@ ECode HashMap::KeySet::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new KeyIterator(mOwner);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -762,6 +765,9 @@ ECode HashMap::Values::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new ValueIterator(mOwner);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 

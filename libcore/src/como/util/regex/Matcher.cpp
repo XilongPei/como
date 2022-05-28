@@ -163,6 +163,9 @@ ECode Matcher::ToMatchResult(
 {
     FAIL_RETURN(EnsureMatch());
     result = new OffsetBasedMatchResult(mInput, mMatchOffsets);
+    if (nullptr == result)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -189,13 +192,16 @@ ECode Matcher::UsePattern(
         }
     }
 
-    if (!mInput.IsNull()) {
+    if (! mInput.IsNull()) {
         ResetForInput();
     }
 
     Integer gc;
     GroupCount(gc);
     mMatchOffsets = Array<Integer>((gc + 1) * 2);
+    if (mMatchOffsets.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     mMatchFound = false;
     return NOERROR;
 }
@@ -221,8 +227,7 @@ ECode Matcher::End(
 {
     FAIL_RETURN(EnsureMatch());
     Integer group;
-    FAIL_RETURN(GetMatchedGroupIndex(
-            Pattern::From(mPattern)->mNative, name, group));
+    FAIL_RETURN(GetMatchedGroupIndex(Pattern::From(mPattern)->mNative, name, group));
     index = mMatchOffsets[group * 2 + 1];
     return NOERROR;
 }
@@ -256,8 +261,7 @@ ECode Matcher::Group(
 {
     FAIL_RETURN(EnsureMatch());
     Integer group;
-    FAIL_RETURN(GetMatchedGroupIndex(
-            Pattern::From(mPattern)->mNative, name, group));
+    FAIL_RETURN(GetMatchedGroupIndex(Pattern::From(mPattern)->mNative, name, group));
     Integer from = mMatchOffsets[group * 2];
     Integer to = mMatchOffsets[(group * 2) + 1];
     if (from == -1 || to == -1) {
@@ -336,8 +340,10 @@ ECode Matcher::QuoteReplacement(
         str = s;
         return NOERROR;
     }
+
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+
     for (Integer i = 0; i < s.GetLength(); i++) {
         Char c = s.GetChar(i);
         if (c == U'\\' || c == U'$') {
@@ -354,7 +360,7 @@ ECode Matcher::AppendReplacement(
 {
     Integer start;
     FAIL_RETURN(Start(start));
-    sb->Append(mInput.Substring(mAppendPos, start));
+    FAIL_RETURN(sb->Append(mInput.Substring(mAppendPos, start)));
     FAIL_RETURN(AppendEvaluated(sb, replacement));
     return End(mAppendPos);
 }
@@ -379,7 +385,7 @@ ECode Matcher::AppendEvaluated(
         else if (c >= U'0' && c <= U'9' && dollar) {
             String subseq;
             FAIL_RETURN(Group(c - U'0', subseq));
-            buffer->Append(subseq);
+            FAIL_RETURN(buffer->Append(subseq));
             dollar = false;
         }
         else if (c == U'{' && dollar) {
@@ -387,11 +393,10 @@ ECode Matcher::AppendEvaluated(
             escapeNamedGroupStart = i;
         }
         else if (c == U'}' && dollar && escapeNamedGroup) {
-            String namedGroupName =
-                    s.Substring(escapeNamedGroupStart + 1, i);
+            String namedGroupName = s.Substring(escapeNamedGroupStart + 1, i);
             String subseq;
             FAIL_RETURN(Group(namedGroupName, subseq));
-            buffer->Append(subseq);
+            FAIL_RETURN(buffer->Append(subseq));
             dollar = false;
             escapeNamedGroup = false;
         }
@@ -399,7 +404,7 @@ ECode Matcher::AppendEvaluated(
             continue;
         }
         else {
-            buffer->Append(c);
+            FAIL_RETURN(buffer->Append(c));
             dollar = false;
             escape = false;
             escapeNamedGroup = false;
@@ -423,7 +428,7 @@ ECode Matcher::AppendTail(
     /* [in] */ IStringBuffer* sb)
 {
     if (mAppendPos < mRegionEnd) {
-        sb->Append(mInput.Substring(mAppendPos, mRegionEnd));
+        FAIL_RETURN(sb->Append(mInput.Substring(mAppendPos, mRegionEnd)));
     }
     return NOERROR;
 }
@@ -433,14 +438,15 @@ ECode Matcher::ReplaceAll(
     /* [out] */ String& str)
 {
     FAIL_RETURN(Reset());
+
     AutoPtr<IStringBuffer> buffer;
-    CStringBuffer::New(mInput.GetLength(),
-            IID_IStringBuffer, (IInterface**)&buffer);
+    FAIL_RETURN(CStringBuffer::New(mInput.GetLength(), IID_IStringBuffer,
+                                                        (IInterface**)&buffer));
     Boolean found;
-    while(Find(found), found) {
+    while (Find(found), found) {
         FAIL_RETURN(AppendReplacement(buffer, replacement));
     }
-    AppendTail(buffer);
+    FAIL_RETURN(AppendTail(buffer));
     return buffer->ToString(str);
 }
 
@@ -449,14 +455,16 @@ ECode Matcher::ReplaceFirst(
     /* [out] */ String& str)
 {
     FAIL_RETURN(Reset());
+
     AutoPtr<IStringBuffer> buffer;
-    CStringBuffer::New(mInput.GetLength(),
-            IID_IStringBuffer, (IInterface**)&buffer);
+
+    FAIL_RETURN(CStringBuffer::New(mInput.GetLength(),
+                                        IID_IStringBuffer, (IInterface**)&buffer));
     Boolean found;
     if (Find(found), found) {
         FAIL_RETURN(AppendReplacement(buffer, replacement));
     }
-    AppendTail(buffer);
+    FAIL_RETURN(AppendTail(buffer));
     return buffer->ToString(str);
 }
 
@@ -517,25 +525,26 @@ ECode Matcher::ToString(
     /* [in] */ String& str)
 {
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(String("como::util::regex::Matcher"));
-    sb->Append("[pattern=");
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+    FAIL_RETURN(sb->Append(String("como::util::regex::Matcher")));
+    FAIL_RETURN(sb->Append("[pattern="));
     AutoPtr<IPattern> p;
     Pattern(p);
-    sb->Append(Object::ToString(p));
-    sb->Append(String(" region="));
+    FAIL_RETURN(sb->Append(Object::ToString(p)));
+    FAIL_RETURN(sb->Append(String(" region=")));
     Integer start, end;
     RegionStart(start);
     RegionEnd(end);
-    sb->Append(start);
-    sb->Append(U',');
-    sb->Append(end);
-    sb->Append(String(" lastmatch="));
+    FAIL_RETURN(sb->Append(start));
+    FAIL_RETURN(sb->Append(U','));
+    FAIL_RETURN(sb->Append(end));
+    FAIL_RETURN(sb->Append(String(" lastmatch=")));
+
     String subseq;
     if (mMatchFound && (Group(subseq), !subseq.IsNull())) {
-        sb->Append(subseq);
+        FAIL_RETURN(sb->Append(subseq));
     }
-    sb->Append(U']');
+    FAIL_RETURN(sb->Append(U']'));
     return sb->ToString(str);
 }
 
@@ -609,7 +618,7 @@ void Matcher::ResetForInput()
 
 ECode Matcher::EnsureMatch()
 {
-    if (!mMatchFound) {
+    if (! mMatchFound) {
         Logger::E("Matcher", "No successful match so far");
         return como::core::E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -637,8 +646,7 @@ ECode Matcher::Start(
 {
     FAIL_RETURN(EnsureMatch());
     Integer group;
-    FAIL_RETURN(GetMatchedGroupIndex(
-            Pattern::From(mPattern)->mNative, name, group));
+    FAIL_RETURN(GetMatchedGroupIndex(Pattern::From(mPattern)->mNative, name, group));
     index = mMatchOffsets[group * 2];
     return NOERROR;
 }
@@ -863,6 +871,6 @@ ECode Matcher::OffsetBasedMatchResult::GroupCount(
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como

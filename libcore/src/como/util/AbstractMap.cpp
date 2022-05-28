@@ -37,7 +37,8 @@ ECode AbstractMap::GetSize(
     /* [out] */ Integer& size)
 {
     AutoPtr<ISet> entries;
-    GetEntrySet(entries);
+    FAIL_RETURN(GetEntrySet(entries));
+
     return entries->GetSize(size);
 }
 
@@ -55,9 +56,11 @@ ECode AbstractMap::ContainsValue(
     /* [out] */ Boolean& result)
 {
     AutoPtr<ISet> entries;
-    GetEntrySet(entries);
+    FAIL_RETURN(GetEntrySet(entries));
+
     AutoPtr<IIterator> it;
-    entries->GetIterator(it);
+    FAIL_RETURN(entries->GetIterator(it));
+
     if (value == nullptr) {
         Boolean hasNext;
         while (it->HasNext(hasNext), hasNext) {
@@ -604,8 +607,9 @@ ECode AbstractMap::ToString(
     }
 
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(U'{');
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+
+    FAIL_RETURN(sb->Append(U'{'));
     for (;;) {
         AutoPtr<IInterface> e;
         it->Next(e);
@@ -613,24 +617,24 @@ ECode AbstractMap::ToString(
         IMapEntry::Probe(e)->GetKey(key);
         IMapEntry::Probe(e)->GetValue(value);
         if (IInterface::Equals(key, (IMap*)this)) {
-            sb->Append(String("(this Map)"));
+            FAIL_RETURN(sb->Append(String("(this Map)")));
         }
         else {
-            sb->Append(key);
+            FAIL_RETURN(sb->Append(key));
         }
-        sb->Append(U'=');
+        FAIL_RETURN(sb->Append(U'='));
         if (IInterface::Equals(value, (IMap*)this)) {
-            sb->Append(String("(this Map)"));
+            FAIL_RETURN(sb->Append(String("(this Map)")));
         }
         else {
-            sb->Append(value);
+            FAIL_RETURN(sb->Append(value));
         }
         if (it->HasNext(hasNext), !hasNext) {
-            sb->Append(U'}');
+            FAIL_RETURN(sb->Append(U'}'));
             return sb->ToString(str);
         }
-        sb->Append(U',');
-        sb->Append(U' ');
+        FAIL_RETURN(sb->Append(U','));
+        FAIL_RETURN(sb->Append(U' '));
     }
 }
 
@@ -787,5 +791,5 @@ ECode AbstractMap::SimpleImmutableEntry::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

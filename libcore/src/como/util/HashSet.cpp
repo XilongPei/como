@@ -44,8 +44,8 @@ ECode HashSet::Constructor(
 {
     Integer size;
     c->GetSize(size);
-    CHashMap::New(Math::Max((Integer)(size / .75f) + 1, 16),
-                                            IID_IHashMap, (IInterface**)&mMap);
+    FAIL_RETURN(CHashMap::New(Math::Max((Integer)(size / .75f) + 1, 16),
+                                            IID_IHashMap, (IInterface**)&mMap));
     AddAll(c);
     return NOERROR;
 }

@@ -178,7 +178,7 @@ protected:
     AutoPtr<ICollection> mValues;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ABSTRACTMAP_H__

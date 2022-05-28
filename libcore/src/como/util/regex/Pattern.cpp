@@ -58,7 +58,8 @@ ECode Pattern::Constructor(
         Logger::E("Pattern", "CANON_EQ flag not supported");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Integer supportedFlags = CASE_INSENSITIVE | COMMENTS | DOTALL | LITERAL | MULTILINE | UNICODE_CASE | UNIX_LINES;
+    Integer supportedFlags = CASE_INSENSITIVE | COMMENTS | DOTALL | LITERAL |
+                                            MULTILINE | UNICODE_CASE | UNIX_LINES;
     if ((f & ~supportedFlags) != 0) {
         Logger::E("Pattern", "Unsupported flags: 0x%08x", (f & ~supportedFlags));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -73,6 +74,9 @@ ECode Pattern::Compile(
     /* [out] */ AutoPtr<IPattern>& pattern)
 {
     AutoPtr<Pattern> pObj = new Pattern();
+    if (nullptr != pObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(pObj->Constructor(regex, 0));
     pattern = (IPattern*)pObj;
     return NOERROR;
@@ -84,6 +88,9 @@ ECode Pattern::Compile(
     /* [out] */ AutoPtr<IPattern>& pattern)
 {
     AutoPtr<Pattern> pObj = new Pattern();
+    if (nullptr != pObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(pObj->Constructor(regex, flags));
     pattern = (IPattern*)pObj;
     return NOERROR;
@@ -107,8 +114,10 @@ ECode Pattern::Matcher(
     /* [in] */ ICharSequence* input,
     /* [out] */ AutoPtr<IMatcher>& matcher)
 {
-    AutoPtr<como::util::regex::Matcher> mObj =
-            new como::util::regex::Matcher();
+    AutoPtr<como::util::regex::Matcher> mObj = new como::util::regex::Matcher();
+    if (nullptr != mObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(mObj->Constructor(this, input));
     matcher = (IMatcher*)mObj;
     return NOERROR;
@@ -127,9 +136,11 @@ ECode Pattern::Matches(
     /* [out] */ Boolean& matched)
 {
     AutoPtr<IPattern> p;
-    Compile(regex, p);
+    FAIL_RETURN(Compile(regex, p));
+
     AutoPtr<IMatcher> m;
-    p->Matcher(input, m);
+    FAIL_RETURN(p->Matcher(input, m));
+
     return m->Matches(matched);
 }
 
@@ -152,16 +163,18 @@ ECode Pattern::Split(
     Integer index = 0;
     Boolean matchLimited = limit > 0;
     AutoPtr<IArrayList> matchList;
-    CArrayList::New(IID_IArrayList, (IInterface**)&matchList);
+    FAIL_RETURN(CArrayList::New(IID_IArrayList, (IInterface**)&matchList));
+
     AutoPtr<IMatcher> m;
-    Matcher(input, m);
+    FAIL_RETURN(Matcher(input, m));
 
     Integer size;
     Boolean found;
-    while(m->Find(found), found) {
-        if (!matchLimited || (matchList->GetSize(size), size < limit - 1)) {
+    while (m->Find(found), found) {
+        if (! matchLimited || (matchList->GetSize(size), size < limit - 1)) {
             Integer startIndex;
             m->Start(startIndex);
+
             AutoPtr<ICharSequence> match;
             input->SubSequence(index, startIndex, match);
             matchList->Add(match);
@@ -182,6 +195,9 @@ ECode Pattern::Split(
         String str;
         input->ToString(str);
         *strArray = Array<String>(1);
+        if ((*strArray).IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
+
         strArray->Set(0, str);
         return NOERROR;
     }
@@ -209,6 +225,7 @@ ECode Pattern::Split(
     }
     AutoPtr<IList> subList;
     matchList->SubList(0, size, subList);
+
     Array<ICharSequence*> seqArray;
     subList->ToArray(IID_ICharSequence, (Array<IInterface*>*)&seqArray);
     *strArray = CoreUtils::Unbox(seqArray);
@@ -405,6 +422,6 @@ ECode Pattern::CompileImpl(
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como

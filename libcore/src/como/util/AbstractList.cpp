@@ -164,7 +164,8 @@ ECode AbstractList::IndexOf(
     /* [out] */ Integer& index)
 {
     AutoPtr<IListIterator> it;
-    GetListIterator(it);
+    FAIL_RETURN(GetListIterator(it));
+
     if (obj == nullptr) {
         Boolean hasNext;
         while (it->HasNext(hasNext), hasNext) {
@@ -193,8 +194,10 @@ ECode AbstractList::LastIndexOf(
 {
     Integer size;
     GetSize(size);
+
     AutoPtr<IListIterator> it;
-    GetListIterator(size, it);
+    FAIL_RETURN(GetListIterator(it));
+
     if (obj == nullptr) {
         Boolean hasPrev;
         while (it->HasPrevious(hasPrev), hasPrev) {
@@ -276,12 +279,18 @@ ECode AbstractList::SubList(
 {
     if (Probe(IID_IRandomAccess) != nullptr) {
         AutoPtr<RandomAccessSubList> list = new RandomAccessSubList();
+        if (nullptr == list)
+            return E_OUT_OF_MEMORY_ERROR;
+
         FAIL_RETURN(list->Constructor(this, fromIndex, toIndex));
         subList = list.Get();
         return NOERROR;
     }
     else {
         AutoPtr<Sublist> list = new Sublist();
+        if (nullptr == list)
+            return E_OUT_OF_MEMORY_ERROR;
+
         FAIL_RETURN(list->Constructor(this, fromIndex, toIndex));
         subList = list.Get();
         return NOERROR;
@@ -302,8 +311,10 @@ ECode AbstractList::Equals(
     }
 
     AutoPtr<IListIterator> e1, e2;
-    GetListIterator(e1);
-    IList::Probe(obj)->GetListIterator(e2);
+    FAIL_RETURN(GetListIterator(e1));
+
+    FAIL_RETURN(IList::Probe(obj)->GetListIterator(e2));
+
     Boolean hasNext1, hasNext2;
     while (e1->HasNext(hasNext1), e2->HasNext(hasNext2), hasNext1 && hasNext2) {
         AutoPtr<IInterface> o1, o2;
@@ -323,7 +334,8 @@ ECode AbstractList::GetHashCode(
 {
     hash = 1;
     AutoPtr<IIterator> it;
-    GetIterator(it);
+    FAIL_RETURN(GetIterator(it));
+
     Boolean hasNext;
     while (it->HasNext(hasNext), hasNext) {
         AutoPtr<IInterface> e;
@@ -338,8 +350,9 @@ ECode AbstractList::RemoveRange(
     /* [in] */ Integer toIndex)
 {
     AutoPtr<IListIterator> it;
-    GetListIterator(fromIndex, it);
-    for (Integer i = 0, n = toIndex - fromIndex; i < n; i++) {
+    FAIL_RETURN(GetListIterator(fromIndex, it));
+
+    for (Integer i = 0, n = toIndex - fromIndex;  i < n;  i++) {
         AutoPtr<IInterface> e;
         it->Next(e);
         it->Remove();
@@ -579,7 +592,7 @@ ECode Sublist::Constructor(
 {
     Integer size;
     if (fromIndex < 0 || (list->GetSize(size), toIndex > size) ||
-            (fromIndex > toIndex)) {
+                                                        (fromIndex > toIndex)) {
         Logger::E("SubList", "fromIndex: %d, toIndex: %d", fromIndex, toIndex);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -687,7 +700,8 @@ ECode Sublist::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     AutoPtr<IListIterator> lit;
-    GetListIterator(lit);
+    FAIL_RETURN(GetListIterator(lit));
+
     it = std::move(lit);
     return NOERROR;
 }
@@ -840,6 +854,9 @@ ECode Sublist::GetListIterator(
     };
 
     it = new _ListIterator(this, index);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -849,6 +866,9 @@ ECode Sublist::SubList(
     /* [out] */ AutoPtr<IList>& subList)
 {
     AutoPtr<Sublist> list = new Sublist();
+    if (nullptr == list)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(list->Constructor(this, fromIndex, toIndex));
     subList = std::move(list);
     return NOERROR;
@@ -911,5 +931,5 @@ ECode RandomAccessSubList::SubList(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como
