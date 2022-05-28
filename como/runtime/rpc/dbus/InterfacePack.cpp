@@ -107,7 +107,10 @@ ECode InterfacePack::ReadFromParcel(
     FAIL_RETURN(source->ReadInterfaceID(mIid));
     FAIL_RETURN(source->ReadBoolean(mIsParcelable));
     FAIL_RETURN(source->ReadLong(mServerObjectId));
-    FAIL_RETURN(source->ReadString(mServerName));
+
+    // RPC over D-Bus, Parameter mServerName is useless
+    // FAIL_RETURN(source->ReadString(mServerName));
+
     return NOERROR;
 }
 
@@ -119,7 +122,10 @@ ECode InterfacePack::WriteToParcel(
     FAIL_RETURN(dest->WriteInterfaceID(mIid));
     FAIL_RETURN(dest->WriteBoolean(mIsParcelable));
     FAIL_RETURN(dest->WriteLong(mServerObjectId));
-    FAIL_RETURN(dest->WriteString(mServerName));
+
+    // RPC over D-Bus, Parameter mServerName is useless
+    //FAIL_RETURN(dest->WriteString(mServerName));
+
     return NOERROR;
 }
 

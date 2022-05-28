@@ -26,7 +26,7 @@
  * Created on: 2019-01-05
  */
 
- #define LOG_TAG    "elog.file"
+#define LOG_TAG    "elog.file"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -79,8 +79,8 @@ static bool elog_file_rotate(void)
     fclose(fp);
 
     for (n = local_cfg.max_rotate - 1; n >= 0; --n) {
-        snprintf(oldpath + base, sizeof(oldpath)-1-base, n ? ".%d" : "", n - 1);
-        snprintf(newpath + base, sizeof(newpath)-1-base, ".%d", n);
+        snprintf(oldpath + base, sizeof(oldpath) - 1 - base, n ? ".%d" : "", n - 1);
+        snprintf(newpath + base, sizeof(newpath) - 1 - base, ".%d", n);
         /* remove the old file */
         if ((tmp_fp = fopen(newpath , "r")) != NULL) {
             fclose(tmp_fp);
@@ -108,6 +108,9 @@ __exit:
 
 void elog_file_write(const char *log, size_t size)
 {
+    if (NULL == fp)
+        return;
+
     size_t file_size = 0;
 
     ELOG_ASSERT(init_ok);
@@ -155,7 +158,7 @@ void elog_file_config(ElogFileCfg *cfg)
 {
     elog_file_port_lock();
 
-    if (fp) {
+    if (NULL != fp) {
         fclose(fp);
         fp = NULL;
     }
