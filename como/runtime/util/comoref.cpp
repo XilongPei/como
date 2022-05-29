@@ -295,8 +295,7 @@ void RefBase::WeakRefImpl::RemoveStrongRef(
         RemoveRef(&mStrongRefs, id);
     }
     else {
-        AddRef(&mStrongRefs, id,
-                -mStrong.load(std::memory_order_relaxed));
+        AddRef(&mStrongRefs, id, -mStrong.load(std::memory_order_relaxed));
     }
 }
 
@@ -310,8 +309,7 @@ void RefBase::WeakRefImpl::RenameStrongRefId(
 void RefBase::WeakRefImpl::AddWeakRef(
     /* [in] */ const void* id)
 {
-    AddRef(&mWeakRefs, id,
-            mWeak.load(std::memory_order_relaxed));
+    AddRef(&mWeakRefs, id, mWeak.load(std::memory_order_relaxed));
 }
 
 void RefBase::WeakRefImpl::RemoveWeakRef(
@@ -321,8 +319,7 @@ void RefBase::WeakRefImpl::RemoveWeakRef(
         RemoveRef(&mWeakRefs, id);
     }
     else {
-        AddRef(&mWeakRefs, id,
-                -mWeak.load(std::memory_order_relaxed));
+        AddRef(&mWeakRefs, id, -mWeak.load(std::memory_order_relaxed));
     }
 }
 
@@ -341,13 +338,13 @@ void RefBase::WeakRefImpl::PrintRefs() const
         Mutex::AutoLock lock(mMutex);
         char buf[128];
         snprintf(buf, sizeof(buf),
-                "Strong references on RefBase %p (WeakRef %p):\n",
-                mBase, this);
+                                "Strong references on RefBase %p (WeakRef %p):\n",
+                                mBase, this);
         text += buf;
         PrintRefsLocked(&text, mStrongRefs);
         snprintf(buf, sizeof(buf),
-                 "Weak references on RefBase %p (WeakRef %p):\n",
-                 mBase, this);
+                                "Weak references on RefBase %p (WeakRef %p):\n",
+                                mBase, this);
         text += buf;
         PrintRefsLocked(&text, mWeakRefs);
     }
@@ -362,7 +359,7 @@ void RefBase::WeakRefImpl::PrintRefs() const
         Logger::D("RefBase", "STACK TRACE for %p saved in %s", this, name);
     }
     else Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
-            name, strerror(errno));
+                                                            name, strerror(errno));
 }
 
 void RefBase::WeakRefImpl::TrackMe(
@@ -412,14 +409,12 @@ void RefBase::WeakRefImpl::RemoveRef(
         }
 
         Logger::E("RefBase", "removing id %p on RefBase %p"
-                "(WeakRef %p) that doesn't exist!",
-                id, mBase, this);
-
+                                            "(WeakRef %p) that doesn't exist!",
+                                            id, mBase, this);
         ref = head;
         while (ref) {
             char inc = ref->mRef >= 0 ? '+' : '-';
-            Logger::D("RefBase", "\t%c ID %p (ref %d):",
-                    inc, ref->mId, ref->mRef);
+            Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
             ref = ref->mNext;
         }
 
@@ -454,7 +449,7 @@ void RefBase::WeakRefImpl::PrintRefsLocked(
     while (refs) {
         char inc = refs->mRef >= 0 ? '+' : '-';
         snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
-                 inc, refs->mId, refs->mRef);
+                                                    inc, refs->mId, refs->mRef);
         *out += buf;
 #if DEBUG_REFS_CALLSTACK_ENABLED
         *out += refs->stack.toString("\t\t");
@@ -510,8 +505,7 @@ Integer RefBase::DecStrong(
     Logger::D("RefBase", "DecStrong of %p from %p: cnt=%d\n", this, id, c);
 #endif
     if (BAD_STRONG(c)) {
-        Logger::E("RefBase", "DecStrong() called on %p too many times",
-                refs);
+        Logger::E("RefBase", "DecStrong() called on %p too many times", refs);
         assert(0);
     }
     if (c == 1) {
@@ -547,7 +541,7 @@ Integer RefBase::ForceIncStrong(
     const Integer c = refs->mStrong.fetch_add(1, std::memory_order_relaxed);
     if (c < 0) {
         Logger::E("RefBase", "forceIncStrong called on %p after ref count underflow",
-                refs);
+                                                                                refs);
         assert(0);
     }
 #if PRINT_REFS
@@ -557,7 +551,7 @@ Integer RefBase::ForceIncStrong(
     switch (c) {
         case INITIAL_STRONG_VALUE:
             refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
-                    std::memory_order_relaxed);
+                                                    std::memory_order_relaxed);
             // fall through...
         case 0:
             refs->mBase->OnFirstRef();
@@ -583,8 +577,7 @@ void RefBase::WeakRef::IncWeak(
 {
     WeakRefImpl* const impl = static_cast<WeakRefImpl*>(this);
     impl->AddWeakRef(id);
-    const Integer c = impl->mWeak.fetch_add(1,
-            std::memory_order_relaxed);
+    const Integer c = impl->mWeak.fetch_add(1, std::memory_order_relaxed);
     if (c < 0) {
         Logger::E("RefBase", "IncWeak called on %p after last weak ref", this);
         assert(0);
@@ -598,8 +591,7 @@ void RefBase::WeakRef::DecWeak(
     impl->RemoveWeakRef(id);
     const Integer c = impl->mWeak.fetch_sub(1, std::memory_order_release);
     if (BAD_WEAK(c)) {
-        Logger::E("RefBase", "decWeak called on %p too many times",
-                this);
+        Logger::E("RefBase", "decWeak called on %p too many times", this);
         assert(0);
     }
     if (c != 1) return;
@@ -612,7 +604,7 @@ void RefBase::WeakRef::DecWeak(
         // outlives the object, it is not destroyed in the dtor, and
         // we'll have to do it here.
         if (impl->mStrong.load(std::memory_order_relaxed)
-                == INITIAL_STRONG_VALUE) {
+                                                        == INITIAL_STRONG_VALUE) {
             // Decrementing a weak count to zero when object never had a strong
             // reference.  We assume it acquired a weak reference early, e.g.
             // in the constructor, and will eventually be properly destroyed,
@@ -621,7 +613,7 @@ void RefBase::WeakRef::DecWeak(
             // seems to be extremely rare, and should not normally occur. We
             // used to deallocate mBase here, so this may now indicate a leak.
             Logger::W("RefBase", "Object at %p lost last weak reference "
-                    "before it had a strong reference", impl->mBase);
+                                "before it had a strong reference", impl->mBase);
         }
         else {
             // ALOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
@@ -645,8 +637,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
     Integer curCount = impl->mStrong.load(std::memory_order_relaxed);
 
     if (curCount < 0) {
-        Logger::E("RefBase", "AttemptIncStrong called on %p after underflow",
-                this);
+        Logger::E("RefBase", "AttemptIncStrong called on %p after underflow", this);
         assert(0);
     }
 
@@ -733,8 +724,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
     // this in the middle of another incStrong.  The subtraction is handled
     // by the thread that started with INITIAL_STRONG_VALUE.
     if (curCount == INITIAL_STRONG_VALUE) {
-        impl->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
-                std::memory_order_relaxed);
+        impl->mStrong.fetch_sub(INITIAL_STRONG_VALUE, std::memory_order_relaxed);
     }
 
     return true;
@@ -747,13 +737,12 @@ Boolean RefBase::WeakRef::AttemptIncWeak(
 
     Integer curCount = impl->mWeak.load(std::memory_order_relaxed);
     if (curCount < 0) {
-        Logger::E("RefBase", "AttemptIncWeak called on %p after underflow",
-               this);
+        Logger::E("RefBase", "AttemptIncWeak called on %p after underflow", this);
         assert(0);
     }
     while (curCount > 0) {
         if (impl->mWeak.compare_exchange_weak(curCount, curCount + 1,
-                std::memory_order_relaxed)) {
+                                                    std::memory_order_relaxed)) {
             break;
         }
         // curCount has been updated.
@@ -815,7 +804,7 @@ RefBase::~RefBase()
         }
     }
     else if (mRefs->mStrong.load(std::memory_order_relaxed)
-            == INITIAL_STRONG_VALUE) {
+                                                    == INITIAL_STRONG_VALUE) {
         // We never acquired a strong reference on this object.
         delete mRefs;
     }
