@@ -459,7 +459,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
             dbus_message_iter_init_append(reply, &args);
             dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
             dbus_uint32_t serial = 0;
-            if (!dbus_connection_send(conn, reply, &serial)) {
+            if (! dbus_connection_send(conn, reply, &serial)) {
                 Logger_E("CDBusChannel", "Send reply message failed.");
             }
             dbus_connection_flush(conn);
@@ -984,7 +984,7 @@ ECode CDBusChannel::ReleaseObject(
     dbus_error_init(&err);
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
-        Logger_E("ServiceManager::ReleaseObject",
+        Logger_E("CDBusChannel::ReleaseObject",
                  "Connect to bus daemon failed, error is \"%s\".", err.message);
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -993,7 +993,7 @@ ECode CDBusChannel::ReleaseObject(
     msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
                                            STUB_INTERFACE_PATH, "ReleaseObject");
     if (nullptr == msg) {
-        Logger_E("ServiceManager::ReleaseObject", "Fail to create dbus message.");
+        Logger_E("CDBusChannel::ReleaseObject", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -1004,20 +1004,20 @@ ECode CDBusChannel::ReleaseObject(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger_E("ServiceManager::ReleaseObject",
+        Logger_E("CDBusChannel::ReleaseObject",
                           "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (!dbus_message_iter_init(reply, &args)) {
-        Logger_E("ServiceManager::ReleaseObject", "Reply has no results.");
+        Logger_E("CDBusChannel::ReleaseObject", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
-        Logger_E("ServiceManager::ReleaseObject",
+        Logger_E("CDBusChannel::ReleaseObject",
                                               "The first result is not INT32.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -1026,7 +1026,7 @@ ECode CDBusChannel::ReleaseObject(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (FAILED(ec)) {
-        Logger_E("ServiceManager::ReleaseObject",
+        Logger_E("CDBusChannel::ReleaseObject",
                                        "Remote call failed with ec = 0x%X", ec);
     }
 

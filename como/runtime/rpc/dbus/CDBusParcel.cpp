@@ -181,10 +181,12 @@ ECode CDBusParcel::ReadString(
     }
 
     if (size < 0) {
-        return E_RUNTIME_EXCEPTION;
+        value = nullptr;
+        return NOERROR;
     }
 
     if (size == 0) {
+        value = "";
         return NOERROR;
     }
 
@@ -200,6 +202,9 @@ ECode CDBusParcel::ReadString(
 ECode CDBusParcel::WriteString(
     /* [in] */ const String& value)
 {
+    if (value.IsNull())
+        return WriteInteger(-1);
+
     ECode ec = WriteInteger(value.GetByteLength());
     if (value.GetByteLength() > 0 && SUCCEEDED(ec)) {
         ec = Write(value.string(), value.GetByteLength() + 1);
@@ -794,17 +799,18 @@ ECode CDBusParcel::WriteInterface(
         AutoPtr<IInterfacePack> ipack;
         ECode ec = CoMarshalInterface(value, RPCType::Local, ipack);
         if (FAILED(ec)) {
-            Logger::E("CDBusParcel", "Marshal the interface in WriteInterface failed.");
+            Logger::E("CDBusParcel::WriteInterface",
+                             "Marshal the interface in WriteInterface failed.");
             return ec;
         }
 
-        IParcelable* p;
-        p = IParcelable::Probe(ipack);
-        if (p != nullptr) {
-            p->WriteToParcel(this);
+        ec = IParcelable::Probe(ipack)->WriteToParcel(this);
+        if (FAILED(ec)) {
+            Logger::E("CDBusParcel::WriteInterface", "WriteToParcel failed.");
+            return ec;
         }
 
-        p = IParcelable::Probe(value);
+        IParcelable* p = IParcelable::Probe(value);
         if (p != nullptr) {
             p->WriteToParcel(this);
         }

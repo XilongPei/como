@@ -101,6 +101,13 @@ ECode CBinderChannelFactory::MarshalInterface(
                 CBinderChannel* channel = CBinderChannel::GetProxyChannel(proxy);
                 pack->SetAndroidBinder(channel->mBinder);
                 pack->SetCoclassID(((CProxy*)proxy)->GetTargetCoclassID());
+
+                //@ `ServerObjectId`
+                // Who reference the object {/* [in] */ IInterface* object} through
+                // {/* [out] */ AutoPtr<IInterfacePack>& ipack}, it can get the
+                // ID (ServerObjectId) of object
+                obj->GetHashCode(hash);
+                pack->SetServerObjectId(hash);
             }
             else {
                 ec = CoCreateStub(object, mType, stub);

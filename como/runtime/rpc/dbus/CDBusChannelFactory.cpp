@@ -72,7 +72,9 @@ ECode CDBusChannelFactory::MarshalInterface(
     /* [in] */ IInterface* object,
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
+    Long hash;
     InterfaceID iid;
+
     object->GetInterfaceID(object, iid);
     InterfacePack* pack = new InterfacePack();
     if (nullptr == pack) {
@@ -90,18 +92,29 @@ ECode CDBusChannelFactory::MarshalInterface(
     }
 
     if (IParcelable::Probe(object) != nullptr) {
+    // It implements the IParcelable interface. Its method is executed on the
+    // client side. The fields that identify the service object needn't to be set.
         CoclassID cid;
         obj->GetCoclassID(cid);
         pack->SetCoclassID(cid);
         pack->SetParcelable(true);
     }
     else {
+    // It does not implement the IParcelable interface. Its method is executed
+    // on the on the server side.
         AutoPtr<IStub> stub;
         ECode ec = FindExportObject(mType, obj, stub);
         if (SUCCEEDED(ec)) {
             CDBusChannel* channel = CDBusChannel::GetStubChannel(stub);
             pack->SetDBusName(channel->mName);
             pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
+
+            //@ `ServerObjectId`
+            // Who reference the object {/* [in] */ IInterface* object} through
+            // {/* [out] */ AutoPtr<IInterfacePack>& ipack}, it can get the
+            // ID (ServerObjectId) of object
+            obj->GetHashCode(hash);
+            pack->SetServerObjectId(hash);
         }
         else {
             IProxy* proxy = IProxy::Probe(object);
@@ -122,7 +135,7 @@ ECode CDBusChannelFactory::MarshalInterface(
                 pack->SetDBusName(channel->mName);
                 pack->SetCoclassID(((CStub*)stub.Get())->GetTargetCoclassID());
 
-                Long hash;
+                // refer to `ServerObjectId`
                 obj->GetHashCode(hash);
                 pack->SetServerObjectId(hash);
 

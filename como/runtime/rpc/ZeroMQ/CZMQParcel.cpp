@@ -183,10 +183,12 @@ ECode CZMQParcel::ReadString(
     }
 
     if (size < 0) {
-        return E_RUNTIME_EXCEPTION;
+        value = nullptr;
+        return NOERROR;
     }
 
     if (size == 0) {
+        value = "";
         return NOERROR;
     }
 
@@ -202,6 +204,9 @@ ECode CZMQParcel::ReadString(
 ECode CZMQParcel::WriteString(
     /* [in] */ const String& value)
 {
+    if (value.IsNull())
+        return WriteInteger(-1);
+
     ECode ec = WriteInteger(value.GetByteLength());
     if (value.GetByteLength() > 0 && SUCCEEDED(ec)) {
         ec = Write(value.string(), value.GetByteLength() + 1);
