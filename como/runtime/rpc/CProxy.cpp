@@ -2199,6 +2199,10 @@ ECode CProxy::CreateObject(
 void CProxy::OnLastStrongRef(
     /* [in] */ const void* id)
 {
+    /**
+     * Lower level programs should not call higher-level logic.
+     * OnLastStrongRef is called by Object (Object::OnLastStrongRef)
+     */
 #if 0
     if (nullptr == mIpack)
         return;

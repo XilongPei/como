@@ -226,6 +226,9 @@ TEST(RPCTest, TestRpcHelpers)
 
     ec = RpcHelpers::ReleaseRemoteObject(SERVICE, obj);
     EXPECT_EQ(0, ec);
+
+    ec = RpcHelpers::ReleaseImportObject(SERVICE, obj);
+    EXPECT_EQ(0, ec);
 }
 
 /*

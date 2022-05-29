@@ -350,8 +350,7 @@ void RefBase::WeakRefImpl::PrintRefs() const
     }
 
     char name[100];
-    snprintf(name, sizeof(name), DEBUG_REFS_CALLSTACK_PATH "/%p.stack",
-             this);
+    snprintf(name, sizeof(name), DEBUG_REFS_CALLSTACK_PATH "/%p.stack", this);
     Integer rc = open(name, O_RDWR | O_CREAT | O_APPEND, 644);
     if (rc >= 0) {
         write(rc, text.string(), text.GetByteLength());
@@ -475,7 +474,7 @@ Integer RefBase::IncStrong(
     const Integer c = refs->mStrong.fetch_add(1, std::memory_order_relaxed);
     if (c <= 0) {
         Logger::E("RefBase", "IncStrong() called on %p after last strong ref",
-                refs);
+                                                                          refs);
         assert(0);
     }
 #if PRINT_REFS
@@ -486,7 +485,7 @@ Integer RefBase::IncStrong(
     }
 
     Integer old = refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
-            std::memory_order_relaxed);
+                                                    std::memory_order_relaxed);
     if (old <= INITIAL_STRONG_VALUE) {
         Logger::E("RefBase", "0x%x too small", old);
         assert(0);
