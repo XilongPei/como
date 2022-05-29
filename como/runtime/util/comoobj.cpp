@@ -130,7 +130,7 @@ ECode Object::ToString(
         mc->GetName(name);
     }
     desc = String::Format("Object[0x%x], Class[%s%s]",
-            this, ns.string(), name.string());
+                                            this, ns.string(), name.string());
     return NOERROR;
 }
 

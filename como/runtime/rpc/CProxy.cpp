@@ -2199,12 +2199,14 @@ ECode CProxy::CreateObject(
 void CProxy::OnLastStrongRef(
     /* [in] */ const void* id)
 {
+#if 0
     if (nullptr == mIpack)
         return;
 
     Long proxyId;
     mIpack->GetProxyInfo(proxyId);
     UnregisterImportObjectByChannel(RPCType::Local, proxyId);
+#endif
 
     Object::OnLastStrongRef(id);
 }
