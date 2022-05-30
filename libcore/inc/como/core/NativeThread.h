@@ -544,7 +544,7 @@ public:
         /* [in] */ NativeThread* self) = 0;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVETHREAD_H__

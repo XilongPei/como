@@ -771,6 +771,6 @@ ECode ConcurrentLinkedQueue::Itr::Remove()
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como

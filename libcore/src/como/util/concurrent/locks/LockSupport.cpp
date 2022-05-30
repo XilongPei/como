@@ -52,7 +52,7 @@ ECode LockSupport::Park(
     return NOERROR;
 }
 
-}
-}
-}
-}
+} // namespace locks
+} // namespace concurrent
+} // namespace util
+} // namespace como

@@ -63,20 +63,30 @@ COMO_INTERFACE_IMPL_1(ThreadLocalRandom, Random, IThreadLocalRandom);
 static AutoPtr<IThreadLocal> CreateThreadLocal()
 {
     AutoPtr<IThreadLocal> l;
-    CThreadLocal::New(IID_IThreadLocal, (IInterface**)&l);
+    ECode ec = CThreadLocal::New(IID_IThreadLocal, (IInterface**)&l);
+    if (FAILED(ec))
+        return nullptr;
+
     return l;
 }
 
 AutoPtr<IThreadLocal> ThreadLocalRandom::GetNextLocalGaussian()
 {
     static AutoPtr<IThreadLocal> sNextLocalGaussian = CreateThreadLocal();
+    if (nullptr == sNextLocalGaussian) {
+        Logger::E("ThreadLocalRandom::GetNextLocalGaussian", "CreateThreadLocal error");
+    }
+
     return sNextLocalGaussian;
 }
 
 static AutoPtr<IAtomicInteger> CreateAtomicInteger()
 {
     AutoPtr<IAtomicInteger> atomic;
-    CAtomicInteger::New(IID_IAtomicInteger, (IInterface**)&atomic);
+    ECode ec = CAtomicInteger::New(IID_IAtomicInteger, (IInterface**)&atomic);
+    if (FAILED(ec))
+        return nullptr;
+
     return atomic;
 }
 
@@ -84,15 +94,22 @@ static AutoPtr<IAtomicLong> CreateAtomicLong(
     /* [in] */ Long initialValue)
 {
     AutoPtr<IAtomicLong> atomic;
-    CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic);
+    ECode ec = CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic);
+    if (FAILED(ec))
+        return nullptr;
+
     return atomic;
 }
 
 AutoPtr<IAtomicLong> ThreadLocalRandom::GetSeeder()
 {
     static AutoPtr<IAtomicLong> sSeeder = CreateAtomicLong(
-            Mix64(System::GetCurrentTimeMillis()) ^
-            Mix64(System::GetNanoTime()));
+                                        Mix64(System::GetCurrentTimeMillis()) ^
+                                        Mix64(System::GetNanoTime()));
+    if (nullptr == sSeeder) {
+        Logger::E("ThreadLocalRandom::GetSeeder", "CreateAtomicLong error");
+    }
+
     return sSeeder;
 }
 
@@ -144,20 +161,31 @@ void ThreadLocalRandom::StaticInitialize()
             /* [out] */ AutoPtr<IInterface>& result)
         {
             result = CoreUtils::Box(
-                    CoreUtils::GetBoolean("como.util.secureRandomSeed"));
+                            CoreUtils::GetBoolean("como.util.secureRandomSeed"));
             return NOERROR;
         }
     };
 
     AutoPtr<IInterface> lsRet;
     AutoPtr<IPrivilegedAction> lsAction = new _PrivilegedAction();
+    if (nullptr == lsAction) {
+        Logger::E("ThreadLocalRandom::StaticInitialize",
+                                                 "new _PrivilegedAction error");
+        return;
+    }
+
     ECode ec = AccessController::DoPrivileged(lsAction, lsRet);
-    CHECK(SUCCEEDED(ec));
+    if (FAILED(ec)) {
+        Logger::E("ThreadLocalRandom::StaticInitialize",
+                                        "AccessController::DoPrivileged error");
+        return;
+    }
+
     if (CoreUtils::Unbox(IBoolean::Probe(lsRet))) {
         Array<Byte> seedBytes;
         CSecureRandom::GetSeed(8, &seedBytes);
         Long s = (Long)seedBytes[0] & 0xffll;
-        for (Integer i = 1; i < 8; ++i) {
+        for (Integer i = 1;  i < 8;  ++i) {
             s = (s << 8) | ((Long)seedBytes[i] & 0xffll);
         }
         GetSeeder()->Set(s);
@@ -169,6 +197,7 @@ Long ThreadLocalRandom::Mix64(
 {
     z = (z ^ (((ULong)z) >> 33)) * 0xff51afd7ed558ccdll;
     z = (z ^ (((ULong)z) >> 33)) * 0xc4ceb9fe1a85ec53ll;
+                                   // 7 6 5 4 3 2 1 0
     return z ^ (((ULong)z) >> 33);
 }
 
@@ -177,20 +206,27 @@ Integer ThreadLocalRandom::Mix32(
 {
     z = (z ^ (((ULong)z) >> 33)) * 0xff51afd7ed558ccdll;
     z = (z ^ (((ULong)z) >> 33)) * 0xc4ceb9fe1a85ec53ll;
+                                   // 7 6 5 4 3 2 1 0
     return (Integer)(((ULong)z) >> 32);
 }
 
 void ThreadLocalRandom::LocalInit()
 {
     static AutoPtr<IAtomicInteger> sProbeGenerator = CreateAtomicInteger();
+    if (nullptr == sProbeGenerator) {
+        Logger::E("ThreadLocalRandom::LocalInit", "CreateAtomicInteger error");
+    }
+
     Integer p;
     sProbeGenerator->AddAndGet(PROBE_INCREMENT, p);
     Integer probe = (p == 0) ? 1 : p; // skip 0
     Long seed;
     GetSeeder()->GetAndAdd(SEEDER_INCREMENT, seed);
     seed = Mix64(seed);
+
     AutoPtr<IThread> t;
     CThread::GetCurrentThread(&t);
+
     PUT_LONG(CThread::From(t), mThreadLocalRandomSeed, seed);
     PUT_INT(CThread::From(t), mThreadLocalRandomProbe, probe);
 }
@@ -198,7 +234,9 @@ void ThreadLocalRandom::LocalInit()
 AutoPtr<IThreadLocalRandom> ThreadLocalRandom::GetCurrent()
 {
     pthread_once(&sThreadLocalRandomIsStaticInitialized, StaticInitialize);
+
     static const AutoPtr<IThreadLocalRandom> sInstance = new ThreadLocalRandom();
+
     AutoPtr<IThread> t;
     CThread::GetCurrentThread(&t);
     if (GET_INT(CThread::From(t), mThreadLocalRandomProbe) == 0) {
@@ -495,6 +533,6 @@ Integer ThreadLocalRandom::NextSecondarySeed()
     return r;
 }
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como

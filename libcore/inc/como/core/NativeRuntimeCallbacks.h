@@ -38,7 +38,7 @@ private:
     std::vector<NativeThreadLifecycleCallback*> mThreadCallbacks;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVERUNTIMECALLBACKS_H__

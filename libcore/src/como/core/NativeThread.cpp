@@ -14,18 +14,6 @@
 // limitations under the License.
 //=========================================================================
 
-#include "como/core/AutoLock.h"
-#include "como/core/CThread.h"
-#include "como/core/globals.h"
-#include "como/core/nativeapi.h"
-#include "como/core/NativeObject.h"
-#include "como/core/NativeRuntime.h"
-#include "como/core/NativeRuntimeCallbacks.h"
-#include "como/core/NativeThread.h"
-#include "como/core/NativeThreadList.h"
-#include "como/core/NativeTimeUtils.h"
-#include "como/core/Thread.h"
-#include <comolog.h>
 #include <limits.h>
 #if defined(__android__)
 #include <cutils/sched_policy.h>
@@ -38,9 +26,24 @@
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #include <signal.h>
+#include "como/core/AutoLock.h"
+#include "como/core/CThread.h"
+#include "como/core/globals.h"
+#include "como/core/nativeapi.h"
+#include "como/core/NativeObject.h"
+#include "como/core/NativeRuntime.h"
+#include "como/core/NativeRuntimeCallbacks.h"
+#include "como/core/NativeThread.h"
+#include "como/core/NativeThreadList.h"
+#include "como/core/NativeTimeUtils.h"
+#include "como/core/Thread.h"
+#include <comolog.h>
+#include "como/util/MemUtils.h"
 
 namespace como {
 namespace core {
+
+using namespace como::util;
 
 Boolean NativeThread::sIsStarted = false;
 pthread_key_t NativeThread::sPthreadKeySelf;
@@ -62,9 +65,15 @@ NativeThread::NativeThread(
     , mInterrupted(false)
 {
     mWaitMutex = new NativeMutex(String("a thread wait mutex"));
-    mWaitCond = new NativeConditionVariable(
+    if (nullptr != mWaitMutex) {
+        mWaitCond = new NativeConditionVariable(
                         String("a thread wait condition variable"), *mWaitMutex);
+    }
     mTlsPtr.mName = new String(kThreadNameDuringStartup);
+
+    if (MemUtils::CheckSomeVoidP(3, mWaitMutex, mWaitCond, mTlsPtr.mName) != 3) {
+        Logger::E("NativeThread::NativeThread", "new NativeMutex error");
+    }
 
     static_assert((sizeof(NativeThread) % 4) == 0,
                         "NativeThread has a size which is not a multiple of 4.");
@@ -73,7 +82,7 @@ NativeThread::NativeThread(
     mTls32.mStateAndFlags.mAsStruct.mState = kNative;
     memset(&mTlsPtr.mHeldMutexes[0], 0, sizeof(mTlsPtr.mHeldMutexes));
 
-    for (uint32_t i = 0; i < kMaxSuspendBarriers; ++i) {
+    for (uint32_t i = 0;  i < kMaxSuspendBarriers;  ++i) {
         mTlsPtr.mActiveSuspendBarriers[i] = nullptr;
     }
 }
@@ -94,16 +103,22 @@ void* NativeThread::CreateCallback(
         return nullptr;
     }
     {
-        // TODO: pass self to MutexLock - requires self to equal Thread::Current(), which is only true
-        //       after self->Init().
-        NativeMutex::AutoLock lock(nullptr, *Locks::sRuntimeShutdownLock);
-        // Check that if we got here we cannot be shutting down (as shutdown should never have started
-        // while threads are being born).
+        /**
+         * TODO: pass self to MutexLock - requires self to equal Thread::Current(),
+         * which is only true after self->Init().
+         * NativeMutex::AutoLock lock(nullptr, *Locks::sRuntimeShutdownLock);
+         * Check that if we got here we cannot be shutting down (as shutdown
+         * should never have started while threads are being born).
+         */
         CHECK(!runtime->IsShuttingDownLocked());
-        // Note: given that the JNIEnv is created in the parent thread, the only failure point here is
-        //       a mess in InitStackHwm. We do not have a reasonable way to recover from that, so abort
-        //       the runtime in such a case. In case this ever changes, we need to make sure here to
-        //       delete the tmp_jni_env, as we own it at this point.
+
+        /**
+         * Note: the only failure point here is a mess in InitStackHwm. We do
+         *       not have a reasonable way to recover from that, so abort the
+         *       runtime in such a case. In case this ever changes, we need to
+         *       make sure here to delete the tmp_jni_env, as we own it at this
+         *       point.
+         */
         Boolean res = self->Init(runtime->GetThreadList());
         CHECK(res);
         NativeRuntime::Current()->EndThreadBirth();
@@ -151,25 +166,31 @@ static size_t FixStackSize(
     // so include that here to support apps that expect large native stacks.
     stackSize += 1 * MB;
 
-    // It's not possible to request a stack smaller than the system-defined PTHREAD_STACK_MIN.
+    // It's not possible to request a stack smaller than the system-defined
+    // PTHREAD_STACK_MIN.
     if (stackSize < PTHREAD_STACK_MIN) {
         stackSize = PTHREAD_STACK_MIN;
     }
 
     if (NativeRuntime::Current()->ExplicitStackOverflowChecks()) {
-        // It's likely that callers are trying to ensure they have at least a certain amount of
-        // stack space, so we should add our reserved space on top of what they requested, rather
-        // than implicitly take it away from them.
+        /**
+         * It's likely that callers are trying to ensure they have at least a
+         * certain amount of stack space, so we should add our reserved space on
+         * top of what they requested, rather than implicitly take it away from them.
+         */
         stackSize += GetStackOverflowReservedBytes(kRuntimeISA);
     }
     else {
-        // If we are going to use implicit stack checks, allocate space for the protected
-        // region at the bottom of the stack.
+        /**
+         * If we are going to use implicit stack checks, allocate space for the
+         * protected region at the bottom of the stack.
+         */
         stackSize += NativeThread::kStackOverflowImplicitCheckSize +
-                GetStackOverflowReservedBytes(kRuntimeISA);
+                                        GetStackOverflowReservedBytes(kRuntimeISA);
     }
 
-    // Some systems require the stack size to be a multiple of the system page size, so round up.
+    // Some systems require the stack size to be a multiple of the system page
+    // size, so round up.
     stackSize = RoundUp(stackSize, kPageSize);
 
     return stackSize;
@@ -204,7 +225,8 @@ void NativeThread::InstallImplicitProtection()
 
     // Try to directly protect the stack.
     Logger::V("NativeThread", "installing stack protected region at %p to %p",
-            static_cast<void*>(pregion), static_cast<void*>(pregion + kStackOverflowProtectedSize - 1));
+            static_cast<void*>(pregion),
+            static_cast<void*>(pregion + kStackOverflowProtectedSize - 1));
     if (ProtectStack(/* fatal_on_error */ false)) {
         // Tell the kernel that we won't be needing these pages any more.
         // NB. madvise will probably write zeroes into the memory (on linux it does).
@@ -213,32 +235,34 @@ void NativeThread::InstallImplicitProtection()
         return;
     }
 
-    // There is a little complexity here that deserves a special mention.  On some
-    // architectures, the stack is created using a VM_GROWSDOWN flag
-    // to prevent memory being allocated when it's not needed.  This flag makes the
-    // kernel only allocate memory for the stack by growing down in memory.  Because we
-    // want to put an mprotected region far away from that at the stack top, we need
-    // to make sure the pages for the stack are mapped in before we call mprotect.
-    //
-    // The failed mprotect in UnprotectStack is an indication of a thread with VM_GROWSDOWN
-    // with a non-mapped stack (usually only the main thread).
-    //
-    // We map in the stack by reading every page from the stack bottom (highest address)
-    // to the stack top. (We then madvise this away.) This must be done by reading from the
-    // current stack pointer downwards. Any access more than a page below the current SP
-    // might cause a segv.
-    // TODO: This comment may be out of date. It seems possible to speed this up. As
-    //       this is normally done once in the zygote on startup, ignore for now.
-    //
-    // AddressSanitizer does not like the part of this functions that reads every stack page.
-    // Looks a lot like an out-of-bounds access.
+    /**
+     * There is a little complexity here that deserves a special mention.  On some
+     * architectures, the stack is created using a VM_GROWSDOWN flag
+     * to prevent memory being allocated when it's not needed.  This flag makes the
+     * kernel only allocate memory for the stack by growing down in memory.  Because we
+     * want to put an mprotected region far away from that at the stack top, we need
+     * to make sure the pages for the stack are mapped in before we call mprotect.
+     *
+     * The failed mprotect in UnprotectStack is an indication of a thread with VM_GROWSDOWN
+     * with a non-mapped stack (usually only the main thread).
+     *
+     * We map in the stack by reading every page from the stack bottom (highest address)
+     * to the stack top. (We then madvise this away.) This must be done by reading from the
+     * current stack pointer downwards. Any access more than a page below the current SP
+     * might cause a segv.
+     * TODO: This comment may be out of date. It seems possible to speed this up. As
+     *       this is normally done once in the zygote on startup, ignore for now.
+     *
+     * AddressSanitizer does not like the part of this functions that reads every stack page.
+     * Looks a lot like an out-of-bounds access.
 
-    // (Defensively) first remove the protection on the protected region as will want to read
-    // and write it. Ignore errors.
+     * (Defensively) first remove the protection on the protected region as will want to read
+     * and write it. Ignore errors.
+     */
     UnprotectStack();
 
     Logger::V("NativeThread", "Need to map in stack for thread at %p",
-            static_cast<void*>(pregion));
+                                                    static_cast<void*>(pregion));
 
     // Read every page from the high address to the low.
 #if defined(__aarch64__)
@@ -262,7 +286,8 @@ void NativeThread::InstallImplicitProtection()
 #endif
 
     Logger::V("NativeThread", "(again) installing stack protected region at %p to %p",
-            static_cast<void*>(pregion), static_cast<void*>(pregion + kStackOverflowProtectedSize - 1));
+            static_cast<void*>(pregion),
+            static_cast<void*>(pregion + kStackOverflowProtectedSize - 1));
 
     // Protect the bottom of the stack to prevent read/write to it.
     ProtectStack(/* fatal_on_error */ true);
@@ -303,6 +328,9 @@ ECode NativeThread::CreateNativeThread(
     }
 
     NativeThread* childThread = new NativeThread(daemon);
+    if (nullptr == childThread)
+        return E_OUT_OF_MEMORY_ERROR;
+
     childThread->mTlsPtr.mPeer = reinterpret_cast<HANDLE>(peer);
     peer->AddRef(reinterpret_cast<HANDLE>(childThread));
     stackSize = FixStackSize(stackSize);
@@ -648,7 +676,7 @@ String NativeThread::GetThreadName()
         return String();
     }
     Thread* tPeer = (Thread*)reinterpret_cast<SyncObject*>(
-            mTlsPtr.mOPeer->mCcmObject);
+                                                    mTlsPtr.mOPeer->mCcmObject);
     return tPeer->mName;
 }
 
@@ -667,8 +695,10 @@ NativeThreadState NativeThread::SetState(
     // miss passing an active suspend barrier.
     CHECK(newState != kRunnable);
     union StateAndFlags oldStateAndFlags;
+
     oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
     CHECK(oldStateAndFlags.mAsStruct.mState != kRunnable);
+
     mTls32.mStateAndFlags.mAsStruct.mState = newState;
     return static_cast<NativeThreadState>(oldStateAndFlags.mAsStruct.mState);
 }
@@ -678,7 +708,7 @@ Boolean NativeThread::IsSuspended() const
     union StateAndFlags stateAndFlags;
     stateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
     return stateAndFlags.mAsStruct.mState != kRunnable &&
-            (stateAndFlags.mAsStruct.mFlags & kSuspendRequest) != 0;
+                        (stateAndFlags.mAsStruct.mFlags & kSuspendRequest) != 0;
 }
 
 Boolean NativeThread::ModifySuspendCount(
@@ -688,8 +718,8 @@ Boolean NativeThread::ModifySuspendCount(
     /* [in] */ Boolean forDebugger)
 {
     if (delta > 0 && suspendBarrier != nullptr) {
-        // When delta > 0 (requesting a suspend), ModifySuspendCountInternal() may fail either if
-        // active_suspend_barriers is full or we are in the middle of a thread flip. Retry in a loop.
+    // When delta > 0 (requesting a suspend), ModifySuspendCountInternal() may fail either if
+    // active_suspend_barriers is full or we are in the middle of a thread flip. Retry in a loop.
         while (true) {
             if (LIKELY(ModifySuspendCountInternal(self, delta, suspendBarrier, forDebugger))) {
                 return true;
@@ -721,15 +751,18 @@ void NativeThread::TransitionToSuspendedAndRunCheckpoints(
 {
     CHECK(newState != kRunnable);
     CHECK(GetState() == kRunnable);
+
     union StateAndFlags oldStateAndFlags;
     union StateAndFlags newStateAndFlags;
+
     while (true) {
         oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
         newStateAndFlags.mAsStruct.mFlags = oldStateAndFlags.mAsStruct.mFlags;
         newStateAndFlags.mAsStruct.mState = newState;
+
         // CAS the value with a memory ordering.
         Boolean done = mTls32.mStateAndFlags.mAsAtomicInt.CompareExchangeWeakRelease(
-                oldStateAndFlags.mAsInt, newStateAndFlags.mAsInt);
+                                    oldStateAndFlags.mAsInt, newStateAndFlags.mAsInt);
         if (LIKELY(done)) {
             break;
         }
@@ -809,7 +842,7 @@ Boolean NativeThread::PassActiveSuspendBarriers(
     AtomicInteger* passBarriers[kMaxSuspendBarriers];
     {
         NativeMutex::AutoLock lock(self, *Locks::sThreadSuspendCountLock);
-        if (!ReadFlag(kActiveSuspendBarrier)) {
+        if (! ReadFlag(kActiveSuspendBarrier)) {
             // quick exit test: the barriers have already been claimed - this is
             // possible as there may be a race to claim and it doesn't matter
             // who wins.
@@ -828,23 +861,28 @@ Boolean NativeThread::PassActiveSuspendBarriers(
     }
 
     uint32_t barrierCount = 0;
-    for (uint32_t i = 0; i < kMaxSuspendBarriers; i++) {
+    for (uint32_t i = 0;  i < kMaxSuspendBarriers;  i++) {
         AtomicInteger* pendingThreads = passBarriers[i];
         if (pendingThreads != nullptr) {
+
             Boolean done = false;
             do {
                 int32_t curVal = pendingThreads->LoadRelaxed();
                 CHECK(curVal > 0);
+
                 // Reduce value by 1.
                 done = pendingThreads->CompareExchangeWeakRelaxed(curVal, curVal - 1);
                 if (done && (curVal - 1) == 0) {  // Weak CAS may fail spuriously.
                     futex(pendingThreads->Address(), FUTEX_WAKE, -1, nullptr, nullptr, 0);
                 }
-            } while (!done);
+            } while (! done);
+
             ++barrierCount;
         }
     }
+
     CHECK(barrierCount > 0);
+
     return true;
 }
 
@@ -865,20 +903,26 @@ NativeThreadState NativeThread::TransitionFromSuspendedToRunnable()
     union StateAndFlags oldStateAndFlags;
     oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
     int16_t oldState = oldStateAndFlags.mAsStruct.mState;
+
     CHECK(static_cast<NativeThreadState>(oldState) != kRunnable);
+
     do {
         Locks::sMutatorLock->AssertNotHeld(this);  // Otherwise we starve GC..
         oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
+
         CHECK(oldStateAndFlags.mAsStruct.mState == oldState);
+
         if (LIKELY(oldStateAndFlags.mAsStruct.mFlags == 0)) {
-            // Optimize for the return from native code case - this is the fast path.
-            // Atomically change from suspended to runnable if no suspend request pending.
+        // Optimize for the return from native code case - this is the fast path.
+        // Atomically change from suspended to runnable if no suspend request pending.
+
             union StateAndFlags newStateAndFlags;
             newStateAndFlags.mAsInt = oldStateAndFlags.mAsInt;
             newStateAndFlags.mAsStruct.mState = kRunnable;
+
             // CAS the value with a memory barrier.
             if (LIKELY(mTls32.mStateAndFlags.mAsAtomicInt.CompareExchangeWeakAcquire(
-                    oldStateAndFlags.mAsInt, newStateAndFlags.mAsInt))) {
+                                oldStateAndFlags.mAsInt, newStateAndFlags.mAsInt))) {
                 // Mark the acquisition of a share of the mutator_lock_.
                 Locks::sMutatorLock->TransitionFromSuspendedToRunnable(this);
                 break;
@@ -896,16 +940,20 @@ NativeThreadState NativeThread::TransitionFromSuspendedToRunnable()
             NativeThread* threadToPass = nullptr;
             NativeMutex::AutoLock lock(threadToPass, *Locks::sThreadSuspendCountLock);
             oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
+
             CHECK(oldStateAndFlags.mAsStruct.mState == oldState);
+
             while ((oldStateAndFlags.mAsStruct.mFlags & kSuspendRequest) != 0) {
                 // Re-check when Thread::resume_cond_ is notified.
                 NativeThread::sResumeCond->Wait(threadToPass);
                 oldStateAndFlags.mAsInt = mTls32.mStateAndFlags.mAsInt;
+
                 CHECK(oldStateAndFlags.mAsStruct.mState == oldState);
             }
             CHECK(GetSuspendCount() == 0);
         }
     } while (true);
+
     return static_cast<NativeThreadState>(oldState);
 }
 
@@ -914,15 +962,17 @@ void NativeThread::ThreadExitCallback(
 {
     NativeThread* self = reinterpret_cast<NativeThread*>(arg);
     if (self->mTls32.mThreadExitCheckCount == 0) {
-        Logger::W("NativeThread", "Native thread exiting without having called DetachCurrentThread (maybe it's "
-                "going to use a pthread_key_create destructor?): %s", self->ShortDump().string());
+        Logger::W("NativeThread", "Native thread exiting without having called "
+                  "DetachCurrentThread (maybe it's "
+                  "going to use a pthread_key_create destructor?): %s",
+                  self->ShortDump().string());
         CHECK(sIsStarted);
         pthread_setspecific(NativeThread::sPthreadKeySelf, self);
         self->mTls32.mThreadExitCheckCount = 1;
     }
     else {
-        Logger::E("NativeThread", "Native thread exited without calling DetachCurrentThread: %s",
-                self->ShortDump().string());
+        Logger::E("NativeThread", "Native thread exited without calling "
+                  "DetachCurrentThread: %s", self->ShortDump().string());
     }
 }
 
@@ -945,7 +995,8 @@ void NativeThread::FinishStartup()
 
     // Finish attaching the main thread.
     ScopedObjectAccess soa(NativeThread::Current());
-    NativeThread::Current()->CreatePeer(String("main"), false, runtime->GetMainThreadGroup());
+    NativeThread::Current()->CreatePeer(String("main"), false,
+                                                runtime->GetMainThreadGroup());
 }
 
 void NativeThread::Destroy()
@@ -972,8 +1023,8 @@ void NativeThread::Destroy()
             runtime->GetRuntimeCallbacks()->ThreadDeath(self);
         }
 
-        // Thread.join() is implemented as an Object.wait() on the Thread.lock object. Signal anyone
-        // who is waiting.
+        // Thread.join() is implemented as an Object.wait() on the Thread.lock
+        // object. Signal anyone who is waiting.
         SyncObject* lock = &tPeer->mLock;
         if (lock != nullptr) {
             AutoLock locker(lock);

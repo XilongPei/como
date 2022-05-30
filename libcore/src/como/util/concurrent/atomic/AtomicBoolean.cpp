@@ -50,7 +50,7 @@ ECode AtomicBoolean::CompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            (expect ? 1 : 0), (update ? 1 : 0));
+                                            (expect ? 1 : 0), (update ? 1 : 0));
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -63,7 +63,7 @@ ECode AtomicBoolean::WeakCompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            (expect ? 1 : 0), (update ? 1 : 0));
+                                            (expect ? 1 : 0), (update ? 1 : 0));
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -91,8 +91,8 @@ ECode AtomicBoolean::GetAndSet(
     Boolean v;
     do {
         v = (mValue.LoadSequentiallyConsistent() != 0);
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(
-            (v ? 1 : 0), (newValue ? 1 : 0)));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(
+                                                (v ? 1 : 0), (newValue ? 1 : 0)));
     prevValue = v;
     return NOERROR;
 }
@@ -104,7 +104,7 @@ ECode AtomicBoolean::ToString(
     return NOERROR;
 }
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como

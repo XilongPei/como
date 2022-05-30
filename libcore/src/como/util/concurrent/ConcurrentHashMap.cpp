@@ -91,7 +91,9 @@ Integer ConcurrentHashMap::CompareComparables(
     /* [in] */ IInterface* k,
     /* [in] */ IInterface* x)
 {
-    if (x == nullptr) return 0;
+    if (x == nullptr)
+        return 0;
+
     Integer result;
     IComparable::Probe(k)->CompareTo(x, result);
     return result;
@@ -170,8 +172,8 @@ ECode ConcurrentHashMap::GetSize(
 {
     Long n = SumCount();
     size = (n < 0ll) ? 0 :
-            (n > (Long)IInteger::MAX_VALUE) ? IInteger::MAX_VALUE :
-            (Integer)n;
+                        (n > (Long)IInteger::MAX_VALUE) ? IInteger::MAX_VALUE :
+                        (Integer)n;
     return NOERROR;
 }
 
@@ -193,10 +195,10 @@ ECode ConcurrentHashMap::Get(
     Integer h = Spread(Object::GetHashCode(key));
     VOLATILE_GET(tab, mTable);
     if (!tab.IsNull() && (n = tab.GetLength()) > 0 &&
-            (e = TabAt(tab, (n - 1) & h)) != nullptr) {
+                                    (e = TabAt(tab, (n - 1) & h)) != nullptr) {
         if ((eh = e->mHash) == h) {
             if (((ek = e->mKey), IInterface::Equals(ek, key)) ||
-                    (ek != nullptr && Object::Equals(key, ek))) {
+                                  (ek != nullptr && Object::Equals(key, ek))) {
                 VOLATILE_GET(value, e->mVal);
                 return NOERROR;
             }
@@ -213,8 +215,8 @@ ECode ConcurrentHashMap::Get(
         }
         while (VOLATILE_GET_INLINE(e, e->mNext), e != nullptr) {
             if (e->mHash == h &&
-                    (((ek = e->mKey), IInterface::Equals(ek, key)) ||
-                    (ek != nullptr && Object::Equals(key, ek)))) {
+                            (((ek = e->mKey), IInterface::Equals(ek, key)) ||
+                            (ek != nullptr && Object::Equals(key, ek)))) {
                 VOLATILE_GET(value, e->mVal);
                 return NOERROR;
             }
@@ -241,13 +243,14 @@ ECode ConcurrentHashMap::ContainsValue(
     if (value == nullptr) {
         return como::core::E_NULL_POINTER_EXCEPTION;
     }
+
     VOLATILE_GET(Array<Node*> t, mTable);
-    if (!t.IsNull()) {
+    if (! t.IsNull()) {
         Traverser it(t, t.GetLength(), 0, t.GetLength());
-        for (AutoPtr<Node> p; (p = it.Advance()) != nullptr;) {
+        for (AutoPtr<Node> p;  (p = it.Advance()) != nullptr; ) {
             VOLATILE_GET(AutoPtr<IInterface> v, p->mVal);
             if (IInterface::Equals(v, value) ||
-                    (v != nullptr && Object::Equals(value ,v))) {
+                                   (v != nullptr && Object::Equals(value ,v))) {
                 result = true;
                 return NOERROR;
             }
@@ -274,6 +277,7 @@ ECode ConcurrentHashMap::PutVal(
     if (key == nullptr || value == nullptr) {
         return como::core::E_NULL_POINTER_EXCEPTION;
     }
+
     Integer hash = Spread(Object::GetHashCode(key));
     Integer binCount = 0;
     VOLATILE_GET(Array<Node*> tab, mTable);
@@ -285,6 +289,9 @@ ECode ConcurrentHashMap::PutVal(
         }
         else if ((f = TabAt(tab, i = (n - 1) & hash)) == nullptr) {
             AutoPtr<Node> newNode = new Node(hash, key, value, nullptr);
+            if (nullptr == newNode)
+                return E_OUT_OF_MEMORY_ERROR;
+
             if (CasTabAt(tab, i, nullptr, newNode)) {
                 break; // no lock when adding to empty bin
             }
@@ -305,7 +312,7 @@ ECode ConcurrentHashMap::PutVal(
                                     (((ek = e->mKey), IInterface::Equals(ek, key)) ||
                                     (ek != nullptr && Object::Equals(key, ek)))) {
                                 VOLATILE_GET(oldVal, e->mVal);
-                                if (!onlyIfAbsent) {
+                                if (! onlyIfAbsent) {
                                     VOLATILE_SET(e->mVal, value);
                                 }
                                 break;
@@ -361,14 +368,17 @@ ECode ConcurrentHashMap::PutAll(
     Integer size;
     m->GetSize(size);
     TryPresize(size);
+
     AutoPtr<ISet> entrySet;
     m->GetEntrySet(entrySet);
+
     FOR_EACH(IMapEntry*, e, IMapEntry::Probe, entrySet) {
         AutoPtr<IInterface> k, v;
         e->GetKey(k);
         e->GetValue(v);
-        PutVal(k, v, false);
+        FAIL_RETURN(PutVal(k, v, false));
     } END_FOR_EACH();
+
     return NOERROR;
 }
 
@@ -525,6 +535,9 @@ ECode ConcurrentHashMap::GetKeySet(
 {
     if (mKeySet == nullptr) {
         mKeySet = new KeySetView(this, nullptr);
+
+        if (mKeySet == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     keys = mKeySet.Get();
     return NOERROR;
@@ -535,6 +548,9 @@ ECode ConcurrentHashMap::GetValues(
 {
     if (mValues == nullptr) {
         mValues = new ValuesView(this);
+
+        if (mValues == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     values = mValues.Get();
     return NOERROR;
@@ -545,6 +561,9 @@ ECode ConcurrentHashMap::GetEntrySet(
 {
     if (mEntrySet == nullptr) {
         mEntrySet = new EntrySetView(this);
+
+        if (mEntrySet == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = mEntrySet;
     return NOERROR;
@@ -571,27 +590,31 @@ ECode ConcurrentHashMap::ToString(
     VOLATILE_GET(Array<Node*> t, mTable);
     Integer f = t.IsNull() ? 0 : t.GetLength();
     Traverser it(t, f, 0, f);
+
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(U'{');
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+
+    FAIL_RETURN(sb->Append(U'{'));
+
     AutoPtr<Node> p;
     if ((p = it.Advance()) != nullptr) {
         for (;;) {
             AutoPtr<IInterface> k = p->mKey;
             VOLATILE_GET(AutoPtr<IInterface> v, p->mVal);
-            sb->Append(IInterface::Equals(k, (IMap*)this) ?
-                    String("(this Map)") : Object::ToString(k));
-            sb->Append(U'=');
-            sb->Append(IInterface::Equals(v, (IMap*)this) ?
-                    String("(this Map)") : Object::ToString(v));
+
+            FAIL_RETURN(sb->Append(IInterface::Equals(k, (IMap*)this) ?
+                                String("(this Map)") : Object::ToString(k)));
+            FAIL_RETURN(sb->Append(U'='));
+            FAIL_RETURN(sb->Append(IInterface::Equals(v, (IMap*)this) ?
+                                String("(this Map)") : Object::ToString(v)));
             if ((p = it.Advance()) == nullptr) {
                 break;
             }
-            sb->Append(U',');
-            sb->Append(U' ');
+            FAIL_RETURN(sb->Append(U','));
+            FAIL_RETURN(sb->Append(U' '));
         }
     }
-    sb->Append(U'}');
+    FAIL_RETURN(sb->Append(U'}'));
     return sb->ToString(desc);
 }
 
@@ -708,7 +731,11 @@ ECode ConcurrentHashMap::Keys(
 {
     VOLATILE_GET(Array<Node*> t, mTable);
     Integer f = t.IsNull() ? 0 : t.GetLength();
+
     keys = new KeyIterator(t, f, 0, f, this);
+    if (nullptr == keys)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -717,7 +744,11 @@ ECode ConcurrentHashMap::Elements(
 {
     VOLATILE_GET(Array<Node*> t, mTable);
     Integer f = t.IsNull() ? 0 : t.GetLength();
+
     elements = new ValueIterator(t, f, 0, f, this);
+    if (nullptr == elements)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -736,7 +767,11 @@ ECode ConcurrentHashMap::GetKeySet(
     if (mappedValue == nullptr) {
         return como::core::E_NULL_POINTER_EXCEPTION;
     }
+
     keys = new KeySetView(this, mappedValue);
+    if (nullptr == keys)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -855,7 +890,7 @@ void ConcurrentHashMap::TryPresize(
     /* [in] */ Integer size)
 {
     Integer c = (size >= (((UInteger)MAXIMUM_CAPACITY) >> 1)) ? MAXIMUM_CAPACITY :
-            TableSizeFor(size + (((UInteger)size) >> 1) + 1);
+                                 TableSizeFor(size + (((UInteger)size) >> 1) + 1);
     Integer sc;
     while (VOLATILE_GET_INLINE(sc, mSizeCtl), sc >= 0) {
         VOLATILE_GET(Array<Node*> tab, mTable);
@@ -2814,6 +2849,6 @@ ECode ConcurrentHashMap::EntrySetView::ToArray(
     return CollectionView::ToArray(iid, objs);
 }
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como

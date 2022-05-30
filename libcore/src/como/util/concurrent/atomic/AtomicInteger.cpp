@@ -68,7 +68,7 @@ ECode AtomicInteger::GetAndSet(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, newValue));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, newValue));
     prevValue = v;
     return NOERROR;
 }
@@ -79,7 +79,7 @@ ECode AtomicInteger::CompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            expect, update);
+                                                                expect, update);
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -92,7 +92,7 @@ ECode AtomicInteger::WeakCompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            expect, update);
+                                                                expect, update);
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -105,7 +105,7 @@ ECode AtomicInteger::GetAndIncrement(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
     prevValue = v;
     return NOERROR;
 }
@@ -116,7 +116,7 @@ ECode AtomicInteger::GetAndDecrement(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
     prevValue = v;
     return NOERROR;
 }
@@ -128,7 +128,7 @@ ECode AtomicInteger::GetAndAdd(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
     prevValue = v;
     return NOERROR;
 }
@@ -139,7 +139,7 @@ ECode AtomicInteger::IncrementAndGet(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
     value = v + 1;
     return NOERROR;
 }
@@ -150,7 +150,7 @@ ECode AtomicInteger::DecrementAndGet(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
     value = v - 1;
     return NOERROR;
 }
@@ -162,7 +162,7 @@ ECode AtomicInteger::AddAndGet(
     Integer v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
     value = v + delta;
     return NOERROR;
 }
@@ -225,7 +225,7 @@ ECode AtomicInteger::ShortValue(
     return NOERROR;
 }
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como

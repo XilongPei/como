@@ -68,7 +68,7 @@ ECode AtomicLong::GetAndSet(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, newValue));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, newValue));
     prevValue = v;
     return NOERROR;
 }
@@ -79,7 +79,7 @@ ECode AtomicLong::CompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            expect, update);
+                                                                expect, update);
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -92,7 +92,7 @@ ECode AtomicLong::WeakCompareAndSet(
     /* [out] */ Boolean* succeeded)
 {
     Boolean result = mValue.CompareExchangeStrongSequentiallyConsistent(
-            expect, update);
+                                                                expect, update);
     if (succeeded != nullptr) {
         *succeeded = result;
     }
@@ -105,7 +105,7 @@ ECode AtomicLong::GetAndIncrement(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
     prevValue = v;
     return NOERROR;
 }
@@ -116,7 +116,7 @@ ECode AtomicLong::GetAndDecrement(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
     prevValue = v;
     return NOERROR;
 }
@@ -128,7 +128,7 @@ ECode AtomicLong::GetAndAdd(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
     prevValue = v;
     return NOERROR;
 }
@@ -139,7 +139,7 @@ ECode AtomicLong::IncrementAndGet(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + 1));
     value = v + 1;
     return NOERROR;
 }
@@ -150,7 +150,7 @@ ECode AtomicLong::DecrementAndGet(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v - 1));
     value = v - 1;
     return NOERROR;
 }
@@ -162,7 +162,7 @@ ECode AtomicLong::AddAndGet(
     Long v;
     do {
         v = mValue.LoadSequentiallyConsistent();
-    } while (!mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
+    } while (! mValue.CompareExchangeStrongSequentiallyConsistent(v, v + delta));
     value = v + delta;
     return NOERROR;
 }
@@ -225,7 +225,7 @@ ECode AtomicLong::ShortValue(
     return NOERROR;
 }
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como
