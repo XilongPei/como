@@ -26,7 +26,7 @@ include_directories(
     ../easylogger/plugins/file
 )
 
-add_library (EasyLogger ${EASYLOGGER_SOURCE_FILES} ${EASYLOGGER_INCLUDE_FILES})
+add_library(EasyLogger ${EASYLOGGER_SOURCE_FILES} ${EASYLOGGER_INCLUDE_FILES})
 
 # Make sure the compiler can find include files for our library
 # when other libraries or executables link to EasyLogger

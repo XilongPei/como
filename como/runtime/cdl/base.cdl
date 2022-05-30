@@ -143,4 +143,13 @@ interface IObjectObserver
         [in] IObject* obj);
 }
 
+[
+    uuid(00000000-0000-0000-0000-000000000008),
+    version(0.1.0)
+]
+interface ICallback
+{
+    Execute();
+}
+
 }

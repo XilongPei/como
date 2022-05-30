@@ -56,7 +56,7 @@ ECode CoCreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
     AutoPtr<IRPCChannelFactory> factory =
-            type == RPCType::Local ? sLocalFactory : sRemoteFactory;
+                        type == RPCType::Local ? sLocalFactory : sRemoteFactory;
     return factory->CreateInterfacePack(ipack);
 }
 

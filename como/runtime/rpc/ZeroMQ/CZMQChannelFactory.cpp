@@ -170,6 +170,8 @@ ECode CZMQChannelFactory::UnmarshalInterface(
     Boolean parcelable;
     ipack->IsParcelable(parcelable);
     if (parcelable) {
+    // It implements the IParcelable interface. Its method execution is executed
+    // on the client side.
         CoclassID cid;
         ipack->GetCoclassID(cid);
         InterfaceID iid;
@@ -182,6 +184,8 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         }
     }
     else {
+    // It does not implement the IParcelable interface. The method execution is
+    // on the server side.
         AutoPtr<IObject> iobject;
         ECode ec = FindImportObject(mType, ipack, iobject);
         if (SUCCEEDED(ec)) {
