@@ -68,6 +68,9 @@ ECode ShortBuffer::Allocate(
     }
 
     AutoPtr<HeapShortBuffer> hsb = new HeapShortBuffer();
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hsb->Constructor(capacity, capacity));
     *buffer = hsb;
     REFCOUNT_ADD(*buffer);
@@ -202,19 +205,19 @@ ECode ShortBuffer::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuffer> sb;
-    CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb);
-    sb->Append(Object::GetCoclassName(this));
-    sb->Append(String("[pos="));
+    FAIL_RETURN(CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb));
+    FAIL_RETURN(sb->Append(Object::GetCoclassName(this)));
+    FAIL_RETURN(sb->Append(String("[pos=")));
     Integer value;
     GetPosition(value);
-    sb->Append(value);
-    sb->Append(String(" lim="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" lim=")));
     GetLimit(value);
-    sb->Append(value);
-    sb->Append(String(" cap="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" cap=")));
     GetCapacity(value);
-    sb->Append(value);
-    sb->Append(String("]"));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String("]")));
     return sb->ToString(desc);
 }
 
@@ -259,7 +262,7 @@ ECode ShortBuffer::Equals(
     Integer i, j;
     GetLimit(i);
     other->GetLimit(j);
-    for (i = i - 1, j = j - 1; i >= p; i--, j--) {
+    for (i = i - 1, j = j - 1;  i >= p;  i--, j--) {
         Short thiss, others;
         Get(i, thiss);
         other->Get(j, others);
@@ -289,7 +292,7 @@ ECode ShortBuffer::CompareTo(
     otherSB->GetPosition(otherPos);
 
     Integer n = thisPos + Math::Min(thisRemaining, otherRemaining);
-    for (Integer i = thisPos, j = otherPos; i < n; i++, j++) {
+    for (Integer i = thisPos, j = otherPos;  i < n;  i++, j++) {
         Short thiss, others;
         Get(i, thiss);
         otherSB->Get(j, others);
@@ -303,6 +306,5 @@ ECode ShortBuffer::CompareTo(
     return NOERROR;
 }
 
-
-}
-}
+} // namespace io
+} // namespace como

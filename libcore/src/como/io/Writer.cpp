@@ -128,5 +128,5 @@ ECode Writer::Append(
     return Write(c);
 }
 
-}
-}
+} // namespace io
+} // namespace como

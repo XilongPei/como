@@ -68,6 +68,9 @@ ECode FloatBuffer::Allocate(
     }
 
     AutoPtr<HeapFloatBuffer> hfb = new HeapFloatBuffer();
+    if (nullptr == hfb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hfb->Constructor(capacity, capacity));
     *buffer = hfb;
     REFCOUNT_ADD(*buffer);
@@ -83,6 +86,9 @@ ECode FloatBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<HeapFloatBuffer> hfb = new HeapFloatBuffer();
+    if (nullptr == hfb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hfb->Constructor(array, offset, length));
     *buffer = hfb;
     REFCOUNT_ADD(*buffer);
@@ -202,19 +208,19 @@ ECode FloatBuffer::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuffer> sb;
-    CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb);
-    sb->Append(Object::GetCoclassName(this));
-    sb->Append(String("[pos="));
+    FAIL_RETURN(CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb));
+    FAIL_RETURN(sb->Append(Object::GetCoclassName(this)));
+    FAIL_RETURN(sb->Append(String("[pos=")));
     Integer value;
     GetPosition(value);
-    sb->Append(value);
-    sb->Append(String(" lim="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" lim=")));
     GetLimit(value);
-    sb->Append(value);
-    sb->Append(String(" cap="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" cap=")));
     GetCapacity(value);
-    sb->Append(value);
-    sb->Append(String("]"));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String("]")));
     return sb->ToString(desc);
 }
 
@@ -315,8 +321,8 @@ Integer FloatBuffer::Compare(
     /* [in] */ Float y)
 {
     return ((x < y) ? -1 : (x > y) ? +1 : (x == y) ? 0 :
-            Math::IsNaN(x) ? (Math::IsNaN(y) ? 0 : +1) : -1);
+                                Math::IsNaN(x) ? (Math::IsNaN(y) ? 0 : +1) : -1);
 }
 
-}
-}
+} // namespace io
+} // namespace como

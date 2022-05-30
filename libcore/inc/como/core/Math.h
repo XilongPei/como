@@ -241,6 +241,7 @@ inline Double Math::Abs(
     /* [in] */ Double a)
 {
     return LongBitsToDouble(0x7fffffffffffffffll & DoubleToRawLongBits(a));
+                            // 7 6 5 4 3 2 1 0
 }
 
 inline Integer Math::Max(
@@ -274,16 +275,16 @@ inline Long Math::Min(
 inline Boolean Math::IsNaN(
     /* [in] */ Float f)
 {
-    return (f != f);
+    return isnan(f);
 }
 
 inline Boolean Math::IsNaN(
     /* [in] */ Double v)
 {
-    return (v != v);
+    return isnan(v);
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif //__COMO_CORE_MATH_H__

@@ -36,6 +36,9 @@ ECode HeapShortBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Short> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(ShortBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -91,7 +94,11 @@ ECode HeapShortBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapShortBuffer> hsb = new HeapShortBuffer();
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hsb->Constructor(
             mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (IShortBuffer*)hsb.Get();
@@ -105,9 +112,13 @@ ECode HeapShortBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapShortBuffer> hsb = new HeapShortBuffer();
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hsb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+                        mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (IShortBuffer*)hsb.Get();
     return NOERROR;
 }
@@ -119,9 +130,12 @@ ECode HeapShortBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapShortBuffer> hsb = new HeapShortBuffer();
-    FAIL_RETURN(hsb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hsb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (IShortBuffer*)hsb.Get();
     return NOERROR;
 }
@@ -183,7 +197,7 @@ ECode HeapShortBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = s;
     return NOERROR;
 }
@@ -293,5 +307,5 @@ ECode HeapShortBuffer::GetCoclassID(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

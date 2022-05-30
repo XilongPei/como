@@ -55,6 +55,9 @@ ECode HeapDoubleBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Double> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(DoubleBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -91,9 +94,13 @@ ECode HeapDoubleBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapDoubleBuffer> hdb = new HeapDoubleBuffer();
+    if (nullptr == hdb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hdb->Constructor(
-            mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
+                mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (IDoubleBuffer*)hdb.Get();
     return NOERROR;
 }
@@ -105,9 +112,13 @@ ECode HeapDoubleBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapDoubleBuffer> hdb = new HeapDoubleBuffer();
+    if (nullptr == hdb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hdb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+                        mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (IDoubleBuffer*)hdb.Get();
     return NOERROR;
 }
@@ -119,9 +130,12 @@ ECode HeapDoubleBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapDoubleBuffer> hdb = new HeapDoubleBuffer();
-    FAIL_RETURN(hdb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hdb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hdb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (IDoubleBuffer*)hdb.Get();
     return NOERROR;
 }
@@ -183,7 +197,7 @@ ECode HeapDoubleBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = d;
     return NOERROR;
 }
@@ -293,5 +307,5 @@ ECode HeapDoubleBuffer::GetCoclassID(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

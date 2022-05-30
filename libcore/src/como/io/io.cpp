@@ -44,10 +44,12 @@ ECode CDirectByteBuffer::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CDirectByteBuffer, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CDirectByteBuffer), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CDirectByteBuffer* _obj = new(addr) CDirectByteBuffer();
     ec = _obj->Constructor(capacity, memoryRef);
@@ -55,6 +57,7 @@ ECode CDirectByteBuffer::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
@@ -73,10 +76,12 @@ ECode CDirectByteBuffer::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CDirectByteBuffer, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CDirectByteBuffer), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CDirectByteBuffer* _obj = new(addr) CDirectByteBuffer();
     ec = _obj->Constructor(address, cap);
@@ -84,6 +89,7 @@ ECode CDirectByteBuffer::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
@@ -106,10 +112,12 @@ ECode CDirectByteBuffer::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CDirectByteBuffer, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CDirectByteBuffer), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CDirectByteBuffer* _obj = new(addr) CDirectByteBuffer();
     ec = _obj->Constructor(memoryRef, mark, pos, lim, cap, off);
@@ -117,6 +125,7 @@ ECode CDirectByteBuffer::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
@@ -140,10 +149,12 @@ ECode CDirectByteBuffer::New(
 
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CDirectByteBuffer, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CDirectByteBuffer), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CDirectByteBuffer* _obj = new(addr) CDirectByteBuffer();
     ec = _obj->Constructor(memoryRef, mark, pos, lim, cap, off, isReadOnly);
@@ -151,6 +162,7 @@ ECode CDirectByteBuffer::New(
         free(addr);
         return ec;
     }
+
     AutoPtr<IMetaComponent> comp;
     clsObject->GetMetadata(comp);
     _obj->AttachMetadata(comp, String("como::io::CDirectByteBuffer"));
@@ -167,5 +179,5 @@ COMO_OBJECT_IMPL(COutputStreamWriter);
 COMO_OBJECT_IMPL(CPrintWriter);
 COMO_OBJECT_IMPL(CStringWriter);
 
-}
-}
+} // namespace io
+} // namespace como

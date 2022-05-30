@@ -68,6 +68,9 @@ ECode LongBuffer::Allocate(
     }
 
     AutoPtr<HeapLongBuffer> hlb = new HeapLongBuffer();
+    if (nullptr == hlb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hlb->Constructor(capacity, capacity));
     *buffer = hlb;
     REFCOUNT_ADD(*buffer);
@@ -83,6 +86,9 @@ ECode LongBuffer::Wrap(
     VALIDATE_NOT_NULL(buffer);
 
     AutoPtr<HeapLongBuffer> hlb = new HeapLongBuffer();
+    if (nullptr == hlb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hlb->Constructor(array, offset, length));
     *buffer = hlb;
     REFCOUNT_ADD(*buffer);
@@ -202,19 +208,19 @@ ECode LongBuffer::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuffer> sb;
-    CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb);
-    sb->Append(Object::GetCoclassName(this));
-    sb->Append(String("[pos="));
+    FAIL_RETURN(CStringBuffer::New(IID_IStringBuffer, (IInterface**)&sb));
+    FAIL_RETURN(sb->Append(Object::GetCoclassName(this)));
+    FAIL_RETURN(sb->Append(String("[pos=")));
     Integer value;
     GetPosition(value);
-    sb->Append(value);
-    sb->Append(String(" lim="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" lim=")));
     GetLimit(value);
-    sb->Append(value);
-    sb->Append(String(" cap="));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String(" cap=")));
     GetCapacity(value);
-    sb->Append(value);
-    sb->Append(String("]"));
+    FAIL_RETURN(sb->Append(value));
+    FAIL_RETURN(sb->Append(String("]")));
     return sb->ToString(desc);
 }
 
@@ -303,5 +309,5 @@ ECode LongBuffer::CompareTo(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

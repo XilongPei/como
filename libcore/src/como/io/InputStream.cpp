@@ -83,6 +83,9 @@ ECode InputStream::Skip(
 
     Integer size = Math::Min((Long)MAX_SKIP_BUFFER_SIZE, remaining);
     Array<Byte> skipBuffer(size);
+    if (skipBuffer.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     while (remaining > 0) {
         FAIL_RETURN(Read(skipBuffer, 0, Math::Min((Long)size, remaining), nr));
         if (nr < 0) {
@@ -128,5 +131,5 @@ ECode InputStream::IsMarkSupported(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

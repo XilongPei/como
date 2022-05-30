@@ -113,7 +113,7 @@ private:
     Integer mCapacity = 0;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BUFFER_H__

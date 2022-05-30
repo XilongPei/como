@@ -196,14 +196,16 @@ private:
         /* [in] */ Integer t);
 
 private:
+    // Whether the new operation is successful needs to check mSlash is not '\0'
     Char mSlash;
+
     Char mColon;
     String mCcmHome;
     ExpiringCache mCache;
     ExpiringCache mCcmHomePrefixCache;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_UNIXFILESYSTEM_H__

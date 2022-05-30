@@ -105,5 +105,5 @@ ECode StringWriter::Close()
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

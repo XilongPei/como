@@ -36,6 +36,9 @@ ECode HeapLongBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Long> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(LongBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -91,9 +94,13 @@ ECode HeapLongBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapLongBuffer> hlb = new HeapLongBuffer();
+    if (nullptr == hlb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hlb->Constructor(
-            mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
+                mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (ILongBuffer*)hlb.Get();
     return NOERROR;
 }
@@ -105,9 +112,13 @@ ECode HeapLongBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapLongBuffer> hlb = new HeapLongBuffer();
+    if (nullptr == hlb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hlb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+                        mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (ILongBuffer*)hlb.Get();
     return NOERROR;
 }
@@ -119,9 +130,12 @@ ECode HeapLongBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapLongBuffer> hlb = new HeapLongBuffer();
-    FAIL_RETURN(hlb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hlb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hlb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (ILongBuffer*)hlb.Get();
     return NOERROR;
 }
@@ -183,7 +197,7 @@ ECode HeapLongBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = l;
     return NOERROR;
 }
@@ -293,5 +307,5 @@ ECode HeapLongBuffer::GetCoclassID(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

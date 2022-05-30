@@ -209,5 +209,5 @@ ECode MappedByteBuffer::Force0(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

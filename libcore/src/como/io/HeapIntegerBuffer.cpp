@@ -33,6 +33,9 @@ ECode HeapIntegerBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Integer> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(IntegerBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -88,9 +91,13 @@ ECode HeapIntegerBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapIntegerBuffer> hib = new HeapIntegerBuffer();
+    if (nullptr == hib)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hib->Constructor(
-            mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
+                mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (IIntegerBuffer*)hib.Get();
     return NOERROR;
 }
@@ -102,9 +109,12 @@ ECode HeapIntegerBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapIntegerBuffer> hib = new HeapIntegerBuffer();
-    FAIL_RETURN(hib->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+    if (nullptr == hib)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hib->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (IIntegerBuffer*)hib.Get();
     return NOERROR;
 }
@@ -116,9 +126,12 @@ ECode HeapIntegerBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapIntegerBuffer> hib = new HeapIntegerBuffer();
-    FAIL_RETURN(hib->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hib)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hib->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (IIntegerBuffer*)hib.Get();
     return NOERROR;
 }
@@ -180,7 +193,7 @@ ECode HeapIntegerBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = i;
     return NOERROR;
 }
@@ -241,5 +254,5 @@ ECode HeapIntegerBuffer::GetOrder(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

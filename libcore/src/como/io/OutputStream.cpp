@@ -57,5 +57,5 @@ ECode OutputStream::Close()
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

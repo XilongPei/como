@@ -42,6 +42,9 @@ ECode HeapByteBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Byte> buf(cap);
+    if (buf.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(ByteBuffer::Constructor(-1, 0, lim, cap, buf, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -86,7 +89,11 @@ ECode HeapByteBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapByteBuffer> hbb = new HeapByteBuffer();
+    if (nullptr == hbb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hbb->Constructor(
             mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (IByteBuffer*)hbb.Get();
@@ -100,9 +107,12 @@ ECode HeapByteBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapByteBuffer> hbb = new HeapByteBuffer();
-    FAIL_RETURN(hbb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+    if (nullptr == hbb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hbb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (IByteBuffer*)hbb.Get();
     return NOERROR;
 }
@@ -114,9 +124,12 @@ ECode HeapByteBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapByteBuffer> hbb = new HeapByteBuffer();
-    FAIL_RETURN(hbb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hbb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hbb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (IByteBuffer*)hbb.Get();
     return NOERROR;
 }
@@ -178,7 +191,7 @@ ECode HeapByteBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = b;
     return NOERROR;
 }
@@ -338,6 +351,9 @@ ECode HeapByteBuffer::AsCharBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsCharBuffer> bb = new ByteBufferAsCharBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (ICharBuffer*)bb.Get();
     return NOERROR;
@@ -432,6 +448,9 @@ ECode HeapByteBuffer::AsShortBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsShortBuffer> bb = new ByteBufferAsShortBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IShortBuffer*)bb.Get();
     return NOERROR;
@@ -526,6 +545,9 @@ ECode HeapByteBuffer::AsIntegerBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsIntegerBuffer> bb = new ByteBufferAsIntegerBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IIntegerBuffer*)bb.Get();
     return NOERROR;
@@ -620,6 +642,9 @@ ECode HeapByteBuffer::AsLongBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsLongBuffer> bb = new ByteBufferAsLongBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (ILongBuffer*)bb.Get();
     return NOERROR;
@@ -714,6 +739,9 @@ ECode HeapByteBuffer::AsFloatBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsFloatBuffer> bb = new ByteBufferAsFloatBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IFloatBuffer*)bb.Get();
     return NOERROR;
@@ -808,10 +836,13 @@ ECode HeapByteBuffer::AsDoubleBuffer(
     GetOrder(order);
 
     AutoPtr<ByteBufferAsDoubleBuffer> bb = new ByteBufferAsDoubleBuffer();
+    if (nullptr == bb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(bb->Constructor(this, -1, 0, size, size, off, order));
     buffer = (IDoubleBuffer*)bb.Get();
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

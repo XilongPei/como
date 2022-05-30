@@ -36,6 +36,9 @@ ECode HeapFloatBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Float> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(FloatBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -91,9 +94,13 @@ ECode HeapFloatBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<HeapFloatBuffer> hfb = new HeapFloatBuffer();
+    if (nullptr == hfb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hfb->Constructor(
-            mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
+                mHb, -1, 0, remaining, remaining, pos + mOffset, mIsReadOnly));
     buffer = (IFloatBuffer*)hfb.Get();
     return NOERROR;
 }
@@ -105,9 +112,13 @@ ECode HeapFloatBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapFloatBuffer> hfb = new HeapFloatBuffer();
+    if (nullptr == hfb)
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(hfb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
+                        mHb, MarkValue(), pos, lim, cap, mOffset, mIsReadOnly));
     buffer = (IFloatBuffer*)hfb.Get();
     return NOERROR;
 }
@@ -119,9 +130,12 @@ ECode HeapFloatBuffer::AsReadOnlyBuffer(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<HeapFloatBuffer> hfb = new HeapFloatBuffer();
-    FAIL_RETURN(hfb->Constructor(
-            mHb, MarkValue(), pos, lim, cap, mOffset, true));
+    if (nullptr == hfb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hfb->Constructor(mHb, MarkValue(), pos, lim, cap, mOffset, true));
     buffer = (IFloatBuffer*)hfb.Get();
     return NOERROR;
 }
@@ -183,7 +197,7 @@ ECode HeapFloatBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = f;
     return NOERROR;
 }
@@ -293,5 +307,5 @@ ECode HeapFloatBuffer::GetCoclassID(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

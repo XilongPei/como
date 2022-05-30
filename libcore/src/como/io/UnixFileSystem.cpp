@@ -56,23 +56,31 @@ namespace io {
 
 UnixFileSystem::UnixFileSystem()
 {
+    ECode ec = NOERROR;
+
     AutoPtr<IPrivilegedAction> fsAction, psAction, hmAction;
-    CGetPropertyAction::New(String("file.separator"),
-            IID_IPrivilegedAction, (IInterface**)&fsAction);
-    CGetPropertyAction::New(String("path.separator"),
-            IID_IPrivilegedAction, (IInterface**)&psAction);
-    CGetPropertyAction::New(String("como.home"),
-            IID_IPrivilegedAction, (IInterface**)&hmAction);
+    ec |= CGetPropertyAction::New(String("file.separator"),
+                                IID_IPrivilegedAction, (IInterface**)&fsAction);
+    ec |= CGetPropertyAction::New(String("path.separator"),
+                                IID_IPrivilegedAction, (IInterface**)&psAction);
+    ec |= CGetPropertyAction::New(String("como.home"),
+                                IID_IPrivilegedAction, (IInterface**)&hmAction);
     AutoPtr<IInterface> fsRet, psRet, hmRet;
-    ECode ec = AccessController::DoPrivileged(fsAction, fsRet);
-    CHECK(SUCCEEDED(ec));
+    ec |= AccessController::DoPrivileged(fsAction, fsRet);
+
     mSlash = CoreUtils::Unbox(ICharSequence::Probe(fsRet)).GetChar(0);
-    ec = AccessController::DoPrivileged(psAction, psRet);
-    CHECK(SUCCEEDED(ec));
+    ec |= AccessController::DoPrivileged(psAction, psRet);
+
     mColon = CoreUtils::Unbox(ICharSequence::Probe(psRet)).GetChar(0);
-    ec = AccessController::DoPrivileged(hmAction, hmRet);
-    CHECK(SUCCEEDED(ec));
+    ec |= AccessController::DoPrivileged(hmAction, hmRet);
+
     mCcmHome = CoreUtils::Unbox(ICharSequence::Probe(hmRet));
+
+    if (FAILED(ec)) {
+        // Whether the new operation is successful needs to check mSlash is not '\0'
+        mSlash = '\0';
+    }
+
 }
 
 ECode UnixFileSystem::GetSeparator(
@@ -810,8 +818,12 @@ ECode UnixFileSystem::ListRoots(
         }
     }
     AutoPtr<IFile> f;
-    CFile::New(String("/"), IID_IFile, (IInterface**)&f);
+    FAIL_RETURN(CFile::New(String("/"), IID_IFile, (IInterface**)&f));
+
     Array<IFile*> rv(1);
+    if (rv.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     rv.Set(0, f);
     *roots = rv;
     return NOERROR;
@@ -883,5 +895,5 @@ ECode UnixFileSystem::GetHashCode(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

@@ -109,5 +109,5 @@ ECode OutputStreamWriter::Close()
     return IWriter::Probe(mSe)->Close();
 }
 
-}
-}
+} // namespace io
+} // namespace como

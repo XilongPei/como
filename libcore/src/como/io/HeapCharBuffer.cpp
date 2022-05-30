@@ -38,6 +38,9 @@ ECode HeapCharBuffer::Constructor(
     /* [in] */ Boolean isReadOnly)
 {
     Array<Char> hb(cap);
+    if (hb.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     FAIL_RETURN(CharBuffer::Constructor(-1, 0, lim, cap, hb, 0));
     mIsReadOnly = isReadOnly;
     return NOERROR;
@@ -193,7 +196,7 @@ ECode HeapCharBuffer::Put(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     Integer index;
-    NextPutIndex(&index);
+    FAIL_RETURN(NextPutIndex(&index));
     mHb[Ix(index)] = c;
     return NOERROR;
 }
@@ -334,6 +337,6 @@ ECode HeapCharBuffer::GetCoclassID(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 

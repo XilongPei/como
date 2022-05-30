@@ -57,9 +57,12 @@ ECode StringCharBuffer::Slice(
     Integer remaining, pos;
     Remaining(remaining);
     GetPosition(pos);
+
     AutoPtr<StringCharBuffer> hsb = new StringCharBuffer();
-    FAIL_RETURN(hsb->Constructor(
-            mStr, -1, 0, remaining, remaining, pos + mOffset));
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hsb->Constructor(mStr, -1, 0, remaining, remaining, pos + mOffset));
     buffer = (ICharBuffer*)hsb.Get();
     return NOERROR;
 }
@@ -71,9 +74,12 @@ ECode StringCharBuffer::Duplicate(
     GetPosition(pos);
     GetLimit(lim);
     GetCapacity(cap);
+
     AutoPtr<StringCharBuffer> hsb = new StringCharBuffer();
-    FAIL_RETURN(hsb->Constructor(
-            mStr, MarkValue(), pos, lim, cap, mOffset));
+    if (nullptr == hsb)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(hsb->Constructor(mStr, MarkValue(), pos, lim, cap, mOffset));
     buffer = (ICharBuffer*)hsb.Get();
     return NOERROR;
 }
@@ -176,5 +182,5 @@ ECode StringCharBuffer::GetOrder(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como
