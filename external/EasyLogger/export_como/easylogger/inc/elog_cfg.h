@@ -33,8 +33,14 @@
 #define ELOG_OUTPUT_ENABLE
 /* enable terminal output. default open this macro */
 #define ELOG_TERMINAL_ENABLE
+
+/**
+ * Outputting logs to a file is a behavior with some costs. This behavior
+ * should not be the default action of comolog
+ */
 /* enable log write file. default open this macro */
-#define ELOG_FILE_ENABLE
+// #define ELOG_FILE_ENABLE
+
 /* enable flush file cache. default open this macro */
 #define ELOG_FILE_FLUSH_CACHE_ENABLE
 /* setting static output log level */

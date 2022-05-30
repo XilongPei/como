@@ -39,7 +39,7 @@ ECode ServiceManager::AddService(
 
     // Because it involves the deep replication of objects in members, we can't
     // simply make a memory directly copy here.
-    //emcpy(ipack, &object, sizeof(InterfacePack));
+    //memcpy(ipack, &object, sizeof(InterfacePack));
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;

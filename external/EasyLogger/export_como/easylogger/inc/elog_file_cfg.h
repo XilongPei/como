@@ -30,7 +30,7 @@
 #define _ELOG_FILE_CFG_H_
 
 /* EasyLogger file log plugin's using file name */
-#define ELOG_FILE_NAME      "/tmp/elog_file.log"
+#define ELOG_FILE_NAME      "/tmp/ComoRuntimeLog.txt"
 
 /* EasyLogger file log plugin's using file max size */
 #define ELOG_FILE_MAX_SIZE  (1 * 1024 * 1024)
