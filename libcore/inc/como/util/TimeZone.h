@@ -153,7 +153,7 @@ inline TimeZone* TimeZone::From(
     return (TimeZone*)zone;
 }
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_TIMEZONE_H__

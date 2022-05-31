@@ -446,7 +446,7 @@ private:
 
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_SIMPLETIMEZONE_H__

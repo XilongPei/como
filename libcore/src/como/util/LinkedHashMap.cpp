@@ -112,7 +112,10 @@ AutoPtr<HashMap::Node> LinkedHashMap::NewNode(
     /* [in] */ Node* next)
 {
     AutoPtr<LinkedHashMapEntry> p = new LinkedHashMapEntry(
-            hash, key, value, next);
+                                                        hash, key, value, next);
+    if (nullptr == p)
+        return nullptr;
+
     LinkNodeLast(p);
     return p.Get();
 }
@@ -123,7 +126,10 @@ AutoPtr<HashMap::Node> LinkedHashMap::ReplacementNode(
 {
     LinkedHashMapEntry* q = (LinkedHashMapEntry*)p;
     AutoPtr<LinkedHashMapEntry> t = new LinkedHashMapEntry(
-            q->mHash, q->mKey, q->mValue, next);
+                                            q->mHash, q->mKey, q->mValue, next);
+    if (nullptr == q)
+        return nullptr;
+
     TransferLinks(q, t);
     return t.Get();
 }
@@ -135,6 +141,9 @@ AutoPtr<TreeNode> LinkedHashMap::NewTreeNode(
     /* [in] */ Node* next)
 {
     AutoPtr<TreeNode> p = new TreeNode(hash, key, value, next);
+    if (nullptr == p)
+        return nullptr;
+
     LinkNodeLast(p);
     return p;
 }
@@ -145,6 +154,9 @@ AutoPtr<TreeNode> LinkedHashMap::ReplacementTreeNode(
 {
     LinkedHashMapEntry* q = (LinkedHashMapEntry*)p;
     AutoPtr<TreeNode> t = new TreeNode(q->mHash, q->mKey, q->mValue, next);
+    if (nullptr == t)
+        return nullptr;
+
     TransferLinks(q, t);
     return t;
 }
@@ -175,8 +187,7 @@ ECode LinkedHashMap::AfterNodeInsertion(
     /* [in] */ Boolean evict)
 {
     LinkedHashMapEntry* first;
-    if (evict && (first = mHead, first != nullptr) &&
-            RemoveEldestEntry(first)) {
+    if (evict && (first = mHead, first != nullptr) && RemoveEldestEntry(first)) {
         IInterface* key = first->mKey;
         RemoveNode(Hash(key), key, nullptr, false, true);
     }
@@ -224,7 +235,7 @@ ECode LinkedHashMap::ContainsValue(
     for (LinkedHashMapEntry* e = mHead; e != nullptr; e = e->mAfter) {
         IInterface* v = e->mValue;
         if (IInterface::Equals(v, value) ||
-                (value != nullptr && Object::Equals(v, value))) {
+                              (value != nullptr && Object::Equals(v, value))) {
             result = true;
             return NOERROR;
         }
@@ -274,6 +285,9 @@ ECode LinkedHashMap::GetKeySet(
 {
     if (mKeySet == nullptr) {
         mKeySet = new LinkedKeySet(this);
+
+        if (mKeySet == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     keys = mKeySet;
     return NOERROR;
@@ -284,6 +298,9 @@ ECode LinkedHashMap::GetValues(
 {
     if (mValues == nullptr) {
         mValues = new LinkedValues(this);
+
+        if (mValues == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     values = mValues;
     return NOERROR;
@@ -294,6 +311,9 @@ ECode LinkedHashMap::GetEntrySet(
 {
     if (mEntrySet == nullptr) {
         mEntrySet = new LinkedEntrySet(this);
+
+        if (mEntrySet == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = mEntrySet;
     return NOERROR;
@@ -499,5 +519,5 @@ ECode LinkedHashMap::LinkedEntryIterator::Next(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

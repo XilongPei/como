@@ -43,7 +43,7 @@ inline ECode CPropertyPermission::Constructor(
     return BasicPermission::Constructor(String(""), String(""));
 }
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CPROPERTYPERMISSION_H__

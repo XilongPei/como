@@ -33,7 +33,7 @@ private:
     TimeZoneFactory();
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_TIMEZONEFACTORY_H__

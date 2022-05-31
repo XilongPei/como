@@ -329,7 +329,7 @@ private:
     static constexpr Integer MAX_ARRAY_SIZE = IInteger::MAX_VALUE - 8;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_VECTOR_H__

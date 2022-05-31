@@ -175,8 +175,8 @@ inline Boolean LocaleUtils::IsEmpty(
     return list == nullptr || (list->IsEmpty(empty), empty);
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_LOCALEUTILS_H__

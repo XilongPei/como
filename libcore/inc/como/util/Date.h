@@ -231,7 +231,7 @@ inline Date* Date::From(
     return (Date*)date;
 }
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_DATE_H__

@@ -46,8 +46,8 @@ public:
     static constexpr Long C6 = C5 * 24LL;
 };
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_TIMEUNIT_H__

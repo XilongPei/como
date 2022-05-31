@@ -54,7 +54,7 @@ protected:
         /* [out] */ AutoPtr<IIterator>& it) override;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ABSTRACTSEQUENTIALLIST_H__

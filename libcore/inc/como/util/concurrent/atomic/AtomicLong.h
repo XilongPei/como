@@ -114,9 +114,9 @@ private:
     como::core::AtomicLong mValue;
 };
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_ATOMIC_ATOMICLONG_H__

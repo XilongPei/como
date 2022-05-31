@@ -45,6 +45,9 @@ void LinkedList::LinkFirst(
 {
     AutoPtr<Node> f = mFirst;
     AutoPtr<Node> newNode = new Node(nullptr, e, f);
+    if (nullptr == newNode)
+        return;
+
     mFirst = std::move(newNode);
     if (f == nullptr) {
         mLast = mFirst;
@@ -61,6 +64,9 @@ void LinkedList::LinkLast(
 {
     AutoPtr<Node> l = mLast;
     AutoPtr<Node> newNode = new Node(l, e, nullptr);
+    if (nullptr == newNode)
+        return;
+
     mLast = std::move(newNode);
     if (l == nullptr) {
         mFirst = mLast;
@@ -78,6 +84,9 @@ void LinkedList::LinkBefore(
 {
     AutoPtr<Node> pred = succ->mPrev;
     AutoPtr<Node> newNode = new Node(pred, e, succ);
+    if (nullptr == newNode)
+        return;
+
     succ->mPrev = newNode;
     if (pred == nullptr) {
         mFirst = std::move(newNode);
@@ -249,7 +258,7 @@ ECode LinkedList::Remove(
     /* [out] */ Boolean* result)
 {
     if (obj == nullptr) {
-        for (AutoPtr<Node> x = mFirst; x != nullptr; x = x->mNext) {
+        for (AutoPtr<Node> x = mFirst;  x != nullptr;  x = x->mNext) {
             if (x->mItem == nullptr) {
                 Unlink(x);
                 if (result != nullptr) {
@@ -260,7 +269,7 @@ ECode LinkedList::Remove(
         }
     }
     else {
-        for (AutoPtr<Node> x = mFirst; x != nullptr; x = x->mNext) {
+        for (AutoPtr<Node> x = mFirst;  x != nullptr;  x = x->mNext) {
             if (Object::Equals(obj, x->mItem)) {
                 Unlink(x);
                 if (result != nullptr) {
@@ -311,6 +320,9 @@ ECode LinkedList::AddAll(
 
     for (IInterface* o : a) {
         AutoPtr<Node> newNode = new Node(pred, o, nullptr);
+        if (nullptr == newNode)
+            return E_OUT_OF_MEMORY_ERROR;
+
         if (pred == nullptr) {
             mFirst = newNode;
         }
@@ -338,7 +350,7 @@ ECode LinkedList::AddAll(
 
 ECode LinkedList::Clear()
 {
-    for (AutoPtr<Node> x = mFirst; x != nullptr; ) {
+    for (AutoPtr<Node> x = mFirst;  x != nullptr; ) {
         AutoPtr<Node> next = std::move(x->mNext);
         x->mItem = nullptr;
         x->mNext = nullptr;
@@ -493,7 +505,7 @@ ECode LinkedList::LastIndexOf(
 {
     Integer idx = mSize;
     if (obj == nullptr) {
-        for (AutoPtr<Node> x = mLast; x != nullptr; x = x->mPrev) {
+        for (AutoPtr<Node> x = mLast;  x != nullptr;  x = x->mPrev) {
             idx--;
             if (x->mItem == nullptr) {
                 index = idx;
@@ -502,7 +514,7 @@ ECode LinkedList::LastIndexOf(
         }
     }
     else {
-        for (AutoPtr<Node> x = mLast; x != nullptr; x = x->mPrev) {
+        for (AutoPtr<Node> x = mLast;  x != nullptr;  x = x->mPrev) {
             idx--;
             if (Object::Equals(obj, x->mItem)) {
                 index = idx;
@@ -636,7 +648,7 @@ ECode LinkedList::RemoveLastOccurrence(
     /* [out] */ Boolean* changed)
 {
     if (e == nullptr) {
-        for (AutoPtr<Node> x = mLast; x != nullptr; x = x->mPrev) {
+        for (AutoPtr<Node> x = mLast;  x != nullptr;  x = x->mPrev) {
             if (x->mItem == nullptr) {
                 Unlink(x);
                 if (changed != nullptr) {
@@ -647,7 +659,7 @@ ECode LinkedList::RemoveLastOccurrence(
         }
     }
     else {
-        for (AutoPtr<Node> x = mLast; x != nullptr; x = x->mPrev) {
+        for (AutoPtr<Node> x = mLast;  x != nullptr;  x = x->mPrev) {
             if (Object::Equals(e, x->mItem)) {
                 Unlink(x);
                 if (changed != nullptr) {
@@ -689,7 +701,7 @@ ECode LinkedList::CloneImpl(
     clone->mSize = 0;
     clone->mModCount = 0;
 
-    for (AutoPtr<Node> x = mFirst; x != nullptr; x = x->mNext) {
+    for (AutoPtr<Node> x = mFirst;  x != nullptr;  x = x->mNext) {
         clone->Add(x->mItem);
     }
     return NOERROR;
@@ -702,7 +714,7 @@ ECode LinkedList::ToArray(
 
     Array<IInterface*> result(mSize);
     Integer i = 0;
-    for (AutoPtr<Node> x = mFirst; x != nullptr; x = x->mNext) {
+    for (AutoPtr<Node> x = mFirst;  x != nullptr;  x = x->mNext) {
         result.Set(i++, x->mItem);
     }
     *objs = result;
@@ -717,7 +729,7 @@ ECode LinkedList::ToArray(
 
     Array<IInterface*> result(mSize);
     Integer i = 0;
-    for (AutoPtr<Node> x = mFirst; x != nullptr; x = x->mNext) {
+    for (AutoPtr<Node> x = mFirst;  x != nullptr;  x = x->mNext) {
         result.Set(i++, x->mItem->Probe(iid));
     }
     *objs = result;
@@ -890,5 +902,5 @@ ECode LinkedList::DescendingIterator::Remove()
     return mItr->Remove();
 }
 
-}
-}
+} // namespace util
+} // namespace como

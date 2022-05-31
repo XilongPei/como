@@ -120,8 +120,8 @@ inline Pattern* Pattern::From(
     return (Pattern*)p;
 }
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_REGEX_PATTERN_H__

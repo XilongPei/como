@@ -114,9 +114,9 @@ private:
     como::core::AtomicInteger mValue;
 };
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_ATOMIC_ATOMICINTEGER_H__

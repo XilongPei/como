@@ -41,7 +41,7 @@ public:
     using _CTreeSet::New;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CTREESET_H__

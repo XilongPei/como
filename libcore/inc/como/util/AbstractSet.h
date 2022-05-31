@@ -78,7 +78,7 @@ public:
     using ISet::GetSize;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ABSTRACTSET_H__

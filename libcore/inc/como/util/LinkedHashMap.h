@@ -294,7 +294,7 @@ protected:
     Boolean mAccessOrder;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LINKEDHASHMAP_H__

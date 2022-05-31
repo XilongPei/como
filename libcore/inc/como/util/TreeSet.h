@@ -162,7 +162,7 @@ private:
     AutoPtr<INavigableMap> mMap;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_TREESET_H__

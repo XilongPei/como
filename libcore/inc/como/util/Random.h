@@ -96,7 +96,7 @@ private:
     Boolean mHaveNextNextGaussian = false;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_RANDOM_H__

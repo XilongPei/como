@@ -167,8 +167,8 @@ private:
     AutoPtr<IMap> mUkeywords;
 };
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_INTERNALLOCALEBUILDER_H__

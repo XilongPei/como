@@ -460,7 +460,7 @@ protected:
     friend class TreeNode;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_HASHMAP_H__

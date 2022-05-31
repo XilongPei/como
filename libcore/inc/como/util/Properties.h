@@ -169,7 +169,7 @@ protected:
     AutoPtr<IProperties> mDefaults;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_PROPERTIES_H__

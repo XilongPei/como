@@ -129,8 +129,8 @@ private:
     Array<IEra*> mEras;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_ABSTRACTCALENDAR_H__

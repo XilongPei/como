@@ -98,7 +98,7 @@ private:
     LocaleFactory();
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALEFACTORY_H__

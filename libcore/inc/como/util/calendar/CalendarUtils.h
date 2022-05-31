@@ -140,8 +140,8 @@ inline Long CalendarUtils::Amod(
     return (z == 0) ? y : z;
 }
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_CALENDARUTILS_H__

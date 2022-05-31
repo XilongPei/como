@@ -41,7 +41,7 @@ public:
         /* [in] */ const String& encoding);
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_XMLUTILS_H__

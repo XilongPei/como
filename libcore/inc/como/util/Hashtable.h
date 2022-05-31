@@ -377,7 +377,7 @@ private:
     static constexpr Integer ENTRIES = 2;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_HASHTABLE_H__

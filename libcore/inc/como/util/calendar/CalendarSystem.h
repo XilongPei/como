@@ -59,8 +59,8 @@ private:
     static AutoPtr<IGregorian> GREGORIAN_INSTANCE;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_CALENDARSYSTEM_H__

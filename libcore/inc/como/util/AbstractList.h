@@ -231,7 +231,7 @@ public:
     Integer mModCount = 0;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ABSTRACTLIST_H__

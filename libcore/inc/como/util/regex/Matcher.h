@@ -321,8 +321,8 @@ private:
     Boolean mTransparentBounds = false;
 };
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_REGEX_MATCHER_H__

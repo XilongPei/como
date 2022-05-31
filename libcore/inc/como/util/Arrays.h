@@ -191,7 +191,7 @@ private:
         /* [in] */ IComparator* c);
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ARRAYS_H__

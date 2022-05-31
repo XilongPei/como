@@ -59,7 +59,7 @@ public:
     using _CGregorianCalendar::New;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CGREGORIANCALENDAR_H__

@@ -108,7 +108,7 @@ private:
 //    private int[] delimiterCodePoints;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_STRINGTOKENIZER_H__

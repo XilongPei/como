@@ -234,8 +234,8 @@ inline String LanguageTag::CanonicalizePrivateuseSubtag(
     return LocaleUtils::ToLowerString(s);
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_LANGUAGETAG_H__

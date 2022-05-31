@@ -87,7 +87,7 @@ private:
     static SyncObject sLock;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CURRENCY_H__

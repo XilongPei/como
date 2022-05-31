@@ -326,7 +326,7 @@ protected:
     AutoPtr<Node> mLast;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LINKEDLIST_H__

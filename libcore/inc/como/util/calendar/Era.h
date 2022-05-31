@@ -84,8 +84,8 @@ private:
     Integer mHash = 0;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_ERA_H__

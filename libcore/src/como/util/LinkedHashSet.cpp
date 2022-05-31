@@ -52,5 +52,5 @@ ECode LinkedHashSet::Constructor(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

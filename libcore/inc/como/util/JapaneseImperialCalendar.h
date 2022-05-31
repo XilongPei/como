@@ -336,7 +336,7 @@ private:
     static SyncObject sInitLock;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_JAPANESEIMPERIALCALENDAR_H__

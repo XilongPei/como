@@ -474,7 +474,7 @@ inline void Calendar::SetZoneShared(
     mSharedZone = shared;
 }
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_H__

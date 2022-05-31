@@ -170,8 +170,8 @@ inline String BaseLocale::GetVariant()
     return mVariant;
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_BASELOCALE_H__

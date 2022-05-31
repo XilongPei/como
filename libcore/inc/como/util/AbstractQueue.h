@@ -49,7 +49,7 @@ public:
     using AbstractCollection::Equals;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_ABSTRACTQUEUE_H__

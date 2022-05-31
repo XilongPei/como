@@ -78,8 +78,8 @@ inline String ParseStatus::GetErrorMessage()
     return mErrorMsg;
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_PARSESTATUS_H__

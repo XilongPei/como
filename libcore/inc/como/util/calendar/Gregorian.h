@@ -82,8 +82,8 @@ public:
         /* [out] */ AutoPtr<ICalendarDate>& date) override;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_GREGORIAN_H__

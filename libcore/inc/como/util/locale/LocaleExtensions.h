@@ -99,8 +99,8 @@ inline String LocaleExtensions::GetID()
     return mId;
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_LOCALEEXTENSIONS_H__

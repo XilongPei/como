@@ -41,9 +41,9 @@ private:
         /* [in] */ IInterface* arg);
 };
 
-}
-}
-}
-}
+} // namespace locks
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_LOCKS_LOCKSUPPORT_H__

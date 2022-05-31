@@ -40,7 +40,7 @@ public:
     using _CSimpleTimeZone::New;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CSIMPLETIMEZONE_H__

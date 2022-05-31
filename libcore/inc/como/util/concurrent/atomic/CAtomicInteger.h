@@ -32,9 +32,9 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
-}
-}
+} // namespace atomic
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_ATOMIC_CATOMICINTEGER_H__

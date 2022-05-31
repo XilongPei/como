@@ -100,8 +100,8 @@ inline LocaleObjectCache::LocaleObjectCache()
     : LocaleObjectCache(16, 0.75f, 16)
 {}
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_LOCALEOBJECTCACHE_H__

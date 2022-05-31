@@ -47,7 +47,7 @@ public:
     using _CLocale::New;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CLOCALE_H__

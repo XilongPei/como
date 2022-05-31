@@ -31,8 +31,8 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_CCONCURRENTLINKEDQUEUE_H__

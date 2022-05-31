@@ -34,7 +34,7 @@ public:
         /* [out] */ IInterface** obj) override;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CLINKEDLIST_H__

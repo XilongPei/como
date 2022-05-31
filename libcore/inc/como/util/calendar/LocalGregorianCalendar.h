@@ -162,8 +162,8 @@ private:
     friend class como::util::JapaneseImperialCalendar;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_LOCALGREGORIANCALENDAR_H__

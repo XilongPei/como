@@ -30,7 +30,7 @@ public:
     COM_PUBLIC static const Array<String> STRING;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_EMPTYARRAY_H__

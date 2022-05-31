@@ -125,8 +125,8 @@ private:
     static constexpr Integer JULIAN_EPOCH = -1;
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_JULIANCALENDAR_H__

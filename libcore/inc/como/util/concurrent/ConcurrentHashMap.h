@@ -1060,8 +1060,8 @@ inline ECode ConcurrentHashMap::Constructor(
     return Constructor(initialCapacity, loadFactor, 1);
 }
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_CONCURRENTHASHMAP_H__

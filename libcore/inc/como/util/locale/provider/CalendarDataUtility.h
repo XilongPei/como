@@ -93,9 +93,9 @@ private:
     static Array<Integer> REST_OF_STYLES;
 };
 
-}
-}
-}
-}
+} // namespace provider
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_PROVIDER_CALENDARDATAUTILITY_H__

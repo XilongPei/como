@@ -157,8 +157,8 @@ inline ThreadLocalRandom::ThreadLocalRandom()
     : mInitialized(true)
 {}
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_THREADLOCALRANDOM_H__

@@ -43,8 +43,8 @@ private:
         /* [in] */ IInterface* x);
 };
 
-}
-}
-}
+} // namespace concurrent
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CONCURRENT_HELPERS_H__

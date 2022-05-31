@@ -104,8 +104,8 @@ inline void StringTokenIterator::SetText(
     SetStart(0);
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_STRINGTOKENITERATOR_H__

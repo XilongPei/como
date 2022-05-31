@@ -451,7 +451,7 @@ inline AutoPtr<LocaleExtensions> Locale::GetLocaleExtensions()
     return mLocaleExtensions;
 }
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_H__

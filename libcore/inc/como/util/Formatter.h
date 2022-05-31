@@ -744,7 +744,7 @@ private:
     static Double sScaleUp;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_FORMATTER_H__

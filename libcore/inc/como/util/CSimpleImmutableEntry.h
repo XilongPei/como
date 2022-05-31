@@ -30,8 +30,7 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
-
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CSIMPLEIMMUTABLEENTRY_H__

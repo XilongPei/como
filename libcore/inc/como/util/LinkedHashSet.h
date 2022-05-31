@@ -43,7 +43,7 @@ public:
         /* [in] */ ICollection* c);
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LinkedHashSet_H__

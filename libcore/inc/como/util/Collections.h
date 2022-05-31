@@ -926,7 +926,7 @@ private:
     static constexpr Integer REVERSE_THRESHOLD = 18;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_COLLECTIONS_H__

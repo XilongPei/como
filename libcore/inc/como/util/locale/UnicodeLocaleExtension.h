@@ -93,8 +93,8 @@ inline Boolean UnicodeLocaleExtension::IsKey(
     return (s.GetByteLength() == 2) && LocaleUtils::IsAlphaNumericString(s);
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_UNICODELOCALEEXTENSION_H__

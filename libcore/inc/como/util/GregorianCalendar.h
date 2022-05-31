@@ -406,7 +406,7 @@ private:
     Long mCachedFixedDate = ILong::MIN_VALUE;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_GREGORIANCALENDAR_H__

@@ -56,8 +56,8 @@ private:
     PatternFactory();
 };
 
-}
-}
-}
+} // namespace regex
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_REGEX_PATTERNFACTORY_H__

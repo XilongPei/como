@@ -89,8 +89,8 @@ inline String Extension::GetID()
     return mId;
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_LOCALE_EXTENSION_H__

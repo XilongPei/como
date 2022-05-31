@@ -31,8 +31,8 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
-}
+} // namespace calendar
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_CALENDAR_CERA_H__
