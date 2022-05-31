@@ -27,5 +27,5 @@ ECode TimeZoneFactory::GetTimeZone(
     return TimeZone::GetTimeZone(id, zone);
 }
 
-}
-}
+} // namespace util
+} // namespace como

@@ -123,7 +123,7 @@ protected:
 private:
     static SyncObject& GetClassLock();
 
-    static void AppendNumber(
+    static ECode AppendNumber(
         /* [in] */ IStringBuilder* sb,
         /* [in] */ Integer count,
         /* [in] */ Integer value);

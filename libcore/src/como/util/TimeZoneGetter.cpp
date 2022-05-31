@@ -60,5 +60,5 @@ ECode TimeZoneGetter::SetInstance(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

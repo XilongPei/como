@@ -254,6 +254,9 @@ ECode AbstractList::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new Itr(this);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -269,6 +272,9 @@ ECode AbstractList::GetListIterator(
 {
     FAIL_RETURN(RangeCheckForAdd(index));
     it = new ListItr(this, index);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 

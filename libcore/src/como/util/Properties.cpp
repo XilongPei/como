@@ -61,7 +61,7 @@ ECode Properties::Constructor()
 ECode Properties::Constructor(
     /* [in] */ IProperties* defaults)
 {
-    Hashtable::Constructor();
+    FAIL_RETURN(Hashtable::Constructor());
     mDefaults = defaults;
     return NOERROR;
 }
@@ -73,7 +73,7 @@ ECode Properties::SetProperty(
 {
     AutoPtr<IInterface> old;
     FAIL_RETURN(Put(CoreUtils::Box(key), CoreUtils::Box(value),
-            prevValue == nullptr ? nullptr : &old));
+                                        prevValue == nullptr ? nullptr : &old));
     if (prevValue != nullptr) {
         *prevValue = CoreUtils::Unbox(ICharSequence::Probe(old));
     }
@@ -83,13 +83,21 @@ ECode Properties::SetProperty(
 ECode Properties::Load(
     /* [in] */ IReader* reader)
 {
-    return Load0(new LineReader(reader));
+    LineReader *reader_ = new LineReader(reader);
+    if (nullptr == reader_)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    return Load0(reader_);
 }
 
 ECode Properties::Load(
     /* [in] */ IInputStream* instream)
 {
-    return Load0(new LineReader(instream));
+    LineReader *reader_ = new LineReader(instream);
+    if (nullptr == reader_)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    return Load0(reader_);
 }
 
 ECode Properties::Load0 (
@@ -166,6 +174,8 @@ ECode Properties::LoadConvert(
             newLen = IInteger::MAX_VALUE;
         }
         convtBuf = Array<Char>(newLen);
+        if (convtBuf.IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
     }
     Char aChar;
     Array<Char>& out = convtBuf;
@@ -217,6 +227,12 @@ ECode Properties::LoadConvert(
     return NOERROR;
 }
 
+#define FAIL_RETURN_NULLPTR(expr)       \
+    do {                                \
+        ECode ec = expr;                \
+        if (FAILED(ec)) return nullptr; \
+    } while(0);
+
 String Properties::SaveConvert(
     /* [in] */ const String& theString,
     /* [in] */ Boolean escapeSpace,
@@ -228,7 +244,9 @@ String Properties::SaveConvert(
         bufLen = IInteger::MAX_VALUE;
     }
     AutoPtr<IStringBuffer> outBuffer;
-    CStringBuffer::New(bufLen, IID_IStringBuffer, (IInterface**)&outBuffer);
+    ECode ec = CStringBuffer::New(bufLen, IID_IStringBuffer, (IInterface**)&outBuffer);
+    if (FAILED(ec))
+        return nullptr;
 
     for(Integer x = 0; x < len; x++) {
         Char aChar = theString.GetChar(x);
@@ -236,54 +254,54 @@ String Properties::SaveConvert(
         // avoids the specials below
         if ((aChar > 61) && (aChar < 127)) {
             if (aChar == U'\\') {
-                outBuffer->Append(U'\\');
-                outBuffer->Append(U'\\');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
                 continue;
             }
-            outBuffer->Append(aChar);
+            FAIL_RETURN_NULLPTR(outBuffer->Append(aChar));
             continue;
         }
         switch(aChar) {
             case U' ':
                 if (x == 0 || escapeSpace) {
-                    outBuffer->Append(U'\\');
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
                 }
-                outBuffer->Append(U' ');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U' '));
                 break;
             case U'\t':
-                outBuffer->Append(U'\\');
-                outBuffer->Append(U't');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U't'));
                 break;
             case U'\n':
-                outBuffer->Append(U'\\');
-                outBuffer->Append(U'n');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'n'));
                 break;
             case U'\r':
-                outBuffer->Append(U'\\');
-                outBuffer->Append(U'r');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'r'));
                 break;
             case U'\f':
-                outBuffer->Append(U'\\');
-                outBuffer->Append(U'f');
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'f'));
                 break;
             case U'=': // Fall through
             case U':': // Fall through
             case U'#': // Fall through
             case U'!':
-                outBuffer->Append(U'\\');
-                outBuffer->Append(aChar);
+                FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                FAIL_RETURN_NULLPTR(outBuffer->Append(aChar));
                 break;
             default:
                 if (((aChar < 0x0020) || (aChar > 0x007e)) & escapeUnicode ) {
-                    outBuffer->Append(U'\\');
-                    outBuffer->Append(U'u');
-                    outBuffer->Append(ToHex((aChar >> 12) & 0xF));
-                    outBuffer->Append(ToHex((aChar >>  8) & 0xF));
-                    outBuffer->Append(ToHex((aChar >>  4) & 0xF));
-                    outBuffer->Append(ToHex( aChar        & 0xF));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(U'\\'));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(U'u'));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(ToHex((aChar >> 12) & 0xF)));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(ToHex((aChar >>  8) & 0xF)));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(ToHex((aChar >>  4) & 0xF)));
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(ToHex( aChar        & 0xF)));
                 }
                 else {
-                    outBuffer->Append(aChar);
+                    FAIL_RETURN_NULLPTR(outBuffer->Append(aChar));
                 }
         }
     }
@@ -354,7 +372,7 @@ ECode Properties::Store(
     AutoPtr<IBufferedWriter> bw =
             IBufferedWriter::Probe(writer);
     if (bw == nullptr) {
-        CBufferedWriter::New(writer, IID_IBufferedWriter, (IInterface**)&bw);
+        FAIL_RETURN(CBufferedWriter::New(writer, IID_IBufferedWriter, (IInterface**)&bw));
     }
     return Store0(bw, comments, false);
 }
@@ -364,11 +382,11 @@ ECode Properties::Store(
     /* [in] */ const String& comments)
 {
     AutoPtr<IOutputStreamWriter> sw;
-    COutputStreamWriter::New(outstream, String("8859_1"),
-            IID_IOutputStreamWriter, (IInterface**)&sw);
+    FAIL_RETURN(COutputStreamWriter::New(outstream, String("8859_1"),
+                                    IID_IOutputStreamWriter, (IInterface**)&sw));
     AutoPtr<IBufferedWriter> bw;
-    CBufferedWriter::New(IWriter::Probe(sw),
-            IID_IBufferedWriter, (IInterface**)&bw);
+    FAIL_RETURN(CBufferedWriter::New(IWriter::Probe(sw),
+                                        IID_IBufferedWriter, (IInterface**)&bw));
     return Store0(bw, comments, true);
 }
 
@@ -459,7 +477,7 @@ ECode Properties::PropertyNames(
     /* [out] */ AutoPtr<IEnumeration>& names)
 {
     AutoPtr<IHashtable> h;
-    CHashtable::New(IID_IHashtable, (IInterface**)&h);
+    FAIL_RETURN(CHashtable::New(IID_IHashtable, (IInterface**)&h));
     Enumerate(h);
     return h->GetKeys(names);
 }
@@ -468,7 +486,7 @@ ECode Properties::StringPropertyNames(
     /* [out] */ AutoPtr<ISet>& names)
 {
     AutoPtr<IHashtable> h;
-    CHashtable::New(IID_IHashtable, (IInterface**)&h);
+    FAIL_RETURN(CHashtable::New(IID_IHashtable, (IInterface**)&h));
     EnumerateStringProperties(h);
     return h->GetKeySet(names);
 }
@@ -708,5 +726,5 @@ ECode Properties::LineReader::ReadLine(
     }
 }
 
-}
-}
+} // namespace util
+} // namespace como

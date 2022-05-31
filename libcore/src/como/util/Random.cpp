@@ -215,5 +215,5 @@ ECode Random::NextGaussian(
     }
 }
 
-}
-}
+} // namespace util
+} // namespace como

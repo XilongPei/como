@@ -110,9 +110,7 @@ ECode TreeMap::Get(
 {
     AutoPtr<TreeMapEntry> entry;
     FAIL_RETURN(GetEntry(key, &entry));
-    value = entry != nullptr
-            ? entry->mValue
-            : nullptr;
+    value = entry != nullptr ? entry->mValue : nullptr;
     return NOERROR;
 }
 
@@ -682,6 +680,9 @@ ECode TreeMap::GetEntrySet(
 {
     if (mEntrySet == nullptr) {
         mEntrySet = new EntrySet(this);
+
+        if (mEntrySet == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = mEntrySet;
     return NOERROR;
@@ -692,8 +693,10 @@ ECode TreeMap::DescendingMap(
 {
     if (mDescendingMap == nullptr) {
         AutoPtr<DescendingSubMap> m = new DescendingSubMap();
-        m->Constructor(this, true, nullptr, true,
-                true, nullptr, true, false);
+        if (nullptr == m)
+            return E_OUT_OF_MEMORY_ERROR;
+
+        m->Constructor(this, true, nullptr, true, true, nullptr, true, false);
         mDescendingMap = m;
     }
     map = mDescendingMap;
@@ -708,8 +711,10 @@ ECode TreeMap::SubMap(
     /* [out] */ AutoPtr<INavigableMap>& submap)
 {
     AutoPtr<AscendingSubMap> m = new AscendingSubMap();
-    m->Constructor(this, false, fromKey, fromInclusive,
-            false, toKey, toInclusive, true);
+    if (nullptr == m)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    m->Constructor(this, false, fromKey, fromInclusive, false, toKey, toInclusive, true);
     submap = (INavigableMap*)m.Get();
     return NOERROR;
 }
@@ -720,8 +725,10 @@ ECode TreeMap::HeadMap(
     /* [out] */ AutoPtr<INavigableMap>& headmap)
 {
     AutoPtr<AscendingSubMap> m = new AscendingSubMap();
-    m->Constructor(this, true, nullptr, true,
-            false, toKey, inclusive, true);
+    if (nullptr == m)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    m->Constructor(this, true, nullptr, true, false, toKey, inclusive, true);
     headmap = (INavigableMap*)m.Get();
     return NOERROR;
 }
@@ -732,8 +739,10 @@ ECode TreeMap::TailMap(
     /* [out] */ AutoPtr<INavigableMap>& tailmap)
 {
     AutoPtr<AscendingSubMap> m = new AscendingSubMap();
-    m->Constructor(this, false, fromKey, inclusive,
-            true, nullptr, true, true);
+    if (nullptr == m)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    m->Constructor(this, false, fromKey, inclusive, true, nullptr, true, true);
     tailmap = (INavigableMap*)m.Get();
     return NOERROR;
 }
@@ -807,7 +816,10 @@ AutoPtr<IMapEntry> TreeMap::ExportEntry(
         return nullptr;
     }
     AutoPtr<AbstractMap::SimpleImmutableEntry> entry =
-            new AbstractMap::SimpleImmutableEntry();
+                                        new AbstractMap::SimpleImmutableEntry();
+    if (nullptr == entry)
+        return nullptr;
+
     entry->Constructor(e);
     return (IMapEntry*)entry.Get();
 }
@@ -1313,6 +1325,9 @@ ECode TreeMap::EntrySet::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new EntryIterator(mOwner->GetFirstEntry(), mOwner);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -1553,6 +1568,9 @@ ECode TreeMap::KeySet::SubSet(
     AutoPtr<INavigableMap> submap;
     mMap->SubMap(fromElement, fromInclusive, toElement, toInclusive, submap);
     subset = new KeySet(submap, true);
+    if (nullptr == subset)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -1564,6 +1582,9 @@ ECode TreeMap::KeySet::HeadSet(
     AutoPtr<INavigableMap> headmap;
     mMap->HeadMap(toElement, inclusive, headmap);
     headset = new KeySet(headmap, true);
+    if (nullptr == headset)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -1575,6 +1596,9 @@ ECode TreeMap::KeySet::TailSet(
     AutoPtr<INavigableMap> tailmap;
     mMap->TailMap(fromElement, inclusive, tailmap);
     tailset = new KeySet(tailmap, true);
+    if (nullptr == tailset)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -1615,6 +1639,9 @@ ECode TreeMap::KeySet::DescendingSet(
     AutoPtr<INavigableMap> navMap;
     mMap->DescendingMap(navMap);
     set = new KeySet(navMap, true);
+    if (nullptr == set)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -1979,7 +2006,7 @@ ECode TreeMap::NavigableSubMap::ContainsKey(
         Logger::E("TreeMap::NavigableSubMap", "key == nullptr");
         return E_NULL_POINTER_EXCEPTION;
     }
-    if (!InRange(key)) {
+    if (! InRange(key)) {
         result = false;
         return NOERROR;
     }
@@ -1995,7 +2022,7 @@ ECode TreeMap::NavigableSubMap::Put(
         Logger::E("TreeMap::NavigableSubMap", "key == nullptr");
         return E_NULL_POINTER_EXCEPTION;
     }
-    if (!InRange(key)) {
+    if (! InRange(key)) {
         Logger::E("TreeMap::NavigableSubMap", "key out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -2010,7 +2037,7 @@ ECode TreeMap::NavigableSubMap::Get(
         Logger::E("TreeMap::NavigableSubMap", "key == nullptr");
         return E_NULL_POINTER_EXCEPTION;
     }
-    if (!InRange(key)) {
+    if (! InRange(key)) {
         value = nullptr;
         return NOERROR;
     }
@@ -2025,7 +2052,7 @@ ECode TreeMap::NavigableSubMap::Remove(
         Logger::E("TreeMap::NavigableSubMap", "key == nullptr");
         return E_NULL_POINTER_EXCEPTION;
     }
-    if (!InRange(key)) {
+    if (! InRange(key)) {
         if (prevValue != nullptr) {
             *prevValue = nullptr;
         }
@@ -2491,7 +2518,7 @@ ECode TreeMap::AscendingSubMap::Constructor(
     /* [in] */ Boolean holdRef)
 {
     return NavigableSubMap::Constructor(m, fromStart, lo, loInclusive,
-            toEnd, hi, hiInclusive, holdRef);
+                                                toEnd, hi, hiInclusive, holdRef);
 }
 
 ECode TreeMap::AscendingSubMap::Comparator(
@@ -2515,17 +2542,20 @@ ECode TreeMap::AscendingSubMap::SubMap(
         Logger::E("TreeMap::AscendingSubMap", "toKey == nullptr");
         return E_NULL_POINTER_EXCEPTION;
     }
-    if (!InRange(fromKey, fromInclusive)) {
+    if (! InRange(fromKey, fromInclusive)) {
         Logger::E("TreeMap::AscendingSubMap", "fromKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (!InRange(toKey, toInclusive)) {
+    if (! InRange(toKey, toInclusive)) {
         Logger::E("TreeMap::AscendingSubMap", "toKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<AscendingSubMap> map = new AscendingSubMap();
-    map->Constructor(mMap, false, fromKey, fromInclusive,
-            false, toKey, toInclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, false, fromKey, fromInclusive,
+                                              false, toKey, toInclusive, true));
     submap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2540,13 +2570,16 @@ ECode TreeMap::AscendingSubMap::HeadMap(
         return E_NULL_POINTER_EXCEPTION;
     }
     if (!InRange(toKey) && !(!mToEnd && (mMap->Compare(toKey, mHi) == 0) &&
-            !mHiInclusive && !inclusive)) {
+                                                !mHiInclusive && !inclusive)) {
         Logger::E("TreeMap::AscendingSubMap", "toKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<AscendingSubMap> map = new AscendingSubMap();
-    map->Constructor(mMap, mFromStart, mLo, mLoInclusive,
-            false, toKey, inclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, mFromStart, mLo, mLoInclusive,
+                                                false, toKey, inclusive, true));
     headmap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2561,13 +2594,16 @@ ECode TreeMap::AscendingSubMap::TailMap(
         return E_NULL_POINTER_EXCEPTION;
     }
     if (!InRange(fromKey) && !(!mFromStart && (mMap->Compare(fromKey, mLo) == 0) &&
-            !mLoInclusive && !inclusive)) {
+                                                    !mLoInclusive && !inclusive)) {
         Logger::E("TreeMap::AscendingSubMap", "fromKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<AscendingSubMap> map = new AscendingSubMap();
-    map->Constructor(mMap, false, fromKey, inclusive,
-            mToEnd, mHi, mHiInclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, false, fromKey, inclusive, mToEnd, mHi,
+                                                            mHiInclusive, true));
     tailmap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2577,8 +2613,11 @@ ECode TreeMap::AscendingSubMap::DescendingMap(
 {
     if (mDescendingMapView == nullptr) {
         AutoPtr<DescendingSubMap> submap = new DescendingSubMap();
-        submap->Constructor(mMap, mFromStart, mLo, mLoInclusive,
-                mToEnd, mHi, mHiInclusive, mHoldRef);
+        if (nullptr == submap)
+            return E_OUT_OF_MEMORY_ERROR;
+
+        FAIL_RETURN(submap->Constructor(mMap, mFromStart, mLo, mLoInclusive,
+                                            mToEnd, mHi, mHiInclusive, mHoldRef));
         mDescendingMapView = (INavigableMap*)submap.Get();
     }
     map = mDescendingMapView;
@@ -2600,6 +2639,9 @@ ECode TreeMap::AscendingSubMap::GetEntrySet(
 {
     if (mEntrySetView == nullptr) {
         mEntrySetView = new AscendingEntrySetView(this);
+
+        if (mEntrySetView == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = (ISet*)mEntrySetView.Get();
     return NOERROR;
@@ -2645,6 +2687,9 @@ ECode TreeMap::AscendingSubMap::AscendingEntrySetView::GetIterator(
     /* [out] */ AutoPtr<IIterator>& it)
 {
     it = new SubMapEntryIterator(mOwner->AbsLowest(), mOwner->AbsHighFence(), mOwner);
+    if (nullptr == it)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return NOERROR;
 }
 
@@ -2663,7 +2708,7 @@ ECode TreeMap::DescendingSubMap::Constructor(
     mReverseComparator = Collections::ReverseOrder(m->mComparator);
 
     return NavigableSubMap::Constructor(m, fromStart, lo, loInclusive,
-            toEnd, hi, hiInclusive, holdRef);
+                                                toEnd, hi, hiInclusive, holdRef);
 }
 
 ECode TreeMap::DescendingSubMap::Comparator(
@@ -2697,8 +2742,11 @@ ECode TreeMap::DescendingSubMap::SubMap(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<DescendingSubMap> map = new DescendingSubMap();
-    map->Constructor(mMap, false, toKey, toInclusive,
-            false, fromKey, fromInclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, false, toKey, toInclusive,
+                                          false, fromKey, fromInclusive, true));
     submap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2713,13 +2761,16 @@ ECode TreeMap::DescendingSubMap::HeadMap(
         return E_NULL_POINTER_EXCEPTION;
     }
     if (!InRange(toKey) && !(!mFromStart && mMap->Compare(toKey, mLo) == 0 &&
-            !mLoInclusive && !inclusive)) {
+                                                !mLoInclusive && !inclusive)) {
         Logger::E("TreeMap::DescendingSubMap", "toKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<DescendingSubMap> map = new DescendingSubMap();
-    map->Constructor(mMap, false, toKey, inclusive,
-            mToEnd, mHi, mHiInclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, false, toKey, inclusive,
+                                              mToEnd, mHi, mHiInclusive, true));
     headmap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2734,13 +2785,16 @@ ECode TreeMap::DescendingSubMap::TailMap(
         return E_NULL_POINTER_EXCEPTION;
     }
     if (!InRange(fromKey) && !(!mToEnd && mMap->Compare(fromKey, mHi) == 0 &&
-            !mHiInclusive && !inclusive)) {
+                                                !mHiInclusive && !inclusive)) {
         Logger::E("TreeMap::DescendingSubMap", "fromKey out of range");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<DescendingSubMap> map = new DescendingSubMap();
-    map->Constructor(mMap, mFromStart, mLo, mLoInclusive,
-            false, fromKey, inclusive, true);
+    if (nullptr == map)
+        return E_OUT_OF_MEMORY_ERROR;
+
+    FAIL_RETURN(map->Constructor(mMap, mFromStart, mLo, mLoInclusive,
+                                              false, fromKey, inclusive, true));
     tailmap = (INavigableMap*)map.Get();
     return NOERROR;
 }
@@ -2773,6 +2827,9 @@ ECode TreeMap::DescendingSubMap::GetEntrySet(
 {
     if (mEntrySetView == nullptr) {
         mEntrySetView = new DescendingEntrySetView(this);
+
+        if (mEntrySetView == nullptr)
+            return E_OUT_OF_MEMORY_ERROR;
     }
     entries = (ISet*)mEntrySetView.Get();
     return NOERROR;
@@ -2940,5 +2997,5 @@ ECode TreeMap::TreeMapEntry::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

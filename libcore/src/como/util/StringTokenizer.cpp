@@ -120,7 +120,7 @@ ECode StringTokenizer::NextToken(
     /* [out] */ String& token)
 {
     mCurrentPosition = (mNewPosition >= 0 && !mDelimsChanged) ?
-            mNewPosition : SkipDelimiters(mCurrentPosition);
+                                mNewPosition : SkipDelimiters(mCurrentPosition);
 
     mDelimsChanged = false;
     mNewPosition = -1;
@@ -175,5 +175,5 @@ ECode StringTokenizer::CountTokens(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

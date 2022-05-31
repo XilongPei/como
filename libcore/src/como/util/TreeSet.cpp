@@ -44,7 +44,7 @@ ECode TreeSet::Constructor(
 ECode TreeSet::Constructor()
 {
     AutoPtr<INavigableMap> m;
-    CTreeMap::New(IID_INavigableMap, (IInterface**)&m);
+    FAIL_RETURN(CTreeMap::New(IID_INavigableMap, (IInterface**)&m));
     return Constructor(m);
 }
 
@@ -52,14 +52,14 @@ ECode TreeSet::Constructor(
     /* [in] */ IComparator* comparator)
 {
     AutoPtr<INavigableMap> m;
-    CTreeMap::New(comparator, IID_INavigableMap, (IInterface**)&m);
+    FAIL_RETURN(CTreeMap::New(comparator, IID_INavigableMap, (IInterface**)&m));
     return Constructor(m);
 }
 
 ECode TreeSet::Constructor(
     /* [in] */ ICollection* c)
 {
-    Constructor();
+    FAIL_RETURN(Constructor());
     return AddAll(c);
 }
 
@@ -68,7 +68,7 @@ ECode TreeSet::Constructor(
 {
     AutoPtr<IComparator> comparator;
     s->Comparator(comparator);
-    Constructor(comparator);
+    FAIL_RETURN(Constructor(comparator));
     return AddAll(ICollection::Probe(s));
 }
 
@@ -310,11 +310,13 @@ ECode TreeSet::CloneImpl(
     /* [in] */ ITreeSet* newObj)
 {
     TreeSet* clone = (TreeSet*)newObj;
+
     AutoPtr<INavigableMap> map;
-    CTreeMap::New(ISortedMap::Probe(mMap), IID_INavigableMap, (IInterface**)&map);
+    FAIL_RETURN(CTreeMap::New(ISortedMap::Probe(mMap), IID_INavigableMap,
+                                                            (IInterface**)&map));
     clone->mMap = std::move(map);
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

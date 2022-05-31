@@ -67,8 +67,8 @@ ECode SimpleTimeZone::Constructor(
     /* [in] */ Integer endTime)
 {
     return Constructor(rawOffset, id, startMonth, startDay,
-            startDayOfWeek, startTime, WALL_TIME, endMonth,
-            endDay, endDayOfWeek, endTime, WALL_TIME, mMillisPerHour);
+                       startDayOfWeek, startTime, WALL_TIME, endMonth,
+                       endDay, endDayOfWeek, endTime, WALL_TIME, mMillisPerHour);
 }
 
 ECode SimpleTimeZone::Constructor(
@@ -85,8 +85,8 @@ ECode SimpleTimeZone::Constructor(
     /* [in] */ Integer dstSavings)
 {
     return Constructor(rawOffset, id, startMonth, startDay,
-            startDayOfWeek, startTime, WALL_TIME, endMonth,
-            endDay, endDayOfWeek, endTime, WALL_TIME, dstSavings);
+                       startDayOfWeek, startTime, WALL_TIME, endMonth,
+                       endDay, endDayOfWeek, endTime, WALL_TIME, dstSavings);
 }
 
 ECode SimpleTimeZone::Constructor(
@@ -642,22 +642,22 @@ ECode SimpleTimeZone::HasSameRules(
     }
     result = mRawOffset == that->mRawOffset &&
             mUseDaylight == that->mUseDaylight &&
-            (!mUseDaylight
-             // Only check rules if using DST
-             || (mDstSavings == that->mDstSavings &&
-                 mStartMode == that->mStartMode &&
-                 mStartMonth == that->mStartMonth &&
-                 mStartDay == that->mStartDay &&
-                 mStartDayOfWeek == that->mStartDayOfWeek &&
-                 mStartTime == that->mStartTime &&
-                 mStartTimeMode == that->mStartTimeMode &&
-                 mEndMode == that->mEndMode &&
-                 mEndMonth == that->mEndMonth &&
-                 mEndDay == that->mEndDay &&
-                 mEndDayOfWeek == that->mEndDayOfWeek &&
-                 mEndTime == that->mEndTime &&
-                 mEndTimeMode == that->mEndTimeMode &&
-                 mStartYear == that->mStartYear));
+            (! mUseDaylight
+                 // Only check rules if using DST
+                 || (mDstSavings == that->mDstSavings &&
+                     mStartMode == that->mStartMode &&
+                     mStartMonth == that->mStartMonth &&
+                     mStartDay == that->mStartDay &&
+                     mStartDayOfWeek == that->mStartDayOfWeek &&
+                     mStartTime == that->mStartTime &&
+                     mStartTimeMode == that->mStartTimeMode &&
+                     mEndMode == that->mEndMode &&
+                     mEndMonth == that->mEndMonth &&
+                     mEndDay == that->mEndDay &&
+                     mEndDayOfWeek == that->mEndDayOfWeek &&
+                     mEndTime == that->mEndTime &&
+                     mEndTimeMode == that->mEndTimeMode &&
+                     mStartYear == that->mStartYear));
     return NOERROR;
 }
 
@@ -665,45 +665,46 @@ ECode SimpleTimeZone::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(GetCoclassName((ISimpleTimeZone*)this));
-    sb->Append("[id=");
+    FAIL_RETURN(CStringBuilder::New(IID_IStringBuilder, (IInterface**)&sb));
+
+    FAIL_RETURN(sb->Append(GetCoclassName((ISimpleTimeZone*)this)));
+    FAIL_RETURN(sb->Append("[id="));
     String id;
     GetID(id);
-    sb->Append(id);
-    sb->Append(",offset=");
-    sb->Append(mRawOffset);
-    sb->Append(",dstSavings=");
-    sb->Append(mDstSavings);
-    sb->Append(",useDaylight=");
-    sb->Append(mUseDaylight);
-    sb->Append(",startYear=");
-    sb->Append(mStartYear);
-    sb->Append(",startMode=");
-    sb->Append(mStartMode);
-    sb->Append(",startMonth=");
-    sb->Append(mStartMonth);
-    sb->Append(",startDay=");
-    sb->Append(mStartDay);
-    sb->Append(",startDayOfWeek=");
-    sb->Append(mStartDayOfWeek);
-    sb->Append(",startTime=");
-    sb->Append(mStartTime);
-    sb->Append(",startTimeMode=");
-    sb->Append(mStartTimeMode);
-    sb->Append(",endMode=");
-    sb->Append(mEndMode);
-    sb->Append(",endMonth=");
-    sb->Append(mEndMonth);
-    sb->Append(",endDay=");
-    sb->Append(mEndDay);
-    sb->Append(",endDayOfWeek=");
-    sb->Append(mEndDayOfWeek);
-    sb->Append(",endTime=");
-    sb->Append(mEndTime);
-    sb->Append(",endTimeMode=");
-    sb->Append(mEndTimeMode);
-    sb->Append(U']');
+    FAIL_RETURN(sb->Append(id));
+    FAIL_RETURN(sb->Append(",offset="));
+    FAIL_RETURN(sb->Append(mRawOffset));
+    FAIL_RETURN(sb->Append(",dstSavings="));
+    FAIL_RETURN(sb->Append(mDstSavings));
+    FAIL_RETURN(sb->Append(",useDaylight="));
+    FAIL_RETURN(sb->Append(mUseDaylight));
+    FAIL_RETURN(sb->Append(",startYear="));
+    FAIL_RETURN(sb->Append(mStartYear));
+    FAIL_RETURN(sb->Append(",startMode="));
+    FAIL_RETURN(sb->Append(mStartMode));
+    FAIL_RETURN(sb->Append(",startMonth="));
+    FAIL_RETURN(sb->Append(mStartMonth));
+    FAIL_RETURN(sb->Append(",startDay="));
+    FAIL_RETURN(sb->Append(mStartDay));
+    FAIL_RETURN(sb->Append(",startDayOfWeek="));
+    FAIL_RETURN(sb->Append(mStartDayOfWeek));
+    FAIL_RETURN(sb->Append(",startTime="));
+    FAIL_RETURN(sb->Append(mStartTime));
+    FAIL_RETURN(sb->Append(",startTimeMode="));
+    FAIL_RETURN(sb->Append(mStartTimeMode));
+    FAIL_RETURN(sb->Append(",endMode="));
+    FAIL_RETURN(sb->Append(mEndMode));
+    FAIL_RETURN(sb->Append(",endMonth="));
+    FAIL_RETURN(sb->Append(mEndMonth));
+    FAIL_RETURN(sb->Append(",endDay="));
+    FAIL_RETURN(sb->Append(mEndDay));
+    FAIL_RETURN(sb->Append(",endDayOfWeek="));
+    FAIL_RETURN(sb->Append(mEndDayOfWeek));
+    FAIL_RETURN(sb->Append(",endTime="));
+    FAIL_RETURN(sb->Append(mEndTime));
+    FAIL_RETURN(sb->Append(",endTimeMode="));
+    FAIL_RETURN(sb->Append(mEndTimeMode));
+    FAIL_RETURN(sb->Append(U']'));
     return sb->ToString(desc);
 }
 
@@ -815,5 +816,5 @@ ECode SimpleTimeZone::DecodeEndRule()
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

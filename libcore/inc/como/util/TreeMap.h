@@ -1154,7 +1154,7 @@ private:
     AutoPtr<INavigableMap> mDescendingMap;
 };
 
-}
-}
+} // namespace util
+} // namespace como
 
 #endif // __COMO_UTIL_TREEMAP_H__

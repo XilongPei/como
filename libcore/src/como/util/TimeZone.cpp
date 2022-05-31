@@ -116,7 +116,8 @@ ECode TimeZone::GetOffset(
     /* [out] */ Integer& offset)
 {
     AutoPtr<IDate> dateObj;
-    CDate::New(date, IID_IDate, (IInterface**)&dateObj);
+    FAIL_RETURN(CDate::New(date, IID_IDate, (IInterface**)&dateObj));
+
     Boolean daylightTime;
     if (InDaylightTime(dateObj, daylightTime), daylightTime) {
         Integer ro, st;
@@ -135,13 +136,17 @@ Integer TimeZone::GetOffsets(
     Integer rawoffset;
     GetRawOffset(rawoffset);
     Integer dstoffset = 0;
+
     AutoPtr<IDate> dateObj;
-    CDate::New(date, IID_IDate, (IInterface**)&dateObj);
+    ECode ec = CDate::New(date, IID_IDate, (IInterface**)&dateObj);
+    if (FAILED(ec))
+        return -1;
+
     Boolean daylightTime;
     if (InDaylightTime(dateObj, daylightTime), daylightTime) {
         GetDSTSavings(dstoffset);
     }
-    if (!offsets.IsNull()) {
+    if (! offsets.IsNull()) {
         offsets[0] = rawoffset;
         offsets[1] = dstoffset;
     }
@@ -185,7 +190,7 @@ ECode TimeZone::GetDisplayName(
     /* [out] */ String& name)
 {
     return GetDisplayName(daylight, style,
-            Locale::GetDefault(Locale::Category::GetDISPLAY()), name);
+                    Locale::GetDefault(Locale::Category::GetDISPLAY()), name);
 }
 
 ECode TimeZone::GetDisplayName(
@@ -232,6 +237,12 @@ ECode TimeZone::GetDisplayName(
     return NOERROR;
 }
 
+#define FAIL_RETURN_NULLPTR(expr)       \
+    do {                                \
+        ECode ec = expr;                \
+        if (FAILED(ec)) return nullptr; \
+    } while(0);
+
 String TimeZone::CreateGmtOffsetString(
     /* [in] */ Boolean includeGmt,
     /* [in] */ Boolean includeMinuteSeparator,
@@ -244,31 +255,32 @@ String TimeZone::CreateGmtOffsetString(
         offsetMinutes = -offsetMinutes;
     }
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(9, IID_IStringBuilder, (IInterface**)&sb);
+    FAIL_RETURN_NULLPTR(CStringBuilder::New(9, IID_IStringBuilder, (IInterface**)&sb));
+
     if (includeGmt) {
-        sb->Append(String("GMT"));
+        FAIL_RETURN_NULLPTR(sb->Append(String("GMT")));
     }
-    sb->Append(sign);
+    FAIL_RETURN_NULLPTR(sb->Append(sign));
     AppendNumber(sb, 2, offsetMinutes / 60);
     if (includeMinuteSeparator) {
-        sb->Append(U':');
+        FAIL_RETURN_NULLPTR(sb->Append(U':'));
     }
     AppendNumber(sb, 2, offsetMinutes % 60);
     String offsetStr;
-    sb->ToString(offsetStr);
+    FAIL_RETURN_NULLPTR(sb->ToString(offsetStr));
     return offsetStr;
 }
 
-void TimeZone::AppendNumber(
+ECode TimeZone::AppendNumber(
     /* [in] */ IStringBuilder* sb,
     /* [in] */ Integer count,
     /* [in] */ Integer value)
 {
     String string = StringUtils::ToString(value);
     for (Integer i = 0; i < count - string.GetLength(); i++) {
-        sb->Append(U'0');
+        FAIL_RETURN(sb->Append(U'0'));
     }
-    sb->Append(string);
+    return sb->Append(string);
 }
 
 ECode TimeZone::GetDSTSavings(
@@ -294,7 +306,7 @@ ECode TimeZone::ObservesDaylightTime(
     }
 
     AutoPtr<IDate> date;
-    CDate::New(IID_IDate, (IInterface**)&date);
+    FAIL_RETURN(CDate::New(IID_IDate, (IInterface**)&date));
     return InDaylightTime(date, result);
 }
 
@@ -314,11 +326,11 @@ ECode TimeZone::GetTimeZone(
     if (id.GetLength() == 3) {
         if (id.Equals("GMT")) {
             return ICloneable::Probe(GetGMT())->Clone(
-                    IID_ITimeZone, (IInterface**)zone);
+                                            IID_ITimeZone, (IInterface**)zone);
         }
         if (id.Equals("UTC")) {
             return ICloneable::Probe(GetUTC())->Clone(
-                    IID_ITimeZone, (IInterface**)zone);
+                                            IID_ITimeZone, (IInterface**)zone);
         }
     }
 
@@ -444,8 +456,8 @@ ECode TimeZone::SetDefault(
     AutoPtr<ISecurityManager> sm = System::GetSecurityManager();
     if (sm != nullptr) {
         AutoPtr<IPermission> perm;
-        CPropertyPermission::New(String("user.timeZone"), String("write"),
-                IID_IPermission, (IInterface**)&perm);
+        FAIL_RETURN(CPropertyPermission::New(String("user.timeZone"),
+                    String("write"), IID_IPermission, (IInterface**)&perm));
         FAIL_RETURN(sm->CheckPermission(perm));
     }
 
@@ -486,5 +498,5 @@ ECode TimeZone::CloneImpl(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como

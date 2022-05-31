@@ -82,6 +82,7 @@ AutoPtr<TreeNode> TreeNode::Find(
         TreeNode* pl = p->mLeft;
         TreeNode* pr = p->mRight;
         TreeNode* q = nullptr;
+
         if (ph = p->mHash, ph > h) {
             p = pl;
         }
@@ -89,7 +90,7 @@ AutoPtr<TreeNode> TreeNode::Find(
             p = pr;
         }
         else if ((pk = p->mKey, IInterface::Equals(pk, k)) ||
-                (k != nullptr && Object::Equals(k, pk))) {
+                                      (k != nullptr && Object::Equals(k, pk))) {
             return p;
         }
         else if (pl == nullptr) {
@@ -98,8 +99,7 @@ AutoPtr<TreeNode> TreeNode::Find(
         else if (pr == nullptr) {
             p = pl;
         }
-        else if (compare &&
-                (dir = HashMap::CompareComparables(k, pk), dir != 0)) {
+        else if (compare && (dir = HashMap::CompareComparables(k, pk), dir != 0)) {
             p = dir < 0 ? pl : pr;
         }
         else if (q = pr->Find(h, k, compare), q != nullptr) {
@@ -116,8 +116,7 @@ AutoPtr<TreeNode> TreeNode::GetTreeNode(
     /* [in] */ Integer h,
     /* [in] */ IInterface* k)
 {
-    AutoPtr<TreeNode> node = mParent != nullptr ?
-            Root() : AutoPtr<TreeNode>(this);
+    AutoPtr<TreeNode> node = mParent != nullptr ? Root() : AutoPtr<TreeNode>(this);
     return node->Find(h, k, false);
 }
 
@@ -127,12 +126,10 @@ Integer TreeNode::TieBreakOrder(
 {
     Integer d = 0;
     String aKlsName, bKlsName;
-    if (a == nullptr || b == nullptr ||
-            (aKlsName = Object::GetCoclassName(a),
-             bKlsName = Object::GetCoclassName(b),
-             d = aKlsName.Compare(bKlsName), a == 0)) {
-        d = Object::GetHashCode(a) <= Object::GetHashCode(b) ?
-                -1 : 1;
+    if (a == nullptr || b == nullptr || (aKlsName = Object::GetCoclassName(a),
+                                    bKlsName = Object::GetCoclassName(b),
+                                    d = aKlsName.Compare(bKlsName), a == 0)) {
+        d = Object::GetHashCode(a) <= Object::GetHashCode(b) ? -1 : 1;
     }
     return d;
 }
@@ -141,7 +138,7 @@ void TreeNode::Treeify(
     /* [in] */ Array<Node*>& tab)
 {
     AutoPtr<TreeNode> root;
-    for (TreeNode* x = this, *next; x != nullptr; x = next) {
+    for (TreeNode* x = this, *next;  x != nullptr;  x = next) {
         next = (TreeNode*)x->mNext.Get();
         x->mLeft = x->mRight = nullptr;
         if (root == nullptr) {
@@ -213,8 +210,7 @@ AutoPtr<TreeNode> TreeNode::PutTreeVal(
 {
     IComparable* kc = nullptr;
     Boolean searched = false;
-    AutoPtr<TreeNode> root = (mParent != nullptr) ?
-            Root() : AutoPtr<TreeNode>(this);
+    AutoPtr<TreeNode> root = (mParent != nullptr) ? Root() : AutoPtr<TreeNode>(this);
     for (TreeNode* p = root;;) {
         Integer dir, ph;
         IInterface* pk;
@@ -225,19 +221,19 @@ AutoPtr<TreeNode> TreeNode::PutTreeVal(
             dir = 1;
         }
         else if ((pk = p->mKey, IInterface::Equals(pk, k)) ||
-                (k != nullptr && Object::Equals(k, pk))) {
+                                      (k != nullptr && Object::Equals(k, pk))) {
             return p;
         }
         else if ((kc == nullptr &&
-                (kc = IComparable::Probe(k), kc == nullptr)) ||
-                (dir = HashMap::CompareComparables(k, pk), dir == 0)) {
-            if (!searched) {
+                        (kc = IComparable::Probe(k), kc == nullptr)) ||
+                        (dir = HashMap::CompareComparables(k, pk), dir == 0)) {
+            if (! searched) {
                 TreeNode* q, *ch;
                 searched = true;
                 if (((ch = p->mLeft, ch != nullptr) &&
-                        (q = ch->Find(h, k, kc), q != nullptr)) ||
-                        ((ch = p->mRight, ch != nullptr) &&
-                        (q = ch->Find(h, k, kc), q != nullptr))) {
+                                    (q = ch->Find(h, k, kc), q != nullptr)) ||
+                                    ((ch = p->mRight, ch != nullptr) &&
+                                    (q = ch->Find(h, k, kc), q != nullptr))) {
                     return q;
                 }
             }
@@ -263,6 +259,8 @@ AutoPtr<TreeNode> TreeNode::PutTreeVal(
             return nullptr;
         }
     }
+
+    return nullptr;
 }
 
 void TreeNode::RemoveTreeNode(
@@ -297,7 +295,7 @@ void TreeNode::RemoveTreeNode(
         root = root->Root();
     }
     if (root == nullptr || root->mRight == nullptr ||
-            (rl = root->mLeft, rl == nullptr) || rl->mLeft == nullptr) {
+                    (rl = root->mLeft, rl == nullptr) || rl->mLeft == nullptr) {
         tab.Set(index, first->Untreeify(map)); // too small
         return;
     }
@@ -672,7 +670,7 @@ Boolean TreeNode::CheckInvariants(
     /* [in] */ TreeNode* t)
 {
     TreeNode* tp = t->mParent, *tl = t->mLeft, *tr = t->mRight,
-            *tb = t->mPrev, *tn = (TreeNode*)t->mNext.Get();
+                               *tb = t->mPrev, *tn = (TreeNode*)t->mNext.Get();
     if (tb != nullptr && t != tb->mNext) {
         return false;
     }
@@ -700,5 +698,5 @@ Boolean TreeNode::CheckInvariants(
     return true;
 }
 
-}
-}
+} // namespace util
+} // namespace como
