@@ -38,25 +38,25 @@ public:
         , _head     { other._head }
         , _tail     { other._tail }
     {
-        EMPTY = &_buff[_max_size];
-
-        if (nullptr != _buff)
+        if (nullptr != _buff) {
+	        EMPTY = &_buff[_max_size];
             std::copy(other.data(), other.data() + _max_size, _buff.get());
+        }
     }
-
 
     CircularBuffer& operator=(const CircularBuffer& other)
     {
         if ( this != &other) {
             _buff.reset(new value_type[other._max_size + 1]);
-            EMPTY = &_buff[other._max_size];
             _max_size = other._max_size;
-            _size = other._size;
-            _head = other._head;
-            _tail = other._tail;
+            _size 	  = other._size;
+            _head 	  = other._head;
+            _tail 	  = other._tail;
 
-            if (nullptr != _buff)
+            if (nullptr != _buff) {
+	            EMPTY = &_buff[_max_size];
                 std::copy(other.data(), other.data() + _max_size, _buff.get());
+            }
         }
         return *this;
     }
@@ -69,7 +69,6 @@ public:
         , _tail     { other._tail }
     {
         EMPTY = &_buff[_max_size];
-
         other._buff     = nullptr;
         other._max_size = 0;
         other._size     = 0;
@@ -81,7 +80,7 @@ public:
         if (this != &other) {
             _buff       = std::move(other._buff);
             EMPTY       = &_buff[other._max_size];
-            _max_size = other._max_size;
+            _max_size   = other._max_size;
             _size       = other._size;
             _head       = other._head;
             _tail       = other._tail;
