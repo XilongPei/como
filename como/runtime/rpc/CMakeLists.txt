@@ -48,6 +48,7 @@ include_directories(
     ../monitor
     ${INC_DIR}
     ${ZeroMQ_INC_DIR}
+    ${EXTERNAL_DIR}/circularbuffer
 )
 
 set(SOURCES

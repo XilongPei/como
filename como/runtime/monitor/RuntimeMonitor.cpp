@@ -33,8 +33,8 @@ namespace como {
 
 CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
-std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue;
-std::deque<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue;
+CircularBuffer<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue(RTM_INVOKEMETHOD_QUEUE_SIZE);
+CircularBuffer<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue(RTM_INVOKEMETHOD_QUEUE_SIZE);
 Mutex RuntimeMonitor::rtmInvokeMethodServerQueue_Lock;
 Mutex RuntimeMonitor::rtmInvokeMethodClientQueue_Lock;
 
@@ -65,7 +65,7 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
         return E_OUT_OF_MEMORY_ERROR;
 
     // Collect the logs generated during COMO running for monitoring by RuntimeMonitor
-    Logger::SetLoggerWriteLog(RuntimeMonitor::WriteLog);
+    Logger::SetLoggerWriteLog(WriteLog);
 
     return NOERROR;
 }
@@ -140,7 +140,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             break;
         }
         case RTM_CommandType::CMD_Server_InvokeMethod: {
-            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+            Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
 
             if (! rtmInvokeMethodServerQueue.empty()) {
                 RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
@@ -159,7 +159,7 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             break;
         }
         case RTM_CommandType::CMD_Server_Dump_InvokeMethod: {
-            Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+            Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
 
             String strBuffer = "[";
 
@@ -321,7 +321,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     rtm_InvokeMethod->coclassID.mCid = (ComponentID*)(sizeof(RTM_InvokeMethod) +
                                                                     sizeParcel);
     if (RTM_WhichQueue::InvokeMethodClientQueue == whichQueue) {
-        Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodClientQueue_Lock);
+        Mutex::AutoLock lock(rtmInvokeMethodClientQueue_Lock);
 
         if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
             RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
@@ -331,7 +331,7 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
         rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
     }
     else {
-        Mutex::AutoLock lock(RuntimeMonitor::rtmInvokeMethodServerQueue_Lock);
+        Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
 
         if (rtmInvokeMethodServerQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
             RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();

@@ -18,6 +18,7 @@
 #define __COMO_RUNTIMEMONITOR_H__
 
 #include <queue>
+#include <circular_buffer.h>
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "zmq.h"
 #endif
@@ -128,8 +129,8 @@ public:
     static ECode GenRtmCommand(RTM_CommandType command, Short param,
                                 const char *cstr, Array<Byte>& arrayRtmCommand);
 
-    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
-    static std::deque<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
+    static CircularBuffer<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
+    static CircularBuffer<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
     static Mutex rtmInvokeMethodServerQueue_Lock;
     static Mutex rtmInvokeMethodClientQueue_Lock;
 

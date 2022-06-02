@@ -30,6 +30,7 @@ include_directories(
     ${INC_DIR}
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/libzmq/include
+    ${EXTERNAL_DIR}/circularbuffer
     ${EXTERNAL_DIR}/inih
 )
 
