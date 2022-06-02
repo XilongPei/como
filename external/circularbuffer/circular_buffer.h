@@ -25,73 +25,81 @@ private:
 
 public:
     explicit CircularBuffer(size_t size)
-        : _buff { std::unique_ptr<T[]>(new value_type[size + 1]) }
-        , _max_size {size}
-        , EMPTY {_buff[size]}
-    {}
+        : _buff     { std::unique_ptr<T[]>(new value_type[size + 1]) }
+        , _max_size { size }
+    {
+        EMPTY = &_buff[size];
+    }
 
     CircularBuffer(const CircularBuffer& other)
-        : _buff {std::unique_ptr<T[]>(new value_type[other._max_size + 1])}
-        , EMPTY {_buff[other._max_size]}
-        , _max_size {other._max_size}
-        , _size {other._size}
-        , _head {other._head}
-        , _tail {other._tail} {
-        std::copy(other.data(), other.data() + _max_size, _buff.get());
+        : _buff     { std::unique_ptr<T[]>(new value_type[other._max_size + 1]) }
+        , _max_size { other._max_size }
+        , _size     { other._size }
+        , _head     { other._head }
+        , _tail     { other._tail }
+    {
+        EMPTY = &_buff[_max_size];
+
+        if (nullptr != _buff)
+            std::copy(other.data(), other.data() + _max_size, _buff.get());
     }
 
 
-    CircularBuffer& operator=(const CircularBuffer& other) {
+    CircularBuffer& operator=(const CircularBuffer& other)
+    {
         if ( this != &other) {
             _buff.reset(new value_type[other._max_size + 1]);
-            EMPTY = _buff[other._max_size];
+            EMPTY = &_buff[other._max_size];
             _max_size = other._max_size;
             _size = other._size;
             _head = other._head;
             _tail = other._tail;
-            std::copy(other.data(), other.data() + _max_size, _buff.get());
+
+            if (nullptr != _buff)
+                std::copy(other.data(), other.data() + _max_size, _buff.get());
         }
         return *this;
     }
 
     CircularBuffer(CircularBuffer&& other) noexcept
-        : _buff {std::move(other._buff)}
-        , EMPTY {_buff[other._max_size]}
-        , _max_size {other._max_size}
-        , _size {other._size}
-        , _head {other._head}
-        , _tail {other._tail}
+        : _buff     { std::move(other._buff) }
+        , _max_size { other._max_size }
+        , _size     { other._size }
+        , _head     { other._head }
+        , _tail     { other._tail }
     {
-        other._buff = nullptr;
+        EMPTY = &_buff[_max_size];
+
+        other._buff     = nullptr;
         other._max_size = 0;
-        other._size = 0;
-        other._head = 0;
-        other._tail = 0;
+        other._size     = 0;
+        other._head     = 0;
+        other._tail     = 0;
     }
 
     CircularBuffer& operator=(CircularBuffer&& other) noexcept {
-        if ( this != &other) {
-            _buff = std::move(other._buff);
-            EMPTY = _buff[other._max_size];
+        if (this != &other) {
+            _buff       = std::move(other._buff);
+            EMPTY       = &_buff[other._max_size];
             _max_size = other._max_size;
-            _size = other._size;
-            _head = other._head;
-            _tail = other._tail;
+            _size       = other._size;
+            _head       = other._head;
+            _tail       = other._tail;
 
-            other._buff = nullptr;
+            other._buff     = nullptr;
             other._max_size = 0;
-            other._size = 0;
-            other._head = 0;
-            other._tail = 0;
+            other._size     = 0;
+            other._head     = 0;
+            other._tail     = 0;
         }
         return *this;
     }
 
-	// Used to check the validity of new CircularBuffer
-	bool IsCircularBuffer() const;
+    // Used to check the validity of new CircularBuffer
+    bool IsCircularBuffer() const;
 
-	// Used to check the validity of the value returned by front(), back()
-	bool IsElement(value_type* data) const;
+    // Used to check the validity of the value returned by front(), back()
+    bool IsElement(value_type* data) const;
 
     void push_back(const value_type& data);
     void push_back(value_type&& data) noexcept;
@@ -127,7 +135,7 @@ public:
     iterator rend() noexcept;
     const_iterator rend() const noexcept;
 
-    value_type& EMPTY;
+    value_type* EMPTY;
 
 private:
     void _increment_bufferstate();
@@ -278,7 +286,7 @@ private:
 template<typename T>
 inline
 bool CircularBuffer<T>::IsCircularBuffer() const {
-    return nullptr == _buff;
+    return nullptr != _buff;
 }
 
 template<typename T>
@@ -324,7 +332,7 @@ inline
 typename CircularBuffer<T>::reference CircularBuffer<T>::front() {
     std::lock_guard<std::mutex> _lck(_mtx);
     if (empty()) {
-        return EMPTY;
+        return *EMPTY;
         // throw std::length_error("front function called on empty buffer");
     }
     return _buff[_tail];
@@ -335,7 +343,7 @@ inline
 typename CircularBuffer<T>::reference CircularBuffer<T>::back() {
     std::lock_guard<std::mutex> _lck(_mtx);
     if (empty()) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::length_error("back function called on empty buffer");
     }
     return _head == 0 ? _buff[_max_size - 1] : _buff[_head - 1];
@@ -346,7 +354,7 @@ inline
 typename CircularBuffer<T>::const_reference CircularBuffer<T>::front() const {
     std::lock_guard<std::mutex> _lck(_mtx);
     if (empty()) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::length_error("front function called on empty buffer");
     }
     return _buff[_tail];
@@ -357,7 +365,7 @@ inline
 typename CircularBuffer<T>::const_reference CircularBuffer<T>::back() const {
     std::lock_guard<std::mutex> _lck(_mtx);
     if (empty()) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::length_error("back function called on empty buffer");
     }
     return _head == 0 ? _buff[_max_size - 1] : _buff[_head - 1];
@@ -396,7 +404,7 @@ inline
 bool CircularBuffer<T>::pop_front() {
     std::lock_guard<std::mutex> _lck(_mtx);
     if (empty()) {
-    	return false;
+        return false;
         // throw std::length_error("pop_front called on empty buffer");
     }
     _decrement_bufferstate();
@@ -415,7 +423,7 @@ inline
 typename CircularBuffer<T>::reference CircularBuffer<T>::operator[](size_t index) {
     std::lock_guard<std::mutex> _lck(_mtx);
     if ((index < 0) || (index >= _size)) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::out_of_range("Index is out of Range of buffer size");
     }
     index += _tail;
@@ -428,7 +436,7 @@ inline
 typename CircularBuffer<T>::const_reference CircularBuffer<T>::operator[](size_t index) const {
     std::lock_guard<std::mutex> _lck(_mtx);
     if ((index < 0) || (index >= _size)) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::out_of_range("Index is out of Range of buffer size");
     }
     index += _tail;
@@ -441,7 +449,7 @@ inline
 typename CircularBuffer<T>::reference CircularBuffer<T>::at(size_t index) {
     std::lock_guard<std::mutex> _lck(_mtx);
     if ((index < 0) || (index >= _size)) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::out_of_range("Index is out of Range of buffer size");
     }
     index += _tail;
@@ -454,7 +462,7 @@ inline
 typename CircularBuffer<T>::const_reference CircularBuffer<T>::at(size_t index) const {
     std::lock_guard<std::mutex> _lck(_mtx);
     if ((index < 0) || (index >= _size)) {
-    	return EMPTY;
+        return *EMPTY;
         // throw std::out_of_range("Index is out of Range of buffer size");
     }
     index += _tail;

@@ -1,6 +1,7 @@
 #include "circular_buffer.h"
 #include <string.h>
 #include <utility>
+#include <iostream>
 #include "gtest/gtest.h"
 
 #define TEST_BUFFER_SIZE 100
@@ -138,13 +139,8 @@ TEST_F(CircularBufferTest, PopFrontTest) {
 	EXPECT_TRUE(test_buff.empty());
 	EXPECT_EQ(test_buff.size(), 0);
 	//try pop on empty buffer
-	try {
-		test_buff.pop_front();
+	if ( ! test_buff.pop_front())
 		FAIL() << "Expected std::length_error";
-	}
-	catch (const std::length_error& err) {
-		EXPECT_EQ(err.what(), std::string("pop_front called on empty buffer"));
-	}
 }
 
 
@@ -164,13 +160,12 @@ TEST_F(CircularBufferTest, FrontTest) {
 	test_buff.clear();
 	EXPECT_EQ(test_buff.size(), 0);
 	//calling front on empty buffer raises exception
-	try {
+
+	std::string str = test_buff.front();
+	if (str.empty() || test_buff.IsElement(&str))
 		test_buff.front() = "string0";
+	else
 		FAIL() << "Expected std::length_error";
-	}
-	catch (const std::length_error& err) {
-		EXPECT_EQ(err.what(), std::string("front function called on empty buffer"));
-	}
 }
 
 TEST_F(CircularBufferTest, BackTest) {

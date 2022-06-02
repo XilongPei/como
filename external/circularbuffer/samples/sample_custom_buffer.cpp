@@ -17,7 +17,8 @@ struct custom_struct {
 
     custom_struct(const custom_struct& other) {
         bytes = (char*)malloc(100);
-        memcpy(bytes, other.bytes, 100);
+        if (nullptr != other.bytes)
+        	memcpy(bytes, other.bytes, 100);
         std::cout << "copy constructor called for custom_struct \n";
     }
 
@@ -28,13 +29,16 @@ struct custom_struct {
     }
 
     custom_struct& operator=(const custom_struct& other) {
-        memcpy(bytes, other.bytes, 100);
+        if (nullptr != other.bytes)
+        	memcpy(bytes, other.bytes, 100);
         std::cout << "assignment operator called for custom_struct \n";
         return *this;
     }
 
     custom_struct& operator=(custom_struct&& other) {
-        delete(bytes);
+        if (nullptr != bytes)
+        	delete(bytes);
+
         bytes = other.bytes;
         other.bytes = nullptr;
         std::cout << "move assignment operator called for custom_struct \n";
@@ -44,8 +48,10 @@ struct custom_struct {
     ~custom_struct() {
         std::cout << "destructor called for test struct " << id << std::endl;
         count--;
-        free(bytes);
-        bytes = nullptr;
+        if (nullptr != bytes) {
+        	free(bytes);
+        	bytes = nullptr;
+        }
     }
 
     friend std::ostream& operator<<(std::ostream& os, const custom_struct& ts) {
@@ -61,22 +67,20 @@ int custom_struct::count = 0;
 int main(int argc, char *argv[])
 {
     CircularBuffer<custom_struct> custom_buffer(5);
-    if (custom_buffer.IsCircularBuffer())
+    if (! custom_buffer.IsCircularBuffer())
         std::cout << "bad CircularBuffer" << std::endl;
 
     custom_struct element;
     for (int i = 0; i < 10; ++i) {
         custom_buffer.push_back(element);
     }
-
     CircularBuffer<custom_struct> buffermoved = std::move(custom_buffer);
     CircularBuffer<custom_struct> buffermoveassigned{10};
     buffermoveassigned = std::move(buffermoved);
     buffermoveassigned.push_back(std::move(element));
-
     custom_struct element2;
     element2 = custom_buffer.front();
-    if (custom_buffer.IsElement(&element2))
+    if (! custom_buffer.IsElement(&element2))
         std::cout << "bad CircularBufferElement" << std::endl;
 
     return 0;
