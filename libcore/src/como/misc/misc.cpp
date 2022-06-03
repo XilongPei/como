@@ -35,7 +35,8 @@ ECode CFDBigInteger::New(
     if (FAILED(ec)) return ec;
 
     void* addr = calloc(sizeof(CFDBigInteger), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CFDBigInteger* _obj = new(addr) CFDBigInteger();
     ec = _obj->Constructor(data, offset);
@@ -51,5 +52,5 @@ ECode CFDBigInteger::New(
     return NOERROR;
 }
 
-}
-}
+} // namespace misc
+} // namespace como

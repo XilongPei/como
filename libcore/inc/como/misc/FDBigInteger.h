@@ -259,7 +259,7 @@ inline FDBigInteger* FDBigInteger::From(
     return (FDBigInteger*)obj;
 }
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_FDBIGINTEGER_H__

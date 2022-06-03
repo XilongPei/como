@@ -45,15 +45,18 @@ class ThreadLocalCharBuffer
 protected:
     AutoPtr<IInterface> InitialValue() override
     {
-        AutoPtr<IObject> buffer = new Wrapper();
-        return buffer.Get();
+        Wrapper *wrapper = new Wrapper();
+        if ((nullptr == wrapper) || (wrapper->mBuffer.IsNull()))
+            return nullptr;
+
+        return (IObject*)wrapper;
     }
 };
 
 AutoPtr<IThreadLocal> FormattedFloatingDecimal::GetThreadLocalCharBuffer()
 {
     static const AutoPtr<IThreadLocal> sThreadLocalCharBuffer =
-            new ThreadLocalCharBuffer();
+                                                    new ThreadLocalCharBuffer();
     return sThreadLocalCharBuffer;
 }
 
@@ -70,6 +73,9 @@ ECode FormattedFloatingDecimal::ValueOf(
     AutoPtr<IFloatingDecimalBinaryToASCIIConverter> fdConverter =
             FloatingDecimal::GetBinaryToASCIIConverter(d, form == FormattedFloatingDecimalForm::COMPATIBLE);
     AutoPtr<FormattedFloatingDecimal> fdObj = new FormattedFloatingDecimal();
+    if (nullptr == fdObj)
+        return E_OUT_OF_MEMORY_ERROR;
+
     fdObj->Constructor(precision, form, fdConverter);
     *fd = fdObj.Get();
     REFCOUNT_ADD(*fd);
@@ -96,7 +102,11 @@ ECode FormattedFloatingDecimal::Constructor(
         mExponent = Array<Char>::Null();
         return NOERROR;
     }
+
     Array<Char> digits = GetBuffer();
+    if (digits.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     Integer nDigits;
     fdConverter->GetDigits(digits, nDigits);
     Integer decExp;
@@ -108,18 +118,18 @@ ECode FormattedFloatingDecimal::Constructor(
         case FormattedFloatingDecimalForm::COMPATIBLE:
             exp = decExp;
             mDecExponentRounded = exp;
-            FillCompatible(precision, digits, nDigits, exp, isNegative);
+            FAIL_RETURN(FillCompatible(precision, digits, nDigits, exp, isNegative));
             break;
 
         case FormattedFloatingDecimalForm::DECIMAL_FLOAT:
             exp = ApplyPrecision(decExp, digits, nDigits, decExp + precision);
-            FillDecimal(precision, digits, nDigits, exp, isNegative);
+            FAIL_RETURN(FillDecimal(precision, digits, nDigits, exp, isNegative));
             mDecExponentRounded = exp;
             break;
 
         case FormattedFloatingDecimalForm::SCIENTIFIC:
             exp = ApplyPrecision(decExp, digits, nDigits, precision + 1);
-            FillScientific(precision, digits, nDigits, exp, isNegative);
+            FAIL_RETURN(FillScientific(precision, digits, nDigits, exp, isNegative));
             mDecExponentRounded = exp;
             break;
 
@@ -130,12 +140,12 @@ ECode FormattedFloatingDecimal::Constructor(
             if ((exp - 1 < -4) || (exp - 1 >= precision)) {
                 // form = Form.SCIENTIFIC;
                 precision--;
-                FillScientific(precision, digits, nDigits, exp, isNegative);
+                FAIL_RETURN(FillScientific(precision, digits, nDigits, exp, isNegative));
             }
             else {
                 // form = Form.DECIMAL_FLOAT;
                 precision = precision - exp;
-                FillDecimal(precision, digits, nDigits, exp, isNegative);
+                FAIL_RETURN(FillDecimal(precision, digits, nDigits, exp, isNegative));
             }
             mDecExponentRounded = exp;
             break;
@@ -219,7 +229,7 @@ Integer FormattedFloatingDecimal::ApplyPrecision(
     return decExp;
 }
 
-void FormattedFloatingDecimal::FillCompatible(
+ECode FormattedFloatingDecimal::FillCompatible(
     /* [in] */ Integer precision,
     /* [out] */ Array<Char>& digits,
     /* [in] */ Integer nDigits,
@@ -232,6 +242,9 @@ void FormattedFloatingDecimal::FillCompatible(
         if (nDigits < exp) {
             Integer extraZeros = exp - nDigits;
             mMantissa = Create(isNegative, nDigits + extraZeros + 2);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa.Copy(startIndex, digits, 0, nDigits);
             Arrays::Fill(mMantissa, startIndex + nDigits, startIndex + nDigits + extraZeros, U'0');
             mMantissa[startIndex + nDigits + extraZeros] = U'.';
@@ -240,12 +253,18 @@ void FormattedFloatingDecimal::FillCompatible(
         else if (exp < nDigits) {
             Integer t = Math::Min(nDigits - exp, precision);
             mMantissa = Create(isNegative, exp + 1 + t);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa.Copy(startIndex, digits, 0, exp);
             mMantissa[startIndex + exp] = U'.';
             mMantissa.Copy(startIndex + exp + 1, digits, exp, t);
         }
         else {
             mMantissa = Create(isNegative, nDigits + 2);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa.Copy(startIndex, digits, 0, nDigits);
             mMantissa[startIndex + nDigits] = U'.';
             mMantissa[startIndex + nDigits + 1] = U'0';
@@ -257,6 +276,9 @@ void FormattedFloatingDecimal::FillCompatible(
         // write '0' s before the significant digits
         if (zeros > 0) {
             mMantissa = Create(isNegative, zeros + 2 + t);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = U'0';
             mMantissa[startIndex + 1] = U'.';
             Arrays::Fill(mMantissa, startIndex + 2, startIndex + 2 + zeros, U'0');
@@ -267,6 +289,9 @@ void FormattedFloatingDecimal::FillCompatible(
         }
         else if (t > 0) {
             mMantissa = Create(isNegative, zeros + 2 + t);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = U'0';
             mMantissa[startIndex + 1] = U'.';
             // copy only when significant digits are within the precision
@@ -280,12 +305,18 @@ void FormattedFloatingDecimal::FillCompatible(
     else {
         if (nDigits > 1) {
             mMantissa = Create(isNegative, nDigits + 1);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = digits[0];
             mMantissa[startIndex + 1] = U'.';
             mMantissa.Copy(startIndex + 2, digits, 1, nDigits - 1);
         }
         else {
             mMantissa = Create(isNegative, 3);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = digits[0];
             mMantissa[startIndex + 1] = U'.';
             mMantissa[startIndex + 2] = U'0';
@@ -303,21 +334,32 @@ void FormattedFloatingDecimal::FillCompatible(
         // decExponent has 1, 2, or 3, digits
         if (e < 9) {
             mExponent = Create(isNegExp, 1);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mExponent[expStartIndex] = (Char)(e + U'0');
         }
         else if (e <= 99) {
             mExponent = Create(isNegExp, 2);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mExponent[expStartIndex] = (Char)(e / 10 + U'0');
             mExponent[expStartIndex + 1] = (Char)(e % 10 + U'0');
         }
         else {
             mExponent = Create(isNegExp, 3);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mExponent[expStartIndex] = (Char)(e / 100 + U'0');
             e %= 100;
             mExponent[expStartIndex + 1] = (Char)(e / 10 + U'0');
             mExponent[expStartIndex + 2] = (Char)(e % 10 + U'0');
         }
     }
+
+    return NOERROR;
 }
 
 Array<Char> FormattedFloatingDecimal::Create(
@@ -334,7 +376,7 @@ Array<Char> FormattedFloatingDecimal::Create(
     }
 }
 
-void FormattedFloatingDecimal::FillDecimal(
+ECode FormattedFloatingDecimal::FillDecimal(
     /* [in] */ Integer precision,
     /* [out] */ Array<Char>& digits,
     /* [in] */ Integer nDigits,
@@ -345,6 +387,9 @@ void FormattedFloatingDecimal::FillDecimal(
     if (exp > 0) {
         if (nDigits < exp) {
             mMantissa = Create(isNegative, exp);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa.Copy(startIndex, digits, 0, nDigits);
             Arrays::Fill(mMantissa, startIndex + nDigits, startIndex + exp, U'0');
             // Do not append ".0" for formatted floats since the user
@@ -354,6 +399,9 @@ void FormattedFloatingDecimal::FillDecimal(
         else {
             Integer t = Math::Min(nDigits - exp, precision);
             mMantissa = Create(isNegative, exp + (t > 0 ? (t + 1) : 0));
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa.Copy(startIndex, digits, 0, exp);
             // Do not append ".0" for formatted floats since the user
             // may request that it be omitted. It is added as necessary
@@ -370,6 +418,9 @@ void FormattedFloatingDecimal::FillDecimal(
         // write '0' s before the significant digits
         if (zeros > 0) {
             mMantissa = Create(isNegative, zeros + 2 + t);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = U'0';
             mMantissa[startIndex + 1] = U'.';
             Arrays::Fill(mMantissa, startIndex + 2, startIndex + 2 + zeros, U'0');
@@ -380,6 +431,9 @@ void FormattedFloatingDecimal::FillDecimal(
         }
         else if (t > 0) {
             mMantissa = Create(isNegative, zeros + 2 + t);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = U'0';
             mMantissa[startIndex + 1] = U'.';
             // copy only when significant digits are within the precision
@@ -387,12 +441,17 @@ void FormattedFloatingDecimal::FillDecimal(
         }
         else {
             mMantissa = Create(isNegative, 1);
+            if (mMantissa.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             mMantissa[startIndex] = U'0';
         }
     }
+
+    return NOERROR;
 }
 
-void FormattedFloatingDecimal::FillScientific(
+ECode FormattedFloatingDecimal::FillScientific(
     /* [in] */ Integer precision,
     /* [out] */ Array<Char>& digits,
     /* [in] */ Integer nDigits,
@@ -403,12 +462,18 @@ void FormattedFloatingDecimal::FillScientific(
     Integer t = Math::Max(0, Math::Min(nDigits - 1, precision));
     if (t > 0) {
         mMantissa = Create(isNegative, t + 2);
+        if (mMantissa.IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
+
         mMantissa[startIndex] = digits[0];
         mMantissa[startIndex + 1] = U'.';
         mMantissa.Copy(startIndex + 2, digits, 1, t);
     }
     else {
         mMantissa = Create(isNegative, 1);
+        if (mMantissa.IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
+
         mMantissa[startIndex] = digits[0];
     }
     Char expSign;
@@ -434,7 +499,9 @@ void FormattedFloatingDecimal::FillScientific(
         mExponent = { expSign, hiExpChar, (Char)(e / 10 + U'0'),
                 (Char)(e % 10 + U'0') };
     }
+
+    return NOERROR;
 }
 
-}
-}
+} // namespace misc
+} // namespace como

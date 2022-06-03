@@ -88,7 +88,7 @@ private:
     DoubleConsts();
 };
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_DOUBLECONSTS_H__

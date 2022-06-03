@@ -487,7 +487,7 @@ void FloatingDecimal::BinaryToASCIIBuffer::Dtoa(
             // Thus we will need more than one digit if we're using
             // E-form
             //
-            if (!isCompatibleFormat ||decExp < -3 || decExp >= 8) {
+            if (!isCompatibleFormat || decExp < -3 || decExp >= 8) {
                 high = low = false;
             }
             while(!low && !high) {
@@ -1538,37 +1538,43 @@ const Integer FloatingDecimal::NAN_LENGTH = FloatingDecimal::NAN_REP.GetLength()
 AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::Get_B2AC_POSITIVE_INFINITY()
 {
     static const AutoPtr<IFloatingDecimalBinaryToASCIIConverter> B2AC_POSITIVE_INFINITY =
-            new ExceptionalBinaryToASCIIBuffer(INFINITY_REP, false);
+                                    new ExceptionalBinaryToASCIIBuffer(INFINITY_REP, false);
     return B2AC_POSITIVE_INFINITY;
 }
 
 AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::Get_B2AC_NEGATIVE_INFINITY()
 {
     static const AutoPtr<IFloatingDecimalBinaryToASCIIConverter> B2AC_NEGATIVE_INFINITY =
-            new ExceptionalBinaryToASCIIBuffer(String("-") + INFINITY_REP, true);
+                    new ExceptionalBinaryToASCIIBuffer(String("-") + INFINITY_REP, true);
     return B2AC_NEGATIVE_INFINITY;
 }
 
 AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::Get_B2AC_NOT_A_NUMBER()
 {
     static const AutoPtr<IFloatingDecimalBinaryToASCIIConverter> B2AC_NOT_A_NUMBER =
-            new ExceptionalBinaryToASCIIBuffer(NAN_REP, false);
+                                    new ExceptionalBinaryToASCIIBuffer(NAN_REP, false);
     return B2AC_NOT_A_NUMBER;
 }
 
 AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::Get_B2AC_POSITIVE_ZERO()
 {
     static Array<Char> digits{ U'0' };
+    if (digits.IsNull())
+        return nullptr;
+
     static const AutoPtr<IFloatingDecimalBinaryToASCIIConverter> B2AC_POSITIVE_ZERO =
-            new BinaryToASCIIBuffer(false, digits);
+                                                new BinaryToASCIIBuffer(false, digits);
     return B2AC_POSITIVE_ZERO;
 }
 
 AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::Get_B2AC_NEGATIVE_ZERO()
 {
     static Array<Char> digits{ U'0' };
+    if (digits.IsNull())
+        return nullptr;
+
     static const AutoPtr<IFloatingDecimalBinaryToASCIIConverter> B2AC_NEGATIVE_ZERO =
-            new BinaryToASCIIBuffer(true, digits);
+                                                new BinaryToASCIIBuffer(true, digits);
     return B2AC_NEGATIVE_ZERO;
 }
 
@@ -1589,21 +1595,21 @@ AutoPtr<IFloatingDecimalASCIIToBinaryConverter> FloatingDecimal::Get_A2BC_NEGATI
 AutoPtr<IFloatingDecimalASCIIToBinaryConverter> FloatingDecimal::Get_A2BC_NOT_A_NUMBER()
 {
     static AutoPtr<IFloatingDecimalASCIIToBinaryConverter> A2BC_NOT_A_NUMBER =
-            new PreparedASCIIToBinaryBuffer(IDouble::NaN, IFloat::NaN);
+                        new PreparedASCIIToBinaryBuffer(IDouble::NaN, IFloat::NaN);
     return A2BC_NOT_A_NUMBER;
 }
 
 AutoPtr<IFloatingDecimalASCIIToBinaryConverter> FloatingDecimal::Get_A2BC_POSITIVE_ZERO()
 {
     static AutoPtr<IFloatingDecimalASCIIToBinaryConverter> A2BC_POSITIVE_ZERO =
-            new PreparedASCIIToBinaryBuffer(0.0, 0.0f);
+                                        new PreparedASCIIToBinaryBuffer(0.0, 0.0f);
     return A2BC_POSITIVE_ZERO;
 }
 
 AutoPtr<IFloatingDecimalASCIIToBinaryConverter> FloatingDecimal::Get_A2BC_NEGATIVE_ZERO()
 {
     static AutoPtr<IFloatingDecimalASCIIToBinaryConverter> A2BC_NEGATIVE_ZERO =
-            new PreparedASCIIToBinaryBuffer(-0.0, -0.0f);
+                                    new PreparedASCIIToBinaryBuffer(-0.0, -0.0f);
     return A2BC_NEGATIVE_ZERO;
 }
 
@@ -2362,13 +2368,17 @@ ECode FloatingDecimal::ParseHexString(
                 floatBits |= FloatConsts::EXP_BIT_MASK;
             }
             else {
-                Integer threshShift = DoubleConsts::SIGNIFICAND_WIDTH - FloatConsts::SIGNIFICAND_WIDTH - 1;
-                Boolean floatSticky = (significand & ((1LL << threshShift) - 1)) != 0 || round || sticky;
+                Integer threshShift = DoubleConsts::SIGNIFICAND_WIDTH -
+                                             FloatConsts::SIGNIFICAND_WIDTH - 1;
+                Boolean floatSticky = (significand & ((1LL << threshShift) - 1))
+                                                        != 0 || round || sticky;
+
                 Integer iValue = (Integer)(((ULong)significand) >> threshShift);
                 if ((iValue & 3) != 1 || floatSticky) {
                     iValue++;
                 }
-                floatBits |= (((((Integer)exponent) + (FloatConsts::EXP_BIAS - 1))) << SINGLE_EXP_SHIFT) + (iValue >> 1);
+                floatBits |= (((((Integer)exponent) + (FloatConsts::EXP_BIAS - 1)))
+                                              << SINGLE_EXP_SHIFT) + (iValue >> 1);
             }
         }
         else {
@@ -2377,9 +2387,12 @@ ECode FloatingDecimal::ParseHexString(
             }
             else {
                 // exponent == -127 ==> threshShift = 53 - 2 + (-149) - (-127) = 53 - 24
-                Integer threshShift = (Integer)((DoubleConsts::SIGNIFICAND_WIDTH - 2 + FloatConsts::MIN_SUB_EXPONENT) - exponent);
+                Integer threshShift = (Integer)((DoubleConsts::SIGNIFICAND_WIDTH -
+                                    2 + FloatConsts::MIN_SUB_EXPONENT) - exponent);
+
                 CHECK(threshShift >= DoubleConsts::SIGNIFICAND_WIDTH - FloatConsts::SIGNIFICAND_WIDTH);
                 CHECK(threshShift < DoubleConsts::SIGNIFICAND_WIDTH);
+
                 Boolean floatSticky = (significand & ((1LL << threshShift) - 1)) != 0 || round || sticky;
                 Integer iValue = (Integer)(((ULong)significand) >> threshShift);
                 if ((iValue & 3) != 1 || floatSticky) {
@@ -2413,11 +2426,10 @@ ECode FloatingDecimal::ParseHexString(
                 // exponent correctly, even in the case of
                 // Double.MAX_VALUE overflowing to infinity.
 
-                significand = ((( exponent +
-                        (Long)DoubleConsts::EXP_BIAS) <<
-                        (DoubleConsts::SIGNIFICAND_WIDTH - 1))
-                        & DoubleConsts::EXP_BIT_MASK) |
-                        (DoubleConsts::SIGNIF_BIT_MASK & significand);
+                significand = ( ((exponent + (Long)DoubleConsts::EXP_BIAS) <<
+                                (DoubleConsts::SIGNIFICAND_WIDTH - 1)) &
+                              DoubleConsts::EXP_BIT_MASK)
+                              | (DoubleConsts::SIGNIF_BIT_MASK & significand);
 
             }
             else {  // Subnormal or zero
@@ -2498,8 +2510,7 @@ ECode FloatingDecimal::ParseHexString(
             // x1.11        x1. + 1
             //
             Boolean leastZero = ((significand & 1LL) == 0LL);
-            if ((leastZero && round && sticky) ||
-                    ((!leastZero) && round)) {
+            if ((leastZero && round && sticky) || ((!leastZero) && round)) {
                 significand++;
             }
 
@@ -2518,7 +2529,7 @@ String FloatingDecimal::StripLeadingZeros(
     /* [in] */ const String& s)
 {
     if (!s.IsEmpty() && s.GetChar(0) == U'0') {
-        for (Integer i = 1; i < s.GetLength(); i++) {
+        for (Integer i = 1;  i < s.GetLength();  i++) {
             if (s.GetChar(i) != U'0') {
                 return s.Substring(i);
             }
@@ -2542,5 +2553,5 @@ ECode FloatingDecimal::GetHexDigit(
     return NOERROR;
 }
 
-}
-}
+} // namespace misc
+} // namespace como

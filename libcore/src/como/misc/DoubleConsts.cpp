@@ -28,5 +28,5 @@ const Double DoubleConsts::NaN = IDouble::NaN;
 const Double DoubleConsts::MAX_VALUE = IDouble::MAX_VALUE;
 const Double DoubleConsts::MIN_VALUE = IDouble::MIN_VALUE;
 
-}
-}
+} // namespace misc
+} // namespace como

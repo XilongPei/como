@@ -91,7 +91,7 @@ private:
     FloatConsts();
 };
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_FLOATCONSTS_H__

@@ -28,5 +28,5 @@ const Float FloatConsts::NaN = IFloat::NaN;
 const Float FloatConsts::MAX_VALUE = IFloat::MAX_VALUE;
 const Float FloatConsts::MIN_VALUE = IFloat::MIN_VALUE;
 
-}
-}
+} // namespace misc
+} // namespace como

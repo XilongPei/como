@@ -42,9 +42,13 @@ constexpr Long FDBigInteger::LONG_5_POW[];
 
 static AutoPtr<IFDBigInteger> CreateZERO()
 {
-    Array<Integer> data(0);
+    Array<Integer> data;
+
     AutoPtr<IFDBigInteger> value;
-    CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&value);
+    ECode ec = CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&value);
+    if (FAILED(ec))
+        return nullptr;
+
     value->MakeImmutable();
     return value;
 }
@@ -64,8 +68,19 @@ static Array<IFDBigInteger*> CreatePOW_5_CACHE(
     Integer i = 0;
     while (i < small_5_pow_len) {
         Array<Integer> data{ small_5_pow[i] };
+        if (data.IsNull()) {
+            // return an NULL array
+            array.Clear();
+            return array;
+        }
+
         AutoPtr<IFDBigInteger> pow5;
-        CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&pow5);
+        ECode ec = CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&pow5);
+        if (FAILED(ec)) {
+            // return an NULL array
+            return array;
+        }
+
         pow5->MakeImmutable();
         array.Set(i, pow5);
         i++;
@@ -83,7 +98,7 @@ static Array<IFDBigInteger*> CreatePOW_5_CACHE(
 const Array<IFDBigInteger*>& FDBigInteger::GetPOW_5_CACHE()
 {
     static const Array<IFDBigInteger*> POW_5_CACHE = CreatePOW_5_CACHE(
-            MAX_FIVE_POW, SMALL_5_POW, ArrayLength(SMALL_5_POW));
+                            MAX_FIVE_POW, SMALL_5_POW, ArrayLength(SMALL_5_POW));
     return POW_5_CACHE;
 }
 
@@ -108,6 +123,9 @@ ECode FDBigInteger::Constructor(
 {
     Integer n = Math::Max((nDigits + 8) / 9, 2);
     mData = Array<Integer>(n);
+    if (mData.IsNull())
+        return E_OUT_OF_MEMORY_ERROR;
+
     mData[0] = lValue;
     mData[1] = (((ULong)lValue) >> 32);
     mOffset = 0;
@@ -140,6 +158,8 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfPow52(
     /* [in] */ Integer p5,
     /* [in] */ Integer p2)
 {
+    ECode ec;
+
     if (p5 != 0) {
         if (p2 == 0) {
             return (IFDBigInteger*)Big5pow(p5).Get();
@@ -150,14 +170,26 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfPow52(
             Integer bitcount = p2 & 0x1f;
             if (bitcount == 0) {
                 Array<Integer> data{ pow5 };
+                if (data.IsNull())
+                    return nullptr;
+
                 AutoPtr<IFDBigInteger> value;
-                CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+                ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+                if (FAILED(ec))
+                    return nullptr;
+
                 return value;
             } else {
                 Array<Integer> data{ pow5 << bitcount,
-                        (Integer)(((UInteger)pow5) >> (32 - bitcount))};
+                                (Integer)(((UInteger)pow5) >> (32 - bitcount))};
+                if (data.IsNull())
+                    return nullptr;
+
                 AutoPtr<IFDBigInteger> value;
-                CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+                ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+                if (FAILED(ec))
+                    return nullptr;
+
                 return value;
             }
         } else {
@@ -176,8 +208,11 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
     /* [in] */ Integer p5,
     /* [in] */ Integer p2)
 {
+    ECode ec;
+
     CHECK(p5 >= 0);
     CHECK(P2 >= 0);
+
     Integer v0 = value;
     Integer v1 = (((ULong)value) >> 32);
     Integer wordcount = p2 >> 5;
@@ -193,8 +228,14 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
             Integer v2 = (Integer)(((ULong)carry) >> 32);
             if (bitcount == 0) {
                 Array<Integer> data{ v0, v1, v2 };
+                if (data.IsNull())
+                    return nullptr;
+
                 AutoPtr<IFDBigInteger> fdValue;
-                CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+                ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+                if (FAILED(ec))
+                    return nullptr;
+
                 return fdValue;
             }
             else {
@@ -203,8 +244,14 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
                     (v1 << bitcount) | (Integer)(((UInteger)v0) >> (32 - bitcount)),
                     (v2 << bitcount) | (Integer)(((UInteger)v1) >> (32 - bitcount)),
                     (Integer)(((UInteger)v2) >> (32 - bitcount)) };
+                if (data.IsNull())
+                    return nullptr;
+
                 AutoPtr<IFDBigInteger> fdValue;
-                CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+                ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+                if (FAILED(ec))
+                    return nullptr;
+
                 return fdValue;
             }
         }
@@ -219,8 +266,14 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
                 r = Array<Integer>(pow5->mNWords + 2 + ((p2 != 0) ? 1 : 0));
                 Mult(pow5->mData, pow5->mNWords, v0, v1, r);
             }
+            if (r.IsNull())
+                return nullptr;
+
             AutoPtr<IFDBigInteger> tmpValue, fdValue;
-            CFDBigInteger::New(r, pow5->mOffset, IID_IFDBigInteger, (IInterface**)&tmpValue);
+            ec = CFDBigInteger::New(r, pow5->mOffset, IID_IFDBigInteger, (IInterface**)&tmpValue);
+            if (FAILED(ec))
+                return nullptr;
+
             tmpValue->LeftShift(p2, fdValue);
             return fdValue;
         }
@@ -228,8 +281,14 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
     else if (p2 != 0) {
         if (bitcount == 0) {
             Array<Integer> data{ v0, v1 };
+            if (data.IsNull())
+                return nullptr;
+
             AutoPtr<IFDBigInteger> fdValue;
-            CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+            ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+            if (FAILED(ec))
+                return nullptr;
+
             return fdValue;
         }
         else {
@@ -237,14 +296,26 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfMulPow52(
                 v0 << bitcount,
                 (v1 << bitcount) | (Integer)(((UInteger)v0) >> (32 - bitcount)),
                 (Integer)(((UInteger)v1) >> (32 - bitcount)) };
+            if (data.IsNull())
+                return nullptr;
+
             AutoPtr<IFDBigInteger> fdValue;
             CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&fdValue);
+            if (FAILED(ec))
+                return nullptr;
+
             return fdValue;
         }
     }
     Array<Integer> data{ v0, v1 };
+    if (data.IsNull())
+        return nullptr;
+
     AutoPtr<IFDBigInteger> fdValue;
-    CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&fdValue);
+    ec = CFDBigInteger::New(data, 0, IID_IFDBigInteger, (IInterface**)&fdValue);
+    if (FAILED(ec))
+        return nullptr;
+
     return fdValue;
 };
 
@@ -255,8 +326,14 @@ AutoPtr<IFDBigInteger> FDBigInteger::ValueOfPow2(
     Integer wordcount = p2 >> 5;
     Integer bitcount = p2 & 0x1f;
     Array<Integer> data{ 1 << bitcount };
+    if (data.IsNull())
+        return nullptr;
+
     AutoPtr<IFDBigInteger> value;
-    CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+    ECode ec = CFDBigInteger::New(data, wordcount, IID_IFDBigInteger, (IInterface**)&value);
+    if (FAILED(ec))
+        return nullptr;
+
     return value;
 }
 
@@ -312,6 +389,7 @@ ECode FDBigInteger::LeftShift(
         value = this;
         return NOERROR;
     }
+
     Integer wordcount = shift >> 5;
     Integer bitcount = shift & 0x1f;
     if (mIsImmutable) {
@@ -326,6 +404,7 @@ ECode FDBigInteger::LeftShift(
             Integer idx = mNWords - 1;
             Integer prev = mData[idx];
             Integer hi = ((UInteger)prev) >> anticount;
+
             Array<Integer> result;
             if (hi != 0) {
                 result = Array<Integer>(mNWords + 1);
@@ -334,6 +413,9 @@ ECode FDBigInteger::LeftShift(
             else {
                 result = Array<Integer>(mNWords);
             }
+            if (result.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             LeftShift(mData, idx, result, bitcount, anticount, prev);
             value = nullptr;
             return CFDBigInteger::New(result, mOffset + wordcount, IID_IFDBigInteger, (IInterface**)&value);
@@ -345,7 +427,7 @@ ECode FDBigInteger::LeftShift(
             if ((mData[0] << bitcount) == 0) {
                 Integer idx = 0;
                 Integer prev = mData[idx];
-                for (; idx < mNWords - 1; idx++) {
+                for (;  idx < mNWords - 1;  idx++) {
                     Integer v = ((UInteger)prev) >> anticount;
                     prev = mData[idx + 1];
                     v |= (prev << bitcount);
@@ -367,6 +449,9 @@ ECode FDBigInteger::LeftShift(
                 if (hi != 0) {
                     if (mNWords == mData.GetLength()) {
                         result = Array<Integer>(mNWords + 1);
+                        if (result.IsNull())
+                            return E_OUT_OF_MEMORY_ERROR;
+
                         mData = result;
                     }
                     result[mNWords++] = hi;
@@ -500,17 +585,28 @@ ECode FDBigInteger::MultByPow52(
         Integer extraSize = (p2 != 0) ? 1 : 0;
         if (p5 < ArrayLength(SMALL_5_POW)) {
             r = Array<Integer>(mNWords + 1 + extraSize);
+            if (r.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             Mult(mData, mNWords, SMALL_5_POW[p5], r);
+
             AutoPtr<IFDBigInteger> fdValue;
-            CFDBigInteger::New(r, mOffset, IID_IFDBigInteger, (IInterface**)&fdValue);
+            FAIL_RETURN(CFDBigInteger::New(r, mOffset, IID_IFDBigInteger,
+                                                       (IInterface**)&fdValue));
             res = std::move(fdValue);
         }
         else {
             AutoPtr<FDBigInteger> pow5 = From(Big5pow(p5));
             r = Array<Integer>(mNWords + pow5->Size() + extraSize);
+            if (r.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             Mult(mData, mNWords, pow5->mData, pow5->mNWords, r);
+
             AutoPtr<IFDBigInteger> fdValue;
-            CFDBigInteger::New(r, mOffset + pow5->mOffset, IID_IFDBigInteger, (IInterface**)&fdValue);
+            FAIL_RETURN(CFDBigInteger::New(r, mOffset + pow5->mOffset,
+                                    IID_IFDBigInteger, (IInterface**)&fdValue));
+
             res = std::move(fdValue);
         }
     }
@@ -524,10 +620,10 @@ void FDBigInteger::Mult(
     /* [in] */ Integer s2Len,
     /* [out] */ Array<Integer>& dst)
 {
-    for (Integer i = 0; i < s1Len; i++) {
+    for (Integer i = 0;  i < s1Len;  i++) {
         Long v = s1[i] & LONG_MASK;
         Long p = 0;
-        for (Integer j = 0; j < s2Len; j++) {
+        for (Integer j = 0;  j < s2Len;  j++) {
             p += (dst[i + j] & LONG_MASK) + v * (s2[j] & LONG_MASK);
             dst[i + j] = p;
             p = ((ULong)p) >> 32;
@@ -541,13 +637,16 @@ ECode FDBigInteger::LeftInplaceSub(
     /* [out] */ AutoPtr<IFDBigInteger>& value)
 {
     CHECK(Size() >= From(subtrahend)->Size());
+
     AutoPtr<IFDBigInteger> minuend;
     if (mIsImmutable) {
-        CFDBigInteger::New(mData.Clone(), mOffset, IID_IFDBigInteger, (IInterface**)&minuend);
+        FAIL_RETURN(CFDBigInteger::New(mData.Clone(), mOffset, IID_IFDBigInteger,
+                                                        (IInterface**)&minuend));
     }
     else {
         minuend = this;
     }
+
     Integer offsetDiff = From(subtrahend)->mOffset - From(minuend)->mOffset;
     Array<Integer> subData = From(subtrahend)->mData;
     Array<Integer> minData = From(minuend)->mData;
@@ -594,15 +693,18 @@ ECode FDBigInteger::RightInplaceSub(
     /* [out] */ AutoPtr<IFDBigInteger>& value)
 {
     CHECK(Size() > From(subtrahend)->Size());
+
     AutoPtr<IFDBigInteger> minuend = this;
     AutoPtr<IFDBigInteger> newSubtrahend;
     if (From(subtrahend)->mIsImmutable) {
-        CFDBigInteger::New(From(subtrahend)->mData.Clone(), From(subtrahend)->mOffset,
-                IID_IFDBigInteger, (IInterface**)&newSubtrahend);
+        FAIL_RETURN(CFDBigInteger::New(From(subtrahend)->mData.Clone(),
+                    From(subtrahend)->mOffset,
+                    IID_IFDBigInteger, (IInterface**)&newSubtrahend));
     }
     else {
         newSubtrahend = subtrahend;
     }
+
     Integer offsetDiff = From(minuend)->mOffset - From(newSubtrahend)->mOffset;
     Array<Integer> subData = From(newSubtrahend)->mData;
     Array<Integer> minData = From(minuend)->mData;
@@ -822,10 +924,18 @@ AutoPtr<IFDBigInteger> FDBigInteger::Mult(
     if (mNWords == 0) {
         return this;
     }
+
     Array<Integer> r(mNWords + 1);
+    if (r.IsNull())
+        return nullptr;
+
     Mult(mData, mNWords, i, r);
+
     AutoPtr<IFDBigInteger> value;
-    CFDBigInteger::New(r, mOffset, IID_IFDBigInteger, (IInterface**)&value);
+    ECode ec = CFDBigInteger::New(r, mOffset, IID_IFDBigInteger, (IInterface**)&value);
+    if (FAILED(ec))
+        return nullptr;
+
     return value;
 }
 
@@ -844,10 +954,19 @@ AutoPtr<IFDBigInteger> FDBigInteger::Mult(
     if (From(other)->Size() == 1) {
         return Mult(From(other)->mData[0]);
     }
+
     Array<Integer> r(mNWords + From(other)->mNWords);
+    if (r.IsNull())
+        return nullptr;
+
     Mult(mData, mNWords, From(other)->mData, From(other)->mNWords, r);
+
     AutoPtr<IFDBigInteger> value;
-    CFDBigInteger::New(r, mOffset + From(other)->mOffset, IID_IFDBigInteger, (IInterface**)&value);
+    ECode ec = CFDBigInteger::New(r, mOffset + From(other)->mOffset,
+                                        IID_IFDBigInteger, (IInterface**)&value);
+    if (FAILED(ec))
+        return nullptr;
+
     return value;
 }
 
@@ -870,23 +989,35 @@ AutoPtr<IFDBigInteger> FDBigInteger::Add(
         small = this;
         smallLen = tSize;
     }
+
     Array<Integer> r(bigLen + 1);
+    if (r.IsNull())
+        return nullptr;
+
     Integer i = 0;
     Long carry = 0;
-    for (; i < smallLen; i++) {
-        carry += (i < From(big)->mOffset ? 0 : (From(big)->mData[i - From(big)->mOffset] & LONG_MASK))
-                + (i < From(small)->mOffset ? 0 : (From(small)->mData[i - From(small)->mOffset] & LONG_MASK));
+    for (;  i < smallLen;  i++) {
+        carry += (i < From(big)->mOffset ? 0 :
+                        (From(big)->mData[i - From(big)->mOffset] & LONG_MASK))
+                 +
+                 (i < From(small)->mOffset ? 0 :
+                    (From(small)->mData[i - From(small)->mOffset] & LONG_MASK));
         r[i] = carry;
         carry = carry >> 32; // signed shift.
     }
     for (; i < bigLen; i++) {
-        carry += (i < From(big)->mOffset ? 0 : (From(big)->mData[i - From(big)->mOffset] & LONG_MASK));
+        carry += (i < From(big)->mOffset ? 0 :
+                        (From(big)->mData[i - From(big)->mOffset] & LONG_MASK));
         r[i] = carry;
         carry = carry >> 32; // signed shift.
     }
     r[bigLen] = carry;
+
     AutoPtr<IFDBigInteger> fdValue;
-    CFDBigInteger::New(r, 0, IID_IFDBigInteger, (IInterface**)&fdValue);
+    ECode ec = CFDBigInteger::New(r, 0, IID_IFDBigInteger, (IInterface**)&fdValue);
+    if (FAILED(ec))
+        return nullptr;
+
     return fdValue;
 }
 
@@ -919,7 +1050,8 @@ Long FDBigInteger::MultDiffMe(
         if (deltaSize >= 0) {
             Array<Integer> sd = From(s)->mData;
             Array<Integer> td = mData;
-            for (Integer sIndex = 0, tIndex = deltaSize; sIndex < From(s)->mNWords; sIndex++, tIndex++) {
+            for (Integer sIndex = 0, tIndex = deltaSize;
+                               sIndex < From(s)->mNWords;  sIndex++, tIndex++) {
                 diff += (td[tIndex] & LONG_MASK) - q * (sd[sIndex] & LONG_MASK);
                 td[tIndex] = diff;
                 diff = diff >> 32; // signed shift.
@@ -931,7 +1063,7 @@ Long FDBigInteger::MultDiffMe(
             Integer sIndex = 0;
             Integer rIndex = 0;
             Array<Integer> sd = From(s)->mData;
-            for (; rIndex < deltaSize && sIndex < From(s)->mNWords; sIndex++, rIndex++) {
+            for (;  rIndex < deltaSize && sIndex < From(s)->mNWords;  sIndex++, rIndex++) {
                 diff -= q * (sd[sIndex] & LONG_MASK);
                 rd[rIndex] = diff;
                 diff = diff >> 32; // signed shift.
@@ -973,7 +1105,7 @@ void FDBigInteger::Mult(
 {
     Long val = value & LONG_MASK;
     Long carry = 0;
-    for (Integer i = 0; i < srcLen; i++) {
+    for (Integer i = 0;  i < srcLen;  i++) {
         Long product = (src[i] & LONG_MASK) * val + carry;
         dst[i] = product;
         carry = ((ULong)product) >> 32;
@@ -990,7 +1122,7 @@ void FDBigInteger::Mult(
 {
     Long v = v0 & LONG_MASK;
     Long carry = 0;
-    for (Integer j = 0; j < srcLen; j++) {
+    for (Integer j = 0;  j < srcLen;  j++) {
         Long product = v * (src[j] & LONG_MASK) + carry;
         dst[j] = product;
         carry = ((ULong)product) >> 32;
@@ -998,7 +1130,7 @@ void FDBigInteger::Mult(
     dst[srcLen] = carry;
     v = v1 & LONG_MASK;
     carry = 0;
-    for (Integer j = 0; j < srcLen; j++) {
+    for (Integer j = 0;  j < srcLen;  j++) {
         Long product = (dst[j + 1] & LONG_MASK) + v * (src[j] & LONG_MASK) + carry;
         dst[j + 1] = product;
         carry = ((ULong)product) >> 32;
@@ -1048,16 +1180,17 @@ ECode FDBigInteger::ToHexString(
         return NOERROR;
     }
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New((mNWords + mOffset) * 8, IID_IStringBuilder, (IInterface**)&sb);
-    for (Integer i = mNWords - 1; i >= 0; i--) {
+    FAIL_RETURN(CStringBuilder::New((mNWords + mOffset) * 8, IID_IStringBuilder,
+                                                            (IInterface**)&sb));
+    for (Integer i = mNWords - 1;  i >= 0;  i--) {
         String subStr = StringUtils::ToHexString(mData[i]);
         for (Integer j = subStr.GetLength(); j < 8; j++) {
-            sb->Append(U'0');
+            FAIL_RETURN(sb->Append(U'0'));
         }
-        sb->Append(subStr);
+        FAIL_RETURN(sb->Append(subStr));
     }
     for (Integer i = mOffset; i > 0; i--) {
-        sb->Append("00000000");
+        FAIL_RETURN(sb->Append("00000000"));
     }
     return sb->ToString(str);
 }
@@ -1074,7 +1207,7 @@ ECode FDBigInteger::ToBigInteger(
         magnitude[magnitude.GetLength() - 4 * i - 4] = (w >> 24);
     }
     AutoPtr<IBigInteger> bi;
-    CBigInteger::New(magnitude, IID_IBigInteger, (IInterface**)&bi);
+    FAIL_RETURN(CBigInteger::New(magnitude, IID_IBigInteger, (IInterface**)&bi));
     return bi->ShiftLeft(mOffset * 32, value);
 }
 
@@ -1086,5 +1219,5 @@ ECode FDBigInteger::ToString(
     return IObject::Probe(value)->ToString(str);
 }
 
-}
-}
+} // namespace misc
+} // namespace como

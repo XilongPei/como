@@ -413,7 +413,7 @@ AutoPtr<IFloatingDecimalBinaryToASCIIConverter> FloatingDecimal::GetBinaryToASCI
     return GetBinaryToASCIIConverter(d, true);
 }
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_FLOATINGDECIMAL_H__

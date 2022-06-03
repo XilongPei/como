@@ -64,7 +64,7 @@ private:
         /* [in] */ Integer nDigits,
         /* [in] */ Integer prec);
 
-    void FillCompatible(
+    ECode FillCompatible(
         /* [in] */ Integer precision,
         /* [out] */ Array<Char>& digits,
         /* [in] */ Integer nDigits,
@@ -75,14 +75,14 @@ private:
         /* [in] */ Boolean isNegative,
         /* [in] */ Integer size);
 
-    void FillDecimal(
+    ECode FillDecimal(
         /* [in] */ Integer precision,
         /* [out] */ Array<Char>& digits,
         /* [in] */ Integer nDigits,
         /* [in] */ Integer exp,
         /* [in] */ Boolean isNegative);
 
-    void FillScientific(
+    ECode FillScientific(
         /* [in] */ Integer precision,
         /* [out] */ Array<Char>& digits,
         /* [in] */ Integer nDigits,
@@ -97,7 +97,7 @@ private:
     Array<Char> mExponent;
 };
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_FORMATTEDFLOATINGDECIMAL_H__

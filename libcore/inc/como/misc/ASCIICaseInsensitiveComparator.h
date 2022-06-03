@@ -33,7 +33,7 @@ public:
     }
 };
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_ASCIICASEINSENSITIVECOMPARATOR_H__

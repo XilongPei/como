@@ -38,7 +38,7 @@ public:
     using _CFDBigInteger::New;
 };
 
-}
-}
+} // namespace misc
+} // namespace como
 
 #endif // __COMO_MISC_CFDBIGINTEGER_H__
