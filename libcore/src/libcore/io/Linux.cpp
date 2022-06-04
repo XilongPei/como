@@ -14,16 +14,40 @@
 // limitations under the License.
 //=========================================================================
 
+#include <arpa/inet.h>
+#include <errno.h>
+#include <ifaddrs.h>
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netpacket/packet.h>
+#include <poll.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <sys/socket.h>
+#include <sys/syscall.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
+#include <sys/xattr.h>
+#include <termios.h>
+#include <unistd.h>
+#include <memory>
 #include "como/io/CFileDescriptor.h"
 #include "libcore/io/AsynchronousCloseMonitor.h"
 #include "libcore/io/Linux.h"
 #include "jing/system/CStructStat.h"
 #include <comolog.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 using como::io::CFileDescriptor;
 using como::io::E_INTERRUPTED_IO_EXCEPTION;
@@ -80,6 +104,52 @@ namespace io {
     }                                                                                           \
     _rc; })
 
+/**
+ * Used to retry networking system calls that can be interrupted with a signal. Unlike
+ * TEMP_FAILURE_RETRY, this also handles the case where
+ * AsynchronousCloseMonitor::signalBlockedThreads(fd) is used to signal a close() or
+ * Thread.interrupt(). Other signals that result in an EINTR result are ignored and the system call
+ * is retried.
+ *
+ * Returns the result of the system call though a Java exception will be pending if the result is
+ * -1:  a SocketException if signaled via AsynchronousCloseMonitor, or ErrnoException for other
+ * failures.
+ */
+#define NET_FAILURE_RETRY(outEc, return_type, syscall_name, fdObj, ...) ({                      \
+    return_type _rc = -1;                                                                       \
+    int _syscallErrno;                                                                          \
+    do {                                                                                        \
+        bool _wasSignaled;                                                                      \
+        {                                                                                       \
+            int _fd;                                                                            \
+            AsynchronousCloseMonitor _monitor(_fd);                                             \
+            _rc = syscall_name(_fd, __VA_ARGS__);                                               \
+            _syscallErrno = errno;                                                              \
+            _wasSignaled = _monitor.WasSignaled();                                              \
+        }                                                                                       \
+        if (_wasSignaled) {                                                                     \
+            Logger::E("Linux", #syscall_name " Socket closed");                                 \
+            *outEc = E_INTERRUPTED_IO_EXCEPTION;                                                \
+            _rc = -1;                                                                           \
+            break;                                                                              \
+        }                                                                                       \
+        if (_rc == -1 && _syscallErrno != EINTR) {                                              \
+            /* TODO: with a format string we could show the arguments too, like strace(1). */   \
+            *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff);                                  \
+            break;                                                                              \
+        }                                                                                       \
+    } while (_rc == -1); /* _syscallErrno == EINTR && !_wasSignaled */                          \
+    if (_rc == -1) {                                                                            \
+        /* If the syscall failed, re-set errno: throwing an exception might have modified it.*/ \
+        errno = _syscallErrno;                                                                  \
+        *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff);                                      \
+    }                                                                                           \
+    else {                                                                                      \
+        *outEc = NOERROR;                                                                       \
+    }                                                                                           \
+    _rc; })
+
+
 COMO_INTERFACE_IMPL_1(Linux, SyncObject, IOs);
 
 ECode Linux::Accept(
@@ -87,6 +157,14 @@ ECode Linux::Accept(
     /* [in] */ ISocketAddress* peerAddress,
     /* [out] */ IFileDescriptor** retFd)
 {
+    ECode outEc;
+
+    sockaddr_storage ss;
+    socklen_t sl = sizeof(ss);
+    memset(&ss, 0, sizeof(ss));
+    sockaddr* peer = (peerAddress != nullptr) ? reinterpret_cast<sockaddr*>(&ss) : nullptr;
+    socklen_t* peerLength = (peerAddress != nullptr) ? &sl : 0;
+    int clientFd = NET_FAILURE_RETRY(&outEc, int, accept, javaFd, peer, peerLength);
     return NOERROR;
 }
 
