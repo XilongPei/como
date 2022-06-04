@@ -66,7 +66,7 @@ private:
     BlockGuard();
 };
 
-}
-}
+} // namespace system
+} // namespace comort
 
 #endif // __COMORT_SYSTEM_BLOCKGUARD_H__

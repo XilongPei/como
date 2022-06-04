@@ -111,5 +111,5 @@ ECode SocketTagger::Set(
     return NOERROR;
 }
 
-}
-}
+} // namespace system
+} // namespace comort

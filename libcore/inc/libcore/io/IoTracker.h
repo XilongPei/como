@@ -51,7 +51,7 @@ private:
     Mode mMode = Mode::READ;
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_IOTRACKER_H__

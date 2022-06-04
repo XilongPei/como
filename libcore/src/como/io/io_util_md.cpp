@@ -51,10 +51,10 @@ using namespace como;
 /*
  * Retry the operation if it is interrupted
  */
-#define RESTARTABLE(_cmd, _result) do { \
-    do { \
-        _result = _cmd; \
-    } while((_result == -1) && (errno == EINTR)); \
+#define RESTARTABLE(_cmd, _result) do {             \
+    do {                                            \
+        _result = _cmd;                             \
+    } while((_result == -1) && (errno == EINTR));   \
 } while(0)
 
 int handleOpen(const char* path, int oflag, int mode)

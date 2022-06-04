@@ -63,7 +63,9 @@ ECode BlockGuardOs::Accept(
 
     AutoPtr<IBlockGuardPolicy> policy;
     BlockGuard::GetThreadPolicy(&policy);
+
     FAIL_RETURN(policy->OnNetwork());
+
     AutoPtr<IFileDescriptor> acceptFd;
     mOs->Accept(fd, peerAddress, &acceptFd);
     if (IsInetSocket(acceptFd)) {
@@ -131,7 +133,8 @@ Boolean BlockGuardOs::IsInetSocket(
     /* [in] */ IFileDescriptor* fd)
 {
     Integer domain;
-    ECode ec = Libcore::GetOs()->GetsockoptInt(fd, OsConstants::SOL_SOCKET_, OsConstants::SO_DOMAIN_, &domain);
+    ECode ec = Libcore::GetOs()->GetsockoptInt(fd, OsConstants::SOL_SOCKET_,
+                                               OsConstants::SO_DOMAIN_, &domain);
     return SUCCEEDED(ec) && IsInetDomain(domain);
 }
 
@@ -146,7 +149,7 @@ Boolean BlockGuardOs::IsLingerSocket(
 {
     AutoPtr<IStructLinger> linger;
     FAIL_RETURN(Libcore::GetOs()->GetsockoptLinger(
-            fd, OsConstants::SOL_SOCKET_, OsConstants::SO_LINGER_, &linger));
+                fd, OsConstants::SOL_SOCKET_, OsConstants::SO_LINGER_, &linger));
     Boolean on; Integer l;
     return (linger->IsOn(&on), on) && (linger->GetLinger(&l), l > 0);
 }
@@ -788,5 +791,5 @@ ECode BlockGuardOs::Writev(
     return mOs->Writev(fd, buffers, offsets, byteCounts, result);
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

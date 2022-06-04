@@ -44,5 +44,5 @@ ECode CLibcore::GetOs(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

@@ -69,7 +69,7 @@ private:
     IoUtils();
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_IOUTILS_H__

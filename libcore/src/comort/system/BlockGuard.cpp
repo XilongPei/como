@@ -26,6 +26,10 @@ namespace system {
 AutoPtr<IBlockGuardPolicy> BlockGuard::GetLAX_POLICY()
 {
     static AutoPtr<IBlockGuardPolicy> LAX_POLICY = new Policy();
+    if (nullptr == LAX_POLICY) {
+        Logger::E("BlockGuard", "policy == null");
+    }
+
     return LAX_POLICY;
 }
 
@@ -106,5 +110,5 @@ ECode BlockGuard::Policy::GetPolicyMask(
     return NOERROR;
 }
 
-}
-}
+} // namespace system
+} // namespace comort

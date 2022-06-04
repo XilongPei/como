@@ -49,6 +49,9 @@ FileOutputStream::FileOutputStream()
 {
     mGuard = CloseGuard::Get();
     mTracker = new IoTracker();
+    if (nullptr == mTracker) {
+        Logger::E("FileOutputStream", "new FileOutputStream return nullptr");
+    }
 }
 
 FileOutputStream::~FileOutputStream()
@@ -69,8 +72,8 @@ ECode FileOutputStream::Constructor(
     /* [in] */ const String& name)
 {
     AutoPtr<IFile> f;
-    if (!name.IsNull()) {
-        CFile::New(name, IID_IFile, (IInterface**)&f);
+    if (! name.IsNull()) {
+        FAIL_RETURN(CFile::New(name, IID_IFile, (IInterface**)&f));
     }
     return Constructor(f, false);
 }
@@ -80,8 +83,8 @@ ECode FileOutputStream::Constructor(
     /* [in] */ Boolean append)
 {
     AutoPtr<IFile> f;
-    if (!name.IsNull()) {
-        CFile::New(name, IID_IFile, (IInterface**)&f);
+    if (! name.IsNull()) {
+        FAIL_RETURN(CFile::New(name, IID_IFile, (IInterface**)&f));
     }
     return Constructor(f, append);
 }
@@ -108,7 +111,7 @@ ECode FileOutputStream::Constructor(
     if (security != nullptr) {
         FAIL_RETURN(security->CheckWrite(name));
     }
-    CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&mFd);
+    FAIL_RETURN(CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&mFd));
     mAppend = append;
     mPath = name;
     mIsFdOwner = true;
@@ -117,7 +120,7 @@ ECode FileOutputStream::Constructor(
     BlockGuard::GetThreadPolicy(&policy);
     FAIL_RETURN(policy->OnWriteToDisk());
     FAIL_RETURN(Open(name, append));
-    mGuard->Open(String("Close"));
+    FAIL_RETURN(mGuard->Open(String("Close")));
     return NOERROR;
 }
 
@@ -149,7 +152,7 @@ ECode FileOutputStream::Open(
 {
     int fd;
     FAIL_RETURN(fileOpen(mPath.string(),
-            O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), &fd));
+                      O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), &fd));
     mFd->SetInt(fd);
     return NOERROR;
 }
@@ -234,6 +237,9 @@ ECode FileOutputStream::GetChannel(
                                          (IFileOutputStream*)this);
     }
     channel = mChannel;
+    if (nullptr == mChannel)
+        return como::io::E_FILE_NOT_FOUND_EXCEPTION;
+
     return NOERROR;
 }
 

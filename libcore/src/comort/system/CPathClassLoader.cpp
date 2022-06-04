@@ -79,5 +79,5 @@ void CPathClassLoader::LoadComponentsInClassPath()
     }
 }
 
-}
-}
+} // namespace system
+} // namespace comort

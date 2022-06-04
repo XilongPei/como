@@ -130,7 +130,7 @@ inline AutoPtr<ICloseGuardTracker> CloseGuard::GetTracker()
     return GetOrSetTRACKER(nullptr);
 }
 
-}
-}
+} // namespace system
+} // namespace comort
 
 #endif // __COMORT_SYSTEM_CLOSEGUARD_H__

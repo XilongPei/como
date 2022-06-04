@@ -75,7 +75,7 @@ inline MemoryMappedFile* MemoryMappedFile::From(
     return (MemoryMappedFile*)obj;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_MEMORYMAPPEDFILE_H__

@@ -33,12 +33,17 @@ COMO_INTERFACE_IMPL_1(CloseGuard, SyncObject, ICloseGuard);
 AutoPtr<ICloseGuard> CloseGuard::GetNOOP()
 {
     static AutoPtr<ICloseGuard> NOOP = new CloseGuard();
+    if (nullptr == NOOP) {
+        Logger::E("CloseGuard::GetNOOP", "NOOP == null");
+    }
+
     return NOOP;
 }
 
 AutoPtr<ICloseGuardReporter> CloseGuard::GetOrSetREPORTER(
     /* [in] */ ICloseGuardReporter* reporter)
 {
+    // needn't check the new result
     static AutoPtr<ICloseGuardReporter> REPORTER = new DefaultReporter();
     if (reporter != nullptr) {
         REPORTER = reporter;
@@ -49,6 +54,7 @@ AutoPtr<ICloseGuardReporter> CloseGuard::GetOrSetREPORTER(
 AutoPtr<ICloseGuardTracker> CloseGuard::GetOrSetTRACKER(
     /* [in] */ ICloseGuardTracker* tracker)
 {
+    // needn't check the new result
     static AutoPtr<ICloseGuardTracker> DEFAULT_TRACKER = new DefaultTracker();
     static AutoPtr<ICloseGuardTracker> TRACKER = DEFAULT_TRACKER;
     if (tracker != nullptr) {
@@ -97,8 +103,9 @@ ECode CloseGuard::Open(
     if ((ICloseGuard*)this == GetNOOP() || !ENABLED) {
         return NOERROR;
     }
-    String message = String::Format("Explicit termination method '%s' not called", closer.string());
-    CStackTrace::New(message, IID_IStackTrace, (IInterface**)&mAllocationSite);
+    String message = String::Format("Explicit termination method '%s' not called",
+                                                                closer.string());
+    FAIL_RETURN(CStackTrace::New(message, IID_IStackTrace, (IInterface**)&mAllocationSite));
     GetOrSetTRACKER(nullptr)->Open(mAllocationSite);
     return NOERROR;
 }
@@ -150,5 +157,5 @@ ECode CloseGuard::DefaultTracker::Close(
     return NOERROR;
 }
 
-}
-}
+} // namespace system
+} // namespace comort

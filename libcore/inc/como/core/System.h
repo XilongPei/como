@@ -135,7 +135,7 @@ inline ECode System::LogW(
     return Log(U'W', message, st);
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_SYSTEM_H__

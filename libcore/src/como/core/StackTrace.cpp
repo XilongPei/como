@@ -50,6 +50,9 @@ ECode StackTrace::PrintStackTrace(
     /* [in] */ IPrintStream* s)
 {
     AutoPtr<PrintStreamOrWriter> ps = new WrappedPrintStream(s);
+    if (nullptr == ps)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return PrintStackTrace(ps);
 }
 
@@ -59,7 +62,7 @@ ECode StackTrace::PrintStackTrace(
     AutoLock lock(s->Lock());
 
     Array<IStackTraceElement*> trace = GetOurStackTrace();
-    for (Integer i = 0; i < trace.GetLength(); i++) {
+    for (Integer i = 0;  i < trace.GetLength();  i++) {
         IStackTraceElement* traceElement = trace[i];
         s->Println(traceElement);
     }
@@ -70,6 +73,9 @@ ECode StackTrace::PrintStackTrace(
     /* [in] */ IPrintWriter* s)
 {
     AutoPtr<PrintStreamOrWriter> ps = new WrappedPrintWriter(s);
+    if (nullptr == ps)
+        return E_OUT_OF_MEMORY_ERROR;
+
     return PrintStackTrace(ps);
 }
 

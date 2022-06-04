@@ -69,7 +69,7 @@ inline Boolean AsynchronousCloseMonitor::WasSignaled()
     return mSignaled;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_ASYNCHRONOUSCLOSEMONITOR_H__

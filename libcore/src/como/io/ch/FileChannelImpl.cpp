@@ -41,6 +41,6 @@ AutoPtr<IFileChannel> FileChannelImpl::Open(
     return nullptr;
 }
 
-}
-}
-}
+} // namespace ch
+} // namespace io
+} // namespace como

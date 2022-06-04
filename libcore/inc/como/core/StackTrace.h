@@ -135,7 +135,7 @@ private:
     Integer mFrameCount = 0;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_STACKTRACK_H__

@@ -33,5 +33,5 @@ AutoPtr<IOs> Libcore::GetOs()
     return sOs;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

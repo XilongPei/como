@@ -40,7 +40,7 @@ public:
         /* [out] */ IOs** os) override;
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_CLIBCORE_H__

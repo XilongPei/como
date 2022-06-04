@@ -52,7 +52,7 @@ private:
     IoBridge();
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_IOBRIDGE_H__

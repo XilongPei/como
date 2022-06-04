@@ -269,7 +269,7 @@ private:
     Memory();
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_MEMORY_H__

@@ -98,7 +98,7 @@ static void UnsafeBulkCopy(
     /* [in] */ Integer sizeofElement,
     /* [in] */ Boolean swap)
 {
-    if (!swap) {
+    if (! swap) {
         memcpy(dst, src, byteCount);
         return;
     }
@@ -646,5 +646,5 @@ ECode Memory::PokeShortArray(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

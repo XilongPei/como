@@ -722,7 +722,7 @@ inline ForwardingOs::ForwardingOs(
     : mOs(os)
 {}
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_FORWARDINGOS_H__

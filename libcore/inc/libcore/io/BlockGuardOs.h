@@ -341,7 +341,7 @@ inline BlockGuardOs::BlockGuardOs(
     : ForwardingOs(os)
 {}
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_BLOCKGUARDOS_H__

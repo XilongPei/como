@@ -30,7 +30,7 @@ COMO_INTERFACE_IMPL_5(Writer, SyncObject, IWriter, IAppendable, ICloseable, IFlu
 
 Writer::~Writer()
 {
-    if (mLock != nullptr && mLock != (ISynchronize*)this) {
+    if ((mLock != nullptr) && (mLock != (ISynchronize*)this)) {
         REFCOUNT_RELEASE(mLock);
     }
 }
@@ -87,11 +87,15 @@ ECode Writer::Write(
     if (len < WRITE_BUFFER_SIZE) {
         if (mWriteBuffer.IsNull()) {
             mWriteBuffer = Array<Char>(WRITE_BUFFER_SIZE);
+            if (mWriteBuffer.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
         }
         buffer = mWriteBuffer;
     }
     else {
         buffer = Array<Char>(len);
+        if (buffer.IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
     }
     str.GetChars(off, off + len, buffer, 0);
     return Write(buffer, 0, len);
@@ -118,7 +122,7 @@ ECode Writer::Append(
         cs = CoreUtils::Box(String("null"));
     }
     AutoPtr<ICharSequence> subcs;
-    cs->SubSequence(start, end, subcs);
+    FAIL_RETURN(cs->SubSequence(start, end, subcs));
     return Write(CoreUtils::Unbox(subcs));
 }
 

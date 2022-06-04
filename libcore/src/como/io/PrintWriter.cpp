@@ -96,8 +96,8 @@ ECode PrintWriter::Constructor(
     /* [in] */ Boolean autoFlush)
 {
     AutoPtr<IWriter> osw, bw;
-    COutputStreamWriter::New(outstream, IID_IWriter, (IInterface**)&osw);
-    CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw);
+    FAIL_RETURN(COutputStreamWriter::New(outstream, IID_IWriter, (IInterface**)&osw));
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw));
     FAIL_RETURN(Constructor(bw, autoFlush));
 
     // save print stream for error propagation
@@ -111,10 +111,10 @@ ECode PrintWriter::Constructor(
     /* [in] */ const String& fileName)
 {
     AutoPtr<IOutputStream> fos;
-    CFileOutputStream::New(fileName, IID_IOutputStream, (IInterface**)&fos);
+    FAIL_RETURN(CFileOutputStream::New(fileName, IID_IOutputStream, (IInterface**)&fos));
     AutoPtr<IWriter> osw, bw;
-    COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw);
-    CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw);
+    FAIL_RETURN(COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw));
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw));
     return Constructor(bw, false);
 }
 
@@ -123,10 +123,10 @@ ECode PrintWriter::Constructor(
     /* [in] */ IFile* file)
 {
     AutoPtr<IOutputStream> fos;
-    CFileOutputStream::New(file, IID_IOutputStream, (IInterface**)&fos);
+    FAIL_RETURN(CFileOutputStream::New(file, IID_IOutputStream, (IInterface**)&fos));
     AutoPtr<IWriter> osw, bw;
-    COutputStreamWriter::New(fos, charset, IID_IWriter, (IInterface**)&osw);
-    CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw);
+    FAIL_RETURN(COutputStreamWriter::New(fos, charset, IID_IWriter, (IInterface**)&osw));
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw));
     return Constructor(bw, false);
 }
 
@@ -135,7 +135,7 @@ ECode PrintWriter::Constructor(
     /* [in] */ const String& csn)
 {
     AutoPtr<IFile> f;
-    CFile::New(fileName, IID_IFile, (IInterface**)&f);
+    FAIL_RETURN(CFile::New(fileName, IID_IFile, (IInterface**)&f));
     AutoPtr<ICharset> cs;
     FAIL_RETURN(ToCharset(csn, cs));
     return Constructor(cs, f);
@@ -145,10 +145,10 @@ ECode PrintWriter::Constructor(
     /* [in] */ IFile* file)
 {
     AutoPtr<IOutputStream> fos;
-    CFileOutputStream::New(file, IID_IOutputStream, (IInterface**)&fos);
+    FAIL_RETURN(CFileOutputStream::New(file, IID_IOutputStream, (IInterface**)&fos));
     AutoPtr<IWriter> osw, bw;
-    COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw);
-    CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw);
+    FAIL_RETURN(COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw));
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IWriter, (IInterface**)&bw));
     return Constructor(bw, false);
 }
 
@@ -174,10 +174,14 @@ ECode PrintWriter::Flush()
 {
     {
         AutoLock lock(mLock);
+
         ECode ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         ec = mOut->Flush();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
         return NOERROR;
     }
 
@@ -190,11 +194,15 @@ ECode PrintWriter::Close()
 {
     {
         AutoLock lock(mLock);
+
         if (mOut == nullptr) {
             return NOERROR;
         }
+
         ECode ec = mOut->Close();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         mOut = nullptr;
         return NOERROR;
     }
@@ -236,10 +244,15 @@ ECode PrintWriter::Write(
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         ec = mOut->Write(c);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         return NOERROR;
     }
 
@@ -263,10 +276,15 @@ ECode PrintWriter::Write(
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         ec = mOut->Write(buffer, off, len);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         return NOERROR;
     }
 
@@ -296,10 +314,15 @@ ECode PrintWriter::Write(
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         ec = mOut->Write(str, off, len);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         return NOERROR;
     }
 
@@ -320,13 +343,19 @@ void PrintWriter::NewLine()
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         ec = mOut->Write(mLineSeparator);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         if (mAutoFlush) {
             ec = mOut->Flush();
-            if (FAILED(ec)) goto ERROR;
+            if (FAILED(ec))
+                goto ERROR;
         }
         return;
     }
@@ -509,20 +538,25 @@ ECode PrintWriter::Format(
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         AutoPtr<ILocale> l;
         if ((mFormatter == nullptr) ||
-                (mFormatter->GetLocale(l),
-                    l != Locale::GetDefault())) {
+                        (mFormatter->GetLocale(l), l != Locale::GetDefault())) {
             mFormatter = nullptr;
-            CFormatter::New(this, IID_IFormatter, (IInterface**)&mFormatter);
+            FAIL_RETURN(CFormatter::New(this, IID_IFormatter, (IInterface**)&mFormatter));
         }
         ec = mFormatter->Format(Locale::GetDefault(), format, args);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         if (mAutoFlush) {
             ec = mOut->Flush();
-            if (FAILED(ec)) goto ERROR;
+            if (FAILED(ec))
+                goto ERROR;
         }
         return NOERROR;
     }
@@ -547,16 +581,20 @@ ECode PrintWriter::Format(
     ECode ec;
     {
         AutoLock lock(mLock);
+
         ec = EnsureOpen();
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         AutoPtr<ILocale> fl;
-        if ((mFormatter == nullptr) ||
-                (mFormatter->GetLocale(fl), fl != l)) {
+        if ((mFormatter == nullptr) || (mFormatter->GetLocale(fl), fl != l)) {
             mFormatter = nullptr;
-            CFormatter::New(this, l, IID_IFormatter, (IInterface**)&mFormatter);
+            FAIL_RETURN(CFormatter::New(this, l, IID_IFormatter, (IInterface**)&mFormatter));
         }
         ec = mFormatter->Format(l, format, args);
-        if (FAILED(ec)) goto ERROR;
+        if (FAILED(ec))
+            goto ERROR;
+
         if (mAutoFlush) {
             ec = mOut->Flush();
             if (FAILED(ec)) goto ERROR;
@@ -576,5 +614,5 @@ ERROR:
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

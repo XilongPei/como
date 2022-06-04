@@ -76,7 +76,8 @@ void AsynchronousCloseMonitor::Init()
     sa.sa_flags = 0;
     int rc = sigaction(BLOCKED_THREAD_SIGNAL, &sa, nullptr);
     if (rc == -1) {
-        Logger::E("AsynchronousCloseMonitor", "setting blocked thread signal handler failed: %s", strerror(errno));
+        Logger::E("AsynchronousCloseMonitor",
+            "setting blocked thread signal handler failed: %s", strerror(errno));
     }
 }
 
@@ -125,5 +126,5 @@ AsynchronousCloseMonitor::~AsynchronousCloseMonitor()
     }
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

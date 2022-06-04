@@ -715,7 +715,7 @@ public:
 inline Linux::Linux()
 {}
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_LINUX_H__

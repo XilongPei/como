@@ -51,7 +51,7 @@ private:
     Array<IMetaComponent*> mComponents;
 };
 
-}
-}
+} // namespace system
+} // namespace comort
 
 #endif // __COMORT_SYSTEM_CPATHCLASSLOADER_H__

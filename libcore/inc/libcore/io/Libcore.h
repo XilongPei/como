@@ -34,7 +34,7 @@ private:
     Libcore();
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_LIBCORE_H__

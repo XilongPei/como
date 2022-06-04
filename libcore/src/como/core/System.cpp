@@ -242,9 +242,11 @@ ECode System::Log(
     Logger::Log(level, "System", "%s", message.string());
     if (st != nullptr) {
         AutoPtr<IStringWriter> sw;
-        CStringWriter::New(IID_IStringWriter, (IInterface**)&sw);
+        FAIL_RETURN(CStringWriter::New(IID_IStringWriter, (IInterface**)&sw));
+
         AutoPtr<IPrintWriter> pw;
-        CPrintWriter::New(IWriter::Probe(sw), IID_IPrintWriter, (IInterface**)&pw);
+        FAIL_RETURN(CPrintWriter::New(IWriter::Probe(sw), IID_IPrintWriter, (IInterface**)&pw));
+
         st->PrintStackTrace(pw);
         String backtrace;
         sw->ToString(backtrace);
@@ -286,5 +288,5 @@ ECode System::PropertiesWithNonOverrideableDefaults::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -87,7 +87,7 @@ private:
     Integer mPosition = 0;
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_NIOBUFFERITERATOR_H__

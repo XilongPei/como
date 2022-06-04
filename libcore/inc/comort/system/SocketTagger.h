@@ -67,7 +67,7 @@ inline AutoPtr<ISocketTagger> SocketTagger::Get()
     return GetOrSet(nullptr);
 }
 
-}
-}
+} // namespace system
+} // namespace comort
 
 #endif // __COMORT_SYSTEM_SOCKETTAGGER_H__

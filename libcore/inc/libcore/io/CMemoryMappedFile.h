@@ -30,7 +30,7 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
+} // namespace io
+} // namespace libcore
 
 #endif // __LIBCORE_IO_CMEMORYMAPPEDFILE_H__
