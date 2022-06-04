@@ -21,5 +21,5 @@ namespace io {
 
 COMO_OBJECT_IMPL(CMemoryMappedFile);
 
-}
-}
+} // namespace io
+} // namespace libcore

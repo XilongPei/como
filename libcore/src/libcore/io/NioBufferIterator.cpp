@@ -174,5 +174,5 @@ ECode NioBufferIterator::CheckDstBounds(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

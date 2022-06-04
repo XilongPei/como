@@ -77,7 +77,9 @@ ECode IoBridge::Read(
     }
     Integer readCount;
     ECode ec = Libcore::GetOs()->Read(fd, bytes, byteOffset, byteCount, &readCount);
-    if (FAILED(ec)) return como::io::E_IO_EXCEPTION;
+    if (FAILED(ec))
+        return como::io::E_IO_EXCEPTION;
+
     if (readCount == 0) {
         *number = -1;
         return NOERROR;
@@ -99,12 +101,14 @@ ECode IoBridge::Write(
     while (byteCount > 0) {
         Integer bytesWritten;
         ECode ec = Libcore::GetOs()->Write(fd, bytes, byteOffset, byteCount, &bytesWritten);
-        if (FAILED(ec)) return como::io::E_IO_EXCEPTION;
+        if (FAILED(ec))
+            return como::io::E_IO_EXCEPTION;
+
         byteCount -= bytesWritten;
         byteOffset += bytesWritten;
     }
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace como

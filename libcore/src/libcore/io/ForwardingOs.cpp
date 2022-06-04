@@ -1054,5 +1054,5 @@ ECode ForwardingOs::Writev(
     return mOs->Writev(fd, buffers, offsets, byteCounts, result);
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

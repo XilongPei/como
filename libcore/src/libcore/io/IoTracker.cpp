@@ -55,5 +55,5 @@ void IoTracker::Reset()
     mTotalByteCount = 0;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

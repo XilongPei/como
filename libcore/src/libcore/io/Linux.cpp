@@ -45,39 +45,39 @@ namespace io {
  * -1: an IOException if the file descriptor is already closed, a InterruptedIOException if signaled
  * via AsynchronousCloseMonitor, or ErrnoException for other failures.
  */
-#define IO_FAILURE_RETRY(outEc, return_type, syscall_name, fdObj, ...) ({ \
-    return_type _rc = -1; \
-    int _syscallErrno; \
-    do { \
-        bool _wasSignaled; \
-        { \
-            int _fd; \
-            fdObj->GetInt(_fd); \
-            AsynchronousCloseMonitor _monitor(_fd); \
-            _rc = syscall_name(_fd, __VA_ARGS__); \
-            _syscallErrno = errno; \
-            _wasSignaled = _monitor.WasSignaled(); \
-        } \
-        if (_wasSignaled) { \
-            Logger::E("Linux", #syscall_name " interrupted"); \
-            *outEc = E_INTERRUPTED_IO_EXCEPTION; \
-            _rc = -1; \
-            break; \
-        } \
-        if (_rc == -1 && _syscallErrno != EINTR) { \
-            /* TODO: with a format string we could show the arguments too, like strace(1). */ \
-            *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff); \
-            break; \
-        } \
-    } while (_rc == -1); /* && _syscallErrno == EINTR && !_wasSignaled */ \
-    if (_rc == -1) { \
-        /* If the syscall failed, re-set errno: throwing an exception might have modified it. */ \
-        errno = _syscallErrno; \
-        *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff); \
-    } \
-    else { \
-        *outEc = NOERROR; \
-    } \
+#define IO_FAILURE_RETRY(outEc, return_type, syscall_name, fdObj, ...) ({                       \
+    return_type _rc = -1;                                                                       \
+    int _syscallErrno;                                                                          \
+    do {                                                                                        \
+        bool _wasSignaled;                                                                      \
+        {                                                                                       \
+            int _fd;                                                                            \
+            fdObj->GetInt(_fd);                                                                 \
+            AsynchronousCloseMonitor _monitor(_fd);                                             \
+            _rc = syscall_name(_fd, __VA_ARGS__);                                               \
+            _syscallErrno = errno;                                                              \
+            _wasSignaled = _monitor.WasSignaled();                                              \
+        }                                                                                       \
+        if (_wasSignaled) {                                                                     \
+            Logger::E("Linux", #syscall_name " interrupted");                                   \
+            *outEc = E_INTERRUPTED_IO_EXCEPTION;                                                \
+            _rc = -1;                                                                           \
+            break;                                                                              \
+        }                                                                                       \
+        if (_rc == -1 && _syscallErrno != EINTR) {                                              \
+            /* TODO: with a format string we could show the arguments too, like strace(1). */   \
+            *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff);                                  \
+            break;                                                                              \
+        }                                                                                       \
+    } while (_rc == -1); /* && _syscallErrno == EINTR && !_wasSignaled */                       \
+    if (_rc == -1) {                                                                            \
+        /* If the syscall failed, re-set errno: throwing an exception might have modified it.*/ \
+        errno = _syscallErrno;                                                                  \
+        *outEc = E_ERRNO_EXCEPTION | (errno & 0x000000ff);                                      \
+    }                                                                                           \
+    else {                                                                                      \
+        *outEc = NOERROR;                                                                       \
+    }                                                                                           \
     _rc; })
 
 COMO_INTERFACE_IMPL_1(Linux, SyncObject, IOs);
@@ -1208,5 +1208,5 @@ ECode Linux::Writev(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

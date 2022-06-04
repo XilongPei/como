@@ -139,5 +139,5 @@ String IoUtils::FileReader::ToString(
     return str;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore

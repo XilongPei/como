@@ -144,5 +144,5 @@ ECode MemoryMappedFile::GetSize(
     return NOERROR;
 }
 
-}
-}
+} // namespace io
+} // namespace libcore
