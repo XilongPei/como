@@ -107,25 +107,38 @@ AutoPtr<IProperties> System::InitUnchangeableSystemProperties()
 AutoPtr<IProperties> System::InitProperties()
 {
     AutoPtr<PropertiesWithNonOverrideableDefaults> p = new PropertiesWithNonOverrideableDefaults();
-    p->Constructor(sUnchangeableProps);
-    SetDefaultChangeableProperties(p);
+    if (nullptr == p)
+        return nullptr;
+
+    if (FAILED(p->Constructor(sUnchangeableProps)))
+        return nullptr;
+
+    if (SetDefaultChangeableProperties(p) == nullptr)
+        return nullptr;
+
     return p.Get();
 }
 
 AutoPtr<IProperties> System::SetDefaultChangeableProperties(
     /* [in] */ IProperties* p)
 {
+    ECode ec;
     Boolean contains;
+
     String tmpdirProp("como.io.tmpdir");
     if (IHashtable::Probe(sUnchangeableProps)->ContainsKey(
-            CoreUtils::Box(tmpdirProp), contains), !contains) {
-        p->SetProperty(tmpdirProp, String("/tmp"));
+                            CoreUtils::Box(tmpdirProp), contains), !contains) {
+        ec = p->SetProperty(tmpdirProp, String("/tmp"));
+        if (FAILED(ec))
+            return nullptr;
     }
 
     String uhProp("user.home");
     if (IHashtable::Probe(sUnchangeableProps)->ContainsKey(
-            CoreUtils::Box(uhProp), contains), !contains) {
-        p->SetProperty(uhProp, String(""));
+                                CoreUtils::Box(uhProp), contains), !contains) {
+        ec = p->SetProperty(uhProp, String(""));
+        if (FAILED(ec))
+            return nullptr;
     }
 
     return p;
@@ -144,7 +157,7 @@ ECode System::AddLegacyLocaleSystemProperties()
 {
     String locale;
     FAIL_RETURN(GetProperty("user.locale", "", locale));
-    if (!locale.IsEmpty()) {
+    if (! locale.IsEmpty()) {
         AutoPtr<ILocale> l = CLocale::ForLanguageTag(locale);
         String language, country, variant;
         l->GetLanguage(language);
@@ -260,6 +273,9 @@ ECode System::StaticInitialize()
 {
     sUnchangeableProps = InitUnchangeableSystemProperties();
     sProps = InitProperties();
+    if (nullptr == sProps)
+        return E_OUT_OF_MEMORY_ERROR;
+
     AddLegacyLocaleSystemProperties();
 
     sProps->GetProperty("line.separator", sLineSeparator);

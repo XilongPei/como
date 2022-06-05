@@ -69,7 +69,7 @@ private:
     AutoPtr<IStringBuffer> mBuf;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_STRINGWRITER_H__

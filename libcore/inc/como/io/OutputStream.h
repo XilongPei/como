@@ -52,7 +52,7 @@ public:
     ECode Close() override;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_OUTPUTSTREAM_H__

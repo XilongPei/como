@@ -169,7 +169,7 @@ protected:
     friend void StaticInitializeFileSystem();
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_FILESYSTEM_H__

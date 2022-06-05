@@ -114,7 +114,7 @@ protected:
     Boolean mIsReadOnly;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_SHORTBUFFER_H__

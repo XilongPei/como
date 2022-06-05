@@ -114,7 +114,7 @@ protected:
     Boolean mIsReadOnly = false;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_INTEGERBUFFER_H__

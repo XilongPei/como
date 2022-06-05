@@ -110,8 +110,8 @@ private:
     Integer mLength = 0;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CODERRESULT_H__

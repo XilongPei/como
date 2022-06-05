@@ -83,7 +83,7 @@ private:
     AutoPtr<IStreamEncoder> mSe;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_OUTPUTSTREAMWRITER_H__

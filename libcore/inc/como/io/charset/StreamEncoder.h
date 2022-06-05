@@ -49,8 +49,8 @@ public:
         /* [out] */ IStreamEncoder** encoder);
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_STREAMENCODER_H__

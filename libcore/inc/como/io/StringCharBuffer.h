@@ -92,7 +92,7 @@ protected:
     AutoPtr<ICharSequence> mStr;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_STRINGCHARBUFFER_H__

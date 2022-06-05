@@ -124,7 +124,7 @@ inline Integer HeapDoubleBuffer::Ix(
     return i + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_HEAPDOUBLEBUFFER_H__

@@ -48,8 +48,8 @@ private:
     String mIcuCanonicalName;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETICU_H__

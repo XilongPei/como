@@ -124,7 +124,7 @@ inline Integer HeapShortBuffer::Ix(
     return i + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_HEAPSHORTBUFFER_H__

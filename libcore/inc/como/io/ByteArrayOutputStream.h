@@ -83,7 +83,7 @@ protected:
     static constexpr Integer MAX_ARRAY_SIZE = IInteger::MAX_VALUE - 8;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEARRAYOUTPUTSTREAM_H__

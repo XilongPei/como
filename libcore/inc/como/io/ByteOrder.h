@@ -54,7 +54,7 @@ inline ByteOrder::ByteOrder(
     : mName(name)
 {}
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEORDER_H__

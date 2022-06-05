@@ -34,7 +34,7 @@ inline AutoPtr<FileSystem> DefaultFileSystem::GetFileSystem()
     return new UnixFileSystem();
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_DEFAULTFILESYSTEM_H__

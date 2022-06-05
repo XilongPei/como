@@ -462,7 +462,7 @@ inline Integer Bits::PageCount(
     return (Integer)(size + (Long)PageSize() - 1LL) / PageSize();
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BITS_H__

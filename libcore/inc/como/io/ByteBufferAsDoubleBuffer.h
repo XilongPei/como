@@ -99,7 +99,7 @@ inline Integer ByteBufferAsDoubleBuffer::Ix(
     return (i << 3) + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEBUFFERASDOUBLEBUFFER_H__

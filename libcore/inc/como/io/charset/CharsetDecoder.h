@@ -147,8 +147,8 @@ private:
     Integer mState = ST_RESET;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETDECODER_H__

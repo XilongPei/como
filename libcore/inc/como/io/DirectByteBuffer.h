@@ -421,7 +421,7 @@ private:
     AutoPtr<MemoryRef> mMemoryRef;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_DIRECTBYTEBUFFER_H__

@@ -70,7 +70,7 @@ private:
     static constexpr Integer MAX_SKIP_BUFFER_SIZE = 2048;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_INPUTSTREAM_H__

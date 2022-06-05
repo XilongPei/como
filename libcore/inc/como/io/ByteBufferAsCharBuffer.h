@@ -113,7 +113,7 @@ inline Integer ByteBufferAsCharBuffer::Ix(
     return (i << 2) + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEBUFFERASCHARBUFFER_H__

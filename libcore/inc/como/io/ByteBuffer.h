@@ -262,7 +262,7 @@ protected:
     Boolean mNativeByteOrder;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEBUFFER_H__

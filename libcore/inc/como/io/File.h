@@ -294,7 +294,7 @@ inline File* File::From(
     return (File*)f;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_FILE_H__

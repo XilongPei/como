@@ -46,8 +46,8 @@ public:
         /* [in] */ IInterface* parent);
 };
 
-}
-}
-}
+} // namespace ch
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CH_FILECHANNELIMPL_H__

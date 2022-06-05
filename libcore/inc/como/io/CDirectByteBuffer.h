@@ -65,7 +65,7 @@ public:
     using _CDirectByteBuffer::New;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CDIRECTBYTEBUFFER_H__

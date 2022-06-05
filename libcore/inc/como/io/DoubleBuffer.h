@@ -119,8 +119,7 @@ protected:
     Boolean mIsReadOnly = false;
 };
 
-}
-}
-
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_DOUBLEBUFFER_H__

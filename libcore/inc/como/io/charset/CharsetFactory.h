@@ -38,8 +38,8 @@ private:
     CharsetFactory();
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETFACTORY_H__

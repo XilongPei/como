@@ -91,7 +91,7 @@ private:
     static Byte sUnused;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_MAPPEDBYTEBUFFER_H__

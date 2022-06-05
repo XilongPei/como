@@ -77,7 +77,7 @@ private:
     String mLineSeparator;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BUFFEREDWRITER_H__

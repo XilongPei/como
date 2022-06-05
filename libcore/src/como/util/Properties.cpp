@@ -100,7 +100,7 @@ ECode Properties::Load(
     return Load0(reader_);
 }
 
-ECode Properties::Load0 (
+ECode Properties::Load0(
     /* [in] */ AutoPtr<LineReader> lr)
 {
     Array<Char> convtBuf(1024);

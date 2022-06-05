@@ -169,7 +169,7 @@ protected:
     Boolean mIsReadOnly = false;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARBUFFER_H__

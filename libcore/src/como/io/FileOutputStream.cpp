@@ -232,9 +232,9 @@ ECode FileOutputStream::GetChannel(
 {
     AutoLock lock(this);
 
-    if (mChannel == nullptr) {
+    if (nullptr == mChannel) {
         mChannel = FileChannelImpl::Open(mFd, mPath, false, true, mAppend,
-                                         (IFileOutputStream*)this);
+                                                      (IFileOutputStream*)this);
     }
     channel = mChannel;
     if (nullptr == mChannel)

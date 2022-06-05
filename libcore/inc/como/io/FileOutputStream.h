@@ -109,7 +109,7 @@ private:
     AutoPtr<IoTracker> mTracker;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_FILEOUTPUTSTREAM_H__

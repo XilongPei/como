@@ -167,8 +167,8 @@ private:
     static SyncObject sLock;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSET_H__

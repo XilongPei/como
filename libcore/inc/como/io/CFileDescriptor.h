@@ -30,7 +30,7 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CFILEDESCRIPTOR_H__

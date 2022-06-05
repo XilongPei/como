@@ -161,8 +161,8 @@ private:
     AutoPtr<IWeakReference> mCachedDecoder;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETENCODER_H__

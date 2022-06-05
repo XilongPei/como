@@ -40,8 +40,8 @@ public:
     }
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_THREADLOCALCODERS_H__

@@ -124,7 +124,7 @@ inline Integer HeapLongBuffer::Ix(
     return i + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_HEAPLONGBUFFER_H__

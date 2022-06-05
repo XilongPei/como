@@ -66,7 +66,7 @@ private:
     Integer mDescriptor;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_FILEDESCRIPTOR_H__

@@ -300,10 +300,13 @@ ECode FileInputStream::GetChannel(
 {
     AutoLock lock(this);
 
-    if (mChannel == nullptr) {
+    if (nullptr == mChannel) {
         mChannel = FileChannelImpl::Open(mFd, mPath, true, false, (IFileInputStream*)this);
     }
     channel = mChannel;
+    if (nullptr == mChannel)
+        return como::io::E_FILE_NOT_FOUND_EXCEPTION;
+
     return NOERROR;
 }
 

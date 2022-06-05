@@ -113,8 +113,8 @@ private:
     Integer mOutEnd = 0;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETENCODERICU_H__

@@ -47,7 +47,7 @@ private:
     ByteBufferFactory();
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEBUFFERFACTORY_H__

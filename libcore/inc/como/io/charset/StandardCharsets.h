@@ -30,8 +30,8 @@ public:
     static AutoPtr<ICharset> GetUTF_8();
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_STANDARDCHARSETS_H__

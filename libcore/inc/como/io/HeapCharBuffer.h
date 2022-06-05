@@ -138,9 +138,7 @@ inline Integer HeapCharBuffer::Ix(
     return i + mOffset;
 }
 
-}
-}
-
-
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_HEAPCHARBUFFER_H__

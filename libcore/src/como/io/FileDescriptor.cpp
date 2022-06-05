@@ -92,7 +92,7 @@ ECode FileDescriptor::IsSocket(
     int error;
     socklen_t error_length = sizeof(error);
     socket = TEMP_FAILURE_RETRY(getsockopt(mDescriptor, SOL_SOCKET,
-            SO_ERROR, &error, &error_length)) == 0;
+                                         SO_ERROR, &error, &error_length)) == 0;
     return NOERROR;
 }
 

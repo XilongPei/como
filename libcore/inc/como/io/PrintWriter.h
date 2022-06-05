@@ -201,7 +201,7 @@ private:
     String mLineSeparator;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_PRINTWRITER_H__

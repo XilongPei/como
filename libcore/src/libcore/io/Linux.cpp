@@ -245,6 +245,23 @@ ECode Linux::Dup(
     /* [in] */ IFileDescriptor* oldFd,
     /* [out] */ IFileDescriptor** retFd)
 {
+    Integer ofd;
+    oldFd->GetInt(ofd);
+    int rc = TEMP_FAILURE_RETRY(dup(ofd));
+    if (rc == -1) {
+        Logger::E("Linux", "dup failed, reason is: %s", strerror(errno));
+        *retFd = nullptr;
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+    }
+
+    ECode ec = CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&retFd);
+    if (FAILED(ec)) {
+        close(rc);
+        return ec;
+    }
+
+    (*retFd)->SetInt(rc);
+
     return NOERROR;
 }
 
@@ -253,6 +270,21 @@ ECode Linux::Dup2(
     /* [in] */ Integer newFd,
     /* [out] */ IFileDescriptor** retFd)
 {
+    Integer ofd;
+    oldFd->GetInt(ofd);
+    int rc = TEMP_FAILURE_RETRY(dup2(ofd, newFd));
+    if (rc == -1) {
+        Logger::E("Linux", "dup2 failed, reason is: %s", strerror(errno));
+        *retFd = nullptr;
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+    }
+
+    ECode ec = CFileDescriptor::New(rc, IID_IFileDescriptor, (IInterface**)&retFd);
+    if (FAILED(ec)) {
+        close(rc);
+        return ec;
+    }
+
     return NOERROR;
 }
 
@@ -340,10 +372,10 @@ ECode Linux::Fstat(
         return E_ERRNO_EXCEPTION;
     }
     return CStructStat::New(sb.st_dev, sb.st_ino,
-            sb.st_mode, sb.st_nlink, sb.st_uid, sb.st_gid,
-            sb.st_rdev, sb.st_size, sb.st_atime, sb.st_mtime,
-            sb.st_ctime, sb.st_blksize, sb.st_blocks,
-            IID_IStructStat, (IInterface**)stat);
+                            sb.st_mode, sb.st_nlink, sb.st_uid, sb.st_gid,
+                            sb.st_rdev, sb.st_size, sb.st_atime, sb.st_mtime,
+                            sb.st_ctime, sb.st_blksize, sb.st_blocks,
+                            IID_IStructStat, (IInterface**)stat);
 }
 
 ECode Linux::Fstatvfs(
@@ -637,6 +669,16 @@ ECode Linux::Lseek(
     /* [in] */ Integer whence,
     /* [out] */ Long* result)
 {
+    Integer ofd;
+    fd->GetInt(ofd);
+    int rc = TEMP_FAILURE_RETRY(lseek64(ofd, offset, whence));
+    if (rc == -1) {
+        Logger::E("Linux", "lseek64 failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+    }
+
+    *result = rc;
+
     return NOERROR;
 }
 

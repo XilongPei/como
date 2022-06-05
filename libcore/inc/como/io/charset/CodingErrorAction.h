@@ -42,8 +42,8 @@ public:
     }
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CODINGERRORACTION_H__

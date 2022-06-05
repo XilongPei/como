@@ -99,7 +99,7 @@ inline Integer ByteBufferAsShortBuffer::Ix(
     return (i << 1) + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_BYTEBUFFERASSHORTBUFFER_H__

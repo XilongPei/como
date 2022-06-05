@@ -104,8 +104,8 @@ private:
     Integer mOutEnd;
 };
 
-}
-}
-}
+} // namespace charset
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_CHARSET_CHARSETDECODERICU_H__

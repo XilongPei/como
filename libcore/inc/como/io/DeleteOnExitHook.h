@@ -46,7 +46,7 @@ private:
     static AutoPtr<IHashSet> FILES;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_DELETEONEXITHOOK_H__

@@ -89,7 +89,7 @@ private:
     static constexpr Integer WRITE_BUFFER_SIZE = 1024;
 };
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_WRITER_H__

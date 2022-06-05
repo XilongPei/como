@@ -124,7 +124,7 @@ inline Integer HeapFloatBuffer::Ix(
     return i + mOffset;
 }
 
-}
-}
+} // namespace io
+} // namespace como
 
 #endif // __COMO_IO_HEAPFLOATBUFFER_H__
