@@ -17,6 +17,8 @@
 #ifndef __COMO_COMOERROR_H__
 #define __COMO_COMOERROR_H__
 
+#include <errno.h>
+
 namespace como {
 
 /**
@@ -39,19 +41,21 @@ namespace como {
  * Code - is the status code.
  */
 
-#define MAKE_ECODE(C, F, N, K) \
-        ((0x1 << 31) | (C << 30) | (F << 16) | K)
-#define MAKE_SUCCESS(C, F, N, K) \
-        ((C << 30) | (F << 16) | K | 0x7fffffff)
+#define MAKE_ECODE(C, F, N, K)    ((0x1 << 31) | (C << 30) | (F << 16) | K)
+#define MAKE_SUCCESS(C, F, N, K)  ((C << 30) | (F << 16) | K | 0x7fffffff)
 
-#define Facility_COMORT     0x0
-#define MAKE_COMORT_ECODE(N, K) \
-        MAKE_ECODE(0, Facility_COMORT, N, K)
+#define Facility_COMORT  0x0
+#define Facility_LIBC    0x1
+#define MAKE_COMORT_ECODE(N, K)   MAKE_ECODE(0, Facility_COMORT, N, K)
+
+#define MAKE_LIBC_ECODE_ERRNO(N)  MAKE_ECODE(0, Facility_LIBC, N, errno)
+#define GET_LIBC_ECODE_ERRNO(ec)  (ec & 0xff)
+#define GET_LIBC_ECODE_NAMESPACE(ec)  ((ec >> 8) & 0xff)
 
 constexpr ECode NOERROR = 0x00000000;
 
 #define SUCCEEDED(E) (!(E & 0x80000000))
-#define FAILED(E) (E & 0x80000000)
+#define FAILED(E)      (E & 0x80000000)
 
 constexpr ECode E_FAILED_EXCEPTION = MAKE_COMORT_ECODE(0, 0x01);
 constexpr ECode E_ILLEGAL_ARGUMENT_EXCEPTION = MAKE_COMORT_ECODE(0, 0x02);

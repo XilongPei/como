@@ -335,7 +335,7 @@ ECode Linux::Fstat(
     struct stat64 sb;
     int rc = TEMP_FAILURE_RETRY(fstat64(nfd, &sb));
     if (rc == -1) {
-        Logger::E("Linux", "fstat failed, reason is \"%s\".", strerror(errno));
+        Logger::E("Linux", "fstat failed, reason is: %s", strerror(errno));
         *stat = nullptr;
         return E_ERRNO_EXCEPTION;
     }
@@ -659,6 +659,13 @@ ECode Linux::Mkdir(
     /* [in] */ const String& path,
     /* [in] */ Integer mode)
 {
+    if (path.IsEmpty())
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    long rc = TEMP_FAILURE_RETRY(mkdir(path.string(), mode));
+    if (-1 == rc) {
+        Logger::E("Linux", "mkdir failed, reason is: %s", strerror(errno));
+        return E_ERRNO_EXCEPTION | (errno & 0xff);
+    }
     return NOERROR;
 }
 
@@ -666,6 +673,14 @@ ECode Linux::Mkfifo(
     /* [in] */ const String& path,
     /* [in] */ Integer mode)
 {
+    if (path.IsEmpty())
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
+    long rc = TEMP_FAILURE_RETRY(mkfifo(path.string(), mode));
+    if (-1 == rc) {
+        Logger::E("Linux", "mkfifo failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+    }
     return NOERROR;
 }
 
@@ -675,9 +690,9 @@ ECode Linux::Mlock(
 {
     void* ptr = reinterpret_cast<void*>(address);
     long rc = TEMP_FAILURE_RETRY(mlock(ptr, byteCount));
-    if (rc == -1) {
-        Logger::E("Linux", "mlock failed, reason is \"%s\".", strerror(errno));
-        return E_ERRNO_EXCEPTION;
+    if (-1 == rc) {
+        Logger::E("Linux", "mlock failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
     }
     return NOERROR;
 }
@@ -696,9 +711,9 @@ ECode Linux::Mmap(
     void* suggestedPtr = reinterpret_cast<void*>(address);
     void* ptr = mmap64(suggestedPtr, byteCount, prot, flags, nfd, offset);
     if (ptr == MAP_FAILED) {
-        Logger::E("Linux", "mmap64 failed, reason is \"%s\".", strerror(errno));
+        Logger::E("Linux", "mmap64 failed, reason is: %s", strerror(errno));
         *result = 0;
-        return E_ERRNO_EXCEPTION;
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
     }
     *result = reinterpret_cast<HANDLE>(ptr);
     return NOERROR;
@@ -712,8 +727,8 @@ ECode Linux::Msync(
     void* ptr = reinterpret_cast<void*>(address);
     long rc = TEMP_FAILURE_RETRY(msync(ptr, byteCount, flags));
     if (rc == -1) {
-        Logger::E("Linux", "msync failed, reason is \"%s\".", strerror(errno));
-        return E_ERRNO_EXCEPTION;
+        Logger::E("Linux", "msync failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
     }
     return NOERROR;
 }
@@ -725,8 +740,8 @@ ECode Linux::Munlock(
     void* ptr = reinterpret_cast<void*>(address);
     long rc = TEMP_FAILURE_RETRY(munlock(ptr, byteCount));
     if (rc == -1) {
-        Logger::E("Linux", "munlock failed, reason is \"%s\".", strerror(errno));
-        return E_ERRNO_EXCEPTION;
+        Logger::E("Linux", "munlock failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
     }
     return NOERROR;
 }
@@ -738,7 +753,7 @@ ECode Linux::Munmap(
     void* ptr = reinterpret_cast<void*>(address);
     long rc = TEMP_FAILURE_RETRY(munmap(ptr, byteCount));
     if (rc == -1) {
-        Logger::E("Linux", "munmap failed, reason is \"%s\".", strerror(errno));
+        Logger::E("Linux", "munmap failed, reason is: %s", strerror(errno));
         return E_ERRNO_EXCEPTION;
     }
     return NOERROR;
@@ -752,15 +767,15 @@ ECode Linux::Open(
 {
     VALIDATE_NOT_NULL(fd);
 
-    if (path.IsNull()) {
+    if (path.IsEmpty()) {
         *fd = nullptr;
         return NOERROR;
     }
 
     int nfd = TEMP_FAILURE_RETRY(open(path.string(), flags, mode));
     if (nfd == -1) {
-        Logger::E("Linux", "open failed, reason is \"%s\".", strerror(errno));
-        return E_ERRNO_EXCEPTION;
+        Logger::E("Linux", "open failed, reason is: %s", strerror(errno));
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
     }
     return CFileDescriptor::New(nfd, IID_IFileDescriptor, (IInterface**)fd);
 }
@@ -1001,7 +1016,7 @@ ECode Linux::Setenv(
     }
     int rc = setenv(name.string(), value.string(), overwrite);
     if (rc == -1) {
-        Logger::E("Linux", "setenv failed, reason is \"%s\".", strerror(errno));
+        Logger::E("Linux", "setenv failed, reason is: %s", strerror(errno));
         return E_ERRNO_EXCEPTION;
     }
     return NOERROR;
