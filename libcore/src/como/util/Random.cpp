@@ -45,8 +45,10 @@ static AutoPtr<IAtomicLong> CreateAtomicLong(
     /* [in] */ Long initialValue)
 {
     AutoPtr<IAtomicLong> atomic;
-    CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic);
-    return atomic;
+    if (SUCCEED(CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic)))
+        return atomic;
+
+    return nullptr;
 }
 
 AutoPtr<IAtomicLong> Random::GetSeedUniquifier()
@@ -66,10 +68,11 @@ ECode Random::Constructor(
     CoclassID cid;
     GetCoclassID(cid);
     if (cid == CID_CRandom) {
-        CAtomicLong::New(InitialScramble(seed), IID_IAtomicLong, (IInterface**)&mSeed);
+        FAIL_RETURN(CAtomicLong::New(InitialScramble(seed), IID_IAtomicLong,
+                                                         (IInterface**)&mSeed));
     }
     else {
-        CAtomicLong::New(IID_IAtomicLong, (IInterface**)&mSeed);
+        FAIL_RETURN(CAtomicLong::New(IID_IAtomicLong, (IInterface**)&mSeed));
         SetSeed(seed);
     }
     return NOERROR;
@@ -124,7 +127,7 @@ ECode Random::NextBytes(
     for (Integer i = 0, len = bytes.GetLength(); i < len;) {
         Integer rnd, n;
         for (NextInteger(rnd), n = Math::Min(len - i, IInteger::SIZE / IByte::SIZE);
-                n-- >0; rnd >>= IByte::SIZE) {
+                n-- >0;  rnd >>= IByte::SIZE) {
             bytes[i++] = (Byte)rnd;
         }
     }

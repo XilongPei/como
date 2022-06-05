@@ -28,6 +28,6 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
-}
+} // namespace action
+} // namespace security
+} // namespace como

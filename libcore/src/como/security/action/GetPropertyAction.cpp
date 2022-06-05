@@ -56,6 +56,6 @@ ECode GetPropertyAction::Run(
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace action
+} // namespace security
+} // namespace como

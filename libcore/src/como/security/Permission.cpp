@@ -44,5 +44,5 @@ ECode Permission::NewPermissionCollection(
     return CPermissions::New(IID_IPermissionCollection, (IInterface**)&permissions);
 }
 
-}
-}
+} // namespace security
+} // namespace como

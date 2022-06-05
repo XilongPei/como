@@ -33,5 +33,5 @@ ECode PermissionCollection::IsReadOnly(
     return NOERROR;
 }
 
-}
-}
+} // namespace security
+} // namespace como

@@ -135,7 +135,7 @@ inline SecureRandom* SecureRandom::From(
     return (SecureRandom*)random;
 }
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_SECURERANDOM_H__

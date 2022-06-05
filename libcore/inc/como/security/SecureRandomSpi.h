@@ -58,8 +58,8 @@ inline SecureRandomSpi* SecureRandomSpi::From(
     return (SecureRandomSpi*)spi;
 }
 
-}
-}
+} // namespace security
+} // namespace como
 
 
 #endif // __COMO_SECURITY_SECURERANDOMSPI_H__

@@ -38,7 +38,7 @@ public:
         /* [out] */ Boolean& readonly) override;
 };
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_PERMISSIONCOLLECTION_H__

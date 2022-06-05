@@ -48,8 +48,8 @@ private:
     String mDefaultVal;
 };
 
-}
-}
-}
+} // namespace action
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_ACTION_GETPROPERTYACTION_H__

@@ -32,56 +32,63 @@ AutoPtr<IChar> CoreUtils::Box(
     /* [in] */ Char c)
 {
     AutoPtr<IChar> ch;
-    CChar::New(c, IID_IChar, (IInterface**)&ch);
-    return ch;
+    if (SUCCEEDED(CChar::New(c, IID_IChar, (IInterface**)&ch)))
+        return ch;
+    return nullptr;
 }
 
 AutoPtr<IBoolean> CoreUtils::Box(
     /* [in] */ Boolean b)
 {
     AutoPtr<IBoolean> bo;
-    CBoolean::New(b, IID_IBoolean, (IInterface**)&bo);
-    return bo;
+    if (SUCCEEDED(CBoolean::New(b, IID_IBoolean, (IInterface**)&bo)))
+        return bo;
+    return nullptr;
 }
 
 AutoPtr<IInteger> CoreUtils::Box(
     /* [in] */ Integer i)
 {
     AutoPtr<IInteger> io;
-    CInteger::New(i, IID_IInteger, (IInterface**)&io);
-    return io;
+    if (SUCCEEDED(CInteger::New(i, IID_IInteger, (IInterface**)&io)))
+        return io;
+    return nullptr;
 }
 
 AutoPtr<ILong> CoreUtils::Box(
     /* [in] */ Long l)
 {
     AutoPtr<ILong> lo;
-    CLong::New(l, IID_ILong, (IInterface**)&lo);
-    return lo;
+    if (SUCCEEDED(CLong::New(l, IID_ILong, (IInterface**)&lo)))
+        return lo;
+    return nullptr;
 }
 
 AutoPtr<IDouble> CoreUtils::Box(
     /* [in] */ Double d)
 {
     AutoPtr<IDouble> dobj;
-    CDouble::New(d, IID_IDouble, (IInterface**)&dobj);
-    return dobj;
+    if (SUCCEEDED(CDouble::New(d, IID_IDouble, (IInterface**)&dobj)))
+        return dobj;
+    return nullptr;
 }
 
 AutoPtr<ICharSequence> CoreUtils::Box(
     /* [in] */ const char* str)
 {
     AutoPtr<ICharSequence> seq;
-    CString::New(str, IID_ICharSequence, (IInterface**)&seq);
-    return seq;
+    if (SUCCEEDED(CString::New(str, IID_ICharSequence, (IInterface**)&seq)))
+        return seq;
+    return nullptr;
 }
 
 AutoPtr<ICharSequence> CoreUtils::Box(
     /* [in] */ const String& str)
 {
     AutoPtr<ICharSequence> seq;
-    CString::New(str, IID_ICharSequence, (IInterface**)&seq);
-    return seq;
+    if (SUCCEEDED(CString::New(str, IID_ICharSequence, (IInterface**)&seq)))
+        return seq;
+    return nullptr;
 }
 
 Array<ICharSequence*> CoreUtils::Box(
@@ -93,6 +100,9 @@ Array<ICharSequence*> CoreUtils::Box(
 
     Long size = strArray.GetLength();
     Array<ICharSequence*> seqArray(size);
+    if (seqArray.IsNull())
+        return nullptr;
+
     for (Long i = 0; i < size; i++) {
         seqArray.Set(i, Box(strArray[i]));
     }
@@ -110,7 +120,10 @@ AutoPtr<IArray> CoreUtils::Box(
     InterfaceID iid;
     objArray[0]->GetInterfaceID(objArray[0], iid);
     AutoPtr<IArray> arrObj;
-    CArray::New(iid, size, IID_IArray, (IInterface**)&arrObj);
+
+    if (FAILED(CArray::New(iid, size, IID_IArray, (IInterface**)&arrObj)))
+        return nullptr;
+
     for (Long i = 0; i < size; i++) {
         arrObj->Set(i, objArray[i]);
     }
@@ -176,6 +189,9 @@ Array<String> CoreUtils::Unbox(
 
     Long size = seqArray.GetLength();
     Array<String> strArray(size);
+    if (strArray.IsNull())
+        return nullptr;
+
     for (Long i = 0; i < size; i++) {
         strArray[i] = Unbox(seqArray[i]);
     }
@@ -192,6 +208,9 @@ Array<IInterface*> CoreUtils::Unbox(
     Long size;
     arrObj->GetLength(size);
     Array<IInterface*> objArray(size);
+    if (objArray.IsNull())
+        return nullptr;
+
     for (Long i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         arrObj->Get(i, obj);
@@ -210,6 +229,9 @@ Array<Short> CoreUtils::ToUTF16Chars(
 
     Long size = chars.GetLength();
     utf16chars = Array<Short>(size);
+    if (utf16chars.IsNull())
+        return nullptr;
+
     for (Long i = 0; i < size; i++) {
         utf16chars[i] = chars[i];
     }
@@ -225,8 +247,8 @@ ECode CoreUtils::ToChars(
     }
 
     Long size = chars.GetLength() <= utf16chars.GetLength() ?
-            chars.GetLength() : utf16chars.GetLength();
-    for (Long i = 0; i < size; i++) {
+                                    chars.GetLength() : utf16chars.GetLength();
+    for (Long i = 0;  i < size;  i++) {
         chars[i] = utf16chars[i];
     }
     return NOERROR;
@@ -257,5 +279,5 @@ AutoPtr<IInterface> CoreUtils::Clone(
     return clone;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -57,8 +57,8 @@ public:
     }
 };
 
-}
-}
-}
+} // namespace cca
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_CCA_INSTANCEFACTORY_H__

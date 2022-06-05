@@ -112,14 +112,14 @@ ECode SecureRandom::GetInstance(
 {
     AutoPtr<IInstance> instance;
     FAIL_RETURN(InstanceFactory::GetInstance(String("CSecureRandom"),
-            IID_ISecureRandomSpi, algorithm, &instance));
+                                   IID_ISecureRandomSpi, algorithm, &instance));
     AutoPtr<IInterface> impl;
     instance->GetImpl(impl);
     AutoPtr<IProvider> provider;
     instance->GetProvider(provider);
     sr = nullptr;
     return CSecureRandom::New(ISecureRandomSpi::Probe(impl),
-            provider, algorithm, IID_ISecureRandom, (IInterface**)&sr);
+                     provider, algorithm, IID_ISecureRandom, (IInterface**)&sr);
 }
 
 ECode SecureRandom::GetInstance(
@@ -129,7 +129,7 @@ ECode SecureRandom::GetInstance(
 {
     AutoPtr<IInstance> instance;
     ECode ec = InstanceFactory::GetInstance(String("CSecureRandom"),
-            IID_ISecureRandomSpi, algorithm, provider, &instance);
+                          IID_ISecureRandomSpi, algorithm, provider, &instance);
     if (FAILED(ec)) {
         if (provider.Equals("Crypto")) {
             Logger::E("SecureRandom", "COMO no longer support the Crypto provider.");
@@ -142,7 +142,7 @@ ECode SecureRandom::GetInstance(
     instance->GetProvider(providerObj);
     sr = nullptr;
     return CSecureRandom::New(ISecureRandomSpi::Probe(impl),
-            providerObj, algorithm, IID_ISecureRandom, (IInterface**)&sr);
+                  providerObj, algorithm, IID_ISecureRandom, (IInterface**)&sr);
 }
 
 ECode SecureRandom::GetInstance(
@@ -152,14 +152,14 @@ ECode SecureRandom::GetInstance(
 {
     AutoPtr<IInstance> instance;
     FAIL_RETURN(InstanceFactory::GetInstance(String("CSecureRandom"),
-            IID_ISecureRandomSpi, algorithm, provider, &instance));
+                         IID_ISecureRandomSpi, algorithm, provider, &instance));
     AutoPtr<IInterface> impl;
     instance->GetImpl(impl);
     AutoPtr<IProvider> providerObj;
     instance->GetProvider(providerObj);
     sr = nullptr;
     return CSecureRandom::New(ISecureRandomSpi::Probe(impl),
-            providerObj, algorithm, IID_ISecureRandom, (IInterface**)&sr);
+                  providerObj, algorithm, IID_ISecureRandom, (IInterface**)&sr);
 }
 
 ECode SecureRandom::GetProvider(
@@ -226,7 +226,7 @@ ECode SecureRandom::GetSeed(
     /* [out, callee] */ Array<Byte>* seed)
 {
     if (sSeedGenerator == nullptr) {
-        CSecureRandom::New(IID_ISecureRandom, (IInterface**)&sSeedGenerator);
+        FAIL_RETURN(CSecureRandom::New(IID_ISecureRandom, (IInterface**)&sSeedGenerator));
     }
     return sSeedGenerator->GenerateSeed(numBytes, seed);
 }
@@ -277,5 +277,5 @@ String SecureRandom::GetPrngAlgorithm()
     return String();
 }
 
-}
-}
+} // namespace security
+} // namespace como

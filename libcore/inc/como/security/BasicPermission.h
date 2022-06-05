@@ -57,7 +57,7 @@ inline ECode BasicPermission::Constructor(
     return Permission::Constructor(String(""));
 }
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_BASICPERMISSION_H__

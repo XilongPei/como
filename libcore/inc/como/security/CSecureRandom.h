@@ -39,7 +39,7 @@ public:
     using _CSecureRandom::New;
 };
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_CSECURERANDOM_H__

@@ -96,7 +96,7 @@ public:
         /* [in] */ const InterfaceID& iid);
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_COREUTILS_H__

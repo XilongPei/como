@@ -34,10 +34,12 @@ ECode CSecureRandom::New(
 {
     AutoPtr<IClassObject> clsObject;
     ECode ec = CoAcquireClassFactory(CID_CSecureRandom, nullptr, clsObject);
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec))
+        return ec;
 
     void* addr = calloc(sizeof(CSecureRandom), 1);
-    if (addr == nullptr) return E_OUT_OF_MEMORY_ERROR;
+    if (addr == nullptr)
+        return E_OUT_OF_MEMORY_ERROR;
 
     CSecureRandom* _obj = new(addr) CSecureRandom();
     ec = _obj->Constructor(secureRandomSpi, provider, algorithm);
@@ -60,5 +62,5 @@ COMO_OBJECT_IMPL(CGetPropertyAction);
 
 }
 
-}
-}
+} // namespace security
+} // namespace como

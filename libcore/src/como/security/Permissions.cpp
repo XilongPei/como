@@ -44,5 +44,5 @@ ECode Permissions::GetElements(
     return NOERROR;
 }
 
-}
-}
+} // namespace security
+} // namespace como

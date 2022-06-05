@@ -26,5 +26,5 @@ ECode AccessController::DoPrivileged(
     return action->Run(result);
 }
 
-}
-}
+} // namespace security
+} // namespace como

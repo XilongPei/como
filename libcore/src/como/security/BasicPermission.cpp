@@ -34,5 +34,5 @@ ECode BasicPermission::GetActions(
     return NOERROR;
 }
 
-}
-}
+} // namespace security
+} // namespace como

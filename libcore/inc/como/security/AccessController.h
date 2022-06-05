@@ -33,7 +33,7 @@ private:
     AccessController();
 };
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_ACCESSCONTROLLER_H__

@@ -30,7 +30,7 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_CPERMISSIONS_H__

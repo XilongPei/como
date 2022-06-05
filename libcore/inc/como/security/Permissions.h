@@ -45,7 +45,7 @@ public:
         /* [out] */ AutoPtr<IEnumeration>& elements) override;
 };
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_PERMISSIONS_H__

@@ -56,7 +56,7 @@ inline ECode Permission::Constructor(
     return NOERROR;
 }
 
-}
-}
+} // namespace security
+} // namespace como
 
 #endif // __COMO_SECURITY_PERMISSION_H__
