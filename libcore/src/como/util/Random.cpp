@@ -45,7 +45,7 @@ static AutoPtr<IAtomicLong> CreateAtomicLong(
     /* [in] */ Long initialValue)
 {
     AutoPtr<IAtomicLong> atomic;
-    if (SUCCEED(CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic)))
+    if (SUCCEEDED(CAtomicLong::New(initialValue, IID_IAtomicLong, (IInterface**)&atomic)))
         return atomic;
 
     return nullptr;

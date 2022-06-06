@@ -101,7 +101,7 @@ Array<ICharSequence*> CoreUtils::Box(
     Long size = strArray.GetLength();
     Array<ICharSequence*> seqArray(size);
     if (seqArray.IsNull())
-        return nullptr;
+        return Array<ICharSequence*>::Null();
 
     for (Long i = 0; i < size; i++) {
         seqArray.Set(i, Box(strArray[i]));
@@ -190,7 +190,7 @@ Array<String> CoreUtils::Unbox(
     Long size = seqArray.GetLength();
     Array<String> strArray(size);
     if (strArray.IsNull())
-        return nullptr;
+        return Array<String>::Null();
 
     for (Long i = 0; i < size; i++) {
         strArray[i] = Unbox(seqArray[i]);
@@ -209,7 +209,7 @@ Array<IInterface*> CoreUtils::Unbox(
     arrObj->GetLength(size);
     Array<IInterface*> objArray(size);
     if (objArray.IsNull())
-        return nullptr;
+        return Array<IInterface*>::Null();
 
     for (Long i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
@@ -230,7 +230,7 @@ Array<Short> CoreUtils::ToUTF16Chars(
     Long size = chars.GetLength();
     utf16chars = Array<Short>(size);
     if (utf16chars.IsNull())
-        return nullptr;
+        return Array<Short>::Null();
 
     for (Long i = 0; i < size; i++) {
         utf16chars[i] = chars[i];
