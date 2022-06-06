@@ -7,6 +7,8 @@
 #ifndef __MISTRING_H_
 #define __MISTRING_H_
 
+#include <comosp.h>
+
 namespace como {
 
 class MiString {
@@ -34,6 +36,12 @@ public:
      */
     static char **SeperateStr(char *s, char seperator, char **seeds,
                                                             int& seedsCapacity);
+
+    static ECode SeperateStr(
+                    /* [in] */ char *s,
+                    /* [in] */ char seperator,
+                    /* [in] */ Integer limit,
+                    /* [out, callee] */ Array<String>* strArray);
 
     static char *shrink(char *dst, int dstSize, const char *src);
 };

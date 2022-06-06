@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "mistring.h"
 #include "como/core/StringUtils.h"
 #include "comort/system/CPathClassLoader.h"
 
@@ -29,7 +30,12 @@ ECode CPathClassLoader::Constructor (
     /* [in] */ const String& classPath,
     /* [in] */ IClassLoader* parent)
 {
-    mClassPath = StringUtils::Split(classPath, String(":"));
+    /**
+     * como::String is Utf8 encoded,  are very inefficient to split.
+     * mClassPath = StringUtils::Split(classPath, String(":"));
+     */
+    FAIL_RETURN(MiString::SeperateStr((char*)classPath.string(), ':', 0, &mClassPath));
+
     FAIL_RETURN(ClassLoader::Constructor(parent));
     FAIL_RETURN(LoadComponentsInClassPath());
     return NOERROR;

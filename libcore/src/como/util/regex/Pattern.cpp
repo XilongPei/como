@@ -312,7 +312,7 @@ ECode Pattern::FastSplit(
     }
 
     begin = 0;
-    for (Integer i = 0; i != separatorCount; ++i) {
+    for (Integer i = 0;  i != separatorCount;  ++i) {
         end = input.IndexOf(ch, begin);
         result[i] = input.Substring(begin, end);
         begin = end + 1;

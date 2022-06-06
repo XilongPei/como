@@ -189,9 +189,10 @@ Integer String::GetLength() const
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p != '\0' && p < end) {
+    while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         p += byteSize;
         charCount++;
     }
@@ -210,9 +211,10 @@ Integer String::GetUTF16Length(
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p != '\0' && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         p += byteSize;
         if (charCount >= start) {
             utf16Count++;
@@ -255,9 +257,10 @@ Char String::GetChar(
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (index == 0) {
             return unicode;
         }
@@ -281,9 +284,10 @@ Array<Char> String::GetChars(
     Integer byteSize, i = 0;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (i >= start) {
             charArray[i - start] = unicode;
         }
@@ -310,12 +314,14 @@ ECode String::GetChars(
     Integer byteSize, i = 0;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (i >= srcBegin && i < srcEnd) {
             dst[dstBegin + i - srcBegin] = unicode;
-            if (i == srcEnd - 1) break;
+            if (i == srcEnd - 1)
+                break;
         }
         p += byteSize;
         i++;
@@ -336,9 +342,10 @@ Array<Short> String::GetUTF16Chars(
     Integer byteSize, count = 0, i = 0;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (count >= start) {
             if (unicode <= 0xFFFF) {
                 utf16Array[i++] = unicode;
@@ -373,9 +380,10 @@ ECode String::GetUTF16Chars(
     Integer byteSize, count = 0, i = 0;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (count >= srcBegin && count < srcEnd) {
             if (unicode <= 0xFFFF) {
                 dst[i++] = unicode;
@@ -386,7 +394,8 @@ ECode String::GetUTF16Chars(
                 dst[i++] = (Short)((unicode >> 10) + 0xD800);
                 dst[i++] = (Short)((unicode & 0x3FF) + 0xDC00);
             }
-            if (count == srcEnd - 1) break;
+            if (count == srcEnd - 1)
+                break;
         }
         p += byteSize;
         count++;
@@ -498,9 +507,10 @@ String String::Substring(
     const char* end = mString + GetByteLength() + 1;
     const char* p1 = p;
     const char* p2 = end;
-    while (*p != '\0' && p < end) {
+    while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (charCount == charStart) {
             p1 = p;
         }
@@ -525,11 +535,14 @@ Integer String::IndexOf(
     Integer byteSize, i = 0;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if ((0 == byteSize) || (p + byteSize >= end))
+            break;
+
         if (i >= fromCharIndex) {
-            if (c == unicode) return i;
+            if (c == unicode)
+                return i;
         }
         p += byteSize;
         i++;
@@ -549,9 +562,10 @@ Integer String::IndexOf(
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
     const char* psub = nullptr;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (i >= fromCharIndex && psub == nullptr) {
             psub = strstr(p, string);
             if (psub == nullptr) {
@@ -708,9 +722,10 @@ String String::ToLowerCase() const
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
     char* dst = nullptr;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char c = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         Char l = u_tolower(c);
         if (l != c) {
             if (lowerStr.IsNull()) {
@@ -731,9 +746,10 @@ String String::ToUpperCase() const
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
     char* dst = nullptr;
-    while (*p && p < end) {
+    while (('\0' != *p) && (p < end)) {
         Char c = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         Char l = u_toupper(c);
         if (l != c) {
             if (upperStr.IsNull()) {
@@ -868,9 +884,10 @@ Integer String::ToByteIndex(
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p != '\0' && p < end) {
+    while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (charCount == charIndex) {
             if (charByteSize != nullptr) {
                 *charByteSize = byteSize;
@@ -895,9 +912,10 @@ Integer String::ToCharIndex(
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
-    while (*p != '\0' && p < end) {
+    while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) break;
+        if (byteSize == 0 || p + byteSize >= end)
+            break;
         if (byteIndex >= p - mString && byteIndex < p - mString + byteSize) {
             if (charByteSize != nullptr) {
                 *charByteSize = byteSize;

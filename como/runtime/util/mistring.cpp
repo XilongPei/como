@@ -84,7 +84,6 @@ char *MiString::WordBreak(char *string, int& num, char *word[], char *breakChar)
 char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCapacity)
 {
     char *sz;
-    int maxNum = seedsCapacity;
 
     if (seeds == nullptr) {
         seedsCapacity = 2;
@@ -98,6 +97,7 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
         }
     }
 
+    int maxNum = seedsCapacity;
     seedsCapacity = 0;
     seeds[seedsCapacity] = s;
     while (*s) {
@@ -114,6 +114,50 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     }
 
     return seeds;
+}
+
+ECode MiString::SeperateStr(
+    /* [in] */ char *s,
+    /* [in] */ char seperator,
+    /* [in] */ Integer limit,
+    /* [out, callee] */ Array<String>* strArray)
+{
+    if ((nullptr == s) || (nullptr == strArray))
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
+    char *sz;
+    int separatorCount = 1;
+    sz = s;
+    while (*sz != '\0') {
+        if (*sz++ == seperator)
+            separatorCount++;
+    }
+
+    if (limit <= 0)
+        limit = separatorCount;
+    else if (separatorCount > limit)
+        separatorCount = limit;
+
+    Array<String> result(separatorCount);
+    if (result.IsNull()) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    int i = 0;
+    sz = s;
+    while ('\0' != *s) {
+        if (*s == seperator)   {
+            *s = '\0';
+            result[i++] = String(sz);
+            sz = s + 1;
+
+            if (i >= separatorCount)
+                break;
+        }
+        s++;
+    }
+
+    return NOERROR;
 }
 
 char *MiString::shrink(char *dst, int dstSize, const char *src)
