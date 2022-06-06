@@ -43,7 +43,7 @@ private:
         /* [in] */ const String& fullName,
         /* [out] */ AutoPtr<IMetaInterface>& intf) override;
 
-    void LoadComponentsInClassPath();
+    ECode LoadComponentsInClassPath();
 
 private:
     Array<String> mClassPath;

@@ -217,7 +217,7 @@ inline Array<String> StringUtils::Split(
     return Split(input, regex, 0);
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_STRINGUTILS_H__

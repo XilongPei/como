@@ -66,7 +66,9 @@ AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
 
     AutoPtr<IClassLoader> bcl, cl;
     CoGetBootClassLoader(bcl);
-    CPathClassLoader::New(classPath, bcl, IID_IClassLoader, (IInterface**)&cl);
+    if (FAILED(CPathClassLoader::New(classPath, bcl, IID_IClassLoader, (IInterface**)&cl)))
+        return nullptr;
+
     CHECK(cl != nullptr);
     return cl;
 }

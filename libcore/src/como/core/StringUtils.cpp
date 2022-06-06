@@ -777,5 +777,5 @@ AutoPtr<IComparator> StringUtils::GetStringCASE_INSENSITIVE_ORDER()
     return CASE_INSENSITIVE_ORDER;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -22,13 +22,16 @@ using como::core::StringUtils;
 namespace comort {
 namespace system {
 
+/**
+ * The expression of classPath is as follows: a.so:b.so:c.so
+ */
 ECode CPathClassLoader::Constructor (
     /* [in] */ const String& classPath,
     /* [in] */ IClassLoader* parent)
 {
     mClassPath = StringUtils::Split(classPath, String(":"));
     FAIL_RETURN(ClassLoader::Constructor(parent));
-    LoadComponentsInClassPath();
+    FAIL_RETURN(LoadComponentsInClassPath());
     return NOERROR;
 }
 
@@ -36,7 +39,7 @@ ECode CPathClassLoader::FindCoclass(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
-    for (Integer i = 0; i < mComponents.GetLength(); i++) {
+    for (Integer i = 0;  i < mComponents.GetLength();  i++) {
         if (mComponents[i] == nullptr) {
             continue;
         }
@@ -64,11 +67,15 @@ ECode CPathClassLoader::FindInterface(
     return E_INTERFACE_NOT_FOUND_EXCEPTION;
 }
 
-void CPathClassLoader::LoadComponentsInClassPath()
+ECode CPathClassLoader::LoadComponentsInClassPath()
 {
     AutoPtr<IClassLoader> parent;
     GetParent(parent);
+
     mComponents = Array<IMetaComponent*>(mClassPath.GetLength());
+    if (mComponents.IsEmpty())
+        return E_OUT_OF_MEMORY_ERROR;
+
     for (Integer i = 0; i < mClassPath.GetLength(); i++) {
         AutoPtr<IMetaComponent> component;
         String path = mClassPath[i];
@@ -77,6 +84,8 @@ void CPathClassLoader::LoadComponentsInClassPath()
         }
         mComponents.Set(i, component.Get());
     }
+
+    return NOERROR;
 }
 
 } // namespace system
