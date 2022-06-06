@@ -272,6 +272,9 @@ ECode Pattern::FastSplit(
     // array, We returns an array containing the empty string.
     if (input.IsEmpty()) {
         *strArray = Array<String>(1);
+        if (strArray->IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
+
         strArray->Set(0, String(""));
         return NOERROR;
     }
@@ -303,6 +306,11 @@ ECode Pattern::FastSplit(
 
     // Collect the result parts.
     Array<String> result(separatorCount + 1);
+    if (result.IsNull()) {
+        *strArray = Array<String>::Null();
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     begin = 0;
     for (Integer i = 0; i != separatorCount; ++i) {
         end = input.IndexOf(ch, begin);
@@ -333,17 +341,18 @@ ECode Pattern::Quote(
     }
 
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(s.GetLength() * 2, IID_IStringBuilder, (IInterface**)&sb);
-    sb->Append(String("\\Q"));
+    FAIL_RETURN(CStringBuilder::New(s.GetLength() * 2, IID_IStringBuilder,
+                                                            (IInterface**)&sb));
+    FAIL_RETURN(sb->Append(String("\\Q")));
     slashEIndex = 0;
     Integer current = 0;
     while ((slashEIndex = s.IndexOf("\\E", current)) != -1) {
-        sb->Append(s.Substring(current, slashEIndex));
+        FAIL_RETURN(sb->Append(s.Substring(current, slashEIndex)));
         current = slashEIndex + 2;
-        sb->Append(String("\\E\\\\E\\Q"));
+        FAIL_RETURN(sb->Append(String("\\E\\\\E\\Q")));
     }
-    sb->Append(s.Substring(current, s.GetLength()));
-    sb->Append(String("\\E"));
+    FAIL_RETURN(sb->Append(s.Substring(current, s.GetLength())));
+    FAIL_RETURN(sb->Append(String("\\E")));
     return sb->ToString(pattStr);
 }
 
@@ -414,7 +423,7 @@ ECode Pattern::CompileImpl(
     icu::UnicodeString regexString;
     regexString.setTo(false, (const UChar*)regexUTF16.GetPayload(), regexUTF16.GetLength());
     icu::RegexPattern* result = icu::RegexPattern::compile(regexString, flags, error, status);
-    if (!U_SUCCESS(status)) {
+    if (! U_SUCCESS(status)) {
         Logger::E("Pattern", "%s: %s", regex.string(), RegexDetailMessage(status));
         return E_PATTERN_SYNTAX_EXCEPTION;
     }

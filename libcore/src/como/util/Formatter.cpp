@@ -131,7 +131,9 @@ AutoPtr<IAppendable> Formatter::NonNullAppendable(
 {
     if (a == nullptr) {
         AutoPtr<IAppendable> sb;
-        CStringBuilder::New(IID_IAppendable, (IInterface**)&sb);
+        if (FAILED(CStringBuilder::New(IID_IAppendable, (IInterface**)&sb)))
+            return nullptr;
+
         return sb;
     }
     return a;
@@ -157,7 +159,7 @@ ECode Formatter::Constructor(
     AutoPtr<IWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(fos, charset, IID_IWriter, (IInterface**)&osw));
     AutoPtr<IAppendable> a;
-    CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a);
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a));
     return Constructor(l, a);
 }
 
@@ -202,7 +204,7 @@ ECode Formatter::Constructor(
     AutoPtr<IWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw));
     AutoPtr<IAppendable> a;
-    CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a);
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a));
     return Constructor(l, a);
 }
 
@@ -235,7 +237,7 @@ ECode Formatter::Constructor(
     AutoPtr<IWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(fos, IID_IWriter, (IInterface**)&osw));
     AutoPtr<IAppendable> a;
-    CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a);
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a));
     return Constructor(l, a);
 }
 
@@ -274,7 +276,7 @@ ECode Formatter::Constructor(
     AutoPtr<IWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(os, IID_IWriter, (IInterface**)&osw));
     AutoPtr<IAppendable> a;
-    CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a);
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a));
     return Constructor(l, a);
 }
 
@@ -294,7 +296,7 @@ ECode Formatter::Constructor(
     AutoPtr<IWriter> osw;
     FAIL_RETURN(COutputStreamWriter::New(os, csn, IID_IWriter, (IInterface**)&osw));
     AutoPtr<IAppendable> a;
-    CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a);
+    FAIL_RETURN(CBufferedWriter::New(osw, IID_IAppendable, (IInterface**)&a));
     return Constructor(l, a);
 }
 
@@ -454,7 +456,8 @@ ECode Formatter::Parse(
     /* [out, callee] */ Array<IFormatString*>* formats)
 {
     AutoPtr<IArrayList> al;
-    CArrayList::New(IID_IArrayList, (IInterface**)&al);
+    FAIL_RETURN(CArrayList::New(IID_IArrayList, (IInterface**)&al));
+
     for (Integer i = 0, len = s.GetLength(); i < len;) {
         Integer nextPercent = s.IndexOf(U'%', i);
         if (s.GetChar(i) != U'%') {
@@ -462,13 +465,18 @@ ECode Formatter::Parse(
             // sequence and store it.
             Integer plainTextStart = i;
             Integer plainTextEnd = (nextPercent == -1) ? len : nextPercent;
-            al->Add(new FixedString(this, s.Substring(plainTextStart,
-                    plainTextEnd)));
+
+            FixedString *fstr = new FixedString(this, s.Substring(plainTextStart,
+                                                                  plainTextEnd));
+            al->Add(fstr);
             i = plainTextEnd;
         }
         else {
             // We have a format specifier
             AutoPtr<FormatSpecifierParser> fsp = new FormatSpecifierParser();
+            if (nullptr == fsp)
+                return E_OUT_OF_MEMORY_ERROR;
+
             FAIL_RETURN(fsp->Constructor(this, s, i + 1));
             al->Add(fsp->GetFormatSpecifier());
             i = fsp->GetEndIdx();
@@ -2817,5 +2825,5 @@ Boolean Formatter::DateTime::IsValid(
     }
 }
 
-}
-}
+} // namespace util
+} // namespace como

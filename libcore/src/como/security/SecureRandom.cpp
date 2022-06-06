@@ -49,14 +49,14 @@ AutoPtr<ISecureRandom> SecureRandom::sSeedGenerator;
 
 ECode SecureRandom::Constructor()
 {
-    Random::Constructor(0);
+    FAIL_RETURN(Random::Constructor(0));
     return GetDefaultPRNG(true, Array<Byte>::Null());
 }
 
 ECode SecureRandom::Constructor(
     /* [in] */ const Array<Byte>& seed)
 {
-    Random::Constructor(0);
+    FAIL_RETURN(Random::Constructor(0));
     return GetDefaultPRNG(true, seed);
 }
 

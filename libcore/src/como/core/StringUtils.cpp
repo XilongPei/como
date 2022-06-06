@@ -54,7 +54,7 @@ ECode StringUtils::ParseByte(
     FAIL_RETURN(ParseInteger(s, radix, i));
     if (i < IByte::MIN_VALUE || i > IByte::MAX_VALUE) {
         Logger::E("StringUtils", "Value out of range. Value:\"%s\" Radix:%d",
-                s.string(), radix);
+                                                             s.string(), radix);
         return E_NUMBER_FORMAT_EXCEPTION;
     }
     value = (Byte)i;
@@ -320,8 +320,8 @@ static void GetChars(
 }
 
 static Integer sizeTable[] = {
-    9, 99, 999, 9999, 99999, 999999, 9999999,
-    99999999, 999999999, IInteger::MAX_VALUE };
+                              9, 99, 999, 9999, 99999, 999999, 9999999,
+                              99999999, 999999999, IInteger::MAX_VALUE };
 
 static Integer StringSize(
     /* [in] */ Integer x)
@@ -677,7 +677,7 @@ Array<String> StringUtils::Split(
     // Try fast splitting without allocating Pattern object
     Array<String> strArr;
     Pattern::FastSplit(regex, input, limit, &strArr);
-    if (!strArr.IsNull()) {
+    if (! strArr.IsNull()) {
         return strArr;
     }
 
@@ -692,7 +692,9 @@ String StringUtils::Format(
     /* [in] */ const Array<IInterface*>* args)
 {
     AutoPtr<IFormatter> formatter;
-    CFormatter::New(IID_IFormatter, (IInterface**)&formatter);
+    if (FAILED(CFormatter::New(IID_IFormatter, (IInterface**)&formatter)))
+        return nullptr;
+
     formatter->Format(format, args);
     return Object::ToString(formatter);
 }
@@ -703,7 +705,9 @@ String StringUtils::Format(
     /* [in] */ const Array<IInterface*>* args)
 {
     AutoPtr<IFormatter> formatter;
-    CFormatter::New(l, IID_IFormatter, (IInterface**)&formatter);
+    if (FAILED(CFormatter::New(l, IID_IFormatter, (IInterface**)&formatter)))
+        return nullptr;
+
     formatter->Format(format, args);
     return Object::ToString(formatter);
 }

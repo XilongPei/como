@@ -23,5 +23,5 @@ const Array<Byte> EmptyArray::BYTE(0);
 const Array<Char> EmptyArray::CHAR(0);
 const Array<String> EmptyArray::STRING(0);
 
-}
-}
+} // namespace util
+} // namespace como

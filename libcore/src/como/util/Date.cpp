@@ -78,15 +78,15 @@ AutoPtr<IBaseCalendar> Date::GetGcal()
 static Array<String> CreateWtb()
 {
     Array<String> strArr(32);
-    strArr[0] = "am"; strArr[1] = "pm";
-    strArr[2] = "monday"; strArr[3] = "tuesday"; strArr[4] = "wednesday";
-    strArr[5] = "thursday"; strArr[6] = "friday"; strArr[7] = "saturday"; strArr[8] = "sunday";
-    strArr[9] = "january"; strArr[10] = "february"; strArr[11] = "march"; strArr[12] = "april";
-    strArr[13] = "may"; strArr[14] = "june"; strArr[15] = "july"; strArr[16] = "august";
-    strArr[17] = "september"; strArr[18] = "october"; strArr[19] = "november"; strArr[20] = "december";
-    strArr[21] = "gmt"; strArr[22] = "ut"; strArr[23] = "utc"; strArr[24] = "est";
-    strArr[25] = "edt"; strArr[26] = "cst"; strArr[27] = "cdt";
-    strArr[28] = "mst"; strArr[29] = "mdt"; strArr[30] = "pst"; strArr[31] = "pdt";
+    strArr[0]  = "am";        strArr[1]  = "pm";
+    strArr[2]  = "monday";    strArr[3]  = "tuesday";  strArr[4]  = "wednesday";
+    strArr[5]  = "thursday";  strArr[6]  = "friday";   strArr[7]  = "saturday";  strArr[8]  = "sunday";
+    strArr[9]  = "january";   strArr[10] = "february"; strArr[11] = "march";     strArr[12] = "april";
+    strArr[13] = "may";       strArr[14] = "june";     strArr[15] = "july";      strArr[16] = "august";
+    strArr[17] = "september"; strArr[18] = "october";  strArr[19] = "november";  strArr[20] = "december";
+    strArr[21] = "gmt";       strArr[22] = "ut";       strArr[23] = "utc";       strArr[24] = "est";
+    strArr[25] = "edt";       strArr[26] = "cst";      strArr[27] = "cdt";
+    strArr[28] = "mst";       strArr[29] = "mdt";      strArr[30] = "pst";       strArr[31] = "pdt";
 
     return strArr;
 }
@@ -147,8 +147,7 @@ ECode Date::Constructor(
     }
     AutoPtr<IBaseCalendar> cal = GetCalendarSystem(y);
     AutoPtr<ICalendarDate> cdate;
-    ICalendarSystem::Probe(cal)->NewCalendarDate(
-            TimeZone::GetDefaultRef(), cdate);
+    ICalendarSystem::Probe(cal)->NewCalendarDate(TimeZone::GetDefaultRef(), cdate);
     mCdate = IBaseCalendarDate::Probe(cdate);
     mCdate->SetNormalizedDate(y, month + 1, date);
     cdate->SetTimeOfDay(hrs, min, sec, 0);
@@ -432,7 +431,7 @@ syntax:
         if (tzoffset == -1) {
             AutoPtr<ICalendarDate> ldate;
             ICalendarSystem::Probe(cal)->NewCalendarDate(
-                    TimeZone::GetDefaultRef(), ldate);
+                                              TimeZone::GetDefaultRef(), ldate);
             ldate->SetDate(year, mon + 1, mday);
             ldate->SetTimeOfDay(hour, min, sec, 0);
             return ICalendarSystem::Probe(cal)->GetTime(ldate, date);
@@ -611,7 +610,7 @@ Long Date::GetMillisOf(
     Boolean normalized;
     if (dateObj->mCdate == nullptr ||
             (ICalendarDate::Probe(dateObj->mCdate)->IsNormalized(normalized),
-                normalized)) {
+                                                                  normalized)) {
         return dateObj->mFastTime;
     }
     AutoPtr<ICalendarDate> cdate;
@@ -649,15 +648,17 @@ ECode Date::ToString(
 {
     // "EEE MMM dd HH:mm:ss zzz yyyy";
     AutoPtr<ICalendarDate> date = ICalendarDate::Probe(Normalize());
+
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(28, IID_IStringBuilder, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuilder::New(28, IID_IStringBuilder, (IInterface**)&sb));
+
     Integer index;
     date->GetDayOfWeek(index);
     if (index == IBaseCalendar::SUNDAY) {
         index = 8;
     }
     ConvertToAbbr(sb, GetWtb()[index]);
-    sb->Append(U' '); // EEE
+    FAIL_RETURN(sb->Append(U' ')); // EEE
     Integer month, days, hours, minutes, seconds, year;
     date->GetMonth(month);
     date->GetDayOfMonth(days);
@@ -666,15 +667,15 @@ ECode Date::ToString(
     date->GetSeconds(seconds);
     date->GetYear(year);
     ConvertToAbbr(sb, GetWtb()[month - 1 + 2 + 7]);
-    sb->Append(U' '); // MMM
+    FAIL_RETURN(sb->Append(U' ')); // MMM
     CalendarUtils::Sprintf0d(sb, days, 2);
-    sb->Append(U' '); // dd
+    FAIL_RETURN(sb->Append(U' ')); // dd
     CalendarUtils::Sprintf0d(sb, hours, 2);
-    sb->Append(U':'); // HH
+    FAIL_RETURN(sb->Append(U':')); // HH
     CalendarUtils::Sprintf0d(sb, minutes, 2);
-    sb->Append(U':'); // mm
+    FAIL_RETURN(sb->Append(U':')); // mm
     CalendarUtils::Sprintf0d(sb, seconds, 2);
-    sb->Append(U' '); // ss
+    FAIL_RETURN(sb->Append(U' ')); // ss
     AutoPtr<ITimeZone> zi;
     date->GetZone(zi);
     if (zi != nullptr) {
@@ -682,13 +683,13 @@ ECode Date::ToString(
         date->IsDaylightTime(daylight);
         String name;
         zi->GetDisplayName(daylight, ITimeZone::SHORT, Locale::GetUS(), name);
-        sb->Append(name);
+        FAIL_RETURN(sb->Append(name));
     }
     else {
-        sb->Append(String("GMT"));
+        FAIL_RETURN(sb->Append(String("GMT")));
     }
-    sb->Append(U' ');
-    sb->Append(year); // yyyy
+    FAIL_RETURN(sb->Append(U' '));
+    FAIL_RETURN(sb->Append(year)); // yyyy
     return sb->ToString(desc);
 }
 
@@ -716,9 +717,10 @@ ECode Date::ToGMTString(
     GetTime(t);
     AutoPtr<ICalendarDate> date;
     ICalendarSystem::Probe(GetCalendarSystem(t))->GetCalendarDate(
-            t, nullptr, date);
+                                                              t, nullptr, date);
     AutoPtr<IStringBuilder> sb;
-    CStringBuilder::New(32, IID_IStringBuilder, (IInterface**)&sb);
+    FAIL_RETURN(CStringBuilder::New(32, IID_IStringBuilder, (IInterface**)&sb));
+
     Integer month, days, hours, minutes, seconds, year;
     date->GetDayOfMonth(days);
     date->GetMonth(month);
@@ -727,17 +729,17 @@ ECode Date::ToGMTString(
     date->GetMinutes(minutes);
     date->GetSeconds(seconds);
     CalendarUtils::Sprintf0d(sb, days, 1);
-    sb->Append(U' '); // d
+    FAIL_RETURN(sb->Append(U' ')); // d
     ConvertToAbbr(sb, GetWtb()[month - 1 + 2 + 7]);
-    sb->Append(U' '); // MMM
-    sb->Append(year);
-    sb->Append(U' '); // yyyy
+    FAIL_RETURN(sb->Append(U' ')); // MMM
+    FAIL_RETURN(sb->Append(year));
+    FAIL_RETURN(sb->Append(U' ')); // yyyy
     CalendarUtils::Sprintf0d(sb, hours, 2);
-    sb->Append(U':'); // HH
+    FAIL_RETURN(sb->Append(U':')); // HH
     CalendarUtils::Sprintf0d(sb, minutes, 2);
-    sb->Append(U':'); // mm
+    FAIL_RETURN(sb->Append(U':')); // mm
     CalendarUtils::Sprintf0d(sb, seconds, 2); // ss
-    sb->Append(String(" GMT")); // ' GMT'
+    FAIL_RETURN(sb->Append(String(" GMT"))); // ' GMT'
     return sb->ToString(str);
 }
 
@@ -917,5 +919,5 @@ AutoPtr<IBaseCalendar> Date::GetJulianCalendar()
     return sJcal;
 }
 
-}
-}
+} // namespace util
+} // namespace como

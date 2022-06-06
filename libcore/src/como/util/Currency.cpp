@@ -91,10 +91,8 @@ AutoPtr<ICurrency> Currency::GetInstance(
     String country;
     locale->GetCountry(country);
     locale->GetVariant(variant);
-    if (!variant.IsEmpty()
-        && (variant.Equals("EURO")
-        || variant.Equals("HK")
-        || variant.Equals("PREEURO"))) {
+    if (! variant.IsEmpty() && (variant.Equals("EURO") || variant.Equals("HK")
+                                                || variant.Equals("PREEURO"))) {
         country = country + String("_") + variant;
     }
 
@@ -213,5 +211,5 @@ ECode Currency::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace util
+} // namespace como
