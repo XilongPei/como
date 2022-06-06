@@ -53,10 +53,15 @@ static AutoPtr<IAtomicLong> CreateAtomicLong(
 
 AutoPtr<IAtomicLong> Random::GetSeedUniquifier()
 {
-    static AutoPtr<IAtomicLong> sSeedUniquifier = CreateAtomicLong(8682522807148012ll);
+    static AutoPtr<IAtomicLong> sSeedUniquifier = CreateAtomicLong(8682522807148012LL);
     return sSeedUniquifier;
 }
 
+/**
+  * Creates a new random number generator. This constructor sets
+  * the seed of the random number generator to a value very likely
+  * to be distinct from any other invocation of this constructor.
+  */
 ECode Random::Constructor()
 {
     return Constructor(SeedUniquifier() ^ System::GetNanoTime());
@@ -85,7 +90,7 @@ Long Random::SeedUniquifier()
     for (;;) {
         Long current;
         GetSeedUniquifier()->Get(current);
-        Long next = current * 181783497276652981ll;
+        Long next = current * 1181783497276652981LL;
         Boolean succeeded;
         if (GetSeedUniquifier()->CompareAndSet(current, next, &succeeded), succeeded) {
             return next;

@@ -37,5 +37,5 @@ ECode CSystem::GetNanoTime(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

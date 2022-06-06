@@ -171,5 +171,5 @@ ECode CStructStat::GetUid(
     return NOERROR;
 }
 
-}
-}
+} // namespace system
+} // namespace jing

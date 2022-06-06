@@ -43,5 +43,5 @@ const Integer OsConstants::S_IFDIR_ = S_IFDIR;
 const Integer OsConstants::S_IFMT_ = S_IFMT;
 const Integer OsConstants::_SC_NPROCESSORS_CONF_ = _SC_NPROCESSORS_CONF;
 
-}
-}
+} // namespace system
+} // namespace jing

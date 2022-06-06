@@ -71,24 +71,25 @@ Long System::GetCurrentTimeMillis()
 Long System::GetNanoTime()
 {
     timespec now;
-    now.tv_sec = now.tv_nsec = 0;
     clock_gettime(CLOCK_MONOTONIC, &now);
     return static_cast<Long>(now.tv_sec) * 1000000000LL + now.tv_nsec;
+                                         // 987654321
 }
 
 AutoPtr<IProperties> System::InitUnchangeableSystemProperties()
 {
     AutoPtr<IHashtable> p;
-    CProperties::New(IID_IHashtable, (IInterface**)&p);
+    if (FAILED(CProperties::New(IID_IHashtable, (IInterface**)&p)))
+        return nullptr;
 
     p->Put(CoreUtils::Box(String("como.class.path")),
-           CoreUtils::Box(String(getenv("CLASS_PATH"))));
+                                  CoreUtils::Box(String(getenv("CLASS_PATH"))));
 
     Integer N = ArrayLength(HardcodedSystemProperties::STATIC_PROPERTIES);
     for (Integer i = 0; i < N; i++) {
         String pair[2] = {
-                HardcodedSystemProperties::STATIC_PROPERTIES[i][0],
-                HardcodedSystemProperties::STATIC_PROPERTIES[i][1] };
+                          HardcodedSystemProperties::STATIC_PROPERTIES[i][0],
+                          HardcodedSystemProperties::STATIC_PROPERTIES[i][1] };
         Boolean contains;
         if (p->ContainsKey(CoreUtils::Box(pair[0]), contains), contains) {
             LogE(String("Ignoring command line argument: -D") + pair[0]);
