@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <cassert>
 #include "mistring.h"
 
 namespace como {
@@ -116,6 +117,9 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     return seeds;
 }
 
+/**
+ * Seperate string into como::Array
+ */
 ECode MiString::SeperateStr(
     /* [in] */ char *s,
     /* [in] */ char seperator,
@@ -149,6 +153,7 @@ ECode MiString::SeperateStr(
         if (*s == seperator)   {
             *s = '\0';
             result[i++] = String(sz);
+            *s = seperator;
             sz = s + 1;
 
             if (i >= separatorCount)
@@ -157,9 +162,17 @@ ECode MiString::SeperateStr(
         s++;
     }
 
+    if ((sz != s) && ((i < separatorCount))) {
+        assert('\0' == *s);
+        result[i++] = String(sz);
+    }
+
     return NOERROR;
 }
 
+/**
+ * shrink space in string
+ */
 char *MiString::shrink(char *dst, int dstSize, const char *src)
 {
     int i, j = 0;
@@ -178,6 +191,166 @@ char *MiString::shrink(char *dst, int dstSize, const char *src)
     }
     return dst;
 }
+
+/**
+ * translate C++ style string into memory inside string
+ */
+char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
+{
+    short i = 0;
+
+    size--;     //for hold tail 0
+    while ( *s != '\0' && *s != '"' && i < size ) {
+        if ( *s == turnChar ) {
+           switch( *(++s) ) {
+            case 't':
+                t[i++] = '\t';
+                break;
+            case 'n':
+                t[i++] = '\n';
+                break;
+            case 'F':
+                t[i++] = '\xFF';
+                break;
+            case '"':
+                t[i++] = '"';
+                break;
+
+            case '\0':
+                t[i] = '\0';
+                return  t;
+
+            case 'x':
+            case 'X':
+            {
+                int j, num = 0;
+
+                s++;
+                for (j = 0;  j < 2 && *s;  j++ ) {
+                    *s = toupper(*s);
+                    if ( *s >= 'A' && *s <= 'Z' )
+                        num = num * 16 + (*s - 'A' + 10 );
+                    else if ( isdigit(*s) )
+                        num = num * 16 + (*s - '0') ;
+                    s++;
+                }
+
+                t[i++] = num;
+                continue;
+            }
+            break;
+
+            case '0':   case '1':   case '2':
+            case '3':   case '4':   case '5':
+            case '6':   case '7':   case '8':
+            case '9':
+            {
+                int j, num = 0;
+
+                for (j = 0;  j < 3 && *s;  j++ ) {
+                    if (isdigit(*s)) {
+                        num = num * 10 + (*s - '0') ;
+                    } else {
+                        break;
+                    }
+                    s++;
+                }
+
+                t[i++] = (unsigned char)num;
+                continue;
+            }
+            break;
+
+            default:
+                t[i++] = *s;
+                break;
+           }
+        } else {
+            t[i++] = *s;
+        }
+        s++;
+    } // end of while
+
+    t[i] = '\0';
+
+    return  t;
+
+}  // end of function strToSourceC()
+
+/**
+ *
+ * strZcpy()
+ *
+ */
+char *MiString::strZcpy(char *dest, const char *src, size_t maxlen)
+{
+    maxlen--;
+    dest[maxlen] = '\0';
+    return  strncpy(dest, src, maxlen);
+}
+
+/**
+ * strToSourceC
+ */
+char *MiString::strToSourceC(char *t, char *s, char turnChar)
+{
+    char *sz = t;
+
+    while( *s != '\0' ) {
+        if( *s == turnChar ) {
+            *sz++ = turnChar;
+            *sz++ = turnChar;
+        } else {
+            *sz++ = *s;
+        }
+        s++;
+    } // end of while
+    *sz = '\0';
+
+    return  t;
+
+}  // end of function strToSourceC()
+
+/**
+ * Call method:
+ *      char *s1, *s2, *s3, *s4, *s;
+ *      s = memNewBlockOnce(&s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ */
+char *MiString::memNewBlockOnce(char **ss, size_t memSize, ...)
+{
+    va_list ap;
+    char **ss1;
+    char *pool;
+    unsigned short poolSize, count;
+
+    poolSize = memSize;
+
+    // count mem alloc
+    va_start(ap, memSize);
+    while ((ss1 = va_arg(ap, char **)) != nullptr) {
+        poolSize += va_arg(ap, size_t);
+    }
+    va_end(ap);
+    if (poolSize <= 0)
+        return  nullptr;
+
+    if ((pool = (char*)malloc(poolSize) ) == nullptr)
+        return  nullptr;
+    memset( pool, 0, poolSize );
+
+    *ss = pool;
+    count = memSize;
+
+    va_start(ap, memSize);
+    while ((ss1 = va_arg(ap, char **)) != nullptr) {
+        *ss1 = (char *)(pool + count);
+        count += va_arg(ap, size_t);
+    }
+    va_end(ap);
+
+    return pool;
+
+} // end of function memNewBlockOnce()
 
 } // namespace como
 

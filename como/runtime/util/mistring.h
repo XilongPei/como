@@ -44,6 +44,17 @@ public:
                     /* [out, callee] */ Array<String>* strArray);
 
     static char *shrink(char *dst, int dstSize, const char *src);
+
+    static char *cnStrToStr(char *t, char *s, char turnChar, size_t size);
+
+    static char *strZcpy(char *dest, const char *src, size_t maxlen);
+
+    static char *strToSourceC(char *t, char *s, char turnChar);
+
+    static char *memNewBlockOnce(char **ss, size_t memSize, ...);
+
+
+
 };
 
 } // namespace como
