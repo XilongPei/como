@@ -30,6 +30,10 @@ namespace action {
 
 COMO_INTERFACE_IMPL_1(GetPropertyAction, SyncObject, IPrivilegedAction);
 
+/**
+ * GetPropertyAction is a convenience class for retrieving the string value of
+ * a system property as a privileged action.
+ */
 ECode GetPropertyAction::Constructor(
     /* [in] */ const String& theProp)
 {
@@ -51,8 +55,7 @@ ECode GetPropertyAction::Run(
 {
     String value;
     FAIL_RETURN(System::GetProperty(mTheProp, value));
-    result = value.IsNull() ?
-            CoreUtils::Box(mDefaultVal) : CoreUtils::Box(value);
+    result = value.IsNull() ? CoreUtils::Box(mDefaultVal) : CoreUtils::Box(value);
     return NOERROR;
 }
 

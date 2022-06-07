@@ -73,12 +73,13 @@ ECode PrintWriter::Constructor(
     /* [in] */ IWriter* outstream,
     /* [in] */ Boolean autoFlush)
 {
-    Writer::Constructor(ISynchronize::Probe(outstream));
+    FAIL_RETURN(Writer::Constructor(ISynchronize::Probe(outstream)));
+
     mOut = outstream;
     mAutoFlush = autoFlush;
     AutoPtr<IPrivilegedAction> lsAction;
-    CGetPropertyAction::New(String("line.separator"),
-            IID_IPrivilegedAction, (IInterface**)&lsAction);
+    FAIL_RETURN(CGetPropertyAction::New(String("line.separator"),
+                                IID_IPrivilegedAction, (IInterface**)&lsAction));
     AutoPtr<IInterface> lsRet;
     FAIL_RETURN(AccessController::DoPrivileged(lsAction, lsRet));
     mLineSeparator = CoreUtils::Unbox(ICharSequence::Probe(lsRet));

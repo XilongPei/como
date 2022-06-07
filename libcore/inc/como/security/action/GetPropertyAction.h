@@ -26,6 +26,26 @@ namespace como {
 namespace security {
 namespace action {
 
+/**
+ * A convenience class for retrieving the string value of a system
+ * property as a privileged action.
+ *
+ * <p>An instance of this class can be used as the argument of
+ * <code>AccessController.doPrivileged</code>.
+ *
+ * <p>The following code retrieves the value of the system
+ * property named <code>"prop"</code> as a privileged action: <p>
+ *
+ * <pre>
+ *      AutoPtr<IPrivilegedAction> fsAction;
+ *      ECode ec = CGetPropertyAction::New(String("file.separator"),
+ *                              IID_IPrivilegedAction, (IInterface**)&fsAction);
+ *      AutoPtr<IInterface> fsRet;
+ *      ec = AccessController::DoPrivileged(fsAction, fsRet);
+ *      mSlash = CoreUtils::Unbox(ICharSequence::Probe(fsRet)).GetChar(0);
+ * </pre>
+ *
+ */
 class GetPropertyAction
     : public SyncObject
     , public IPrivilegedAction

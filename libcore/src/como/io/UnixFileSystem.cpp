@@ -65,22 +65,26 @@ UnixFileSystem::UnixFileSystem()
                                 IID_IPrivilegedAction, (IInterface**)&psAction);
     ec |= CGetPropertyAction::New(String("como.home"),
                                 IID_IPrivilegedAction, (IInterface**)&hmAction);
-    AutoPtr<IInterface> fsRet, psRet, hmRet;
-    ec |= AccessController::DoPrivileged(fsAction, fsRet);
-
-    mSlash = CoreUtils::Unbox(ICharSequence::Probe(fsRet)).GetChar(0);
-    ec |= AccessController::DoPrivileged(psAction, psRet);
-
-    mColon = CoreUtils::Unbox(ICharSequence::Probe(psRet)).GetChar(0);
-    ec |= AccessController::DoPrivileged(hmAction, hmRet);
-
-    mCcmHome = CoreUtils::Unbox(ICharSequence::Probe(hmRet));
-
     if (FAILED(ec)) {
+        //@ `Whether mSlash`
         // Whether the new operation is successful needs to check mSlash is not '\0'
         mSlash = '\0';
+        return;
     }
 
+    AutoPtr<IInterface> fsRet, psRet, hmRet;
+    ec |= AccessController::DoPrivileged(fsAction, fsRet);
+    ec |= AccessController::DoPrivileged(psAction, psRet);
+    ec |= AccessController::DoPrivileged(hmAction, hmRet);
+    if (SUCCEEDED(ec)) {
+        mSlash = CoreUtils::Unbox(ICharSequence::Probe(fsRet)).GetChar(0);
+        mColon = CoreUtils::Unbox(ICharSequence::Probe(psRet)).GetChar(0);
+        mCcmHome = CoreUtils::Unbox(ICharSequence::Probe(hmRet));
+    }
+    else {
+        // `Whether mSlash`
+        mSlash = '\0';
+    }
 }
 
 ECode UnixFileSystem::GetSeparator(

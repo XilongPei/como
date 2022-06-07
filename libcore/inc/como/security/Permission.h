@@ -28,6 +28,14 @@ using como::io::ISerializable;
 namespace como {
 namespace security {
 
+/**
+ * class Permission representing access to a system resource.
+ * All Permissions have a name. Interface IGuard include an "actions" list that tells the actions
+ * that are permitted for the COMO Object. For example, a FilePermission COMO Object,
+ * the permission name is the pathname of a file (or directory), and the actions
+ * list (such as "read, write") specifies which actions are granted for the
+ * specified file (or for files in the specified directory).
+ */
 class Permission
     : public SyncObject
     , public IPermission
