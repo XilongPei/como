@@ -11,7 +11,7 @@
 
 namespace como {
 
-class MiString {
+class COM_PUBLIC MiString {
 public:
     /**
      * A powerful wordbreak function to break a string to many word,
