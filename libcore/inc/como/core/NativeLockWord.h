@@ -181,7 +181,7 @@ inline uint32_t NativeLockWord::GetValue() const
     return mValue;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVELOCKWORD_H__

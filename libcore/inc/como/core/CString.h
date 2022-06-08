@@ -75,7 +75,7 @@ private:
     String mString;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSTRING_H__

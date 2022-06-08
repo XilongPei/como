@@ -254,7 +254,7 @@ private:
     Monitors mList;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEMONITOR_H__

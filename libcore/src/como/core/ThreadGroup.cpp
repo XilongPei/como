@@ -28,7 +28,9 @@ COMO_INTERFACE_IMPL_1(ThreadGroup, SyncObject, IThreadGroup);
 static AutoPtr<IThreadGroup> CreateSystemThreadGroup()
 {
     AutoPtr<IThreadGroup> tg;
-    CThreadGroup::New(IID_IThreadGroup, (IInterface**)&tg);
+    if (FAILED(CThreadGroup::New(IID_IThreadGroup, (IInterface**)&tg)))
+        return nullptr;
+
     return tg;
 }
 
@@ -36,21 +38,19 @@ static AutoPtr<IThreadGroup> CreateMainThreadGroup()
 {
     AutoPtr<IThreadGroup> tg;
     CThreadGroup::New(ThreadGroup::GetSystemThreadGroup(),
-            String("main"), IID_IThreadGroup, (IInterface**)&tg);
+                           String("main"), IID_IThreadGroup, (IInterface**)&tg);
     return tg;
 }
 
 AutoPtr<IThreadGroup> ThreadGroup::GetSystemThreadGroup()
 {
-    static AutoPtr<IThreadGroup> sSystemThreadGroup =
-            CreateSystemThreadGroup();
+    static AutoPtr<IThreadGroup> sSystemThreadGroup = CreateSystemThreadGroup();
     return sSystemThreadGroup;
 }
 
 AutoPtr<IThreadGroup> ThreadGroup::GetMainThreadGroup()
 {
-    static AutoPtr<IThreadGroup> sMainThreadGroup =
-            CreateMainThreadGroup();
+    static AutoPtr<IThreadGroup> sMainThreadGroup = CreateMainThreadGroup();
     return sMainThreadGroup;
 }
 
@@ -137,6 +137,7 @@ ECode ThreadGroup::SetMaxPriority(
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
+
         FAIL_RETURN(CheckAccess());
         if (pri < IThread::MIN_PRIORITY) {
             pri = IThread::MIN_PRIORITY;
@@ -152,12 +153,15 @@ ECode ThreadGroup::SetMaxPriority(
             mMaxPriority = Math::Min(pri, pprior);
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         groupsSnapshot[i]->SetMaxPriority(pri);
     }
     return NOERROR;
@@ -200,12 +204,15 @@ ECode ThreadGroup::ActiveCount(
         }
         result = mNthreads;
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         Integer ac;
         groupsSnapshot[i]->ActiveCount(ac);
         result += ac;
@@ -242,6 +249,7 @@ Integer ThreadGroup::Enumerate(
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
+
         if (mDestroyed) {
             return 0;
         }
@@ -249,7 +257,7 @@ Integer ThreadGroup::Enumerate(
         if (nt > list.GetLength() - n) {
             nt = list.GetLength() - n;
         }
-        for (Integer i = 0; i < nt; i++) {
+        for (Integer i = 0;  i < nt;  i++) {
             Boolean alive;
             if (mThreads[i]->IsAlive(alive), alive) {
                 list.Set(n++, mThreads[i]);
@@ -257,14 +265,17 @@ Integer ThreadGroup::Enumerate(
         }
         if (recurse) {
             ngroupsSnapshot = mNgroups;
-            if (!mGroups.IsEmpty()) {
+            if (! mGroups.IsEmpty()) {
                 groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+                if (groupsSnapshot.IsNull())
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
             }
         }
     }
     if (recurse) {
-        for (Integer i = 0; i < ngroupsSnapshot; i++) {
+        for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
             n = From(groupsSnapshot[i])->Enumerate(list, n, true);
         }
     }
@@ -283,13 +294,16 @@ ECode ThreadGroup::ActiveGroupCount(
             return NOERROR;
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
     Integer n = ngroupsSnapshot;
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         Integer agc;
         groupsSnapshot[i]->ActiveGroupCount(agc);
         n += agc;
@@ -339,8 +353,11 @@ Integer ThreadGroup::Enumerate(
         }
         if (recurse) {
             ngroupsSnapshot = mNgroups;
-            if (!mGroups.IsEmpty()) {
+            if (! mGroups.IsEmpty()) {
                 groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+                if (groupsSnapshot.IsNull())
+                    return E_OUT_OF_MEMORY_ERROR;
+
                 groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
             }
         }
@@ -370,16 +387,19 @@ ECode ThreadGroup::Interrupt()
     {
         AutoLock lock(this);
         FAIL_RETURN(CheckAccess());
-        for (Integer i = 0; i < mNthreads; i++) {
+        for (Integer i = 0;  i < mNthreads;  i++) {
             mThreads[i]->Interrupt();
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         groupsSnapshot[i]->Interrupt();
     }
     return NOERROR;
@@ -405,8 +425,9 @@ Boolean ThreadGroup::StopOrSuspend(
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
+
         FAIL_RETURN(CheckAccess());
-        for (Integer i = 0 ; i < mNthreads ; i++) {
+        for (Integer i = 0;  i < mNthreads;  i++) {
             if (mThreads[i] == us) {
                 suicide = true;
             }
@@ -418,12 +439,15 @@ Boolean ThreadGroup::StopOrSuspend(
             }
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0 ; i < ngroupsSnapshot ; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         suicide = From(groupsSnapshot[i])->StopOrSuspend(suspend) || suicide;
     }
 
@@ -436,17 +460,21 @@ ECode ThreadGroup::Resume()
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
+
         FAIL_RETURN(CheckAccess());
-        for (Integer i = 0; i < mNthreads; i++) {
+        for (Integer i = 0;  i < mNthreads;  i++) {
             mThreads[i]->Resume();
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         groupsSnapshot[i]->Resume();
     }
     return NOERROR;
@@ -458,13 +486,17 @@ ECode ThreadGroup::Destroy()
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
+
         FAIL_RETURN(CheckAccess());
         if (mDestroyed || mNthreads > 0) {
             return E_ILLEGAL_THREAD_STATE_EXCEPTION;
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
         if (mParent != nullptr) {
@@ -475,7 +507,7 @@ ECode ThreadGroup::Destroy()
             mThreads.Clear();
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         groupsSnapshot[i]->Destroy();
     }
     if (mParent != nullptr) {
@@ -497,6 +529,9 @@ ECode ThreadGroup::Add(
     else if (mNgroups == mGroups.GetLength()) {
         Array<IThreadGroup*> oldGroups = mGroups;
         mGroups = Array<IThreadGroup*>(mNgroups * 2);
+        if (mGroups.IsNull())
+            return E_OUT_OF_MEMORY_ERROR;
+
         mGroups.Copy(oldGroups, oldGroups.GetLength());
     }
     mGroups.Set(mNgroups, g);
@@ -514,11 +549,11 @@ void ThreadGroup::Remove(
     if (mDestroyed) {
         return;
     }
-    for (Integer i = 0; i < mNgroups; i++) {
+    for (Integer i = 0;  i < mNgroups;  i++) {
         if (mGroups[i] == g) {
             mGroups.Set(i, nullptr);
             mNgroups -= 1;
-            for (Integer j = i; j < mNgroups; j++) {
+            for (Integer j = i;  j < mNgroups;  j++) {
                 mGroups[j] = mGroups[j + 1];
             }
             mGroups[mNgroups] = nullptr;
@@ -529,7 +564,7 @@ void ThreadGroup::Remove(
         NotifyAll();
     }
     if (mDaemon && (mNthreads == 0) &&
-            (mNUnstartedThreads == 0) && (mNgroups == 0)) {
+                                (mNUnstartedThreads == 0) && (mNgroups == 0)) {
         Destroy();
     }
 }
@@ -579,6 +614,7 @@ ECode ThreadGroup::ThreadStartFailed(
     /* [in] */ IThread* t)
 {
     AutoLock lock(this);
+
     Remove(t);
     mNUnstartedThreads++;
     return NOERROR;
@@ -594,7 +630,7 @@ ECode ThreadGroup::ThreadTerminated(
         NotifyAll();
     }
     if (mDaemon && (mNthreads == 0) &&
-            (mNUnstartedThreads == 0) && (mNgroups == 0)) {
+                                (mNUnstartedThreads == 0) && (mNgroups == 0)) {
         Destroy();
     }
     return NOERROR;
@@ -607,11 +643,11 @@ void ThreadGroup::Remove(
     if (mDestroyed) {
         return;
     }
-    for (Integer i = 0; i < mNthreads; i++) {
+    for (Integer i = 0;  i < mNthreads;  i++) {
         if (mThreads[i] == t) {
             mThreads.Set(i, nullptr);
             mNthreads -= 1;
-            for (Integer j = i; j < mNthreads; j++) {
+            for (Integer j = i;  j < mNthreads;  j++) {
                 mThreads[j] = mThreads[j + 1];
             }
             mThreads[mNthreads] = nullptr;
@@ -626,7 +662,7 @@ ECode ThreadGroup::List()
     return NOERROR;
 }
 
-void ThreadGroup::List(
+ECode ThreadGroup::List(
     /* [in] */ IPrintStream* out,
     /* [in] */ Integer indent)
 {
@@ -634,41 +670,46 @@ void ThreadGroup::List(
     Array<IThreadGroup*> groupsSnapshot;
     {
         AutoLock lock(this);
-        for (Integer j = 0 ; j < indent ; j++) {
+        for (Integer j = 0;  j < indent;  j++) {
             out->Print(String(" "));
         }
         out->Println((IThreadGroup*)this);
         indent += 4;
-        for (Integer i = 0 ; i < mNthreads ; i++) {
-            for (Integer j = 0 ; j < indent ; j++) {
+        for (Integer i = 0;  i < mNthreads;  i++) {
+            for (Integer j = 0;  j < indent;  j++) {
                 out->Print(String(" "));
             }
             out->Println(mThreads[i]);
         }
         ngroupsSnapshot = mNgroups;
-        if (!mGroups.IsEmpty()) {
+        if (! mGroups.IsEmpty()) {
             groupsSnapshot = Array<IThreadGroup*>(ngroupsSnapshot);
+            if (groupsSnapshot.IsNull())
+                return E_OUT_OF_MEMORY_ERROR;
+
             groupsSnapshot.Copy(mGroups, ngroupsSnapshot);
         }
     }
-    for (Integer i = 0; i < ngroupsSnapshot; i++) {
+    for (Integer i = 0;  i < ngroupsSnapshot;  i++) {
         From(groupsSnapshot[i])->List(out, indent);
     }
+
+    return NOERROR;
 }
 
 ECode ThreadGroup::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IMetaCoclass> klass;
-    GetCoclass(klass);
+    FAIL_RETURN(GetCoclass(klass));
     String cName;
-    klass->GetName(cName);
+    FAIL_RETURN(klass->GetName(cName));
     String name;
-    GetName(name);
+    FAIL_RETURN(GetName(name));
     desc = String::Format("%s[name=%s,maxpri=%d]",
-            cName.string(), name.string(), mMaxPriority);
+                          cName.string(), name.string(), mMaxPriority);
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

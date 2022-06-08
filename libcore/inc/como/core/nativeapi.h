@@ -73,7 +73,7 @@ Boolean MaybeCauseIcuException(
     /* [in] */ const char* function,
     /* [in] */ UErrorCode error);
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEAPI_H__

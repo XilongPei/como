@@ -1429,7 +1429,7 @@ inline Integer Character::Compare(
     return x - y;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CHARACTER_H__

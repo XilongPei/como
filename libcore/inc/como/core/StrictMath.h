@@ -32,7 +32,7 @@ public:
         /* [in] */ Double a);
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_STRICTMATH_H__

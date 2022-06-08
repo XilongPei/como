@@ -63,7 +63,7 @@ private:
     Boolean mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CBOOLEAN_H__

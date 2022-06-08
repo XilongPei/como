@@ -94,7 +94,7 @@ private:
     static Integer sDigitCount;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_REALTOSTRING_H__

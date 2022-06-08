@@ -49,7 +49,7 @@ inline ECode RuntimePermission::Constructor(
     return BasicPermission::Constructor(name, actions);
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_RUNTIMEPERMISSION_H__

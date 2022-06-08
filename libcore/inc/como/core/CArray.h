@@ -57,7 +57,7 @@ private:
     InterfaceID mElementTypeId;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CARRAY_H__

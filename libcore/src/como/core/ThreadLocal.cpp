@@ -30,7 +30,9 @@ COMO_INTERFACE_IMPL_1(ThreadLocal, SyncObject, IThreadLocal);
 static AutoPtr<IAtomicInteger> CreateGenerator()
 {
     AutoPtr<IAtomicInteger> atomic;
-    CAtomicInteger::New(IID_IAtomicInteger, (IInterface**)&atomic);
+    if (FAILED(CAtomicInteger::New(IID_IAtomicInteger, (IInterface**)&atomic)))
+        return nullptr;
+
     return atomic;
 }
 
@@ -49,6 +51,9 @@ ECode ThreadLocal::Constructor()
 Integer ThreadLocal::GetNextHashCode()
 {
     AutoPtr<IAtomicInteger> gen = GetHashCodeGenerator();
+    if (nullptr == gen)
+        return 0;
+
     Integer hash;
     gen->GetAndAdd(HASH_INCREMENT, hash);
     return hash;
@@ -473,5 +478,5 @@ void ThreadLocal::ThreadLocalMap::Entry::Clear()
     mValue = nullptr;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -498,7 +498,7 @@ void Thread::DumpStack()
     t->GetStackTrace(&frames);
     for (Integer i = 0; i < frames.GetLength(); i++) {
         Logger::D("Thread", "Frame[%d] %s", i,
-                Object::ToString(frames[i]).string());
+                                         Object::ToString(frames[i]).string());
     }
 }
 
@@ -538,8 +538,7 @@ ECode Thread::ToString(
         GetPriority(prio);
         String gName;
         g->GetName(gName);
-        desc = String::Format("Thread[%s,%d,%s]",
-                name.string(), prio, gName.string());
+        desc = String::Format("Thread[%s,%d,%s]", name.string(), prio, gName.string());
         return NOERROR;
     }
     else {
@@ -547,8 +546,7 @@ ECode Thread::ToString(
         GetName(name);
         Integer prio;
         GetPriority(prio);
-        desc = String::Format("Thread[%s,%d,]",
-                name.string(), prio);
+        desc = String::Format("Thread[%s,%d,]", name.string(), prio);
         return NOERROR;
     }
 }
@@ -584,7 +582,9 @@ Boolean Thread::NativeHoldsLock(
         return false;
     }
     NativeThread* self = NativeThread::Current();
+
     NativeMutex::AutoLock lock(self, *Locks::sThreadListLock);
+
     NativeThread* thread = NativeThread::FromManagedThread(this);
     return thread->HoldsLock(reinterpret_cast<NativeObject*>(so->mNativeObject));
 }
@@ -601,7 +601,8 @@ ECode Thread::GetStackTrace(
     VALIDATE_NOT_NULL(trace);
 
     AutoPtr<IStackTrace> strace;
-    CStackTrace::New(IID_IStackTrace, (IInterface**)&strace);
+    FAIL_RETURN(CStackTrace::New(IID_IStackTrace, (IInterface**)&strace));
+
     ECode ec = strace->GetStackTrace(trace);
     if (FAILED(ec)) {
         *trace = Get_EMPTY_STACK_TRACE();
@@ -658,7 +659,9 @@ void Thread::NativeSetPriority(
     /* [in] */ Integer newPriority)
 {
     NativeThread* self = NativeThread::Current();
+
     NativeMutex::AutoLock lock(self, *Locks::sThreadListLock);
+
     NativeThread* thread = NativeThread::FromManagedThread(this);
     if (thread != nullptr) {
         thread->SetNativePriority(newPriority);
@@ -670,9 +673,10 @@ ThreadState Thread::NativeGetStatus(
 {
     NativeThread* self = NativeThread::Current();
     ScopedObjectAccess soa(self);
-    NativeThreadState threadState = hasBeenStarted ?
-            kTerminated : kStarting;
+    NativeThreadState threadState = hasBeenStarted ? kTerminated : kStarting;
+
     NativeMutex::AutoLock lock(soa.Self(), *Locks::sThreadListLock);
+
     NativeThread* thread = NativeThread::FromManagedThread(this);
     if (thread != nullptr) {
         threadState = thread->GetState();
@@ -697,7 +701,9 @@ ThreadState Thread::NativeGetStatus(
 ECode Thread::NativeInterrupt()
 {
     NativeThread* self = NativeThread::Current();
+
     NativeMutex::AutoLock lock(self, *Locks::sThreadListLock);
+
     NativeThread* thread = NativeThread::FromManagedThread(this);
     if (thread != nullptr) {
         thread->Interrupt(self);
@@ -789,5 +795,5 @@ SyncObject* Thread::GetStaticLock()
     return sLock;
 }
 
-}
-}
+} // namespace core
+} // namespace como

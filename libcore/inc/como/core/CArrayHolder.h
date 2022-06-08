@@ -14,6 +14,9 @@
 // limitations under the License.
 //=========================================================================
 
+#ifndef __COMO_CORE_CARRAYHOLDER_H__
+#define __COMO_CORE_CARRAYHOLDER_H__
+
 #include "como/core/ArrayHolder.h"
 #include "_como_core_CArrayHolder.h"
 
@@ -27,5 +30,7 @@ public:
     COMO_OBJECT_DECL();
 };
 
-}
-}
+} // namespace core
+} // namespace como
+
+#endif // __COMO_CORE_CARRAYHOLDER_H__

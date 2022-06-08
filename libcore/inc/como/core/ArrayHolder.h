@@ -45,7 +45,7 @@ private:
     Triple mArray;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_ARRAYHOLDER_H__

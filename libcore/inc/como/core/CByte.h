@@ -83,7 +83,7 @@ private:
     Byte mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CBYTE_H__

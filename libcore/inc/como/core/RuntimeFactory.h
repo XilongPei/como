@@ -32,7 +32,7 @@ private:
     RuntimeFactory();
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_RuntimeFactory_H__

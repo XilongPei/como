@@ -89,7 +89,7 @@ private:
     Float mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CFLOAT_H__

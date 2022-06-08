@@ -106,7 +106,7 @@ private:
     std::set<MapEntry*, CompareEntries> mEntries;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
-#endif  // __COMO_CORE_NATIVEMAPDATA_H__
+#endif // __COMO_CORE_NATIVEMAPDATA_H__

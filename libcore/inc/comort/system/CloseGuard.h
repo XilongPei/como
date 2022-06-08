@@ -30,6 +30,10 @@ using como::core::SyncObject;
 namespace comort {
 namespace system {
 
+/**
+ * CloseGuard is a mechanism for flagging implicit finalizer cleanup of resources
+ * that should have been cleaned up by explicit close methods.
+ */
 class CloseGuard
     : public SyncObject
     , public ICloseGuard

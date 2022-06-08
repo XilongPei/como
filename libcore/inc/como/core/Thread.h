@@ -298,7 +298,7 @@ inline Thread* Thread::From(
     return (Thread*)t;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_THREAD_H__

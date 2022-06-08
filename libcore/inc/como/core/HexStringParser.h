@@ -122,7 +122,7 @@ private:
     String mAbandonedNumber = String("");
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_HEXSTRINGPARSER_H__

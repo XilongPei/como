@@ -222,7 +222,7 @@ public:
         /* [out] */ String& str) override;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSTRINGBUFFER_H__

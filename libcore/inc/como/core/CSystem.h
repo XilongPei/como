@@ -40,7 +40,7 @@ public:
         /* [out] */ Long& time) override;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSYSTEM_H__

@@ -83,7 +83,7 @@ private:
     Short mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSHORT_H__

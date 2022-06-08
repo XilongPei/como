@@ -54,7 +54,7 @@ void InitTimeSpec(
     /* [in] */ int32_t ns,
     /* [in] */ timespec* ts);
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVETIMEUTILS_H__

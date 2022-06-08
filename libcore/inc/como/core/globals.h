@@ -65,7 +65,7 @@ static constexpr size_t kX86_64StackOverflowReservedBytes = 8192;
 
 constexpr size_t kMemoryToolStackGuardSizeScale = 2;
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_GLOBALS_H__

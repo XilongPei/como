@@ -89,7 +89,7 @@ private:
     Double mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CDOUBLE_H__

@@ -222,7 +222,7 @@ public:
         /* [out] */ AutoPtr<ICharSequence>& subcsq) override;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CSTRINGBUILDER_H__

@@ -31,7 +31,7 @@ public:
     COMO_INTERFACE_DECL();
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_RUNNABLE_H__

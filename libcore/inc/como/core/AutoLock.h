@@ -67,7 +67,7 @@ inline AutoLock::~AutoLock()
     mSyncObj->Unlock();
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_AUTOLOCK_H__

@@ -58,7 +58,7 @@ private:
     Boolean mShuttingDown = false;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_RUNTIME_H__

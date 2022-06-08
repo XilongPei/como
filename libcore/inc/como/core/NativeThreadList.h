@@ -104,7 +104,7 @@ private:
     const uint64_t mThreadSuspendTimeoutNs;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVETHREADLIST_H__

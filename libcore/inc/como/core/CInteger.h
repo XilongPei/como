@@ -83,7 +83,7 @@ private:
     Integer mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CINTEGER_H__

@@ -71,7 +71,7 @@ public:
 
 extern NativeFaultManager sFaultManager;
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEFAULTHANDLER_H__

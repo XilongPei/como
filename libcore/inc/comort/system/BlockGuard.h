@@ -28,9 +28,18 @@ using como::core::IThreadLocal;
 namespace comort {
 namespace system {
 
+/**
+ * IBlockGuardPolicy, interface that enables to install callbacks to implement
+ * its policy detection and penalty behavior in libcore}code.
+ */
 class BlockGuard
 {
 public:
+    /**
+     * Per-thread interface used to implement.
+     *      AutoPtr<IBlockGuardPolicy> policy;
+     *      BlockGuard::GetThreadPolicy(&policy);
+     */
     class Policy
         : public Object
         , public IBlockGuardPolicy

@@ -70,7 +70,7 @@ private:
         /* [out] */ Float& value);
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_STRINGTOREAL_H__

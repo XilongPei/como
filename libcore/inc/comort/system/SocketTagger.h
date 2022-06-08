@@ -30,6 +30,9 @@ using como::net::ISocket;
 namespace comort {
 namespace system {
 
+/**
+ * Callbacks for socket assignment and reassignment.
+ */
 class SocketTagger
     : public SyncObject
     , public ISocketTagger

@@ -171,7 +171,7 @@ inline Boolean NativeRuntime::ExplicitStackOverflowChecks() const
     return !mImplicitSoChecks;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVERUNTIME_H__

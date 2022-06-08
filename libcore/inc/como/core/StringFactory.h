@@ -41,7 +41,7 @@ private:
     static constexpr Char REPLACEMENT_CHAR = 0xfffd;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_STRINGFACTORY_H__

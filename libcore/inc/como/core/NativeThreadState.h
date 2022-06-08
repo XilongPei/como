@@ -33,7 +33,7 @@ enum NativeThreadState {
     kNative,                          // RUNNABLE       TS_RUNNING   running in a native method
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVETHREADSTATE_H__

@@ -46,6 +46,9 @@ static AutoPtr<IThreadLocal> CreateThreadLocal()
     };
 
     AutoPtr<_ThreadLocal> tl = new _ThreadLocal();
+    if (nullptr == nullptr)
+        return nullptr;
+
     tl->Constructor();
     return tl.Get();
 }

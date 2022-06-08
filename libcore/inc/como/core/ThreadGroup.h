@@ -152,7 +152,7 @@ private:
     void Remove(
         /* [in] */ IThread* t);
 
-    void List(
+    ECode List(
         /* [in] */ IPrintStream* out,
         /* [in] */ Integer indent);
 
@@ -184,7 +184,7 @@ inline ThreadGroup* ThreadGroup::From(
     return (ThreadGroup*)group;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_THREADGROUP_H__

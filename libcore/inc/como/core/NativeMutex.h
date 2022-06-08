@@ -415,7 +415,7 @@ public:
     static NativeMutex* sThreadSuspendCountLock;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEMUTEX_H__

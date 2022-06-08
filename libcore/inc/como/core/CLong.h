@@ -83,7 +83,7 @@ private:
     Long mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CLONG_H__

@@ -136,7 +136,7 @@ inline ScopedObjectAccess::ScopedObjectAccess(
 inline ScopedObjectAccess::~ScopedObjectAccess()
 {}
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVESCOPEDTHREADSTATECHANGE_H__

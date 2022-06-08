@@ -63,7 +63,7 @@ private:
     Char mValue;
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_CCHAR_H__

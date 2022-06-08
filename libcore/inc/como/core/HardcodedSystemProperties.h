@@ -33,7 +33,7 @@ public:
     static const String STATIC_PROPERTIES[3][2];
 };
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_HARDCODEDSYSTEMPROPERTIES_H__

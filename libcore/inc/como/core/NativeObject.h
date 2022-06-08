@@ -144,7 +144,7 @@ inline ECode NativeObject::Wait(
     return NativeMonitor::Wait(self, this, ms, ns, true, kTimedWaiting);
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_NATIVEOBJECT_H__

@@ -164,7 +164,7 @@ inline ThreadLocal* ThreadLocal::From(
     return (ThreadLocal*)tl;
 }
 
-}
-}
+} // namespace core
+} // namespace como
 
 #endif // __COMO_CORE_THREADLOCAL_H__
