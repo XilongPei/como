@@ -361,7 +361,7 @@ static void timespecToString(struct timespec& ts, const char *buffer, int bufSiz
     snprintf((char*)buffer, bufSize, "%lld", microseconds);
 }
 
-static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub,
+static void ExportRegistryWalker(String& str, IObject*& obj, IStub*& istub,
                                                 struct timespec& lastAccessTime)
 {
     char buf[32];
@@ -376,8 +376,8 @@ static void ExportRegistryWalker(String& str, IObject* obj, IStub* istub,
                                            ",\"LastAccessTime\":" + buf + "},");
 }
 
-static void ImportRegistryWalker(String& str, IInterfacePack* intfPack,
-                                  IObject* obj, struct timespec& lastAccessTime)
+static void ImportRegistryWalker(String& str, IInterfacePack*& intfPack,
+                                  IObject*& obj, struct timespec& lastAccessTime)
 {
     char buf[32];
     timespecToString(lastAccessTime, buf, sizeof(buf));
