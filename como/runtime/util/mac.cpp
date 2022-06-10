@@ -67,14 +67,17 @@ Long Mac::GetMacAddress(Long& lMacAddr)
     clock_gettime(CLOCK_REALTIME, &tsTime);
 
     srand(tsTime.tv_nsec);
-    lMacAddr = rand();
+    lMacAddr = ((Long)rand() << 32) | rand();
 
     return 0;
 }
 
 Long Mac::GetThisServiceId(Long& lMacAddr, unsigned short port)
 {
-    lMacAddr = GetMacAddress(lMacAddr);
+    if (0 == g_lMacAddr)
+        Mac::GetMacAddress(g_lMacAddr);
+
+    lMacAddr = g_lMacAddr;
     *(unsigned short *)((unsigned char *)&lMacAddr + 6) = port;
 
     return lMacAddr;

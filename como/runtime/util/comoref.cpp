@@ -291,7 +291,7 @@ void RefBase::WeakRefImpl::AddStrongRef(
 void RefBase::WeakRefImpl::RemoveStrongRef(
     /* [in] */ const void* id)
 {
-    if (!mRetain) {
+    if (! mRetain) {
         RemoveRef(&mStrongRefs, id);
     }
     else {
@@ -315,7 +315,7 @@ void RefBase::WeakRefImpl::AddWeakRef(
 void RefBase::WeakRefImpl::RemoveWeakRef(
     /* [in] */ const void* id)
 {
-    if (!mRetain) {
+    if (! mRetain) {
         RemoveRef(&mWeakRefs, id);
     }
     else {
@@ -378,6 +378,12 @@ void RefBase::WeakRefImpl::AddRef(
         Mutex::AutoLock lock(mMutex);
 
         RefEntry* ref = new RefEntry();
+        if (nullptr == ref) {
+            Logger::E("RefBase", "new RefEntry() == nullptr");
+            *refs = nullptr;
+            return;
+        }
+
         ref->mRef = refCount;
         ref->mId = id;
 #if DEBUG_REFS_CALLSTACK_ENABLED
@@ -430,6 +436,7 @@ void RefBase::WeakRefImpl::RenameRefsId(
 {
     if (mTrackEnabled) {
         Mutex::AutoLock lock(mMutex);
+
         RefEntry* ref = r;
         while (ref != nullptr) {
             if (ref->mId == oldId) {

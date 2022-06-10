@@ -153,3 +153,20 @@ interface ICallback
 }
 
 }
+
+[
+    uuid(00000000-0000-0000-0000-000000000009),
+    version(0.1.0)
+]
+interface ICheckpoint
+{
+    SetParam(
+        [in] String path,
+        [in] IInterface* object);
+
+    GetParam(
+        [in] String path,
+        [out] IInterface&& object);
+
+    Execute();
+}

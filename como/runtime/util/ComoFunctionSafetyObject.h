@@ -100,5 +100,4 @@ private:
 
 } // namespace como
 
-
 #endif // __ComoFunctionSafetyObject_H__
