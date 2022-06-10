@@ -17,26 +17,56 @@
 #include "comoobj.h"
 #include "comoapi.h"
 #include "comolog.h"
+#include "RuntimeMonitor.h"
 #include "CCheckpoint.h"
 
 namespace como {
 
+static void CheckpointParamsWalker(String& str, String& name, IObject*& intf)
+{
+    String info;
+    intf->ToString(info);
+    str += "{\"" + name + "\":\"" + info + "\"},";
+}
+
 ECode CCheckpoint::Execute()
 {
+    String strBuffer;
+
+    strBuffer = "[";
+    mParams.GetValues(strBuffer, CheckpointParamsWalker);
+
+    if (strBuffer.GetByteLength() > 1) {
+        // replace the last ',' with ']'
+        char* str = (char*)strBuffer.string();
+        str[strBuffer.GetByteLength() - 1] = ']';
+    }
+    else {
+        strBuffer += "]";
+    }
+
+    // tell RuntimeMonitor
+    RuntimeMonitor::WriteLog(strBuffer.string(), strBuffer.GetByteLength());
+
     return NOERROR;
 }
 
 ECode CCheckpoint::SetParam(
     /* [in] */ String& name,
-    /* [in] */ IInterface* object)
+    /* [in] */ IObject* object)
 {
+    mParams.Put(name, object);
     return NOERROR;
 }
 
 ECode CCheckpoint::GetParam(
     /* [in] */ String& name,
-    /* [out] */ AutoPtr<IInterface>& value)
+    /* [out] */ AutoPtr<IObject>& object)
 {
+    object = mParams.Get(name);
+    if (nullptr == object)
+        return E_NOT_FOUND_EXCEPTION;
+
     return NOERROR;
 }
 

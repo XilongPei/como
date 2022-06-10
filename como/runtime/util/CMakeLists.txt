@@ -25,6 +25,7 @@ include_directories(
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/cityhash/export_como
     ${EXTERNAL_DIR}/inih
+    ${EXTERNAL_DIR}/circularbuffer
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
@@ -46,6 +47,7 @@ set(SOURCES
     ${EXTERNAL_DIR}/cityhash/export_como/cityhash.cc
     mistring.cpp
     mac.cpp
+    CCheckpoint.cpp
     ${EXTERNAL_DIR}/inih/ini.c
 )
 

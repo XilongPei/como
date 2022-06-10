@@ -19,6 +19,7 @@
 
 #include "comotypes.h"
 #include "comoref.h"
+#include "util/hashmap.h"
 
 using namespace std;
 
@@ -28,18 +29,20 @@ class COM_PUBLIC CCheckpoint
     : public ICheckpoint
 {
 public:
-    Execute();
+    ECode Execute();
 
-    SetParam(
+    ECode SetParam(
         /* [in] */ String& name,
-        /* [in] */ IInterface* object);
+        /* [in] */ IObject* object);
 
-    GetParam(
+    ECode GetParam(
         /* [in] */ String& name,
-        /* [out] */ AutoPtr<IInterface>& value);
+        /* [out] */ AutoPtr<IObject>& object);
 
-private
-    HashMap<String, IInterface*> mParams;
-}
+private:
+    HashMap<String, IObject*> mParams;
+};
+
+} // namespace como
 
 #endif // __ComoCCheckpoint_H__
