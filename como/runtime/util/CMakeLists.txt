@@ -20,6 +20,7 @@ include_directories(
     ./
     ../
     ../type
+    ../monitor
     ${INC_DIR}
     ${EXTERNAL_DIR}/EasyLogger/easylogger/inc
     ${EXTERNAL_DIR}/libcrc/include

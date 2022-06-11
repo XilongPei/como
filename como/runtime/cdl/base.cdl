@@ -158,6 +158,12 @@ interface ICallback
 ]
 interface ICheckpoint
 {
+    SetTransId(
+        [in] Long transId);
+
+    GetTransId(
+        [out] Long& transId);
+
     SetParam(
         [in] String path,
         [in] IObject* object);

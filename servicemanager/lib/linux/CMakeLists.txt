@@ -57,6 +57,7 @@ include_directories(
     /usr/lib/x86_64-linux-gnu/dbus-1.0/include
     ${RPC_ZeroMQ_INC}
     ${EXTERNAL_DIR}/debugbreak
+    ${EXTERNAL_DIR}/circularbuffer
 )
 
 set(SOURCES

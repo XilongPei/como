@@ -51,8 +51,22 @@ ECode CCheckpoint::Execute()
     return NOERROR;
 }
 
+ECode CCheckpoint::SetTransId(
+    /* [in] */ Long transId)
+{
+    mTransId = transId;
+    return NOERROR;
+}
+
+ECode CCheckpoint::GetTransId(
+    /* [out] */ Long& transId)
+{
+    transId = mTransId;
+    return NOERROR;
+}
+
 ECode CCheckpoint::SetParam(
-    /* [in] */ String& name,
+    /* [in] */ const String& name,
     /* [in] */ IObject* object)
 {
     mParams.Put(name, object);
@@ -60,7 +74,7 @@ ECode CCheckpoint::SetParam(
 }
 
 ECode CCheckpoint::GetParam(
-    /* [in] */ String& name,
+    /* [in] */ const String& name,
     /* [out] */ AutoPtr<IObject>& object)
 {
     object = mParams.Get(name);

@@ -22,7 +22,9 @@ set(CLIENT_OBJ_DIR ${RPC_OBJ_DIR}/clientMonitor)
 include_directories(
     ./
     ${INC_DIR}
-    ${CLIENT_OBJ_DIR})
+    ${CLIENT_OBJ_DIR}
+    ${EXTERNAL_DIR}/circularbuffer
+)
 
 set(SOURCES
     main.cpp)

@@ -29,17 +29,29 @@ class COM_PUBLIC CCheckpoint
     : public ICheckpoint
 {
 public:
+    CCheckpoint(Integer ckpointId)
+        : mCkpointId(ckpointId)
+    {}
+
     ECode Execute();
 
+    ECode SetTransId(
+        /* [in] */ Long transId) override;
+
+    ECode GetTransId(
+        /* [out] */ Long& transId) override;
+
     ECode SetParam(
-        /* [in] */ String& name,
-        /* [in] */ IObject* object);
+        /* [in] */ const String& name,
+        /* [in] */ IObject* object) override;
 
     ECode GetParam(
-        /* [in] */ String& name,
-        /* [out] */ AutoPtr<IObject>& object);
+        /* [in] */ const String& name,
+        /* [out] */ AutoPtr<IObject>& object) override;
 
 private:
+    Integer mCkpointId;
+    Long    mTransId;
     HashMap<String, IObject*> mParams;
 };
 
