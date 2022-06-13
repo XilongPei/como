@@ -50,10 +50,13 @@ const_reference at(size_type idx) const
 static __thread int     _exn_handler_idx = -1;
 static __thread jmp_buf _exn_handlers[MAX_EXCEPTION_NESTING_LEVEL];
 
+// In a closure environment, there may be n `try ...catch ...`,  so this variable
+// has been defined as a global variable.
+static __thread int __JSON_EXCEPTION__;
+
 //#define std::out_of_range(aaa) ::out_of_range::create(408, aaa)
 
 #define JSON_TRY_USER                                                          \
-    int __JSON_EXCEPTION__;                                                    \
     if (_exn_handler_idx < MAX_EXCEPTION_NESTING_LEVEL)                        \
         _exn_handler_idx++;                                                    \
     if (! (__JSON_EXCEPTION__ = setjmp(_exn_handlers[_exn_handler_idx])))      \
@@ -62,7 +65,7 @@ static __thread jmp_buf _exn_handlers[MAX_EXCEPTION_NESTING_LEVEL];
     if (_exn_handler_idx--, __JSON_EXCEPTION__)                                \
 
 #define JSON_THROW_USER(exception)                                             \
-    puts(exception.what());                                                    \
+    Logger::E("JSON", exception.what());                                       \
     longjmp(_exn_handlers[_exn_handler_idx], _exn_handler_idx+1);
 
 #include <nlohmann/json.hpp>
