@@ -2,6 +2,7 @@
 #define __Allocator_H__
 
 #include <memory>
+#include <errno.h>
 
 namespace como {
 
@@ -16,6 +17,7 @@ class MemoryPool
     class Buffer
     {
         static const std::size_t blockSize = sizeof(T) > sizeof(Block) ? sizeof(T) : sizeof(Block);
+
         uint8_t data[blockSize * growSize];
 
         public:
@@ -32,8 +34,8 @@ class MemoryPool
             }
     };
 
-    Block *firstFreeBlock = nullptr;
-    Buffer *firstBuffer = nullptr;
+    Block  *firstFreeBlock = nullptr;
+    Buffer *firstBuffer    = nullptr;
     std::size_t bufferedBlocks = growSize;
 
 public:
@@ -62,6 +64,11 @@ public:
 
         if (bufferedBlocks >= growSize) {
             firstBuffer = new Buffer(firstBuffer);
+            if (nullptr == firstBuffer) {
+                errno = ENOMEM;
+                return nullptr;
+            }
+
             bufferedBlocks = 0;
         }
 
@@ -80,18 +87,18 @@ template <class T, std::size_t growSize = 1024>
 class Allocator : private MemoryPool<T, growSize>
 {
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
-    Allocator *copyAllocator = nullptr;
+    Allocator         *copyAllocator = nullptr;
     std::allocator<T> *rebindAllocator = nullptr;
 #endif
 
 public:
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef T *pointer;
-    typedef const T *const_pointer;
-    typedef T &reference;
-    typedef const T &const_reference;
-    typedef T value_type;
+    typedef std::size_t     size_type;
+    typedef std::ptrdiff_t  difference_type;
+    typedef T        *pointer;
+    typedef const T  *const_pointer;
+    typedef T        &reference;
+    typedef const T  &const_reference;
+    typedef T         value_type;
 
     template <class U>
     struct rebind
@@ -109,8 +116,11 @@ public:
     template <class U>
     Allocator(const Allocator<U, growSize> &other)
     {
-        if (!std::is_same<T, U>::value)
+        if (! std::is_same<T, U>::value) {
             rebindAllocator = new std::allocator<T>();
+            if (nullptr == rebindAllocator)
+                errno = ENOMEM;
+        }
     }
 
     ~Allocator()
@@ -119,16 +129,32 @@ public:
     }
 #endif
 
+    /**
+     * C++11 states, in 20.6.9.1 allocator members:
+     * 4 - [ Note: In a container member function, the address of an adjacent
+     *       element is often a good choice to pass for the hint argument. — end note ]
+     * [...]
+     * 6 - [...] The use of hint is unspecified, but intended as an aid to
+     *           locality if an implementation so desires.
+     *
+     * Allocating new elements adjacent or close to existing elements in memory
+     * can aid performance by improving locality; because they are usually cached
+     * together, nearby elements will tend to travel together up the memory
+     * hierarchy and will not evict each other.
+     */
     pointer allocate(size_type n, const void *hint = 0)
     {
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
-        if (copyAllocator)
+        if (nullptr != copyAllocator)
             return copyAllocator->allocate(n, hint);
 
-        if (rebindAllocator)
+        if (nullptr != rebindAllocator)
             return rebindAllocator->allocate(n, hint);
 #endif
 
+        /**
+         * The MemoryPool mechanism can allocate only one object at a time.
+         */
         if (n != 1 || hint) {
             // COMO turns off the c++ exception mechanism
             // throw std::bad_alloc();
@@ -141,12 +167,12 @@ public:
     void deallocate(pointer p, size_type n)
     {
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
-        if (copyAllocator) {
+        if (nullptr != copyAllocator) {
             copyAllocator->deallocate(p, n);
             return;
         }
 
-        if (rebindAllocator) {
+        if (nullptr != rebindAllocator) {
             rebindAllocator->deallocate(p, n);
             return;
         }
@@ -157,7 +183,10 @@ public:
 
     void construct(pointer p, const_reference val)
     {
-        new (p) T(val);
+        if (nullptr != p)
+            new (p) T(val);
+        else
+            errno = EADDRNOTAVAIL;
     }
 
     void destroy(pointer p)
