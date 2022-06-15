@@ -27,15 +27,13 @@ class PerformanceTest
 
     public:
 
-        PerformanceTest() :
-            randomNumberGenerator(0),
-            randomNumberDistribution(0, randomRange)
-        {
-        }
+        PerformanceTest()
+            : randomNumberGenerator(0)
+            , randomNumberDistribution(0, randomRange)
+        {}
 
         virtual ~PerformanceTest()
-        {
-        }
+        {}
 
         double run()
         {
@@ -125,8 +123,8 @@ void printTestStatus(const char *name, StlAllocatorContainer &stlContainer, Moya
 int main()
 {
     typedef size_t DataType;
-    typedef Moya::Allocator<DataType, growSize> MemoryPoolAllocator;
-    typedef Moya::Allocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryPoolAllocator;
+    typedef como::Allocator<DataType, growSize> MemoryPoolAllocator;
+    typedef como::Allocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryPoolAllocator;
 
     std::cout << "Allocator performance measurement example" << std::endl;
     std::cout << "Version: 1.0" << std::endl << std::endl;
