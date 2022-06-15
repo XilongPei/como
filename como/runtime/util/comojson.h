@@ -19,6 +19,7 @@
 
 #include <pthread.h>
 #include <setjmp.h>
+#include <errno.h>
 #include "comotypes.h"
 #include "comoref.h"
 #include "comolog.h"
@@ -61,11 +62,13 @@ static __thread int __JSON_EXCEPTION__;
         _exn_handler_idx++;                                                    \
     if (! (__JSON_EXCEPTION__ = setjmp(_exn_handlers[_exn_handler_idx])))      \
 
-#define JSON_CATCH_USER(exception)                                             \
+#define JSON_CATCH_USER(excep)                                                 \
     if (_exn_handler_idx--, __JSON_EXCEPTION__)                                \
 
-#define JSON_THROW_USER(exception)                                             \
-    Logger::E("JSON", exception.what());                                       \
+#define JSON_THROW_USER(excep)                                                 \
+    if (std::is_base_of<typeof(excep), nlohmann::detail::exception>::value)    \
+        errno = ((nlohmann::detail::exception)excep).id;                       \
+    Logger::E("JSON", excep.what());                                           \
     longjmp(_exn_handlers[_exn_handler_idx], _exn_handler_idx+1);
 
 #include <nlohmann/json.hpp>
