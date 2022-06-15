@@ -1904,6 +1904,7 @@ String CodeGenerator::Emitter::EmitInterfaceMethod(
 {
     StringBuilder builder;
 
+    builder.Append(prefix).AppendFormat("// Signature: %s\n", mm->mSignature);
     builder.Append(prefix).AppendFormat("virtual como::ECode %s(", mm->mName);
     for (int i = 0; i < mm->mParameterNumber; i++) {
         builder.Append("\n");
