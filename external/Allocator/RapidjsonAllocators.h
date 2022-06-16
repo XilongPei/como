@@ -195,8 +195,9 @@ concept Allocator {
 #endif
 
 
-///////////////////////////////////////////////////////////////////////////////
-// CrtAllocator
+/**
+ * CrtAllocator
+ ******************************************************************************/
 
 //! C-runtime library allocator.
 /*! This class is just wrapper for standard C library memory routines.
@@ -239,8 +240,10 @@ public:
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// MemoryPoolAllocator
+
+/**
+ * MemoryPoolAllocator
+ ******************************************************************************/
 
 //! Default memory allocator used by the parser and DOM.
 /*! This allocator allocate memory blocks from pre-allocated memory chunks. 
@@ -511,7 +514,10 @@ public:
     }
 
     //! Frees a memory block (concept Allocator)
-    static void Free(void *ptr) noexcept { (void)ptr; } // Do nothing
+    static void Free(void *ptr) noexcept
+    { // Do nothing
+        (void)ptr;
+    }
 
     //! Compare (equality) with another MemoryPoolAllocator
     bool operator==(const MemoryPoolAllocator& rhs) const noexcept
@@ -536,6 +542,7 @@ private:
     {
         if (nullptr == baseAllocator_)
             shared_->ownBaseAllocator = baseAllocator_ = RAPIDJSON_NEW(BaseAllocator)();
+
         if (ChunkHeader* chunk = static_cast<ChunkHeader*>(
                               baseAllocator_->Malloc(SIZEOF_CHUNK_HEADER + capacity))) {
             chunk->capacity = capacity;
@@ -617,6 +624,11 @@ inline void Free(A& a, T *p, size_t n = 1)
     RAPIDJSON_DIAG_PUSH
     RAPIDJSON_DIAG_OFF(effc++) // std::allocator can safely be inherited
 #endif
+
+
+/**
+ * StdAllocator
+ ******************************************************************************/
 
 template <typename T, typename BaseAllocator = CrtAllocator>
 class StdAllocator :
@@ -700,6 +712,7 @@ public:
     {
         traits_type::construct(*this, p, std::forward<Args>(args)...);
     }
+
     void destroy(pointer p)
     {
         traits_type::destroy(*this, p);
@@ -710,6 +723,7 @@ public:
     {
         return como::Malloc<U>(baseAllocator_, n);
     }
+
     template <typename U>
     void deallocate(U* p, size_type n = 1)
     {
@@ -720,6 +734,7 @@ public:
     {
         return allocate<value_type>(n);
     }
+
     void deallocate(pointer p, size_type n = 1)
     {
         deallocate<value_type>(p, n);

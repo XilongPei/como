@@ -93,8 +93,13 @@ public:
     }
 };
 
+
+/**
+ * MemoryCacheAllocator
+ ******************************************************************************/
+
 template <typename T, std::size_t growSize = 1024>
-class Allocator : private MemoryPool<T, growSize>
+class MemoryCacheAllocator : private MemoryPool<T, growSize>
 {
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
     Allocator         *copyAllocator = nullptr;
@@ -113,18 +118,18 @@ public:
     template <typename U>
     struct rebind
     {
-        typedef Allocator<U, growSize> other;
+        typedef MemoryCacheAllocator<U, growSize> other;
     };
 
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
-    Allocator() = default;
+    MemoryCacheAllocator() = default;
 
-    Allocator(Allocator &allocator)
+    MemoryCacheAllocator(Allocator &allocator)
         : copyAllocator(&allocator)
     {}
 
     template <typename U>
-    Allocator(const Allocator<U, growSize> &other)
+    MemoryCacheAllocator(const Allocator<U, growSize> &other)
     {
         if (! std::is_same<T, U>::value) {
             rebindAllocator = new std::allocator<T>();
@@ -133,7 +138,7 @@ public:
         }
     }
 
-    ~Allocator()
+    ~MemoryCacheAllocator()
     {
         delete rebindAllocator;
     }

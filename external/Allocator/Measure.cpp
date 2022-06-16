@@ -123,8 +123,8 @@ void printTestStatus(const char *name, StlAllocatorContainer &stlContainer, Moya
 int main()
 {
     typedef size_t DataType;
-    typedef como::Allocator<DataType, growSize> MemoryPoolAllocator;
-    typedef como::Allocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryPoolAllocator;
+    typedef como::MemoryCacheAllocator<DataType, growSize> MemoryPoolAllocator;
+    typedef como::MemoryCacheAllocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryPoolAllocator;
 
     std::cout << "Allocator performance measurement example" << std::endl;
     std::cout << "Version: 1.0" << std::endl << std::endl;
