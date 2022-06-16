@@ -205,26 +205,36 @@ concept Allocator {
 class CrtAllocator {
 public:
     static const bool kNeedFree = true;
-    void* Malloc(size_t size) { 
-        if (size) //  behavior of malloc(0) is implementation defined.
+    void* Malloc(size_t size)
+    {
+        if (0 != size)      //  behavior of malloc(0) is implementation defined.
             return std::malloc(size);
         else
             return nullptr; // standardize to returning nullptr.
     }
-    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize) {
+
+    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize)
+    {
         (void)originalSize;
-        if (newSize == 0) {
+        if (0 == newSize) {
             std::free(originalPtr);
             return nullptr;
         }
         return std::realloc(originalPtr, newSize);
     }
-    static void Free(void *ptr) noexcept { std::free(ptr); }
 
-    bool operator==(const CrtAllocator&) const noexcept {
+    static void Free(void *ptr) noexcept
+    {
+        std::free(ptr);
+    }
+
+    bool operator==(const CrtAllocator&) const noexcept
+    {
         return true;
     }
-    bool operator!=(const CrtAllocator&) const noexcept {
+
+    bool operator!=(const CrtAllocator&) const noexcept
+    {
         return false;
     }
 };
@@ -289,15 +299,18 @@ public:
         \param baseAllocator The allocator for allocating memory chunks.
     */
     explicit
-    MemoryPoolAllocator(size_t chunkSize = kDefaultChunkCapacity, BaseAllocator* baseAllocator = 0) : 
-        chunk_capacity_(chunkSize),
-        baseAllocator_(baseAllocator ? baseAllocator : RAPIDJSON_NEW(BaseAllocator)()),
-        shared_(static_cast<SharedData*>(baseAllocator_ ? baseAllocator_->Malloc(SIZEOF_SHARED_DATA + SIZEOF_CHUNK_HEADER) : 0))
+    MemoryPoolAllocator(size_t chunkSize = kDefaultChunkCapacity, BaseAllocator* baseAllocator = nullptr)
+        : chunk_capacity_(chunkSize)
+        , baseAllocator_((nullptr != baseAllocator) ?
+                         baseAllocator : RAPIDJSON_NEW(BaseAllocator)())
+        , shared_(static_cast<SharedData*>(baseAllocator_ ?
+                  baseAllocator_->Malloc(SIZEOF_SHARED_DATA + SIZEOF_CHUNK_HEADER) : 0))
     {
         assert(baseAllocator_ != 0);
         assert(shared_ != 0);
-        if (baseAllocator) {
-            shared_->ownBaseAllocator = 0;
+
+        if (nullptr != baseAllocator) {
+            shared_->ownBaseAllocator = nullptr;
         }
         else {
             shared_->ownBaseAllocator = baseAllocator_;
@@ -305,7 +318,7 @@ public:
         shared_->chunkHead = GetChunkHead(shared_);
         shared_->chunkHead->capacity = 0;
         shared_->chunkHead->size = 0;
-        shared_->chunkHead->next = 0;
+        shared_->chunkHead->next = nullptr;
         shared_->ownBuffer = true;
         shared_->refcount = 1;
     }
@@ -329,20 +342,21 @@ public:
         shared_->chunkHead = GetChunkHead(shared_);
         shared_->chunkHead->capacity = size - SIZEOF_SHARED_DATA - SIZEOF_CHUNK_HEADER;
         shared_->chunkHead->size = 0;
-        shared_->chunkHead->next = 0;
-        shared_->ownBaseAllocator = 0;
+        shared_->chunkHead->next = nullptr;
+        shared_->ownBaseAllocator = nullptr;
         shared_->ownBuffer = false;
         shared_->refcount = 1;
     }
 
-    MemoryPoolAllocator(const MemoryPoolAllocator& rhs) noexcept :
-        chunk_capacity_(rhs.chunk_capacity_),
-        baseAllocator_(rhs.baseAllocator_),
-        shared_(rhs.shared_)
+    MemoryPoolAllocator(const MemoryPoolAllocator& rhs) noexcept
+        : chunk_capacity_(rhs.chunk_capacity_)
+        , baseAllocator_(rhs.baseAllocator_)
+        , shared_(rhs.shared_)
     {
         assert(shared_->refcount > 0);
         ++shared_->refcount;
     }
+
     MemoryPoolAllocator& operator=(const MemoryPoolAllocator& rhs) noexcept
     {
         assert(rhs.shared_->refcount > 0);
@@ -354,14 +368,15 @@ public:
         return *this;
     }
 
-    MemoryPoolAllocator(MemoryPoolAllocator&& rhs) noexcept :
-        chunk_capacity_(rhs.chunk_capacity_),
-        baseAllocator_(rhs.baseAllocator_),
-        shared_(rhs.shared_)
+    MemoryPoolAllocator(MemoryPoolAllocator&& rhs) noexcept
+        : chunk_capacity_(rhs.chunk_capacity_)
+        , baseAllocator_(rhs.baseAllocator_)
+        , shared_(rhs.shared_)
     {
         assert(rhs.shared_->refcount > 0);
         rhs.shared_ = 0;
     }
+
     MemoryPoolAllocator& operator=(MemoryPoolAllocator&& rhs) noexcept
     {
         assert(rhs.shared_->refcount > 0);
@@ -376,8 +391,9 @@ public:
     //! Destructor.
     /*! This deallocates all memory chunks, excluding the user-supplied buffer.
     */
-    ~MemoryPoolAllocator() noexcept {
-        if (!shared_) {
+    ~MemoryPoolAllocator() noexcept
+    {
+        if (nullptr != shared_) {
             // do nothing if moved
             return;
         }
@@ -394,11 +410,12 @@ public:
     }
 
     //! Deallocates all memory chunks, excluding the first/user one.
-    void Clear() noexcept {
+    void Clear() noexcept
+    {
         assert(shared_->refcount > 0);
         for (;;) {
             ChunkHeader* c = shared_->chunkHead;
-            if (!c->next) {
+            if (! c->next) {
                 break;
             }
             shared_->chunkHead = c->next;
@@ -410,10 +427,11 @@ public:
     //! Computes the total capacity of allocated memory chunks.
     /*! \return total capacity in bytes.
     */
-    size_t Capacity() const noexcept {
+    size_t Capacity() const noexcept
+    {
         assert(shared_->refcount > 0);
         size_t capacity = 0;
-        for (ChunkHeader* c = shared_->chunkHead; c != 0; c = c->next)
+        for (ChunkHeader* c = shared_->chunkHead;  c != 0;  c = c->next)
             capacity += c->capacity;
         return capacity;
     }
@@ -421,10 +439,11 @@ public:
     //! Computes the memory blocks allocated.
     /*! \return total used bytes.
     */
-    size_t Size() const noexcept {
+    size_t Size() const noexcept
+    {
         assert(shared_->refcount > 0);
         size_t size = 0;
-        for (ChunkHeader* c = shared_->chunkHead; c != 0; c = c->next)
+        for (ChunkHeader* c = shared_->chunkHead;  c != 0;  c = c->next)
             size += c->size;
         return size;
     }
@@ -432,20 +451,22 @@ public:
     //! Whether the allocator is shared.
     /*! \return true or false.
     */
-    bool Shared() const noexcept {
+    bool Shared() const noexcept
+    {
         assert(shared_->refcount > 0);
         return shared_->refcount > 1;
     }
 
     //! Allocates a memory block. (concept Allocator)
-    void* Malloc(size_t size) {
+    void* Malloc(size_t size)
+    {
         assert(shared_->refcount > 0);
-        if (!size)
+        if (0 == size)
             return nullptr;
 
         size = RAPIDJSON_ALIGN(size);
         if (RAPIDJSON_UNLIKELY(shared_->chunkHead->size + size > shared_->chunkHead->capacity))
-            if (!AddChunk(chunk_capacity_ > size ? chunk_capacity_ : size))
+            if (! AddChunk(chunk_capacity_ > size ? chunk_capacity_ : size))
                 return nullptr;
 
         void *buffer = GetChunkBuffer(shared_) + shared_->chunkHead->size;
@@ -454,8 +475,9 @@ public:
     }
 
     //! Resizes a memory block (concept Allocator)
-    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize) {
-        if (originalPtr == 0)
+    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize)
+    {
+        if (nullptr == originalPtr)
             return Malloc(newSize);
 
         assert(shared_->refcount > 0);
@@ -480,7 +502,7 @@ public:
 
         // Realloc process: allocate and copy memory, do not free original buffer.
         if (void* newBuffer = Malloc(newSize)) {
-            if (originalSize)
+            if (0 != originalSize)
                 memcpy(newBuffer, originalPtr, originalSize);
             return newBuffer;
         }
@@ -492,13 +514,16 @@ public:
     static void Free(void *ptr) noexcept { (void)ptr; } // Do nothing
 
     //! Compare (equality) with another MemoryPoolAllocator
-    bool operator==(const MemoryPoolAllocator& rhs) const noexcept {
+    bool operator==(const MemoryPoolAllocator& rhs) const noexcept
+    {
         assert(shared_->refcount > 0);
         assert(rhs.shared_->refcount > 0);
         return shared_ == rhs.shared_;
     }
+
     //! Compare (inequality) with another MemoryPoolAllocator
-    bool operator!=(const MemoryPoolAllocator& rhs) const noexcept {
+    bool operator!=(const MemoryPoolAllocator& rhs) const noexcept
+    {
         return !operator==(rhs);
     }
 
@@ -507,8 +532,9 @@ private:
     /*! \param capacity Capacity of the chunk in bytes.
         \return true if success.
     */
-    bool AddChunk(size_t capacity) {
-        if (! baseAllocator_)
+    bool AddChunk(size_t capacity)
+    {
+        if (nullptr == baseAllocator_)
             shared_->ownBaseAllocator = baseAllocator_ = RAPIDJSON_NEW(BaseAllocator)();
         if (ChunkHeader* chunk = static_cast<ChunkHeader*>(
                               baseAllocator_->Malloc(SIZEOF_CHUNK_HEADER + capacity))) {
@@ -706,6 +732,7 @@ public:
     {
         return baseAllocator_ == rhs.baseAllocator_;
     }
+
     template<typename U>
     bool operator!=(const StdAllocator<U, BaseAllocator>& rhs) const noexcept
     {
@@ -719,10 +746,12 @@ public:
     {
         return baseAllocator_.Malloc(size);
     }
+
     void* Realloc(void* originalPtr, size_t originalSize, size_t newSize)
     {
         return baseAllocator_.Realloc(originalPtr, originalSize, newSize);
     }
+
     static void Free(void *ptr) noexcept
     {
         BaseAllocator::Free(ptr);
@@ -779,7 +808,7 @@ public:
 
 private:
     template <typename, typename>
-    friend class StdAllocator; // access to StdAllocator<!T>.*
+    friend class StdAllocator;  // access to StdAllocator<!T>.*
 
     BaseAllocator baseAllocator_;
 };
