@@ -1,3 +1,13 @@
+/**
+ * Nevertheless, there are many scenarios where customized allocators are
+ * desirable. Some of the most common reasons for writing custom allocators
+ * include improving performance of allocations by using memory pools, and
+ * encapsulating access to different types of memory, like shared memory or
+ * garbage-collected memory. In particular, programs with many frequent
+ * allocations of small amounts of memory may benefit greatly from specialized
+ * allocators, both in terms of running time and memory footprint.
+ */
+
 #ifndef __Allocator_H__
 #define __Allocator_H__
 
@@ -196,5 +206,7 @@ public:
 };
 
 } // namespace como
+
+#include "RapidjsonAllocators.h"
 
 #endif // __Allocator_H__
