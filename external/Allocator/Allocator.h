@@ -16,7 +16,7 @@
 
 namespace como {
 
-template <class T, std::size_t growSize = 1024>
+template <typename T, std::size_t growSize = 1024>
 class MemoryPool
 {
     struct Block
@@ -93,7 +93,7 @@ public:
     }
 };
 
-template <class T, std::size_t growSize = 1024>
+template <typename T, std::size_t growSize = 1024>
 class Allocator : private MemoryPool<T, growSize>
 {
 #if defined(_WIN32) && defined(ENABLE_OLD_WIN32_SUPPORT)
@@ -110,7 +110,7 @@ public:
     typedef const T  &const_reference;
     typedef T         value_type;
 
-    template <class U>
+    template <typename U>
     struct rebind
     {
         typedef Allocator<U, growSize> other;
@@ -123,7 +123,7 @@ public:
         : copyAllocator(&allocator)
     {}
 
-    template <class U>
+    template <typename U>
     Allocator(const Allocator<U, growSize> &other)
     {
         if (! std::is_same<T, U>::value) {
