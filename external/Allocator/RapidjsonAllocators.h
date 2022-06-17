@@ -707,6 +707,7 @@ public:
         return traits_type::max_size(*this);
     }
 
+    // `construct`
     template <typename ...Args>
     void construct(pointer p, Args&&... args)
     {

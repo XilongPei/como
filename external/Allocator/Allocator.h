@@ -214,7 +214,7 @@ public:
 
 
 /**
- * MemoryCacheAllocator
+ * MemoryAearAllocator
  ******************************************************************************/
 
 #ifdef __MIMALLOC_UTILS_H__
@@ -248,6 +248,25 @@ public:
         MimallocUtils::area_free(iMemArea, p);
     }
 
+    //@ `construct`
+    /**
+     * Defined in header <memory>
+     * Constructs an object of type T in allocated uninitialized storage pointed
+     * to by p, using placement-new
+     *
+     * void construct(pointer p, const_reference val);  (1) (until C++11)
+     *
+     * template<class U, class... Args>
+     * void construct(U* p, Args&&... args);            (2) (since C++11)
+     *                                                      (deprecated in C++17)
+     *                                                      (removed in C++20)
+     * construct_at (C++20)         creates an object at a given address
+     *                              (function template)
+     *
+     * p       -  pointer to allocated uninitialized storage
+     * val     -  the value to use as the copy constructor argument
+     * args... -  the constructor arguments to use
+     */
     void construct(pointer p, const_reference val)
     {
         if (nullptr != p)
