@@ -682,12 +682,12 @@ public:
         typedef StdAllocator<U, BaseAllocator> other;
     };
 
-    typedef typename traits_type::size_type         size_type;
-    typedef typename traits_type::difference_type   difference_type;
+    typedef typename traits_type::size_type        size_type;
+    typedef typename traits_type::difference_type  difference_type;
 
-    typedef typename traits_type::value_type        value_type;
-    typedef typename traits_type::pointer           pointer;
-    typedef typename traits_type::const_pointer     const_pointer;
+    typedef typename traits_type::value_type       value_type;
+    typedef typename traits_type::pointer          pointer;
+    typedef typename traits_type::const_pointer    const_pointer;
 
     typedef typename std::add_lvalue_reference<value_type>::type &reference;
     typedef typename std::add_lvalue_reference<typename std::add_const<value_type>::type>::type &const_reference;
@@ -774,7 +774,7 @@ public:
 
 private:
     template <typename, typename>
-    friend class StdAllocator; // access to StdAllocator<!T>.*
+    friend class StdAllocator;  // access to StdAllocator<!T>.*
 
     BaseAllocator baseAllocator_;
 };

@@ -8,6 +8,7 @@
 #include <forward_list>
 
 #include "Allocator.h"
+#include "RapidjsonAllocators.h"
 
 const size_t growSize = 1024;
 const size_t numberOfIterations = 1024;
@@ -123,31 +124,60 @@ void printTestStatus(const char *name, StlAllocatorContainer &stlContainer, Moya
 int main()
 {
     typedef size_t DataType;
-    typedef como::MemoryCacheAllocator<DataType, growSize> MemoryPoolAllocator;
-    typedef como::MemoryCacheAllocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryPoolAllocator;
+    typedef como::MemoryCacheAllocator<DataType, growSize> MemoryCacheAllocator;
+    typedef como::MemoryCacheAllocator<std::map<DataType, DataType>::value_type, growSize> MapMemoryCacheAllocator;
 
-    std::cout << "Allocator performance measurement example" << std::endl;
-    std::cout << "Version: 1.0" << std::endl << std::endl;
+    std::cout << "MemoryCacheAllocator performance measurement example" << std::endl;
 
     PushFrontTest<std::forward_list<DataType>> pushFrontForwardListTestStl;
-    PushFrontTest<std::forward_list<DataType, MemoryPoolAllocator>> pushFrontForwardListTestFast;
+    PushFrontTest<std::forward_list<DataType, MemoryCacheAllocator>> pushFrontForwardListTestFast;
     printTestStatus("ForwardList PushFront", pushFrontForwardListTestStl, pushFrontForwardListTestFast);
 
     PushFrontTest<std::list<DataType>> pushFrontListTestStl;
-    PushFrontTest<std::list<DataType, MemoryPoolAllocator>> pushFrontListTestFast;
+    PushFrontTest<std::list<DataType, MemoryCacheAllocator>> pushFrontListTestFast;
     printTestStatus("List PushFront", pushFrontListTestStl, pushFrontListTestFast);
 
     PushBackTest<std::list<DataType>> pushBackListTestStl;
-    PushBackTest<std::list<DataType, MemoryPoolAllocator>> pushBackListTestFast;
+    PushBackTest<std::list<DataType, MemoryCacheAllocator>> pushBackListTestFast;
     printTestStatus("List PushBack", pushBackListTestStl, pushBackListTestFast);
 
     MapTest<std::map<DataType, DataType, std::less<DataType>>> mapTestStl;
-    MapTest<std::map<DataType, DataType, std::less<DataType>, MapMemoryPoolAllocator>> mapTestFast;
+    MapTest<std::map<DataType, DataType, std::less<DataType>, MapMemoryCacheAllocator>> mapTestFast;
     printTestStatus("Map", mapTestStl, mapTestFast);
 
     SetTest<std::set<DataType, std::less<DataType>>> setTestStl;
-    SetTest<std::set<DataType, std::less<DataType>, MemoryPoolAllocator>> setTestFast;
+    SetTest<std::set<DataType, std::less<DataType>, MemoryCacheAllocator>> setTestFast;
     printTestStatus("Set", setTestStl, setTestFast);
+
+
+    //////////RapidjsonAllocators///////////////////////////////////////////////
+
+
+    typedef como::StdAllocator<DataType, como::StdAllocator<DataType, como::MemoryPoolAllocator<>>> memPoolAllocator;
+    typedef como::StdAllocator<std::map<DataType, DataType>::value_type,
+                                         como::StdAllocator<DataType, como::MemoryPoolAllocator<>>> mapMemPoolAllocator;
+
+    std::cout << "StdAllocator performance measurement example" << std::endl;
+
+    PushFrontTest<std::forward_list<DataType>> pushFrontForwardListTestStl_2;
+    PushFrontTest<std::forward_list<DataType, memPoolAllocator>> pushFrontForwardListTestFast_2;
+    printTestStatus("ForwardList PushFront", pushFrontForwardListTestStl_2, pushFrontForwardListTestFast_2);
+
+    PushFrontTest<std::list<DataType>> pushFrontListTestStl_2;
+    PushFrontTest<std::list<DataType, memPoolAllocator>> pushFrontListTestFast_2;
+    printTestStatus("List PushFront", pushFrontListTestStl_2, pushFrontListTestFast_2);
+
+    PushBackTest<std::list<DataType>> pushBackListTestStl_2;
+    PushBackTest<std::list<DataType, memPoolAllocator>> pushBackListTestFast_2;
+    printTestStatus("List PushBack", pushBackListTestStl_2, pushBackListTestFast_2);
+
+    MapTest<std::map<DataType, DataType, std::less<DataType>>> mapTestStl_2;
+    MapTest<std::map<DataType, DataType, std::less<DataType>, mapMemPoolAllocator>> mapTestFast_2;
+    printTestStatus("Map", mapTestStl_2, mapTestFast_2);
+
+    SetTest<std::set<DataType, std::less<DataType>>> setTestStl_2;
+    SetTest<std::set<DataType, std::less<DataType>, memPoolAllocator>> setTestFast_2;
+    printTestStatus("Set", setTestStl_2, setTestFast_2);
 
     return 0;
 }
