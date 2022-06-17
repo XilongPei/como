@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <errno.h>
+//#include "../mimalloc/export_como/mimalloc_utils.h"
 
 namespace como {
 
@@ -144,6 +145,7 @@ public:
     }
 #endif
 
+    //@ `ALLOCATE#HINT`
     /**
      * C++11 states, in 20.6.9.1 allocator members:
      * 4 - [ Note: In a container member function, the address of an adjacent
@@ -210,8 +212,58 @@ public:
     }
 };
 
-} // namespace como
 
-#include "RapidjsonAllocators.h"
+/**
+ * MemoryCacheAllocator
+ ******************************************************************************/
+
+#ifdef __MIMALLOC_UTILS_H__
+
+template <typename T, short iMemArea = 0>
+class MemoryAearAllocator
+{
+public:
+    typedef std::size_t     size_type;
+    typedef std::ptrdiff_t  difference_type;
+    typedef T        *pointer;
+    typedef const T  *const_pointer;
+    typedef T        &reference;
+    typedef const T  &const_reference;
+    typedef T         value_type;
+
+    template <typename U>
+    struct rebind
+    {
+        typedef MemoryAearAllocator<U, iMemArea> other;
+    };
+
+    // refer to `ALLOCATE#HINT`
+    pointer allocate(size_type n, const void *hint = 0)
+    {
+        return MimallocUtils::area_malloc(iMemArea, sizeof(T) * n);
+    }
+
+    void deallocate(pointer p, size_type n)
+    {
+        MimallocUtils::area_free(iMemArea, p);
+    }
+
+    void construct(pointer p, const_reference val)
+    {
+        if (nullptr != p)
+            new (p) T(val);
+        else
+            errno = EADDRNOTAVAIL;
+    }
+
+    void destroy(pointer p)
+    {
+        p->~T();
+    }
+};
+
+#endif
+
+} // namespace como
 
 #endif // __Allocator_H__
