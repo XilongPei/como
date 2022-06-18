@@ -224,9 +224,9 @@ bool Parser::ParseAttributes(
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken == Token::BRACKETS_OPEN) {
         mTokenizer.GetToken();
-        tokenInfo = mTokenizer.PeekToken();
+        tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
         while (tokenInfo.mToken != Token::BRACKETS_CLOSE &&
-                tokenInfo.mToken != Token::END_OF_FILE) {
+                                       tokenInfo.mToken != Token::END_OF_FILE) {
             switch (tokenInfo.mToken) {
                 case Token::UUID: {
                     result = ParseUuid(attrs) && result;
@@ -246,6 +246,11 @@ bool Parser::ParseAttributes(
                 }
                 case Token::FUNCTION_SAFETY_SETTING: {
                     result = ParseFuncSafetySetting(attrs) && result;
+                    break;
+                }
+                case Token::FRAMAC_BLOCK: {
+                    tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
+                    attrs.mStrFramacBlock = tokenInfo.mStringValue;
                     break;
                 }
                 default: {

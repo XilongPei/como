@@ -87,11 +87,17 @@ public:
 
     inline int GetConstantNumber();
 
+    inline String GetStrFramacBlock();
+
+    inline void SetStrFramacBlock(
+        /* [in] */ const String& strFramacBlock);
+
 private:
     AutoPtr<UUID> mUuid;
     String mVersion;
     String mDescription;
     String mFuncSafetySetting;
+    String mStrFramacBlock;
     std::vector<AutoPtr<Method>> mConstructors;
     std::vector<AutoPtr<InterfaceType>> mInterfaces;
     std::vector<AutoPtr<Constant>> mConstants;
@@ -181,6 +187,17 @@ void CoclassType::AddConstant(
 int CoclassType::GetConstantNumber()
 {
     return mConstants.size();
+}
+
+String CoclassType::GetStrFramacBlock()
+{
+    return mStrFramacBlock;
+}
+
+void CoclassType::SetStrFramacBlock(
+    /* [in] */ const String& strFramacBlock)
+{
+    mStrFramacBlock = strFramacBlock;
 }
 
 } // namespace cdlc

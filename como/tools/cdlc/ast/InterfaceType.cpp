@@ -28,6 +28,7 @@ void InterfaceType::SetAttributes(
     mUuid = UUID::Parse(attrs.mUuid);
     mVersion = attrs.mVersion;
     mDescription = attrs.mDescription;
+    mStrFramacBlock = attrs.mStrFramacBlock;
 }
 
 AutoPtr<InterfaceType> InterfaceType::GetNestedInterface(

@@ -95,6 +95,11 @@ public:
         /* [in] */ Module* module,
         /* [in] */ bool deepCopy) override;
 
+    inline String GetStrFramacBlock();
+
+    inline void SetStrFramacBlock(
+        /* [in] */ const String& strFramacBlock);
+
     inline static AutoPtr<InterfaceType> CastFrom(
         /* [in] */ Type* type);
 
@@ -105,6 +110,7 @@ private:
     AutoPtr<UUID> mUuid;
     String mVersion;
     String mDescription;
+    String mStrFramacBlock;
     InterfaceType* mBaseInterface = nullptr;
     InterfaceType* mOuterInterface = nullptr;
     std::vector<AutoPtr<InterfaceType>> mNestedInterfaces;
@@ -187,6 +193,17 @@ AutoPtr<InterfaceType> InterfaceType::CastFrom(
     /* [in] */ Type* type)
 {
     return static_cast<InterfaceType*>(type);
+}
+
+String InterfaceType::GetStrFramacBlock()
+{
+    return mStrFramacBlock;
+}
+
+void InterfaceType::SetStrFramacBlock(
+    /* [in] */ const String& strFramacBlock)
+{
+    mStrFramacBlock = strFramacBlock;
 }
 
 }

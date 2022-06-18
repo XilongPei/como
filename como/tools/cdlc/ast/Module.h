@@ -122,6 +122,11 @@ public:
     static AutoPtr<Module> Resolve(
         /* [in] */ void* metadata);
 
+    inline String GetStrFramacBlock();
+
+    inline void SetStrFramacBlock(
+        /* [in] */ const String& strFramacBlock);
+
 private:
     Module(
         /* [in] */ como::MetaComponent* component);
@@ -157,6 +162,7 @@ private:
     String mDescription;
     String mUri;
     String mName;
+    String mStrFramacBlock;
     AutoPtr<Namespace> mGlobalNamespace;
 
     std::vector<AutoPtr<Constant>> mConstants;
@@ -278,6 +284,17 @@ Module::GetTypes()
 int Module::GetTypeNumber()
 {
     return mAllTypeMap.size();
+}
+
+String Module::GetStrFramacBlock()
+{
+    return mStrFramacBlock;
+}
+
+void Module::SetStrFramacBlock(
+    /* [in] */ const String& strFramacBlock)
+{
+    mStrFramacBlock = strFramacBlock;
 }
 
 }

@@ -408,6 +408,7 @@ void MetadataBuilder::WriteMetaComponent(
 
     mc->mName = WriteString(module->GetName());
     mc->mUri = WriteString(module->GetUri());
+    mc->mStrFramacBlock = WriteString(module->GetStrFramacBlock());
 
     mc->mGlobalNamespace = WriteMetaNamespace(module->GetGlobalNamespace());
 
@@ -555,6 +556,7 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
     mc->mName = WriteString(klass->GetName());
     mc->mNamespace = WriteString(klass->GetNamespace()->ToString());
     mc->mFuncSafetySetting = WriteString(klass->GetFuncSafetySetting());
+    mc->mStrFramacBlock = WriteString(klass->GetStrFramacBlock());
     mc->mInterfaceNumber = IN;
     mc->mConstantNumber = CN;
     // mInterfaceIndexes address
@@ -642,6 +644,7 @@ como::MetaInterface* MetadataBuilder::WriteMetaInterface(
     mi->mUuid = interface->GetUUID()->ToComoUUID();
     mi->mName = WriteString(interface->GetName());
     mi->mNamespace = WriteString(interface->GetNamespace()->ToString());
+    mi->mStrFramacBlock = WriteString(interface->GetStrFramacBlock());
     mi->mBaseInterfaceIndex = mModule->IndexOf(interface->GetBaseInterface());
     mi->mOuterInterfaceIndex = mModule->IndexOf(interface->GetOuterInterface());
     mi->mNestedInterfaceNumber = IN;

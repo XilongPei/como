@@ -59,6 +59,7 @@ struct MetaComponent
     UUID                mUuid;
     char*               mName;
     char*               mUri;
+    char*               mStrFramacBlock;
     int                 mNamespaceNumber;
     int                 mConstantNumber;
     int                 mCoclassNumber;
@@ -115,6 +116,7 @@ struct MetaCoclass
     int*                mInterfaceIndexes;
     MetaConstant**      mConstants;
     char*               mFuncSafetySetting;
+    char*               mStrFramacBlock;
     unsigned char       mProperties;
 };
 
@@ -139,6 +141,7 @@ struct MetaInterface
     UUID                mUuid;
     char*               mName;
     char*               mNamespace;
+    char*               mStrFramacBlock;
     int                 mBaseInterfaceIndex;
     int                 mOuterInterfaceIndex;
     int                 mNestedInterfaceNumber;

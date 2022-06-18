@@ -109,6 +109,7 @@ void MetadataSerializer::SerializeMetaCoclass(
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(SerializeAdjust(mc->mFuncSafetySetting));
+    mc->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrFramacBlock));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
@@ -148,6 +149,7 @@ void MetadataSerializer::SerializeMetaInterface(
 {
     mi->mName = reinterpret_cast<char*>(SerializeAdjust(mi->mName));
     mi->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mi->mNamespace));
+    mi->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mi->mStrFramacBlock));
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mi->mNestedInterfaceIndexes));
 
     for (int i = 0; i < mi->mConstantNumber; i++) {
@@ -228,6 +230,7 @@ void MetadataSerializer::Deserialize(
     mComponent = mc;
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mUri = reinterpret_cast<char*>(DeserializeAdjust(mc->mUri));
+    mc->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrFramacBlock));
 
     mc->mTypes = reinterpret_cast<MetaType**>(DeserializeAdjust(mc->mTypes));
     for (int i = 0; i < mc->mTypeNumber; i++) {

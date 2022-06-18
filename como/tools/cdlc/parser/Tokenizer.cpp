@@ -242,7 +242,7 @@ TokenInfo Tokenizer::ReadToken(
                     tokenInfo.mTokenColumnNo = columnNo;
                     mCurrentTokenInfo = std::move(tokenInfo);
 
-                    if ((Token::UNKNOWN != expectedToken) &&
+                    if ((Token::FRAMAC_BLOCK == expectedToken) &&
                                     (tokenInfo.mToken == Token::FRAMAC_BLOCK)) {
                         mCurrentTokenInfo = std::move(tokenInfo);
                         return mCurrentTokenInfo;

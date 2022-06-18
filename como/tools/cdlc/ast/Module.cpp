@@ -29,6 +29,7 @@ void Module::SetAttributes(
     mVersion = attrs.mVersion;
     mDescription = attrs.mDescription;
     mUri = attrs.mUri;
+    mStrFramacBlock = attrs.mStrFramacBlock;
 }
 
 AutoPtr<Namespace> Module::ParseNamespace(

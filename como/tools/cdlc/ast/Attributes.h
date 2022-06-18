@@ -33,6 +33,7 @@ public:
     String mDescription;
     String mUri;
     String mFuncSafetySetting;
+    String mStrFramacBlock;
 };
 
 }
