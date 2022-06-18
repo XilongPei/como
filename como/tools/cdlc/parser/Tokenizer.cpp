@@ -101,7 +101,7 @@ TokenInfo Tokenizer::ReadToken(
     int lineNo = mReader->GetCurrentLineNumber();
     int columnNo = mReader->GetCurrentColumnNumber();
 
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         lineNo = mReader->GetCurrentLineNumber();
         columnNo = mReader->GetCurrentColumnNumber();
         char c = mReader->GetChar();
@@ -241,6 +241,12 @@ TokenInfo Tokenizer::ReadToken(
                     tokenInfo.mTokenLineNo = lineNo;
                     tokenInfo.mTokenColumnNo = columnNo;
                     mCurrentTokenInfo = std::move(tokenInfo);
+
+                    if ((Token::UNKNOWN != expectedToken) &&
+                                    (tokenInfo.mToken == Token::FRAMAC_BLOCK)) {
+                        mCurrentTokenInfo = std::move(tokenInfo);
+                        return mCurrentTokenInfo;
+                    }
                     continue;
                 }
                 TokenInfo tokenInfo(Token::DIVIDE,
@@ -384,7 +390,7 @@ TokenInfo Tokenizer::ReadUuidNumberToken()
 
     int state = SEGMENT_1;
     int index = 0;
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         char c = mReader->PeekChar();
         index++;
         if (state == SEGMENT_1) {
@@ -582,7 +588,7 @@ TokenInfo Tokenizer::ReadVersionNumberToken()
     int columnNo = mReader->GetCurrentColumnNumber();
 
     int state = SEGMENT_1;
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         char c = mReader->PeekChar();
         if (state == SEGMENT_1) {
             if (IsDecimalDigital(c)) {
@@ -653,7 +659,7 @@ TokenInfo Tokenizer::ReadIdentifier(
     StringBuilder builder;
 
     builder.Append(c);
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         c = mReader->PeekChar();
         if (c == '_' || IsAlphabet(c) || IsDecimalDigital(c)) {
             mReader->GetChar();
@@ -698,10 +704,10 @@ TokenInfo Tokenizer::ReadNumber(
 
     builder.Append(c);
     int bit = 32;
-    int radix = c == '0' ? 8 : 10;
+    int radix = ((c == '0') ? 8 : 10);
     bool scientificNotation = false;
-    int state = c == '0' ? NUMBER_INT_0 : NUMBER_INT;
-    while (!mReader->IsEof()) {
+    int state = ((c == '0') ? NUMBER_INT_0 : NUMBER_INT);
+    while (! mReader->IsEof()) {
         c = mReader->PeekChar();
         if (state == NUMBER_INT_0) {
             if (c == 'x' || c =='X') {
@@ -868,7 +874,7 @@ TokenInfo Tokenizer::ReadStringLiteral(
 {
     StringBuilder builder;
 
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         c = mReader->GetChar();
         if (c != '"') {
             builder.Append(c);
@@ -891,7 +897,7 @@ TokenInfo Tokenizer::ReadLineComment(
     StringBuilder builder;
 
     builder.Append(c);
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         c = mReader->GetChar();
         if (c == '\n') {
             break;
@@ -908,17 +914,43 @@ TokenInfo Tokenizer::ReadBlockComment(
     /* [in] */ char c)
 {
     StringBuilder builder;
+    bool bFramaC = false;
 
-    builder.Append(c);
-    while (!mReader->IsEof()) {
+    // skip "/*"
+    c = mReader->GetChar();
+
+    if (! mReader->IsEof()) {
         c = mReader->GetChar();
+        if ('@' != c)
+            builder.Append(c);
+        else
+            bFramaC = true;
+    }
+
+    while (! mReader->IsEof()) {
+        c = mReader->GetChar();
+        if (c == '\\' && !mReader->IsEof()) {
+            builder.Append(c);
+            c = mReader->GetChar();
+            builder.Append(c);
+            continue;
+        }
+
         if (c == '*' && mReader->PeekChar() == '/') {
             mReader->GetChar();
-            builder.Append("*/");
+            // builder.Append("*/");
             break;
         }
         builder.Append(c);
     }
+
+    if (bFramaC) {
+        TokenInfo tokenInfo(Token::FRAMAC_BLOCK,
+                            mReader->GetCurrentFilePath());
+        tokenInfo.mStringValue = builder.ToString();
+        return tokenInfo;
+    }
+
     TokenInfo tokenInfo(Token::COMMENT_BLOCK,
                         mReader->GetCurrentFilePath());
     tokenInfo.mStringValue = builder.ToString();
@@ -927,7 +959,7 @@ TokenInfo Tokenizer::ReadBlockComment(
 
 void Tokenizer::SkipCurrentLine()
 {
-    while (!mReader->IsEof()) {
+    while (! mReader->IsEof()) {
         if (mReader->GetChar() == '\n') {
             return;
         }

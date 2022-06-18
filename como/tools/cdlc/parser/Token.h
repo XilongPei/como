@@ -100,6 +100,7 @@ enum class Token
     UUID_NUMBER,            // 72)
     VERSION_NUMBER,         // 73)
     FUNCTION_SAFETY_SETTING,    // 74)    FuncSafetySetting
+    FRAMAC_BLOCK,           // 75 "/*@"
 };
 
 char Token2Char(

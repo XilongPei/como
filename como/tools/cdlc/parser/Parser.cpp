@@ -784,9 +784,11 @@ bool Parser::ParseInterfaceBody(
     }
     mTokenizer.GetToken();
 
-    tokenInfo = mTokenizer.PeekToken();
+    String tokenInfoLastStringValue;
+
+    tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                      tokenInfo.mToken != Token::END_OF_FILE) {
         switch (tokenInfo.mToken) {
             case Token::BRACKETS_OPEN: {
                 result = ParseNestedInterface(interface) && result;
@@ -804,6 +806,16 @@ bool Parser::ParseInterfaceBody(
             }
             case Token::IDENTIFIER: {
                 result = ParseMethod(interface) && result;
+
+                if (! tokenInfoLastStringValue.IsEmpty()) {
+                    // TODO
+                    // set FramaC block into Method
+                }
+
+                break;
+            }
+            case Token::FRAMAC_BLOCK: {
+                tokenInfoLastStringValue = tokenInfo.mStringValue;
                 break;
             }
             default: {
@@ -813,7 +825,7 @@ bool Parser::ParseInterfaceBody(
                 break;
             }
         }
-        tokenInfo = mTokenizer.PeekToken();
+        tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
     }
     if (tokenInfo.mToken == Token::END_OF_FILE) {
         LogError(tokenInfo, "\"}\" is expected.");
