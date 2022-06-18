@@ -44,6 +44,7 @@ CMetaConstructor::CMetaConstructor(
     , mIndex(index)
     , mName("Constructor")
     , mSignature(mm->mSignature)
+    , mStrFramacBlock(mm->mStrFramacBlock)
     , mIsDefault(mcObj->mMetadata->mProperties & COCLASS_CONSTRUCTOR_DEFAULT)
     , mParameters(mm->mParameterNumber)
     , mOpaque(0)
@@ -67,6 +68,13 @@ ECode CMetaConstructor::GetSignature(
     /* [out] */ String& signature)
 {
     signature = mSignature;
+    return NOERROR;
+}
+
+ECode CMetaConstructor::GetStrFramacBlock(
+    /* [out] */ String& strFramacBlock)
+{
+    strFramacBlock = mStrFramacBlock;
     return NOERROR;
 }
 

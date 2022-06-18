@@ -201,7 +201,8 @@ private:
         /* [in] */ Type* type);
 
     bool ParseMethod(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType* interface,
+        /* [in] */ String& strFramacBlock);
 
     bool ParseParameter(
         /* [in] */ Method* method);

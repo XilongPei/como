@@ -359,6 +359,9 @@ interface IMetaMethod
     GetSignature(
         [out] String& signature);
 
+    GetStrFramacBlock(
+        [out] String& strFramacBlock);
+
     GetParameterNumber(
         [out] Integer& number);
 

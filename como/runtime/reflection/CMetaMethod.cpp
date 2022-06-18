@@ -52,6 +52,7 @@ CMetaMethod::CMetaMethod(
     , mIndex(index)
     , mName(mm->mName)
     , mSignature(mm->mSignature)
+    , mStrFramacBlock(mm->mStrFramacBlock)
     , mParameters(mMetadata->mParameterNumber)
     , mHasOutArguments(0)
     , mOpaque(0)
@@ -89,6 +90,13 @@ ECode CMetaMethod::GetSignature(
     /* [out] */ String& signature)
 {
     signature = mSignature;
+    return NOERROR;
+}
+
+ECode CMetaMethod::GetStrFramacBlock(
+    /* [out] */ String& strFramacBlock)
+{
+    strFramacBlock = mStrFramacBlock;
     return NOERROR;
 }
 

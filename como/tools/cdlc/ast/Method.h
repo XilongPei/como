@@ -64,6 +64,11 @@ public:
         /* [in] */ Module* module,
         /* [in] */ bool deepCopy) override;
 
+    inline String GetStrFramacBlock();
+
+    inline void SetStrFramacBlock(
+        /* [in] */ const String& strFramacBlock);
+
 private:
     void BuildSignature();
 
@@ -73,6 +78,7 @@ private:
     AutoPtr<Type> mReturnType;
     std::vector<AutoPtr<Parameter>> mParameters;
     bool mDeleted = false;
+    String mStrFramacBlock;
 };
 
 String Method::GetName()
@@ -129,6 +135,17 @@ bool Method::IsDeleted()
     return mDeleted;
 }
 
+String Method::GetStrFramacBlock()
+{
+    return mStrFramacBlock;
 }
+
+void Method::SetStrFramacBlock(
+    /* [in] */ const String& strFramacBlock)
+{
+    mStrFramacBlock = strFramacBlock;
+}
+
+} // namespace cdlc
 
 #endif // __CDLC_METHOD_H__

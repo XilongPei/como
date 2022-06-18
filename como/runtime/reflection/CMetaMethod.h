@@ -51,6 +51,9 @@ public:
     ECode GetSignature(
         /* [out] */ String& signature) override;
 
+    ECode GetStrFramacBlock(
+        /* [out] */ String& strFramacBlock) override;
+
     ECode GetParameterNumber(
         /* [out] */ Integer& number) override;
 
@@ -110,6 +113,7 @@ public:
     Integer mIndex;
     String mName;
     String mSignature;
+    String mStrFramacBlock;
     Array<IMetaParameter*> mParameters;
     Mutex mParametersLock;
     Integer mHasOutArguments;

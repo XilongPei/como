@@ -158,6 +158,7 @@ struct MetaMethod
 {
     char*               mName;
     char*               mSignature;
+    char*               mStrFramacBlock;
     int                 mReturnTypeIndex;
     int                 mParameterNumber;
     MetaParameter**     mParameters;

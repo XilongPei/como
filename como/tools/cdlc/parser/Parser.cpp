@@ -805,13 +805,7 @@ bool Parser::ParseInterfaceBody(
                 break;
             }
             case Token::IDENTIFIER: {
-                result = ParseMethod(interface) && result;
-
-                if (! tokenInfoLastStringValue.IsEmpty()) {
-                    // TODO
-                    // set FramaC block into Method
-                }
-
+                result = ParseMethod(interface, tokenInfoLastStringValue) && result;
                 break;
             }
             case Token::FRAMAC_BLOCK: {
@@ -1562,7 +1556,8 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
 }
 
 bool Parser::ParseMethod(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType* interface,
+    /* [in] */ String& strFramacBlock)
 {
     bool result = true;
 
@@ -1571,6 +1566,10 @@ bool Parser::ParseMethod(
     AutoPtr<Method> method = new Method();
     method->SetName(tokenInfo.mStringValue);
     method->SetReturnType(FindType("como::ECode", false));
+    if (! strFramacBlock.IsEmpty())
+        method->SetStrFramacBlock(String(""));
+    else
+        method->SetStrFramacBlock(strFramacBlock);
 
     tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken != Token::PARENTHESES_OPEN) {
@@ -1581,7 +1580,7 @@ bool Parser::ParseMethod(
 
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                      tokenInfo.mToken != Token::END_OF_FILE) {
         result = ParseParameter(method) && result;
         tokenInfo = mTokenizer.PeekToken();
         if (tokenInfo.mToken == Token::COMMA) {
@@ -1592,11 +1591,11 @@ bool Parser::ParseMethod(
             LogError(tokenInfo, "\",\" or \")\" is expected.");
             result = false;
         }
-        if (!result) {
+        if (! result) {
             // jump to ',' or ')'
             while (tokenInfo.mToken != Token::COMMA &&
-                    tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-                    tokenInfo.mToken != Token::END_OF_FILE) {
+                                tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
+                                tokenInfo.mToken != Token::END_OF_FILE) {
                 mTokenizer.GetToken();
                 tokenInfo = mTokenizer.PeekToken();
             }
@@ -1619,14 +1618,14 @@ bool Parser::ParseMethod(
     if (result) {
         if (interface->FindMethod(method->GetName(), method->GetSignature()) != nullptr) {
             String message = String::Format("The method \"%s\" is redeclared.",
-                    method->ToString().string());
+                                            method->ToString().string());
             LogError(tokenInfo, message);
             return false;
         }
         interface->AddMethod(method);
         if (interface->GetMethodNumber() >= InterfaceType::METHOD_MAX_NUMBER) {
             String message = String::Format("The Interface \"%s\" has too many methods.",
-                    interface->ToString().string());
+                                            interface->ToString().string());
             LogError(tokenInfo, message);
             return false;
         }

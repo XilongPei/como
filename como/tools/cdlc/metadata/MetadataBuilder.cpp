@@ -271,10 +271,16 @@ void MetadataBuilder::CalculateMetaMethod(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(method->GetName());
+
     // add mSignature to StringPool
     mPool.Add(method->GetSignature());
+
+    // add mStrFramacBlock to StringPool
+    mPool.Add(method->GetStrFramacBlock());
+
     // mParameters address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaMethod));
     // end address
@@ -687,6 +693,7 @@ como::MetaMethod* MetadataBuilder::WriteMetaMethod(
     como::MetaMethod* mm = reinterpret_cast<como::MetaMethod*>(mBasePtr);
     mm->mName = WriteString(method->GetName());
     mm->mSignature = WriteString(method->GetSignature());
+    mm->mStrFramacBlock = WriteString(method->GetStrFramacBlock());
     mm->mReturnTypeIndex = mModule->IndexOf(method->GetReturnType());
     mm->mParameterNumber = PN;
     // mParameters address
