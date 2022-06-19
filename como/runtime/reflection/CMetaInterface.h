@@ -48,6 +48,9 @@ public:
     ECode GetNamespace(
         /* [out] */ String& ns) override;
 
+    ECode GetStrFramacBlock(
+        /* [out] */ String& strFramacBlock) override;
+
     ECode GetInterfaceID(
         /* [out] */ InterfaceID& iid) override;
 
@@ -107,6 +110,7 @@ public:
     InterfaceID mIid;
     String mName;
     String mNamespace;
+    String mStrFramacBlock;
     CMetaInterface* mBaseInterface;
     Array<IMetaConstant*> mConstants;
     Mutex mConstantsLock;

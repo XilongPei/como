@@ -49,6 +49,9 @@ public:
     ECode GetFuncSafetySetting(
         /* [out] */ String& funcSafetySetting) override;
 
+    ECode GetStrFramacBlock(
+        /* [out] */ String& strFramacBlock) override;
+
     ECode GetCoclassID(
         /* [out] */ CoclassID& cid) override;
 
@@ -146,6 +149,7 @@ public:
     String mName;
     String mNamespace;
     String mFuncSafetySetting;
+    String mStrFramacBlock;
     Array<IMetaConstructor*> mConstructors;
     Mutex mConstructorsLock;
     Array<IMetaMethod*> mMethods;

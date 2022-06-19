@@ -57,6 +57,7 @@ CMetaComponent::CMetaComponent(
     , mInterfaceIdMap(mMetadata->mInterfaceNumber -
                                             mMetadata->mExternalInterfaceNumber)
     , mInterfacesAlreadyBuilt(false)
+    , mStrFramacBlock(mMetadata->mStrFramacBlock)
     , mOpaque(0)
 {
     mCid.mUuid = metadata->mUuid;
@@ -772,6 +773,13 @@ void CMetaComponent::ReleaseResources()
     mInterfaceNameMap.Clear();
     mInterfaceIdMap.Clear();
     mInterfacesAlreadyBuilt = false;
+}
+
+ECode CMetaComponent::GetStrFramacBlock(
+    /* [out] */ String& strFramacBlock)
+{
+    strFramacBlock = mStrFramacBlock;
+    return NOERROR;
 }
 
 ECode CMetaComponent::SetOpaque(

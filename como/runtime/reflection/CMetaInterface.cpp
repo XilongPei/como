@@ -32,6 +32,7 @@ CMetaInterface::CMetaInterface(
     , mOwner(mcObj)
     , mName(mi->mName)
     , mNamespace(mi->mNamespace)
+    , mStrFramacBlock(mi->mStrFramacBlock)
     , mConstants(mi->mConstantNumber)
     , mMethods(mi->mMethodNumber)
 {
@@ -59,6 +60,13 @@ ECode CMetaInterface::GetNamespace(
     /* [out] */ String& ns)
 {
     ns = mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace;
+    return NOERROR;
+}
+
+ECode CMetaInterface::GetStrFramacBlock(
+    /* [out] */ String& strFramacBlock)
+{
+    strFramacBlock = mStrFramacBlock;
     return NOERROR;
 }
 

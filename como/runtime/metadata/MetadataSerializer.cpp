@@ -177,6 +177,7 @@ void MetadataSerializer::SerializeMetaMethod(
 {
     mm->mName = reinterpret_cast<char*>(SerializeAdjust(mm->mName));
     mm->mSignature = reinterpret_cast<char*>(SerializeAdjust(mm->mSignature));
+    mm->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mm->mStrFramacBlock));
 
     for (int i = 0; i < mm->mParameterNumber; i++) {
         MetaParameter* mp = mm->mParameters[i];
@@ -340,6 +341,7 @@ void MetadataSerializer::DeserializeMetaInterface(
 {
     mi->mName = reinterpret_cast<char*>(DeserializeAdjust(mi->mName));
     mi->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mi->mNamespace));
+    mi->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mi->mStrFramacBlock));
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mi->mNestedInterfaceIndexes));
 
     mi->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mi->mConstants));
@@ -365,6 +367,7 @@ void MetadataSerializer::DeserializeMetaMethod(
 {
     mm->mName = reinterpret_cast<char*>(DeserializeAdjust(mm->mName));
     mm->mSignature = reinterpret_cast<char*>(DeserializeAdjust(mm->mSignature));
+    mm->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mm->mStrFramacBlock));
 
     mm->mParameters = reinterpret_cast<MetaParameter**>(DeserializeAdjust(mm->mParameters));
     for (int i = 0; i < mm->mParameterNumber; i++) {
