@@ -109,7 +109,7 @@ bool Parser::ParseFile(
     AutoPtr<MemoryFileReader> reader = new MemoryFileReader(filePath);
     if (!reader->ReadIn(false)) {
         String message = String::Format("Fail to open the file \"%s\".",
-                filePath.string());
+                                        filePath.string());
         LogError(tokenInfo, message);
         return false;
     }
@@ -195,7 +195,7 @@ bool Parser::ParseDeclarationWithAttributes(
         case Token::MODULE: {
             if (excludeModule) {
                 String message = String::Format("%s is not expected.",
-                        TokenInfo::Dump(tokenInfo).string());
+                                           TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 result = false;
                 break;
@@ -205,7 +205,7 @@ bool Parser::ParseDeclarationWithAttributes(
         }
         default: {
             String message = String::Format("%s is not expected.",
-                    TokenInfo::Dump(tokenInfo).string());
+                                           TokenInfo::Dump(tokenInfo).string());
             LogError(tokenInfo, message);
             result = false;
             break;
@@ -264,8 +264,8 @@ bool Parser::ParseAttributes(
             if (!result) {
                 // jump to ',' or ']'
                 while (tokenInfo.mToken != Token::COMMA &&
-                        tokenInfo.mToken != Token::BRACKETS_CLOSE &&
-                        tokenInfo.mToken != Token::END_OF_FILE) {
+                                tokenInfo.mToken != Token::BRACKETS_CLOSE &&
+                                tokenInfo.mToken != Token::END_OF_FILE) {
                     mTokenizer.GetToken();
                     tokenInfo = mTokenizer.PeekToken();
                 }
@@ -448,12 +448,13 @@ bool Parser::ParseModule(
         moduleName = tokenInfo.mStringValue;
         if (attrs.mUuid.IsEmpty()) {
             char buf[40];       // 16(byte) * 2 + 4(-) = 36
-            attrs.mUuid = String(Uint128ToUuidString(CityHash128(moduleName, strlen(moduleName)), buf));
+            attrs.mUuid = String(Uint128ToUuidString(CityHash128(moduleName,
+                                                     strlen(moduleName)), buf));
         }
 
         if (attrs.mUri.IsEmpty()) {
             String message = String::Format("Module %s should have attributes.",
-                    moduleName.string());
+                                            moduleName.string());
             LogError(tokenInfo, message);
             result = false;
         }
@@ -479,7 +480,7 @@ bool Parser::ParseModule(
 
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                       tokenInfo.mToken != Token::END_OF_FILE) {
         switch (tokenInfo.mToken) {
             case Token::BRACKETS_OPEN: {
                 result = ParseDeclarationWithAttributes(true) && result;
@@ -574,7 +575,7 @@ bool Parser::ParseNamespace()
 
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                       tokenInfo.mToken != Token::END_OF_FILE) {
         switch (tokenInfo.mToken) {
             case Token::BRACKETS_OPEN: {
                 result = ParseDeclarationWithAttributes(true) && result;
@@ -736,7 +737,8 @@ bool Parser::ParseInterface(
                 interface->SetBaseInterface(baseInterface);
             }
             else {
-                String message = String::Format("Base interface \"%s\" is not found or not declared.",
+                String message = String::Format(
+                        "Base interface \"%s\" is not found or not declared.",
                         tokenInfo.mStringValue.string());
                 LogError(tokenInfo, message);
                 result = false;
@@ -1057,8 +1059,8 @@ AutoPtr<ShiftExpression> Parser::ParseShiftExpression(
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken == Token::SHIFT_LEFT ||
-            tokenInfo.mToken == Token::SHIFT_RIGHT ||
-            tokenInfo.mToken == Token::SHIFT_RIGHT_UNSIGNED) {
+                            tokenInfo.mToken == Token::SHIFT_RIGHT ||
+                            tokenInfo.mToken == Token::SHIFT_RIGHT_UNSIGNED) {
         mTokenizer.GetToken();
 
         rightOperand = ParseAdditiveExpression(type);
@@ -1069,7 +1071,7 @@ AutoPtr<ShiftExpression> Parser::ParseShiftExpression(
         AutoPtr<ShiftExpression> leftOperand = expr;
 
         if (!leftOperand->GetType()->IsIntegralType() ||
-                !rightOperand->GetType()->IsIntegralType()) {
+                                  !rightOperand->GetType()->IsIntegralType()) {
             LogError(tokenInfo, "Shift operation can not be applied "
                     "to non-integral type.");
             return nullptr;
@@ -1079,10 +1081,10 @@ AutoPtr<ShiftExpression> Parser::ParseShiftExpression(
         expr->SetLeftOperand(leftOperand);
         expr->SetRightOperand(rightOperand);
         expr->SetOperator(tokenInfo.mToken == Token::SHIFT_LEFT
-                ? Expression::OPERATOR_LEFT_SHIFT
-                : tokenInfo.mToken == Token::SHIFT_RIGHT
-                    ? Expression::OPERATOR_RIGHT_SHIFT
-                    : Expression::OPERATOR_UNSIGNED_RIGHT_SHIFT);
+                            ? Expression::OPERATOR_LEFT_SHIFT
+                            : tokenInfo.mToken == Token::SHIFT_RIGHT
+                                ? Expression::OPERATOR_RIGHT_SHIFT
+                                : Expression::OPERATOR_UNSIGNED_RIGHT_SHIFT);
         expr->SetType(Type::Choose(leftOperand->GetType(), rightOperand->GetType()));
 
         tokenInfo = mTokenizer.PeekToken();
@@ -1118,7 +1120,7 @@ AutoPtr<AdditiveExpression> Parser::ParseAdditiveExpression(
         AutoPtr<AdditiveExpression> leftOperand = expr;
 
         if (!leftOperand->GetType()->IsNumericType() ||
-                !rightOperand->GetType()->IsNumericType()) {
+                                    !rightOperand->GetType()->IsNumericType()) {
             LogError(tokenInfo, "Additive operation can not be applied "
                     "to non-numeric type.");
             return nullptr;
@@ -1128,8 +1130,7 @@ AutoPtr<AdditiveExpression> Parser::ParseAdditiveExpression(
         expr->SetLeftOperand(leftOperand);
         expr->SetRightOperand(rightOperand);
         expr->SetOperator(tokenInfo.mToken == Token::PLUS
-                ? Expression::OPERATOR_PLUS
-                : Expression::OPERATOR_MINUS);
+                        ? Expression::OPERATOR_PLUS : Expression::OPERATOR_MINUS);
         expr->SetType(Type::Choose(leftOperand->GetType(), rightOperand->GetType()));
 
         tokenInfo = mTokenizer.PeekToken();
@@ -1154,8 +1155,8 @@ AutoPtr<MultiplicativeExpression> Parser::ParseMultiplicativeExpression(
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken == Token::ASTERISK ||
-            tokenInfo.mToken == Token::DIVIDE ||
-            tokenInfo.mToken == Token::MODULO) {
+                                        tokenInfo.mToken == Token::DIVIDE ||
+                                        tokenInfo.mToken == Token::MODULO) {
         mTokenizer.GetToken();
 
         rightOperand = ParseUnaryExpression(type);
@@ -1176,10 +1177,10 @@ AutoPtr<MultiplicativeExpression> Parser::ParseMultiplicativeExpression(
         expr->SetLeftOperand(leftOperand);
         expr->SetRightOperand(rightOperand);
         expr->SetOperator(tokenInfo.mToken == Token::ASTERISK
-                ? Expression::OPERATOR_MULTIPLE
-                : tokenInfo.mToken == Token::DIVIDE
-                    ? Expression::OPERATOR_DIVIDE
-                    : Expression::OPERATOR_MODULO);
+                                        ? Expression::OPERATOR_MULTIPLE
+                                        : tokenInfo.mToken == Token::DIVIDE
+                                            ? Expression::OPERATOR_DIVIDE
+                                            : Expression::OPERATOR_MODULO);
         expr->SetType(Type::Choose(leftOperand->GetType(), rightOperand->GetType()));
 
         tokenInfo = mTokenizer.PeekToken();
@@ -1193,9 +1194,9 @@ AutoPtr<UnaryExpression> Parser::ParseUnaryExpression(
 {
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken == Token::PLUS ||
-            tokenInfo.mToken == Token::MINUS ||
-            tokenInfo.mToken == Token::COMPLIMENT ||
-            tokenInfo.mToken == Token::NOT) {
+                                    tokenInfo.mToken == Token::MINUS ||
+                                    tokenInfo.mToken == Token::COMPLIMENT ||
+                                    tokenInfo.mToken == Token::NOT) {
         mTokenizer.GetToken();
 
         AutoPtr<UnaryExpression> rightOperand = ParseUnaryExpression(type);
@@ -1218,12 +1219,12 @@ AutoPtr<UnaryExpression> Parser::ParseUnaryExpression(
         AutoPtr<UnaryExpression> expr = new UnaryExpression();
         expr->SetRightOperand(rightOperand);
         expr->SetOperator(tokenInfo.mToken == Token::PLUS
-                ? Expression::OPERATOR_POSITIVE
-                : tokenInfo.mToken == Token::MINUS
-                    ? Expression::OPERATOR_NEGATIVE
-                    : tokenInfo.mToken == Token::COMPLIMENT
-                        ? Expression::OPERATOR_COMPLIMENT
-                        : Expression::OPERATOR_NOT);
+                                ? Expression::OPERATOR_POSITIVE
+                                : tokenInfo.mToken == Token::MINUS
+                                    ? Expression::OPERATOR_NEGATIVE
+                                    : tokenInfo.mToken == Token::COMPLIMENT
+                                        ? Expression::OPERATOR_COMPLIMENT
+                                        : Expression::OPERATOR_NOT);
         expr->SetType(rightOperand->GetType());
 
         return expr;
@@ -1278,7 +1279,7 @@ AutoPtr<PostfixExpression> Parser::ParsePostfixExpression(
             }
 
             String message = String::Format("\"nullptr\" can not be assigned to \"%s\" type.",
-                    type->ToString().string());
+                                            type->ToString().string());
             LogError(tokenInfo, message);
             return nullptr;
         }
@@ -1299,7 +1300,7 @@ AutoPtr<PostfixExpression> Parser::ParsePostfixExpression(
         }
         default: {
             String message = String::Format("%s is not expected.",
-                    TokenInfo::Dump(tokenInfo).string());
+                                        TokenInfo::Dump(tokenInfo).string());
             LogError(tokenInfo, message);
             return nullptr;
         }
@@ -1313,8 +1314,7 @@ AutoPtr<PostfixExpression> Parser::ParseBooleanLiteral(
     if (type->IsBooleanType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
         expr->SetType(type);
-        expr->SetBooleanValue(tokenInfo.mToken == Token::TRUE
-                ? true : false);
+        expr->SetBooleanValue(tokenInfo.mToken == Token::TRUE ? true : false);
         return expr;
     }
 
@@ -1461,9 +1461,9 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
         expr->SetType(type);
         if (constant->GetType()->IsCharType() ||
-                constant->GetType()->IsByteType() ||
-                constant->GetType()->IsShortType() ||
-                constant->GetType()->IsIntegerType()) {
+                                    constant->GetType()->IsByteType() ||
+                                    constant->GetType()->IsShortType() ||
+                                    constant->GetType()->IsIntegerType()) {
             if (type->IsIntegralType()) {
                 expr->SetIntegralValue(constant->GetValue()->IntegerValue());
                 expr->SetRadix(constant->GetValue()->GetRadix());
@@ -1509,7 +1509,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
         int idx = id.LastIndexOf("::");
         if (idx == -1) {
             String message = String::Format("\"%s\" is not a valid enumerator of %s",
-                    id.string(), type->GetName().string());
+                                            id.string(), type->GetName().string());
             LogError(tokenInfo, message);
             return nullptr;
         }
@@ -1714,8 +1714,8 @@ bool Parser::ParseParameter(
     else {
         // jump to ',' or ';'
         while (tokenInfo.mToken != Token::COMMA &&
-                tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-                tokenInfo.mToken != Token::END_OF_FILE) {
+                            tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
+                            tokenInfo.mToken != Token::END_OF_FILE) {
             mTokenizer.GetToken();
             tokenInfo = mTokenizer.PeekToken();
         }
@@ -1727,8 +1727,8 @@ bool Parser::ParseParameter(
         LogError(tokenInfo, "Parameter name is expected.");
         // jump to ',' or ';'
         while (tokenInfo.mToken != Token::COMMA &&
-                tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-                tokenInfo.mToken != Token::END_OF_FILE) {
+                            tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
+                            tokenInfo.mToken != Token::END_OF_FILE) {
             mTokenizer.GetToken();
             tokenInfo = mTokenizer.PeekToken();
         }
@@ -1988,7 +1988,7 @@ bool Parser::ParseCoclassBody(
 
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                    tokenInfo.mToken != Token::END_OF_FILE) {
         switch (tokenInfo.mToken) {
             case Token::CONSTRUCTOR: {
                 result = ParseConstructor(klass) && result;
@@ -2048,7 +2048,7 @@ bool Parser::ParseConstructor(
 
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                    tokenInfo.mToken != Token::END_OF_FILE) {
         result = ParseParameter(method) && result;
         tokenInfo = mTokenizer.PeekToken();
         if (tokenInfo.mToken == Token::COMMA) {
@@ -2248,7 +2248,7 @@ bool Parser::ParseEnumerationBody(
     int enumeratorValue = 0;
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+                                    tokenInfo.mToken != Token::END_OF_FILE) {
         String enumeratorName;
         if (tokenInfo.mToken == Token::IDENTIFIER) {
             mTokenizer.GetToken();
@@ -2488,4 +2488,4 @@ void Parser::ShowErrors()
     }
 }
 
-}
+} // namespace cdlc

@@ -197,7 +197,7 @@ String CoclassType::GetStrFramacBlock()
 void CoclassType::SetStrFramacBlock(
     /* [in] */ const String& strFramacBlock)
 {
-    mStrFramacBlock = strFramacBlock;
+    mStrFramacBlock += strFramacBlock;
 }
 
 } // namespace cdlc

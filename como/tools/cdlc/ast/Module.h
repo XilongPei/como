@@ -294,9 +294,9 @@ String Module::GetStrFramacBlock()
 void Module::SetStrFramacBlock(
     /* [in] */ const String& strFramacBlock)
 {
-    mStrFramacBlock = strFramacBlock;
+    mStrFramacBlock += strFramacBlock;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_MODULE_H__

@@ -203,9 +203,9 @@ String InterfaceType::GetStrFramacBlock()
 void InterfaceType::SetStrFramacBlock(
     /* [in] */ const String& strFramacBlock)
 {
-    mStrFramacBlock = strFramacBlock;
+    mStrFramacBlock += strFramacBlock;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_INTERFACETYPE_H__

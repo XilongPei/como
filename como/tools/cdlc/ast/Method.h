@@ -143,7 +143,7 @@ String Method::GetStrFramacBlock()
 void Method::SetStrFramacBlock(
     /* [in] */ const String& strFramacBlock)
 {
-    mStrFramacBlock = strFramacBlock;
+    mStrFramacBlock += strFramacBlock;
 }
 
 } // namespace cdlc
