@@ -17,6 +17,9 @@
 [
     uuid(42197c0a-0de1-4c11-8a35-4ed719e72695),
     uri("http://como.org/component/test/reflection/ReflectionTestUnit.so")
+/*@
+module ReflectionTestUnit FramacBlock ...
+*/
 ]
 module ReflectionTestUnit
 {

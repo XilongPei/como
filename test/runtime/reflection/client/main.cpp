@@ -637,6 +637,46 @@ TEST(ReflectionTest, TestModuleUnload)
     EXPECT_TRUE(SUCCEEDED(ec));
 }
 
+TEST(ReflectionTest, TestGetStrFramacBlock)
+{
+    AutoPtr<IMetaComponent> mc;
+    CoGetComponentMetadata(CID_ReflectionTestUnit, nullptr, mc);
+
+    String strFramacBlock;
+    ECode ec = mc->GetStrFramacBlock(strFramacBlock);
+    EXPECT_EQ(NOERROR, ec);
+    printf("Component FramacBlock: \n%s\n", strFramacBlock.string());
+
+    AutoPtr<IMetaInterface> intf;
+    mc->GetInterface("como::test::reflection::IMethodTest", intf);
+
+    ec = intf->GetStrFramacBlock(strFramacBlock);
+    EXPECT_EQ(NOERROR, ec);
+    printf("interface como::test::reflection::IMethodTest FramacBlock: \n%s\n", strFramacBlock.string());
+
+    Integer totalNumber;
+    intf->GetMethodNumber(totalNumber);
+    EXPECT_EQ(10, totalNumber);
+    Integer declaredNumber;
+    intf->GetDeclaredMethodNumber(declaredNumber);
+    EXPECT_EQ(6, declaredNumber);
+    Array<IMetaMethod*> declaredMethods(declaredNumber);
+    intf->GetDeclaredMethods(declaredMethods);
+    for (Integer i = 0; i < declaredNumber; i++) {
+        String name, signature;
+        declaredMethods[i]->GetName(name);
+        declaredMethods[i]->GetSignature(signature);
+        if (i == 0) {
+            EXPECT_STREQ("TestMethod1", name.string());
+            EXPECT_STREQ("(II&)E", signature.string());
+        }
+
+        ec = declaredMethods[i]->GetStrFramacBlock(strFramacBlock);
+        EXPECT_EQ(NOERROR, ec);
+        printf("method \"%s\" FramacBlock: \n%s\n", name.string(), strFramacBlock.string());
+    }
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

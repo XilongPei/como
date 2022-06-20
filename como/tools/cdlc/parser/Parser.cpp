@@ -181,6 +181,8 @@ bool Parser::ParseDeclarationWithAttributes(
 {
     Attributes attrs;
     bool result = ParseAttributes(attrs);
+    if (! result)
+        return false;
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     switch (tokenInfo.mToken) {
@@ -251,6 +253,7 @@ bool Parser::ParseAttributes(
                 case Token::FRAMAC_BLOCK: {
                     tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
                     attrs.mStrFramacBlock = tokenInfo.mStringValue;
+
                     break;
                 }
                 default: {
@@ -261,7 +264,7 @@ bool Parser::ParseAttributes(
                     break;
                 }
             }
-            if (!result) {
+            if (! result) {
                 // jump to ',' or ']'
                 while (tokenInfo.mToken != Token::COMMA &&
                                 tokenInfo.mToken != Token::BRACKETS_CLOSE &&
@@ -270,12 +273,13 @@ bool Parser::ParseAttributes(
                     tokenInfo = mTokenizer.PeekToken();
                 }
             }
-            tokenInfo = mTokenizer.PeekToken();
+            tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
             if (tokenInfo.mToken == Token::COMMA) {
                 mTokenizer.GetToken();
-                tokenInfo = mTokenizer.PeekToken();
+                tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
             }
-            else if (tokenInfo.mToken != Token::BRACKETS_CLOSE) {
+            else if ( (tokenInfo.mToken != Token::FRAMAC_BLOCK) &&
+                                  (tokenInfo.mToken != Token::BRACKETS_CLOSE)) {
                 LogError(tokenInfo, "\",\" or \"]\" is expected.");
                 return false;
             }
@@ -816,6 +820,7 @@ bool Parser::ParseInterfaceBody(
                 break;
             }
             case Token::FRAMAC_BLOCK: {
+                tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
                 tokenInfoLastStringValue = tokenInfo.mStringValue;
                 break;
             }
@@ -1880,6 +1885,8 @@ bool Parser::ParseNestedInterface(
 {
     Attributes attrs;
     bool result = ParseAttributes(attrs);
+    if (! result)
+        return false;
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken != Token::INTERFACE) {

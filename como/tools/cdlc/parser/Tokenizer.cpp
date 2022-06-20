@@ -244,7 +244,6 @@ TokenInfo Tokenizer::ReadToken(
 
                     if ((Token::FRAMAC_BLOCK == expectedToken) &&
                                     (tokenInfo.mToken == Token::FRAMAC_BLOCK)) {
-                        mCurrentTokenInfo = std::move(tokenInfo);
                         return mCurrentTokenInfo;
                     }
                     continue;
