@@ -817,6 +817,7 @@ bool Parser::ParseInterfaceBody(
             }
             case Token::IDENTIFIER: {
                 result = ParseMethod(interface, tokenInfoLastStringValue) && result;
+                tokenInfoLastStringValue = "";
                 break;
             }
             case Token::FRAMAC_BLOCK: {
@@ -1576,7 +1577,7 @@ bool Parser::ParseMethod(
     AutoPtr<Method> method = new Method();
     method->SetName(tokenInfo.mStringValue);
     method->SetReturnType(FindType("como::ECode", false));
-    if (! strFramacBlock.IsEmpty())
+    if (strFramacBlock.IsEmpty())
         method->SetStrFramacBlock(String(""));
     else
         method->SetStrFramacBlock(strFramacBlock);
