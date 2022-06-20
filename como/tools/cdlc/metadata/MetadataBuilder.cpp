@@ -61,22 +61,34 @@ void MetadataBuilder::CalculateMetaComponent(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(module->GetName());
+
     // add mUri to StringPool
     mPool.Add(module->GetUri());
+
+    // add mStrFramacBlock to StringPool
+    mPool.Add(module->GetStrFramacBlock());
+
     // mNamespaces address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaComponent));
+
     // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaNamespace*));
+
     // mCoclasses address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
+
     // mEnumerations address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass*) * KN);
+
     // mInterfaces address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaEnumeration*) * EN);
+
     // mTypes address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaInterface*) * IN);
+
     // mStringPool address
     mBasePtr = mBasePtr + sizeof(como::MetaType*) * TN;
 
@@ -118,18 +130,25 @@ void MetadataBuilder::CalculateMetaNamespace(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(ns->ToString());
+
     // mNamespaces address
     mBasePtr =  ALIGN(mBasePtr + sizeof(como::MetaNamespace));
+
     // mConstantIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaNamespace*) * NN);
+
     // mCoclassIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(int) * CN);
+
     // mEnumerationIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(int) * KN);
+
     // mInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(int) * EN);
+
     // end address
     mBasePtr = mBasePtr + sizeof(int) * IN;
 
@@ -143,10 +162,13 @@ void MetadataBuilder::CalculateMetaConstant(
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(constant->GetName());
+
     // add mNamespace to StringPool
     AutoPtr<Namespace> ns = constant->GetNamespace();
+
     if (ns != nullptr) {
         mPool.Add(ns->ToString());
     }
@@ -157,6 +179,7 @@ void MetadataBuilder::CalculateMetaConstant(
     else if (constant->GetType()->IsEnumerationType()) {
         mPool.Add(constant->GetValue()->EnumeratorValue());
     }
+
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaConstant);
 }
@@ -169,16 +192,25 @@ void MetadataBuilder::CalculateMetaCoclass(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(klass->GetName());
+
     // add mNamespace to StringPool
     mPool.Add(klass->GetNamespace()->ToString());
+
     // add mFuncSafetySetting to StringPool
     mPool.Add(klass->GetFuncSafetySetting());
+
+    // add mStrFramacBlock to StringPool
+    mPool.Add(klass->GetStrFramacBlock());
+
     // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass));
+
     // mInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
+
     // end address
     mBasePtr = mBasePtr + sizeof(int) * IN;
 
@@ -194,10 +226,13 @@ void MetadataBuilder::CalculateMetaEnumeration(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(enumeration->GetName());
+
     // add mNamespace to StringPool
     mPool.Add(enumeration->GetNamespace()->ToString());
+
     // mExternalModuleName address if needed
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaEnumeration));
     if (enumeration->IsExternal()) {
@@ -205,8 +240,10 @@ void MetadataBuilder::CalculateMetaEnumeration(
         mPool.Add(enumeration->GetExternalModuleName());
         mBasePtr = mBasePtr + sizeof(char**);
     }
+
     // mEnumerators address
     mBasePtr = ALIGN(mBasePtr);
+
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaEnumerator*) * EN;
 
@@ -220,8 +257,10 @@ void MetadataBuilder::CalculateMetaEnumerator(
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(enumerator->mName);
+
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaEnumerator);
 }
@@ -235,10 +274,16 @@ void MetadataBuilder::CalculateMetaInterface(
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(interface->GetName());
+
     // add mNamespace to StringPool
     mPool.Add(interface->GetNamespace()->ToString());
+
+    // add mStrFramacBlock to StringPool
+    mPool.Add(interface->GetStrFramacBlock());
+
     // mExternalModuleName address if needed
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaInterface));
     if (interface->IsExternal()) {
@@ -246,12 +291,16 @@ void MetadataBuilder::CalculateMetaInterface(
         mPool.Add(interface->GetExternalModuleName());
         mBasePtr = mBasePtr + sizeof(char**);
     }
+
     // mNestedInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr);
+
     // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(int) * IN);
+
     // mMethods address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
+
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaMethod*) * MN;
 
@@ -296,8 +345,10 @@ void MetadataBuilder::CalculateMetaParameter(
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add mName to StringPool
     mPool.Add(parameter->GetName());
+
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaParameter);
 
@@ -311,6 +362,7 @@ void MetadataBuilder::CalculateMetaValue(
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
+
     // add value to StringPool when expression is String or Enumerator
     if (parameter->GetType()->IsStringType()) {
         mPool.Add(parameter->GetDefaultValue()->StringValue());

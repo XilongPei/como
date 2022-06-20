@@ -75,6 +75,7 @@ AutoPtr<Node> Method::Clone(
     AutoPtr<Method> clone = new Method();
     clone->mName = mName;
     clone->mSignature = mSignature;
+    clone->mStrFramacBlock = mStrFramacBlock;
     if (!deepCopy) {
         clone->mReturnType = mReturnType;
         clone->mParameters = mParameters;

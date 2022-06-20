@@ -156,6 +156,7 @@ AutoPtr<Node> InterfaceType::Clone(
     clone->mUuid = mUuid;
     clone->mVersion = mVersion;
     clone->mDescription = mDescription;
+    clone->mStrFramacBlock = mStrFramacBlock;
 
     if (!deepCopy) {
         clone->mBaseInterface = mBaseInterface;
