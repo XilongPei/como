@@ -32,6 +32,7 @@ void MetadataSerializer::Serialize()
 
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mUri = reinterpret_cast<char*>(SerializeAdjust(mc->mUri));
+    mc->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrFramacBlock));
 
     SerializeMetaNamespace(mc->mGlobalNamespace);
     mc->mGlobalNamespace = reinterpret_cast<MetaNamespace*>(SerializeAdjust(mc->mGlobalNamespace));
@@ -303,6 +304,7 @@ void MetadataSerializer::DeserializeMetaCoclass(
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(DeserializeAdjust(mc->mFuncSafetySetting));
+    mc->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrFramacBlock));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mc->mConstants));

@@ -97,9 +97,6 @@ public:
 
     inline String GetStrFramacBlock();
 
-    inline void SetStrFramacBlock(
-        /* [in] */ const String& strFramacBlock);
-
     inline static AutoPtr<InterfaceType> CastFrom(
         /* [in] */ Type* type);
 
@@ -198,12 +195,6 @@ AutoPtr<InterfaceType> InterfaceType::CastFrom(
 String InterfaceType::GetStrFramacBlock()
 {
     return mStrFramacBlock;
-}
-
-void InterfaceType::SetStrFramacBlock(
-    /* [in] */ const String& strFramacBlock)
-{
-    mStrFramacBlock += strFramacBlock;
 }
 
 } // namespace cdlc

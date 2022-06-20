@@ -89,9 +89,6 @@ public:
 
     inline String GetStrFramacBlock();
 
-    inline void SetStrFramacBlock(
-        /* [in] */ const String& strFramacBlock);
-
 private:
     AutoPtr<UUID> mUuid;
     String mVersion;
@@ -192,12 +189,6 @@ int CoclassType::GetConstantNumber()
 String CoclassType::GetStrFramacBlock()
 {
     return mStrFramacBlock;
-}
-
-void CoclassType::SetStrFramacBlock(
-    /* [in] */ const String& strFramacBlock)
-{
-    mStrFramacBlock += strFramacBlock;
 }
 
 } // namespace cdlc

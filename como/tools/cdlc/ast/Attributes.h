@@ -26,6 +26,7 @@ class Attributes
 public:
     Attributes()
         : mFuncSafetySetting("")
+        , mStrFramacBlock("")
     {}
 
     String mUuid;
@@ -36,6 +37,6 @@ public:
     String mStrFramacBlock;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_ATTRIBUTES_H__

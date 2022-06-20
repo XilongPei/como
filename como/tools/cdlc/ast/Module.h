@@ -124,9 +124,6 @@ public:
 
     inline String GetStrFramacBlock();
 
-    inline void SetStrFramacBlock(
-        /* [in] */ const String& strFramacBlock);
-
 private:
     Module(
         /* [in] */ como::MetaComponent* component);
@@ -289,12 +286,6 @@ int Module::GetTypeNumber()
 String Module::GetStrFramacBlock()
 {
     return mStrFramacBlock;
-}
-
-void Module::SetStrFramacBlock(
-    /* [in] */ const String& strFramacBlock)
-{
-    mStrFramacBlock += strFramacBlock;
 }
 
 } // namespace cdlc
