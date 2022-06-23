@@ -233,6 +233,11 @@ TokenInfo Tokenizer::ReadToken(
                     tokenInfo.mTokenLineNo = lineNo;
                     tokenInfo.mTokenColumnNo = columnNo;
                     mCurrentTokenInfo = std::move(tokenInfo);
+
+                    if ((Token::FRAMAC_BLOCK == expectedToken) &&
+                                    (tokenInfo.mToken == Token::FRAMAC_BLOCK)) {
+                        return mCurrentTokenInfo;
+                    }
                     continue;
                 }
                 else if (mReader->PeekChar() == '*') {
@@ -895,7 +900,19 @@ TokenInfo Tokenizer::ReadLineComment(
 {
     StringBuilder builder;
 
-    builder.Append(c);
+    bool bFramaC = false;
+
+    // skip "//"
+    c = mReader->GetChar();
+
+    if (! mReader->IsEof()) {
+        c = mReader->GetChar();
+        if ('@' != c)
+            builder.Append(c);
+        else
+            bFramaC = true;
+    }
+
     while (! mReader->IsEof()) {
         c = mReader->GetChar();
         if (c == '\n') {
@@ -903,6 +920,14 @@ TokenInfo Tokenizer::ReadLineComment(
         }
         builder.Append(c);
     }
+
+    if (bFramaC) {
+        TokenInfo tokenInfo(Token::FRAMAC_BLOCK,
+                            mReader->GetCurrentFilePath());
+        tokenInfo.mStringValue = builder.ToString();
+        return tokenInfo;
+    }
+
     TokenInfo tokenInfo(Token::COMMENT_LINE,
                         mReader->GetCurrentFilePath());
     tokenInfo.mStringValue = builder.ToString();
