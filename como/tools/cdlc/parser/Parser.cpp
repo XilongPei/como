@@ -29,6 +29,7 @@
 #include "util/MemoryFileReader.h"
 #include "util/Properties.h"
 #include "util/UUID.h"
+#include "util/Options.h"
 #include "cityhash.h"
 #include <cstdlib>
 #include <unistd.h>
@@ -252,7 +253,9 @@ bool Parser::ParseAttributes(
                 }
                 case Token::FRAMAC_BLOCK: {
                     tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
-                    attrs.mStrFramacBlock = tokenInfo.mStringValue;
+
+                    if (! Options::disableFramacBlock)
+                        attrs.mStrFramacBlock = tokenInfo.mStringValue;
 
                     break;
                 }
@@ -822,7 +825,10 @@ bool Parser::ParseInterfaceBody(
             }
             case Token::FRAMAC_BLOCK: {
                 tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
-                tokenInfoLastStringValue = tokenInfo.mStringValue;
+
+                if (! Options::disableFramacBlock)
+                    tokenInfoLastStringValue = tokenInfo.mStringValue;
+
                 break;
             }
             default: {

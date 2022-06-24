@@ -23,6 +23,8 @@
 
 namespace cdlc {
 
+bool Options::disableFramacBlock = false;
+
 void Options::Parse(
     /* [in] */ int argc,
     /* [in] */ char** argv)
@@ -89,6 +91,9 @@ void Options::Parse(
         }
         else if (option.Equals("-ComoMetadataReader")) {
             mComoMetadataReader = true;
+        }
+        else if (option.Equals("-disableFramacBlock")) {
+            disableFramacBlock = true;
         }
         else {
             errors.Append(option);

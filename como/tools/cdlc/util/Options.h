@@ -58,6 +58,8 @@ public:
 
     void ShowUsage() const;
 
+    static bool disableFramacBlock;
+
 private:
     void Parse(
         /* [in] */ int argc,
