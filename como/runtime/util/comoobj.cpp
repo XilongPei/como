@@ -123,7 +123,8 @@ ECode Object::ToString(
     /* [out] */ String& desc)
 {
     AutoPtr<IMetaCoclass> mc;
-    GetCoclass(mc);
+    FAIL_RETURN(GetCoclass(mc));
+
     String ns, name;
     if (mc != nullptr) {
         mc->GetNamespace(ns);
@@ -138,6 +139,10 @@ ECode Object::GetWeakReference(
     /* [out] */ AutoPtr<IWeakReference>& wr)
 {
     wr = new WeakReferenceImpl((IObject*)this, CreateWeak(this));
+    if (nullptr == wr) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     return NOERROR;
 }
 
@@ -175,7 +180,11 @@ AutoPtr<IMetaCoclass> Object::GetCoclass(
     IObject* o = IObject::Probe(obj);
     if (o != nullptr) {
         AutoPtr<IMetaCoclass> mc;
-        o->GetCoclass(mc);
+        ECode ec = o->GetCoclass(mc);
+        if (FAILED(ec)) {
+            return nullptr;
+        }
+
         return mc;
     }
     return nullptr;
@@ -184,12 +193,20 @@ AutoPtr<IMetaCoclass> Object::GetCoclass(
 String Object::GetFuncSafetySetting(
     /* [in] */ IInterface* obj)
 {
+    String funcSafetySetting;
+
     IObject* o = IObject::Probe(obj);
     if (o != nullptr) {
         AutoPtr<IMetaCoclass> mc;
-        o->GetCoclass(mc);
-        String funcSafetySetting;
-        mc->GetFuncSafetySetting(funcSafetySetting);
+        ECode ec = o->GetCoclass(mc);
+        if (FAILED(ec)) {
+            return funcSafetySetting;
+        }
+
+        if (mc != nullptr) {
+            mc->GetFuncSafetySetting(funcSafetySetting);
+        }
+
         return funcSafetySetting;
     }
     return nullptr;
@@ -210,7 +227,11 @@ String Object::GetCoclassName(
 {
     String name;
     AutoPtr<IMetaCoclass> mc;
-    obj->GetCoclass(mc);
+    ECode ec = obj->GetCoclass(mc);
+    if (FAILED(ec)) {
+        return String("");
+    }
+
     if (mc != nullptr) {
         mc->GetName(name);
     }
