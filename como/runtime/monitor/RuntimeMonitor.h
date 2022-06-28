@@ -29,7 +29,7 @@
 namespace como {
 
 // align to Short type
-enum RTM_CommandType {
+enum RTM_CommandType : Short {
     CMD_BY_STRING                      = 0x0001,
 
     CMD_Server_Activate_InvokeMethod   = 0x0101,
@@ -45,10 +45,10 @@ enum RTM_CommandType {
     CMD_Server_CpuMemoryStatus         = 0x0301,
 };
 
-// align to Short type
-enum RTM_ParamTransDirection {
-    CALL_METHOD                        = 0x0001,
-    RETURN_FROM_METHOD                 = 0x0002,
+// align to Byte type
+enum RTM_ParamTransDirection : Byte {
+    CALL_METHOD                        = 0x01,
+    RETURN_FROM_METHOD                 = 0x02,
 };
 
 enum RTM_WhichQueue {
