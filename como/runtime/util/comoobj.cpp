@@ -395,7 +395,7 @@ InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemAr
     if ((iMemArea < 0) || (iMemArea > 4096))
         iid.mCid = nullptr;
     else
-        iid.mCid = (const ComponentID*)(HANDLE)(iMemArea + 1);
+        iid.mCid = (const ComponentID*)(static_cast<HANDLE>(iMemArea + 1));
 
     return iid;
 }
@@ -408,7 +408,7 @@ InterfaceID InterfaceIDWithMemArea(const InterfaceID& iid, Short iMemArea)
     if ((iMemArea < 0) || (iMemArea > 4096))
         value.mCid = nullptr;
     else
-        value.mCid = (const ComponentID*)(HANDLE)(iMemArea + 1);
+        value.mCid = (const ComponentID*)(static_cast<HANDLE>(iMemArea + 1));
 
     return value;
 }

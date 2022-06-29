@@ -171,8 +171,9 @@ Integer RefBase::Release(
 
 void RefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
 {
-    funFreeMem = ((HANDLE)shortPara << 48) | (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
-                                                                               // 5 4 3 2 1 0
+    funFreeMem = (static_cast<HANDLE>(shortPara) << 48) |
+                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
+                                                                // 5 4 3 2 1 0
 }
 
 // LightRefBase
@@ -262,8 +263,9 @@ Integer LightRefBase::GetStrongCount() const
 
 void LightRefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
 {
-    funFreeMem = ((HANDLE)shortPara << 48) | (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
-                                                                               // 5 4 3 2 1 0
+    funFreeMem = (static_cast<HANDLE>(shortPara) << 48) |
+                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
+                                                                // 5 4 3 2 1 0
 }
 
 // WeakReferenceImpl
