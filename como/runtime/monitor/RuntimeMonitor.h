@@ -17,6 +17,7 @@
 #ifndef __COMO_RUNTIMEMONITOR_H__
 #define __COMO_RUNTIMEMONITOR_H__
 
+#include <cstdint>
 #include <queue>
 #include <circular_buffer.h>
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
@@ -28,8 +29,15 @@
 
 namespace como {
 
-// align to Short type
-enum RTM_CommandType : Short {
+/**
+ * Explicitly declaring a bit-field unsigned prevents unexpected sign extension,
+ * overflows and implementation-defined behavior. Note that if a bit-field has
+ * enumeration type, then the enumeration base needs to be declared of an
+ * explicitly unsigned type.
+ *
+ * align to Short type
+ */
+enum RTM_CommandType : std::uint16_t {
     CMD_BY_STRING                      = 0x0001,
 
     CMD_Server_Activate_InvokeMethod   = 0x0101,
@@ -46,7 +54,7 @@ enum RTM_CommandType : Short {
 };
 
 // align to Byte type
-enum RTM_ParamTransDirection : Byte {
+enum RTM_ParamTransDirection : std::uint8_t {
     CALL_METHOD                        = 0x01,
     RETURN_FROM_METHOD                 = 0x02,
 };
