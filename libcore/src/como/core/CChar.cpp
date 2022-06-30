@@ -85,5 +85,5 @@ ECode CChar::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

@@ -35,21 +35,21 @@ ECode CLong::Constructor(
 ECode CLong::ByteValue(
     /* [out] */ Byte& value)
 {
-    value = (Byte)mValue;
+    value = static_cast<Byte>(mValue);
     return NOERROR;
 }
 
 ECode CLong::ShortValue(
     /* [out] */ Short& value)
 {
-    value = (Short)mValue;
+    value = static_cast<Short>(mValue);
     return NOERROR;
 }
 
 ECode CLong::IntegerValue(
     /* [out] */ Integer& value)
 {
-    value = (Integer)mValue;
+    value = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -63,14 +63,14 @@ ECode CLong::LongValue(
 ECode CLong::FloatValue(
     /* [out] */ Float& value)
 {
-    value = (Float)mValue;
+    value = static_cast<Float>(mValue);
     return NOERROR;
 }
 
 ECode CLong::DoubleValue(
     /* [out] */ Double& value)
 {
-    value = (Double)mValue;
+    value = static_cast<Double>(mValue);
     return NOERROR;
 }
 
@@ -93,7 +93,7 @@ ECode CLong::CompareTo(
 
     Long lv;
     l->GetValue(lv);
-    result = mValue == lv ? 0 : (mValue > lv ? 1 : -1);
+    result = (mValue == lv ? 0 : (mValue > lv ? 1 : -1));
     return NOERROR;
 }
 
@@ -116,7 +116,7 @@ ECode CLong::Equals(
 ECode CLong::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -127,5 +127,5 @@ ECode CLong::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

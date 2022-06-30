@@ -35,14 +35,14 @@ ECode CInteger::Constructor(
 ECode CInteger::ByteValue(
     /* [out] */ Byte& value)
 {
-    value = (Byte)mValue;
+    value = static_cast<Byte>(mValue);
     return NOERROR;
 }
 
 ECode CInteger::ShortValue(
     /* [out] */ Short& value)
 {
-    value = (Short)mValue;
+    value = static_cast<Short>(mValue);
     return NOERROR;
 }
 
@@ -56,21 +56,21 @@ ECode CInteger::IntegerValue(
 ECode CInteger::LongValue(
     /* [out] */ Long& value)
 {
-    value = (Long)mValue;
+    value = static_cast<Long>(mValue);
     return NOERROR;
 }
 
 ECode CInteger::FloatValue(
     /* [out] */ Float& value)
 {
-    value = (Float)mValue;
+    value = static_cast<Float>(mValue);
     return NOERROR;
 }
 
 ECode CInteger::DoubleValue(
     /* [out] */ Double& value)
 {
-    value = (Double)mValue;
+    value = static_cast<Double>(mValue);
     return NOERROR;
 }
 
@@ -93,7 +93,7 @@ ECode CInteger::CompareTo(
 
     Integer iv;
     i->GetValue(iv);
-    result = mValue == iv ? 0 : (mValue > iv ? 1 : -1);
+    result = (mValue == iv ? 0 : (mValue > iv ? 1 : -1));
     return NOERROR;
 }
 
@@ -127,5 +127,5 @@ ECode CInteger::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

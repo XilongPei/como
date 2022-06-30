@@ -35,7 +35,7 @@ ECode CDouble::Constructor(
 ECode CDouble::ByteValue(
     /* [out] */ Byte& value)
 {
-    value = (Byte)mValue;
+    value = static_cast<Byte>(mValue);
     return NOERROR;
 }
 
@@ -49,21 +49,21 @@ ECode CDouble::ShortValue(
 ECode CDouble::IntegerValue(
     /* [out] */ Integer& value)
 {
-    value = (Integer)mValue;
+    value = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
 ECode CDouble::LongValue(
     /* [out] */ Long& value)
 {
-    value = (Long)mValue;
+    value = static_cast<Long>(mValue);
     return NOERROR;
 }
 
 ECode CDouble::FloatValue(
     /* [out] */ Float& value)
 {
-    value = (Float)mValue;
+    value = static_cast<Float>(mValue);
     return NOERROR;
 }
 
@@ -91,7 +91,7 @@ ECode CDouble::IsInfinite(
 ECode CDouble::IsNaN(
     /* [out] */ Boolean& nan)
 {
-    nan = mValue != mValue;
+    nan = (mValue != mValue);
     return NOERROR;
 }
 
@@ -130,7 +130,7 @@ ECode CDouble::Equals(
 ECode CDouble::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -141,5 +141,5 @@ ECode CDouble::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

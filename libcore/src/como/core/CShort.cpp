@@ -35,7 +35,7 @@ ECode CShort::Constructor(
 ECode CShort::ByteValue(
     /* [out] */ Byte& value)
 {
-    value = (Byte)mValue;
+    value = static_cast<Byte>(mValue);
     return NOERROR;
 }
 
@@ -49,28 +49,28 @@ ECode CShort::ShortValue(
 ECode CShort::IntegerValue(
     /* [out] */ Integer& value)
 {
-    value = (Integer)mValue;
+    value = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
 ECode CShort::LongValue(
     /* [out] */ Long& value)
 {
-    value = (Long)mValue;
+    value = static_cast<Long>(mValue);
     return NOERROR;
 }
 
 ECode CShort::FloatValue(
     /* [out] */ Float& value)
 {
-    value = (Float)mValue;
+    value = static_cast<Float>(mValue);
     return NOERROR;
 }
 
 ECode CShort::DoubleValue(
     /* [out] */ Double& value)
 {
-    value = (Double)mValue;
+    value = static_cast<Double>(mValue);
     return NOERROR;
 }
 
@@ -93,7 +93,7 @@ ECode CShort::CompareTo(
 
     Short sv;
     s->GetValue(sv);
-    result = mValue == sv ? 0 : (mValue > sv ? 1 : -1);
+    result = (mValue == sv ? 0 : (mValue > sv ? 1 : -1));
     return NOERROR;
 }
 
@@ -116,7 +116,7 @@ ECode CShort::Equals(
 ECode CShort::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -127,5 +127,5 @@ ECode CShort::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

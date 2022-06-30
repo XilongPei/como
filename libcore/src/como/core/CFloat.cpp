@@ -35,28 +35,28 @@ ECode CFloat::Constructor(
 ECode CFloat::ByteValue(
     /* [out] */ Byte& value)
 {
-    value = (Byte)mValue;
+    value = static_cast<Byte>(mValue);
     return NOERROR;
 }
 
 ECode CFloat::ShortValue(
     /* [out] */ Short& value)
 {
-    value = (Short)mValue;
+    value = static_cast<Short>(mValue);
     return NOERROR;
 }
 
 ECode CFloat::IntegerValue(
     /* [out] */ Integer& value)
 {
-    value = (Integer)mValue;
+    value = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
 ECode CFloat::LongValue(
     /* [out] */ Long& value)
 {
-    value = (Long)mValue;
+    value = static_cast<Long>(mValue);
     return NOERROR;
 }
 
@@ -70,7 +70,7 @@ ECode CFloat::FloatValue(
 ECode CFloat::DoubleValue(
     /* [out] */ Double& value)
 {
-    value = (Double)mValue;
+    value = static_cast<Double>(mValue);
     return NOERROR;
 }
 
@@ -84,7 +84,7 @@ ECode CFloat::GetValue(
 ECode CFloat::IsInfinite(
     /* [out] */ Boolean& infinite)
 {
-    infinite = (mValue == POSITIVE_INFINITY) || (mValue == NEGATIVE_INFINITY);
+    infinite = ((mValue == POSITIVE_INFINITY) || (mValue == NEGATIVE_INFINITY));
     return NOERROR;
 }
 
@@ -123,14 +123,14 @@ ECode CFloat::Equals(
 
     Float fv;
     f->GetValue(fv);
-    result = mValue == fv;
+    result = (mValue == fv);
     return NOERROR;
 }
 
 ECode CFloat::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -141,5 +141,5 @@ ECode CFloat::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como

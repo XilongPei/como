@@ -42,35 +42,35 @@ ECode CByte::ByteValue(
 ECode CByte::ShortValue(
     /* [out] */ Short& value)
 {
-    value = (Short)mValue;
+    value = static_cast<Short>(mValue);
     return NOERROR;
 }
 
 ECode CByte::IntegerValue(
     /* [out] */ Integer& value)
 {
-    value = (Integer)mValue;
+    value = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
 ECode CByte::LongValue(
     /* [out] */ Long& value)
 {
-    value = (Long)mValue;
+    value = static_cast<Long>(mValue);
     return NOERROR;
 }
 
 ECode CByte::FloatValue(
     /* [out] */ Float& value)
 {
-    value = (Float)mValue;
+    value = static_cast<Float>(mValue);
     return NOERROR;
 }
 
 ECode CByte::DoubleValue(
     /* [out] */ Double& value)
 {
-    value = (Double)mValue;
+    value = static_cast<Double>(mValue);
     return NOERROR;
 }
 
@@ -116,7 +116,7 @@ ECode CByte::Equals(
 ECode CByte::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 
@@ -127,5 +127,5 @@ ECode CByte::ToString(
     return NOERROR;
 }
 
-}
-}
+} // namespace core
+} // namespace como
