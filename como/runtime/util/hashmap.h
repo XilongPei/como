@@ -95,7 +95,7 @@ public:
         : mCount(0)
     {
         mBucketSize = get_next_prime(size);
-        mBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
+        mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
         if (nullptr == mBuckets)
             mBucketSize = 0;
         mThreshold = mBucketSize * LOAD_FACTOR;
@@ -332,7 +332,7 @@ private:
         if (mBucketSize > MAX_BUCKET_SIZE || mBucketSize < 0) {
             mBucketSize = MAX_BUCKET_SIZE;
         }
-        Bucket** newBuckets = (Bucket**)calloc(sizeof(Bucket*), mBucketSize);
+        Bucket** newBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
         if (newBuckets == nullptr)
             return;
 
