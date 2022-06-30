@@ -201,13 +201,13 @@ inline String StringUtils::ToString(
 inline String StringUtils::ToString(
     /* [in] */ Byte b)
 {
-    return ToString((Integer)b);
+    return ToString(static_cast<Integer>(b));
 }
 
 inline String StringUtils::ToString(
     /* [in] */ Short b)
 {
-    return ToString((Integer)b);
+    return ToString(static_cast<Integer>(b));
 }
 
 inline Array<String> StringUtils::Split(

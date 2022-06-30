@@ -1302,7 +1302,7 @@ private:
 inline Integer Character::HashCode(
     /* [in] */ Char value)
 {
-    return (Integer)value;
+    return static_cast<Integer>(value);
 }
 
 inline String Character::ToString(
@@ -1315,7 +1315,7 @@ inline Boolean Character::IsValidCodePoint(
     /* [in] */ Char c)
 {
     Integer plane = c >> 16;
-    return plane < ((unsigned int)(MAX_CODE_POINT + 1) >> 16);
+    return plane < (static_cast<unsigned int>(MAX_CODE_POINT + 1) >> 16);
 }
 
 inline Boolean Character::IsBmpCodePoint(
@@ -1412,8 +1412,7 @@ inline Char Character::ToTitleCase(
 inline Boolean Character::IsISOControl(
     /* [in] */ Char c)
 {
-    return c <= 0x9F &&
-            (c >= 0x7F || (c >> 5 == 0));
+    return c <= 0x9F && (c >= 0x7F || (c >> 5 == 0));
 }
 
 inline Boolean Character::IsMirrored(

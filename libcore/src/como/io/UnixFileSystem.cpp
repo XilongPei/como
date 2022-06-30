@@ -361,9 +361,8 @@ Integer UnixFileSystem::GetBooleanAttributes0(
     int mode;
     if (StatMode(abspath.string(), &mode)) {
         int fmt = mode & S_IFMT;
-        rv = (Integer) (BA_EXISTS
-              | ((fmt == S_IFREG) ? BA_REGULAR : 0)
-              | ((fmt == S_IFDIR) ? BA_DIRECTORY : 0));
+        rv = static_cast<Integer>(BA_EXISTS | ((fmt == S_IFREG) ? BA_REGULAR : 0)
+                                            | ((fmt == S_IFDIR) ? BA_DIRECTORY : 0));
     }
     return rv;
 }

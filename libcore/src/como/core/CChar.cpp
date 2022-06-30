@@ -74,7 +74,7 @@ ECode CChar::Equals(
 ECode CChar::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = (Integer)mValue;
+    hash = static_cast<Integer>(mValue);
     return NOERROR;
 }
 

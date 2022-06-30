@@ -407,7 +407,7 @@ static void GetChars(
 
     // Get 2 digits/iteration using ints
     Integer q2;
-    Integer i2 = (Integer)i;
+    Integer i2 = static_cast<Integer>(i);
     while (i2 >= 65536) {
         q2 = i2 / 100;
         // really: r = i2 - (q * 100);
@@ -420,7 +420,7 @@ static void GetChars(
     // Fall thru to fast mode for smaller numbers
     // assert(i2 <= 65536, i2);
     for (;;) {
-        q2 = ((UInteger)(i2 * 52429)) >> (16+3);
+        q2 = (static_cast<UInteger>(i2 * 52429)) >> (16+3);
         r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
         buf[--charPos] = digits[r];
         i2 = q2;
@@ -508,7 +508,7 @@ String StringUtils::ToOctalString(
 
     do {
         buf[--cursor] = digits[i & 7];
-    } while ((i = (((UInteger)i) >> 3) ) != 0);
+    } while ((i = (static_cast<UInteger>(i) >> 3) ) != 0);
 
     return String(buf + cursor, bufLen - cursor);
 }
@@ -516,7 +516,7 @@ String StringUtils::ToOctalString(
 String StringUtils::ToOctalString(
     /* [in] */ Long i)
 {
-    Integer v = (Integer)i;
+    Integer v = static_cast<Integer>(i);
     if (i >= 0 && v == i) {
         return ToOctalString(v);
     }
@@ -526,8 +526,8 @@ String StringUtils::ToOctalString(
     Integer cursor = bufLen;
 
     do {
-        buf[--cursor] = digits[((Integer)i) & 7];
-    } while ((i = (((ULong)i) >> 3)) != 0);
+        buf[--cursor] = digits[static_cast<Integer>(i) & 7];
+    } while ((i = (static_cast<UInteger>(i) >> 3)) != 0);
 
     return String(buf + cursor, bufLen - cursor);
 }
@@ -544,7 +544,7 @@ String StringUtils::ToHexString(
     const Char* DIGITS = upperCase ? upperCaseDigits : digits;
     do {
         buf[--cursor] = DIGITS[i & 0xf];
-    } while ((i = (((UInteger)i) >> 4)) != 0 || (bufLen - cursor < minWidth));
+    } while ((i = (static_cast<UInteger>(i) >> 4)) != 0 || (bufLen - cursor < minWidth));
 
     return String(buf + cursor, bufLen - cursor);
 }
@@ -564,8 +564,8 @@ String StringUtils::ToHexString(
 
     const Char* DIGITS = upperCase ? upperCaseDigits : digits;
     do {
-        buf[--cursor] = DIGITS[((Integer)i) & 0xF];
-    } while ((i = (((ULong)i) >> 4)) != 0);
+        buf[--cursor] = DIGITS[static_cast<Integer>(i) & 0xF];
+    } while ((i = (static_cast<ULong>(i) >> 4)) != 0);
 
     return String(buf + cursor, bufLen - cursor);
 }
@@ -600,8 +600,9 @@ String StringUtils::ToHexString(
             // so that the string representation has a known
             // length.
             Long signifBits = (Math::DoubleToLongBits(d) &
-                    DoubleConsts::SIGNIF_BIT_MASK) |
-                    0x1000000000000000LL;
+                                            DoubleConsts::SIGNIF_BIT_MASK) |
+                                            0x1000000000000000LL;
+                                            // 7 6 5 4 3 2 1 0
 
             // Subnormal values have a 0 implicit bit; normal
             // values have a 1 implicit bit.
@@ -627,7 +628,7 @@ String StringUtils::ToHexString(
             // exponent (the representation of a subnormal uses
             // E_min -1).
             answer->Append(subnormal ? DoubleConsts::MIN_EXPONENT :
-                    Math::GetExponent(d));
+                                                            Math::GetExponent(d));
         }
         String answerStr;
         answer->ToString(answerStr);

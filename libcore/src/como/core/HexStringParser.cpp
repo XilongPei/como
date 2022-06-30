@@ -37,10 +37,10 @@ HexStringParser::HexStringParser(
     /* [in] */ Integer mantissaWidth)
     : EXPONENT_WIDTH(exponentWidth)
     , MANTISSA_WIDTH(mantissaWidth)
-    , EXPONENT_BASE(~(-1ll << (exponentWidth - 1)))
-    , MAX_EXPONENT(~(-1ll << exponentWidth))
+    , EXPONENT_BASE(~(-1LL << (exponentWidth - 1)))
+    , MAX_EXPONENT(~(-1LL << exponentWidth))
     , MIN_EXPONENT(-(MANTISSA_WIDTH + 1))
-    , MANTISSA_MASK(~(-1ll << mantissaWidth))
+    , MANTISSA_MASK(~(-1LL << mantissaWidth))
 {}
 
 ECode HexStringParser::ParseFloat(
@@ -199,7 +199,7 @@ void HexStringParser::ProcessNormalNumber()
 void HexStringParser::ProcessSubNormalNumber()
 {
     Integer desiredWidth = MANTISSA_WIDTH + 1;
-    desiredWidth += (Integer)mExponent;//lends bit from mantissa to exponent
+    desiredWidth += static_cast<Integer>(mExponent);    //lends bit from mantissa to exponent
     mExponent = 0;
     FitMantissaInDesiredWidth(desiredWidth);
     Round();
@@ -221,9 +221,9 @@ void HexStringParser::FitMantissaInDesiredWidth(
 void HexStringParser::DiscardTrailingBits(
     /* [in] */ Long num)
 {
-    Long mask = ~(-1ll << num);
+    Long mask = ~(-1LL << num);
     mAbandonedNumber = String::Format("%s%lld",
-            mAbandonedNumber.string(), mMantissa & mask);
+                                mAbandonedNumber.string(), mMantissa & mask);
     mMantissa >>= num;
 }
 
@@ -233,13 +233,13 @@ void HexStringParser::Round()
     StringUtils::ReplaceAll(mAbandonedNumber, String("0+"), String(""), result);
     Boolean moreThanZero = (result.GetLength() > 0 ? true : false);
 
-    Integer lastDiscardedBit = (Integer) (mMantissa & 1ll);
+    Integer lastDiscardedBit = static_cast<Integer>(mMantissa & 1LL);
     mMantissa >>= 1;
-    Integer tailBitInMantissa = (Integer) (mMantissa & 1ll);
+    Integer tailBitInMantissa = static_cast<Integer>(mMantissa & 1LL);
 
     if (lastDiscardedBit == 1 && (moreThanZero || tailBitInMantissa == 1)) {
         Integer oldLength = CountBitsLength(mMantissa);
-        mMantissa += 1ll;
+        mMantissa += 1LL;
         Integer newLength = CountBitsLength(mMantissa);
 
         //Rounds up to exponent when whole bits of mantissa are one-bits.

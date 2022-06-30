@@ -130,7 +130,7 @@ String RealToString::ConvertDouble(
 {
     Long inputNumberBits = Math::DoubleToRawLongBits(inputNumber);
     Boolean positive = (inputNumberBits & DOUBLE_SIGN_MASK) == 0;
-    Integer e = (Integer) ((inputNumberBits & DOUBLE_EXPONENT_MASK) >> DOUBLE_MANTISSA_BITS);
+    Integer e = static_cast<Integer>((inputNumberBits & DOUBLE_EXPONENT_MASK) >> DOUBLE_MANTISSA_BITS);
     Long f = inputNumberBits & DOUBLE_MANTISSA_MASK;
     Boolean mantissaIsZero = f == 0;
 
@@ -491,7 +491,7 @@ void RealToString::LongDigitGenerator(
         }
     }
 
-    Integer k = (Integer)Math::Ceil((e + p - 1) * sInvLogOfTenBaseTwo - 1e-10);
+    Integer k = static_cast<Integer>(Math::Ceil((e + p - 1) * sInvLogOfTenBaseTwo - 1e-10));
 
     if (k > 0) {
         S = S * Math::LONG_POWERS_OF_TEN[k];

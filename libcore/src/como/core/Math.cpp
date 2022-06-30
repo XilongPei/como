@@ -185,22 +185,20 @@ Integer Math::Signum(
 Integer Math::Signum(
     /* [in] */ Long l)
 {
-    return (Integer) ((l >> 63) | (((ULong)-l) >> 63));
+    return static_cast<Integer>((l >> 63) | (((ULong)-l) >> 63));
 }
 
 Short Math::ReverseBytes(
     /* [in] */ Short s)
 {
-    return (Short) (((s & 0xFF00) >> 8) | (s << 8));
+    return static_cast<Short>(((s & 0xFF00) >> 8) | (s << 8));
 }
 
 Integer Math::ReverseBytes(
     /* [in] */ Integer i)
 {
-    return ((((UInteger)i) >> 24)) |
-           ((i >> 8) & 0xFF00) |
-           ((i << 8) & 0xFF0000) |
-           ((i << 24));
+    return ((((UInteger)i) >> 24)) | ((i >> 8) & 0xFF00) |
+                                            ((i << 8) & 0xFF0000) | ((i << 24));
 }
 
 Long Math::ReverseBytes(
@@ -208,7 +206,7 @@ Long Math::ReverseBytes(
 {
     l = (l & 0x00ff00ff00ff00ffLL) << 8 | ((((ULong)l) >> 8) & 0x00ff00ff00ff00ffLL);
     return (l << 48) | ((l & 0xffff0000LL) << 16) |
-            ((((ULong)l) >> 16) & 0xffff0000LL) | (((ULong)l) >> 48);
+                        ((((ULong)l) >> 16) & 0xffff0000LL) | (((ULong)l) >> 48);
 }
 
 Double Math::CopySign(
@@ -216,10 +214,10 @@ Double Math::CopySign(
     /* [in] */ Double sign)
 {
     return LongBitsToDouble((DoubleToRawLongBits(sign) &
-            (DoubleConsts::SIGNIF_BIT_MASK)) |
-            (DoubleToRawLongBits(magnitude) &
-            (DoubleConsts::EXP_BIT_MASK |
-            DoubleConsts::SIGNIF_BIT_MASK)));
+                                            (DoubleConsts::SIGNIF_BIT_MASK)) |
+                                            (DoubleToRawLongBits(magnitude) &
+                                            (DoubleConsts::EXP_BIT_MASK |
+                                            DoubleConsts::SIGNIF_BIT_MASK)));
 }
 
 Integer Math::GetExponent(
@@ -230,7 +228,7 @@ Integer Math::GetExponent(
      * to the right and then subtract out double's bias adjust to
      * get true exponent value.
      */
-    return (Integer)(((DoubleToRawLongBits(d) & DoubleConsts::EXP_BIT_MASK) >>
+    return static_cast<Integer>(((DoubleToRawLongBits(d) & DoubleConsts::EXP_BIT_MASK) >>
             (DoubleConsts::SIGNIFICAND_WIDTH - 1)) - DoubleConsts::EXP_BIAS);
 }
 
@@ -465,12 +463,27 @@ Integer Math::NumberOfLeadingZeros(
         return 64;
     }
     Integer n = 1;
-    Integer x = (Integer)(((ULong)value) >> 32);
-    if (x == 0) { n += 32; x = (Integer)value; }
-    if (((UInteger)x) >> 16 == 0) { n += 16; x <<= 16; }
-    if (((UInteger)x) >> 24 == 0) { n +=  8; x <<=  8; }
-    if (((UInteger)x) >> 28 == 0) { n +=  4; x <<=  4; }
-    if (((UInteger)x) >> 30 == 0) { n +=  2; x <<=  2; }
+    Integer x = static_cast<Integer>(((ULong)value) >> 32);
+    if (x == 0) {
+        n += 32;
+        x = (Integer)value;
+    }
+    if (((UInteger)x) >> 16 == 0) {
+        n += 16;
+        x <<= 16;
+    }
+    if (((UInteger)x) >> 24 == 0) {
+        n +=  8;
+        x <<=  8;
+    }
+    if (((UInteger)x) >> 28 == 0) {
+        n +=  4;
+        x <<=  4;
+    }
+    if (((UInteger)x) >> 30 == 0) {
+        n +=  2;
+        x <<=  2;
+    }
     n -= ((UInteger)x) >> 31;
     return n;
 }

@@ -235,7 +235,7 @@ ECode LongBuffer::GetHashCode(
     for (i = i - 1; i >= p; i--) {
         Long l;
         Get(i, l);
-        hash = 31 * hash + (Integer)l;
+        hash = 31 * hash + static_cast<Integer>(l);
     }
     return NOERROR;
 }

@@ -235,7 +235,7 @@ ECode FloatBuffer::GetHashCode(
     for (i = i - 1; i >= p; i--) {
         Float f;
         Get(i, f);
-        hash = 31 * hash + (Integer)f;
+        hash = 31 * hash + static_cast<Integer>(f);
     }
     return NOERROR;
 }

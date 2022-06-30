@@ -64,10 +64,10 @@ Integer Division::DivideArrayByInteger(
                 }
             }
         }
-        quotient[i] = (Integer)(quot & 0xffffffffLL);
+        quotient[i] = static_cast<Integer>(quot & 0xffffffffLL);
     }
     return (Integer)rem;
 }
 
-}
-}
+} // namespace math
+} // namespace como

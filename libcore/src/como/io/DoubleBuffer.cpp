@@ -237,7 +237,7 @@ ECode DoubleBuffer::GetHashCode(
     for (i = i - 1; i >= p; i--) {
         Double d;
         Get(i, d);
-        hash = 31 * hash + (Integer)d;
+        hash = 31 * hash + static_cast<Integer>(d);
     }
     return NOERROR;
 }

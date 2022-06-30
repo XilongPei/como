@@ -1055,7 +1055,7 @@ ECode StringToReal::InitialParse(
     const Integer MAX_DIGITS = 52;
     length = s.GetLength();
     if (length > MAX_DIGITS && pair.mE < APPROX_MIN_MAGNITUDE) {
-        Integer d = Math::Min(APPROX_MIN_MAGNITUDE - (Integer)pair.mE, length - 1);
+        Integer d = Math::Min(APPROX_MIN_MAGNITUDE - static_cast<Integer>(pair.mE), length - 1);
         s = s.Substring(0, length - d);
         pair.mE += d;
     }
@@ -1137,8 +1137,9 @@ ECode StringToReal::ParseFloat(
         value = info.SpecialValue();
         return NOERROR;
     }
-    Float result = ParseFltImpl(info.mS, (Integer)info.mE);
+    Float result = ParseFltImpl(info.mS, static_cast<Integer>(info.mE));
     if (Math::FloatToRawIntegerBits(result) == 0xffffffff) {
+                                               // 3 2 1 0
         Logger::E("StringToReal", "Invalid Float: \"%s\"", ss.string());
         return E_NUMBER_FORMAT_EXCEPTION;
     }
@@ -1179,8 +1180,9 @@ ECode StringToReal::ParseDouble(
         value = info.SpecialValue();
         return NOERROR;
     }
-    Double result = ParseDblImpl(info.mS, (Integer)info.mE);
+    Double result = ParseDblImpl(info.mS, static_cast<Integer>(info.mE));
     if (Math::DoubleToRawLongBits(result) == 0xffffffffffffffffLL) {
+                                             // 7 6 5 4 3 2 1 0
         Logger::E("StringToReal", "Invalid Double: \"%s\"", ss.string());
         return E_NUMBER_FORMAT_EXCEPTION;
     }
