@@ -316,8 +316,8 @@ Double Math::PowerOfTwoD(
     /* [in] */ Integer n)
 {
     CHECK(n >= DoubleConsts::MIN_EXPONENT && n <= DoubleConsts::MAX_EXPONENT);
-    return LongBitsToDouble((((Long)n + (Long)DoubleConsts::EXP_BIAS) <<
-            (DoubleConsts::SIGNIFICAND_WIDTH - 1)) & DoubleConsts::EXP_BIT_MASK);
+    return LongBitsToDouble(( (static_cast<Long>(n) + static_cast<Long>(DoubleConsts::EXP_BIAS)) <<
+                    (DoubleConsts::SIGNIFICAND_WIDTH - 1)) & DoubleConsts::EXP_BIT_MASK);
 }
 
 Boolean Math::IsInfinite(
@@ -466,25 +466,25 @@ Integer Math::NumberOfLeadingZeros(
     Integer x = static_cast<Integer>(((ULong)value) >> 32);
     if (x == 0) {
         n += 32;
-        x = (Integer)value;
+        x = static_cast<Integer>(value);
     }
-    if (((UInteger)x) >> 16 == 0) {
+    if (static_cast<UInteger>(x) >> 16 == 0) {
         n += 16;
         x <<= 16;
     }
-    if (((UInteger)x) >> 24 == 0) {
+    if (static_cast<UInteger>(x) >> 24 == 0) {
         n +=  8;
         x <<=  8;
     }
-    if (((UInteger)x) >> 28 == 0) {
+    if (static_cast<UInteger>(x) >> 28 == 0) {
         n +=  4;
         x <<=  4;
     }
-    if (((UInteger)x) >> 30 == 0) {
+    if (static_cast<UInteger>(x) >> 30 == 0) {
         n +=  2;
         x <<=  2;
     }
-    n -= ((UInteger)x) >> 31;
+    n -= static_cast<UInteger>(x) >> 31;
     return n;
 }
 

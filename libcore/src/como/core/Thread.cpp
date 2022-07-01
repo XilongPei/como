@@ -135,7 +135,7 @@ ECode Thread::Sleep(
             duration -= elapsed;
             start = now;
             millis = duration / NANOS_PER_MILLI;
-            nanos = (Integer)(duration % NANOS_PER_MILLI);
+            nanos = static_cast<Integer>(duration % NANOS_PER_MILLI);
         }
     }
 
@@ -745,7 +745,7 @@ ECode Thread::ParkFor(
             nanos %= NANOS_PER_MILLI;
 
             mParkState = ParkState::PARKED;
-            ECode ec = mLock.Wait(millis, (Integer)nanos);
+            ECode ec = mLock.Wait(millis, static_cast<Integer>(nanos));
             if (ec == E_INTERRUPTED_EXCEPTION) {
                 Interrupt();
             }

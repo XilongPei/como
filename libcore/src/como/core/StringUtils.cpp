@@ -57,7 +57,7 @@ ECode StringUtils::ParseByte(
                                                              s.string(), radix);
         return E_NUMBER_FORMAT_EXCEPTION;
     }
-    value = (Byte)i;
+    value = static_cast<Byte>(i);
     return NOERROR;
 }
 
@@ -70,10 +70,10 @@ ECode StringUtils::ParseShort(
     FAIL_RETURN(ParseInteger(s, radix, i));
     if (i < IShort::MIN_VALUE || i > IShort::MAX_VALUE) {
         Logger::E("StringUtils", "Value out of range. Value:\"%s\" Radix:%d",
-                s.string(), radix);
+                  s.string(), radix);
         return E_NUMBER_FORMAT_EXCEPTION;
     }
-    value = (Short)i;
+    value = static_cast<Short>(i);
     return NOERROR;
 }
 
@@ -340,9 +340,12 @@ String StringUtils::ToString(
         return String("-2147483648");
     }
 
-    Boolean negative = i < 0;
+    Boolean negative = (i < 0);
     Integer size = negative ? StringSize(-i) + 1 : StringSize(i);
     Array<Char> buf(size);
+    if (buf.IsNull())
+        return nullptr;
+
     GetChars(i, size, buf);
     return String(buf);
 }
@@ -363,7 +366,7 @@ String StringUtils::ToString(
     Boolean negative = (i < 0);
     Integer charPos = 32;
 
-    if (!negative) {
+    if (! negative) {
         i = -i;
     }
 
@@ -399,7 +402,7 @@ static void GetChars(
     while (i > IInteger::MAX_VALUE) {
         q = i / 100;
         // really: r = i - (q * 100);
-        r = (Integer)(i - ((q << 6) + (q << 5) + (q << 2)));
+        r = static_cast<Integer>(i - ((q << 6) + (q << 5) + (q << 2)));
         i = q;
         buf[--charPos] = digitOnes[r];
         buf[--charPos] = digitTens[r];
@@ -467,10 +470,13 @@ String StringUtils::ToString(
         return ToString(i);
     }
     Array<Char> buf(65);
+    if (buf.IsNull())
+        return nullptr;
+
     Integer charPos = 64;
     Boolean negative = (i < 0);
 
-    if (!negative) {
+    if (! negative) {
         i = -i;
     }
 
@@ -553,7 +559,7 @@ String StringUtils::ToHexString(
     /* [in] */ Long i,
     /* [in] */ Boolean upperCase)
 {
-    Integer v = (Integer)i;
+    Integer v = static_cast<Integer>(i);
     if (i >= 0 && v == i) {
         return ToHexString(v, upperCase, 0);
     }
@@ -573,14 +579,16 @@ String StringUtils::ToHexString(
 String StringUtils::ToHexString(
     /* [in] */ Double d)
 {
-    if (!Math::IsFinite(d)) {
+    if (! Math::IsFinite(d)) {
         // For infinity and NaN, use the decimal output.
         return ToString(d);
     }
     else {
         // Initialized to maximum size of output.
         AutoPtr<IStringBuilder> answer;
-        CStringBuilder::New(24, IID_IStringBuilder, (IInterface**)&answer);
+        ECode ec = CStringBuilder::New(24, IID_IStringBuilder, (IInterface**)&answer);
+        if (FAILED(ec))
+            return nullptr;
 
         if (Math::CopySign(1.0, d) == -1.0){
             answer->Append(U'-');
@@ -664,9 +672,11 @@ ECode StringUtils::ReplaceAll(
     /* [out] */ String& result)
 {
     AutoPtr<IPattern> p;
-    Pattern::Compile(regex, p);
+    FAIL_RETURN(Pattern::Compile(regex, p));
+
     AutoPtr<IMatcher> m;
-    p->Matcher(CoreUtils::Box(input), m);
+    FAIL_RETURN(p->Matcher(CoreUtils::Box(input), m));
+
     return m->ReplaceAll(replacement, result);
 }
 
@@ -683,7 +693,7 @@ Array<String> StringUtils::Split(
     }
 
     AutoPtr<IPattern> p;
-    Pattern::Compile(regex, p);
+    FAIL_RETURN(Pattern::Compile(regex, p));
     p->Split(CoreUtils::Box(input), limit, &strArr);
     return strArr;
 }
@@ -693,7 +703,7 @@ String StringUtils::Format(
     /* [in] */ const Array<IInterface*>* args)
 {
     AutoPtr<IFormatter> formatter;
-    if (FAILED(CFormatter::New(IID_IFormatter, (IInterface**)&formatter)))
+    if (FAILED(CFormatter::New(IID_IFormatter, reinterpret_cast<IInterface**>(&formatter))))
         return nullptr;
 
     formatter->Format(format, args);
@@ -706,7 +716,7 @@ String StringUtils::Format(
     /* [in] */ const Array<IInterface*>* args)
 {
     AutoPtr<IFormatter> formatter;
-    if (FAILED(CFormatter::New(l, IID_IFormatter, (IInterface**)&formatter)))
+    if (FAILED(CFormatter::New(l, IID_IFormatter, reinterpret_cast<IInterface**>(&formatter))))
         return nullptr;
 
     formatter->Format(format, args);
@@ -768,7 +778,7 @@ ECode CaseInsensitiveComparator::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean& isEqual)
 {
-    isEqual = IComparator::Probe(obj) == (IComparator*)this;
+    isEqual = IComparator::Probe(obj) == static_cast<IComparator*>(this);
     return NOERROR;
 }
 

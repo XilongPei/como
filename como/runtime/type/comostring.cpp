@@ -82,7 +82,7 @@ static char* AllocFromUTF8(
         return nullptr;
     }
 
-    char* str = (char*)buf->GetData();
+    char* str = static_cast<char*>(buf->GetData());
     memcpy(str, string, byteSize);
     str[byteSize] = '\0';
     return str;

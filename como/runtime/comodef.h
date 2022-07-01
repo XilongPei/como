@@ -172,6 +172,11 @@ inline int ArrayLength(const T (&)[N])
         /* [out] */ InterfaceID& iid) override;
 #endif
 
+/**
+ * Traditional C-style casts shall not be used. But multiple casts in one
+ * statement, using C++ style casts make the code difficult to read.
+ */
+
 #ifndef COMO_INTERFACE_IMPL_1
 #define COMO_INTERFACE_IMPL_1(ClassName, SuperclassName, InterfaceName)       \
     Integer ClassName::AddRef(                             \
