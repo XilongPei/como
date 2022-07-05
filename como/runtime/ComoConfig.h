@@ -18,6 +18,7 @@
 #define __COMO_CONFIG_H__
 
 #include <map>
+#include <string>
 #include "comotypes.h"
 #include "mutex.h"
 

@@ -103,7 +103,9 @@ unsigned long CpuCoreUtils::GetCpuTotalOccupy()
         return 0;
     }
 
-    fgets(buff, sizeof(buff), fd);
+    if (fgets(buff, sizeof(buff), fd) == nullptr)
+        return 0;
+
     char name[64] = {0};
     sscanf(buff, "%s %ld %ld %ld %ld", name, &t.user, &t.nice, &t.system, &t.idle);
     fclose(fd);
@@ -125,7 +127,8 @@ unsigned long CpuCoreUtils::GetCpuProcOccupy(unsigned int pid) {
         return 0;
     }
 
-    fgets(line_buff, sizeof(line_buff), fd);
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+        return 0;
 
     sscanf(line_buff, "%u", &t.pid);
     const char *q = get_items(line_buff, PROCESS_ITEM);
@@ -196,10 +199,13 @@ unsigned int CpuCoreUtils::GetProcMem(unsigned int pid)
     char name[64];
     int vmrss;
     for (int i = 0; i < VMRSS_LINE - 1; i++) {
-        fgets(line_buff, sizeof(line_buff), fd);
+        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+            return 0;
     }
 
-    fgets(line_buff, sizeof(line_buff), fd);
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+        return 0;
+
     sscanf(line_buff, "%s %d", name, &vmrss);
     fclose(fd);
 
@@ -222,10 +228,13 @@ unsigned int CpuCoreUtils::GetProcVirtualmem(unsigned int pid)
     char name[64];
     int vmsize;
     for (int i = 0; i < VMSIZE_LINE - 1; i++) {
-        fgets(line_buff, sizeof(line_buff), fd);
+        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+            return 0;
     }
 
-    fgets(line_buff, sizeof(line_buff), fd);
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+        return 0;
+
     sscanf(line_buff, "%s %d", name, &vmsize);
     fclose(fd);
 
