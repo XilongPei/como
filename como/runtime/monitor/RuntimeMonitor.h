@@ -38,30 +38,30 @@ namespace como {
  * align to Short type
  */
 enum RTM_CommandType : std::uint16_t {
-    CMD_BY_STRING                      = 0x0001,
+    CMD_BY_STRING                      = 0x0001U,
 
-    CMD_Server_Activate_InvokeMethod   = 0x0101,
-    CMD_Server_Deactivate_InvokeMethod = 0x0102,
-    CMD_Server_InvokeMethod            = 0x0103,
-    CMD_Server_Dump_InvokeMethod       = 0x0104,
+    CMD_Server_Activate_InvokeMethod   = 0x0101U,
+    CMD_Server_Deactivate_InvokeMethod = 0x0102U,
+    CMD_Server_InvokeMethod            = 0x0103U,
+    CMD_Server_Dump_InvokeMethod       = 0x0104U,
 
-    CMD_Client_Activate_InvokeMethod   = 0x0201,
-    CMD_Client_Deactivate_InvokeMethod = 0x0202,
-    CMD_Client_InvokeMethod            = 0x0203,
-    CMD_Client_Dump_InvokeMethod       = 0x0204,
+    CMD_Client_Activate_InvokeMethod   = 0x0201U,
+    CMD_Client_Deactivate_InvokeMethod = 0x0202U,
+    CMD_Client_InvokeMethod            = 0x0203U,
+    CMD_Client_Dump_InvokeMethod       = 0x0204U,
 
     CMD_Server_CpuMemoryStatus         = 0x0301,
 };
 
 // align to Byte type
 enum RTM_ParamTransDirection : std::uint8_t {
-    CALL_METHOD                        = 0x01,
-    RETURN_FROM_METHOD                 = 0x02,
+    CALL_METHOD                        = 0x01U,
+    RETURN_FROM_METHOD                 = 0x02U,
 };
 
-enum RTM_WhichQueue {
-    InvokeMethodClientQueue            = 0x1,
-    InvokeMethodServerQueue            = 0x2,
+enum RTM_WhichQueue : std::uint8_t {
+    InvokeMethodClientQueue            = 0x1U,
+    InvokeMethodServerQueue            = 0x2U,
 };
 
 #pragma pack(4)
