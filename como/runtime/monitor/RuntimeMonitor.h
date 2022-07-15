@@ -50,7 +50,7 @@ enum RTM_CommandType : std::uint16_t {
     CMD_Client_InvokeMethod            = 0x0203U,
     CMD_Client_Dump_InvokeMethod       = 0x0204U,
 
-    CMD_Server_CpuMemoryStatus         = 0x0301,
+    CMD_Server_CpuMemoryStatus         = 0x0301U,
 };
 
 // align to Byte type
