@@ -341,7 +341,7 @@ function build()
     fi
 
     echo "Building $BUILD"
-    make "$*"
+    make $@
 }
 
 function clobber()
