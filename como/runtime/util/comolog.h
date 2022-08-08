@@ -24,6 +24,17 @@ namespace como {
 
 using LoggerWriteLog = int(*)(const char *, size_t);
 
+/*
+    Logger will produce the following log line:
+
+    SamplingTag       +- month      +- millisecond
+    +                 |  +- day     |   +- timezone     +- message
+    |                 |  |          |   |               |
+   [Sample 1239 2022-08-08 11:02:58.361 +0800 LOG tag]: log information
+           |               |                  |   |
+           |               +- time            |   +- tag information
+           +- thread id                       +- DEBUG,ERROR,VERBOSE,WARNING
+*/
 class COM_PUBLIC Logger
 {
 public:
