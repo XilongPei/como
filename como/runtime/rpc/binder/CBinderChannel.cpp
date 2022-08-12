@@ -294,9 +294,7 @@ ECode CBinderChannel::GetComponentMetadata(
     parcel->GetPayload(data);
     android::Parcel reply;
 
-    if (DEBUG) {
-        Logger::D("CBinderChannel", "Send message.");
-    }
+    Logger::D("CBinderChannel", "Send message.");
 
     if (mBinder->transact(COMMAND_GET_COMPONENT_METADATA,
             *reinterpret_cast<android::Parcel*>(data), &reply) != android::NO_ERROR) {
@@ -306,9 +304,7 @@ ECode CBinderChannel::GetComponentMetadata(
 
     ECode ec = reply.readInt32();
     if (FAILED(ec)) {
-        if (DEBUG) {
-            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
         return ec;
     }
 
@@ -330,9 +326,7 @@ ECode CBinderChannel::Invoke(
     argParcel->GetPayload(data);
     resParcel->GetPayload(reply);
 
-    if (DEBUG) {
-        Logger::D("CBinderChannel", "Send message.");
-    }
+    Logger::D("CBinderChannel", "Send message.");
 
     if (mBinder->transact(COMMAND_INVOKE,
             *reinterpret_cast<android::Parcel*>(data),
@@ -344,9 +338,7 @@ ECode CBinderChannel::Invoke(
     ECode ec;
     resParcel->ReadInteger(ec);
     if (FAILED(ec)) {
-        if (DEBUG) {
-            Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
-        }
+        Logger::D("CBinderChannel", "Remote call failed with ec = 0x%X.", ec);
         return ec;
     }
 

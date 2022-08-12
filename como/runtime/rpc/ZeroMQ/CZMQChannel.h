@@ -116,8 +116,6 @@ public:
 private:
     friend class CZMQChannelFactory;
 
-    static constexpr Boolean DEBUG = false;
-
     RPCType mType;
     RPCPeer mPeer;
     String mName;

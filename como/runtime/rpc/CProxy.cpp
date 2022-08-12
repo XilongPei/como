@@ -1722,7 +1722,7 @@ ECode InterfaceProxy::ProxyEntry(
 #endif
     GET_STACK_LONG(args, offset, *(Long *)&thisObj);
 
-    if (DEBUG) {
+    if (Logger::GetLevel() <= Logger::DEBUG) {
         String name, ns;
         thisObj->mTargetMetadata->GetName(name);
         thisObj->mTargetMetadata->GetNamespace(ns);
@@ -1733,7 +1733,7 @@ ECode InterfaceProxy::ProxyEntry(
     AutoPtr<IMetaMethod> method;
     thisObj->mTargetMetadata->GetMethod(methodIndex + 4, method);
 
-    if (DEBUG) {
+    if (Logger::GetLevel() <= Logger::DEBUG) {
         String name, signature;
         method->GetName(name);
         method->GetSignature(signature);
@@ -1871,9 +1871,7 @@ ECode InterfaceProxy::ProxyEntry(
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
 ProxyExit:
-    if (DEBUG) {
-        Logger::D("CProxy", "Exit ProxyEntry with ec(0x%X)", ec);
-    }
+    Logger::D("CProxy", "Exit ProxyEntry with ec(0x%X)", ec);
 
     return ec;
 }
