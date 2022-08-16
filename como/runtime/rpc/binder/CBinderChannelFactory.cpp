@@ -36,10 +36,21 @@ CBinderChannelFactory::CBinderChannelFactory(
 ECode CBinderChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = InterfacePack::MemPoolAlloc(sizeof(InterfacePack));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(InterfacePack::MemPoolFree, 0);
+    ipack = new(buf) InterfacePack();
+#else
     ipack = new InterfacePack();
     if (nullptr == ipack) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 
@@ -92,10 +103,21 @@ ECode CBinderChannelFactory::MarshalInterface(
 {
     InterfaceID iid;
     object->GetInterfaceID(object, iid);
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = InterfacePack::MemPoolAlloc(sizeof(InterfacePack));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(InterfacePack::MemPoolFree, 0);
+    InterfacePack* pack = new(buf) InterfacePack();
+#else
     InterfacePack* pack = new InterfacePack();
     if (nullptr == pack) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
 
     pack->SetInterfaceID(iid);
 

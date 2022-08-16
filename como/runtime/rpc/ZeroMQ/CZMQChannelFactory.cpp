@@ -111,10 +111,21 @@ ECode CZMQChannelFactory::MarshalInterface(
     InterfaceID iid;
 
     object->GetInterfaceID(object, iid);
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CZMQInterfacePack::MemPoolAlloc(sizeof(CZMQInterfacePack));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CZMQInterfacePack::MemPoolFree, 0);
+    CZMQInterfacePack* pack = new(buf) CZMQInterfacePack();
+#else
     CZMQInterfacePack* pack = new CZMQInterfacePack();
     if (nullptr == pack) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
 
     pack->SetInterfaceID(iid);
 
