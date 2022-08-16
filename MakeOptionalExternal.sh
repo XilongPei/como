@@ -57,6 +57,11 @@ function build_phxpaxos()
     psucc "make phxpaxos ok."
 }
 
+if [ ! -n "${ROOT}" ]; then
+    echo "Not in COMO build environment!";
+    exit 0;
+fi
+
 build_libzmq;
 build_phxpaxos;
 
