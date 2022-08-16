@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include "InterfacePack.h"
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -27,6 +28,17 @@ InterfacePack::~InterfacePack()
 {
     ReleaseCoclassID(mCid);
     ReleaseInterfaceID(mIid);
+}
+
+CMemPool *InterfacePack::memPool = new CMemPool(ComoConfig::POOL_SIZE_InterfacePack, sizeof(InterfacePack));
+void *InterfacePack::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void InterfacePack::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
 }
 
 ECode InterfacePack:: GetCoclassID(

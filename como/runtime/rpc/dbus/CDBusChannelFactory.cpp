@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <new>
 #include "component/comoobjapi.h"
 #include "rpc/comorpc.h"
 #include "rpc/CProxy.h"
@@ -40,20 +41,42 @@ CDBusChannelFactory::CDBusChannelFactory(
 ECode CDBusChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = InterfacePack::MemPoolAlloc(sizeof(InterfacePack));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(InterfacePack::MemPoolFree, 0);
+    ipack = new(buf) InterfacePack();
+#else
     ipack = new InterfacePack();
     if (nullptr == ipack) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 
 ECode CDBusChannelFactory::CreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+    parcel = new(buf) CDBusParcel();
+#else
     parcel = new CDBusParcel();
     if (nullptr == parcel) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 

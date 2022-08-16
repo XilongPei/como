@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <new>
 #include "component/comoobjapi.h"
 #include "rpc/comorpc.h"
 #include "rpc/CProxy.h"
@@ -51,10 +52,21 @@ ECode CZMQChannelFactory::CreateInterfacePack(
 ECode CZMQChannelFactory::CreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+    parcel = new(buf) CDBusParcel();
+#else
     parcel = new CZMQParcel();
     if (nullptr == parcel) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 

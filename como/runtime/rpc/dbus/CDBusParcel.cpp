@@ -35,6 +35,7 @@
 #include "util/comosp.h"
 #include "util/comolog.h"
 #include <stdlib.h>
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -59,6 +60,17 @@ CDBusParcel::~CDBusParcel()
     if (mData != mBuffer) {
         free(mData);
     }
+}
+
+CMemPool *CDBusParcel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Parcel, sizeof(CDBusParcel));
+void *CDBusParcel::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CDBusParcel::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
 }
 
 ECode CDBusParcel::ReadChar(

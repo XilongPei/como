@@ -93,6 +93,9 @@ public:
     static int sizeofFscpMemAreaInfo;
 
     static std::string sPhxPaxosDataPath;
+
+    static int POOL_SIZE_Parcel;
+    static int POOL_SIZE_InterfacePack;
 };
 
 // defined in VerifiedU64Pointer.cpp

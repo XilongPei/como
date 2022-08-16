@@ -20,6 +20,7 @@
 #include "comotypes.h"
 #include "rpc/registry.h"
 #include "util/comoref.h"
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -48,6 +49,9 @@ public:
     ~InterfacePack();
 
     COMO_INTERFACE_DECL();
+
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
 
     ECode GetCoclassID(
         /* [out] */ CoclassID& cid) override;
@@ -106,6 +110,8 @@ public:
         /* [in] */ IInterfacePack* ipack);
 
 private:
+
+    static CMemPool *memPool;
 
     //@ `InterfacePack` Interface description data
 
