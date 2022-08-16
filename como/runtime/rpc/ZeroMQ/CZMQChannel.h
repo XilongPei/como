@@ -22,6 +22,7 @@
 #include "CStub.h"
 //#include "ThreadPoolZmqActor.h"
 #include "util/comoobj.h"
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -40,6 +41,9 @@ public:
     COMO_INTERFACE_DECL();
 
     COMO_OBJECT_DECL();
+
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
 
     ECode Apply(
         /* [in] */ IInterfacePack* ipack) override;
@@ -115,6 +119,8 @@ public:
 
 private:
     friend class CZMQChannelFactory;
+
+    static CMemPool *memPool;
 
     RPCType mType;
     RPCPeer mPeer;

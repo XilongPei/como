@@ -24,6 +24,7 @@
 #include "util/comolog.h"
 #include "ComoConfig.h"
 #include "registry.h"
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -498,6 +499,17 @@ CDBusChannel::CDBusChannel(
     , mCond(mLock)
     , mServerName(nullptr)
 {}
+
+CMemPool *CDBusChannel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Channel, sizeof(CDBusChannel));
+void *CDBusChannel::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CDBusChannel::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
+}
 
 ECode CDBusChannel::Apply(
     /* [in] */ IInterfacePack* ipack)

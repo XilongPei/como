@@ -106,5 +106,6 @@ std::string ComoConfig::sPhxPaxosDataPath = std::string("/ComoRuntimeData/PhxPax
 
 int ComoConfig::POOL_SIZE_Parcel = 20;
 int ComoConfig::POOL_SIZE_InterfacePack = 20;
+int ComoConfig::POOL_SIZE_Channel = 20;
 
 } // namespace como

@@ -17,12 +17,13 @@
 #ifndef __COMO_CBINDERCHANNEL_H__
 #define __COMO_CBINDERCHANNEL_H__
 
+#include <binder/Binder.h>
 #include "rpc/CProxy.h"
 #include "rpc/CStub.h"
 #include "util/arraylist.h"
 #include "util/comoobj.h"
 #include "util/mutex.h"
-#include <binder/Binder.h>
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -107,6 +108,9 @@ public:
 
     COMO_OBJECT_DECL();
 
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
+
     ECode Apply(
         /* [in] */ IInterfacePack* ipack) override;
 
@@ -175,6 +179,8 @@ private:
     static constexpr Integer COMMAND_GET_COMPONENT_METADATA { android::IBinder::FIRST_CALL_TRANSACTION };
     static constexpr Integer COMMAND_INVOKE { android::IBinder::FIRST_CALL_TRANSACTION + 1 };
     static constexpr Integer COMMAND_RELEASE { android::IBinder::FIRST_CALL_TRANSACTION + 2 };
+
+    static CMemPool *memPool;
 
     RPCType mType;
     RPCPeer mPeer;

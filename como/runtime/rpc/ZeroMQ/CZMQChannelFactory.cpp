@@ -42,10 +42,21 @@ CZMQChannelFactory::CZMQChannelFactory(
 ECode CZMQChannelFactory::CreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CZMQInterfacePack::MemPoolAlloc(sizeof(CZMQInterfacePack));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CZMQInterfacePack::MemPoolFree, 0);
+    ipack = new(buf) CZMQInterfacePack();
+#else
     ipack = new CZMQInterfacePack();
     if (nullptr == ipack) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 
@@ -58,8 +69,8 @@ ECode CZMQChannelFactory::CreateParcel(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
-    parcel = new(buf) CDBusParcel();
+    SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
+    parcel = new(buf) CZMQParcel();
 #else
     parcel = new CZMQParcel();
     if (nullptr == parcel) {
@@ -74,10 +85,20 @@ ECode CZMQChannelFactory::CreateChannel(
     /* [in] */ RPCPeer peer,
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
-    channel = (IRPCChannel*)new CZMQChannel(mType, peer);
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CZMQChannel::MemPoolAlloc(sizeof(CZMQChannel));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CZMQChannel::MemPoolFree, 0);
+    channel = new(buf) CZMQChannel(mType, peer);
+#else
+    channel = new CZMQChannel(mType, peer);
     if (nullptr == channel) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
 
     return NOERROR;
 }

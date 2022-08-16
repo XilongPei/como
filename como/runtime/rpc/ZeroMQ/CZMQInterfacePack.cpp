@@ -34,6 +34,17 @@ CZMQInterfacePack::~CZMQInterfacePack()
     ReleaseInterfaceID(mIid);
 }
 
+CMemPool *CZMQInterfacePack::memPool = new CMemPool(ComoConfig::POOL_SIZE_InterfacePack, sizeof(CZMQInterfacePack));
+void *CZMQInterfacePack::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CZMQInterfacePack::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
+}
+
 ECode CZMQInterfacePack:: GetCoclassID(
     /* [out] */ CoclassID& cid)
 {

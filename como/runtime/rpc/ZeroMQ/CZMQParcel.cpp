@@ -30,11 +30,12 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
 #include "rpc/comorpc.h"
 #include "rpc/ZeroMQ/CZMQParcel.h"
 #include "util/comosp.h"
 #include "util/comolog.h"
-#include <stdlib.h>
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -61,6 +62,17 @@ CZMQParcel::~CZMQParcel()
     if (mData != mBuffer) {
         free(mData);
     }
+}
+
+CMemPool *CZMQParcel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Parcel, sizeof(CZMQParcel));
+void *CZMQParcel::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CZMQParcel::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
 }
 
 ECode CZMQParcel::ReadChar(

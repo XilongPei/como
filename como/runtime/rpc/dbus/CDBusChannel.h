@@ -17,12 +17,13 @@
 #ifndef __COMO_CDBUSCHANNEL_H__
 #define __COMO_CDBUSCHANNEL_H__
 
+#include <dbus/dbus.h>
 #include "CProxy.h"
 #include "CStub.h"
 #include "ThreadPoolExecutor.h"
 #include "util/comoobj.h"
 #include "util/mutex.h"
-#include <dbus/dbus.h>
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -64,6 +65,9 @@ public:
     COMO_INTERFACE_DECL();
 
     COMO_OBJECT_DECL();
+
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
 
     ECode Apply(
         /* [in] */ IInterfacePack* ipack) override;
@@ -137,6 +141,8 @@ private:
 
     static constexpr const char* STUB_OBJECT_PATH = "/como/rpc/CStub";
     static constexpr const char* STUB_INTERFACE_PATH = "como.rpc.IStub";
+
+    static CMemPool *memPool;
 
     RPCType mType;
     RPCPeer mPeer;

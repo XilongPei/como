@@ -14,13 +14,14 @@
 // limitations under the License.
 //=========================================================================
 
+#include <binder/Parcel.h>
+#include <binder/ProcessState.h>
 #include "rpc/comorpc.h"
 #include "rpc/binder/CBinderChannel.h"
 #include "rpc/binder/CBinderParcel.h"
 #include "rpc/binder/InterfacePack.h"
 #include "util/comolog.h"
-#include <binder/Parcel.h>
-#include <binder/ProcessState.h>
+#include "ComoConfig.h"
 
 namespace como {
 
@@ -182,6 +183,17 @@ CBinderChannel::CBinderChannel(
     , mOrgue(new DeathRecipientList())
     , mServerName(nullptr)
 {}
+
+CMemPool *CBinderChannel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Channel, sizeof(CBinderChannel));
+void *CBinderChannel::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CBinderChannel::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
+}
 
 ECode CBinderChannel::Apply(
     /* [in] */ IInterfacePack* ipack)

@@ -34,6 +34,7 @@
 #define __COMO_CZMQPARCEL_H__
 
 #include "util/comoobj.h"
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -52,6 +53,9 @@ public:
     COMO_INTERFACE_DECL();
 
     COMO_OBJECT_DECL();
+
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
 
     ECode ReadChar(
         /* [out] */ Char& value) override;
@@ -223,6 +227,8 @@ private:
     static constexpr Integer TAG_NULL = 0;
     static constexpr Integer TAG_NOT_NULL = 1;
     static constexpr Integer MAX_BUFFER_SIZE = 128;
+
+    static CMemPool *memPool;
 
     ECode mError;
     Byte* mData;

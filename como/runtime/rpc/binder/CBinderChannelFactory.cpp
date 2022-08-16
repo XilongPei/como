@@ -68,10 +68,21 @@ ECode CBinderChannelFactory::CreateChannel(
     /* [in] */ RPCPeer peer,
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = CBinderParcel::MemPoolAlloc(sizeof(CBinderParcel));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+    channel = new(buf) CBinderChannel(mType, peer);
+#else
     channel = (IRPCChannel*)new CBinderChannel(mType, peer);
     if (nullptr == channel) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
+
     return NOERROR;
 }
 
