@@ -237,7 +237,15 @@ Integer LightRefBase::Release(
                                                                     // 5 4 3 2 1 0
             Short shortPara = (Short)(funFreeMem >> 48);
             this->~LightRefBase();
-            func(shortPara, this);
+
+            /**
+             * One can use this design to allow the owner of an object to
+             * release memory in a controlled manner, for example, when the
+             * memory is sourced from a memory pool.
+             */
+            if (LIKELY(nullptr != func)) {
+                func(shortPara, this);
+            }
         }
     }
     return c - 1;

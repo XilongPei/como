@@ -49,6 +49,7 @@ set(SOURCES
     mistring.cpp
     mac.cpp
     CCheckpoint.cpp
+    MemPool.cpp
     ${EXTERNAL_DIR}/inih/ini.c
 )
 
