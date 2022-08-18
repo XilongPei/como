@@ -46,13 +46,13 @@ CMetaCoclass::CMetaCoclass(
             mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
     mConstructors = Array<IMetaConstructor*>(mi->mMethodNumber);
 
-#ifndef COMO_FUNCTION_SAFETY_RTOS
+#ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
      * In the functional safety calculation of RTOS, there shall be no dynamic
      * memory call, and the metadata shall be handled well in advance.
      */
     ECode ec;
-    ec |= BuildAllConstructors();
+    ec = BuildAllConstructors();
     ec |= BuildAllInterfaces();
     ec |= BuildAllMethods();
     ec |= BuildAllConstants();
