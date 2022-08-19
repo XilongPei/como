@@ -72,6 +72,16 @@ CMetaComponent::CMetaComponent(
     if (FAILED(ec)) {
         mIInterface = nullptr;
     }
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    if (FAILED(Preload())) {
+        Logger::E("CMetaComponent", "BuildAll... failed.");
+    }
+#endif
 }
 
 CMetaComponent::~CMetaComponent()
@@ -424,8 +434,11 @@ ECode CMetaComponent::BuildAllCoclasses()
         AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(this, mMetadata, mc);
         if ((nullptr != mcObj) && (! fullName.IsEmpty())) {
             mCoclasses.Set(i, mcObj);
-            mCoclassNameMap.Put(fullName, mcObj);
-            mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj);
+            if (0 != mCoclassNameMap.Put(fullName, mcObj))
+                return E_OUT_OF_MEMORY_ERROR;
+
+            if (0 != mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj))
+                return E_OUT_OF_MEMORY_ERROR;
         }
         else {
             // roll back this transaction?
