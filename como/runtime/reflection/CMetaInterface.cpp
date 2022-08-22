@@ -40,6 +40,19 @@ CMetaInterface::CMetaInterface(
     mIid.mCid = &mcObj->mCid;
     BuildBaseInterface();
     mMethods = Array<IMetaMethod*>(CalculateMethodNumber());
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    ECode ec;
+    ec = BuildAllConstants();
+    ec |= BuildAllMethods();
+    if (FAILED(ec)) {
+        Logger::E("CMetaInterface", "BuildAll... failed.");
+    }
+#endif
 }
 
 ECode CMetaInterface::GetComponent(

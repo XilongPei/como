@@ -40,7 +40,19 @@ CMetaMethod::CMetaMethod()
     , mOpaque(0)
     , mMethodAddr(0)
     , mHotCode(0)
-{}
+{
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    ECode ec;
+    ec = BuildAllParameters();
+    if (FAILED(ec)) {
+        Logger::E("CMetaMethod", "BuildAll... failed.");
+    }
+#endif
+}
 
 CMetaMethod::CMetaMethod(
     /* [in] */ MetaComponent* mc,

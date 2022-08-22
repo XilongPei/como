@@ -48,7 +48,19 @@ CMetaConstructor::CMetaConstructor(
     , mIsDefault(mcObj->mMetadata->mProperties & COCLASS_CONSTRUCTOR_DEFAULT)
     , mParameters(mm->mParameterNumber)
     , mOpaque(0)
-{}
+{
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    ECode ec;
+    ec = BuildAllParameters();
+    if (FAILED(ec)) {
+        Logger::E("CMetaConstructor", "BuildAll... failed.");
+    }
+#endif
+}
 
 ECode CMetaConstructor::GetInterface(
     /* [out] */ AutoPtr<IMetaInterface>& intf)

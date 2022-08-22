@@ -32,7 +32,19 @@ CMetaEnumeration::CMetaEnumeration(
     , mName(me->mName)
     , mNamespace(me->mNamespace)
     , mEnumerators(me->mEnumeratorNumber)
-{}
+{
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    ECode ec;
+    ec = BuildAllEnumerators();
+    if (FAILED(ec)) {
+        Logger::E("CMetaEnumeration", "BuildAll... failed.");
+    }
+#endif
+}
 
 ECode CMetaEnumeration::GetComponent(
     /* [out] */ AutoPtr<IMetaComponent>& comp)
