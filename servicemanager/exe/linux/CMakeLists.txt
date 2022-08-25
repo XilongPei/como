@@ -33,6 +33,7 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         RpcOverZeroMQ.cpp
         ${COMO_RUNTIME_DIR}/util/mutex.cpp
         ${COMO_RUNTIME_DIR}/util/mistring.cpp
+        ${COMO_RUNTIME_DIR}/util/MemPool.cpp
         ${COMO_RUNTIME_DIR}/rpc/ZeroMQ/CZMQParcel.cpp
         ${COMO_RUNTIME_DIR}/rpc/ZeroMQ/CZMQUtils.cpp
     )
