@@ -90,7 +90,7 @@ public:
 
     static void *CzmqPoll();
 
-    static int CzmqProxy(void *context, const char *tcpEndpoint,
+    COM_PUBLIC static int CzmqProxy(void *context, const char *tcpEndpoint,
                                                     const char *inprocEndpoint);
 
     static int CzmqGetSockets(void *context, const char *endpoint);
