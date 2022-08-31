@@ -205,7 +205,7 @@ ECode CBootClassLoader::FindComponent(
                                                                   uri.string());
 
     Integer index = uri.LastIndexOf("/");
-    String compFile = index != -1 ? uri.Substring(index + 1) : uri;
+    String compFile = (index != -1 ? uri.Substring(index + 1) : uri);
     if (compFile.IsEmpty()) {
         Logger::E(TAG, "The name of component is null or empty.");
         compPath = nullptr;
@@ -299,7 +299,7 @@ ECode CBootClassLoader::FindComponent(
     Elf64_Shdr* mdSec = nullptr;
     for (int i = 0; i < ehdr.e_shnum; i++) {
         const char* secName = strTable + shdrs[i].sh_name;
-        if (!strncmp(secName, ".metadata", 9)) {
+        if (! strncmp(secName, ".metadata", 9)) {
             mdSec = shdrs + i;
             break;
         }
