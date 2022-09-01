@@ -260,12 +260,15 @@ HandleMessage_GetComponentMetadata:
                     goto HandleMessage_Object_Release;
                 }
 
+                Long hash = *(Long*)zmq_msg_data(&msg);
+
                 // At this time, the Channel object may be released itself.
-                ec = UnregisterExportObjectByHash(RPCType::Remote,
-                                                    *(Long*)zmq_msg_data(&msg));
-                if (FAILED(ec)) {
-                    Logger::E("threadHandleMessage",
+                if (0 != hash) {
+                    ec = UnregisterExportObjectByHash(RPCType::Remote, hash);
+                    if (FAILED(ec)) {
+                        Logger::E("threadHandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
+                    }
                 }
 
                 // `ReleaseWorker` will NOT delete this work

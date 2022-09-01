@@ -166,6 +166,11 @@ ECode CDBusChannelFactory::MarshalInterface(
             if (proxy != nullptr) {
                 CDBusChannel* channel = CDBusChannel::GetProxyChannel(proxy);
                 pack->SetDBusName(channel->mName);
+
+                // refer to `ServerObjectId`
+                obj->GetHashCode(hash);
+                pack->SetServerObjectId(hash);
+
                 pack->SetCoclassID(((CProxy*)proxy)->GetTargetCoclassID());
             }
             else {

@@ -440,7 +440,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         Long hash;
         ECode ec = NOERROR;
 
-        if (!dbus_message_iter_init(msg, &args)) {
+        if (! dbus_message_iter_init(msg, &args)) {
             Logger_E("CDBusChannel", "ReleaseObject message has no arguments.");
             goto ReleaseObjectExit;
         }
@@ -451,8 +451,13 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
 
         dbus_message_iter_get_basic(&args, &hash);
 
-        if (0 != hash)
-            ec = UnregisterExportObjectByHash(RPCType::Local, hash);
+        if (0 != hash) {
+            ec = UnregisterExportObjectByHash(RPCType::Remote, hash);
+            if (FAILED(ec)) {
+                Logger::E("threadHandleMessage",
+                                       "Object_Release error, ECode: 0x%X", ec);
+            }
+        }
 
     ReleaseObjectExit:
         DBusMessage* reply = dbus_message_new_method_return(msg);
@@ -496,6 +501,7 @@ CDBusChannel::CDBusChannel(
     : mType(type)
     , mPeer(peer)
     , mStarted(false)
+    , mServerObjectId(0)
     , mCond(mLock)
     , mServerName(nullptr)
 {}

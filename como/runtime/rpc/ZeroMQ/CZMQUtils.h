@@ -29,21 +29,21 @@ class ZmqFunCode {
 public:
     enum {
         GetComponentMetadata = 0x0,
-        Method_Invoke        = 0x0101,
-        Actor_IsPeerAlive    = 0x0102,
-        Object_Release       = 0x0103,
-        ReleasePeer          = 0x0104,
-        AddService           = 0x0201,
-        GetService           = 0x0202,
-        RemoveService        = 0x0203,
-        RuntimeMonitor       = 0x0301,
-        AnswerECode          = 0x1111
+        Method_Invoke        = 0x0101U,
+        Actor_IsPeerAlive    = 0x0102U,
+        Object_Release       = 0x0103U,
+        ReleasePeer          = 0x0104U,
+        AddService           = 0x0201U,
+        GetService           = 0x0202U,
+        RemoveService        = 0x0203U,
+        RuntimeMonitor       = 0x0301U,
+        AnswerECode          = 0x1111U
     };
 };
 
-constexpr ECode E_ZMQ_FUN_CODE_ERROR = MAKE_COMORT_ECODE(0, 0xE0);
-constexpr ECode ZMQ_BAD_REPLY_DATA = MAKE_COMORT_ECODE(0, 0xE1);
-constexpr ECode ZMQ_BAD_PACKET = MAKE_COMORT_ECODE(0, 0xE2);
+constexpr ECode E_ZMQ_FUN_CODE_ERROR = MAKE_COMORT_ECODE(0, 0xE0U);
+constexpr ECode ZMQ_BAD_REPLY_DATA = MAKE_COMORT_ECODE(0, 0xE1U);
+constexpr ECode ZMQ_BAD_PACKET = MAKE_COMORT_ECODE(0, 0xE2U);
 
 #pragma pack(1)
 typedef struct tagCOMO_ZMQ_RPC_MSG_HEAD {
