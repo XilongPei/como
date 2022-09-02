@@ -475,6 +475,49 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
             dbus_connection_flush(conn);
         }
     }
+    else if (dbus_message_is_method_call(msg, DBUS_INTERFACE_INTROSPECTABLE, "Introspect")) {
+        DBusMessage* reply = dbus_message_new_method_return(msg);
+        if (nullptr != reply) {
+            const char *introspection_xml =
+"<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\"\n"
+"\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">\n"
+"<node name=\"/com/example/sample_object0\">\n"
+"  <interface name=\"com.example.SampleInterface0\">\n"
+"    <method name=\"Frobate\">\n"
+"      <arg name=\"foo\" type=\"i\" direction=\"in\"/>\n"
+"      <arg name=\"bar\" type=\"s\" direction=\"out\"/>\n"
+"      <arg name=\"baz\" type=\"a{us}\" direction=\"out\"/>\n"
+"      <annotation name=\"org.freedesktop.DBus.Deprecated\" value=\"true\"/>\n"
+"    </method>\n"
+"    <method name=\"Bazify\">\n"
+"      <arg name=\"bar\" type=\"(iiu)\" direction=\"in\"/>\n"
+"      <arg name=\"bar\" type=\"v\" direction=\"out\"/>\n"
+"    </method>\n"
+"    <method name=\"Mogrify\">\n"
+"      <arg name=\"bar\" type=\"(iiav)\" direction=\"in\"/>\n"
+"    </method>\n"
+"    <signal name=\"Changed\">\n"
+"      <arg name=\"new_value\" type=\"b\"/>\n"
+"    </signal>\n"
+"    <property name=\"Bar\" type=\"y\" access=\"readwrite\"/>\n"
+"  </interface>\n"
+"  <node name=\"child_of_sample_object\"/>\n"
+"  <node name=\"another_child_of_sample_object\"/>\n"
+"</node>";
+            dbus_message_append_args(reply, DBUS_TYPE_STRING, &introspection_xml,
+                                                                DBUS_TYPE_INVALID);
+
+            dbus_uint32_t serial = 0;
+            if (! dbus_connection_send(conn, reply, &serial)) {
+                Logger::E("CDBusChannel", "Send Introspect reply message failed.");
+            }
+            dbus_connection_flush(conn);
+            dbus_message_unref(reply);
+        }
+        else {
+            dbus_connection_flush(conn);
+        }
+    }
     else {
         const char* name = dbus_message_get_member(msg);
         if (nullptr != name) {
