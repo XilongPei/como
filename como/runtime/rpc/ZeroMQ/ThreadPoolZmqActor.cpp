@@ -252,6 +252,8 @@ HandleMessage_GetComponentMetadata:
             }
 
             case ZmqFunCode::Object_Release: {
+                Long hash;
+
                 worker = PickWorkerByChannelHandle(hChannel, true);
                 if ((nullptr == worker) || (zmq_msg_size(&msg) < sizeof(Long))) {
                     Logger::E("threadHandleMessage",
@@ -260,7 +262,7 @@ HandleMessage_GetComponentMetadata:
                     goto HandleMessage_Object_Release;
                 }
 
-                Long hash = *(Long*)zmq_msg_data(&msg);
+                hash = *(Long*)zmq_msg_data(&msg);
 
                 // At this time, the Channel object may be released itself.
                 if (0 != hash) {

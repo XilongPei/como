@@ -109,22 +109,18 @@ ECode CZMQChannel::IsPeerAlive(
     /* [out] */ Boolean& alive)
 {
     /**
-     * 1. Find out who asked me for ReleasePeer and establish a socket
-     * connection with it.
+     * 1. Find out who asked me for IsPeerAlive and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ECode ec = GetServerName(serverName);
-
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::ReleasePeer",
-                  "CzmqGetSocket error, endpoint: %s", serverName);
+                  "CzmqGetSocket error, endpoint: %s", mServerName);
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::ReleasePeer",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                         ZmqFunCode::Actor_IsPeerAlive, socket,
                                                  (void *)&lvalue, sizeof(Long));
@@ -132,6 +128,7 @@ ECode CZMQChannel::IsPeerAlive(
         return E_RUNTIME_EXCEPTION;
     }
 
+    ECode ec;
     HANDLE hChannel;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
@@ -172,22 +169,18 @@ ECode CZMQChannel::ReleasePeer(
     /* [out] */ Boolean& alive)
 {
     /**
-     * 1. Find out who asked me for ReleasePeer and establish a socket
-     * connection with it.
+     * 1. Find out who asked me for ReleasePeer and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ECode ec = GetServerName(serverName);
-
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::ReleasePeer",
-                  "CzmqGetSocket error, endpoint: %s", serverName);
+                  "CzmqGetSocket error, endpoint: %s", mServerName);
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::ReleasePeer",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                         ZmqFunCode::ReleasePeer, socket,
                                         (void *)&mServerObjectId, sizeof(Long));
@@ -196,6 +189,8 @@ ECode CZMQChannel::ReleasePeer(
     }
 
     alive = true;
+
+    ECode ec;
     HANDLE hChannel;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
@@ -223,22 +218,18 @@ ECode CZMQChannel::ReleaseObject(
     /* [in] */ Long objectId)
 {
     /**
-     * 1. Find out who asked me for ReleaseObject and establish a socket
-     * connection with it.
+     * 1. Find out who asked me for ReleaseObject and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ECode ec = GetServerName(serverName);
-
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::ReleaseObject",
-                  "CzmqGetSocket error, endpoint: %s", serverName);
+                  "CzmqGetSocket error, endpoint: %s", mServerName);
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::ReleaseObject",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                              ZmqFunCode::Object_Release, socket,
                                                (void *)&objectId, sizeof(Long));
@@ -246,6 +237,7 @@ ECode CZMQChannel::ReleaseObject(
         return E_RUNTIME_EXCEPTION;
     }
 
+    ECode ec;
     HANDLE hChannel;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
@@ -305,18 +297,15 @@ ECode CZMQChannel::GetComponentMetadata(
      * connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ec = GetServerName(serverName);
-
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::GetComponentMetadata",
-                  "CzmqGetSocket error, endpoint: %s", serverName);
+                  "CzmqGetSocket error, endpoint: %s", mServerName);
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::GetComponentMetadata",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                   ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
     if (-1 == rc) {
@@ -369,27 +358,24 @@ ECode CZMQChannel::Invoke(
     ECode ec;
 
     /**
-     * 1. Find out who asked me for Invoke and establish a socket
-     * connection with it.
+     * 1. Find out who asked me for Invoke and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ec = GetServerName(serverName);
-    if (serverName.IsEmpty()) {
+    if (mServerName.IsEmpty()) {
         Logger::E("CZMQChannel::Invoke", "serverName error");
         return E_RUNTIME_EXCEPTION;
     }
 
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName.string(), ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName.string(), ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::Invoke",
                   "CzmqGetSocket error, channel endpoint: %s",
-                  serverName.string());
+                  mServerName.string());
         return E_RUNTIME_EXCEPTION;
     }
 
     Logger::D("CZMQChannel::Invoke",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
 
     HANDLE data;
     Long size;
@@ -485,17 +471,13 @@ ECode CZMQChannel::MonitorRuntime(
     /* [out] */ Array<Byte>& response)
 {
     /**
-     * 1. Find out who asked me for ReleaseObject and establish a socket
-     * connection with it.
+     * 1. Find out who asked me for ReleaseObject and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    String serverName;
-    ECode ec = GetServerName(serverName);
-
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, serverName, ZMQ_REQ);
+    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
     if (nullptr == socket) {
         Logger::E("CZMQChannel::MonitorRuntime",
-                  "CzmqGetSocket error, endpoint: %s", serverName);
+                  "CzmqGetSocket error, endpoint: %s", mServerName);
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -503,7 +485,7 @@ ECode CZMQChannel::MonitorRuntime(
     Long resSize = request.GetLength() + 1;
 
     Logger::D("CZMQChannel::MonitorRuntime",
-              "Try to CzmqSendBuf to endpoint %s", serverName.string());
+              "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                              ZmqFunCode::RuntimeMonitor, socket,
                                                       (void *)resData, resSize);
@@ -511,6 +493,7 @@ ECode CZMQChannel::MonitorRuntime(
         return E_RUNTIME_EXCEPTION;
     }
 
+    ECode ec;
     HANDLE hChannel;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, ec, socket, msg, 0);
