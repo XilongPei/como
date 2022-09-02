@@ -37,6 +37,7 @@
 #include "type/comoarray.h"
 #include "util/comosp.h"
 #include "util/comoobj.h"
+#include "util/MemPool.h"
 
 namespace como {
 
@@ -318,6 +319,9 @@ public:
 
     COMO_INTERFACE_DECL();
 
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
+
     void OnLastStrongRef(
         /* [in] */ const void* id) override;
 
@@ -370,8 +374,10 @@ public:
 private:
     friend class InterfaceProxy;
 
+    static CMemPool        *memPool;
+
     CoclassID               mCid;
-    IMetaCoclass*           mTargetMetadata;
+    IMetaCoclass           *mTargetMetadata;
     Array<InterfaceProxy*>  mInterfaces;
     AutoPtr<IRPCChannel>    mChannel;
 

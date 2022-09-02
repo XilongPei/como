@@ -2130,9 +2130,20 @@ ECode CProxy::CreateObject(
         }
     }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    void *buf = MemPoolAlloc(sizeof(CProxy));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    CProxy *cProxy = new(buf) CProxy();
+    AutoPtr<CProxy> proxyObj = cProxy;
+    cProxy->SetFunFreeMem(MemPoolFree, 0);
+#else
     AutoPtr<CProxy> proxyObj = new CProxy();
     if (nullptr == proxyObj)
         return E_OUT_OF_MEMORY_ERROR;
+#endif
 
     mc->GetCoclassID(proxyObj->mCid);
     proxyObj->mTargetMetadata = mc;
@@ -2211,6 +2222,17 @@ void CProxy::OnLastStrongRef(
 #endif
 
     Object::OnLastStrongRef(id);
+}
+
+CMemPool *CProxy::memPool = new CMemPool(ComoConfig::POOL_SIZE_Proxy, sizeof(CProxy));
+void *CProxy::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void CProxy::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
 }
 
 } // namespace como
