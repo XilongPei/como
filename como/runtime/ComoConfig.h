@@ -98,6 +98,7 @@ public:
     static int POOL_SIZE_InterfacePack;
     static int POOL_SIZE_Channel;
     static int POOL_SIZE_Proxy;
+    static int POOL_SIZE_InterfaceProxy;
 };
 
 // defined in VerifiedU64Pointer.cpp

@@ -108,5 +108,6 @@ int ComoConfig::POOL_SIZE_Parcel = 20;
 int ComoConfig::POOL_SIZE_InterfacePack = 20;
 int ComoConfig::POOL_SIZE_Channel = 20;
 int ComoConfig::POOL_SIZE_Proxy = 20;
+int ComoConfig::POOL_SIZE_InterfaceProxy = 20;
 
 } // namespace como

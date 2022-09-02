@@ -1888,7 +1888,12 @@ CProxy::~CProxy()
     for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
         InterfaceProxy* iproxy = mInterfaces[i];
         mInterfaces[i] = nullptr;
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        InterfaceProxy::MemPoolFree(0, iproxy);
+#else
         delete iproxy;
+#endif
     }
 }
 
@@ -2178,9 +2183,19 @@ ECode CProxy::CreateObject(
     channel->GetServerObjectId(proxyObj->mServerObjectId);
 
     for (Integer i = 0; i < interfaceNumber; i++) {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        void *buf = MemPoolAlloc(sizeof(InterfaceProxy));
+        if (nullptr == buf) {
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
+        InterfaceProxy *interfaceProxy = new(buf) InterfaceProxy();
+        AutoPtr<InterfaceProxy> iproxy = interfaceProxy;
+#else
         AutoPtr<InterfaceProxy> iproxy = new InterfaceProxy();
         if (nullptr == iproxy)
             return E_OUT_OF_MEMORY_ERROR;
+#endif
 
         iproxy->mIndex = i;
         iproxy->mOwner = proxyObj;
@@ -2234,5 +2249,18 @@ void CProxy::MemPoolFree(Short id, const void *p)
 {
     memPool->Free((void *)p);
 }
+
+CMemPool *InterfaceProxy::memPool = new CMemPool(ComoConfig::POOL_SIZE_InterfaceProxy,
+                                                 sizeof(InterfaceProxy));
+void *InterfaceProxy::MemPoolAlloc(size_t ulSize)
+{
+    return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void InterfaceProxy::MemPoolFree(Short id, const void *p)
+{
+    memPool->Free((void *)p);
+}
+
 
 } // namespace como

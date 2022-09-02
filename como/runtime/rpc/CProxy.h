@@ -233,6 +233,9 @@ private:
     };
 
 public:
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(Short id, const void *p);
+
     Integer AddRef(
         /* [in] */ HANDLE id = 0);
 
@@ -292,6 +295,8 @@ private:
 
 private:
     friend class CProxy;
+
+    static CMemPool *memPool;
 
     HANDLE*         mVtable;        // must be the first member
     HANDLE          mProxyEntry;    // must be the second member
@@ -374,10 +379,10 @@ public:
 private:
     friend class InterfaceProxy;
 
-    static CMemPool        *memPool;
+    static CMemPool*        memPool;
 
     CoclassID               mCid;
-    IMetaCoclass           *mTargetMetadata;
+    IMetaCoclass*           mTargetMetadata;
     Array<InterfaceProxy*>  mInterfaces;
     AutoPtr<IRPCChannel>    mChannel;
 
