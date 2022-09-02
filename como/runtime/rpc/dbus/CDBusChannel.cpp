@@ -947,7 +947,19 @@ ECode CDBusChannel::Invoke(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        void *buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
+        if (nullptr == buf) {
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
+        CDBusParcel *cdbusParcel = new(buf) CDBusParcel();
+        resParcel = cdbusParcel;
+        cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+#else
         resParcel = new CDBusParcel();
+#endif
+        // When COMO_FUNCTION_SAFETY_RTOS, this judgment is redundant
         if (nullptr == resParcel) {
             Logger::E("CDBusChannel.Invoke", "Fail to new CDBusParcel()");
             ec = E_REMOTE_EXCEPTION;

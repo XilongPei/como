@@ -68,8 +68,9 @@ ECode CDBusChannelFactory::CreateParcel(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
-    parcel = new(buf) CDBusParcel();
+    CDBusParcel *cdbusParcel = new(buf) CDBusParcel();
+    parcel = cdbusParcel;
+    cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
 #else
     parcel = new CDBusParcel();
     if (nullptr == parcel) {

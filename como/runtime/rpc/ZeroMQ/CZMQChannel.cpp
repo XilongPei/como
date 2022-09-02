@@ -393,7 +393,20 @@ ECode CZMQChannel::Invoke(
 
     if (rc > 0) {
         if (SUCCEEDED(ec)) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
+            void *buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
+            if (nullptr == buf) {
+                zmq_msg_close(&msg);
+                return E_OUT_OF_MEMORY_ERROR;
+            }
+
+            CZMQParcel *czmqParcel = new(buf) CZMQParcel();
+            resParcel = czmqParcel;
+            czmqParcel->SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
+#else
             resParcel = new CZMQParcel();
+#endif
+            // When COMO_FUNCTION_SAFETY_RTOS, this judgment is redundant
             if (nullptr != resParcel) {
                 Integer hasOutArgs;
                 method->GetOutArgumentsNumber(hasOutArgs);

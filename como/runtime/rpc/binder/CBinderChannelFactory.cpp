@@ -63,8 +63,14 @@ ECode CBinderChannelFactory::CreateParcel(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
-    parcel = new(buf) CDBusParcel();
+    void *buf = CBinderParcel::MemPoolAlloc(sizeof(CBinderParcel));
+    if (nullptr == buf) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
+    CBinderParcel *cbinderParcel = new(buf) CBinderParcel();
+    parcel = cbinderParcel;
+    cbinderParcel->SetFunFreeMem(CBinderParcel::MemPoolFree, 0);
 #else
     parcel = new CBinderParcel();
     if (nullptr == parcel) {

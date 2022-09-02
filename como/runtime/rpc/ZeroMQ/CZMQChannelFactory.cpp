@@ -69,8 +69,9 @@ ECode CZMQChannelFactory::CreateParcel(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
-    parcel = new(buf) CZMQParcel();
+    CZMQParcel *czmqParcel = new(buf) CZMQParcel();
+    parcel = czmqParcel;
+    czmqParcel->SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
 #else
     parcel = new CZMQParcel();
     if (nullptr == parcel) {
