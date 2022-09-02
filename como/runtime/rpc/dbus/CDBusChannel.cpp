@@ -950,7 +950,9 @@ ECode CDBusChannel::Invoke(
 #ifdef COMO_FUNCTION_SAFETY_RTOS
         void *buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
         if (nullptr == buf) {
-            return E_OUT_OF_MEMORY_ERROR;
+            Logger::E("CDBusChannel", "MemPoolAlloc return nullptr.");
+            ec = E_OUT_OF_MEMORY_ERROR;
+            goto Exit;
         }
 
         CDBusParcel *cdbusParcel = new(buf) CDBusParcel();

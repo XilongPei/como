@@ -393,7 +393,7 @@ ECode CZMQChannel::Invoke(
 
     if (rc > 0) {
         if (SUCCEEDED(ec)) {
-#ifndef COMO_FUNCTION_SAFETY_RTOS
+#ifdef COMO_FUNCTION_SAFETY_RTOS
             void *buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
             if (nullptr == buf) {
                 zmq_msg_close(&msg);
