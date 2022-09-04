@@ -41,8 +41,9 @@ namespace como {
  * Code - is the status code.
  */
 
-#define MAKE_ECODE(C, F, N, K)    ((0x1 << 31) | (C << 30) | (F << 16) | K)
-#define MAKE_SUCCESS(C, F, N, K)  ((C << 30) | (F << 16) | K | 0x7fffffff)
+#define MAKE_ECODE(C, F, N, K)    ((0x1 << 31) | (C << 30) | (F << 16) | (N << 8) | K)
+#define MAKE_SUCCESS(C, F, N, K)  ((C << 30) | (F << 16) | (N << 8) | K | 0x7fffffff)
+                                                                          // 3 2 1 0
 
 #define Facility_COMORT  0x0
 #define Facility_LIBC    0x1
@@ -54,6 +55,7 @@ namespace como {
 
 constexpr ECode NOERROR = 0x00000000;
 
+                            // 3 2 1 0
 #define SUCCEEDED(E) (!(E & 0x80000000))
 #define FAILED(E)      (E & 0x80000000)
 
