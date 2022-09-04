@@ -261,11 +261,23 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_recurse(&args, &subArg);
         dbus_message_iter_get_fixed_array(&subArg, &data, (int*)&size);
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        void *buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
+        if (nullptr == buf) {
+            Logger::E("CDBusChannel", "MemPoolAlloc return nullptr.");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
+        CDBusParcel *cdbusParcel = new(buf) CDBusParcel();
+        AutoPtr<IParcel> argParcel = cdbusParcel;
+        cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+#else
         AutoPtr<IParcel> argParcel = new CDBusParcel();
         if (argParcel == nullptr) {
             Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
+#endif
 
         argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
         CoclassID cid;
@@ -328,19 +340,43 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_recurse(&args, &subArg);
         dbus_message_iter_get_fixed_array(&subArg, &data, (int*)&size);
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        void *buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
+        if (nullptr == buf) {
+            Logger::E("CDBusChannel", "MemPoolAlloc return nullptr.");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
+        CDBusParcel *cdbusParcel = new(buf) CDBusParcel();
+        AutoPtr<IParcel> argParcel = cdbusParcel;
+        cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+#else
         AutoPtr<IParcel> argParcel = new CDBusParcel();
         if (argParcel == nullptr) {
             Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
+#endif
 
         argParcel->SetData(reinterpret_cast<HANDLE>(data), size);
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        buf = CDBusParcel::MemPoolAlloc(sizeof(CDBusParcel));
+        if (nullptr == buf) {
+            Logger::E("CDBusChannel", "MemPoolAlloc return nullptr.");
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+
+        cdbusParcel = new(buf) CDBusParcel();
+        AutoPtr<IParcel> resParcel = cdbusParcel;
+        cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
+#else
         AutoPtr<IParcel> resParcel = new CDBusParcel();
         if (resParcel == nullptr) {
             Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
+#endif
 
         ECode ec = thisRunnable->mTarget->Invoke(argParcel, resParcel);
 
@@ -960,13 +996,12 @@ ECode CDBusChannel::Invoke(
         cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
 #else
         resParcel = new CDBusParcel();
-#endif
-        // When COMO_FUNCTION_SAFETY_RTOS, this judgment is redundant
         if (nullptr == resParcel) {
             Logger::E("CDBusChannel.Invoke", "Fail to new CDBusParcel()");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
+#endif
 
         Integer hasOutArgs;
         method->GetOutArgumentsNumber(hasOutArgs);

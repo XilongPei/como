@@ -96,6 +96,21 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                     break;
                 }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+                void *buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
+                if (nullptr == buf) {
+                    Logger::E("threadHandleMessage",
+                                "Method_Invoke, new CZMQParcel return nullptr");
+                    resData = reinterpret_cast<HANDLE>((char*)"");
+                    resSize = 1;
+                    ec = E_OUT_OF_MEMORY_ERROR;
+                    goto HandleMessage_Method_Invoke;
+                }
+
+                CZMQParcel *czmqParcel = new(buf) CZMQParcel();
+                AutoPtr<IParcel> argParcel = czmqParcel;
+                czmqParcel->SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
+#else
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
                 if (nullptr == argParcel) {
                     Logger::E("threadHandleMessage",
@@ -105,6 +120,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                     ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_Method_Invoke;
                 }
+#endif
 
                 ec = argParcel->SetData(reinterpret_cast<HANDLE>(
                                        zmq_msg_data(&msg)), zmq_msg_size(&msg));
@@ -116,6 +132,21 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                     goto HandleMessage_Method_Invoke;
                 }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+                buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
+                if (nullptr == buf) {
+                    Logger::E("threadHandleMessage",
+                                "Method_Invoke, new CZMQParcel return nullptr");
+                    resData = reinterpret_cast<HANDLE>((char*)"");
+                    resSize = 1;
+                    ec = E_OUT_OF_MEMORY_ERROR;
+                    goto HandleMessage_Method_Invoke;
+                }
+
+                czmqParcel = new(buf) CZMQParcel();
+                resParcel = czmqParcel;
+                czmqParcel->SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
+#else
                 resParcel = new CZMQParcel();
                 if (nullptr == resParcel) {
                     Logger::E("threadHandleMessage",
@@ -125,6 +156,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
                     ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_Method_Invoke;
                 }
+#endif
 
                 ec = worker->mStub->Invoke(argParcel, resParcel);
 
@@ -161,6 +193,21 @@ HandleMessage_Method_Invoke:
                     break;
                 }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+                void *buf = CZMQParcel::MemPoolAlloc(sizeof(CZMQParcel));
+                if (nullptr == buf) {
+                    Logger::E("threadHandleMessage",
+                         "GetComponentMetadata, new CZMQParcel return nullptr");
+                    // `ReleaseWorker`, This Worker is a daemon
+                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
+                    ec = E_OUT_OF_MEMORY_ERROR;
+                    goto HandleMessage_GetComponentMetadata;
+                }
+
+                CZMQParcel *czmqParcel = new(buf) CZMQParcel();
+                AutoPtr<IParcel> argParcel = czmqParcel;
+                czmqParcel->SetFunFreeMem(CZMQParcel::MemPoolFree, 0);
+#else
                 AutoPtr<IParcel> argParcel = new CZMQParcel();
                 if (nullptr == argParcel) {
                     Logger::E("threadHandleMessage",
@@ -170,6 +217,7 @@ HandleMessage_Method_Invoke:
                     ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_GetComponentMetadata;
                 }
+#endif
 
                 ec = argParcel->SetData(reinterpret_cast<HANDLE>(
                                        zmq_msg_data(&msg)), zmq_msg_size(&msg));
