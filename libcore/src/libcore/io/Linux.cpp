@@ -251,7 +251,7 @@ ECode Linux::Dup(
     if (rc == -1) {
         Logger::E("Linux", "dup failed, reason is: %s", strerror(errno));
         *retFd = nullptr;
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
 
     ECode ec = CFileDescriptor::New(IID_IFileDescriptor, (IInterface**)&retFd);
@@ -276,7 +276,7 @@ ECode Linux::Dup2(
     if (rc == -1) {
         Logger::E("Linux", "dup2 failed, reason is: %s", strerror(errno));
         *retFd = nullptr;
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
 
     ECode ec = CFileDescriptor::New(rc, IID_IFileDescriptor, (IInterface**)&retFd);
@@ -674,7 +674,7 @@ ECode Linux::Lseek(
     int rc = TEMP_FAILURE_RETRY(lseek64(ofd, offset, whence));
     if (rc == -1) {
         Logger::E("Linux", "lseek64 failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
 
     *result = rc;
@@ -721,7 +721,7 @@ ECode Linux::Mkfifo(
     long rc = TEMP_FAILURE_RETRY(mkfifo(path.string(), mode));
     if (-1 == rc) {
         Logger::E("Linux", "mkfifo failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     return NOERROR;
 }
@@ -734,7 +734,7 @@ ECode Linux::Mlock(
     long rc = TEMP_FAILURE_RETRY(mlock(ptr, byteCount));
     if (-1 == rc) {
         Logger::E("Linux", "mlock failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     return NOERROR;
 }
@@ -755,7 +755,7 @@ ECode Linux::Mmap(
     if (ptr == MAP_FAILED) {
         Logger::E("Linux", "mmap64 failed, reason is: %s", strerror(errno));
         *result = 0;
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     *result = reinterpret_cast<HANDLE>(ptr);
     return NOERROR;
@@ -770,7 +770,7 @@ ECode Linux::Msync(
     long rc = TEMP_FAILURE_RETRY(msync(ptr, byteCount, flags));
     if (rc == -1) {
         Logger::E("Linux", "msync failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     return NOERROR;
 }
@@ -783,7 +783,7 @@ ECode Linux::Munlock(
     long rc = TEMP_FAILURE_RETRY(munlock(ptr, byteCount));
     if (rc == -1) {
         Logger::E("Linux", "munlock failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     return NOERROR;
 }
@@ -817,7 +817,7 @@ ECode Linux::Open(
     int nfd = TEMP_FAILURE_RETRY(open(path.string(), flags, mode));
     if (nfd == -1) {
         Logger::E("Linux", "open failed, reason is: %s", strerror(errno));
-        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION);
+        return MAKE_LIBC_ECODE_ERRNO(E_ERRNO_EXCEPTION >> 8);
     }
     return CFileDescriptor::New(nfd, IID_IFileDescriptor, (IInterface**)fd);
 }
