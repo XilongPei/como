@@ -256,14 +256,15 @@ ECode ServiceManager::AddRemoteService(
     Integer eventCode;
     zmq_msg_t msg;
     rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-    if (rc <= 0) {
+    if ((rc <= 0) || (ZmqFunCode::AnswerECode != eventCode) ||
+                                        (zmq_msg_size(&msg) != sizeof(ECode))) {
         Logger::E("ServiceManager::AddRemoteService",
                                        "CzmqRecvMsg error, rc: %d, ECode: 0x%X",
                                        rc, eventCode);
         return E_REMOTE_EXCEPTION;
     }
 
-    return ec;
+    return *(ECode *)zmq_msg_data(&msg);
 }
 
 #else
