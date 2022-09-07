@@ -189,7 +189,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
 
         HandleMessage_Exit_GetService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
-                                        ZmqFunCode::AnswerECode,
+                                        ec,
                                         socket, (const void *)resData, resSize);
             if (rc <= 0)
                 usleep(100);
@@ -224,7 +224,7 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
 
             ec = ServiceManager::GetInstance()->RemoveService((char*)data);
 
-HandleMessage_Exit_RemoveService:
+        HandleMessage_Exit_RemoveService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                          ZmqFunCode::AnswerECode,
                                          socket, (const void *)&ec, sizeof(ec));
