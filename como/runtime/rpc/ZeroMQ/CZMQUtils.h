@@ -74,10 +74,10 @@ public:
     static void *CzmqGetSocket(void *context, const char *endpoint, int type);
 
     static Integer CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
-                         void *socket, void *buf, size_t bufSize, Boolean wait);
+                         void *socket, void *buf, size_t bufSize, int flags);
 
     static Integer CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
-                                    void *socket, zmq_msg_t& msg, Boolean wait);
+                                    void *socket, zmq_msg_t& msg, int flags);
 
     static int CzmqCloseSocket(const char *serverName);
 

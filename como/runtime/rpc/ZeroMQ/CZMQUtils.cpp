@@ -228,13 +228,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
  * Receive message into buffer
  */
 Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
-                          void *socket, void *buf, size_t bufSize, Boolean wait)
+                          void *socket, void *buf, size_t bufSize, int flags)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
-    // Block until a message is available to be received from socket if wait != ZMQ_DONTWAIT
-    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), wait);
+    // Block until a message is available to be received from socket if flags != ZMQ_DONTWAIT
+    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
     if (numberOfBytes != -1) {
         if (EAGAIN == errno) {
             return 0;
@@ -289,13 +289,13 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
  * Receive message into zmq_msg_t, it should be rleased with zmq_msg_close(&msg)
  */
 Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
-                                     void *socket, zmq_msg_t& msg, Boolean wait)
+                                     void *socket, zmq_msg_t& msg, int flags)
 {
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
-    // Block until a message is available to be received from socket if wait != ZMQ_DONTWAIT
-    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), wait);
+    // Block until a message is available to be received from socket if flags != ZMQ_DONTWAIT
+    numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
     if (numberOfBytes == -1) {
         if (EAGAIN == errno) {
             return 0;

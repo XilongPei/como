@@ -35,7 +35,7 @@ public:
 
     ECode AddRemoteService(
         /* [in] */ const String& thisServerName,
-        /* [in] */ const String& snServManager,
+        /* [in] */ const String& snServiceManager,
         /* [in] */ const String& name,
         /* [in] */ IInterface* object);
 
@@ -44,7 +44,7 @@ public:
         /* [out] */ AutoPtr<IInterface>& object);
 
     ECode GetRemoteService(
-        /* [in] */ const String& snServManager,
+        /* [in] */ const String& snServiceManager,
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IInterface>& object);
 
@@ -52,7 +52,7 @@ public:
         /* [in] */ const String& name);
 
     ECode RemoveRemoteService(
-        /* [in] */ const String& snServManager,
+        /* [in] */ const String& snServiceManager,
         /* [in] */ const String& name);
 
 private:

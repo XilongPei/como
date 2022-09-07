@@ -143,7 +143,7 @@ Exit:
 
 ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& thisServerName,
-    /* [in] */ const String& snServManager,
+    /* [in] */ const String& snServiceManager,
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
@@ -152,8 +152,8 @@ ECode ServiceManager::AddRemoteService(
     }
 
     Logger_D("ServiceManager::AddRemoteService",
-            "thisServerName: %s  snServManager: %s  name: %s",
-            thisServerName.string(), snServManager.string(), name.string());
+            "thisServerName: %s  snServiceManager: %s  name: %s",
+            thisServerName.string(), snServiceManager.string(), name.string());
 
     AutoPtr<IInterfacePack> ipack;
     ECode ec = CoMarshalInterface(object, RPCType::Remote, ipack);
@@ -165,7 +165,7 @@ ECode ServiceManager::AddRemoteService(
     }
 
     if ((nullptr == thisServerName) || thisServerName.IsEmpty() ||
-        (nullptr == snServManager) || snServManager.IsEmpty()) {
+                  (nullptr == snServiceManager) || snServiceManager.IsEmpty()) {
         return AddService(name, object);
     }
 
@@ -209,7 +209,7 @@ ECode ServiceManager::AddRemoteService(
      * tell ServiceManager to add service
      */
     std::map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServiceManager.string()));
     std::string strServerEndpoint;
     void *socket;
 
@@ -222,7 +222,7 @@ ECode ServiceManager::AddRemoteService(
         found = false;
         strServerEndpoint = "";
         Logger::E("ServiceManager::AddRemoteService",
-                        "Unregistered ServerName: %s", snServManager.string());
+                      "Unregistered ServerName: %s", snServiceManager.string());
     }
 
     if (found && (nullptr != iter->second->socket)) {
@@ -236,7 +236,7 @@ ECode ServiceManager::AddRemoteService(
     if (nullptr == socket) {
         Logger::E("ServiceManager::AddRemoteService",
                         "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
-                        snServManager.string(), strServerEndpoint.c_str());
+                        snServiceManager.string(), strServerEndpoint.c_str());
         return E_REMOTE_EXCEPTION;
     }
 
@@ -503,7 +503,7 @@ Exit:
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 
 ECode ServiceManager::RemoveRemoteService(
-    /* [in] */ const String& snServManager,
+    /* [in] */ const String& snServiceManager,
     /* [in] */ const String& name)
 {
     if (name.IsEmpty()) {
@@ -511,10 +511,10 @@ ECode ServiceManager::RemoveRemoteService(
     }
 
     Logger_D("ServiceManager::RemoveRemoteService",
-                                         "snServManager: %s  name: %s",
-                                         snServManager.string(), name.string());
+                                         "snServiceManager: %s  name: %s",
+                                         snServiceManager.string(), name.string());
 
-    if ((nullptr == snServManager) || snServManager.IsEmpty()) {
+    if ((nullptr == snServiceManager) || snServiceManager.IsEmpty()) {
         return RemoveService(name);
     }
 
@@ -522,7 +522,7 @@ ECode ServiceManager::RemoveRemoteService(
      * tell ServiceManager to add service
      */
     std::map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServiceManager.string()));
     std::string strServerEndpoint;
     void *socket;
 
@@ -535,7 +535,7 @@ ECode ServiceManager::RemoveRemoteService(
         found = false;
         strServerEndpoint = "";
         Logger::E("ServiceManager::RemoveRemoteService",
-                        "Unregistered ServerName: %s", snServManager.string());
+                        "Unregistered ServerName: %s", snServiceManager.string());
     }
 
     if (found && (nullptr != iter->second->socket)) {
@@ -549,7 +549,7 @@ ECode ServiceManager::RemoveRemoteService(
     if (nullptr == socket) {
         Logger::E("ServiceManager::RemoveRemoteService",
                         "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
-                        snServManager.string(), strServerEndpoint.c_str());
+                        snServiceManager.string(), strServerEndpoint.c_str());
         return E_REMOTE_EXCEPTION;
     }
 
@@ -580,7 +580,7 @@ ECode ServiceManager::RemoveRemoteService(
 }
 
 ECode ServiceManager::GetRemoteService(
-    /* [in] */ const String& snServManager,
+    /* [in] */ const String& snServiceManager,
     /* [in] */ const String& name,
     /* [out] */ AutoPtr<IInterface>& object)
 {
@@ -589,10 +589,10 @@ ECode ServiceManager::GetRemoteService(
     }
 
     Logger_D("ServiceManager::GetRemoteService",
-                                         "snServManager: %s  name: %s",
-                                         snServManager.string(), name.string());
+                                         "snServiceManager: %s  name: %s",
+                                         snServiceManager.string(), name.string());
 
-    if ((nullptr == snServManager) || snServManager.IsEmpty()) {
+    if ((nullptr == snServiceManager) || snServiceManager.IsEmpty()) {
         return RemoveService(name);
     }
 
@@ -600,7 +600,7 @@ ECode ServiceManager::GetRemoteService(
      * tell ServiceManager to add service
      */
     std::map<std::string, ServerNodeInfo*>::iterator iter =
-            ComoConfig::ServerNameEndpointMap.find(std::string(snServManager.string()));
+            ComoConfig::ServerNameEndpointMap.find(std::string(snServiceManager.string()));
     std::string strServerEndpoint;
     void *socket;
 
@@ -613,7 +613,7 @@ ECode ServiceManager::GetRemoteService(
         found = false;
         strServerEndpoint = "";
         Logger::E("ServiceManager::GetRemoteService",
-                        "Unregistered ServerName: %s", snServManager.string());
+                        "Unregistered ServerName: %s", snServiceManager.string());
     }
 
     if (found && (nullptr != iter->second->socket)) {
@@ -627,7 +627,7 @@ ECode ServiceManager::GetRemoteService(
     if (nullptr == socket) {
         Logger::E("ServiceManager::GetRemoteService",
                         "socket is nullptr, ServerManager:%s ServerEndpoint:%s",
-                        snServManager.string(), strServerEndpoint.c_str());
+                        snServiceManager.string(), strServerEndpoint.c_str());
         return E_REMOTE_EXCEPTION;
     }
 
@@ -713,14 +713,14 @@ ECode ServiceManager::GetRemoteService(
 #else
 
 ECode ServiceManager::RemoveRemoteService(
-    /* [in] */ const String& snServManager,
+    /* [in] */ const String& snServiceManager,
     /* [in] */ const String& name)
 {
     return NOERROR;
 }
 
 ECode ServiceManager::GetRemoteService(
-    /* [in] */ const String& snServManager,
+    /* [in] */ const String& snServiceManager,
     /* [in] */ const String& name,
     /* [out] */ AutoPtr<IInterface>& object)
 {
