@@ -195,7 +195,7 @@ public:
 
                 // Move the write pointer. If the area on the left of the read
                 // pointer can put down the remaining data, it will be offset to
-                // the `cont - leftcount` position, Otherwise, it will be shifted
+                // the `count - leftcount` position, Otherwise, it will be shifted
                 // to the read pointer position, indicating that the cache is
                 // full and the redundant data will NOT be discarded,
                 // so DiscardedRead(), then recall function Write()
@@ -317,7 +317,7 @@ public:
         // Read pointer in front
             /* memory model
              (unread)                (read)                      (unread)
-             |-------------------|--------------------|----_-------------------|
+             |-------------------|--------------------|------------------------|
                             m_nWritePos           m_nReadPos              m_nBufSize
 
              */
