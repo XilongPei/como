@@ -348,6 +348,10 @@ interface IProxy
     MonitorRuntime(
         [in] Array<Byte> request,
         [out] Array<Byte>& response);
+
+    GetUuidOrder(
+        [out] Long& uuidOrder
+    );
 }
 
 [

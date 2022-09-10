@@ -1763,6 +1763,8 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
+    thisObj->mOwner->mUuidOrder = uuid64;
+
     if (thisObj->mOwner->mMonitorInvokeMethod) {
         RuntimeMonitor::WriteRtmInvokeMethod(uuid64,
                                          thisObj->mOwner->mServerObjectId,
@@ -2218,6 +2220,12 @@ ECode CProxy::CreateObject(
 
     proxy = proxyObj;
     return NOERROR;
+}
+
+ECode CProxy::GetUuidOrder(
+    /* [out] */ Long& uuidOrder)
+{
+    return mUuidOrder;
 }
 
 void CProxy::OnLastStrongRef(

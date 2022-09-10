@@ -361,6 +361,9 @@ public:
         /* [in] */ const Array<Byte>& request,
         /* [out] */ Array<Byte>& response) override;
 
+    ECode GetUuidOrder(
+        /* [out] */ Long& uuidOrder) override;
+
     AutoPtr<IRPCChannel> GetChannel();
 
     CoclassID GetTargetCoclassID();
@@ -376,6 +379,11 @@ public:
     String                  mServerName;
     Long                    mServerObjectId;
 
+    // Member used in normal use phase, do not need to be passed between the
+    // server and the client.
+    // Order, A normal execution of a method.
+    Long                    mUuidOrder;
+
 private:
     friend class InterfaceProxy;
 
@@ -386,7 +394,7 @@ private:
     Array<InterfaceProxy*>  mInterfaces;
     AutoPtr<IRPCChannel>    mChannel;
 
-    bool mMonitorInvokeMethod;
+    bool                    mMonitorInvokeMethod;
 };
 
 } // namespace como
