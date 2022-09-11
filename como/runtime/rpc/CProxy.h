@@ -318,6 +318,7 @@ class CProxy
     , public IProxy
 {
 public:
+    CProxy();
     ~CProxy();
 
     COMO_OBJECT_DECL();

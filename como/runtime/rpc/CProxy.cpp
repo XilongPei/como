@@ -1885,6 +1885,10 @@ const CoclassID CID_CProxy =
 
 COMO_OBJECT_IMPL(CProxy);
 
+CProxy::CProxy()
+    : mUuidOrder(0)
+{}
+
 CProxy::~CProxy()
 {
     for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
