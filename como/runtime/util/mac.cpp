@@ -94,6 +94,9 @@ Long Mac::GetUuid64(Long& uuid64)
     if (0 == g_lMacAddr)
         Mac::GetMacAddress(g_lMacAddr);
 
+    // This value is not repeated within 49.710 days.
+    // 0xFFFFFFFF(millisecond) / 3600,000(millisecond/hour) / 24(hour/day) ~= 49.710(day)
+    //    4 3 2 1
     uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFF);
                                           // 4 3 2 1
     return uuid64;
