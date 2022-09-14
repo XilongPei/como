@@ -27,6 +27,7 @@ include_directories(
     ${EXTERNAL_DIR}/cityhash/export_como
     ${EXTERNAL_DIR}/inih
     ${EXTERNAL_DIR}/circularbuffer
+    ${EXTERNAL_DIR}/lwrb
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")

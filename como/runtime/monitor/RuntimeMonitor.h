@@ -26,6 +26,7 @@
 #include "mutex.h"
 #include "comodef.h"
 #include "comotypes.h"
+#include "lwrb.h"
 
 namespace como {
 
@@ -97,6 +98,7 @@ class COM_PUBLIC RuntimeMonitor
 {
 public:
     RuntimeMonitor();
+    ~RuntimeMonitor();
 
     ECode StartRuntimeMonitor();
 
@@ -125,20 +127,20 @@ public:
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
-                                            const Byte *buffer, int bufferSize);
+                                         const Byte *buffer, size_t bufferSize);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
                                                               const char *cstr);
 
     static ECode GenRtmCommand(RTM_CommandType command, Short param,
-                                            const Byte *buffer, int bufferSize,
-                                            Array<Byte>& arrayRtmCommand);
+                                          const Byte *buffer, size_t bufferSize,
+                                          Array<Byte>& arrayRtmCommand);
 
     static ECode GenRtmCommand(RTM_CommandType command, Short param,
                                 const char *cstr, Array<Byte>& arrayRtmCommand);
 
-    static CircularBuffer<RTM_InvokeMethod*> rtmInvokeMethodServerQueue;
-    static CircularBuffer<RTM_InvokeMethod*> rtmInvokeMethodClientQueue;
+    static lwrb_t *rtmLwRB_ServerQueue;
+    static lwrb_t *rtmLwRB_ClientQueue;
     static Mutex rtmInvokeMethodServerQueue_Lock;
     static Mutex rtmInvokeMethodClientQueue_Lock;
 

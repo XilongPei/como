@@ -49,6 +49,7 @@ include_directories(
     ${INC_DIR}
     ${ZeroMQ_INC_DIR}
     ${EXTERNAL_DIR}/circularbuffer
+    ${EXTERNAL_DIR}/lwrb
 )
 
 set(SOURCES

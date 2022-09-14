@@ -33,13 +33,29 @@ namespace como {
 
 CircleBuffer<char> *logCircleBuf = nullptr;
 CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
-CircularBuffer<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodServerQueue(RTM_INVOKEMETHOD_QUEUE_SIZE);
-CircularBuffer<RTM_InvokeMethod*> RuntimeMonitor::rtmInvokeMethodClientQueue(RTM_INVOKEMETHOD_QUEUE_SIZE);
 Mutex RuntimeMonitor::rtmInvokeMethodServerQueue_Lock;
 Mutex RuntimeMonitor::rtmInvokeMethodClientQueue_Lock;
 
+lwrb_t *RuntimeMonitor::rtmLwRB_ServerQueue;
+lwrb_t *RuntimeMonitor::rtmLwRB_ClientQueue;
+
 RuntimeMonitor::RuntimeMonitor() {
     //
+}
+
+RuntimeMonitor::~RuntimeMonitor() {
+    if (nullptr == logCircleBuf)
+        return;
+
+    delete logCircleBuf;
+    delete loggerOutputCircleBuf;
+
+    free(rtmLwRB_ServerQueue->buff);
+    free(rtmLwRB_ClientQueue->buff);
+
+    // just set buffer handle to `NULL`
+    lwrb_free(rtmLwRB_ServerQueue);
+    lwrb_free(rtmLwRB_ClientQueue);
 }
 
 ECode RuntimeMonitor::StartRuntimeMonitor()
@@ -66,6 +82,19 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
 
     // Collect the logs generated during COMO running for monitoring by RuntimeMonitor
     Logger::SetLoggerWriteLog(WriteLog);
+
+    void *buff_data;
+    buff_data = malloc(RTM_INVOKEMETHOD_QUEUE_SIZE);
+    if (nullptr == buff_data) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+    (void)lwrb_init(rtmLwRB_ServerQueue, buff_data, RTM_INVOKEMETHOD_QUEUE_SIZE);
+
+    buff_data = malloc(RTM_INVOKEMETHOD_QUEUE_SIZE);
+    if (nullptr == buff_data) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+    (void)lwrb_init(rtmLwRB_ClientQueue, buff_data, RTM_INVOKEMETHOD_QUEUE_SIZE);
 
     return NOERROR;
 }
@@ -142,17 +171,17 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
         case RTM_CommandType::CMD_Server_InvokeMethod: {
             Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
 
-            if (! rtmInvokeMethodServerQueue.empty()) {
-                RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
+            if (lwrb_get_free(rtmLwRB_ServerQueue) != 0) {
+                size_t len;
+                if (lwrb_peek(rtmLwRB_ServerQueue, 0, &len, sizeof(size_t))
+                                                                    != sizeof(size_t)) {
+                    return E_OUT_OF_MEMORY_ERROR;
+                }
 
-                if (nullptr != rtm_InvokeMethod) {
-                    resBuffer = Array<Byte>(rtm_InvokeMethod->length);
-                    if (! resBuffer.IsNull()) {
-                        // resBuffer.Copy works very slowly
-                        memcpy(resBuffer.GetPayload(), rtm_InvokeMethod,
-                                                      rtm_InvokeMethod->length);
-                        rtmInvokeMethodServerQueue.pop_front();
-                        free(rtm_InvokeMethod);
+                resBuffer = Array<Byte>(len);
+                if (! resBuffer.IsNull()) {
+                    if (lwrb_read(rtmLwRB_ServerQueue, resBuffer.GetPayload(), len)!= len) {
+                        return E_OUT_OF_MEMORY_ERROR;
                     }
                 }
             }
@@ -163,23 +192,30 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
 
             String strBuffer = "[";
 
-            while(! rtmInvokeMethodServerQueue.empty()) {
-                RTM_InvokeMethod *rtm_InvokeMethod = rtmInvokeMethodServerQueue.front();
-
-                if (nullptr != rtm_InvokeMethod) {
-                    DeserializeRtmInvokeMethod(rtm_InvokeMethod);
-
-                    String str;
-                    ECode ec = DumpRtmInvokeMethod(rtm_InvokeMethod, str);
-                    if (SUCCEEDED(ec))
-                        strBuffer += (str + ",");
-                    else
-                        break;
-
-                    free(rtm_InvokeMethod);
+            while (lwrb_get_free(rtmLwRB_ServerQueue) != 0) {
+                size_t len;
+                if (lwrb_peek(rtmLwRB_ServerQueue, 0, &len, sizeof(size_t))
+                                                                    != sizeof(size_t)) {
+                    return E_OUT_OF_MEMORY_ERROR;
                 }
 
-                rtmInvokeMethodServerQueue.pop_front();
+                Array<Byte> buffer = Array<Byte>(len);
+                if (! buffer.IsNull()) {
+                    if (lwrb_read(rtmLwRB_ServerQueue, buffer.GetPayload(), len) != len) {
+                        return E_OUT_OF_MEMORY_ERROR;
+                    }
+                }
+
+                DeserializeRtmInvokeMethod(reinterpret_cast<como::RTM_InvokeMethod*>(
+                                                                        buffer.GetPayload()));
+
+                String str;
+                ECode ec = DumpRtmInvokeMethod(reinterpret_cast<como::RTM_InvokeMethod*>(
+                                                                    buffer.GetPayload()), str);
+                if (SUCCEEDED(ec))
+                    strBuffer += (str + ",");
+                else
+                    break;
             }
 
             if (strBuffer.GetByteLength() > 1) {
@@ -279,7 +315,6 @@ static ECode SerializeComponentID(
 
 /**
  * in_out: 0, in; 1, out
- * whichQueue: 0, rtmInvokeMethodClientQueue; 1, rtmInvokeMethodServerQueue
  */
 ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
                                       Long serverObjectId, CoclassID& clsId,
@@ -293,7 +328,12 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     Long sizeParcel;
     parcel->GetDataSize(sizeParcel);
 
-    Long len = sizeof(RTM_InvokeMethod) + sizeParcel + arrCid.GetLength();
+    size_t len = sizeof(RTM_InvokeMethod) + sizeParcel + arrCid.GetLength();
+    if (len > RTM_INVOKEMETHOD_QUEUE_SIZE / 2) {
+        // Too much parameter data to monitor
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
     if (nullptr == rtm_InvokeMethod)
         return E_OUT_OF_MEMORY_ERROR;
@@ -323,22 +363,50 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     if (RTM_WhichQueue::InvokeMethodClientQueue == whichQueue) {
         Mutex::AutoLock lock(rtmInvokeMethodClientQueue_Lock);
 
-        if (rtmInvokeMethodClientQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
-            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodClientQueue.front();
-            free(rtmMethod);
-            rtmInvokeMethodClientQueue.pop_front();
+        while ((lwrb_get_free(rtmLwRB_ClientQueue) < rtm_InvokeMethod->length) &&
+                            (lwrb_get_full(rtmLwRB_ClientQueue) > sizeof(size_t))) {
+            if (lwrb_peek(rtmLwRB_ClientQueue, 0, &len, sizeof(size_t)) != sizeof(size_t)) {
+                free(rtm_InvokeMethod);
+                return E_OUT_OF_MEMORY_ERROR;
+            }
+
+            if (lwrb_advance(rtmLwRB_ClientQueue, len) != len) {
+                free(rtm_InvokeMethod);
+                return E_OUT_OF_MEMORY_ERROR;
+            }
         }
-        rtmInvokeMethodClientQueue.push_back(rtm_InvokeMethod);
+
+        if (lwrb_write(rtmLwRB_ClientQueue, rtm_InvokeMethod,
+                       rtm_InvokeMethod->length) < rtm_InvokeMethod->length) {
+            free(rtm_InvokeMethod);
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
+        free(rtm_InvokeMethod);
     }
     else {
         Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
 
-        if (rtmInvokeMethodServerQueue.size() >= RTM_INVOKEMETHOD_QUEUE_SIZE) {
-            RTM_InvokeMethod *rtmMethod = rtmInvokeMethodServerQueue.front();
-            free(rtmMethod);
-            rtmInvokeMethodServerQueue.pop_front();
+        while ((lwrb_get_free(rtmLwRB_ServerQueue) < rtm_InvokeMethod->length) &&
+                            (lwrb_get_full(rtmLwRB_ServerQueue) > sizeof(size_t))) {
+            if (lwrb_peek(rtmLwRB_ServerQueue, 0, &len, sizeof(size_t)) != sizeof(size_t)) {
+                free(rtm_InvokeMethod);
+                return E_OUT_OF_MEMORY_ERROR;
+            }
+
+            if (lwrb_advance(rtmLwRB_ServerQueue, len) != len) {
+                free(rtm_InvokeMethod);
+                return E_OUT_OF_MEMORY_ERROR;
+            }
         }
-        rtmInvokeMethodServerQueue.push_back(rtm_InvokeMethod);
+
+        if (lwrb_write(rtmLwRB_ServerQueue, rtm_InvokeMethod,
+                       rtm_InvokeMethod->length) < rtm_InvokeMethod->length) {
+            free(rtm_InvokeMethod);
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+
+        free(rtm_InvokeMethod);
     }
 
     return NOERROR;
@@ -434,7 +502,7 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
-                                             const Byte *buffer, int bufferSize)
+                                             const Byte *buffer, size_t bufferSize)
 {
     Integer len = sizeof(RTM_Command) + bufferSize;
     RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
@@ -462,8 +530,8 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
 }
 
 ECode RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
-                                            const Byte *buffer, int bufferSize,
-                                            Array<Byte>& arrayRtmCommand)
+                                          const Byte *buffer, size_t bufferSize,
+                                          Array<Byte>& arrayRtmCommand)
 {
     Integer len = sizeof(RTM_Command) + bufferSize;
     arrayRtmCommand = Array<Byte>::Allocate(len);

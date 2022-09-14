@@ -32,12 +32,14 @@ include_directories(
     ${EXTERNAL_DIR}/libzmq/include
     ${EXTERNAL_DIR}/circularbuffer
     ${EXTERNAL_DIR}/inih
+    ${EXTERNAL_DIR}/lwrb
 )
 
 set(SOURCES
     RuntimeMonitor.cpp
     CpuCoreUtils.cpp
     MarshalUtils.cpp
+    ${EXTERNAL_DIR}/lwrb/lwrb.c
 )
 
 add_library(RuntimeMonitor STATIC

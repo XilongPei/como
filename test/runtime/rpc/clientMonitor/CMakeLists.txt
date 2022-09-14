@@ -24,6 +24,7 @@ include_directories(
     ${INC_DIR}
     ${CLIENT_OBJ_DIR}
     ${EXTERNAL_DIR}/circularbuffer
+    ${EXTERNAL_DIR}/lwrb
 )
 
 set(SOURCES

@@ -59,6 +59,7 @@ include_directories(
     ${RPC_ZeroMQ_INC}
     ${EXTERNAL_DIR}/debugbreak
     ${EXTERNAL_DIR}/circularbuffer
+    ${EXTERNAL_DIR}/lwrb
 )
 
 set(SOURCES

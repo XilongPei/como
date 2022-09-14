@@ -36,6 +36,7 @@ include_directories(
     ${EXTERNAL_DIR}/libcrc/include
     ${EXTERNAL_DIR}/libzmq/include
     ${EXTERNAL_DIR}/circularbuffer
+    ${EXTERNAL_DIR}/lwrb
 )
 
 set(SOURCES
