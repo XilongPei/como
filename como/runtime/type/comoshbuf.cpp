@@ -48,7 +48,7 @@ SharedBuffer* SharedBuffer::Alloc(
     }
 
     SharedBuffer* sb = static_cast<SharedBuffer *>(malloc(sizeof(SharedBuffer) + size));
-    if (sb) {
+    if (nullptr != sb) {
         // Should be std::atomic_init(&sb->mRefs, 1);
         // But that generates a warning with some compilers.
         // The following is OK on Android-supported platforms.
@@ -71,7 +71,7 @@ SharedBuffer* SharedBuffer::Edit() const
         return const_cast<SharedBuffer*>(this);
     }
     SharedBuffer* sb = Alloc(mSize);
-    if (sb) {
+    if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), GetSize());
         Release();
     }
@@ -93,14 +93,14 @@ SharedBuffer* SharedBuffer::EditResize(
         }
 
         buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newSize);
-        if (buf != nullptr) {
+        if (nullptr != buf) {
             buf->mSize = newSize;
             buf->mCapacity = newSize;
             return buf;
         }
     }
     SharedBuffer* sb = Alloc(newSize);
-    if (sb) {
+    if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), newSize < mSize ? newSize : mSize);
         Release();
     }
@@ -119,7 +119,7 @@ SharedBuffer* SharedBuffer::Reset(
     /* [in] */ size_t new_size) const
 {
     SharedBuffer* sb = Alloc(new_size);
-    if (sb) {
+    if (nullptr != sb) {
         Release();
     }
     return sb;
@@ -149,7 +149,7 @@ SharedBuffer* SharedBuffer::Reserve(
         }
     }
     SharedBuffer* sb = Alloc(newCapacity);
-    if (sb) {
+    if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), newCapacity < mSize ? newCapacity : mSize);
         Release();
     }
