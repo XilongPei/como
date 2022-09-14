@@ -138,6 +138,10 @@ TEST(RPCTest, TestCallTestMethod4)
     IProxy* proxy = IProxy::Probe(obj);
     EXPECT_TRUE(proxy != nullptr);
 
+    Long uuidOrder;
+    proxy->GetUuidOrder(uuidOrder);
+    printf("== uuidOrder == %llX\n", uuidOrder);
+
     AutoPtr<como::IInterfacePack> ipack;
     ec = proxy->GetIpack(ipack);
     EXPECT_EQ(0, ec);

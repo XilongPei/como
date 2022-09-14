@@ -2236,7 +2236,8 @@ ECode CProxy::CreateObject(
 ECode CProxy::GetUuidOrder(
     /* [out] */ Long& uuidOrder)
 {
-    return mUuidOrder;
+    uuidOrder = mUuidOrder;
+    return NOERROR;
 }
 
 void CProxy::OnLastStrongRef(
