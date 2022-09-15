@@ -127,10 +127,12 @@ public:
     static int WriteLog(const char *log, size_t strLen);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
-                                         const Byte *buffer, size_t bufferSize);
+                                        const Byte *buffer, size_t bufferSize,
+                                        Byte *bytesRtmCommand, size_t bytesSize);
 
     static RTM_Command* GenRtmCommand(RTM_CommandType command, Short param,
-                                                              const char *cstr);
+                                        const char *cstr,
+                                        Byte *bytesRtmCommand, size_t bytesSize);
 
     static ECode GenRtmCommand(RTM_CommandType command, Short param,
                                           const Byte *buffer, size_t bufferSize,

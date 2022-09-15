@@ -502,30 +502,54 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
-                                             const Byte *buffer, size_t bufferSize)
+                                        const Byte *buffer, size_t bufferSize,
+                                        Byte *bytesRtmCommand, size_t bytesSize)
 {
+    RTM_Command *rtmCommand;
     Integer len = sizeof(RTM_Command) + bufferSize;
-    RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
+
+    if (nullptr != bytesRtmCommand) {
+        if (len > bytesSize)
+            return nullptr;
+        rtmCommand = (RTM_Command*)bytesRtmCommand;
+    }
+    else {
+        rtmCommand = (RTM_Command*)malloc(len);
+    }
+
     if (nullptr != rtmCommand) {
         rtmCommand->length = len;
         rtmCommand->command = command;
         rtmCommand->param = param;
         memcpy(rtmCommand->parcel, buffer, bufferSize);
     }
+
     return rtmCommand;
 }
 
 RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
-                                                               const char *cstr)
+                                        const char *cstr,
+                                        Byte *bytesRtmCommand, size_t bytesSize)
 {
+    RTM_Command *rtmCommand;
     Integer len = sizeof(RTM_Command) + strlen(cstr) + 1;
-    RTM_Command *rtmCommand = (RTM_Command*)malloc(len);
+
+    if (nullptr != bytesRtmCommand) {
+        if (len > bytesSize)
+            return nullptr;
+        rtmCommand = (RTM_Command*)bytesRtmCommand;
+    }
+    else {
+        rtmCommand = (RTM_Command*)malloc(len);
+    }
+
     if (nullptr != rtmCommand) {
         rtmCommand->length = len;
         rtmCommand->command = command;
         rtmCommand->param = param;
         strcpy((char*)rtmCommand->parcel, cstr);
     }
+
     return rtmCommand;
 }
 

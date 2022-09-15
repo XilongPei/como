@@ -50,7 +50,7 @@ TEST(ClientMonitor, TestCMD_Client_Activate_InvokeMethod)
 
     ECode ec = RuntimeMonitor::GenRtmCommand(
                            RTM_CommandType::CMD_Client_Activate_InvokeMethod, 0,
-                                                     (const char *)"", request);
+                                            (const char *)"", request);
     EXPECT_EQ(NOERROR, ec);
 
     Array<Byte> response;
@@ -68,7 +68,7 @@ TEST(ClientMonitor, TestCMD_Server_Activate_InvokeMethod)
 
     ECode ec = RuntimeMonitor::GenRtmCommand(
                            RTM_CommandType::CMD_Server_Activate_InvokeMethod, 0,
-                                                     (const char *)"", request);
+                                            (const char *)"", request);
     EXPECT_EQ(NOERROR, ec);
 
     Array<Byte> response;
@@ -94,8 +94,8 @@ TEST(ClientMonitor, TestMonitorRuntime)
     EXPECT_TRUE(proxy != nullptr);
 
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
-                                              RTM_CommandType::CMD_BY_STRING, 0,
-                                                (const char *)"ExportObject=1");
+                                        RTM_CommandType::CMD_BY_STRING, 0,
+                                        (const char *)"ExportObject=1", nullptr, 0);
 
     Array<Byte> response;
     Array<Byte> request(rtmCommand->length);
@@ -115,7 +115,7 @@ TEST(ClientMonitor, TestCMD_Server_InvokeMethod)
 
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
                                     RTM_CommandType::CMD_Server_InvokeMethod, 0,
-                                                              (const char *)"");
+                                                    (const char *)"", nullptr, 0);
     EXPECT_NE(nullptr, rtmCommand);
 
     Array<Byte> response;
@@ -167,7 +167,7 @@ TEST(ClientMonitor, TestCMD_Client_InvokeMethod)
 
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
                                     RTM_CommandType::CMD_Client_InvokeMethod, 0,
-                                                              (const char *)"");
+                                                        (const char *)"", nullptr, 0);
     Array<Byte> response;
     Array<Byte> request(rtmCommand->length);
     request.Copy((Byte*)rtmCommand, rtmCommand->length);
@@ -202,7 +202,7 @@ TEST(ClientMonitor, TestCMD_Server_CpuMemoryStatus)
 
     RTM_Command *rtmCommand = RuntimeMonitor::GenRtmCommand(
                                     RTM_CommandType::CMD_Server_CpuMemoryStatus, 0,
-                                                              (const char *)"");
+                                                              (const char *)"", nullptr, 0);
     EXPECT_NE(nullptr, rtmCommand);
 
     Array<Byte> response;
