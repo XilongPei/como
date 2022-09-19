@@ -149,24 +149,28 @@ bool CMemPool::CheckExist(void* p)
 }
 
 /**
- * (mMemPoolSet == nullptr) indicates the construction fail.
+ * (m_MemPoolSet == nullptr) indicates the construction fail.
  * memPoolItems must be ordered by keyword lUnitSize.
  */
 CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
 {
-    mMemPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
-    if (nullptr != mMemPoolSet) {
+    m_MemPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
+    if (nullptr != m_MemPoolSet) {
         for (size_t i = 0;  i < num;  i++) {
-            mMemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum, memPoolItems[i].lUnitSize);
-            if (nullptr == mMemPoolSet[i].memPool) {
+            m_MemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum, memPoolItems[i].lUnitSize);
+            if (nullptr == m_MemPoolSet[i].memPool) {
                 for (size_t j = 0;  j < i;  j++) {
-                    delete mMemPoolSet[i].memPool;
+                    delete m_MemPoolSet[i].memPool;
                 }
-                mMemPoolSet = nullptr;
+                m_MemPoolSet = nullptr;
+                return;
             }
+
+            m_MemPoolSet[i].lUnitNum = memPoolItems[i].lUnitNum;
+            m_MemPoolSet[i].lUnitSize = memPoolItems[i].lUnitSize;
         }
     }
-    mItemNum = num;
+    m_ItemNum = num;
 }
 
 /**
@@ -174,10 +178,10 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
  */
 CMemPoolSet::~CMemPoolSet()
 {
-    for (size_t i = 0;  i < mItemNum;  i++) {
-        delete mMemPoolSet[i].memPool;
+    for (size_t i = 0;  i < m_ItemNum;  i++) {
+        delete m_MemPoolSet[i].memPool;
     }
-    free(mMemPoolSet);
+    free(m_MemPoolSet);
 }
 
 /**
@@ -193,9 +197,9 @@ CMemPoolSet::~CMemPoolSet()
  */
 void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
-    for (size_t i = 0;  i < mItemNum;  i++) {
-        if (ulSize <= mMemPoolSet[i].lUnitSize) {
-            return mMemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+    for (size_t i = 0;  i < m_ItemNum;  i++) {
+        if (ulSize <= m_MemPoolSet[i].lUnitSize) {
+            return m_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
         }
     }
     return nullptr;
@@ -213,9 +217,9 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
  */
 bool CMemPoolSet::Free(void* p)
 {
-    for (size_t i = 0;  i < mItemNum;  i++) {
-        if (mMemPoolSet[i].memPool->CheckExist(p)) {
-            mMemPoolSet[i].memPool->Free(p);
+    for (size_t i = 0;  i < m_ItemNum;  i++) {
+        if (m_MemPoolSet[i].memPool->CheckExist(p)) {
+            m_MemPoolSet[i].memPool->Free(p);
             return true;
         }
     }

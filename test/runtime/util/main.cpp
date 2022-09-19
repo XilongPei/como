@@ -23,10 +23,15 @@ using namespace como;
 
 TEST(MemPool, TestMemPool)
 {
-    Array<Char> charArray = { U'H', U'e', U'l', U'l', U'o', U' ',
-            U'W', U'o', U'r', U'l', U'd', U'.' };
-    String str(charArray);
-    EXPECT_STREQ("Hello World.", str.string());
+    CMemPoolSet::MemPoolItem items[] = {{10, 64, nullptr}, {10, 128, nullptr}, {10, 256, nullptr}};
+    CMemPoolSet *memPoolSet = new CMemPoolSet(items, 3);
+    EXPECT_NE(memPoolSet, nullptr);
+
+    void *p = memPoolSet->Alloc(28, MUST_USE_MEM_POOL);
+    EXPECT_NE(p, nullptr);
+
+    bool b = memPoolSet->Free(p);
+    EXPECT_EQ(b, true);
 }
 
 int main(int argc, char **argv)

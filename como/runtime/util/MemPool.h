@@ -68,8 +68,8 @@ public:
     bool Free(void* p);
 
 private:
-    MemPoolItem    *mMemPoolSet;
-    size_t          mItemNum;
+    MemPoolItem    *m_MemPoolSet;
+    size_t          m_ItemNum;
 };
 
 } // namespace como

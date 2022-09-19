@@ -25,7 +25,9 @@ include_directories(
     ${UTIL_OBJ_DIR})
 
 set(SOURCES
-    main.cpp)
+    main.cpp
+    ${PROJECT_DIR}/como/runtime/util/MemPool.cpp
+)
 
 IMPORT_LIBRARY(comort.so)
 IMPORT_GTEST()
