@@ -47,7 +47,29 @@ public:
     ~CMemPool();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
-    void  Free(void* p);
+    void Free(void* p);
+    bool CheckExist(void* p);
+};
+
+class CMemPoolSet
+{
+public:
+    typedef struct tagMemPoolItem {
+        size_t      lUnitNum;
+        size_t      lUnitSize;
+        CMemPool   *memPool;
+    } MemPoolItem;
+
+    // point to [32, 64, 128, ...]
+    CMemPoolSet(MemPoolItem *memPoolItems, size_t num);
+    ~CMemPoolSet();
+
+    void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
+    bool Free(void* p);
+
+private:
+    MemPoolItem    *memPoolSet;
+    size_t          itemNum;
 };
 
 } // namespace como

@@ -73,8 +73,7 @@ CMemPool::~CMemPool()
  *
  * Return Values:
  *     Return a pointer to a memory unit.
-//=============================================================================
-*/
+ */
 void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
     if (ulSize > m_ulUnitSize ||
@@ -115,7 +114,7 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
  */
 void CMemPool::Free(void* p)
 {
-    if (m_pMemBlock < p && p < (void *)((char *)m_pMemBlock + m_ulBlockSize) ) {
+    if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize))) {
         struct _Unit *pCurUnit = (struct _Unit *)((char *)p - sizeof(struct _Unit));
 
         m_pAllocatedMemBlock = pCurUnit->pNext;
@@ -133,6 +132,95 @@ void CMemPool::Free(void* p)
     else {
         free(p);
     }
+}
+
+/**
+ * Parameters:
+ *     [in] p    point to a memory unit.
+ *
+ * Return Values:
+ *     whether p in this CMemPool
+ */
+bool CMemPool::CheckExist(void* p)
+{
+    if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize)))
+        return true;
+    return false;
+}
+
+/**
+ * (memPoolSet == nullptr) indicates the construction fail.
+ * memPoolItems must be ordered by keyword lUnitSize.
+ */
+CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
+{
+    memPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
+    if (nullptr != memPoolSet) {
+        for (size_t i = 0;  i < num;  i++) {
+            memPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum, memPoolItems[i].lUnitSize);
+            if (nullptr == memPoolSet[i].memPool) {
+                for (size_t j = 0;  j < i;  j++) {
+                    delete memPoolSet[i].memPool;
+                }
+                memPoolSet = nullptr;
+            }
+        }
+    }
+    itemNum = num;
+}
+
+/**
+ * ~CMemPoolSet()
+ */
+CMemPoolSet::~CMemPoolSet()
+{
+    for (size_t i = 0;  i < itemNum;  i++) {
+        delete memPoolSet[i].memPool;
+    }
+    free(memPoolSet);
+}
+
+/**
+ * Alloc
+ * To allocate a memory unit.
+ *
+ * Parameters:
+ *     [in] ulSize            Memory unit size.
+ *     [in] iTryToUseMemPool  Whether use memory pool.
+ *
+ * Return Values:
+ *     Return a pointer to a memory unit.
+ */
+void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
+{
+    for (size_t i = 0;  i < itemNum;  i++) {
+        if (ulSize <= memPoolSet[i].lUnitSize) {
+            return memPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+        }
+    }
+    return nullptr;
+}
+
+/**
+ * To free a memory unit. If the pointer of parameter point to a memory unit,
+ * then insert it to "Free linked list". Otherwise, do nothing.
+ *
+ * Parameters:
+ *     [in] p    point to a memory unit and prepare to free it.
+ *
+ * Return Values:
+ *     whether memory P is freed.
+ */
+bool CMemPoolSet::Free(void* p)
+{
+    for (size_t i = 0;  i < itemNum;  i++) {
+        if (memPoolSet[i].memPool->CheckExist(p)) {
+            memPoolSet[i].memPool->Free(p);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace como
