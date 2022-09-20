@@ -27,11 +27,23 @@ TEST(MemPool, TestMemPool)
     CMemPoolSet *memPoolSet = new CMemPoolSet(items, 3);
     EXPECT_NE(memPoolSet, nullptr);
 
-    void *p = memPoolSet->Alloc(28, MUST_USE_MEM_POOL);
-    EXPECT_NE(p, nullptr);
+    void *p;
+    for (int i = 0;  i < 100;  i++) {
+        p = memPoolSet->Alloc(28, MUST_USE_MEM_POOL);
+        if (i < 20) {
+            EXPECT_NE(p, nullptr);
+        }
+
+        if ((i % 2) == 0) {
+            bool b = memPoolSet->Free(p);
+            if (i < 20) {
+                EXPECT_EQ(b, true);
+            }
+        }
+    }
 
     bool b = memPoolSet->Free(p);
-    EXPECT_EQ(b, true);
+    EXPECT_EQ(b, false);
 }
 
 int main(int argc, char **argv)
