@@ -30,6 +30,7 @@
  * limitations under the License.
  */
 
+#include "ComoConfig.h"
 #include "comoshbuf.h"
 #include "util/comolog.h"
 #include <cstdlib>
@@ -47,7 +48,12 @@ SharedBuffer* SharedBuffer::Alloc(
         return nullptr;
     }
 
-    SharedBuffer* sb = static_cast<SharedBuffer *>(malloc(sizeof(SharedBuffer) + size));
+    SharedBuffer *sb;
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    sb = static_cast<SharedBuffer *>(MemPoolAlloc(sizeof(SharedBuffer) + size));
+#else
+    sb = static_cast<SharedBuffer *>(malloc(sizeof(SharedBuffer) + size));
+#endif
     if (nullptr != sb) {
         // Should be std::atomic_init(&sb->mRefs, 1);
         // But that generates a warning with some compilers.
@@ -185,6 +191,18 @@ int32_t SharedBuffer::Release(
         }
     }
     return prevRefCount - 1;
+}
+
+CMemPoolSet *SharedBuffer::memPoolSet = new CMemPoolSet(
+                    ComoConfig::itemsSharedBuffer, ComoConfig::numSharedBuffer);
+void *SharedBuffer::MemPoolAlloc(size_t ulSize)
+{
+    return memPoolSet->Alloc(ulSize, MUST_USE_MEM_POOL);
+}
+
+void SharedBuffer::MemPoolFree(short id, const void *p)
+{
+    memPoolSet->Free((void *)p);
 }
 
 } // namespace como

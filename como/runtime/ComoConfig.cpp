@@ -100,7 +100,7 @@ FSCP_MEM_AREA_INFO ComoConfig::FscpMemAreaInfo[] = {
         .allocated = 0
     }
 };
-int ComoConfig::sizeofFscpMemAreaInfo = sizeof(ComoConfig::FscpMemAreaInfo) / sizeof(FSCP_MEM_AREA_INFO);
+int ComoConfig::numFscpMemAreaInfo = sizeof(ComoConfig::FscpMemAreaInfo) / sizeof(FSCP_MEM_AREA_INFO);
 
 std::string ComoConfig::sPhxPaxosDataPath = std::string("/ComoRuntimeData/PhxPaxosData");
 
@@ -109,5 +109,8 @@ int ComoConfig::POOL_SIZE_InterfacePack = 20;
 int ComoConfig::POOL_SIZE_Channel = 20;
 int ComoConfig::POOL_SIZE_Proxy = 20;
 int ComoConfig::POOL_SIZE_InterfaceProxy = 20;
+
+CMemPoolSet::MemPoolItem ComoConfig::itemsSharedBuffer[] = {{10, 64, nullptr}, {10, 128, nullptr}, {10, 256, nullptr}};
+int ComoConfig::numSharedBuffer = 3;
 
 } // namespace como

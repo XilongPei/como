@@ -49,6 +49,7 @@ public:
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
     void Free(void* p);
     bool CheckExist(void* p);
+    bool CheckFull();
 };
 
 class CMemPoolSet

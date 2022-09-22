@@ -21,6 +21,7 @@
 #include <string>
 #include "comotypes.h"
 #include "mutex.h"
+#include "MemPool.h"
 
 namespace como {
 
@@ -90,7 +91,7 @@ public:
     static Mutex CZMQUtils_ContextLock;
 
     static FSCP_MEM_AREA_INFO FscpMemAreaInfo[];
-    static int sizeofFscpMemAreaInfo;
+    static int numFscpMemAreaInfo;
 
     static std::string sPhxPaxosDataPath;
 
@@ -99,6 +100,9 @@ public:
     static int POOL_SIZE_Channel;
     static int POOL_SIZE_Proxy;
     static int POOL_SIZE_InterfaceProxy;
+
+    static CMemPoolSet::MemPoolItem itemsSharedBuffer[];
+    static int numSharedBuffer;
 };
 
 // defined in VerifiedU64Pointer.cpp

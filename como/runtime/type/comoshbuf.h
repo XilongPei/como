@@ -34,6 +34,7 @@
 #define __COMO_SHAREDBUFFER_H__
 
 #include "comodef.h"
+#include "MemPool.h"
 #include <atomic>
 #include <cstddef>
 
@@ -146,6 +147,12 @@ private:
     uint32_t                    mClientMetadata;
     */
     size_t mCapacity;
+
+    static void *MemPoolAlloc(size_t ulSize);
+    static void MemPoolFree(short id, const void *p);
+
+public:
+    static CMemPoolSet *memPoolSet;
 };
 
 static_assert(sizeof(SharedBuffer) % 8 == 0

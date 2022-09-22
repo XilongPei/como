@@ -28,10 +28,10 @@ ComoContext::ComoContext()
     : funComoMalloc(nullptr)
     , freeMemInArea(nullptr)
 {
-    if (ComoConfig::sizeofFscpMemAreaInfo > 0) {
+    if (ComoConfig::numFscpMemAreaInfo > 0) {
 /*
         int ret =  MimallocUtils::setupFscpMemAreas(ComoConfig::FscpMemAreaInfo,
-                                                    ComoConfig::sizeofFscpMemAreaInfo,
+                                                    ComoConfig::numFscpMemAreaInfo,
                                                     funComoMalloc, freeMemInArea);
         if (0 != ret) {
             Logger::E("ComoContext", "new ComoContext error, errno: %d", ret);

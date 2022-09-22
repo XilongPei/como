@@ -149,6 +149,18 @@ bool CMemPool::CheckExist(void* p)
 }
 
 /**
+ * CheckFull
+ * Determine if the pool is full.
+ *
+ * Return Values:
+ *     Return true if the pool is full.
+ */
+bool CMemPool::CheckFull()
+{
+    return (nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock);
+}
+
+/**
  * (m_MemPoolSet == nullptr) indicates the construction fail.
  * memPoolItems must be ordered by keyword lUnitSize.
  */
@@ -199,6 +211,12 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
     for (size_t i = 0;  i < m_ItemNum;  i++) {
         if (ulSize <= m_MemPoolSet[i].lUnitSize) {
+
+            if (((i + 1) < m_ItemNum) && m_MemPoolSet[i].memPool->CheckFull() &&
+                        (m_MemPoolSet[i].lUnitSize == m_MemPoolSet[i + 1].lUnitSize)) {
+                continue;
+            }
+
             return m_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
         }
     }
