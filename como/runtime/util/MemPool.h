@@ -44,6 +44,7 @@ private:
 
 public:
     CMemPool(size_t lUnitNum = 50, size_t lUnitSize = 1024);
+    CMemPool(void *buffer, size_t lUnitNum = 50, size_t lUnitSize = 1024);
     ~CMemPool();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
@@ -61,16 +62,24 @@ public:
         CMemPool   *memPool;
     } MemPoolItem;
 
-    // point to [32, 64, 128, ...]
     CMemPoolSet(MemPoolItem *memPoolItems, size_t num);
     ~CMemPoolSet();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
     bool Free(void* p);
 
+    bool CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize);
+
 private:
     MemPoolItem    *m_MemPoolSet;
     size_t          m_ItemNum;
+
+    // general purpose memory pool
+    CMemPool       *g_MemPool;
+    size_t          m_g_lUnitNum;
+    size_t          m_g_lUnitSize;
+
+    MemPoolItem    *m_g_MemPoolSet;
 };
 
 } // namespace como

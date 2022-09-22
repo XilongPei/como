@@ -68,7 +68,11 @@ SharedBuffer* SharedBuffer::Alloc(
 void SharedBuffer::Dealloc(
     /* [in] */ const SharedBuffer* released)
 {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    MemPoolFree(0, const_cast<SharedBuffer*>(released));
+#else
     free(const_cast<SharedBuffer*>(released));
+#endif
 }
 
 SharedBuffer* SharedBuffer::Edit() const

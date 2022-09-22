@@ -28,14 +28,21 @@ namespace como {
  *     [in] ulUnitSize The size of unit.
  */
 CMemPool::CMemPool(size_t ulUnitNum, size_t ulUnitSize)
-    : m_pMemBlock(nullptr)
+{
+    CMemPool(nullptr, ulUnitNum, ulUnitSize);
+}
+
+CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
+    : m_pMemBlock(buffer)
     , m_pAllocatedMemBlock(nullptr)
     , m_pFreeMemBlock(nullptr)
     , m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit)))
     , m_ulUnitSize(ulUnitSize)
 {
 
-    m_pMemBlock = ::malloc(m_ulBlockSize);            // Allocate a memory block.
+    if (nullptr == buffer) {
+        m_pMemBlock = ::malloc(m_ulBlockSize);            // Allocate a memory block.
+    }
 
     if (nullptr != m_pMemBlock) {
         // Link all mem unit.
@@ -157,7 +164,7 @@ bool CMemPool::CheckExist(void* p)
  */
 bool CMemPool::CheckFull()
 {
-    return (nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock);
+    return (nullptr == m_pMemBlock) || (nullptr == m_pFreeMemBlock);
 }
 
 /**
@@ -165,6 +172,9 @@ bool CMemPool::CheckFull()
  * memPoolItems must be ordered by keyword lUnitSize.
  */
 CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
+    : g_MemPool(nullptr)
+    , m_g_lUnitNum(0)
+    , m_g_lUnitSize(0)
 {
     m_MemPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
     if (nullptr != m_MemPoolSet) {
@@ -183,6 +193,24 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
         }
     }
     m_ItemNum = num;
+}
+
+bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
+{
+    g_MemPool = new CMemPool(lUnitNum, lUnitSize);
+    if (nullptr == g_MemPool)
+        return false;
+
+    m_g_lUnitNum = lUnitNum;
+    m_g_lUnitSize = lUnitSize;
+
+    m_g_MemPoolSet = (MemPoolItem *)calloc(lUnitNum, sizeof(MemPoolItem));
+    if (nullptr == m_g_MemPoolSet) {
+        free(g_MemPool);
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -209,17 +237,42 @@ CMemPoolSet::~CMemPoolSet()
  */
 void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
-    for (size_t i = 0;  i < m_ItemNum;  i++) {
+    void *p = nullptr;
+    size_t i;
+    size_t ulElemSize;
+
+    for (i = 0;  i < m_ItemNum;  i++) {
         if (ulSize <= m_MemPoolSet[i].lUnitSize) {
-
-            if (((i + 1) < m_ItemNum) && m_MemPoolSet[i].memPool->CheckFull() &&
-                        (m_MemPoolSet[i].lUnitSize == m_MemPoolSet[i + 1].lUnitSize)) {
-                continue;
-            }
-
-            return m_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+            p = m_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+            break;
         }
     }
+
+    if (i < m_ItemNum) {
+        ulElemSize = m_MemPoolSet[i].lUnitSize;
+    }
+    else {
+        ulElemSize = ulSize;
+    }
+
+    if (nullptr == p) {
+        // acquire memory from g_MemPool
+        if (nullptr != g_MemPool) {
+            for (i = 0;  i < m_g_lUnitNum;  i++) {
+                if (nullptr == m_g_MemPoolSet[i].memPool) {
+                    void *memPool = g_MemPool->Alloc(ulElemSize, MUST_USE_MEM_POOL);
+                    m_g_MemPoolSet[i].memPool = new CMemPool(memPool, m_g_lUnitSize / ulElemSize, ulElemSize);
+                    m_g_MemPoolSet[i].lUnitSize = ulElemSize;
+                }
+
+                if (ulSize <= m_g_MemPoolSet[i].lUnitSize) {
+                    p = m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+                    break;
+                }
+            }
+        }
+    }
+
     return nullptr;
 }
 
