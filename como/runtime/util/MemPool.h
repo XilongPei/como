@@ -68,6 +68,8 @@ public:
     } MemPoolItem;
 
     CMemPoolSet(MemPoolItem *memPoolItems, size_t num);
+    CMemPoolSet(MemPoolItem *memPoolItems, size_t num, size_t g_lUnitNum,
+                                                            size_t g_lUnitSize);
     ~CMemPoolSet();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);

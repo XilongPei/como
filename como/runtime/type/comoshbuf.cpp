@@ -198,7 +198,8 @@ int32_t SharedBuffer::Release(
 }
 
 CMemPoolSet *SharedBuffer::memPoolSet = new CMemPoolSet(
-                    ComoConfig::itemsSharedBuffer, ComoConfig::numSharedBuffer);
+                ComoConfig::itemsSharedBuffer, ComoConfig::numSharedBuffer,
+                ComoConfig::unitNumGeneralBuffer, ComoConfig::unitSizeGeneralBuffer);
 void *SharedBuffer::MemPoolAlloc(size_t ulSize)
 {
     return memPoolSet->Alloc(ulSize, MUST_USE_MEM_POOL);

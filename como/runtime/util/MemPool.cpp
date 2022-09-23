@@ -203,7 +203,8 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
     m_MemPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
     if (nullptr != m_MemPoolSet) {
         for (size_t i = 0;  i < num;  i++) {
-            m_MemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum, memPoolItems[i].lUnitSize);
+            m_MemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum,
+                                                     memPoolItems[i].lUnitSize);
             if (nullptr == m_MemPoolSet[i].memPool) {
                 for (size_t j = 0;  j < i;  j++) {
                     delete m_MemPoolSet[i].memPool;
@@ -219,8 +220,18 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
     m_ItemNum = num;
 }
 
+CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num,
+                                          size_t g_lUnitNum, size_t g_lUnitSize)
+{
+    CMemPoolSet(memPoolItems, num);
+    CreateGeneralMemPool(g_lUnitNum, g_lUnitSize);
+}
+
 bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
 {
+    if ((0 == lUnitNum ) || (0 == lUnitSize))
+        return false;
+
     g_MemPool = new CMemPool(lUnitNum, lUnitSize);
     if (nullptr == g_MemPool)
         return false;

@@ -103,6 +103,8 @@ public:
 
     static CMemPoolSet::MemPoolItem itemsSharedBuffer[];
     static int numSharedBuffer;
+    static int unitNumGeneralBuffer;
+    static int unitSizeGeneralBuffer;
 };
 
 // defined in VerifiedU64Pointer.cpp

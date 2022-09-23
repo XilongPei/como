@@ -112,5 +112,7 @@ int ComoConfig::POOL_SIZE_InterfaceProxy = 20;
 
 CMemPoolSet::MemPoolItem ComoConfig::itemsSharedBuffer[] = {{10, 64, nullptr}, {10, 128, nullptr}, {10, 256, nullptr}};
 int ComoConfig::numSharedBuffer = 3;
+int ComoConfig::unitNumGeneralBuffer = 0;
+int ComoConfig::unitSizeGeneralBuffer = 0;
 
 } // namespace como
