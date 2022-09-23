@@ -28,27 +28,57 @@ namespace como {
  *     [in] ulUnitSize The size of unit.
  */
 CMemPool::CMemPool(size_t ulUnitNum, size_t ulUnitSize)
-{
-    CMemPool(nullptr, ulUnitNum, ulUnitSize);
-}
-
-CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
-    : m_pMemBlock(buffer)
+    : m_pMemBlock(nullptr)
     , m_pAllocatedMemBlock(nullptr)
     , m_pFreeMemBlock(nullptr)
     , m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit)))
     , m_ulUnitSize(ulUnitSize)
-{
+{}
 
+CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
+    : m_pAllocatedMemBlock(nullptr)
+    , m_pFreeMemBlock(nullptr)
+    , m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit)))
+    , m_ulUnitSize(ulUnitSize)
+{
+    SetBuffer(buffer);
+}
+
+/**
+ * Destructor of this class. Its task is to free memory block.
+ */
+CMemPool::~CMemPool()
+{
+    if (shouldFreeMemBlock && (nullptr != m_pMemBlock))  {
+        ::free(m_pMemBlock);
+    }
+}
+
+/**
+ * SetBuffer
+ */
+bool CMemPool::SetBuffer(void *buffer)
+{
     if (nullptr == buffer) {
-        m_pMemBlock = ::malloc(m_ulBlockSize);            // Allocate a memory block.
+        m_pMemBlock = ::malloc(m_ulBlockSize);       // Allocate a memory block.
+        if (nullptr == m_pMemBlock) {
+            return false;
+        }
+
+        shouldFreeMemBlock = true;
+    }
+    else {
+        m_pMemBlock = buffer;
+        shouldFreeMemBlock = false;
     }
 
     if (nullptr != m_pMemBlock) {
         // Link all mem unit.
+
+        size_t ulUnitNum = m_ulBlockSize / (m_ulUnitSize + sizeof(struct _Unit));
         for (size_t i = 0;  i < ulUnitNum;  i++) {
             struct _Unit *pCurUnit = (struct _Unit *)((char *)m_pMemBlock + i *
-                                            (ulUnitSize + sizeof(struct _Unit)));
+                                            (m_ulUnitSize + sizeof(struct _Unit)));
 
             pCurUnit->pPrev = nullptr;
             pCurUnit->pNext = m_pFreeMemBlock;   // Insert the new unit at head.
@@ -59,14 +89,8 @@ CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
             m_pFreeMemBlock = pCurUnit;
         }
     }
-}
 
-/**
- * Destructor of this class. Its task is to free memory block.
- */
-CMemPool::~CMemPool()
-{
-    ::free(m_pMemBlock);
+    return true;
 }
 
 /**
@@ -210,6 +234,14 @@ bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
         return false;
     }
 
+    for (size_t i = 0;  i < lUnitNum;  i++) {
+        m_g_MemPoolSet[i].memPool = new CMemPool();
+        if (nullptr == m_g_MemPoolSet[i].memPool) {
+            free(g_MemPool);
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -244,7 +276,10 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
     for (i = 0;  i < m_ItemNum;  i++) {
         if (ulSize <= m_MemPoolSet[i].lUnitSize) {
             p = m_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
-            break;
+            if (nullptr == p)
+                break;
+            else
+                return p;
         }
     }
 
@@ -255,20 +290,19 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
         ulElemSize = ulSize;
     }
 
-    if (nullptr == p) {
-        // acquire memory from g_MemPool
-        if (nullptr != g_MemPool) {
-            for (i = 0;  i < m_g_lUnitNum;  i++) {
-                if (nullptr == m_g_MemPoolSet[i].memPool) {
-                    void *memPool = g_MemPool->Alloc(ulElemSize, MUST_USE_MEM_POOL);
-                    m_g_MemPoolSet[i].memPool = new CMemPool(memPool, m_g_lUnitSize / ulElemSize, ulElemSize);
-                    m_g_MemPoolSet[i].lUnitSize = ulElemSize;
-                }
+    // acquire memory from g_MemPool
+    if (nullptr != g_MemPool) {
+        for (i = 0;  i < m_g_lUnitNum;  i++) {
+            if (nullptr == m_g_MemPoolSet[i].memPool) {
+                void *memPool = g_MemPool->Alloc(ulElemSize, MUST_USE_MEM_POOL);
+                m_g_MemPoolSet[i].memPool->SetBuffer(memPool);
+                m_g_MemPoolSet[i].lUnitSize = ulElemSize;
 
-                if (ulSize <= m_g_MemPoolSet[i].lUnitSize) {
-                    p = m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
-                    break;
-                }
+                return m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+            }
+
+            if (ulSize <= m_g_MemPoolSet[i].lUnitSize) {
+                return m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
             }
         }
     }

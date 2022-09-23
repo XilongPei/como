@@ -34,6 +34,7 @@ private:
     };
 
     void         *m_pMemBlock;              // The address of memory pool.
+    bool          shouldFreeMemBlock;
 
     //Manage all unit with two linkedlist.
     struct _Unit *m_pAllocatedMemBlock;     // Head pointer to Allocated linkedlist.
@@ -51,6 +52,10 @@ public:
     void Free(void* p);
     bool CheckExist(void* p);
     bool CheckFull();
+
+protected:
+    friend class CMemPoolSet;
+    bool SetBuffer(void *buffer);
 };
 
 class CMemPoolSet
