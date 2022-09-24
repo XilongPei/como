@@ -14,7 +14,29 @@
 // limitations under the License.
 //=========================================================================
 
+/*
+class CMemPool
++--------------+    m_pMemBlock___      /----------------\
+| struct _Unit +--> _Unit 0 <==>  _Unit 1   _Unit 2 ...  _Unit N
++--------------+          m_pFreeMemBlock---^
+
+class CMemPoolSet
++------------------------+
+| struct _Unit UnitSize0 | --> CMemPool0
+| struct _Unit UnitSize1 | --> CMemPool1
+| ...                    | --> ...
+| ...                    | --> ...
+| struct _Unit UnitSizeN | --> CMemPoolN
++------------------------+
+| struct _Unit UnitSize0 | -->Gereral Purpose fix sized <= from g_MemPool
+| struct _Unit UnitSize1 | -->Gereral Purpose fix sized <= from g_MemPool
+| ...................... |
+|                        |
++------------------------+
+*/
+
 #include <malloc.h>
+#include <stdint.h>
 #include "MemPool.h"
 
 namespace como {
@@ -280,7 +302,7 @@ CMemPoolSet::~CMemPoolSet()
  */
 void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
-    void *p = nullptr;
+    void *p;
     size_t i;
     size_t ulElemSize;
 
@@ -302,6 +324,8 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
     }
 
     // acquire memory from g_MemPool
+    size_t lastUnitSize = UINTMAX_MAX;
+    size_t pos = m_g_lUnitNum;
     if (nullptr != g_MemPool) {
         for (i = 0;  i < m_g_lUnitNum;  i++) {
             if (nullptr == m_g_MemPoolSet[i].memPool) {
@@ -312,8 +336,18 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
                 return m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
             }
 
-            if (ulSize <= m_g_MemPoolSet[i].lUnitSize) {
-                return m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
+            if ((ulSize <= m_g_MemPoolSet[i].lUnitSize) &&
+                                (m_g_MemPoolSet[i].lUnitSize < lastUnitSize) &&
+                                (! m_g_MemPoolSet[i].memPool->CheckFull())) {
+                lastUnitSize = m_g_MemPoolSet[i].lUnitSize;
+                pos = i;
+            }
+        }
+
+        if (pos < m_g_lUnitNum) {
+            p = m_g_MemPoolSet[pos].memPool->Alloc(ulSize, iTryToUseMemPool);
+            if (nullptr != p) {
+                return p;
             }
         }
     }
