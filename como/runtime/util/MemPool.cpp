@@ -231,6 +231,10 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
                 for (size_t j = 0;  j < i;  j++) {
                     delete m_MemPoolSet[i].memPool;
                 }
+                free(m_MemPoolSet);
+
+                // Set m_MemPoolSet to nullptr indicates that the object was not
+                // constructed successfully.
                 m_MemPoolSet = nullptr;
                 return;
             }
