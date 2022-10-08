@@ -33,7 +33,7 @@ public:
         : mCkpointId(ckpointId)
     {}
 
-    ECode Execute();
+    ECode Execute() override;
 
     ECode SetTransId(
         /* [in] */ Long transId) override;
@@ -48,6 +48,8 @@ public:
     ECode GetParam(
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IObject>& object) override;
+
+    ECode ClearParams() override;
 
 private:
     Integer mCkpointId;

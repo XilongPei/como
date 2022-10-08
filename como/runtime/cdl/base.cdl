@@ -172,6 +172,8 @@ interface ICheckpoint
         [in] String path,
         [out] IObject&& object);
 
+    ClearParams();
+
     Execute();
 }
 

@@ -84,4 +84,10 @@ ECode CCheckpoint::GetParam(
     return NOERROR;
 }
 
+ECode CCheckpoint::ClearParams()
+{
+    mParams.Clear();
+    return NOERROR;
+}
+
 } // namespace como
