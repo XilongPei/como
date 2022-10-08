@@ -165,7 +165,7 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
  * Return Values:
  *     none
  */
-void CMemPool::Free(void* p)
+void CMemPool::Free(void *p)
 {
     if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize))) {
         struct _Unit *pCurUnit = (struct _Unit *)((char *)p - sizeof(struct _Unit));
@@ -194,7 +194,7 @@ void CMemPool::Free(void* p)
  * Return Values:
  *     whether p in this CMemPool
  */
-bool CMemPool::CheckExist(void* p)
+bool CMemPool::CheckExist(void *p)
 {
     if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize)))
         return true;
@@ -222,7 +222,7 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
     , m_g_lUnitNum(0)
     , m_g_lUnitSize(0)
 {
-    m_MemPoolSet = (MemPoolItem*)calloc(num, sizeof(MemPoolItem));
+    m_MemPoolSet = (MemPoolItem *)calloc(num, sizeof(MemPoolItem));
     if (nullptr != m_MemPoolSet) {
         for (size_t i = 0;  i < num;  i++) {
             m_MemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum,
@@ -255,12 +255,14 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num,
 
 bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
 {
-    if ((0 == lUnitNum ) || (0 == lUnitSize))
+    if ((0 == lUnitNum ) || (0 == lUnitSize)) {
         return false;
+    }
 
     g_MemPool = new CMemPool(lUnitNum, lUnitSize);
-    if (nullptr == g_MemPool)
+    if (nullptr == g_MemPool) {
         return false;
+    }
 
     m_g_lUnitNum = lUnitNum;
     m_g_lUnitSize = lUnitSize;
@@ -369,7 +371,7 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
  * Return Values:
  *     whether memory P is freed.
  */
-bool CMemPoolSet::Free(void* p)
+bool CMemPoolSet::Free(void *p)
 {
     for (size_t i = 0;  i < m_ItemNum;  i++) {
         if (m_MemPoolSet[i].memPool->CheckExist(p)) {

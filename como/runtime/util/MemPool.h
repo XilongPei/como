@@ -49,8 +49,8 @@ public:
     ~CMemPool();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
-    void Free(void* p);
-    bool CheckExist(void* p);
+    void Free(void *p);
+    bool CheckExist(void *p);
     bool CheckFull();
 
 protected:
@@ -73,7 +73,7 @@ public:
     ~CMemPoolSet();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
-    bool Free(void* p);
+    bool Free(void *p);
 
     bool CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize);
 
