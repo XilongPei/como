@@ -225,8 +225,9 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
     m_MemPoolSet = (MemPoolItem *)calloc(num, sizeof(MemPoolItem));
     if (nullptr != m_MemPoolSet) {
         for (size_t i = 0;  i < num;  i++) {
-            m_MemPoolSet[i].memPool = new CMemPool(memPoolItems[i].lUnitNum,
-                                                     memPoolItems[i].lUnitSize);
+            m_MemPoolSet[i].memPool = new CMemPool(nullptr,
+                                                   memPoolItems[i].lUnitNum,
+                                                   memPoolItems[i].lUnitSize);
             if (nullptr == m_MemPoolSet[i].memPool) {
                 for (size_t j = 0;  j < i;  j++) {
                     delete m_MemPoolSet[i].memPool;
