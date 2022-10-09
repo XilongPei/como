@@ -31,24 +31,34 @@
 
 namespace como {
 
-CircleBuffer<char> *logCircleBuf = nullptr;
-CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
+// If the definitions of these two global variables are placed in class
+// RuntimeMonitor, it will require references to the header CircleBuffer.h,
+// which will make header RuntimeMonitor.h cumbersome
+static CircleBuffer<char> *logCircleBuf = nullptr;
+static CircleBuffer<char> *loggerOutputCircleBuf = nullptr;
+
 Mutex RuntimeMonitor::rtmInvokeMethodServerQueue_Lock;
 Mutex RuntimeMonitor::rtmInvokeMethodClientQueue_Lock;
 
 lwrb_t *RuntimeMonitor::rtmLwRB_ServerQueue;
 lwrb_t *RuntimeMonitor::rtmLwRB_ClientQueue;
 
-RuntimeMonitor::RuntimeMonitor() {
-    //
+RuntimeMonitor::RuntimeMonitor()
+{
+    logCircleBuf = nullptr;
+    loggerOutputCircleBuf = nullptr;
 }
 
-RuntimeMonitor::~RuntimeMonitor() {
+RuntimeMonitor::~RuntimeMonitor()
+{
     if (nullptr == logCircleBuf)
         return;
 
     delete logCircleBuf;
     delete loggerOutputCircleBuf;
+
+    logCircleBuf = nullptr;
+    loggerOutputCircleBuf = nullptr;
 
     free(rtmLwRB_ServerQueue->buff);
     free(rtmLwRB_ClientQueue->buff);
