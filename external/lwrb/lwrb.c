@@ -31,7 +31,7 @@
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  * Version:         v3.0.0-rc1
  */
-#include "lwrb.h"
+#include "lwrb/lwrb.h"
 
 /* Memory set and copy functions */
 #define BUF_MEMSET      memset
@@ -522,4 +522,42 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     atomic_store_explicit(&buff->w, w, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
+}
+
+/**
+ * Write in units of record
+ */
+size_t lwrb_rec_write(lwrb_t* buff, const void* data, size_t btw)
+{
+    if (lwrb_get_free(buff) < (sizeof(size_t) + btw)) {
+        return 0;
+    }
+
+    if (lwrb_write(buff, &btw, sizeof(size_t)) != sizeof(size_t)) {
+        return 0;
+    }
+
+    return lwrb_write(buff, data, btw);
+
+}
+
+/**
+ * Read in units of record
+ */
+size_t lwrb_rec_read(lwrb_t* buff, void* data, size_t btr)
+{
+    size_t btsize;
+    if (lwrb_peek(buff, 0, &btsize, sizeof(size_t)) != sizeof(size_t)) {
+        return 0;
+    }
+
+    if ((btr < btsize) || (lwrb_get_full(buff) < (sizeof(size_t) + btsize))) {
+        return 0;
+    }
+
+    if (lwrb_skip(buff, sizeof(size_t)) != sizeof(size_t)) {
+        return 0;
+    }
+
+    return lwrb_read(buff, data, btsize);
 }

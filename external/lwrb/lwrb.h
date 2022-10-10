@@ -115,6 +115,10 @@ void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
 size_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
 size_t lwrb_advance(lwrb_t* buff, size_t len);
 
+/* Read/Write record functions */
+size_t lwrb_rec_write(lwrb_t* buff, const void* data, size_t btw);
+size_t lwrb_rec_read(lwrb_t* buff, void* data, size_t btr);
+
 /**
  * \}
  */
