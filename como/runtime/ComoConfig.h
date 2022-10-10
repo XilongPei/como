@@ -105,6 +105,8 @@ public:
     static int numSharedBuffer;
     static int unitNumGeneralBuffer;
     static int unitSizeGeneralBuffer;
+
+    static int MAX_SIZE_Parcel;
 };
 
 // defined in VerifiedU64Pointer.cpp

@@ -1012,19 +1012,21 @@ ECode CZMQParcel::GrowData(
 
     Long newSize = ((mDataSize + len) * 3) / 2;
     return (newSize <= mDataSize) ?
-            E_OUT_OF_MEMORY_ERROR : ContinueWrite(newSize);
+                                E_OUT_OF_MEMORY_ERROR : ContinueWrite(newSize);
 }
 
 ECode CZMQParcel::RestartWrite(
     /* [in] */ Long desired)
 {
-    if (desired < 0) {
+    if ((desired < 0) || (desired > ComoConfig::MAX_SIZE_Parcel)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (desired < MAX_BUFFER_SIZE) {
-        if (mData != mBuffer)
+        if (mData != mBuffer) {
             free(mData);
+        }
+
         mData = mBuffer;
         mDataCapacity = MAX_BUFFER_SIZE;
         mDataSize = mDataPos = 0;
@@ -1056,7 +1058,7 @@ ECode CZMQParcel::RestartWrite(
 ECode CZMQParcel::ContinueWrite(
     /* [in] */ Long desired)
 {
-    if (desired < 0) {
+    if ((desired < 0) || (desired > ComoConfig::MAX_SIZE_Parcel)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

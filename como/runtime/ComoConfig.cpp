@@ -115,4 +115,6 @@ int ComoConfig::numSharedBuffer = 3;
 int ComoConfig::unitNumGeneralBuffer = 0;
 int ComoConfig::unitSizeGeneralBuffer = 0;
 
+int ComoConfig::MAX_SIZE_Parcel = 4 * 1024 * 1024;      // 4 MB
+
 } // namespace como
