@@ -77,7 +77,11 @@ public:
 
     bool CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize);
 
+#ifndef __IN_COMOTEST__
 private:
+#else
+public:
+#endif
     MemPoolItem    *m_MemPoolSet;
     size_t          m_ItemNum;
 
