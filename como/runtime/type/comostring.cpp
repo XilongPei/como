@@ -213,12 +213,16 @@ Integer String::GetUTF16Length(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         p += byteSize;
         if (charCount >= start) {
             utf16Count++;
-            if (unicode > 0xFFFF) utf16Count++; // this will be a surrogate pair in utf16
+            if (unicode > 0xFFFF) {
+                utf16Count++;   // this will be a surrogate pair in utf16
+            }
         }
         charCount++;
     }
@@ -241,7 +245,7 @@ Long String::GetHashCode() const
 
     const char* string = mString;
     if (string) {
-        for ( ; *string; ++string) {
+        for ( ;  *string;  ++string) {
             hash = hash * seed + (*string);
         }
     }
@@ -305,9 +309,9 @@ ECode String::GetChars(
     /* [in] */ Integer dstBegin) const
 {
     if (srcBegin < 0 || srcEnd > GetLength() ||
-            srcEnd < srcBegin || dst.IsNull() || dstBegin < 0 ||
-            dstBegin > dst.GetLength() ||
-            (srcEnd - srcBegin > dst.GetLength() - dstBegin)) {
+                        srcEnd < srcBegin || dst.IsNull() || dstBegin < 0 ||
+                        dstBegin > dst.GetLength() ||
+                        (srcEnd - srcBegin > dst.GetLength() - dstBegin)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -344,8 +348,10 @@ Array<Short> String::GetUTF16Chars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         if (count >= start) {
             if (unicode <= 0xFFFF) {
                 utf16Array[i++] = unicode;
@@ -353,8 +359,8 @@ Array<Short> String::GetUTF16Chars(
             else {
                 // Multiple UTF16 characters with surrogates
                 unicode =  unicode - 0x10000;
-                utf16Array[i++] = (Short)((unicode >> 10) + 0xD800);
-                utf16Array[i++] = (Short)((unicode & 0x3FF) + 0xDC00);
+                utf16Array[i++] = (Short)((unicode >> 10) + 0xD800U);
+                utf16Array[i++] = (Short)((unicode & 0x3FF) + 0xDC00U);
             }
         }
         p += byteSize;
@@ -371,9 +377,9 @@ ECode String::GetUTF16Chars(
     /* [in] */ Integer dstBegin) const
 {
     if (srcBegin < 0 || srcEnd > GetLength() ||
-            srcEnd < srcBegin || dst.IsNull() || dstBegin < 0 ||
-            dstBegin > dst.GetLength() ||
-            (srcEnd - srcBegin > dst.GetLength() - dstBegin)) {
+                        srcEnd < srcBegin || dst.IsNull() || dstBegin < 0 ||
+                        dstBegin > dst.GetLength() ||
+                        (srcEnd - srcBegin > dst.GetLength() - dstBegin)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -382,8 +388,10 @@ ECode String::GetUTF16Chars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         if (count >= srcBegin && count < srcEnd) {
             if (unicode <= 0xFFFF) {
                 dst[i++] = unicode;
@@ -391,8 +399,8 @@ ECode String::GetUTF16Chars(
             else {
                 // Multiple UTF16 characters with surrogates
                 unicode =  unicode - 0x10000;
-                dst[i++] = (Short)((unicode >> 10) + 0xD800);
-                dst[i++] = (Short)((unicode & 0x3FF) + 0xDC00);
+                dst[i++] = (Short)((unicode >> 10) + 0xD800U);
+                dst[i++] = (Short)((unicode & 0x3FF) + 0xDC00U);
             }
             if (count == srcEnd - 1)
                 break;
@@ -442,8 +450,8 @@ Boolean String::RegionMatches(
     Integer to = toffset;
     Integer po = ooffset;
     if ((ooffset < 0) || (toffset < 0)
-            || (toffset > GetLength() - len)
-            || (ooffset > other.GetLength() - len)) {
+                                    || (toffset > GetLength() - len)
+                                    || (ooffset > other.GetLength() - len)) {
         return false;
     }
     Integer tsize, osize;
@@ -470,8 +478,8 @@ Boolean String::RegionMatchesIgnoreCase(
     Integer to = toffset;
     Integer po = ooffset;
     if ((ooffset < 0) || (toffset < 0)
-            || (toffset > GetLength() - len)
-            || (ooffset > other.GetLength() - len)) {
+                                    || (toffset > GetLength() - len)
+                                    || (ooffset > other.GetLength() - len)) {
         return false;
     }
     Integer tsize, osize;
@@ -481,7 +489,7 @@ Boolean String::RegionMatchesIgnoreCase(
         Char tc = GetCharInternal(tstr, &tsize);
         Char oc = GetCharInternal(ostr, &osize);
         if (tsize != osize || (u_toupper(tc) != u_toupper(oc) &&
-                u_tolower(tc) != u_tolower(oc))) {
+                                            u_tolower(tc) != u_tolower(oc))) {
             return false;
         }
         tstr += tsize;
@@ -497,7 +505,7 @@ String String::Substring(
     if (mString == nullptr)
         return String();
     if (charStart < 0 || charEnd < 0 ||
-        charStart > charEnd || charStart >= GetLength()) {
+                            charStart > charEnd || charStart >= GetLength()) {
         return String("");
     }
 
@@ -509,8 +517,10 @@ String String::Substring(
     const char* p2 = end;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         if (charCount == charStart) {
             p1 = p;
         }
@@ -537,8 +547,9 @@ Integer String::IndexOf(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if ((0 == byteSize) || (p + byteSize >= end))
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
+        }
 
         if (i >= fromCharIndex) {
             if (c == unicode)
@@ -564,8 +575,10 @@ Integer String::IndexOf(
     const char* psub = nullptr;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         if (i >= fromCharIndex && psub == nullptr) {
             psub = strstr(p, string);
             if (psub == nullptr) {
@@ -608,8 +621,7 @@ Integer String::LastIndexOf(
     if (string == nullptr || string[0] == '\0')
         return -1;
 
-    Integer byteIndex = LastByteIndexOfInternal(
-            string, GetByteLength() - 1);
+    Integer byteIndex = LastByteIndexOfInternal(string, GetByteLength() - 1);
     return ToCharIndex(byteIndex);
 }
 
@@ -624,7 +636,7 @@ Integer String::LastIndexOf(
     Integer fromByteIndex = ToByteIndex(
             fromCharIndex, &charByteSize);
     Integer byteIndex = LastByteIndexOfInternal(
-            string, fromByteIndex + charByteSize);
+                                        string, fromByteIndex + charByteSize);
     return ToCharIndex(byteIndex);
 }
 
@@ -671,7 +683,7 @@ String& String::operator=(
         SharedBuffer::GetBufferFromData(mString)->Release();
 
     mString = string != nullptr ?
-        AllocFromUTF8(string, strlen(string)) : nullptr;
+                            AllocFromUTF8(string, strlen(string)) : nullptr;
     mCharCount = 0;
     return *this;
 }
@@ -724,8 +736,10 @@ String String::ToLowerCase() const
     char* dst = nullptr;
     while (('\0' != *p) && (p < end)) {
         Char c = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         Char l = u_tolower(c);
         if (l != c) {
             if (lowerStr.IsNull()) {
@@ -748,8 +762,10 @@ String String::ToUpperCase() const
     char* dst = nullptr;
     while (('\0' != *p) && (p < end)) {
         Char c = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if (byteSize == 0 || p + byteSize >= end) {
             break;
+        }
+
         Char l = u_toupper(c);
         if (l != c) {
             if (upperStr.IsNull()) {
@@ -774,7 +790,7 @@ String String::Replace(
 
     Boolean found = false;
     Array<Char> charArray = GetChars();
-    for (Integer i = 0; i < charArray.GetLength(); i++) {
+    for (Integer i = 0;  i < charArray.GetLength();  i++) {
         if (charArray[i] == oldChar) {
             charArray[i] = newChar;
             found = true;
@@ -857,7 +873,7 @@ String String::TrimStart() const
         ++start;
     }
     return start - mString >= byteSize ? String(nullptr) :
-            String(start, mString + byteSize - start);
+                                    String(start, mString + byteSize - start);
 }
 
 String String::TrimEnd() const
@@ -869,8 +885,7 @@ String String::TrimEnd() const
     while (isspace(*end) && end >= mString) {
         --end;
     }
-    return end < mString ? String(nullptr) :
-            String(mString, end - mString + 1);
+    return end < mString ? String(nullptr) : String(mString, end - mString + 1);
 }
 
 Integer String::ToByteIndex(
@@ -999,7 +1014,7 @@ Integer String::GetByteSize(
     /* [in] */ Char c)
 {
     if ((c > MAX_CODE_POINT) ||
-            (MIN_HIGH_SURROGATE <= c && c <= MAX_LOW_SURROGATE)) {
+                        (MIN_HIGH_SURROGATE <= c && c <= MAX_LOW_SURROGATE)) {
         return 0;
     }
 
@@ -1028,7 +1043,7 @@ ECode String::WriteCharArray(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
     length = (start + length) <= charArray.GetLength() ?
-            length : (charArray.GetLength() - start);
+                                        length : (charArray.GetLength() - start);
 
     Integer totalByteSize = 0;
     for (Integer i = start; i < start + length; i++) {
@@ -1193,7 +1208,7 @@ Char String::GetCharInternal(
     Char result = first_char;
     Char mask, to_ignore_mask;
     Integer num_to_read = 0;
-    for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0xFFFFFF80;
+    for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0xFFFFFF80U;
          (first_char & mask);
          num_to_read++, to_ignore_mask |= mask, mask >>= 1) {
         // 0x3F == 00111111
@@ -1205,8 +1220,8 @@ Char String::GetCharInternal(
     return result;
 }
 
-static const Char kByteMask               = 0x000000BF;
-static const Char kByteMark               = 0x00000080;
+static const Char kByteMask               = 0x000000BFU;
+static const Char kByteMark               = 0x00000080U;
 
 // Mask used to set appropriate bits in first byte of UTF-8 sequence,
 // indexed by number of bytes in the sequence.
@@ -1219,7 +1234,7 @@ static const Char kByteMark               = 0x00000080;
 // 11110yyy 10yyxxxx 10xxxxxx 10xxxxxx
 // -> (f0-f7)(80-bf)(80-bf)(80-bf) 21bit. Bit mask is 0x000000F0
 static const Char kFirstByteMark[] = {
-    0x00000000, 0x00000000, 0x000000C0, 0x000000E0, 0x000000F0
+    0x00000000U, 0x00000000U, 0x000000C0U, 0x000000E0U, 0x000000F0U
 };
 
 void String::WriteUTF8Bytes(
@@ -1230,10 +1245,17 @@ void String::WriteUTF8Bytes(
     dst += bytes;
     switch (bytes) {
         /* note: everything falls through. */
-        case 4: *--dst = (Byte)((c | kByteMark) & kByteMask); c >>= 6;
-        case 3: *--dst = (Byte)((c | kByteMark) & kByteMask); c >>= 6;
-        case 2: *--dst = (Byte)((c | kByteMark) & kByteMask); c >>= 6;
-        case 1: *--dst = (Byte)(c | kFirstByteMark[bytes]);
+        case 4:
+            *--dst = (Byte)((c | kByteMark) & kByteMask);
+            c >>= 6;
+        case 3:
+            *--dst = (Byte)((c | kByteMark) & kByteMask);
+            c >>= 6;
+        case 2:
+            *--dst = (Byte)((c | kByteMark) & kByteMask);
+            c >>= 6;
+        case 1:
+            *--dst = (Byte)(c | kFirstByteMark[bytes]);
     }
 }
 
