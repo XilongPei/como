@@ -74,6 +74,7 @@ COPY(util ${UTIL_SRC_DIR}/ComoFunctionSafetyObject.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/mistring.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/VerifiedU64Pointer.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/MemPool.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/mac.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comosp.h
@@ -85,6 +86,7 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/mutex.h
     ${UTIL_SRC_DIR}/mistring.h
     ${UTIL_SRC_DIR}/MemPool.h
+    ${UTIL_SRC_DIR}/mac.h
 )
 
 install(FILES
