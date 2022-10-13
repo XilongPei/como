@@ -24,6 +24,10 @@ namespace como {
 
 static void CheckpointParamsWalker(String& str, String& name, IObject*& intf)
 {
+    if (nullptr == intf) {
+        return;
+    }
+
     String info;
     intf->ToString(info);
     str += "{\"" + name + "\":\"" + info + "\"},";
@@ -48,6 +52,13 @@ ECode CCheckpoint::Execute()
     // tell RuntimeMonitor
     RuntimeMonitor::WriteLog(strBuffer.string(), strBuffer.GetByteLength());
 
+    return NOERROR;
+}
+
+ECode CCheckpoint::ExecuteStr(
+    /* [in] */ const String& strBuffer)
+{
+    RuntimeMonitor::WriteLog(strBuffer.string(), strBuffer.GetByteLength());
     return NOERROR;
 }
 
@@ -78,8 +89,9 @@ ECode CCheckpoint::GetParam(
     /* [out] */ AutoPtr<IObject>& object)
 {
     object = mParams.Get(name);
-    if (nullptr == object)
+    if (nullptr == object) {
         return E_NOT_FOUND_EXCEPTION;
+    }
 
     return NOERROR;
 }

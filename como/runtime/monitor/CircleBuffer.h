@@ -56,7 +56,7 @@ public:
 
     ~CircleBuffer()
     {
-        if (m_pBuf) {
+        if (nullptr != m_pBuf) {
             delete[] m_pBuf;
             m_pBuf = nullptr;
         }
@@ -108,8 +108,9 @@ public:
         Mutex::AutoLock lock(m_Lock);
 
         // Only data less than half the capacity can be written
-        if ((count <= 0) || ((count + count) >= m_nBufSize))
+        if ((count <= 0) || ((count + count) >= m_nBufSize)) {
             return 0;
+        }
 
         // GetLength() first
         unsigned int length;
@@ -124,8 +125,9 @@ public:
 
         if (m_nBufSize - length < count) {
             // clear some buffer to hold new content
-            if (DiscardedRead(count) < count)
+            if (DiscardedRead(count) < count) {
                 return 0;
+            }
         }
 
         m_bEmpty = false;
@@ -261,8 +263,9 @@ public:
     {
         Mutex::AutoLock lock(m_Lock);
 
-        if (count <= 0)
+        if (count <= 0) {
             return 0;
+        }
 
         m_bFull = false;
 
@@ -359,8 +362,9 @@ public:
 
     int DiscardedRead(int count)
     {
-        if (count > m_nBufSize)
+        if (count > m_nBufSize) {
             return -1;
+        }
 
         // When buffer if full
         if (m_nReadPos == m_nWritePos) {

@@ -35,6 +35,9 @@ public:
 
     ECode Execute() override;
 
+    ECode ExecuteStr(
+        /* [in] */ const String& strBuffer) override;
+
     ECode SetTransId(
         /* [in] */ Long transId) override;
 
