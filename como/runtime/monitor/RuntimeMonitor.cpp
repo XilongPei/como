@@ -51,8 +51,9 @@ RuntimeMonitor::RuntimeMonitor()
 
 RuntimeMonitor::~RuntimeMonitor()
 {
-    if (nullptr == logCircleBuf)
+    if (nullptr == logCircleBuf) {
         return;
+    }
 
     delete logCircleBuf;
     delete loggerOutputCircleBuf;
@@ -312,8 +313,9 @@ static ECode SerializeComponentID(
 
     Array<Byte> arrCid_(sizeof(ComponentID) + strlen(mUri_) + 1);
     Byte *pByte = arrCid_.GetPayload();
-    if (nullptr == pByte)
+    if (nullptr == pByte) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     memcpy(pByte, cid, sizeof(ComponentID));
     strcpy((char*)(pByte + sizeof(ComponentID)), mUri_);
@@ -345,8 +347,9 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
     }
 
     RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
-    if (nullptr == rtm_InvokeMethod)
+    if (nullptr == rtm_InvokeMethod) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -440,8 +443,9 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     AutoPtr<IMetaCoclass> klass;
     ECode ec = CoGetCoclassMetadata(rtm_InvokeMethod->coclassID, nullptr, klass);
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         return ec;
+    }
 
     strBuffer = "{\"tag\":\"RM_IM_\",";
 
@@ -519,8 +523,9 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     Integer len = sizeof(RTM_Command) + bufferSize;
 
     if (nullptr != bytesRtmCommand) {
-        if (len > bytesSize)
+        if (len > bytesSize) {
             return nullptr;
+        }
         rtmCommand = (RTM_Command*)bytesRtmCommand;
     }
     else {
@@ -545,8 +550,9 @@ RTM_Command* RuntimeMonitor::GenRtmCommand(RTM_CommandType command, Short param,
     Integer len = sizeof(RTM_Command) + strlen(cstr) + 1;
 
     if (nullptr != bytesRtmCommand) {
-        if (len > bytesSize)
+        if (len > bytesSize) {
             return nullptr;
+        }
         rtmCommand = (RTM_Command*)bytesRtmCommand;
     }
     else {
