@@ -106,8 +106,9 @@ public:
     static ECode RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer);
 #endif
 
-    static constexpr int RM_LOG_BUFFER_SIZE = 4096;
-    static constexpr int RTM_INVOKEMETHOD_QUEUE_SIZE = 512;
+    static constexpr int RTM_LOG_BUFFER_SIZE = 32 * 1024;
+    static constexpr int RTM_INVOKEMETHOD_QUEUE_SIZE = 16 * 1024;
+    static constexpr int RTM_MAX_PARCEL_SIZE = 4 * 1024;
 
     static ECode GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
                                  IInterface *intf, AutoPtr<IMetaMethod>& method);

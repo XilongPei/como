@@ -71,7 +71,7 @@ RuntimeMonitor::~RuntimeMonitor()
 
 ECode RuntimeMonitor::StartRuntimeMonitor()
 {
-    logCircleBuf = new CircleBuffer<char>(RM_LOG_BUFFER_SIZE);
+    logCircleBuf = new CircleBuffer<char>(RTM_LOG_BUFFER_SIZE);
     if (nullptr != logCircleBuf) {
         ECode ec = ECode_CircleBuffer(logCircleBuf);
         if (FAILED(ec)) {
@@ -81,7 +81,7 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
     else
         return E_OUT_OF_MEMORY_ERROR;
 
-    loggerOutputCircleBuf = new CircleBuffer<char>(RM_LOG_BUFFER_SIZE);
+    loggerOutputCircleBuf = new CircleBuffer<char>(RTM_LOG_BUFFER_SIZE);
     if (nullptr != loggerOutputCircleBuf) {
         ECode ec = ECode_CircleBuffer(loggerOutputCircleBuf);
         if (FAILED(ec)) {
@@ -346,10 +346,20 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    RTM_InvokeMethod *rtm_InvokeMethod = (RTM_InvokeMethod*)malloc(len);
+    RTM_InvokeMethod *rtm_InvokeMethod;
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    char buf[RTM_MAX_PARCEL_SIZE];
+    if (len > RTM_MAX_PARCEL_SIZE) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    rtm_InvokeMethod = reinterpret_cast<RTM_InvokeMethod *>(buf);
+#else
+    rtm_InvokeMethod = (RTM_InvokeMethod *)malloc(len);
     if (nullptr == rtm_InvokeMethod) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+#endif
 
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -379,23 +389,31 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
         while ((lwrb_get_free(rtmLwRB_ClientQueue) < rtm_InvokeMethod->length) &&
                             (lwrb_get_full(rtmLwRB_ClientQueue) > sizeof(size_t))) {
             if (lwrb_peek(rtmLwRB_ClientQueue, 0, &len, sizeof(size_t)) != sizeof(size_t)) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
                 free(rtm_InvokeMethod);
+#endif
                 return E_OUT_OF_MEMORY_ERROR;
             }
 
             if (lwrb_advance(rtmLwRB_ClientQueue, len) != len) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
                 free(rtm_InvokeMethod);
+#endif
                 return E_OUT_OF_MEMORY_ERROR;
             }
         }
 
         if (lwrb_write(rtmLwRB_ClientQueue, rtm_InvokeMethod,
                        rtm_InvokeMethod->length) < rtm_InvokeMethod->length) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
             free(rtm_InvokeMethod);
+#endif
             return E_OUT_OF_MEMORY_ERROR;
         }
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
         free(rtm_InvokeMethod);
+#endif
     }
     else {
         Mutex::AutoLock lock(rtmInvokeMethodServerQueue_Lock);
@@ -403,23 +421,31 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
         while ((lwrb_get_free(rtmLwRB_ServerQueue) < rtm_InvokeMethod->length) &&
                             (lwrb_get_full(rtmLwRB_ServerQueue) > sizeof(size_t))) {
             if (lwrb_peek(rtmLwRB_ServerQueue, 0, &len, sizeof(size_t)) != sizeof(size_t)) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
                 free(rtm_InvokeMethod);
+#endif
                 return E_OUT_OF_MEMORY_ERROR;
             }
 
             if (lwrb_advance(rtmLwRB_ServerQueue, len) != len) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
                 free(rtm_InvokeMethod);
+#endif
                 return E_OUT_OF_MEMORY_ERROR;
             }
         }
 
         if (lwrb_write(rtmLwRB_ServerQueue, rtm_InvokeMethod,
                        rtm_InvokeMethod->length) < rtm_InvokeMethod->length) {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
             free(rtm_InvokeMethod);
+#endif
             return E_OUT_OF_MEMORY_ERROR;
         }
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
         free(rtm_InvokeMethod);
+#endif
     }
 
     return NOERROR;
