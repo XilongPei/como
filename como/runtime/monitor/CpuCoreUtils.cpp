@@ -30,8 +30,9 @@ int CpuCoreUtils::SetThreadAffinity(pthread_t thread, int iCore)
 {
     cpu_set_t cpuset;
 
-    if (0 == thread)
+    if (0 == thread) {
         thread = pthread_self();
+    }
 
     CPU_ZERO(&cpuset);
     CPU_SET(iCore, &cpuset);
@@ -63,10 +64,10 @@ typedef struct {
 
 typedef struct {
     unsigned int pid;
-    unsigned long utime;  //user time
-    unsigned long stime;  //kernel time
-    unsigned long cutime; //all user time
-    unsigned long cstime; //all dead time
+    unsigned long utime;    // user time
+    unsigned long stime;    // kernel time
+    unsigned long cutime;   // all user time
+    unsigned long cstime;   // all dead time
 } ProcCpuOccupy;
 
 // Gets the pointer to the beginning of item n
@@ -127,8 +128,9 @@ unsigned long CpuCoreUtils::GetCpuProcOccupy(unsigned int pid) {
         return 0;
     }
 
-    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
         return 0;
+    }
 
     sscanf(line_buff, "%u", &t.pid);
     const char *q = get_items(line_buff, PROCESS_ITEM);
@@ -199,12 +201,14 @@ unsigned int CpuCoreUtils::GetProcMem(unsigned int pid)
     char name[64];
     int vmrss;
     for (int i = 0; i < VMRSS_LINE - 1; i++) {
-        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
             return 0;
+        }
     }
 
-    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
         return 0;
+    }
 
     sscanf(line_buff, "%s %d", name, &vmrss);
     fclose(fd);
@@ -228,12 +232,14 @@ unsigned int CpuCoreUtils::GetProcVirtualmem(unsigned int pid)
     char name[64];
     int vmsize;
     for (int i = 0; i < VMSIZE_LINE - 1; i++) {
-        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+        if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
             return 0;
+        }
     }
 
-    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr)
+    if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
         return 0;
+    }
 
     sscanf(line_buff, "%s %d", name, &vmsize);
     fclose(fd);

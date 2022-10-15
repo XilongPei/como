@@ -68,8 +68,9 @@ static String& TripleHexDump(Triple& triple, String& strBuffer, int elemSize)
     const unsigned char *pc = (const unsigned char *)triple.mData;
     for (int i = 0;  i < triple.mSize;) {
         if ((i % perLine) == 0) {
-            if (i != 0)
+            if (i != 0) {
                 strBuffer += String("\n");
+            }
         }
 
         switch (elemSize) {
