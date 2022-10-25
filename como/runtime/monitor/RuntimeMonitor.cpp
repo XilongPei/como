@@ -69,6 +69,11 @@ RuntimeMonitor::~RuntimeMonitor()
     lwrb_free(rtmLwRB_ClientQueue);
 }
 
+/**
+ * If the current environment is COMO_FUNCTION_SAFETY_RTOS, applying for dynamic
+ * memory in this function does not matter, because it is the job of the system
+ * initialization phase.
+ */
 ECode RuntimeMonitor::StartRuntimeMonitor()
 {
     logCircleBuf = new CircleBuffer<char>(RTM_LOG_BUFFER_SIZE);
@@ -78,18 +83,23 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
             return ec;
         }
     }
-    else
+    else {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     loggerOutputCircleBuf = new CircleBuffer<char>(RTM_LOG_BUFFER_SIZE);
     if (nullptr != loggerOutputCircleBuf) {
         ECode ec = ECode_CircleBuffer(loggerOutputCircleBuf);
         if (FAILED(ec)) {
+            delete logCircleBuf;
+            logCircleBuf = nullptr;
+
             return ec;
         }
     }
-    else
+    else {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     // Collect the logs generated during COMO running for monitoring by RuntimeMonitor
     Logger::SetLoggerWriteLog(WriteLog);
@@ -97,15 +107,29 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
     void *buff_data;
     buff_data = malloc(RTM_INVOKEMETHOD_QUEUE_SIZE);
     if (nullptr == buff_data) {
+        delete logCircleBuf;
+        delete loggerOutputCircleBuf;
+
+        logCircleBuf = nullptr;
+        loggerOutputCircleBuf = nullptr;
+
         return E_OUT_OF_MEMORY_ERROR;
     }
     (void)lwrb_init(rtmLwRB_ServerQueue, buff_data, RTM_INVOKEMETHOD_QUEUE_SIZE);
 
-    buff_data = malloc(RTM_INVOKEMETHOD_QUEUE_SIZE);
-    if (nullptr == buff_data) {
+    void *buff_data2;
+    buff_data2 = malloc(RTM_INVOKEMETHOD_QUEUE_SIZE);
+    if (nullptr == buff_data2) {
+        delete logCircleBuf;
+        delete loggerOutputCircleBuf;
+
+        logCircleBuf = nullptr;
+        loggerOutputCircleBuf = nullptr;
+        free(buff_data);
+
         return E_OUT_OF_MEMORY_ERROR;
     }
-    (void)lwrb_init(rtmLwRB_ClientQueue, buff_data, RTM_INVOKEMETHOD_QUEUE_SIZE);
+    (void)lwrb_init(rtmLwRB_ClientQueue, buff_data2, RTM_INVOKEMETHOD_QUEUE_SIZE);
 
     return NOERROR;
 }
