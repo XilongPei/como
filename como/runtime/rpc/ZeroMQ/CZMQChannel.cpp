@@ -449,7 +449,12 @@ ECode CZMQChannel::StartListening(
 
         Logger::D("CZMQChannel::StartListening",
                                              "endpoint: %s", mEndpoint.c_str());
-        TPZA_Executor::GetInstance()->RunTask(worker);
+
+        if (TPZA_Executor::GetInstance()->RunTask(worker) < 0) {
+            Logger::E("CZMQChannel::StartListening",
+                                                "Too much Task in WorkerList");
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
 
     return NOERROR;

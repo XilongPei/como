@@ -75,6 +75,8 @@ CpuInvokeDsa ComoConfig::cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM] = {nullptr};
 
 int ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM = 1;
 
+int ComoConfig::MAX_SIZE_WorkerList = 100;
+
 char *ComoConfig::localhostTcpEndpoint = (char*)"tcp://127.0.0.1:8083";
 char *ComoConfig::localhostInprocEndpoint = (char*)"inproc://workers";
 

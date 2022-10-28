@@ -84,6 +84,8 @@ public:
 
     static int ThreadPoolZmqActor_MAX_THREAD_NUM;
 
+    static int MAX_SIZE_WorkerList;
+
     static CpuInvokeDsa cpuInvokeDsa[MAX_DSA_IN_ONE_SYSTEM];
 
     static std::map<std::string, ServerNodeInfo*> ServerNameEndpointMap;

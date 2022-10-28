@@ -637,6 +637,10 @@ int ThreadPoolZmqActor::AddTask(
         mWorkerList[i] = task;
     }
     else {
+        if (i >= ComoConfig::MAX_SIZE_WorkerList) {
+            return -1;
+        }
+
         mWorkerList.push_back(task);
     }
     REFCOUNT_ADD(task);
