@@ -81,8 +81,9 @@ ECode RegisterExportObject(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (0 != registry.Put(object, stub, value))
+    if (0 != registry.Put(object, stub, value)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     return NOERROR;
 }
@@ -97,7 +98,7 @@ ECode UnregisterExportObject(
 
     HashMapCache<IObject*, IStub*>& registry = (type == RPCType::Local) ?
                                    sLocalExportRegistry : sRemoteExportRegistry;
-    Mutex& registryLock = type == (RPCType::Local) ?
+    Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
@@ -123,7 +124,7 @@ ECode UnregisterExportObjectByHash(
 {
     HashMapCache<IObject*, IStub*>& registry = (type == RPCType::Local) ?
                                    sLocalExportRegistry : sRemoteExportRegistry;
-    Mutex& registryLock = type == (RPCType::Local) ?
+    Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
@@ -131,8 +132,9 @@ ECode UnregisterExportObjectByHash(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByHash(hash))
+    if (! registry.RemoveByHash(hash)) {
         return E_NOT_FOUND_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -142,7 +144,7 @@ ECode UnregisterExportObjectByChannel(
 {
     HashMapCache<IObject*, IStub*>& registry = (type == RPCType::Local) ?
                                    sLocalExportRegistry : sRemoteExportRegistry;
-    Mutex& registryLock = type == (RPCType::Local) ?
+    Mutex& registryLock = (type == RPCType::Local) ?
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
@@ -150,8 +152,9 @@ ECode UnregisterExportObjectByChannel(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByValue(channel))
+    if (! registry.RemoveByValue(channel)) {
         return E_NOT_FOUND_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -219,8 +222,9 @@ ECode FindExportObject(
     Mutex::AutoLock lock(registryLock);
 
     stub = registry.GetValue(Cmp_PVoid, (void*)ipack);
-    if (nullptr != stub)
+    if (nullptr != stub) {
         return NOERROR;
+    }
 
     return E_NOT_FOUND_EXCEPTION;
 
@@ -264,8 +268,9 @@ ECode RegisterImportObject(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (0 == registry.Put(ipack, object, value))
+    if (0 == registry.Put(ipack, object, value)) {
         return NOERROR;
+    }
 
     return E_OUT_OF_MEMORY_ERROR;
 }
@@ -341,8 +346,9 @@ ECode UnregisterImportObjectByChannel(
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByValue(channel))
+    if (! registry.RemoveByValue(channel)) {
         return E_NOT_FOUND_EXCEPTION;
+    }
     return NOERROR;
 }
 
