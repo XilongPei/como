@@ -160,10 +160,6 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
                 ec = worker->mStub->Invoke(argParcel, resParcel);
 
-                // It shouldn't be WORKER_TASK_FINISH.
-                // A request ends, but the channel still needs to be.
-                worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-
                 // Even if worker->mStub->Invoke fails, the following two
                 // behaviors of taking the return value of Invoke work normally.
                 resParcel->GetData(resData);
@@ -176,6 +172,9 @@ HandleMessage_Method_Invoke:
 
                 // `ReleaseWorker`, This Worker is a daemon
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+
+                // It shouldn't be WORKER_TASK_FINISH.
+                // A request ends, but the channel still needs to be.
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                 break;
             }
@@ -198,8 +197,6 @@ HandleMessage_Method_Invoke:
                 if (nullptr == buf) {
                     Logger::E("threadHandleMessage",
                          "GetComponentMetadata, new CZMQParcel return nullptr");
-                    // `ReleaseWorker`, This Worker is a daemon
-                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_GetComponentMetadata;
                 }
@@ -212,8 +209,6 @@ HandleMessage_Method_Invoke:
                 if (nullptr == argParcel) {
                     Logger::E("threadHandleMessage",
                          "GetComponentMetadata, new CZMQParcel return nullptr");
-                    // `ReleaseWorker`, This Worker is a daemon
-                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     ec = E_OUT_OF_MEMORY_ERROR;
                     goto HandleMessage_GetComponentMetadata;
                 }
@@ -235,7 +230,6 @@ HandleMessage_Method_Invoke:
                     Logger::E("threadHandleMessage",
                                "CoGetComponentMetadata error, ECode: 0x%X", ec);
                     ReleaseCoclassID(cid);
-                    worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
                     goto HandleMessage_GetComponentMetadata;
                 }
 
@@ -436,8 +430,9 @@ HandleMessage_Default:
         }
     }
     else if (iRet < 0) {
-        if (iRet < -1)
+        if (iRet < -1) {
             zmq_msg_close(&msg);
+        }
 
         SendECode(hChannel, socket, NOERROR);
     }
@@ -457,8 +452,9 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 
     if (nullptr == sInstance) {
         sInstance = new TPZA_Executor();
-        if (nullptr != sInstance)
+        if (nullptr != sInstance) {
             threadPool = new ThreadPoolZmqActor(ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM);
+        }
 
         if (nullptr == threadPool) {
             delete sInstance;
@@ -497,8 +493,9 @@ static void CalWaitTime(struct timespec& curTime, int timeout_ms) {
 
 static bool LivingWorker(TPZA_Executor::Worker *worker)
 {
-    if (nullptr == worker)
+    if (nullptr == worker) {
         return false;
+    }
 
     switch (worker->mWorkerStatus) {
         case WORKER_TASK_READY:
