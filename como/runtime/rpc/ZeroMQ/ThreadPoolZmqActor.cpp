@@ -632,12 +632,14 @@ int ThreadPoolZmqActor::AddTask(
         }
     }
     if (i < mWorkerList.size()) {
-        if (nullptr != mWorkerList[i])
+        if (nullptr != mWorkerList[i]) {
             REFCOUNT_RELEASE(mWorkerList[i]);
+        }
         mWorkerList[i] = task;
     }
     else {
         if (i >= ComoConfig::MAX_SIZE_WorkerList) {
+            pthread_mutex_unlock(&pthreadMutex);
             return -1;
         }
 
