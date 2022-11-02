@@ -287,11 +287,11 @@ ECode CZMQParcel::ReadComponentID(
         return E_RUNTIME_EXCEPTION;
     }
 
-    const char* uri = (const char*)ReadInplace(size + 1);
+    const char *uri = (const char *)ReadInplace(size + 1);
     if (nullptr == uri)
         return E_OUT_OF_MEMORY_ERROR;
 
-    value.mUri = (const char*)malloc(size + 1);
+    value.mUri = (const char *)malloc(size + 1);
     if (nullptr != value.mUri) {
         memcpy(const_cast<char*>(value.mUri), uri, size + 1);
     }
@@ -301,14 +301,14 @@ ECode CZMQParcel::ReadComponentID(
 ECode CZMQParcel::WriteComponentID(
     /* [in] */ const ComponentID& value)
 {
-    ComponentID* cid = (ComponentID*)WriteInplace(sizeof(ComponentID));
+    ComponentID *cid = (ComponentID*)WriteInplace(sizeof(ComponentID));
     if (cid == nullptr) {
         return E_RUNTIME_EXCEPTION;
     }
     memcpy(cid, &value, sizeof(ComponentID));
     cid->mUri = nullptr;
 
-    Integer size = value.mUri == nullptr ? 0 : strlen(value.mUri);
+    Integer size = (value.mUri == nullptr) ? 0 : strlen(value.mUri);
     ECode ec = WriteInteger(size);
     if (size > 0 && SUCCEEDED(ec)) {
         ec = Write(value.mUri, size + 1);
@@ -330,7 +330,7 @@ ECode CZMQParcel::ReadInterfaceID(
         return NOERROR;
     }
 
-    ComponentID* cid = (ComponentID*)malloc(sizeof(ComponentID));
+    ComponentID *cid = (ComponentID*)malloc(sizeof(ComponentID));
     if (cid == nullptr) {
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -341,7 +341,7 @@ ECode CZMQParcel::ReadInterfaceID(
 ECode CZMQParcel::WriteInterfaceID(
     /* [in] */ const InterfaceID& value)
 {
-    InterfaceID* iid = (InterfaceID*)WriteInplace(sizeof(InterfaceID));
+    InterfaceID *iid = (InterfaceID*)WriteInplace(sizeof(InterfaceID));
     if (iid == nullptr) {
         return E_RUNTIME_EXCEPTION;
     }
@@ -889,6 +889,7 @@ ECode CZMQParcel::SetDataPosition(
 ECode CZMQParcel::GetPayload(
     /* [out] */ HANDLE& payload)
 {
+    payload = reinterpret_cast<HANDLE>(mData);
     return NOERROR;
 }
 
@@ -896,6 +897,17 @@ ECode CZMQParcel::SetPayload(
     /* [in] */ HANDLE payload,
     /* [in] */ Boolean release)
 {
+    (void)release;
+
+    if (payload == 0) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if ((mData != nullptr) && (mData != mBuffer)) {
+        free(mData);
+    }
+
+    mData = reinterpret_cast<Byte*>(payload);
     return NOERROR;
 }
 

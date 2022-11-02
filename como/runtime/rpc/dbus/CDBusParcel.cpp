@@ -306,7 +306,7 @@ ECode CDBusParcel::WriteComponentID(
     memcpy(cid, &value, sizeof(ComponentID));
     cid->mUri = nullptr;
 
-    Integer size = value.mUri == nullptr ? 0 : strlen(value.mUri);
+    Integer size = (value.mUri == nullptr) ? 0 : strlen(value.mUri);
     ECode ec = WriteInteger(size);
     if (size > 0 && SUCCEEDED(ec)) {
         ec = Write(value.mUri, size + 1);
@@ -328,7 +328,7 @@ ECode CDBusParcel::ReadInterfaceID(
         return NOERROR;
     }
 
-    ComponentID* cid = (ComponentID*)malloc(sizeof(ComponentID));
+    ComponentID *cid = (ComponentID*)malloc(sizeof(ComponentID));
     if (cid == nullptr) {
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -339,7 +339,7 @@ ECode CDBusParcel::ReadInterfaceID(
 ECode CDBusParcel::WriteInterfaceID(
     /* [in] */ const InterfaceID& value)
 {
-    InterfaceID* iid = (InterfaceID*)WriteInplace(sizeof(InterfaceID));
+    InterfaceID *iid = (InterfaceID*)WriteInplace(sizeof(InterfaceID));
     if (iid == nullptr) {
         return E_RUNTIME_EXCEPTION;
     }
@@ -882,6 +882,7 @@ ECode CDBusParcel::SetDataPosition(
 ECode CDBusParcel::GetPayload(
     /* [out] */ HANDLE& payload)
 {
+    payload = reinterpret_cast<HANDLE>(mData);
     return NOERROR;
 }
 
@@ -889,6 +890,17 @@ ECode CDBusParcel::SetPayload(
     /* [in] */ HANDLE payload,
     /* [in] */ Boolean release)
 {
+    (void)release;
+
+    if (payload == 0) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if ((mData != nullptr) && (mData != mBuffer)) {
+        free(mData);
+    }
+
+    mData = reinterpret_cast<Byte*>(payload);
     return NOERROR;
 }
 
