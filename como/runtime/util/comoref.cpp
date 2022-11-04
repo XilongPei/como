@@ -903,6 +903,9 @@ ECode WeakReferenceImpl::GetInterfaceID(
         iid = IID_IWeakReference;
     }
     else {
+        // Just want to assign a value to iid
+        iid = IID_IInterface;
+
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -912,7 +915,7 @@ ECode WeakReferenceImpl::Resolve(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ IInterface** object)
 {
-    if (mObject && mRef->AttemptIncStrong(object)) {
+    if ((nullptr != mObject) && mRef->AttemptIncStrong(object)) {
         *object = mObject->Probe(iid);
         if (*object == nullptr) {
             mObject->Release();
