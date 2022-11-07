@@ -72,12 +72,13 @@ Long Mac::GetMacAddress(Long& lMacAddr)
     return 0;
 }
 
-Long Mac::GetThisServiceId(Long& lMacAddr, unsigned short port)
+Long Mac::GetThisServiceId(unsigned short port)
 {
-    if (0 == g_lMacAddr)
+    if (0 == g_lMacAddr) {
         Mac::GetMacAddress(g_lMacAddr);
+    }
 
-    lMacAddr = g_lMacAddr;
+    Long lMacAddr = g_lMacAddr;
     *(unsigned short *)((unsigned char *)&lMacAddr + 6) = port;
 
     return lMacAddr;

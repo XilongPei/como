@@ -26,7 +26,7 @@ public:
 
     static Long GetMacAddress(Long& lMacAddr);
 
-    static Long GetThisServiceId(Long& lMacAddr, unsigned short port);
+    static Long GetThisServiceId(unsigned short port);
 
     static Long GetUuid64(Long& uuid64);
 };
