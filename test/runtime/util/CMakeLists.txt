@@ -25,8 +25,13 @@ include_directories(
     ${UTIL_OBJ_DIR})
 
 set(SOURCES
-    main.cpp
+    testMempool.cpp
     ${PROJECT_DIR}/como/runtime/util/MemPool.cpp
+)
+
+set(SOURCES1
+    testMac.cpp
+    ${PROJECT_DIR}/como/runtime/util/mac.cpp
 )
 
 IMPORT_LIBRARY(comort.so)
@@ -34,10 +39,18 @@ IMPORT_GTEST()
 
 add_executable(testUtil
     ${SOURCES})
+
+add_executable(testMac
+    ${SOURCES1})
+
+target_link_libraries(testMac comort.so ${GTEST_LIBS})
+add_dependencies(testMac comort gtest gtest_main)
+
 target_link_libraries(testUtil comort.so ${GTEST_LIBS})
 add_dependencies(testUtil comort gtest gtest_main)
 
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
+COPY(testMac ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil
