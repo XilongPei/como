@@ -40,14 +40,14 @@ TEST(Mac, TestMac1)
     }
 }
 
-// TEST(Mac, TestMac2)
-// {
-//     std::unordered_set<Long> st;
-//     for(int i = 0; i < 1000; i++){
-//         lMacAddr = Mac::GetThisServiceId(lMacAddr, i);
-//         std::cout << *(unsigned short *)((unsigned char *)&lMacAddr + 6) << std::endl;
-//     }
-// }
+TEST(Mac, TestMac2)
+{
+    std::unordered_set<Long> st;
+    for(int i = 0; i < 1000; i++){
+        lMacAddr = Mac::GetUuid64(lMacAddr);
+        std::cout << lMacAddr << std::endl;
+    }
+}
 
 
 int main(int argc, char **argv)

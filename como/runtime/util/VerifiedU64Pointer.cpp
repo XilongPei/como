@@ -14,16 +14,6 @@
 // limitations under the License.
 //=========================================================================
 
-#define __TEST_ME__
-
-#ifdef __TEST_ME__
-#include <cstdio>
-#include <bitset>
-#include <string>
-
-using namespace std;
-#endif
-
 #include "VerifiedU64Pointer.h"
 
 namespace como {
@@ -87,7 +77,7 @@ struct _long {
 };
 
 
-unsigned long encodeUnsignedLong(unsigned long l)
+unsigned long VerifiedU64Pointer::encodeUnsignedLong(unsigned long l)
 {
     struct _long *L = (struct _long *)&l;
 
@@ -114,7 +104,7 @@ unsigned long encodeUnsignedLong(unsigned long l)
     return l;
 }
 
-unsigned long decodeUnsignedLong(unsigned long l)
+unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
 {
     struct _long *L = (struct _long *)&l;
     unsigned char b1, b0;
@@ -175,25 +165,3 @@ unsigned long decodeUnsignedLong(unsigned long l)
 }
 
 } // namespace como
-
-#ifdef __TEST_ME__
-int main()
-{
-    string str;
-    bitset<8> bits;
-    bits = (int)'u';
-
-    str = bits.to_string();
-    printf("bits: %s 'u'\n", str.c_str());
-
-    const char *p = str.c_str();
-    unsigned long L1, L2;
-
-    L1 = como::encodeUnsignedLong((unsigned long)p);
-    L2 = como::decodeUnsignedLong(L1);
-
-    printf("p: %lx   L1: %lx   L2: %lx   p-L2: %lx\n", (unsigned long)p, L1, L2, (unsigned long)p-L2);
-
-    printf("sizeof struct _long %ld\n", sizeof(struct como::_long));
-}
-#endif

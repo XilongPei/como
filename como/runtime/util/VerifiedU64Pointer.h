@@ -25,9 +25,9 @@ extern int gFixedMemError;
 class VerifiedU64Pointer
 {
 public:
-    unsigned long encodeUnsignedLong(unsigned long l);
+    static unsigned long encodeUnsignedLong(unsigned long l);
 
-    unsigned long decodeUnsignedLong(unsigned long l);
+    static unsigned long decodeUnsignedLong(unsigned long l);
 };
 
 } // namespace como
