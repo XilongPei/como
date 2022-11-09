@@ -46,34 +46,34 @@ Errors of 1 bit can be corrected, and errors of 2 or more bits can be detected.
 */
 
 struct _byte {
-    unsigned b7:1;      unsigned b6:1;      unsigned b5:1;      unsigned b4:1;
-    unsigned b3:1;      unsigned b2:1;      unsigned b1:1;      unsigned b0:1;
+    unsigned b0:1;      unsigned b1:1;      unsigned b2:1;      unsigned b3:1;
+    unsigned b4:1;      unsigned b5:1;      unsigned b6:1;      unsigned b7:1;
 };
 
 struct _long {
-    unsigned b0_7:1;    unsigned b0_6:1;    unsigned b0_5:1;    unsigned b0_4:1;
-    unsigned b0_3:1;    unsigned b0_2:1;    unsigned b0_1:1;    unsigned b0_0:1;
+    unsigned b0_0:1;    unsigned b0_1:1;    unsigned b0_2:1;    unsigned b0_3:1;
+    unsigned b0_4:1;    unsigned b0_5:1;    unsigned b0_6:1;    unsigned b0_7:1;
 
-    unsigned b1_7:1;    unsigned b1_6:1;    unsigned b1_5:1;    unsigned b1_4:1;
-    unsigned b1_3:1;    unsigned b1_2:1;    unsigned b1_1:1;    unsigned b1_0:1;
+    unsigned b1_0:1;    unsigned b1_1:1;    unsigned b1_2:1;    unsigned b1_3:1;
+    unsigned b1_4:1;    unsigned b1_5:1;    unsigned b1_6:1;    unsigned b1_7:1;
 
-    unsigned b2_7:1;    unsigned b2_6:1;    unsigned b2_5:1;    unsigned b2_4:1;
-    unsigned b2_3:1;    unsigned b2_2:1;    unsigned b2_1:1;    unsigned b2_0:1;
+    unsigned b2_0:1;    unsigned b2_1:1;    unsigned b2_2:1;    unsigned b2_3:1;
+    unsigned b2_4:1;    unsigned b2_5:1;    unsigned b2_6:1;    unsigned b2_7:1;
 
-    unsigned b3_7:1;    unsigned b3_6:1;    unsigned b3_5:1;    unsigned b3_4:1;
-    unsigned b3_3:1;    unsigned b3_2:1;    unsigned b3_1:1;    unsigned b3_0:1;
+    unsigned b3_0:1;    unsigned b3_1:1;    unsigned b3_2:1;    unsigned b3_3:1;
+    unsigned b3_4:1;    unsigned b3_5:1;    unsigned b3_6:1;    unsigned b3_7:1;
 
-    unsigned b4_7:1;    unsigned b4_6:1;    unsigned b4_5:1;    unsigned b4_4:1;
-    unsigned b4_3:1;    unsigned b4_2:1;    unsigned b4_1:1;    unsigned b4_0:1;
+    unsigned b4_0:1;    unsigned b4_1:1;    unsigned b4_2:1;    unsigned b4_3:1;
+    unsigned b4_4:1;    unsigned b4_5:1;    unsigned b4_6:1;    unsigned b4_7:1;
 
-    unsigned b5_7:1;    unsigned b5_6:1;    unsigned b5_5:1;    unsigned b5_4:1;
-    unsigned b5_3:1;    unsigned b5_2:1;    unsigned b5_1:1;    unsigned b5_0:1;
+    unsigned b5_0:1;    unsigned b5_1:1;    unsigned b5_2:1;    unsigned b5_3:1;
+    unsigned b5_4:1;    unsigned b5_5:1;    unsigned b5_6:1;    unsigned b5_7:1;
 
-    unsigned b6_7:1;    unsigned b6_6:1;    unsigned b6_5:1;    unsigned b6_4:1;
-    unsigned b6_3:1;    unsigned b6_2:1;    unsigned b6_1:1;    unsigned b6_0:1;
+    unsigned b6_0:1;    unsigned b6_1:1;    unsigned b6_2:1;    unsigned b6_3:1;
+    unsigned b6_4:1;    unsigned b6_5:1;    unsigned b6_6:1;    unsigned b6_7:1;
 
-    unsigned b7_7:1;    unsigned b7_6:1;    unsigned b7_5:1;    unsigned b7_4:1;
-    unsigned b7_3:1;    unsigned b7_2:1;    unsigned b7_1:1;    unsigned b7_0:1;
+    unsigned b7_0:1;    unsigned b7_1:1;    unsigned b7_2:1;    unsigned b7_3:1;
+    unsigned b7_4:1;    unsigned b7_5:1;    unsigned b7_6:1;    unsigned b7_7:1;
 };
 
 
@@ -137,19 +137,19 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
     }
 
     // one is 0, another is not 0
-    if (b1 ^ b0) {
-        *((unsigned short *)&l + 3) = 0;
-        gUnfixedMemError++;
-        return l;
-    }
+    // if (b1 ^ b0) {
+    //     *((unsigned short *)&l + 3) = 0;
+    //     gUnfixedMemError++;
+    //     return l;
+    // }
 
     // fix the pointer
     int n1, n0;
     unsigned char *b;
     for (n1 = 0;  n1 < 6;  n1++) {
-        if ((1 << n1) & b1) {
+        if ((b1 >> n1) & 1) {
             for (n0 = 0;  n0 < 8;  n0++) {
-                if ((1 << n0) & b0) {
+                if ((b0 >> n0) & 1) {
                     b = (unsigned char *)&l + n1;
                     *b ^= (1 << n0);
                     gFixedMemError++;
@@ -160,7 +160,6 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
 
     // set highest 2 bytes of l to 0
     *((unsigned short *)&l + 3) = 0;
-
     return l;
 }
 
