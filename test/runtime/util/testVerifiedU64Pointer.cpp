@@ -17,7 +17,6 @@ TEST(VerifiedU64Pointer, testVerifiedU64Pointer1)
     bits = (int)'u';
 
     str = bits.to_string();
-    printf("bits: %s 'u'\n", str.c_str());
 
     const char *p = str.c_str();
     unsigned long L1, L2;
@@ -25,7 +24,7 @@ TEST(VerifiedU64Pointer, testVerifiedU64Pointer1)
     L1 = VerifiedU64Pointer::encodeUnsignedLong((unsigned long)p);
     L2 = VerifiedU64Pointer::decodeUnsignedLong(L1);
 
-    printf("p: %lx   L1: %lx   L2: %lx   p-L2: %lx\n", (unsigned long)p, L1, L2, (unsigned long)p-L2);
+    EXPECT_EQ(p, (char *)L2);
 }
 
 TEST(VerifiedU64Pointer, testVerifiedU64Pointer2)
@@ -43,7 +42,7 @@ TEST(VerifiedU64Pointer, testVerifiedU64Pointer2)
         x |= (1 << b);
         *((char *)&L1 + a) ^= x;
         L2 = VerifiedU64Pointer::decodeUnsignedLong(L1);
-        EXPECT_EQ(p, (char *) L2);
+        EXPECT_EQ(p, (char *)L2);
     }
 }
 
