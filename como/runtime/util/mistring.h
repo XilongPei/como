@@ -30,7 +30,7 @@ public:
 
     /**
      *  seperate string s into pieces, such as:
-     *  abc'def'asdafs' into abc   def   azsdafs
+     *  abc'def'asdafs' into abc   def   asdafs
      *  is seed is NULL, alloc the pointer memory, else use seeds
      *  to store it.
      */

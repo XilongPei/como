@@ -120,12 +120,11 @@ TEST(Mistring, testSeperateStr3)
 
 TEST(Mistring, testSeperateStr4)
 {
-    // char str[256] = "12-34-56-78-90";
-    // Integer limit = 5;
-    // Array<String>* arr = new Array<String>();
-    // auto ret = MiString::SeperateStr(str, '-', limit, arr);
-    // cout << arr->GetLength();
-    // EXPECT_EQ(ret, NOERROR);
+    char str[256] = "--12-34-----56-78---90";
+    Integer limit = 5;
+    Array<String>* arr = new Array<String>();
+    auto ret = MiString::SeperateStr(str, '-', limit, arr);
+    EXPECT_EQ(ret, NOERROR);
 }
 
 TEST(Mistring, testShrink1)
@@ -145,8 +144,8 @@ TEST(Mistring, testShrink1)
 
     //test when dstSize is not enough
     const char* str2 = "t  e  s  t   c a   s    e";
-    MiString::shrink(buf, 10, str2);
-    EXPECT_STREQ(buf, "testcase");
+    MiString::shrink(buf, 5, str2);
+    EXPECT_STREQ(buf, "test");
 }
 
 TEST(Mistring, testShrink2)
@@ -169,8 +168,9 @@ TEST(Mistring, testShrink3)
 TEST(Mistring, testcnStrToStr)
 {
     char t[256], s[256];
-    strcpy(s, "abd_t_n_");
+    strcpy(s, "abd_t_n");
     MiString::cnStrToStr(t, s, '_', 256);
+    EXPECT_STREQ(t, "abd\t\n");
 }
 
 TEST(Mistring, teststrZcpy)

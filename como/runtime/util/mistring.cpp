@@ -167,6 +167,8 @@ ECode MiString::SeperateStr(
         result[i++] = String(sz);
     }
 
+    *strArray = result;
+
     return NOERROR;
 }
 
