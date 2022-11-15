@@ -175,20 +175,23 @@ ECode MiString::SeperateStr(
  */
 char *MiString::shrink(char *dst, int dstSize, const char *src)
 {
-    int i, j = 0;
+    int j = 0;
+
+    if (dstSize <= 0)
+        return nullptr;
 
     dstSize--;
     dst[dstSize] = '\0';
-    for (i = 0;  i < dstSize - 1 ;  i++) {
-        if ('\0' == src[i]) {
-            dst[j++] = '\0';
+    for (int i = 0;  i < dstSize;  i++) {
+        if (src[j] == '\0') {
+            dst[i] = '\0';
             break;
         }
-
-        if (! isspace(src[i])) {
-            dst[j++] = src[i];
-        }
+        while (isspace(src[j]))
+            j++;
+        dst[i] = src[j++];
     }
+
     return dst;
 }
 

@@ -39,6 +39,11 @@ set(SOURCES2
     ${PROJECT_DIR}/como/runtime/util/VerifiedU64Pointer.cpp
 )
 
+set(SOURCES3
+    testMistring.cpp
+    ${PROJECT_DIR}/como/runtime/util/mistring.cpp
+)
+
 IMPORT_LIBRARY(comort.so)
 IMPORT_GTEST()
 
@@ -51,6 +56,9 @@ add_executable(testMac
 add_executable(testVerifiedU64Pointer
     ${SOURCES2})
 
+add_executable(testMistring
+    ${SOURCES3})
+
 target_link_libraries(testMac comort.so ${GTEST_LIBS})
 add_dependencies(testMac comort gtest gtest_main)
 
@@ -60,9 +68,14 @@ add_dependencies(testUtil comort gtest gtest_main)
 target_link_libraries(testVerifiedU64Pointer comort.so ${GTEST_LIBS})
 add_dependencies(testVerifiedU64Pointer comort gtest gtest_main)
 
+target_link_libraries(testMistring comort.so ${GTEST_LIBS})
+add_dependencies(testMistring comort gtest gtest_main)
+
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 COPY(testMac ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 COPY(testVerifiedU64Pointer ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
+COPY(testMistring ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
+
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil

@@ -1,0 +1,201 @@
+#include <comosp.h>
+#include <comoobj.h>
+#include <mistring.h>
+#include <gtest/gtest.h>
+#include <iostream>
+
+using namespace como;
+using namespace std;
+
+TEST(Mistring, testWordBreak1)
+{
+    char* str = nullptr;
+    char* word[256];
+    char br[256];
+    int num = 5;
+    strcpy(br, "-");
+    //test when str == nullptr
+    char *ret = MiString::WordBreak(str, num, word, br);
+    EXPECT_EQ(ret, nullptr);
+
+    //test when word == nullptr
+    char ** word1 = nullptr;
+    char str1[256] = "187-1778-9376";
+    ret = MiString::WordBreak(str1, num, word1, br);
+    EXPECT_EQ(ret, nullptr);
+
+    //test when breakChar == nullptr
+    char *word2[256];
+    char str2[256] = "187-1778-9376";
+    char* br2 = nullptr;
+    ret = MiString::WordBreak(str2, num, word2, br2);
+    EXPECT_EQ(ret, nullptr);
+}
+
+TEST(Mistring, testWordBreak2)
+{
+    //test when str is ""
+    char str[256] = "";
+    char *word[256];
+    char br[256] = "_";
+    int num = 5;
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_EQ(num, 0);
+    EXPECT_STREQ(word[0], "");
+
+    //test when num <= 0
+    strcpy(str, "hello_world");
+    num = 0;
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_STREQ(word[0], "hello");
+
+    num = -25;
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_STREQ(word[0], "hello");
+
+    //test space conditions
+    num = 10;
+    strcpy(str, "Tiger in me, sniff  the   rose");
+    strcpy(br, ",");
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_EQ(num, 6);
+}
+
+TEST(Mistring, testWordBreak3)
+{
+    char str[256] = "  name: lsx_email: 1215291835@qq.com_phone-number: 187-1778-9376";
+    char *word[256];
+    char br[256] = "_:";
+    int num = 10;
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_EQ(num, 6);
+    EXPECT_STREQ(word[0], "name");
+    EXPECT_STREQ(word[1], "lsx");
+    EXPECT_STREQ(word[2], "email");
+    EXPECT_STREQ(word[3], "1215291835@qq.com");
+    EXPECT_STREQ(word[4], "phone-number");
+    EXPECT_STREQ(word[5], "187-1778-9376");
+}
+
+TEST(Mistring, testWordBreak4)
+{
+    char str[256] = "____123:_:_:2333:__::qwerr";
+    char *word[256];
+    char br[256] = "_:";
+    int num = 10;
+    MiString::WordBreak(str, num, word, br);
+    EXPECT_EQ(num, 3);
+}
+
+TEST(Mistring, testSeperateStr1)
+{
+    // test when str has nothing
+    char str[256] = "";
+    int volume;
+    char** ret = MiString::SeperateStr(str, '-', nullptr, volume);
+    EXPECT_EQ(volume, 0);
+
+    //test when str == nullptr
+    char *str1 = nullptr;
+    ret = MiString::SeperateStr(str, '-', nullptr, volume);
+    EXPECT_EQ(volume, 0);
+}
+
+TEST(Mistring, testSeperateStr2)
+{
+    char str[256] = "-12-34-5678-90-";
+    int volume;
+    char** ret = MiString::SeperateStr(str, '-', nullptr, volume);
+    // for(int i = 0; i < volume; i++) cout << ret[i] << endl;
+    EXPECT_EQ(volume, 4);
+}
+
+TEST(Mistring, testSeperateStr3)
+{
+    char str[256] = "---12-34--5678--90--";
+    int volume;
+    char** ret = MiString::SeperateStr(str, '-', nullptr, volume);
+    EXPECT_EQ(volume, 4);
+}
+
+TEST(Mistring, testSeperateStr4)
+{
+    // char str[256] = "12-34-56-78-90";
+    // Integer limit = 5;
+    // Array<String>* arr = new Array<String>();
+    // auto ret = MiString::SeperateStr(str, '-', limit, arr);
+    // cout << arr->GetLength();
+    // EXPECT_EQ(ret, NOERROR);
+}
+
+TEST(Mistring, testShrink1)
+{
+    //test when src == nullptr
+    char buf[256];
+    // const char* str = nullptr;
+    // MiString::shrink(buf, 256, str);
+
+    //test when dst == nullptr
+
+
+    //test when src is composed with space
+    const char *str1 = "           ";
+    MiString::shrink(buf, 256, str1);
+    EXPECT_STREQ(buf, "");
+
+    //test when dstSize is not enough
+    const char* str2 = "t  e  s  t   c a   s    e";
+    MiString::shrink(buf, 10, str2);
+    EXPECT_STREQ(buf, "testcase");
+}
+
+TEST(Mistring, testShrink2)
+{
+    char buf[256];
+    const char str[256] = "   abd 123 544   1d3 &&  @#$  iiol 57123**";
+    MiString::shrink(buf, 256, str);
+    EXPECT_STREQ(buf, "abd1235441d3&&@#$iiol57123**");
+}
+
+TEST(Mistring, testShrink3)
+{
+    char buf[256];
+    memset(buf, '\0', sizeof buf);
+    const char str[256] = "  abc  bc a";
+    MiString::shrink(buf, 11, str);
+    EXPECT_STREQ(buf, "abcbca");
+}
+
+TEST(Mistring, testcnStrToStr)
+{
+    char t[256], s[256];
+    strcpy(s, "abd_t_n_");
+    MiString::cnStrToStr(t, s, '_', 256);
+}
+
+TEST(Mistring, teststrZcpy)
+{
+    char t[256], s[256];
+    strcpy(s, "hello world!");
+    MiString::strZcpy(t, s, 256);
+    EXPECT_STREQ(t, "hello world!");
+    EXPECT_EQ(strlen(t), 12);
+
+    //test when s == nullptr
+    // char t1[256];
+    // char *s1 = nullptr;
+    // MiString::strZcpy(t1, s1, 256);
+    // EXPECT_EQ(strlen(t1), 0);
+
+    //test when s == ""
+    char t2[256], s2[256];
+    strcpy(s2, "");
+    MiString::strZcpy(t2, s2, 256);
+    EXPECT_EQ(strlen(t2), 0);
+}
+
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
