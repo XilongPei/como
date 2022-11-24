@@ -83,7 +83,10 @@ TEST(Mistring, testWordBreak4)
     char *word[256];
     char br[256] = "_:";
     int num = 10;
+
+    //printf("%s\n", str);
     MiString::WordBreak(str, num, word, br);
+    //printf("%s\n%s\n%s\n", word[0], word[1], word[2]);
     EXPECT_EQ(num, 3);
 }
 
@@ -105,8 +108,15 @@ TEST(Mistring, testSeperateStr2)
 {
     char str[256] = "-12-34-5678-90-";
     int volume;
+
+    //cout << str << endl;
     char** ret = MiString::SeperateStr(str, '-', nullptr, volume);
-    // for(int i = 0; i < volume; i++) cout << ret[i] << endl;
+    /*
+    for (int i = 0; i < volume; i++) {
+        cout << ret[i] << endl;
+    }
+    */
+
     EXPECT_EQ(volume, 4);
 }
 

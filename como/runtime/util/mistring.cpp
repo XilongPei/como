@@ -41,30 +41,37 @@ char *MiString::WordBreak(char *string, int& num, char *word[], char *breakChar)
     num = 0;
     rp = string;
 
+    // skip the leading breakChar
     while (isspace(*rp) || strchr(breakChar, *rp)) {
-        rp++;   // skip top space
+        rp++;
         if (*rp == '\0')
             break;
     }
 
     word[num] = rp;
     while (*rp) {
+
         while ((!isspace(*rp)) && (!strchr(breakChar, *rp)) && (*rp != '\0'))
             rp++;
 
-        if (*rp) {
+        if (*rp != '\0') {
             *rp = '\0';
             rp++;
         }
+        else {
+            num++;
+            break;
+        }
 
-        if (*rp && strchr(breakChar, *rp) != nullptr)
+        // skip to next word
+        while (isspace(*rp) || strchr(breakChar, *rp)) {
             rp++;
+            if (*rp == '\0')
+                break;
+        }
 
-        while (isspace(*rp))
-            rp++;   // skip blanks
-
-        if (*rp && (strchr(breakChar, *rp) != nullptr))
-            rp++;
+        if (*rp == '\0')
+            break;
 
         if (num >= maxNum)
             break;
@@ -100,14 +107,21 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
 
     int maxNum = seedsCapacity;
     seedsCapacity = 0;
+
+    while (*s == seperator)
+        s++;
+
     seeds[seedsCapacity] = s;
-    while (*s) {
+    while (*s != '\0') {
         if (seedsCapacity >= maxNum)
             break;
 
         if (*s == seperator)   {
             *s = '\0';
             seeds[++seedsCapacity] = ++s;
+
+            while (*s == seperator)
+                s++;
         }
         else {
             s++;
