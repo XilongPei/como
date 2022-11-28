@@ -85,7 +85,7 @@ ECode CDBusChannelFactory::CreateChannel(
     /* [in] */ RPCPeer peer,
     /* [out] */ AutoPtr<IRPCChannel>& channel)
 {
-#ifndef COMO_FUNCTION_SAFETY_RTOS
+#ifdef COMO_FUNCTION_SAFETY_RTOS
     void *buf = CDBusChannel::MemPoolAlloc(sizeof(CDBusChannel));
     if (nullptr == buf) {
         return E_OUT_OF_MEMORY_ERROR;
@@ -95,10 +95,11 @@ ECode CDBusChannelFactory::CreateChannel(
     channel = new(buf) CDBusChannel(mType, peer);
 #else
     channel = (IRPCChannel*)new CDBusChannel(mType, peer);
+#endif
+
     if (nullptr == channel) {
         return E_OUT_OF_MEMORY_ERROR;
     }
-#endif
 
     return NOERROR;
 }
