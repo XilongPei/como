@@ -72,9 +72,9 @@ target_link_libraries(testMistring comort.so ${GTEST_LIBS})
 add_dependencies(testMistring comort gtest gtest_main)
 
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
-COPY(testMac ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
-COPY(testVerifiedU64Pointer ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
-COPY(testMistring ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
+COPY(testMac ${UTIL_OBJ_DIR}/testMac ${BIN_DIR})
+COPY(testVerifiedU64Pointer ${UTIL_OBJ_DIR}/testVerifiedU64Pointer ${BIN_DIR})
+COPY(testMistring ${UTIL_OBJ_DIR}/testMistring ${BIN_DIR})
 
 
 install(FILES
