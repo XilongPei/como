@@ -104,7 +104,7 @@ int main(int argc, char** argv)
                         ? MetadataUtils::TYPE_METADATA
                         : options.GetMetadataFileType());
             if (metadata == nullptr) {
-                Logger::E("ccdl", "Read metadata from \"%s\" failed.",
+                Logger::E("cdlc", "Read metadata from \"%s\" failed.",
                         options.GetMetadataFile().string());
                 return -1;
             }
