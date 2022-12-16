@@ -460,7 +460,7 @@ bool Parser::ParseModule(
         }
 
         if (attrs.mUri.IsEmpty()) {
-            String message = String::Format("Module %s should have attributes.",
+            String message = String::Format("Module %s should have attribute uri().",
                                             moduleName.string());
             LogError(tokenInfo, message);
             result = false;
