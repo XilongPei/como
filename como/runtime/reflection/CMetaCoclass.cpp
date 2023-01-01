@@ -308,7 +308,7 @@ ECode CMetaCoclass::GetAllMethodsOverrideInfo(
     if (FAILED(ec))
         return ec;
 
-   Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
+    Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
     for (Integer i = 0; i < N; i++) {
         overridesInfo.Set(i, mOverridesInfo[i]);
     }
