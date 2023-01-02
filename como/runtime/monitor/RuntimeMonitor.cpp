@@ -350,7 +350,7 @@ static ECode SerializeComponentID(
 }
 
 /**
- * in_out: 0, in; 1, out
+ * Write Runtime Invoke Method information into rtmLwRB_Client(/Server)Queue
  */
 ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
                                       Long serverObjectId, CoclassID& clsId,
