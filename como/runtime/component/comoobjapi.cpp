@@ -84,4 +84,25 @@ ECode CoSetSystemClassLoader(
     return NOERROR;
 }
 
+/**
+ * Find coclass in the components already cached by LoadComponent().
+ */
+ECode CoClassForName(
+    /* [in] */ String& namespaceAndName,
+    /* [in] */ IClassLoader* loader,
+    /* [out] */ AutoPtr<IMetaCoclass>& mc)
+{
+    if (loader == nullptr) {
+        loader = CBootClassLoader::GetSystemClassLoader();
+    }
+
+    CoclassID cid;
+
+    // LoadCoclass will not attempt to call LoadComponent, so let
+    // cid.mCid (componentID) be nullptr.
+    cid = CoclassIDfromName(namespaceAndName, nullptr);
+
+    return loader->LoadCoclass(cid, mc);
+}
+
 } // namespace como

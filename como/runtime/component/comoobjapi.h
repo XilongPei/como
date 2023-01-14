@@ -38,6 +38,11 @@ EXTERN_C COM_PUBLIC ECode CoGetBootClassLoader(
 EXTERN_C COM_PUBLIC ECode CoSetSystemClassLoader(
     /* [out] */ IClassLoader* loader);
 
+EXTERN_C COM_PUBLIC ECode CoClassForName(
+    /* [in] */ String& namespaceAndName,
+    /* [in] */ IClassLoader* loader,
+    /* [out] */ AutoPtr<IMetaCoclass>& mc);
+
 } // namespace como
 
 #endif // __COMO_COMOOBJECTAPI_H__

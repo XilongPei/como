@@ -128,7 +128,7 @@ ECode CBootClassLoader::LoadComponent(
         if (mc != nullptr) {
             Boolean onlyMetadata;
             mc->IsOnlyMetadata(onlyMetadata);
-            if (!onlyMetadata) {
+            if (! onlyMetadata) {
                 component = mc;
                 return NOERROR;
             }
@@ -142,7 +142,7 @@ ECode CBootClassLoader::LoadComponent(
         return ec;
     }
 
-    void* handle = dlopen(compPath.string(), RTLD_NOW);
+    void *handle = dlopen(compPath.string(), RTLD_NOW);
     if (handle == nullptr) {
         Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
                                             compPath.string(), strerror(errno));
@@ -158,7 +158,7 @@ ECode CBootClassLoader::LoadComponent(
         if (mc != nullptr) {
             Boolean onlyMetadata;
             mc->IsOnlyMetadata(onlyMetadata);
-            if (!onlyMetadata) {
+            if (! onlyMetadata) {
                 component = mc;
                 return NOERROR;
             }
