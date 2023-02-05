@@ -97,10 +97,10 @@ bool CMemPool::SetBuffer(void *buffer)
     if (nullptr != m_pMemBlock) {
         // Link all mem unit.
 
-        size_t ulUnitNum = m_ulBlockSize / (m_ulUnitSize + sizeof(struct _Unit));
+        size_t ul = m_ulUnitSize + sizeof(struct _Unit);
+        size_t ulUnitNum = m_ulBlockSize / ul;
         for (size_t i = 0;  i < ulUnitNum;  i++) {
-            struct _Unit *pCurUnit = (struct _Unit *)((char *)m_pMemBlock + i *
-                                            (m_ulUnitSize + sizeof(struct _Unit)));
+            struct _Unit *pCurUnit = (struct _Unit *)((char *)m_pMemBlock + (i * ul));
 
             pCurUnit->pPrev = nullptr;
             pCurUnit->pNext = m_pFreeMemBlock;   // Insert the new unit at head.
