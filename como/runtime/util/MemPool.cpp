@@ -60,10 +60,8 @@ CMemPool::CMemPool(size_t ulUnitNum, size_t ulUnitSize)
 CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
     : m_pAllocatedMemBlock(nullptr)
     , m_pFreeMemBlock(nullptr)
-    , m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit)))
-    , m_ulUnitSize(ulUnitSize)
 {
-    SetBuffer(buffer);
+    SetBuffer(buffer, ulUnitNum, ulUnitSize);
 }
 
 /**
@@ -79,8 +77,11 @@ CMemPool::~CMemPool()
 /**
  * SetBuffer
  */
-bool CMemPool::SetBuffer(void *buffer)
+bool CMemPool::SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
 {
+    m_ulBlockSize = ulUnitNum * (ulUnitSize + sizeof(struct _Unit));
+    m_ulUnitSize = ulUnitSize;
+
     if (nullptr == buffer) {
         m_pMemBlock = ::malloc(m_ulBlockSize);       // Allocate a memory block.
         if (nullptr == m_pMemBlock) {
@@ -134,7 +135,7 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
         if (MUST_USE_MEM_POOL == iTryToUseMemPool)
         	return nullptr;
 
-    	return malloc(ulSize);
+    	return ::malloc(ulSize);
     }
 
     // Now FreeList isn`t empty
@@ -183,7 +184,7 @@ void CMemPool::Free(void *p)
         m_pFreeMemBlock = pCurUnit;
     }
     else {
-        free(p);
+        ::free(p);
     }
 }
 
@@ -232,7 +233,7 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
                 for (size_t j = 0;  j < i;  j++) {
                     delete m_MemPoolSet[i].memPool;
                 }
-                free(m_MemPoolSet);
+                ::free(m_MemPoolSet);
 
                 // Set m_MemPoolSet to nullptr indicates that the object was not
                 // constructed successfully.
@@ -270,14 +271,14 @@ bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
 
     m_g_MemPoolSet = (MemPoolItem *)calloc(lUnitNum, sizeof(MemPoolItem));
     if (nullptr == m_g_MemPoolSet) {
-        free(g_MemPool);
+        ::free(g_MemPool);
         return false;
     }
 
     for (size_t i = 0;  i < lUnitNum;  i++) {
         m_g_MemPoolSet[i].memPool = new CMemPool();
         if (nullptr == m_g_MemPoolSet[i].memPool) {
-            free(g_MemPool);
+            ::free(g_MemPool);
             return false;
         }
     }
@@ -293,7 +294,7 @@ CMemPoolSet::~CMemPoolSet()
     for (size_t i = 0;  i < m_ItemNum;  i++) {
         delete m_MemPoolSet[i].memPool;
     }
-    free(m_MemPoolSet);
+    ::free(m_MemPoolSet);
 }
 
 /**
@@ -334,15 +335,18 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
     size_t lastUnitSize = UINTMAX_MAX;
     size_t pos = m_g_lUnitNum;
     if (nullptr != g_MemPool) {
+
+/*This algorithm needs to be optimized！
+Gereral Purpose, fix sized, from g_MemPool
+
+             +------------------------+
+           0 |                        |
+             | === === === === ===    |-->SetBuffer, m_ulBlockSize, m_ulUnitSize
+             | ......                 |
+m_g_lUnitNum |                        |
+             +------------------------+
+*/
         for (i = 0;  i < m_g_lUnitNum;  i++) {
-            if (nullptr == m_g_MemPoolSet[i].memPool) {
-                void *memPool = g_MemPool->Alloc(ulElemSize, MUST_USE_MEM_POOL);
-                m_g_MemPoolSet[i].memPool->SetBuffer(memPool);
-                m_g_MemPoolSet[i].lUnitSize = ulElemSize;
-
-                return m_g_MemPoolSet[i].memPool->Alloc(ulSize, iTryToUseMemPool);
-            }
-
             if ((ulSize <= m_g_MemPoolSet[i].lUnitSize) &&
                                 (m_g_MemPoolSet[i].lUnitSize < lastUnitSize) &&
                                 (! m_g_MemPoolSet[i].memPool->CheckFull())) {
@@ -355,6 +359,19 @@ void *CMemPoolSet::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
             p = m_g_MemPoolSet[pos].memPool->Alloc(ulSize, iTryToUseMemPool);
             if (nullptr != p) {
                 return p;
+            }
+        }
+
+        for (i = 0;  i < m_g_lUnitNum;  i++) {
+            CMemPool *tmpPool = m_g_MemPoolSet[i].memPool;
+            if (0 == tmpPool->m_ulBlockSize) {
+                void *mem = g_MemPool->Alloc(m_g_lUnitSize);
+                if (nullptr == mem)
+                    return nullptr;
+
+                tmpPool->SetBuffer(mem, ulElemSize, m_g_lUnitSize/ulElemSize);
+
+                return tmpPool->Alloc(ulSize, iTryToUseMemPool);
             }
         }
     }

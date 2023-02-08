@@ -44,8 +44,8 @@ private:
     size_t m_ulBlockSize;            // Memory pool size. Memory pool is make of memory unit.
 
 public:
-    CMemPool(size_t lUnitNum = 50, size_t lUnitSize = 1024);
-    CMemPool(void *buffer, size_t lUnitNum = 50, size_t lUnitSize = 1024);
+    CMemPool(size_t ulUnitNum = 0, size_t ulUnitSize = 0);
+    CMemPool(void *buffer, size_t ulUnitNum = 0, size_t ulUnitSize = 0);
     ~CMemPool();
 
     void *Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool = MUST_USE_MEM_POOL);
@@ -55,7 +55,7 @@ public:
 
 protected:
     friend class CMemPoolSet;
-    bool SetBuffer(void *buffer);
+    bool SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize);
 };
 
 class CMemPoolSet
