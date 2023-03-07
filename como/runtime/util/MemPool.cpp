@@ -53,7 +53,7 @@ CMemPool::CMemPool(size_t ulUnitNum, size_t ulUnitSize)
     : m_pMemBlock(nullptr)
     , m_pAllocatedMemBlock(nullptr)
     , m_pFreeMemBlock(nullptr)
-    , m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit)))
+    , m_ulBlockSize(0)
     , m_ulUnitSize(ulUnitSize)
 {}
 
