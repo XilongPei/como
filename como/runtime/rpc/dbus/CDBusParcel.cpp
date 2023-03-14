@@ -62,7 +62,8 @@ CDBusParcel::~CDBusParcel()
     }
 }
 
-CMemPool *CDBusParcel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Parcel, sizeof(CDBusParcel));
+CMemPool *CDBusParcel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Parcel,
+                                              sizeof(CDBusParcel));
 void *CDBusParcel::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);

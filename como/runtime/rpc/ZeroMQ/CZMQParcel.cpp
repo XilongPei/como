@@ -64,7 +64,8 @@ CZMQParcel::~CZMQParcel()
     }
 }
 
-CMemPool *CZMQParcel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Parcel, sizeof(CZMQParcel));
+CMemPool *CZMQParcel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Parcel,
+                                             sizeof(CZMQParcel));
 void *CZMQParcel::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);

@@ -49,12 +49,12 @@ namespace como {
  *     [in] ulUnitNum     The number of unit which is a part of memory block.
  *     [in] ulUnitSize The size of unit.
  */
-CMemPool::CMemPool(size_t ulUnitNum, size_t ulUnitSize)
+CMemPool::CMemPool()
     : m_pMemBlock(nullptr)
     , m_pAllocatedMemBlock(nullptr)
     , m_pFreeMemBlock(nullptr)
     , m_ulBlockSize(0)
-    , m_ulUnitSize(ulUnitSize)
+    , m_ulUnitSize(0)
 {}
 
 CMemPool::CMemPool(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
@@ -261,7 +261,7 @@ bool CMemPoolSet::CreateGeneralMemPool(size_t lUnitNum, size_t lUnitSize)
         return false;
     }
 
-    g_MemPool = new CMemPool(lUnitNum, lUnitSize);
+    g_MemPool = new CMemPool(nullptr, lUnitNum, lUnitSize);
     if (nullptr == g_MemPool) {
         return false;
     }

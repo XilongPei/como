@@ -184,7 +184,8 @@ CBinderChannel::CBinderChannel(
     , mServerName(nullptr)
 {}
 
-CMemPool *CBinderChannel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Channel, sizeof(CBinderChannel));
+CMemPool *CBinderChannel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Channel,
+                                                 sizeof(CBinderChannel));
 void *CBinderChannel::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);

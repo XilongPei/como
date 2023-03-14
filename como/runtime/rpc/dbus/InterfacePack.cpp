@@ -30,7 +30,8 @@ InterfacePack::~InterfacePack()
     ReleaseInterfaceID(mIid);
 }
 
-CMemPool *InterfacePack::memPool = new CMemPool(ComoConfig::POOL_SIZE_InterfacePack, sizeof(InterfacePack));
+CMemPool *InterfacePack::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_InterfacePack,
+                                                sizeof(InterfacePack));
 void *InterfacePack::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);

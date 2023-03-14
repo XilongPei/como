@@ -51,7 +51,8 @@ CZMQChannel::CZMQChannel(
     mEndpoint = ComoConfig::localhostInprocEndpoint;
 }
 
-CMemPool *CZMQChannel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Channel, sizeof(CZMQChannel));
+CMemPool *CZMQChannel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Channel,
+                                              sizeof(CZMQChannel));
 void *CZMQChannel::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);

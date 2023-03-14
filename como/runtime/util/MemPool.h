@@ -44,7 +44,7 @@ private:
     size_t m_ulBlockSize;            // Memory pool size. Memory pool is make of memory unit.
 
 public:
-    CMemPool(size_t ulUnitNum = 0, size_t ulUnitSize = 0);
+    CMemPool();
     CMemPool(void *buffer, size_t ulUnitNum = 0, size_t ulUnitSize = 0);
     ~CMemPool();
 

@@ -2259,7 +2259,8 @@ void CProxy::OnLastStrongRef(
     Object::OnLastStrongRef(id);
 }
 
-CMemPool *CProxy::memPool = new CMemPool(ComoConfig::POOL_SIZE_Proxy, sizeof(CProxy));
+CMemPool *CProxy::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Proxy,
+                                         sizeof(CProxy));
 void *CProxy::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
@@ -2270,7 +2271,7 @@ void CProxy::MemPoolFree(Short id, const void *p)
     memPool->Free((void *)p);
 }
 
-CMemPool *InterfaceProxy::memPool = new CMemPool(ComoConfig::POOL_SIZE_InterfaceProxy,
+CMemPool *InterfaceProxy::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_InterfaceProxy,
                                                  sizeof(InterfaceProxy));
 void *InterfaceProxy::MemPoolAlloc(size_t ulSize)
 {

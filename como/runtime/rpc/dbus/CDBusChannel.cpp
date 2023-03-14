@@ -585,7 +585,8 @@ CDBusChannel::CDBusChannel(
     , mServerName(nullptr)
 {}
 
-CMemPool *CDBusChannel::memPool = new CMemPool(ComoConfig::POOL_SIZE_Channel, sizeof(CDBusChannel));
+CMemPool *CDBusChannel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Channel,
+                                               sizeof(CDBusChannel));
 void *CDBusChannel::MemPoolAlloc(size_t ulSize)
 {
     return memPool->Alloc(ulSize, MUST_USE_MEM_POOL);
