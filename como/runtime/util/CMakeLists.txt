@@ -51,6 +51,7 @@ set(SOURCES
     mac.cpp
     CCheckpoint.cpp
     MemPool.cpp
+    ThreadStack.cpp
     ${EXTERNAL_DIR}/inih/ini.c
 )
 
