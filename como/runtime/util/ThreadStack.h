@@ -32,7 +32,7 @@ public:
         #define SET_MACHINE_STACK_END(p) rb_gc_set_stack_end(p)
     #endif
 
-    static __attribute__((noinline)) void ReserveStack(volatile char *limit, size_t size);
+    static __attribute__((noinline)) volatile char *ReserveStack(volatile char *limit, size_t size);
 
     static int GetStack(void **addr, size_t *size);
 

@@ -29,37 +29,44 @@ __attribute__((noinline)) void ThreadStack::rb_gc_set_stack_end(uintptr_t **stac
     *stack_end_p = &stack_end;
 }
 
-__attribute__((noinline)) void ThreadStack::ReserveStack(volatile char *limit, size_t size)
+
+/**
+ * fix intermittent SIGBUS on Linux, by reserving the stack virtual address
+ * space at process start up, so that it will not clash with the heap space.
+ */
+__attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char *stack_start, size_t size)
 {
     struct rlimit rl;
     volatile char buf[0x100];
     enum {stack_check_margin = 0x1000}; /* for -fstack-check */
 
-    if (! getrlimit(RLIMIT_STACK, &rl) && rl.rlim_cur == RLIM_INFINITY)
-        return;
+    if ((! getrlimit(RLIMIT_STACK, &rl)) && (rl.rlim_cur == RLIM_INFINITY))
+        return 0;
 
     if (size < stack_check_margin)
-        return;
+        return 0;
 
     size -= stack_check_margin;
 
-    size -= sizeof(buf); /* margin */
+    size -= sizeof(buf);        // margin
 #ifdef STACK_DIR_UPPER
     const volatile char *end = buf + sizeof(buf);
-    limit += size;
-    if (limit > end) {
-        size = limit - end;
-        limit = (volatile char*)alloca(size);
-        limit[stack_check_margin+size-1] = 0;
+    stack_start += size;
+    if (stack_start > end) {
+        size = stack_start - end;
+        stack_start = (volatile char*)alloca(size);
+        stack_start[stack_check_margin + size - 1] = 0;
     }
 #else
-    limit -= size;
-    if (buf > limit) {
-        limit = (volatile char*)alloca(buf - limit);
-        limit[0] = 0; /* ensure alloca is called */
-        limit -= stack_check_margin;
+    stack_start -= size;
+    if (buf > stack_start) {
+        stack_start = (volatile char*)alloca(buf - stack_start);
+        stack_start[0] = 0;     // ensure alloca is called
+        stack_start -= stack_check_margin;
     }
 #endif
+
+    return stack_start;
 }
 
 #define HAVE_PTHREAD_GETATTR_NP
