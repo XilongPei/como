@@ -102,6 +102,8 @@ uint16_t		update_crc_dnp(     uint16_t crc, unsigned char c                     
 uint16_t		update_crc_kermit(  uint16_t crc, unsigned char c                          );
 uint16_t		update_crc_sick(    uint16_t crc, unsigned char c, unsigned char prev_byte );
 
+uint64_t update_crc_64_ecma_bytes(uint64_t crc, const unsigned char *input_str, size_t num_bytes);
+
 /*
  * Global CRC lookup tables
  */
