@@ -200,9 +200,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
     funCodeAndCRC64.eCode = eventCode;
-    funCodeAndCRC64.crc64 = crc64;
+    funCodeAndCRC64.crc64 = 0;
     funCodeAndCRC64.msgSize = bufSize;
     funCodeAndCRC64.hChannel = hChannel;
+
+    funCodeAndCRC64.crc64 = update_crc_64_ecma_bytes(crc64,
+                            reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
+                            sizeof(COMO_ZMQ_RPC_MSG_HEAD));
 
     numberOfBytes = zmq_send(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64),
                                                                    ZMQ_SNDMORE);
@@ -263,7 +267,14 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), numberOfBytes);
-            if ((funCodeAndCRC64.crc64 != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
+
+            Long crcTmp = funCodeAndCRC64.crc64;
+            funCodeAndCRC64.crc64 = 0;
+            crc64 = update_crc_64_ecma_bytes(crc64,
+                                    reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
+                                    sizeof(COMO_ZMQ_RPC_MSG_HEAD));
+
+            if ((crcTmp != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
                 return -1;
@@ -327,8 +338,14 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(
                                             zmq_msg_data(&msg)), numberOfBytes);
-            if ((funCodeAndCRC64.crc64 != crc64) ||
-                                   (funCodeAndCRC64.msgSize != numberOfBytes)) {
+
+            Long crcTmp = funCodeAndCRC64.crc64;
+            funCodeAndCRC64.crc64 = 0;
+            crc64 = update_crc_64_ecma_bytes(crc64,
+                                    reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
+                                    sizeof(COMO_ZMQ_RPC_MSG_HEAD));
+
+            if ((crcTmp != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 // msg has already been zmq_msg_init
                 return -3;
