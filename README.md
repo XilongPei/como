@@ -1,4 +1,4 @@
-# COMO [![Build Status](https://travis-ci.org/jingcao80/ccm.svg?branch=master)](https://travis-ci.org/jingcao80/ccm)
+# COMO
 
 COMO is a C++ Component Model. It can:
 1. support interface-oriented programming;
