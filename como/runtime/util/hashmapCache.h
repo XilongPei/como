@@ -138,6 +138,10 @@ public:
                 }
                 prev = prev->mNext;
             }
+
+            if (nullptr == prev)
+                return -3;
+
             Bucket* b = new Bucket();
             if (nullptr == b)
                 return -2;
