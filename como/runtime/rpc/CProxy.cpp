@@ -1752,7 +1752,7 @@ ECode InterfaceProxy::ProxyEntry(
     }
 
     inParcel->WriteInteger(RPC_MAGIC_NUMBER);
-    inParcel->WriteInteger(thisObj->mIndex);
+    inParcel->WriteInteger(thisObj->mIndex);    // interfaceIndex
     inParcel->WriteInteger(methodIndex + 4);
 
     Long uuid64;
