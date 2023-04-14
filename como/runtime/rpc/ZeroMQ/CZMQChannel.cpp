@@ -66,6 +66,7 @@ void CZMQChannel::MemPoolFree(Short id, const void *p)
 ECode CZMQChannel::Apply(
     /* [in] */ IInterfacePack* ipack)
 {
+    // DBus distinguishes channels by name, ZeroMQ channels have no name
     //mName = CZMQInterfacePack::From(ipack)->GetDBusName();
     return NOERROR;
 }
