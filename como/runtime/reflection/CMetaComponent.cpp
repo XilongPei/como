@@ -581,6 +581,9 @@ ECode CMetaComponent::LoadAllClassObjectGetters()
     return NOERROR;
 }
 
+/**
+ * This function does not fully free memory if error E_OUT_OF_MEMORY_ERROR occurs.
+ */
 ECode CMetaComponent::BuildIInterface()
 {
     CMetaInterface* miObj = new CMetaInterface();
@@ -593,9 +596,12 @@ ECode CMetaComponent::BuildIInterface()
     miObj->mNamespace = "como::";
     miObj->mMethods = Array<IMetaMethod*>(4);
 
-    // AddRef
+    /**
+     * method 0:
+     * Integer AddRef([in] HANDLE id)
+     **/
     CMetaMethod* mmObj = new CMetaMethod();
-    if (nullptr == miObj) {
+    if (nullptr == mmObj) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mmObj->mOwner = miObj;
@@ -628,7 +634,10 @@ ECode CMetaComponent::BuildIInterface()
     mmObj->mReturnType = mtObj;
     miObj->mMethods.Set(0, mmObj);
 
-    // Release
+    /**
+     * method 1:
+     * Integer Release([in] HANDLE id)
+     **/
     mmObj = new CMetaMethod();
     if (nullptr == mmObj) {
         return E_OUT_OF_MEMORY_ERROR;
@@ -663,7 +672,10 @@ ECode CMetaComponent::BuildIInterface()
     mmObj->mReturnType = mtObj;
     miObj->mMethods.Set(1, mmObj);
 
-    // Probe
+    /**
+     * method 2:
+     * IInterface* ClassName::Probe([in] const InterfaceID& iid)
+     **/
     mmObj = new CMetaMethod();
     if (nullptr == mmObj) {
         return E_OUT_OF_MEMORY_ERROR;
@@ -699,7 +711,11 @@ ECode CMetaComponent::BuildIInterface()
     mmObj->mReturnType = mtObj;
     miObj->mMethods.Set(2, mmObj);
 
-    // GetInterfaceID
+    /**
+     * method 3:
+     * ECode ClassName::GetInterfaceID([in]  IInterface* object,
+     *                                 [out] InterfaceID& iid)
+     */
     mmObj = new CMetaMethod();
     if (nullptr == mmObj) {
         return E_OUT_OF_MEMORY_ERROR;

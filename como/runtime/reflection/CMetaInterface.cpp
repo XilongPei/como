@@ -324,8 +324,11 @@ Integer CMetaInterface::BuildInterfaceMethod(
     for (Integer i = 0; i < mi->mMethodNumber; i++) {
         AutoPtr<CMetaMethod> mmObj = new CMetaMethod(mOwner->mMetadata,
                                          this, startIndex + i, mi->mMethods[i]);
-        if (nullptr == mmObj)
+        // Methods in all interfaces return values of type ECode,
+        // not TYPE_EXTERNAL, so mmObj->mReturnType shouldn't be nullptr here.
+        if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
             return -1;
+        }
 
         mMethods.Set(startIndex + i, mmObj);
     }

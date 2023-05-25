@@ -76,8 +76,12 @@ CMetaMethod::CMetaMethod(
         mReturnType = nullptr;
     else {
         mReturnType = new CMetaType(mc, mc->mTypes[mm->mReturnTypeIndex]);
-        if ((nullptr != mReturnType) &&
-                             (nullptr == CMetaType::From(mReturnType)->mName)) {
+
+        if (nullptr == mReturnType) {
+            Logger::E("CMetaMethod::CMetaMethod", "E_OUT_OF_MEMORY_ERROR, %s", mName);
+        }
+
+        if (nullptr == CMetaType::From(mReturnType)->mName) {
             delete mReturnType;
             mReturnType = nullptr;
         }
