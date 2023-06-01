@@ -132,7 +132,9 @@ ECode ComoFunctionSafetyObject::SetExpires(
 {
     mExpires = expires;
 
-    objsLifeCycleExpires.cfso_push(this);
+    if (objsLifeCycleExpires.cfso_find(this) < 0) {
+        objsLifeCycleExpires.cfso_push(this);
+    }
 
     return NOERROR;
 }
@@ -202,7 +204,7 @@ CFSO_VECTOR::CFSO_VECTOR()
 {
     _size = 0;
     _extra = 0;
-    extra = 100;
+    extra = CFSO_VECTOR_Size_ONCE_ALLOC;
     numNullArray = 0;
     cfso_allocate();
 }
@@ -238,8 +240,12 @@ int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
     }
 
     if (_extra < 1) {
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        return -1;
+#else
         if (cfso_allocate() <= 0)
             return -1;
+#endif
     }
 
     *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + _size *

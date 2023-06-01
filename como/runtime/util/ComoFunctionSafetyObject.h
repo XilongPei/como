@@ -72,6 +72,7 @@ enum CFSO_Expires {
     CFSO_ExpireTime
 };
 
+#define CFSO_VECTOR_Size_ONCE_ALLOC 1024
 #define CFSO_VECTOR_SizeNullArray   300
 
 // Class Function Safety Object management VECTOR
