@@ -1708,7 +1708,7 @@ ECode InterfaceProxy::ProxyEntry(
 #endif
 
     Integer methodIndex;
-    InterfaceProxy* thisObj;
+    InterfaceProxy *thisObj;
     Integer offset;
 
     GET_STACK_INTEGER(args, 0, methodIndex);
@@ -1810,7 +1810,7 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 #else
-    if (0 == mTimeout) {
+    if (0 == thisObj->mTimeout) {
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
         if (FAILED(ec)) {
             goto ProxyExit;
@@ -1820,10 +1820,10 @@ ECode InterfaceProxy::ProxyEntry(
         struct timespec curTime;
         clock_gettime(CLOCK_REALTIME, &curTime);
 
-        Long nsec = curTime.tv_nsec + mTimeout % 1000000;
+        Long nsec = curTime.tv_nsec + thisObj->mTimeout % 1000000;
                                               //123456
-        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + mTimeout / 1000000000;
-                                                //123456789             //123456789
+        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + thisObj->mTimeout / 1000000000;
+                                                //123456789                      //123456789
         curTime.tv_nsec = nsec % 1000000000;
                                 //123456789
 

@@ -215,7 +215,7 @@ CFSO_VECTOR::~CFSO_VECTOR()
 unsigned int CFSO_VECTOR::cfso_allocate()
 {
     ComoFunctionSafetyObject *newData = (ComoFunctionSafetyObject *)realloc(_data,
-                             sizeof(ComoFunctionSafetyObject*) * (_size + extra));
+                                        sizeof(ComoFunctionSafetyObject*) * (_size + extra));
 
     if (nullptr == newData) {
         _extra = 0;
@@ -277,14 +277,14 @@ int CFSO_VECTOR::cfso_del(unsigned int index) {
         for ( ;  numNullArray >= 0;  numNullArray--) {
             ComoFunctionSafetyObject* cfso;
             for ( ;  _size > 0;  _size--) {
-                cfso = *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + (_size-1) *
-                                                                    sizeof(ComoFunctionSafetyObject*));
+                cfso = *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
+                                                        (_size-1) * sizeof(ComoFunctionSafetyObject*));
                 if (cfso != nullptr)
                     break;
             }
             if (cfso != nullptr) {
-                *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + numNullArray *
-                                                                sizeof(ComoFunctionSafetyObject*)) = cfso;
+                *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
+                            idxNullArray[numNullArray-1] * sizeof(ComoFunctionSafetyObject*)) = cfso;
             }
             else {
                 numNullArray = 0;
