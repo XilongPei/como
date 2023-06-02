@@ -472,6 +472,9 @@ ECode CMetaCoclass::BuildAllMethods()
             }
 
             Integer methodNumber = mMethods.GetLength();
+            if (index != methodNumber) {
+                return E_RUNTIME_EXCEPTION;
+            }
             mOverridesInfo = Array<Boolean>(methodNumber);
 
             for (Integer i = 0;  i < methodNumber;  i++)
