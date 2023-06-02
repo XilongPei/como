@@ -136,7 +136,7 @@ private:
 
     ECode BuildAllMethods();
 
-    void BuildInterfaceMethodLocked(
+    ECode BuildInterfaceMethodLocked(
         /* [in] */ IMetaInterface* miObj,
         /* [in, out] */ Integer& index);
 

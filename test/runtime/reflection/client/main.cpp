@@ -258,7 +258,8 @@ TEST(ReflectionTest, TestCoclassGetMethods)
 #ifdef COMO_FUNCTION_SAFETY
     EXPECT_EQ(12, methodNumber);
     Array<IMetaMethod*> methods(methodNumber);
-    klass->GetAllMethods(methods);
+    ECode ec = klass->GetAllMethods(methods);
+    EXPECT_TRUE(SUCCEEDED(ec));
     for (Integer i = 0; i < methodNumber; i++) {
         IMetaMethod* method = methods[i];
         String name, sig;
@@ -269,7 +270,8 @@ TEST(ReflectionTest, TestCoclassGetMethods)
 #else
     EXPECT_EQ(10, methodNumber);
     Array<IMetaMethod*> methods(methodNumber);
-    klass->GetAllMethods(methods);
+    ECode ec = klass->GetAllMethods(methods);
+    EXPECT_TRUE(SUCCEEDED(ec));
     for (Integer i = 0; i < methodNumber; i++) {
         IMetaMethod* method = methods[i];
         String name, sig;

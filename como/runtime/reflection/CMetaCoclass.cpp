@@ -455,8 +455,8 @@ ECode CMetaCoclass::BuildAllMethods()
         Mutex::AutoLock lock(mMethodsLock);
         if (mMethods[0] == nullptr) {
             Integer index = 0;
-            BuildInterfaceMethodLocked(mOwner->mIInterface, index);
-            for (Integer i = 0; i < mMetadata->mInterfaceNumber - 1; i++) {
+            FAIL_RETURN(BuildInterfaceMethodLocked(mOwner->mIInterface, index));
+            for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(
                                                 mMetadata->mInterfaceIndexes[i]);
                 if (nullptr == miObj)
@@ -468,7 +468,7 @@ ECode CMetaCoclass::BuildAllMethods()
                 if (String("como::IInterface").Equals(ns + "::" + name)) {
                     continue;
                 }
-                BuildInterfaceMethodLocked(miObj, index);
+                FAIL_RETURN(BuildInterfaceMethodLocked(miObj, index));
             }
 
             Integer methodNumber = mMethods.GetLength();
@@ -513,7 +513,7 @@ ECode CMetaCoclass::BuildAllMethods()
     return NOERROR;
 }
 
-void CMetaCoclass::BuildInterfaceMethodLocked(
+ECode CMetaCoclass::BuildInterfaceMethodLocked(
     /* [in] */ IMetaInterface* miObj,
     /* [in, out] */ Integer& index)
 {
@@ -522,6 +522,10 @@ void CMetaCoclass::BuildInterfaceMethodLocked(
     for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4);  i < N;  i++) {
         AutoPtr<IMetaMethod> mmObj;
         miObj->GetMethod(i, mmObj);
+        if (nullptr == (IMetaMethod *)mmObj) {
+            return E_RUNTIME_EXCEPTION;
+        }
+
         mMethods.Set(index, mmObj);
         index++;
     }
