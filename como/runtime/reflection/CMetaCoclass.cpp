@@ -42,7 +42,7 @@ CMetaCoclass::CMetaCoclass(
     mCid.mUuid = mk->mUuid;
     mCid.mCid = &mcObj->mCid;
 
-    MetaInterface* mi = mOwner->mMetadata->mInterfaces[
+    MetaInterface *mi = mOwner->mMetadata->mInterfaces[
             mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
     mConstructors = Array<IMetaConstructor*>(mi->mMethodNumber);
 
@@ -264,12 +264,14 @@ ECode CMetaCoclass::GetMethodNumber(
         Mutex::AutoLock lock(mMethodsLock);
         if (mMethods.IsEmpty()) {
             Integer num = 4;
-            for (Integer i = 0; i < mMetadata->mInterfaceNumber - 1; i++) {
-                MetaInterface* mi = mOwner->mMetadata->mInterfaces[
-                        mMetadata->mInterfaceIndexes[i]];
-                String fullName = String::Format("%s::%s", mi->mNamespace,
-                        mi->mName);
+            for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
+                MetaInterface *mi = mOwner->mMetadata->mInterfaces[
+                                                    mMetadata->mInterfaceIndexes[i]];
+                String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
                 if (fullName.Equals("como::IInterface")) {
+                    continue;
+                }
+                if (fullName.Equals("como::IComoFunctionSafetyObject")) {
                     continue;
                 }
                 AutoPtr<IMetaInterface> miObj;
@@ -462,12 +464,20 @@ ECode CMetaCoclass::BuildAllMethods()
                 if (nullptr == miObj)
                     return E_OUT_OF_MEMORY_ERROR;
 
-                String name, ns;
+                String name, ns, nsName;
                 miObj->GetName(name);
                 miObj->GetNamespace(ns);
-                if (String("como::IInterface").Equals(ns + "::" + name)) {
+                nsName = ns + "::" + name;
+
+                static String nsName_interface = String("como::IInterface");
+                static String nsName_icfso = String("como::IComoFunctionSafetyObject");
+
+                if (nsName_interface.Equals(nsName))
                     continue;
-                }
+
+                if (nsName_icfso.Equals(nsName))
+                    continue;
+
                 FAIL_RETURN(BuildInterfaceMethodLocked(miObj, index));
             }
 

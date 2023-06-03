@@ -214,10 +214,10 @@ AutoPtr<Type> Module::FindType(
 }
 
 int Module::IndexOf(
-    /* [in] */ Type* type)
+    /* [in] */ Type *type)
 {
     auto it = mAllTypeMap.begin();
-    for (int i = 0; it != mAllTypeMap.end(); i++, it++) {
+    for (int i = 0;  it != mAllTypeMap.end();  i++, it++) {
         if (it->second == type) {
             return i;
         }
@@ -292,7 +292,7 @@ Module::Module(
     mName = mComponent->mName;
     mUri = mComponent->mUri;
     como::MetaNamespace* global = mComponent->mGlobalNamespace;
-    for (int i = 0; i < global->mNamespaceNumber; i++) {
+    for (int i = 0;  i < global->mNamespaceNumber;  i++) {
         como::MetaNamespace* mn = global->mNamespaces[i];
         ResolveNamespace(mn);
     }
@@ -304,7 +304,7 @@ void Module::ResolveNamespace(
     AutoPtr<Namespace> ns = ParseNamespace(mn->mName);
     ns->SetMetadata(mn);
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         como::MetaNamespace* mnn = mn->mNamespaces[i];
         ResolveNamespace(mnn);
     }
@@ -326,8 +326,8 @@ AutoPtr<Module> Module::Resolve(
     /* [in] */ void* metadata)
 {
     AutoPtr<Module> module = new Module(
-            reinterpret_cast<como::MetaComponent*>(metadata));
+                                reinterpret_cast<como::MetaComponent*>(metadata));
     return module;
 }
 
-}
+} // namespace cdlc

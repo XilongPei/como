@@ -32,13 +32,12 @@ AutoPtr<Type> MetadataResolver::ResolveType(
 {
     mResolvingTypename = ns->ToString() + "::" + typeName;
 
-    for (int i = 0; i < mn->mEnumerationNumber; i++) {
-        como::MetaEnumeration* me = mComponent->mEnumerations[
-                mn->mEnumerationIndexes[i]];
+    for (int i = 0;  i < mn->mEnumerationNumber;  i++) {
+        como::MetaEnumeration* me = mComponent->mEnumerations[mn->mEnumerationIndexes[i]];
         if (typeName.Equals(me->mName)) {
             if (me->mProperties & TYPE_EXTERNAL) {
                 char** moduleNamePP = reinterpret_cast<char**>(
-                        ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
+                                            ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
                     return module->FindType(String::Format("%s::%s", me->mNamespace, me->mName));
@@ -51,13 +50,12 @@ AutoPtr<Type> MetadataResolver::ResolveType(
         }
     }
 
-    for (int i = 0; i < mn->mInterfaceNumber; i++) {
-        como::MetaInterface* mi = mComponent->mInterfaces[
-                mn->mInterfaceIndexes[i]];
+    for (int i = 0;  i < mn->mInterfaceNumber;  i++) {
+        como::MetaInterface *mi = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
         if (typeName.Equals(mi->mName)) {
             if (mi->mProperties & TYPE_EXTERNAL) {
                 char** moduleNamePP = reinterpret_cast<char**>(
-                        ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
+                                            ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
                     return module->FindType(String::Format("%s::%s", mi->mNamespace, mi->mName));
@@ -81,8 +79,8 @@ AutoPtr<Type> MetadataResolver::BuildEnumeration(
     enumeration->SetName(me->mName);
     ns->AddType(enumeration);
 
-    for (int i = 0; i < me->mEnumeratorNumber; i++) {
-        como::MetaEnumerator* enumr = me->mEnumerators[i];
+    for (int i = 0;  i < me->mEnumeratorNumber;  i++) {
+        como::MetaEnumerator *enumr = me->mEnumerators[i];
         enumeration->AddEnumerator(enumr->mName, enumr->mValue);
     }
 
@@ -111,7 +109,7 @@ AutoPtr<Type> MetadataResolver::BuildInterface(
     attrs.mUuid = UUID::Parse(mi->mUuid)->Dump();
     interface->SetAttributes(attrs);
 
-    for (int i = 0; i < mi->mMethodNumber; i++) {
+    for (int i = 0;  i < mi->mMethodNumber;  i++) {
         AutoPtr<Method> method = BuildMethod(mi->mMethods[i]);
         interface->AddMethod(method);
     }
@@ -127,7 +125,7 @@ AutoPtr<Method> MetadataResolver::BuildMethod(
     AutoPtr<Type> type = BuildType(mComponent->mTypes[mm->mReturnTypeIndex]);
     method->SetReturnType(type);
 
-    for (int i = 0; i < mm->mParameterNumber; i++) {
+    for (int i = 0;  i < mm->mParameterNumber;  i++) {
         AutoPtr<Parameter> parameter = BuildParameter(mm->mParameters[i]);
         method->AddParameter(parameter);
     }
@@ -153,7 +151,7 @@ AutoPtr<Parameter> MetadataResolver::BuildParameter(
     }
     if (mp->mProperties & PARAMETER_VALUE_DEFAULT) {
         como::MetaValue* mv = reinterpret_cast<como::MetaValue*>(
-                ALIGN((uintptr_t)mp + sizeof(como::MetaParameter)));
+                                    ALIGN((uintptr_t)mp + sizeof(como::MetaParameter)));
         AutoPtr<Expression> value = BuildValue(type, mv);
         parameter->SetDefaultValue(value);
     }
@@ -231,7 +229,7 @@ AutoPtr<Type> MetadataResolver::BuildType(
 
         if (mt->mProperties & TYPE_EXTERNAL) {
             char** moduleNamePP = reinterpret_cast<char**>(
-                    ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
+                                            ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
             AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
             if (module != nullptr) {
                 type = module->FindType(typeStr);
@@ -320,8 +318,8 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
         return expr;
     }
     else if (type->IsByteType() || type->IsShortType() ||
-             type->IsIntegerType() || type->IsLongType() ||
-             type->IsEnumerationType() || type->IsHANDLEType()) {
+                         type->IsIntegerType() || type->IsLongType() ||
+                         type->IsEnumerationType() || type->IsHANDLEType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
         expr->SetType(type);
         expr->SetIntegralValue(mv->mIntegralValue);
@@ -345,4 +343,4 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
     return nullptr;
 }
 
-}
+} // namespace cdlc

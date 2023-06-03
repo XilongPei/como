@@ -35,9 +35,9 @@ bool ParameterTypeChecker::CheckInterfaces()
     bool ret = true;
 
     int N = mModule->GetInterfaceNumber();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0;  i < N;  i++) {
         mInterface = mModule->GetInterface(i);
-        if (!mInterface->IsExternal()){
+        if (! mInterface->IsExternal()) {
             ret = CheckInterface(mInterface) && ret;
         }
     }
@@ -49,7 +49,7 @@ bool ParameterTypeChecker::CheckCoclasses()
     bool ret = true;
 
     int N = mModule->GetCoclassNumber();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0;  i < N;  i++) {
         mCoclass = mModule->GetCoclass(i);
         ret = CheckCoclass(mCoclass) && ret;
     }
@@ -57,12 +57,12 @@ bool ParameterTypeChecker::CheckCoclasses()
 }
 
 bool ParameterTypeChecker::CheckInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     bool ret = true;
 
     int N = interface->GetMethodNumber();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0;  i < N;  i++) {
         mMethod = interface->GetMethod(i);
         ret = CheckMethod(mMethod) && ret;
     }
@@ -70,12 +70,12 @@ bool ParameterTypeChecker::CheckInterface(
 }
 
 bool ParameterTypeChecker::CheckCoclass(
-    /* [in] */ CoclassType* coclass)
+    /* [in] */ CoclassType *coclass)
 {
     bool ret = true;
 
     int N = coclass->GetConstructorNumber();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0;  i < N;  i++) {
         mMethod = coclass->GetConstructor(i);
         ret = CheckConstructor(mMethod) && ret;
     }
@@ -83,12 +83,12 @@ bool ParameterTypeChecker::CheckCoclass(
 }
 
 bool ParameterTypeChecker::CheckMethod(
-    /* [in] */ Method* method)
+    /* [in] */ Method *method)
 {
     bool ret = true;
 
     int N = method->GetParameterNumber();
-    for (int i = 0; i < N; i++) {
+    for (int i = 0;  i < N;  i++) {
         AutoPtr<Parameter> parameter = method->GetParameter(i);
         ret = CheckMethodParameter(parameter) && ret;
     }
@@ -99,8 +99,8 @@ bool ParameterTypeChecker::CheckMethodParameter(
     /* [in] */ Parameter* parameter)
 {
     bool ret = IsTypeValid(parameter->GetType(), parameter->IsIn(),
-            parameter->IsOut(), parameter->IsCallee());
-    if (!ret) {
+                                    parameter->IsOut(), parameter->IsCallee());
+    if (! ret) {
         Logger::E("ParameterTypeChecker", "The type \"%s\" of the parameter"
                 " \"%s\" in \"%s::%s\" is illegal.",
                 parameter->GetType()->ToString().string(),
@@ -117,7 +117,7 @@ bool ParameterTypeChecker::CheckConstructor(
     bool ret = true;
 
     int N = method->GetParameterNumber();
-    for (int i = 0; i < N - 2; i++) {
+    for (int i = 0;  i < N - 2;  i++) {
         AutoPtr<Parameter> parameter = method->GetParameter(i);
         ret = CheckConstructorParameter(parameter) && ret;
     }
@@ -128,15 +128,15 @@ bool ParameterTypeChecker::CheckConstructorParameter(
     /* [in] */ Parameter* parameter)
 {
     bool ret = false;
-    if (!parameter->IsOut()) {
+    if (! parameter->IsOut()) {
         ret = IsTypeValid(parameter->GetType(), true, false, false);
     }
-    if (!ret) {
+    if (! ret) {
         Logger::E("ParameterTypeChecker", "The type \"%s\" of the parameter"
-                " \"%s\" in coclass \"%s\" constructor is illegal.",
-                parameter->GetType()->ToString().string(),
-                parameter->GetName().string(),
-                mCoclass->ToString().string());
+                            " \"%s\" in coclass \"%s\" constructor is illegal.",
+                            parameter->GetType()->ToString().string(),
+                            parameter->GetName().string(),
+                            mCoclass->ToString().string());
     }
     return ret;
 }
@@ -151,12 +151,12 @@ bool ParameterTypeChecker::IsTypeValid(
     int referenceNumber = 0;
     while (type->IsPointerType() || type->IsReferenceType()) {
         if (type->IsPointerType()) {
-            PointerType* pointer = PointerType::CastFrom(type);
+            PointerType *pointer = PointerType::CastFrom(type);
             pointerNumber += pointer->GetPointerNumber();
             type = pointer->GetBaseType();
         }
         else {
-            ReferenceType* reference = ReferenceType::CastFrom(type);
+            ReferenceType *reference = ReferenceType::CastFrom(type);
             referenceNumber += reference->GetReferenceNumber();
             type = reference->GetBaseType();
         }
@@ -192,4 +192,4 @@ bool ParameterTypeChecker::IsTypeValid(
     return true;
 }
 
-}
+} // namespace cdlc

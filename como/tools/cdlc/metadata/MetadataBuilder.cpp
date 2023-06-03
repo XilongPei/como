@@ -629,6 +629,27 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
 
     for (int i = 0; i < IN; i++) {
         mc->mInterfaceIndexes[i] = mModule->IndexOf(klass->GetInterface(i));
+
+        // TODO
+        #if 0
+        AutoPtr<InterfaceType> interface = klass->GetInterface(i);
+        // interface IComoFunctionSafetyObject INTERFACE_ID
+        static UUID *uuidIComoFunctionSafetyObject =
+                                 UUID::Parse("00000000-0000-0000-0000-000000000008");
+
+        if (interface->GetUUID != uuidIComoFunctionSafetyObject) {
+            mc->mInterfaceIndexes[i] = mModule->IndexOf(interface);
+        }
+        else {
+            mc->mInterfaceIndexes[i] = -1;
+            continue;
+        }
+
+        // If the Interface is not found, is it an error.
+        if (nullptr == mc->mInterfaceIndexes[i]) {
+            Logger::E(TAG, "Interface can't be found");
+        }
+        #endif
     }
 
     for (int i = 0; i < CN; i++) {
