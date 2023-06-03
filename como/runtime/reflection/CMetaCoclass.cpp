@@ -199,7 +199,7 @@ ECode CMetaCoclass::GetInterface(
 
     FAIL_RETURN(BuildAllInterfaces());
 
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         String name, ns;
         miObj->GetName(name);
@@ -277,6 +277,11 @@ ECode CMetaCoclass::GetMethodNumber(
                 AutoPtr<IMetaInterface> miObj;
                 GetInterface(fullName, miObj);
                 Integer methodNum;
+
+                if (nullptr == miObj) {
+                    return E_RUNTIME_EXCEPTION;
+                }
+
                 miObj->GetMethodNumber(methodNum);
                 num += methodNum - 4;
             }
@@ -355,7 +360,7 @@ ECode CMetaCoclass::GetMethod(
         return NOERROR;
     }
 
-    for (i = 0; i < mMethods.GetLength(); i++) {
+    for (i = 0;  i < mMethods.GetLength();  i++) {
         IMetaMethod* mmObj = mMethods[i];
         String mmName, mmSignature;
         mmObj->GetName(mmName);
@@ -434,7 +439,7 @@ ECode CMetaCoclass::BuildAllInterfaces()
     if (mInterfaces[0] == nullptr) {
         Mutex::AutoLock lock(mInterfacesLock);
         if (mInterfaces[0] == nullptr) {
-            for (Integer i = 0; i < mMetadata->mInterfaceNumber - 1; i++) {
+            for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 Integer intfIndex = mMetadata->mInterfaceIndexes[i];
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(intfIndex);
                 if (nullptr == miObj)

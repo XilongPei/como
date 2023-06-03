@@ -44,6 +44,6 @@ BuildinTypeBuilder::BuildinTypeBuilder()
     mModule = mWorld->GetCompilerRTModule();
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_BUILDINTYPEBUILDER_H__

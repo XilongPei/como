@@ -33,6 +33,6 @@ private:
     static const char* TAG;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_COMORTMETADATALOADER_H__

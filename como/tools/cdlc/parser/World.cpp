@@ -73,6 +73,7 @@ AutoPtr<Type> World::FindType(
     if (type != nullptr) {
         return type;
     }
+
     for (AutoPtr<Module> module : mDependentModules) {
         type = module->FindType(name);
         if (type != nullptr) {
@@ -82,4 +83,4 @@ AutoPtr<Type> World::FindType(
     return nullptr;
 }
 
-}
+} // namespace cdlc

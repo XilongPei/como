@@ -28,9 +28,8 @@ const char* ComoRTMetadataLoader::TAG = "ComoRTMetadataLoader";
 bool ComoRTMetadataLoader::Process()
 {
     String rtPath(getenv("COMORT_PATH"));
-    void* metadata = MetadataUtils::ReadMetadata(
-            rtPath, MetadataUtils::TYPE_SO);
-    if (metadata == nullptr) {
+    void *metadata = MetadataUtils::ReadMetadata(rtPath, MetadataUtils::TYPE_SO);
+    if (nullptr == metadata) {
         Logger::E(TAG, "Load metadata from comort failed.");
         return false;
     }
@@ -42,4 +41,4 @@ bool ComoRTMetadataLoader::Process()
     return true;
 }
 
-}
+} // namespace cdlc

@@ -213,4 +213,4 @@ void BuildinTypeBuilder::BuildIInterface()
     iinterface->AddMethod(method);
 }
 
-}
+} // namespace cdlc

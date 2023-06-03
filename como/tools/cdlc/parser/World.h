@@ -77,6 +77,6 @@ AutoPtr<Module> World::GetCompilerRTModule()
     return mCompilerRTModule;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_WORLD_H__
