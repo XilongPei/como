@@ -331,6 +331,7 @@ TEST(ReflectionTest, TestGetMethodWithoutSignature)
     CoGetComponentMetadata(CID_ReflectionTestUnit, nullptr, mc);
     AutoPtr<IMetaCoclass> klass;
     mc->GetCoclass("como::test::reflection::CMethodTester", klass);
+    EXPECT_NE(nullptr, klass);
 
     AutoPtr<IMetaMethod> method;
     klass->GetMethod("TestMethod1", nullptr, method);

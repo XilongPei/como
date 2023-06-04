@@ -170,8 +170,9 @@ ECode CMetaComponent::GetCoclass(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
+    klass = nullptr;
+
     if (fullName.IsEmpty() || mCoclasses.IsEmpty()) {
-        klass = nullptr;
         return NOERROR;
     }
 
@@ -185,6 +186,8 @@ ECode CMetaComponent::GetCoclass(
     /* [in] */ const CoclassID& cid,
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
+    klass = nullptr;
+
     FAIL_RETURN(BuildAllCoclasses());
 
     klass = mCoclassIdMap.Get(cid.mUuid);
@@ -535,7 +538,7 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
         return nullptr;
     }
 
-    MetaInterface* mi = mMetadata->mInterfaces[index];
+    MetaInterface *mi = mMetadata->mInterfaces[index];
     String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
     if (fullName.IsEmpty())
         return nullptr;
@@ -548,7 +551,7 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
                 return nullptr;
 
             Integer realIndex = index;
-            for (Integer i = 0; i <= index; i++) {
+            for (Integer i = 0;  i <= index;  i++) {
                 if (mMetadata->mInterfaces[i]->mProperties & TYPE_EXTERNAL) {
                     realIndex--;
                 }
