@@ -480,12 +480,11 @@ ECode CMetaCoclass::BuildAllMethods()
                 nsName = ns + "::" + name;
 
                 static String nsName_interface = String("como::IInterface");
-                static String nsName_icfso = String("como::IComoFunctionSafetyObject");
 
-                if (nsName_interface.Equals(nsName))
+                if (mOwner->ChkExternalInterface(mMetadata->mInterfaceIndexes[i]))
                     continue;
 
-                if (nsName_icfso.Equals(nsName))
+                if (nsName_interface.Equals(nsName))
                     continue;
 
                 FAIL_RETURN(BuildInterfaceMethodLocked(miObj, index));

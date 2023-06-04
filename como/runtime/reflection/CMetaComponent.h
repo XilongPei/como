@@ -134,6 +134,9 @@ public:
     AutoPtr<IMetaInterface> BuildInterface(
         /* [in] */ Integer index);
 
+    Boolean ChkExternalInterface(
+        /* [in] */ Integer index);
+
     inline static CMetaComponent* From(
         /* [in] */ IMetaComponent* comp);
 

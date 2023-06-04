@@ -834,4 +834,15 @@ ECode CMetaComponent::GetOpaque(
     return NOERROR;
 }
 
+Boolean CMetaComponent::ChkExternalInterface(
+    /* [in] */ Integer index)
+{
+    if (index < 0 || index >= mMetadata->mInterfaceNumber) {
+        return true;
+    }
+
+    MetaInterface *mi = mMetadata->mInterfaces[index];
+    return mi->mProperties & TYPE_EXTERNAL;
+}
+
 } // namespace como
