@@ -138,8 +138,9 @@ ECode CMetaCoclass::GetConstructor(
     /* [in] */ const String& signature,
     /* [out] */ AutoPtr<IMetaConstructor>& constr)
 {
+    constr = nullptr;
+
     if (mConstructors.IsEmpty()) {
-        constr = nullptr;
         return NOERROR;
     }
 
@@ -150,7 +151,7 @@ ECode CMetaCoclass::GetConstructor(
         return NOERROR;
     }
 
-    for (Integer i = 0; i < mConstructors.GetLength(); i++) {
+    for (Integer i = 0;  i < mConstructors.GetLength();  i++) {
         IMetaConstructor* mc = mConstructors[i];
         String mcSig;
         mc->GetSignature(mcSig);
@@ -159,7 +160,7 @@ ECode CMetaCoclass::GetConstructor(
             return NOERROR;
         }
     }
-    constr = nullptr;
+
     return NOERROR;
 }
 
@@ -192,9 +193,10 @@ ECode CMetaCoclass::GetInterface(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaInterface>& intf)
 {
+    intf = nullptr;
+
     if (fullName.IsEmpty() || mInterfaces.IsEmpty()) {
-        intf = nullptr;
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllInterfaces());
@@ -209,7 +211,7 @@ ECode CMetaCoclass::GetInterface(
             return NOERROR;
         }
     }
-    intf = nullptr;
+
     return NOERROR;
 }
 
@@ -217,9 +219,11 @@ ECode CMetaCoclass::GetInterface(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ AutoPtr<IMetaInterface>& intf)
 {
+    intf = nullptr;
+
     FAIL_RETURN(BuildAllInterfaces());
 
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         InterfaceID iidTmp;
         miObj->GetInterfaceID(iidTmp);
@@ -228,7 +232,7 @@ ECode CMetaCoclass::GetInterface(
             return NOERROR;
         }
     }
-    intf = nullptr;
+
     return NOERROR;
 }
 
@@ -236,14 +240,15 @@ ECode CMetaCoclass::ContainsInterface(
     /* [in] */ const String& fullName,
     /* [out] */ Boolean& result)
 {
+    result = false;
+
     if (fullName.IsEmpty() || mInterfaces.IsEmpty()) {
-        result = false;
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllInterfaces());
 
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         String name, ns;
         miObj->GetName(name);
@@ -253,7 +258,7 @@ ECode CMetaCoclass::ContainsInterface(
             return NOERROR;
         }
     }
-    result = false;
+
     return NOERROR;
 }
 
@@ -316,7 +321,7 @@ ECode CMetaCoclass::GetAllMethodsOverrideInfo(
         return ec;
 
     Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         overridesInfo.Set(i, mOverridesInfo[i]);
     }
 
@@ -328,9 +333,10 @@ ECode CMetaCoclass::GetMethod(
     /* [in] */ const String& signature,
     /* [out] */ AutoPtr<IMetaMethod>& method)
 {
+    method = nullptr;
+
     if (fullName.IsEmpty() || mInterfaces.IsEmpty()) {
-        method = nullptr;
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     ECode ec = BuildAllMethods();
@@ -344,7 +350,7 @@ ECode CMetaCoclass::GetMethod(
         IMetaInterface* miObj = nullptr;
         String nameSpace = fullName.Substring(0, pos-1);
         String methodName = fullName.Substring(pos+1);
-        for (i = 0; i < mInterfaces.GetLength(); i++) {
+        for (i = 0;  i < mInterfaces.GetLength();  i++) {
             miObj = mInterfaces[i];
             String name, ns;
             miObj->GetName(name);
@@ -356,7 +362,6 @@ ECode CMetaCoclass::GetMethod(
         if (i < mInterfaces.GetLength())
             return miObj->GetMethod(methodName, signature, method);
 
-        method = nullptr;
         return NOERROR;
     }
 
@@ -385,7 +390,7 @@ ECode CMetaCoclass::GetMethod(
             }
         }
     }
-    method = nullptr;
+
     return NOERROR;
 }
 
@@ -400,11 +405,11 @@ ECode CMetaCoclass::CreateObject(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object);
+    *object = nullptr;
 
     AutoPtr<IClassObject> factory;
     ECode ec = mOwner->GetClassObject(mCid, factory);
     if (FAILED(ec)) {
-        *object = nullptr;
         return ec;
     }
 

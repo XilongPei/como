@@ -120,8 +120,9 @@ ECode CMetaInterface::GetConstant(
     /* [in] */ const String& name,
     /* [out] */ AutoPtr<IMetaConstant>& constt)
 {
+    constt = nullptr;
+
     if (name.IsEmpty() || mConstants.IsEmpty()) {
-        constt = nullptr;
         return E_CONST_NOT_FOUND_EXCEPTION;
     }
 
@@ -143,8 +144,9 @@ ECode CMetaInterface::GetConstant(
     /* [in] */ Integer index,
     /* [out] */ AutoPtr<IMetaConstant>& constt)
 {
+    constt = nullptr;
+
     if (index < 0 || index >= mConstants.GetLength()) {
-        constt = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -198,14 +200,13 @@ ECode CMetaInterface::GetMethod(
     /* [in] */ const String& signature,
     /* [out] */ AutoPtr<IMetaMethod>& method)
 {
+    method = nullptr;
+
     if (name.IsEmpty() || mMethods.IsEmpty()) {
-        method = nullptr;
         return NOERROR;
     }
 
     FAIL_RETURN(BuildAllMethods());
-
-    method = nullptr;
 
     if (! signature.IsEmpty()) {
         for (Integer i = 0;  i < mMethods.GetLength();  i++) {
@@ -240,8 +241,9 @@ ECode CMetaInterface::GetMethod(
     /* [in] */ Integer index,
     /* [out] */ AutoPtr<IMetaMethod>& method)
 {
+    method = nullptr;
+
     if (index < 0 || index >= mMethods.GetLength()) {
-        method = nullptr;
         return NOERROR;
     }
 

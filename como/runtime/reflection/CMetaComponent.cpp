@@ -68,6 +68,7 @@ CMetaComponent::CMetaComponent(
     if (FAILED(ec)) {
         mIInterface = nullptr;
     }
+
     ec = BuildIInterface();
     if (FAILED(ec)) {
         mIInterface = nullptr;
@@ -131,8 +132,9 @@ ECode CMetaComponent::GetConstant(
     /* [in] */ const String& name,
     /* [out] */ AutoPtr<IMetaConstant>& constt)
 {
+    constt = nullptr;
+
     if (name.IsEmpty() || mConstants.IsEmpty()) {
-        constt = nullptr;
         return NOERROR;
     }
 
@@ -222,8 +224,9 @@ ECode CMetaComponent::GetEnumeration(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaEnumeration>& enumn)
 {
+    enumn = nullptr;
+
     if (fullName.IsEmpty() || mEnumerations.IsEmpty()) {
-        enumn = nullptr;
         return NOERROR;
     }
 
@@ -261,8 +264,9 @@ ECode CMetaComponent::GetInterface(
     /* [in] */ const String& fullName,
     /* [out] */ AutoPtr<IMetaInterface>& metaIntf)
 {
+    metaIntf = nullptr;
+
     if (fullName.IsEmpty() || mInterfaces.IsEmpty()) {
-        metaIntf = nullptr;
         return NOERROR;
     }
 
@@ -276,6 +280,8 @@ ECode CMetaComponent::GetInterface(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ AutoPtr<IMetaInterface>& metaIntf)
 {
+    metaIntf = nullptr;
+
     FAIL_RETURN(BuildAllInterfaces());
     metaIntf = mInterfaceIdMap.Get(iid.mUuid);
     return NOERROR;
@@ -352,8 +358,8 @@ ECode CMetaComponent::CanUnload(
     /* [out] */ Boolean& unload)
 {
     unload = mComponent->mSoCanUnload != nullptr
-            ? mComponent->mSoCanUnload()
-            : false;
+                                        ? mComponent->mSoCanUnload()
+                                        : false;
     return NOERROR;
 }
 
