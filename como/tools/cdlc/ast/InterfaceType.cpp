@@ -97,7 +97,7 @@ String InterfaceType::GetSignature()
     StringBuilder builder;
 
     builder.Append("L");
-    if (!mNamespace->IsGlobal()) {
+    if (! mNamespace->IsGlobal()) {
         builder.Append(mNamespace->ToString().Replace("::", "/"));
     }
     builder.Append("/");

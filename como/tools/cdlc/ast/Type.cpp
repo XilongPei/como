@@ -167,13 +167,13 @@ String Type::Dump(
 }
 
 void Type::CloneBase(
-    /* [in] */ Type* clone,
-    /* [in] */ Module* module)
+    /* [in] */ Type *clone,
+    /* [in] */ Module *module)
 {
     clone->mName = mName;
     clone->mExternalModuleName = mExternalModuleName.IsEmpty()
-            ? mModule->GetName()
-            : mExternalModuleName;
+                                                        ? mModule->GetName()
+                                                        : mExternalModuleName;
     clone->mDeepCopied = true;
     if (mNamespace != nullptr) {
         AutoPtr<Namespace> ns = module->ParseNamespace(mNamespace->ToString());
@@ -182,8 +182,8 @@ void Type::CloneBase(
 }
 
 AutoPtr<Type> Type::Choose(
-    /* [in] */ Type* type1,
-    /* [in] */ Type* type2)
+    /* [in] */ Type *type1,
+    /* [in] */ Type *type2)
 {
     if (type1->IsDoubleType()) {
         return type1;

@@ -42,15 +42,15 @@ public:
     inline AutoPtr<InterfaceType> GetBaseInterface();
 
     inline void SetBaseInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     inline AutoPtr<InterfaceType> GetOuterInterface();
 
     inline void SetOuterInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     inline void AddNestedInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     AutoPtr<InterfaceType> GetNestedInterface(
         /* [in] */ int i);
@@ -58,7 +58,7 @@ public:
     inline int GetNestedInterfaceNumber();
 
     inline void AddConstant(
-        /* [in] */ Constant* constant);
+        /* [in] */ Constant *constant);
 
     AutoPtr<Constant> FindConstant(
         /* [in] */ const String& name);
@@ -69,7 +69,7 @@ public:
     inline int GetConstantNumber();
 
     inline void AddMethod(
-        /* [in] */ Method* method);
+        /* [in] */ Method *method);
 
     AutoPtr<Method> FindMethod(
         /* [in] */ const String& name,
@@ -98,7 +98,7 @@ public:
     inline String GetStrFramacBlock();
 
     inline static AutoPtr<InterfaceType> CastFrom(
-        /* [in] */ Type* type);
+        /* [in] */ Type *type);
 
 public:
     static constexpr int METHOD_MAX_NUMBER = 240 + 4;
@@ -108,8 +108,8 @@ private:
     String mVersion;
     String mDescription;
     String mStrFramacBlock;
-    InterfaceType* mBaseInterface = nullptr;
-    InterfaceType* mOuterInterface = nullptr;
+    InterfaceType *mBaseInterface = nullptr;
+    InterfaceType *mOuterInterface = nullptr;
     std::vector<AutoPtr<InterfaceType>> mNestedInterfaces;
     std::vector<AutoPtr<Constant>> mConstants;
     std::vector<AutoPtr<Method>> mMethods;

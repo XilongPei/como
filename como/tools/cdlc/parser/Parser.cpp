@@ -2128,7 +2128,7 @@ bool Parser::ParseConstructor(
 }
 
 bool Parser::ParseInterface(
-    /* [in] */ CoclassType* klass)
+    /* [in] */ CoclassType *klass)
 {
     bool result = true;
 

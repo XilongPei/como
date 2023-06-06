@@ -43,7 +43,7 @@ public:
     inline String GetFuncSafetySetting();
 
     inline void AddConstructor(
-        /* [in] */ Method* constructor);
+        /* [in] */ Method *constructor);
 
     AutoPtr<Method> FindConstructor(
         /* [in] */ const String& name,
@@ -59,10 +59,10 @@ public:
     inline bool IsConstructorDeleted();
 
     inline void AddInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     inline void InsertInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     AutoPtr<InterfaceType> GetInterface(
         /* [in] */ int i);
@@ -74,10 +74,10 @@ public:
     String GetSignature() override;
 
     inline static AutoPtr<CoclassType> CastFrom(
-        /* [in] */ Type* type);
+        /* [in] */ Type *type);
 
     inline void AddConstant(
-        /* [in] */ Constant* constant);
+        /* [in] */ Constant *constant);
 
     AutoPtr<Constant> FindConstant(
         /* [in] */ const String& name);
