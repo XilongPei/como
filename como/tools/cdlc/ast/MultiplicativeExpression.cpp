@@ -209,4 +209,4 @@ bool MultiplicativeExpression::IsNaN()
            (mOperator == OPERATOR_DIVIDE);
 }
 
-}
+} // namespace cdlc

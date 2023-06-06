@@ -189,6 +189,6 @@ bool Type::IsExternal()
     return !mExternalModuleName.IsEmpty();
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_TYPE_H__

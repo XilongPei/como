@@ -72,7 +72,7 @@ bool Parser::Parse(
         ret = RunPhases();
     }
 
-    if (!ret) {
+    if (! ret) {
         ShowErrors();
     }
 
@@ -108,7 +108,7 @@ bool Parser::ParseFile(
 {
     String filePath = tokenInfo.mStringValue;
     AutoPtr<MemoryFileReader> reader = new MemoryFileReader(filePath);
-    if (!reader->ReadIn(false)) {
+    if (! reader->ReadIn(false)) {
         String message = String::Format("Fail to open the file \"%s\".",
                                         filePath.string());
         LogError(tokenInfo, message);
@@ -787,7 +787,7 @@ bool Parser::ParseInterface(
 }
 
 bool Parser::ParseInterfaceBody(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     bool result = true;
 
@@ -2368,7 +2368,7 @@ AutoPtr<Type> Parser::FindType(
     /* [in] */ bool deepCopyIfNeed)
 {
     String fullTypeName = typeName;
-    if (!fullTypeName.Contains("::")) {
+    if (! fullTypeName.Contains("::")) {
         if (mCurrentContext != nullptr) {
             fullTypeName = mCurrentContext->FindTypeForwardDeclaration(typeName);
         }

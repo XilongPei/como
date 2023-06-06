@@ -41,7 +41,7 @@ String LongType::GetSignature()
 }
 
 AutoPtr<Node> LongType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<LongType> clone = new LongType();

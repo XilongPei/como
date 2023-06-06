@@ -109,6 +109,6 @@ void PostfixExpression::SetEnumeratorName(
     mStringValue = name;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_POSTFIXEXPRESSION_H__

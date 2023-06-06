@@ -36,7 +36,7 @@ String InterfaceIDType::GetSignature()
 }
 
 AutoPtr<Node> InterfaceIDType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<InterfaceIDType> clone = new InterfaceIDType();
@@ -44,4 +44,4 @@ AutoPtr<Node> InterfaceIDType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

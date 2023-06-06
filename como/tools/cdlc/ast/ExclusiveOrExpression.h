@@ -55,6 +55,6 @@ ExclusiveOrExpression::ExclusiveOrExpression()
     mOperator = OPERATOR_BITWISE_XOR;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_EXCLUSIVEOREXPRESSION_H__

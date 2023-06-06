@@ -43,7 +43,7 @@ public:
     String ToString() override;
 
     AutoPtr<Node> Clone(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 
     inline static AutoPtr<ReferenceType> CastFrom(

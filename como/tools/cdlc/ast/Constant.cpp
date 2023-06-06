@@ -41,7 +41,7 @@ String Constant::Dump(
 }
 
 AutoPtr<Node> Constant::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Constant> clone = new Constant();

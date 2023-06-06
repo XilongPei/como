@@ -209,6 +209,6 @@ void Namespace::SetMetadata(
     mMetadata = metadata;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_NAMESPACE_H__

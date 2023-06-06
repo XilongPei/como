@@ -55,6 +55,6 @@ AndExpression::AndExpression()
     mOperator = OPERATOR_BITWISE_AND;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_ANDEXPRESSION_H__

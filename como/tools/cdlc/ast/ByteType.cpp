@@ -41,7 +41,7 @@ String ByteType::GetSignature()
 }
 
 AutoPtr<Node> ByteType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ByteType> clone = new ByteType();

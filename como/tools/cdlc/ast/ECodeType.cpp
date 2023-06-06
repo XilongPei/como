@@ -36,7 +36,7 @@ String ECodeType::GetSignature()
 }
 
 AutoPtr<Node> ECodeType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ECodeType> clone = new ECodeType();

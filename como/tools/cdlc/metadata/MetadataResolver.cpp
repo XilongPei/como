@@ -27,13 +27,13 @@ namespace cdlc {
 
 AutoPtr<Type> MetadataResolver::ResolveType(
     /* [in] */ const String& typeName,
-    /* [in] */ Namespace* ns,
-    /* [in] */ como::MetaNamespace* mn)
+    /* [in] */ Namespace *ns,
+    /* [in] */ como::MetaNamespace *mn)
 {
     mResolvingTypename = ns->ToString() + "::" + typeName;
 
     for (int i = 0;  i < mn->mEnumerationNumber;  i++) {
-        como::MetaEnumeration* me = mComponent->mEnumerations[mn->mEnumerationIndexes[i]];
+        como::MetaEnumeration *me = mComponent->mEnumerations[mn->mEnumerationIndexes[i]];
         if (typeName.Equals(me->mName)) {
             if (me->mProperties & TYPE_EXTERNAL) {
                 char** moduleNamePP = reinterpret_cast<char**>(
@@ -72,8 +72,8 @@ AutoPtr<Type> MetadataResolver::ResolveType(
 }
 
 AutoPtr<Type> MetadataResolver::BuildEnumeration(
-    /* [in] */ Namespace* ns,
-    /* [in] */ como::MetaEnumeration* me)
+    /* [in] */ Namespace *ns,
+    /* [in] */ como::MetaEnumeration *me)
 {
     AutoPtr<EnumerationType> enumeration = new EnumerationType();
     enumeration->SetName(me->mName);
@@ -88,8 +88,8 @@ AutoPtr<Type> MetadataResolver::BuildEnumeration(
 }
 
 AutoPtr<Type> MetadataResolver::BuildInterface(
-    /* [in] */ Namespace* ns,
-    /* [in] */ como::MetaInterface* mi)
+    /* [in] */ Namespace *ns,
+    /* [in] */ como::MetaInterface *mi)
 {
     AutoPtr<InterfaceType> interface = new InterfaceType();
     mResolvingType = interface;
@@ -118,7 +118,7 @@ AutoPtr<Type> MetadataResolver::BuildInterface(
 }
 
 AutoPtr<Method> MetadataResolver::BuildMethod(
-    /* [in] */ como::MetaMethod* mm)
+    /* [in] */ como::MetaMethod *mm)
 {
     AutoPtr<Method> method = new Method();
     method->SetName(mm->mName);
@@ -134,7 +134,7 @@ AutoPtr<Method> MetadataResolver::BuildMethod(
 }
 
 AutoPtr<Parameter> MetadataResolver::BuildParameter(
-    /* [in] */ como::MetaParameter* mp)
+    /* [in] */ como::MetaParameter *mp)
 {
     AutoPtr<Parameter> parameter = new Parameter();
     parameter->SetName(mp->mName);
@@ -159,7 +159,7 @@ AutoPtr<Parameter> MetadataResolver::BuildParameter(
 }
 
 AutoPtr<Type> MetadataResolver::BuildType(
-    /* [in] */ como::MetaType* mt)
+    /* [in] */ como::MetaType *mt)
 {
     AutoPtr<Type> type;
     String typeStr;
@@ -302,8 +302,8 @@ AutoPtr<Type> MetadataResolver::BuildType(
 }
 
 AutoPtr<Expression> MetadataResolver::BuildValue(
-    /* [in] */ Type* type,
-    /* [in] */ como::MetaValue* mv)
+    /* [in] */ Type *type,
+    /* [in] */ como::MetaValue *mv)
 {
     if (type->IsBooleanType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();

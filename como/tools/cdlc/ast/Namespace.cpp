@@ -141,7 +141,7 @@ int Namespace::GetExternalEnumerationNumber()
 }
 
 void Namespace::AddInterfaceType(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     if (interface != nullptr) {
         mInterfaces.push_back(interface);
@@ -240,4 +240,4 @@ String Namespace::Dump(
     return prefix + ToString();
 }
 
-}
+} // namespace cdlc

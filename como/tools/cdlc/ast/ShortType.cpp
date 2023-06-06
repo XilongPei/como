@@ -41,7 +41,7 @@ String ShortType::GetSignature()
 }
 
 AutoPtr<Node> ShortType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ShortType> clone = new ShortType();
@@ -49,4 +49,4 @@ AutoPtr<Node> ShortType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

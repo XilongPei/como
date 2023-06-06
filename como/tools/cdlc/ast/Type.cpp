@@ -197,4 +197,4 @@ AutoPtr<Type> Type::Choose(
     return type2;
 }
 
-}
+} // namespace cdlc

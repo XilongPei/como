@@ -48,6 +48,6 @@ public:
     bool IsNaN() override;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_ADDITIVEEXPRESSION_H__

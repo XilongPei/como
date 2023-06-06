@@ -193,4 +193,4 @@ bool AdditiveExpression::IsNaN()
     return mRightOperand->IsNaN();
 }
 
-}
+} // namespace cdlc

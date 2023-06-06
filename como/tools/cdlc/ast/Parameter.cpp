@@ -73,7 +73,7 @@ String Parameter::Dump(
 }
 
 AutoPtr<Node> Parameter::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Parameter> clone = new Parameter();

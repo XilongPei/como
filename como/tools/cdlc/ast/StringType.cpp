@@ -36,7 +36,7 @@ String StringType::GetSignature()
 }
 
 AutoPtr<Node> StringType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<StringType> clone = new StringType();

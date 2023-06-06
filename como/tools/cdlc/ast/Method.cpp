@@ -69,7 +69,7 @@ String Method::Dump(
 }
 
 AutoPtr<Node> Method::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Method> clone = new Method();

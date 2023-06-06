@@ -126,4 +126,4 @@ bool ShiftExpression::IsNaN()
     return mRightOperand->IsNaN();
 }
 
-}
+} // namespace cdlc

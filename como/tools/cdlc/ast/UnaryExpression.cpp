@@ -195,4 +195,4 @@ bool UnaryExpression::IsNaN()
     return false;
 }
 
-}
+} // namespace cdlc

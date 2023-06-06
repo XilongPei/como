@@ -30,7 +30,7 @@ String Node::Dump(
 }
 
 AutoPtr<Node> Node::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     return nullptr;

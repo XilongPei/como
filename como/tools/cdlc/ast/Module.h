@@ -259,7 +259,7 @@ void Module::AddEnumerationType(
 }
 
 void Module::AddInterfaceType(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     mInterfaces.push_back(interface);
     AddType(interface);

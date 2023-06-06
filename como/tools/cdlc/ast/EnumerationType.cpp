@@ -99,7 +99,7 @@ String EnumerationType::Dump(
 }
 
 AutoPtr<Node> EnumerationType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<EnumerationType> clone = new EnumerationType();

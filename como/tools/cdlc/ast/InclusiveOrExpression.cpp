@@ -98,4 +98,4 @@ bool InclusiveOrExpression::IsNaN()
     return mRightOperand->IsNaN();
 }
 
-}
+} // namespace cdlc

@@ -36,7 +36,7 @@ String CoclassIDType::GetSignature()
 }
 
 AutoPtr<Node> CoclassIDType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<CoclassIDType> clone = new CoclassIDType();

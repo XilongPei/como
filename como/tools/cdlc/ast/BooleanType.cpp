@@ -36,7 +36,7 @@ String BooleanType::GetSignature()
 }
 
 AutoPtr<Node> BooleanType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<BooleanType> clone = new BooleanType();

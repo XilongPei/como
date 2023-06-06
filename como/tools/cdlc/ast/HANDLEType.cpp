@@ -36,7 +36,7 @@ String HANDLEType::GetSignature()
 }
 
 AutoPtr<Node> HANDLEType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<HANDLEType> clone = new HANDLEType();

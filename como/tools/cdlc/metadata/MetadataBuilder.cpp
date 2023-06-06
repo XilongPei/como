@@ -266,7 +266,7 @@ void MetadataBuilder::CalculateMetaEnumerator(
 }
 
 void MetadataBuilder::CalculateMetaInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     int IN = interface->GetNestedInterfaceNumber();
     int CN = interface->GetConstantNumber();
@@ -705,7 +705,7 @@ como::MetaEnumerator* MetadataBuilder::WriteMetaEnumerator(
 }
 
 como::MetaInterface* MetadataBuilder::WriteMetaInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     int IN = interface->GetNestedInterfaceNumber();
     int CN = interface->GetConstantNumber();

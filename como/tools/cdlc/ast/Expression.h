@@ -151,6 +151,6 @@ void Expression::SetScientificNotation(
     mScientificNotation = scientificNotation;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_EXPRESSION_H__

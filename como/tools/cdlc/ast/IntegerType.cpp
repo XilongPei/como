@@ -41,7 +41,7 @@ String IntegerType::GetSignature()
 }
 
 AutoPtr<Node> IntegerType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<IntegerType> clone = new IntegerType();
@@ -49,4 +49,4 @@ AutoPtr<Node> IntegerType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

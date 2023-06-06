@@ -36,7 +36,7 @@ public:
     String GetSignature() override;
 
     AutoPtr<Node> Clone(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 };
 
@@ -45,6 +45,6 @@ IntegerType::IntegerType()
     mName = "Integer";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_INTEGERTYPE_H__

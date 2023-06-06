@@ -32,7 +32,7 @@ bool InterfaceIntegrityChecker::Process()
 }
 
 bool InterfaceIntegrityChecker::CheckInterfaceIntegrity(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     bool ret = true;
     for (int i = 0; i < interface->GetMethodNumber(); i++) {

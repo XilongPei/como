@@ -36,7 +36,7 @@ String ArrayType::ToString()
 }
 
 AutoPtr<Node> ArrayType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ArrayType> clone = new ArrayType();

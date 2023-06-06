@@ -142,7 +142,7 @@ bool CoclassType::IsConstructorDeleted()
 }
 
 void CoclassType::AddInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     if (interface != nullptr) {
         mInterfaces.push_back(interface);
@@ -150,7 +150,7 @@ void CoclassType::AddInterface(
 }
 
 void CoclassType::InsertInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     if (interface != nullptr) {
         mInterfaces.insert(mInterfaces.begin(), interface);

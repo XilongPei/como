@@ -31,7 +31,7 @@ String TripleType::GetSignature()
 }
 
 AutoPtr<Node> TripleType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<TripleType> clone = new TripleType();

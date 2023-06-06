@@ -36,7 +36,7 @@ String ComponentIDType::GetSignature()
 }
 
 AutoPtr<Node> ComponentIDType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ComponentIDType> clone = new ComponentIDType();

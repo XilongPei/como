@@ -98,4 +98,4 @@ bool ExclusiveOrExpression::IsNaN()
     return mRightOperand->IsNaN();
 }
 
-}
+} // namespace cdlc

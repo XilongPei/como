@@ -92,7 +92,7 @@ public:
         /* [in] */ const String& prefix) override;
 
     AutoPtr<Node> Clone(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 
     inline String GetStrFramacBlock();
@@ -131,7 +131,7 @@ AutoPtr<InterfaceType> InterfaceType::GetBaseInterface()
 }
 
 void InterfaceType::SetBaseInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     mBaseInterface = interface;
 }
@@ -142,13 +142,13 @@ AutoPtr<InterfaceType> InterfaceType::GetOuterInterface()
 }
 
 void InterfaceType::SetOuterInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     mOuterInterface = interface;
 }
 
 void InterfaceType::AddNestedInterface(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     if (interface != nullptr) {
         mNestedInterfaces.push_back(interface);

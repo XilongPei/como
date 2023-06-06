@@ -147,7 +147,7 @@ String InterfaceType::Dump(
 }
 
 AutoPtr<Node> InterfaceType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<InterfaceType> clone = new InterfaceType();
@@ -158,7 +158,7 @@ AutoPtr<Node> InterfaceType::Clone(
     clone->mDescription = mDescription;
     clone->mStrFramacBlock = mStrFramacBlock;
 
-    if (!deepCopy) {
+    if (! deepCopy) {
         clone->mBaseInterface = mBaseInterface;
         clone->mOuterInterface = mOuterInterface;
         clone->mNestedInterfaces = mNestedInterfaces;
@@ -200,4 +200,4 @@ AutoPtr<Node> InterfaceType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

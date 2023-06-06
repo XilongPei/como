@@ -23,7 +23,7 @@
 
 namespace cdlc {
 
-const char* ComoRTMetadataLoader::TAG = "ComoRTMetadataLoader";
+const char *ComoRTMetadataLoader::TAG = "ComoRTMetadataLoader";
 
 bool ComoRTMetadataLoader::Process()
 {

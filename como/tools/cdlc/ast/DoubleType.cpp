@@ -41,7 +41,7 @@ String DoubleType::GetSignature()
 }
 
 AutoPtr<Node> DoubleType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<DoubleType> clone = new DoubleType();

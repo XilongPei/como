@@ -55,6 +55,6 @@ InclusiveOrExpression::InclusiveOrExpression()
     mOperator = OPERATOR_BITWISE_OR;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_INCLUSIVEOREXPRESSION_H__

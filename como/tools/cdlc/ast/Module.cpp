@@ -134,7 +134,7 @@ AutoPtr<InterfaceType> Module::GetInterface(
 }
 
 int Module::IndexOf(
-    /* [in] */ InterfaceType* interface)
+    /* [in] */ InterfaceType *interface)
 {
     auto it = std::find(mInterfaces.begin(), mInterfaces.end(), interface);
     if (it != mInterfaces.end()) {

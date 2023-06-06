@@ -44,7 +44,7 @@ String ReferenceType::ToString()
 }
 
 AutoPtr<Node> ReferenceType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ReferenceType> clone = new ReferenceType();

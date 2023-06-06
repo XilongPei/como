@@ -35,7 +35,7 @@ public:
         /* [in] */ const String& prefix);
 
     virtual AutoPtr<Node> Clone(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ bool deepCopy);
 };
 

@@ -98,4 +98,4 @@ bool AndExpression::IsNaN()
     return mRightOperand->IsNaN();
 }
 
-}
+} // namespace cdlc

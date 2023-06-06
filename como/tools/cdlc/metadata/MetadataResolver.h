@@ -30,7 +30,7 @@ class MetadataResolver
 {
 public:
     inline MetadataResolver(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ como::MetaComponent* mc);
 
     AutoPtr<Type> ResolveType(
@@ -69,7 +69,7 @@ private:
 };
 
 MetadataResolver::MetadataResolver(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ como::MetaComponent* mc)
     : mModule(module)
     , mComponent(mc)

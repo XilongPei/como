@@ -41,7 +41,7 @@ String FloatType::GetSignature()
 }
 
 AutoPtr<Node> FloatType::Clone(
-    /* [in] */ Module* module,
+    /* [in] */ Module *module,
     /* [in] */ bool deepCopy)
 {
     AutoPtr<FloatType> clone = new FloatType();

@@ -56,7 +56,7 @@ public:
         /* [in] */ const String& prefix) override;
 
     AutoPtr<Node> Clone(
-        /* [in] */ Module* module,
+        /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 
 private:
