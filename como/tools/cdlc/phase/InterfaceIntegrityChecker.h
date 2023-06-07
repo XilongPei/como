@@ -36,10 +36,10 @@ private:
         /* [in] */ InterfaceType* interface);
 
     bool CheckTypeIntegrity(
-        /* [in] */ Type* type);
+        /* [in] */ Type *type);
 
 private:
-    Module* mModule = nullptr;
+    Module *mModule = nullptr;
 };
 
 InterfaceIntegrityChecker::InterfaceIntegrityChecker()
@@ -47,6 +47,6 @@ InterfaceIntegrityChecker::InterfaceIntegrityChecker()
     mModule = mWorld->GetWorkingModule();
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_INTERFACEINTEGRITYCHECKER_H__

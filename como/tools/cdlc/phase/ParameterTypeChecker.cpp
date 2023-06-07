@@ -166,10 +166,10 @@ bool ParameterTypeChecker::IsTypeValid(
         if (isCallee) {
             return false;
         }
-        if (isOut && pointerNumber + referenceNumber > 1) {
+        if (isOut && (pointerNumber + referenceNumber > 1)) {
             return false;
         }
-        if (!isOut && pointerNumber + referenceNumber > 0) {
+        if ((! isOut) && (pointerNumber + referenceNumber > 0)) {
             return false;
         }
     }
@@ -182,10 +182,11 @@ bool ParameterTypeChecker::IsTypeValid(
         if (isCallee) {
             return false;
         }
-        if (isIn && pointerNumber + referenceNumber != 1) {
+        if (isIn && (pointerNumber + referenceNumber != 1)) {
             return false;
         }
-        if (isOut && (pointerNumber + referenceNumber == 0 || pointerNumber + referenceNumber > 2)) {
+        if (isOut && ((pointerNumber + referenceNumber == 0) ||
+                                        (pointerNumber + referenceNumber > 2))) {
             return false;
         }
     }

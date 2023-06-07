@@ -33,12 +33,12 @@ public:
 
 private:
     void BuildCoclassObjectInterface(
-        /* [in] */ CoclassType* klass);
+        /* [in] */ CoclassType *klass);
 
 private:
-    static const char* TAG;
+    static const char *TAG;
 
-    Module* mModule = nullptr;
+    Module       *mModule = nullptr;
     AutoPtr<Type> mIInterfaceType;
     AutoPtr<Type> mInterfaceIDType;
     AutoPtr<Type> mIClassObjectType;
@@ -49,6 +49,6 @@ ClassObjectInterfaceBuilder::ClassObjectInterfaceBuilder()
     mModule = mWorld->GetWorkingModule();
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_CLASSOBJECTINTERFACEBUILDER_H__

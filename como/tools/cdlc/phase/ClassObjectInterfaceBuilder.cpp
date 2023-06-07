@@ -24,7 +24,7 @@
 
 namespace cdlc {
 
-const char* ClassObjectInterfaceBuilder::TAG = "ClassObjectInterfaceBuilder";
+const char *ClassObjectInterfaceBuilder::TAG = "ClassObjectInterfaceBuilder";
 
 bool ClassObjectInterfaceBuilder::Process()
 {
@@ -56,10 +56,10 @@ bool ClassObjectInterfaceBuilder::Process()
 }
 
 void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
-    /* [in] */ CoclassType* klass)
+    /* [in] */ CoclassType *klass)
 {
     bool hasConstructorWithArguments = false;
-    for (int i = 0; i < klass->GetConstructorNumber(); i++) {
+    for (int i = 0;  i < klass->GetConstructorNumber();  i++) {
         AutoPtr<Method> constructor = klass->GetConstructor(i);
         if (constructor->GetParameterNumber() > 0) {
             hasConstructorWithArguments = true;
@@ -77,7 +77,7 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
         clsObjIntf->SetBaseInterface(InterfaceType::CastFrom(mIInterfaceType));
         klass->GetNamespace()->AddInterfaceType(clsObjIntf);
         klass->AddInterface(clsObjIntf);
-        for (int i = 0; i < klass->GetConstructorNumber(); i++) {
+        for (int i = 0;  i < klass->GetConstructorNumber();  i++) {
             AutoPtr<Method> m = klass->GetConstructor(i);
             m->SetName("CreateObject");
             AutoPtr<Parameter> p = new Parameter();
@@ -106,4 +106,4 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
     }
 }
 
-}
+} // namespace cdlc

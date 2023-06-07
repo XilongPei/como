@@ -39,22 +39,22 @@ private:
     bool CheckCoclasses();
 
     bool CheckInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     bool CheckCoclass(
-        /* [in] */ CoclassType* coclass);
+        /* [in] */ CoclassType *coclass);
 
     bool CheckMethod(
-        /* [in] */ Method* method);
+        /* [in] */ Method *method);
 
     bool CheckMethodParameter(
-        /* [in] */ Parameter* parameter);
+        /* [in] */ Parameter *parameter);
 
     bool CheckConstructor(
-        /* [in] */ Method* method);
+        /* [in] */ Method *method);
 
     bool CheckConstructorParameter(
-        /* [in] */ Parameter* parameter);
+        /* [in] */ Parameter *parameter);
 
     bool IsTypeValid(
         /* [in] */ AutoPtr<Type> type,
@@ -63,10 +63,10 @@ private:
         /* [in] */ bool isCallee);
 
 private:
-    Module* mModule = nullptr;
-    AutoPtr<InterfaceType> mInterface;
-    AutoPtr<CoclassType> mCoclass;
-    AutoPtr<Method> mMethod;
+    Module                 *mModule = nullptr;
+    AutoPtr<InterfaceType>  mInterface;
+    AutoPtr<CoclassType>    mCoclass;
+    AutoPtr<Method>         mMethod;
 };
 
 ParameterTypeChecker::ParameterTypeChecker()
@@ -74,6 +74,6 @@ ParameterTypeChecker::ParameterTypeChecker()
     mModule = mWorld->GetWorkingModule();
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_PARAMETERTYPECHECKER_H__

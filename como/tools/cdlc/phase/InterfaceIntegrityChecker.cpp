@@ -25,7 +25,7 @@ namespace cdlc {
 bool InterfaceIntegrityChecker::Process()
 {
     bool ret = true;
-    for (int i = 0; i < mModule->GetInterfaceNumber(); i++) {
+    for (int i = 0;  i < mModule->GetInterfaceNumber();  i++) {
         ret = CheckInterfaceIntegrity(mModule->GetInterface(i)) && ret;
     }
     return ret;
@@ -35,13 +35,14 @@ bool InterfaceIntegrityChecker::CheckInterfaceIntegrity(
     /* [in] */ InterfaceType *interface)
 {
     bool ret = true;
-    for (int i = 0; i < interface->GetMethodNumber(); i++) {
+    for (int i = 0;  i < interface->GetMethodNumber();  i++) {
         AutoPtr<Method> method = interface->GetMethod(i);
         for (int j = 0; j < method->GetParameterNumber(); j++) {
             AutoPtr<Parameter> param = method->GetParameter(j);
             if (param->GetType() == nullptr) {
-                Logger::E("InterfaceIntegrityChecker", "The type of the parameter \"%s\" is nullptr which method is \"%s\"",
-                        param->ToString().string(), method->ToString().string());
+                Logger::E("InterfaceIntegrityChecker",
+                          "The type of the parameter \"%s\" is nullptr which method is \"%s\"",
+                          param->ToString().string(), method->ToString().string());
                 ret = false;
                 continue;
             }
@@ -49,7 +50,7 @@ bool InterfaceIntegrityChecker::CheckInterfaceIntegrity(
         }
         if (method->GetReturnType() == nullptr) {
             Logger::E("InterfaceIntegrityChecker", "The return type of the method \"%s\" is nullptr",
-                    method->ToString().string());
+                                                                            method->ToString().string());
             ret = false;
             continue;
         }
@@ -74,10 +75,10 @@ bool InterfaceIntegrityChecker::CheckTypeIntegrity(
     }
     if (type->IsForwardDeclared()) {
         Logger::E("Parser", "Type[%p] \"%s\" is not declared",
-                type, type->ToString().string());
+                                                type, type->ToString().string());
         return false;
     }
     return true;
 }
 
-}
+} // namespace cdlc
