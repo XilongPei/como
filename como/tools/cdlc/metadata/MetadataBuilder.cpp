@@ -867,27 +867,27 @@ como::MetaValue* MetadataBuilder::WriteMetaValue(
 }
 
 como::MetaType* MetadataBuilder::WriteMetaType(
-    /* [in] */ Type* type)
+    /* [in] */ Type *type)
 {
-    Type* self = type;
+    Type *self = type;
 
     // begin address
     mBasePtr = ALIGN(mBasePtr);
-    como::MetaType* mt = reinterpret_cast<como::MetaType*>(mBasePtr);
+    como::MetaType *mt = reinterpret_cast<como::MetaType*>(mBasePtr);
     mt->mProperties = 0;
 
     int shift = 1;
     while (type->IsPointerType() || type->IsReferenceType()) {
         if (type->IsPointerType()) {
             int N = PointerType::CastFrom(type)->GetPointerNumber();
-            for (int i = 0; i < N; i++) {
+            for (int i = 0;  i < N;  i++) {
                 mt->mProperties |= ((unsigned char)TYPE_POINTER) << (shift++ * 2);
             }
             type = PointerType::CastFrom(type)->GetBaseType();
         }
         else {
             int N = ReferenceType::CastFrom(type)->GetReferenceNumber();
-            for (int i = 0; i < N; i++) {
+            for (int i = 0;  i < N;  i++) {
                 mt->mProperties |= ((unsigned char)TYPE_REFERENCE) << (shift++ * 2);
             }
             type = ReferenceType::CastFrom(type)->GetBaseType();

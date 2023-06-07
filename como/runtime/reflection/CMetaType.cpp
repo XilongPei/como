@@ -23,8 +23,8 @@ const char* CMetaType::TAG = "CMetaType";
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaType, LightRefBase, IMetaType)
 
 CMetaType::CMetaType(
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ MetaType* mt)
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ MetaType *mt)
     : mMetadata(mt)
     , mKind(mt->mKind)
     , mMode(TypeModification::NAKED)
@@ -54,6 +54,14 @@ CMetaType::CMetaType(
             // The caller uses mName to determine whether the construct is wrong
             mName = nullptr;
         }
+    }
+
+    if (mt->mProperties & TYPE_EXTERNAL) {
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
+        mExternalModuleName = String(*externalPtr);
+    }
+    else {
+        mExternalModuleName = nullptr;
     }
 }
 
@@ -86,12 +94,12 @@ ECode CMetaType::GetTypeModification(
 }
 
 String CMetaType::BuildName(
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ MetaType* mt)
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ MetaType *mt)
 {
     String typeStr;
 
-    switch(mt->mKind) {
+    switch (mt->mKind) {
         case TypeKind::Unknown:
             return "Unknown";
         case TypeKind::Char:
@@ -120,19 +128,19 @@ String CMetaType::BuildName(
             break;
         case TypeKind::String:
             typeStr = mMode == TypeModification::NAKED ?
-                    "const String&" : "String";
+                                        "const String&" : "String";
             break;
         case TypeKind::CoclassID:
             typeStr = mMode == TypeModification::NAKED ?
-                    "const CoclassID&" : "CoclassID";
+                                        "const CoclassID&" : "CoclassID";
             break;
         case TypeKind::ComponentID:
             typeStr = mMode == TypeModification::NAKED ?
-                    "const ComponentID&" : "ComponentID";
+                                        "const ComponentID&" : "ComponentID";
             break;
         case TypeKind::InterfaceID:
             typeStr = mMode == TypeModification::NAKED ?
-                    "const InterfaceID&" : "InterfaceID";
+                                        "const InterfaceID&" : "InterfaceID";
             break;
         case TypeKind::HANDLE:
             typeStr = "HANDLE";
@@ -153,7 +161,7 @@ String CMetaType::BuildName(
             break;
         case TypeKind::Triple:
             typeStr = mMode == TypeModification::NAKED ?
-                    "const Triple&" : "Triple";
+                                        "const Triple&" : "Triple";
             break;
         case TypeKind::TypeKind:
             typeStr = "TypeKind";
@@ -187,6 +195,13 @@ String CMetaType::BuildName(
     }
 
     return typeStr;
+}
+
+ECode CMetaType::GetExternalModuleName(
+    /* [out] */ String& externalModuleName)
+{
+    externalModuleName = mExternalModuleName;
+    return NOERROR;
 }
 
 } // namespace como

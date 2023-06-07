@@ -206,6 +206,6 @@ struct MetaType
     unsigned char       mProperties;
 };
 
-}
+} // namespace como
 
 #endif // __COMO_METACOMPONENT_H__

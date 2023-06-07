@@ -31,8 +31,8 @@ public:
     CMetaType() = default;
 
     CMetaType(
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ MetaType* mt);
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ MetaType *mt);
 
     COMO_INTERFACE_DECL();
 
@@ -48,23 +48,27 @@ public:
     ECode GetTypeModification(
         /* [out] */ TypeModification& mode) override;
 
+    ECode GetExternalModuleName(
+        /* [out] */ String& externalModuleName) override;
+
     inline static CMetaType* From(
         /* [in] */ IMetaType* comp);
 
 private:
     String BuildName(
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ MetaType* mt);
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ MetaType *mt);
 
 public:
-    MetaType* mMetadata = nullptr;
-    TypeKind mKind = TypeKind::Unknown;
-    String mName;
-    AutoPtr<IMetaType> mElementType;
-    TypeModification mMode = TypeModification::NAKED;
+    MetaType           *mMetadata = nullptr;
+    TypeKind            mKind = TypeKind::Unknown;
+    String              mName;
+    AutoPtr<IMetaType>  mElementType;
+    TypeModification    mMode = TypeModification::NAKED;
+    String              mExternalModuleName;
 
 private:
-    static const char* TAG;
+    static const char *TAG;
 };
 
 CMetaType* CMetaType::From(

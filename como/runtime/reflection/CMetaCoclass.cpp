@@ -545,6 +545,8 @@ ECode CMetaCoclass::BuildInterfaceMethodLocked(
         mMethods.Set(index, mmObj);
         index++;
     }
+
+    return NOERROR;
 }
 
 ECode CMetaCoclass::SetOpaque(

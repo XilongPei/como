@@ -467,6 +467,9 @@ interface IMetaType
 
     GetTypeModification(
         [out] TypeModification& typeMod);
+
+    GetExternalModuleName(
+        [out] String& externalModuleName);
 }
 
 [
