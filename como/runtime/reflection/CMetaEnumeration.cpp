@@ -24,15 +24,23 @@ namespace como {
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaEnumeration, LightRefBase, IMetaEnumeration);
 
 CMetaEnumeration::CMetaEnumeration(
-    /* [in] */ CMetaComponent* mcObj,
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ MetaEnumeration* me)
+    /* [in] */ CMetaComponent *mcObj,
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ MetaEnumeration *me)
     : mMetadata(me)
     , mOwner(mcObj)
     , mName(me->mName)
     , mNamespace(me->mNamespace)
     , mEnumerators(me->mEnumeratorNumber)
 {
+    if (me->mProperties & TYPE_EXTERNAL) {
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)me + sizeof(MetaEnumeration)));
+        mExternalModuleName = String(*externalPtr);
+    }
+    else {
+        mExternalModuleName = nullptr;
+    }
+
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
      * In the functional safety calculation of RTOS, there shall be no dynamic

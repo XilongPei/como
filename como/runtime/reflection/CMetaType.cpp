@@ -57,7 +57,7 @@ CMetaType::CMetaType(
     }
 
     if (mt->mProperties & TYPE_EXTERNAL) {
-        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mt + sizeof(MetaType)));
         mExternalModuleName = String(*externalPtr);
     }
     else {

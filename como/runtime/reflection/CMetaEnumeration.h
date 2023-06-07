@@ -59,12 +59,13 @@ public:
     ECode BuildAllEnumerators();
 
 public:
-    MetaEnumeration* mMetadata;
-    CMetaComponent* mOwner;
-    String mName;
-    String mNamespace;
+    MetaEnumeration        *mMetadata;
+    CMetaComponent         *mOwner;
+    String                  mName;
+    String                  mNamespace;
     Array<IMetaEnumerator*> mEnumerators;
-    Mutex mEnumeratorsLock;
+    Mutex                   mEnumeratorsLock;
+    String                  mExternalModuleName;
 };
 
 } // namespace como
