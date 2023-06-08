@@ -30,8 +30,8 @@ class CMetaEnumerator
 {
 public:
     CMetaEnumerator(
-        /* [in] */ CMetaEnumeration* menObj,
-        /* [in] */ MetaEnumerator* me);
+        /* [in] */ CMetaEnumeration *menObj,
+        /* [in] */ MetaEnumerator *me);
 
     COMO_INTERFACE_DECL();
 
@@ -45,10 +45,10 @@ public:
         /* [out] */ Integer& value) override;
 
 public:
-    MetaEnumerator* mMetadata;
-    CMetaEnumeration* mOwner;
-    String mName;
-    Integer mValue;
+    MetaEnumerator   *mMetadata;
+    CMetaEnumeration *mOwner;
+    String            mName;
+    Integer           mValue;
 };
 
 } // namespace como

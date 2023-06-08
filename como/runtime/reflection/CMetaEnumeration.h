@@ -56,6 +56,9 @@ public:
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IMetaEnumerator>& enumr) override;
 
+    ECode GetExternalModuleName(
+        /* [out] */ String& externalModuleName) override;
+
     ECode BuildAllEnumerators();
 
 public:

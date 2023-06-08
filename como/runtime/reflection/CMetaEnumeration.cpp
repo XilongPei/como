@@ -91,7 +91,7 @@ ECode CMetaEnumeration::GetAllEnumerators(
 
     FAIL_RETURN(BuildAllEnumerators());
 
-    for (Integer i = 0; i < mEnumerators.GetLength(); i++) {
+    for (Integer i = 0;  i < mEnumerators.GetLength();  i++) {
         enumrs.Set(i, mEnumerators[i]);
     }
 
@@ -109,7 +109,7 @@ ECode CMetaEnumeration::GetEnumerator(
 
     FAIL_RETURN(BuildAllEnumerators());
 
-    for (Integer i = 0; i < mEnumerators.GetLength(); i++) {
+    for (Integer i = 0;  i < mEnumerators.GetLength();  i++) {
         String enumrName;
         mEnumerators[i]->GetName(enumrName);
         if (enumrName.Equals(name)) {
@@ -122,13 +122,20 @@ ECode CMetaEnumeration::GetEnumerator(
     return NOERROR;
 }
 
+ECode CMetaEnumeration::GetExternalModuleName(
+    /* [out] */ String& externalModuleName)
+{
+    externalModuleName = mExternalModuleName;
+    return NOERROR;
+}
+
 ECode CMetaEnumeration::BuildAllEnumerators()
 {
     if (mEnumerators[0] == nullptr) {
         Mutex::AutoLock lock(mEnumeratorsLock);
         if (mEnumerators[0] == nullptr) {
-            for (Integer i = 0; i < mMetadata->mEnumeratorNumber; i++) {
-                MetaEnumerator* me = mMetadata->mEnumerators[i];
+            for (Integer i = 0;  i < mMetadata->mEnumeratorNumber;  i++) {
+                MetaEnumerator *me = mMetadata->mEnumerators[i];
                 AutoPtr<IMetaEnumerator> meObj = new CMetaEnumerator(this, me);
                 if (nullptr == meObj)
                     return E_OUT_OF_MEMORY_ERROR;

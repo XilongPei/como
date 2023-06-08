@@ -256,6 +256,9 @@ interface IMetaEnumeration
     GetEnumerator(
         [in] String name,
         [out] IMetaEnumerator&& enumr);
+
+    GetExternalModuleName(
+        [out] String& externalModuleName);
 }
 
 [

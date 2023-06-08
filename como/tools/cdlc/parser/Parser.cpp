@@ -2184,7 +2184,7 @@ bool Parser::ParseEnumeration()
     if (mTokenizer.PeekToken().mToken == Token::SEMICOLON) {
         mTokenizer.GetToken();
         String fullTypeName = enumName;
-        if (!fullTypeName.Contains("::")) {
+        if (! fullTypeName.Contains("::")) {
             fullTypeName = mCurrentNamespace->ToString() + "::" + fullTypeName;
         }
         AutoPtr<Type> type = FindType(fullTypeName, false);

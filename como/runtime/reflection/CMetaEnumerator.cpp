@@ -22,8 +22,8 @@ namespace como {
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaEnumerator, LightRefBase, IMetaEnumerator)
 
 CMetaEnumerator::CMetaEnumerator(
-    /* [in] */ CMetaEnumeration* menObj,
-    /* [in] */ MetaEnumerator* me)
+    /* [in] */ CMetaEnumeration *menObj,
+    /* [in] */ MetaEnumerator *me)
     : mMetadata(me)
     , mOwner(menObj)
     , mName(me->mName)
