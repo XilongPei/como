@@ -32,9 +32,9 @@ class CMetaComponent
 {
 public:
     CMetaComponent(
-        /* [in] */ IClassLoader* loader,
-        /* [in] */ ComoComponent* component,
-        /* [in] */ MetaComponent* metadata);
+        /* [in] */ IClassLoader *loader,
+        /* [in] */ ComoComponent *component,
+        /* [in] */ MetaComponent *metadata);
 
     ~CMetaComponent();
 
@@ -137,8 +137,8 @@ public:
     Boolean ChkExternalInterface(
         /* [in] */ Integer index);
 
-    inline static CMetaComponent* From(
-        /* [in] */ IMetaComponent* comp);
+    inline static CMetaComponent *From(
+        /* [in] */ IMetaComponent *comp);
 
 private:
     ECode LoadAllClassObjectGetters();
@@ -150,38 +150,38 @@ private:
     HANDLE mOpaque;
 
 public:
-    IClassLoader* mLoader;
-    ComoComponent* mComponent;
-    MetaComponent* mMetadata;
-    ComponentID mCid;
-    String mName;
-    String mUri;
-    String mStrFramacBlock;
-    Array<IMetaConstant*> mConstants;
+    IClassLoader           *mLoader;
+    ComoComponent          *mComponent;
+    MetaComponent          *mMetadata;
+    ComponentID             mCid;
+    String                  mName;
+    String                  mUri;
+    String                  mStrFramacBlock;
+    Array<IMetaConstant*>   mConstants;
     HashMap<String, IMetaConstant*> mConstantNameMap;
-    Boolean mConstantsAlreadyBuilt;
-    Mutex mConstantsLock { true };
-    Array<IMetaCoclass*> mCoclasses;
+    Boolean                 mConstantsAlreadyBuilt;
+    Mutex                   mConstantsLock { true };
+    Array<IMetaCoclass*>    mCoclasses;
     HashMap<String, IMetaCoclass*> mCoclassNameMap;
     HashMap<UUID, IMetaCoclass*> mCoclassIdMap;
-    Boolean mCoclassesAlreadyBuilt;
-    Mutex mCoclassesLock { true };
+    Boolean                 mCoclassesAlreadyBuilt;
+    Mutex                   mCoclassesLock { true };
     Array<IMetaEnumeration*> mEnumerations;
     HashMap<String, IMetaEnumeration*> mEnumerationNameMap;
-    Boolean mEnumerationsAlreadyBuilt;
-    Mutex mEnumerationsLock { true };
-    Array<IMetaInterface*> mInterfaces;
+    Boolean                 mEnumerationsAlreadyBuilt;
+    Mutex                   mEnumerationsLock { true };
+    Array<IMetaInterface*>  mInterfaces;
     HashMap<String, IMetaInterface*> mInterfaceNameMap;
     HashMap<UUID, IMetaInterface*> mInterfaceIdMap;
-    Boolean mInterfacesAlreadyBuilt;
-    Mutex mInterfacesLock { true };
+    Boolean                 mInterfacesAlreadyBuilt;
+    Mutex                   mInterfacesLock { true };
 
     AutoPtr<IMetaInterface> mIInterface;
     HashMap<UUID, ClassObjectGetter*> mClassObjects;
 };
 
-CMetaComponent* CMetaComponent::From(
-    /* [in] */ IMetaComponent* comp)
+CMetaComponent *CMetaComponent::From(
+    /* [in] */ IMetaComponent *comp)
 {
     return (CMetaComponent*)comp;
 }

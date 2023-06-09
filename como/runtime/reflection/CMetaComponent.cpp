@@ -30,9 +30,9 @@ namespace como {
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaComponent, LightRefBase, IMetaComponent);
 
 CMetaComponent::CMetaComponent(
-    /* [in] */ IClassLoader* loader,
-    /* [in] */ ComoComponent* component,
-    /* [in] */ MetaComponent* metadata)
+    /* [in] */ IClassLoader *loader,
+    /* [in] */ ComoComponent *component,
+    /* [in] */ MetaComponent *metadata)
     : mLoader(loader)
     , mComponent(component)
     , mMetadata(metadata)
@@ -121,7 +121,7 @@ ECode CMetaComponent::GetAllConstants(
     FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         consts.Set(i, mConstants[i]);
     }
 
@@ -161,7 +161,7 @@ ECode CMetaComponent::GetAllCoclasses(
     FAIL_RETURN(BuildAllCoclasses());
 
     Integer N = MIN(mCoclasses.GetLength(), klasses.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         klasses.Set(i, mCoclasses[i]);
     }
 
@@ -213,7 +213,7 @@ ECode CMetaComponent::GetAllEnumerations(
     FAIL_RETURN(BuildAllEnumerations());
 
     Integer N = MIN(mEnumerations.GetLength(), enumns.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         enumns.Set(i, mEnumerations[i]);
     }
 
@@ -253,7 +253,7 @@ ECode CMetaComponent::GetAllInterfaces(
     FAIL_RETURN(BuildAllInterfaces());
 
     Integer N = MIN(mInterfaces.GetLength(), intfs.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         intfs.Set(i, mInterfaces[i]);
     }
 
@@ -309,7 +309,7 @@ ECode CMetaComponent::IsOnlyMetadata(
 }
 
 ECode CMetaComponent::LoadComponent(
-    /* [in] */ IMetaComponent* comp)
+    /* [in] */ IMetaComponent *comp)
 {
     Boolean onlyMetadata;
     IsOnlyMetadata(onlyMetadata);
@@ -405,8 +405,8 @@ ECode CMetaComponent::BuildAllConstants()
         return NOERROR;
     }
 
-    for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
-        MetaConstant* mc = mMetadata->mConstants[i];
+    for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
+        MetaConstant *mc = mMetadata->mConstants[i];
         String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
         AutoPtr<CMetaConstant> mcObj = new CMetaConstant(mMetadata, mc);
         if ((nullptr != mcObj) && (nullptr != mcObj->mValue)) {
@@ -438,7 +438,7 @@ ECode CMetaComponent::BuildAllCoclasses()
     }
 
     for (Integer i = 0;  i < mMetadata->mCoclassNumber;  i++) {
-        MetaCoclass* mc = mMetadata->mCoclasses[i];
+        MetaCoclass *mc = mMetadata->mCoclasses[i];
         String fullName = String::Format("%s::%s", mc->mNamespace, mc->mName);
         AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(this, mMetadata, mc);
         if ((nullptr != mcObj) && (! fullName.IsEmpty())) {
@@ -514,10 +514,11 @@ ECode CMetaComponent::BuildAllInterfaces()
 
     Integer index = 0;
     for (Integer i = 0;  i < mMetadata->mInterfaceNumber;  i++) {
-        MetaInterface* mi = mMetadata->mInterfaces[i];
+        MetaInterface *mi = mMetadata->mInterfaces[i];
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
         }
+
         String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
         if (! mInterfaceNameMap.ContainsKey(fullName)) {
             AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
@@ -577,7 +578,7 @@ ECode CMetaComponent::LoadAllClassObjectGetters()
 {
     if (mComponent->mSoGetAllClassObjects != nullptr) {
         Integer N;
-        ClassObjectGetter* getters = mComponent->mSoGetAllClassObjects(N);
+        ClassObjectGetter *getters = mComponent->mSoGetAllClassObjects(N);
         if (nullptr == getters)
             return E_OUT_OF_MEMORY_ERROR;
 
@@ -595,7 +596,7 @@ ECode CMetaComponent::LoadAllClassObjectGetters()
  */
 ECode CMetaComponent::BuildIInterface()
 {
-    CMetaInterface* miObj = new CMetaInterface();
+    CMetaInterface *miObj = new CMetaInterface();
     if (nullptr == miObj) {
         return E_OUT_OF_MEMORY_ERROR;
     }

@@ -189,7 +189,7 @@ ECode CMetaInterface::GetDeclaredMethods(
 
     Integer offset = mMethods.GetLength() - mMetadata->mMethodNumber;
     Integer N = MIN(mMetadata->mMethodNumber, methods.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         methods.Set(i, mMethods[i + offset]);
     }
     return NOERROR;
@@ -210,7 +210,7 @@ ECode CMetaInterface::GetMethod(
 
     if (! signature.IsEmpty()) {
         for (Integer i = 0;  i < mMethods.GetLength();  i++) {
-            IMetaMethod* mmObj = mMethods[i];
+            IMetaMethod *mmObj = mMethods[i];
             String mmName, mmSignature;
             mmObj->GetName(mmName);
             mmObj->GetSignature(mmSignature);
@@ -222,7 +222,7 @@ ECode CMetaInterface::GetMethod(
     }
     else {
         for (Integer i = 0;  i < mMethods.GetLength();  i++) {
-            IMetaMethod* mmObj = mMethods[i];
+            IMetaMethod *mmObj = mMethods[i];
             String mmName;
             mmObj->GetName(mmName);
             if (mmName.Equals(name)) {
@@ -255,7 +255,7 @@ ECode CMetaInterface::GetMethod(
 
 Integer CMetaInterface::CalculateMethodNumber()
 {
-    MetaInterface* mi = mMetadata;
+    MetaInterface *mi = mMetadata;
     Integer number = 0;
     while (mi != nullptr) {
         number += mi->mMethodNumber;
@@ -273,7 +273,7 @@ ECode CMetaInterface::BuildBaseInterface()
 {
     if (mMetadata->mBaseInterfaceIndex != -1) {
         AutoPtr<IMetaInterface> base =
-                mOwner->BuildInterface(mMetadata->mBaseInterfaceIndex);
+                        mOwner->BuildInterface(mMetadata->mBaseInterfaceIndex);
         if (nullptr == base)
             return E_OUT_OF_MEMORY_ERROR;
 
@@ -287,7 +287,7 @@ ECode CMetaInterface::BuildAllConstants()
     if (mConstants[0] == nullptr) {
         Mutex::AutoLock lock(mConstantsLock);
         if (mConstants[0] == nullptr) {
-            for (Integer i = 0; i < mMetadata->mConstantNumber; i++) {
+            for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
                 if ((nullptr == mcObj) || (nullptr == mcObj->mValue))
@@ -313,7 +313,7 @@ ECode CMetaInterface::BuildAllMethods()
 }
 
 Integer CMetaInterface::BuildInterfaceMethod(
-    /* [in] */ MetaInterface* mi)
+    /* [in] */ MetaInterface *mi)
 {
     Integer startIndex = 0;
     if (mi->mBaseInterfaceIndex != -1) {
@@ -323,7 +323,7 @@ Integer CMetaInterface::BuildInterfaceMethod(
             return startIndex;
     }
 
-    for (Integer i = 0; i < mi->mMethodNumber; i++) {
+    for (Integer i = 0;  i < mi->mMethodNumber;  i++) {
         AutoPtr<CMetaMethod> mmObj = new CMetaMethod(mOwner->mMetadata,
                                          this, startIndex + i, mi->mMethods[i]);
         // Methods in all interfaces return values of type ECode,

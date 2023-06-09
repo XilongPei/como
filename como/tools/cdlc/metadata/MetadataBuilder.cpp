@@ -51,7 +51,7 @@ size_t MetadataBuilder::CalculateMetadata()
 }
 
 void MetadataBuilder::CalculateMetaComponent(
-    /* [in] */ Module* module)
+    /* [in] */ Module *module)
 {
     int CN = module->GetConstantNumber();
     int EN = module->GetEnumerationNumber();
@@ -120,7 +120,7 @@ void MetadataBuilder::CalculateMetaComponent(
 }
 
 void MetadataBuilder::CalculateMetaNamespace(
-    /* [in] */ Namespace* ns)
+    /* [in] */ Namespace *ns)
 {
     int CN = ns->GetConstantNumber();
     int EN = ns->GetEnumerationNumber();
@@ -158,7 +158,7 @@ void MetadataBuilder::CalculateMetaNamespace(
 }
 
 void MetadataBuilder::CalculateMetaConstant(
-    /* [in] */ Constant* constant)
+    /* [in] */ Constant *constant)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -185,7 +185,7 @@ void MetadataBuilder::CalculateMetaConstant(
 }
 
 void MetadataBuilder::CalculateMetaCoclass(
-    /* [in] */ CoclassType* klass)
+    /* [in] */ CoclassType *klass)
 {
     int IN = klass->GetInterfaceNumber();
     int CN = klass->GetConstantNumber();
@@ -220,7 +220,7 @@ void MetadataBuilder::CalculateMetaCoclass(
 }
 
 void MetadataBuilder::CalculateMetaEnumeration(
-    /* [in] */ EnumerationType* enumeration)
+    /* [in] */ EnumerationType *enumeration)
 {
     int EN = enumeration->GetEnumeratorNumber();
 
@@ -253,7 +253,7 @@ void MetadataBuilder::CalculateMetaEnumeration(
 }
 
 void MetadataBuilder::CalculateMetaEnumerator(
-    /* [in] */ EnumerationType::Enumerator* enumerator)
+    /* [in] */ EnumerationType::Enumerator *enumerator)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -314,7 +314,7 @@ void MetadataBuilder::CalculateMetaInterface(
 }
 
 void MetadataBuilder::CalculateMetaMethod(
-    /* [in] */ Method* method)
+    /* [in] */ Method *method)
 {
     int PN = method->GetParameterNumber();
 
@@ -341,7 +341,7 @@ void MetadataBuilder::CalculateMetaMethod(
 }
 
 void MetadataBuilder::CalculateMetaParameter(
-    /* [in] */ Parameter* parameter)
+    /* [in] */ Parameter *parameter)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -358,7 +358,7 @@ void MetadataBuilder::CalculateMetaParameter(
 }
 
 void MetadataBuilder::CalculateMetaValue(
-    /* [in] */ Parameter* parameter)
+    /* [in] */ Parameter *parameter)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -378,7 +378,7 @@ void MetadataBuilder::CalculateMetaValue(
 }
 
 void MetadataBuilder::CalculateMetaType(
-    /* [in] */ Type* type)
+    /* [in] */ Type *type)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -409,7 +409,7 @@ void MetadataBuilder::WriteMetadata(
 }
 
 void MetadataBuilder::WriteMetaComponent(
-    /* [in] */ Module* module)
+    /* [in] */ Module *module)
 {
     int CN = module->GetConstantNumber();
     int EN = module->GetEnumerationNumber();
@@ -487,8 +487,8 @@ void MetadataBuilder::WriteMetaComponent(
     }
 }
 
-como::MetaNamespace* MetadataBuilder::WriteMetaNamespace(
-    /* [in] */ Namespace* ns)
+como::MetaNamespace *MetadataBuilder::WriteMetaNamespace(
+    /* [in] */ Namespace *ns)
 {
     int CN = ns->GetConstantNumber();
     int EN = ns->GetEnumerationNumber();
@@ -549,8 +549,8 @@ como::MetaNamespace* MetadataBuilder::WriteMetaNamespace(
     return mn;
 }
 
-como::MetaConstant* MetadataBuilder::WriteMetaConstant(
-    /* [in] */ Constant* constant)
+como::MetaConstant *MetadataBuilder::WriteMetaConstant(
+    /* [in] */ Constant *constant)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -595,8 +595,8 @@ como::MetaConstant* MetadataBuilder::WriteMetaConstant(
     return mc;
 }
 
-como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
-    /* [in] */ CoclassType* klass)
+como::MetaCoclass *MetadataBuilder::WriteMetaCoclass(
+    /* [in] */ CoclassType *klass)
 {
     int IN = klass->GetInterfaceNumber();
     int CN = klass->GetConstantNumber();
@@ -659,8 +659,8 @@ como::MetaCoclass* MetadataBuilder::WriteMetaCoclass(
     return mc;
 }
 
-como::MetaEnumeration* MetadataBuilder::WriteMetaEnumeration(
-    /* [in] */ EnumerationType* enumeration)
+como::MetaEnumeration *MetadataBuilder::WriteMetaEnumeration(
+    /* [in] */ EnumerationType *enumeration)
 {
     int EN = enumeration->GetEnumeratorNumber();
 
@@ -690,8 +690,8 @@ como::MetaEnumeration* MetadataBuilder::WriteMetaEnumeration(
     return me;
 }
 
-como::MetaEnumerator* MetadataBuilder::WriteMetaEnumerator(
-    /* [in] */ EnumerationType::Enumerator* enumerator)
+como::MetaEnumerator *MetadataBuilder::WriteMetaEnumerator(
+    /* [in] */ EnumerationType::Enumerator *enumerator)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -704,7 +704,7 @@ como::MetaEnumerator* MetadataBuilder::WriteMetaEnumerator(
     return me;
 }
 
-como::MetaInterface* MetadataBuilder::WriteMetaInterface(
+como::MetaInterface *MetadataBuilder::WriteMetaInterface(
     /* [in] */ InterfaceType *interface)
 {
     int IN = interface->GetNestedInterfaceNumber();
@@ -759,8 +759,8 @@ como::MetaInterface* MetadataBuilder::WriteMetaInterface(
     return mi;
 }
 
-como::MetaMethod* MetadataBuilder::WriteMetaMethod(
-    /* [in] */ Method* method)
+como::MetaMethod *MetadataBuilder::WriteMetaMethod(
+    /* [in] */ Method *method)
 {
     int PN = method->GetParameterNumber();
 
@@ -789,8 +789,8 @@ como::MetaMethod* MetadataBuilder::WriteMetaMethod(
     return mm;
 }
 
-como::MetaParameter* MetadataBuilder::WriteMetaParameter(
-    /* [in] */ Parameter* parameter)
+como::MetaParameter *MetadataBuilder::WriteMetaParameter(
+    /* [in] */ Parameter *parameter)
 {
     // begin address
     mBasePtr = ALIGN(mBasePtr);
@@ -819,8 +819,8 @@ como::MetaParameter* MetadataBuilder::WriteMetaParameter(
     return mp;
 }
 
-como::MetaValue* MetadataBuilder::WriteMetaValue(
-    /* [in] */ Parameter* parameter)
+como::MetaValue *MetadataBuilder::WriteMetaValue(
+    /* [in] */ Parameter *parameter)
 {
     AutoPtr<Type> type = parameter->GetType();
     AutoPtr<Expression> value = parameter->GetDefaultValue();
@@ -866,7 +866,7 @@ como::MetaValue* MetadataBuilder::WriteMetaValue(
     return mv;
 }
 
-como::MetaType* MetadataBuilder::WriteMetaType(
+como::MetaType *MetadataBuilder::WriteMetaType(
     /* [in] */ Type *type)
 {
     Type *self = type;
@@ -929,7 +929,7 @@ char* MetadataBuilder::WriteString(
 }
 
 como::TypeKind MetadataBuilder::ToTypeKind(
-    /* [in] */ Type* type)
+    /* [in] */ Type *type)
 {
     if (type->IsBooleanType()) {
         return como::TypeKind::Boolean;

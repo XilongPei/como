@@ -46,37 +46,37 @@ private:
     size_t CalculateMetadata();
 
     void CalculateMetaComponent(
-        /* [in] */ Module* module);
+        /* [in] */ Module *module);
 
     void CalculateMetaNamespace(
-        /* [in] */ Namespace* ns);
+        /* [in] */ Namespace *ns);
 
     void CalculateMetaConstant(
-        /* [in] */ Constant* constant);
+        /* [in] */ Constant *constant);
 
     void CalculateMetaCoclass(
-        /* [in] */ CoclassType* klass);
+        /* [in] */ CoclassType *klass);
 
     void CalculateMetaEnumeration(
-        /* [in] */ EnumerationType* enumeration);
+        /* [in] */ EnumerationType *enumeration);
 
     void CalculateMetaEnumerator(
-        /* [in] */ EnumerationType::Enumerator* enumerator);
+        /* [in] */ EnumerationType::Enumerator *enumerator);
 
     void CalculateMetaInterface(
-        /* [in] */ InterfaceType* interface);
+        /* [in] */ InterfaceType *interface);
 
     void CalculateMetaMethod(
-        /* [in] */ Method* method);
+        /* [in] */ Method *method);
 
     void CalculateMetaParameter(
-        /* [in] */ Parameter* parameter);
+        /* [in] */ Parameter *parameter);
 
     void CalculateMetaValue(
-        /* [in] */ Parameter* parameter);
+        /* [in] */ Parameter *parameter);
 
     void CalculateMetaType(
-        /* [in] */ Type* type);
+        /* [in] */ Type *type);
 
     void CalculateStringPool();
 
@@ -84,43 +84,43 @@ private:
         /* [in] */ uintptr_t base);
 
     void WriteMetaComponent(
-        /* [in] */ Module* module);
+        /* [in] */ Module *module);
 
-    como::MetaNamespace* WriteMetaNamespace(
-        /* [in] */ Namespace* ns);
+    como::MetaNamespace *WriteMetaNamespace(
+        /* [in] */ Namespace *ns);
 
     como::MetaConstant* WriteMetaConstant(
-        /* [in] */ Constant* constant);
+        /* [in] */ Constant *constant);
 
-    como::MetaCoclass* WriteMetaCoclass(
-        /* [in] */ CoclassType* klass);
+    como::MetaCoclass *WriteMetaCoclass(
+        /* [in] */ CoclassType *klass);
 
-    como::MetaEnumeration* WriteMetaEnumeration(
-        /* [in] */ EnumerationType* enumeration);
+    como::MetaEnumeration *WriteMetaEnumeration(
+        /* [in] */ EnumerationType *enumeration);
 
-    como::MetaEnumerator* WriteMetaEnumerator(
-        /* [in] */ EnumerationType::Enumerator* enumerator);
+    como::MetaEnumerator *WriteMetaEnumerator(
+        /* [in] */ EnumerationType::Enumerator *enumerator);
 
-    como::MetaInterface* WriteMetaInterface(
-        /* [in] */ InterfaceType* interface);
+    como::MetaInterface *WriteMetaInterface(
+        /* [in] */ InterfaceType *interface);
 
-    como::MetaMethod* WriteMetaMethod(
-        /* [in] */ Method* method);
+    como::MetaMethod *WriteMetaMethod(
+        /* [in] */ Method *method);
 
-    como::MetaParameter* WriteMetaParameter(
-        /* [in] */ Parameter* parameter);
+    como::MetaParameter *WriteMetaParameter(
+        /* [in] */ Parameter *parameter);
 
-    como::MetaValue* WriteMetaValue(
-        /* [in] */ Parameter* parameter);
+    como::MetaValue *WriteMetaValue(
+        /* [in] */ Parameter *parameter);
 
-    como::MetaType* WriteMetaType(
-        /* [in] */ Type* type);
+    como::MetaType *WriteMetaType(
+        /* [in] */ Type *type);
 
     char* WriteString(
         /* [in] */ const String& string);
 
     static como::TypeKind ToTypeKind(
-        /* [in] */ Type* type);
+        /* [in] */ Type *type);
 
 private:
     static const char* TAG;
