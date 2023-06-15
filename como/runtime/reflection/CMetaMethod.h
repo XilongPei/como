@@ -35,10 +35,10 @@ public:
     CMetaMethod();
 
     CMetaMethod(
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ CMetaInterface* miObj,
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ CMetaInterface *miObj,
         /* [in] */ Integer index,
-        /* [in] */ MetaMethod* mm);
+        /* [in] */ MetaMethod *mm);
 
     COMO_INTERFACE_DECL();
 
@@ -93,7 +93,7 @@ public:
     ECode GetOpaque(
         /* [out] */ HANDLE &opaque) override;
 
-    inline static CMetaMethod* From(IMetaMethod* method);
+    inline static CMetaMethod *From(IMetaMethod *method);
 
     Integer mHotCode;
 
@@ -108,22 +108,22 @@ private:
     HANDLE mOpaque;
 
 public:
-    MetaMethod* mMetadata;
-    CMetaInterface* mOwner;
-    Integer mIndex;
-    String mName;
-    String mSignature;
-    String mStrFramacBlock;
+    MetaMethod     *mMetadata;
+    CMetaInterface *mOwner;
+    Integer         mIndex;
+    String          mName;
+    String          mSignature;
+    String          mStrFramacBlock;
     Array<IMetaParameter*> mParameters;
-    Mutex mParametersLock;
-    Integer mHasOutArguments;
+    Mutex           mParametersLock;
+    Integer         mHasOutArguments;
     AutoPtr<IMetaType> mReturnType;
 
-    HANDLE mMethodAddr;
-    HANDLE mVobj;
+    HANDLE          mMethodAddr;
+    HANDLE          mVobj;
 };
 
-CMetaMethod* CMetaMethod::From(IMetaMethod* method)
+CMetaMethod *CMetaMethod::From(IMetaMethod* method)
 {
     return (CMetaMethod*)method;
 }

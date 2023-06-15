@@ -26,9 +26,9 @@ namespace como {
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaCoclass, LightRefBase, IMetaCoclass);
 
 CMetaCoclass::CMetaCoclass(
-    /* [in] */ CMetaComponent* mcObj,
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ MetaCoclass* mk)
+    /* [in] */ CMetaComponent *mcObj,
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ MetaCoclass *mk)
     : mMetadata(mk)
     , mOwner(mcObj)
     , mName(mk->mName)

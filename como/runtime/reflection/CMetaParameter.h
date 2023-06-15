@@ -31,9 +31,9 @@ public:
     CMetaParameter();
 
     CMetaParameter(
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ IMetaMethod* mmObj,
-        /* [in] */ MetaParameter* mp,
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ IMetaMethod *mmObj,
+        /* [in] */ MetaParameter *mp,
         /* [in] */ Integer index);
 
     COMO_INTERFACE_DECL();
@@ -63,12 +63,12 @@ private:
     static constexpr int CALLEE = 0x4;
 
 public:
-    MetaParameter* mMetadata;
-    IMetaMethod* mOwner;
-    String mName;
-    Integer mIndex;
-    IOAttribute mIOAttr;
-    AutoPtr<IMetaType> mType;
+    MetaParameter      *mMetadata;
+    IMetaMethod        *mOwner;
+    String              mName;
+    Integer             mIndex;
+    IOAttribute         mIOAttr;
+    AutoPtr<IMetaType>  mType;
 };
 
 } // namespace como

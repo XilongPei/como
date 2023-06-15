@@ -64,14 +64,14 @@ public:
         /* [out] */ Integer& radix) override;
 
 public:
-    AutoPtr<IMetaType> mType;
-    Boolean mBooleanValue;
-    Integer mIntegerValue;
-    Long mLongValue;
-    Float mFloatValue;
-    Double mDoubleValue;
-    String mStringValue;
-    Integer mRadix;
+    AutoPtr<IMetaType>  mType;
+    Boolean     mBooleanValue;
+    Integer     mIntegerValue;
+    Long        mLongValue;
+    Float       mFloatValue;
+    Double      mDoubleValue;
+    String      mStringValue;
+    Integer     mRadix;
 };
 
 } // namespace como

@@ -31,9 +31,9 @@ class CMetaCoclass
 {
 public:
     CMetaCoclass(
-        /* [in] */ CMetaComponent* mcObj,
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ MetaCoclass* mk);
+        /* [in] */ CMetaComponent *mcObj,
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ MetaCoclass *mk);
 
     COMO_INTERFACE_DECL();
 
@@ -137,28 +137,28 @@ private:
     ECode BuildAllMethods();
 
     ECode BuildInterfaceMethodLocked(
-        /* [in] */ IMetaInterface* miObj,
+        /* [in] */ IMetaInterface *miObj,
         /* [in, out] */ Integer& index);
 
     HANDLE mOpaque;
 
 public:
-    MetaCoclass* mMetadata;
-    CMetaComponent* mOwner;
-    CoclassID mCid;
-    String mName;
-    String mNamespace;
-    String mFuncSafetySetting;
-    String mStrFramacBlock;
+    MetaCoclass    *mMetadata;
+    CMetaComponent *mOwner;
+    CoclassID       mCid;
+    String          mName;
+    String          mNamespace;
+    String          mFuncSafetySetting;
+    String          mStrFramacBlock;
     Array<IMetaConstructor*> mConstructors;
-    Mutex mConstructorsLock;
+    Mutex           mConstructorsLock;
     Array<IMetaMethod*> mMethods;
-    Array<Boolean> mOverridesInfo;
-    Mutex mMethodsLock { true };
+    Array<Boolean>  mOverridesInfo;
+    Mutex           mMethodsLock { true };
     Array<IMetaInterface*> mInterfaces;
-    Mutex mInterfacesLock;
+    Mutex           mInterfacesLock;
     Array<IMetaConstant*> mConstants;
-    Mutex mConstantsLock;
+    Mutex           mConstantsLock;
 };
 
 } // namespace como

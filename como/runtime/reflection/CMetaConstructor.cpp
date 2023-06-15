@@ -26,7 +26,7 @@ namespace como {
 
 EXTERN_C ECode invoke(
     /* [in] */ HANDLE func,
-    /* [in] */ Byte* params,
+    /* [in] */ Byte *params,
     /* [in] */ Integer paramNum,
     /* [in] */ Integer stackParamNum,
     /* [in] */ struct ParameterInfo* paramInfos);
@@ -34,10 +34,10 @@ EXTERN_C ECode invoke(
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaConstructor, LightRefBase, IMetaConstructor);
 
 CMetaConstructor::CMetaConstructor(
-    /* [in] */ CMetaCoclass* mcObj,
-    /* [in] */ MetaInterface* mi,
+    /* [in] */ CMetaCoclass *mcObj,
+    /* [in] */ MetaInterface *mi,
     /* [in] */ Integer index,
-    /* [in] */ MetaMethod* mm)
+    /* [in] */ MetaMethod *mm)
     : mMetadata(mm)
     , mOwner(mcObj)
     , mClassObjectInterface(mi)

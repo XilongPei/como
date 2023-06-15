@@ -29,9 +29,9 @@ CMetaParameter::CMetaParameter()
 {}
 
 CMetaParameter::CMetaParameter(
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ IMetaMethod* mmObj,
-    /* [in] */ MetaParameter* mp,
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ IMetaMethod *mmObj,
+    /* [in] */ MetaParameter *mp,
     /* [in] */ Integer index)
     : mMetadata(mp)
     , mOwner(mmObj)

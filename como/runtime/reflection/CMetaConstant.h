@@ -51,14 +51,14 @@ private:
         /* [in] */ IMetaType* type);
 
 public:
-    MetaConstant* mMetadata;
-    String mName;
-    String mNamespace;
+    MetaConstant   *mMetadata;
+    String          mName;
+    String          mNamespace;
     AutoPtr<IMetaType> mType;
     AutoPtr<IMetaValue> mValue;
 
 private:
-    static const char* TAG;
+    static const char *TAG;
 };
 
 } // namespace como

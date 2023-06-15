@@ -25,9 +25,9 @@ namespace como {
 COMO_INTERFACE_IMPL_LIGHT_1(CMetaInterface, LightRefBase, IMetaInterface);
 
 CMetaInterface::CMetaInterface(
-    /* [in] */ CMetaComponent* mcObj,
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ MetaInterface* mi)
+    /* [in] */ CMetaComponent *mcObj,
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ MetaInterface *mi)
     : mMetadata(mi)
     , mOwner(mcObj)
     , mName(mi->mName)
@@ -110,7 +110,7 @@ ECode CMetaInterface::GetAllConstants(
     FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         consts.Set(i, mConstants[i]);
     }
     return NOERROR;
@@ -147,6 +147,7 @@ ECode CMetaInterface::GetConstant(
     constt = nullptr;
 
     if (index < 0 || index >= mConstants.GetLength()) {
+        constt = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -169,7 +170,7 @@ ECode CMetaInterface::GetAllMethods(
     FAIL_RETURN(BuildAllMethods());
 
     Integer N = MIN(mMethods.GetLength(), methods.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         methods.Set(i, mMethods[i]);
     }
     return NOERROR;
@@ -189,7 +190,7 @@ ECode CMetaInterface::GetDeclaredMethods(
 
     Integer offset = mMethods.GetLength() - mMetadata->mMethodNumber;
     Integer N = MIN(mMetadata->mMethodNumber, methods.GetLength());
-    for (Integer i = 0;  i < N;  i++) {
+    for (Integer i = 0;   i < N;   i++) {
         methods.Set(i, mMethods[i + offset]);
     }
     return NOERROR;
@@ -203,7 +204,7 @@ ECode CMetaInterface::GetMethod(
     method = nullptr;
 
     if (name.IsEmpty() || mMethods.IsEmpty()) {
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllMethods());
@@ -244,7 +245,7 @@ ECode CMetaInterface::GetMethod(
     method = nullptr;
 
     if (index < 0 || index >= mMethods.GetLength()) {
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllMethods());

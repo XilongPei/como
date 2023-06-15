@@ -25,7 +25,7 @@ namespace como {
 
 EXTERN_C ECode invoke(
     /* [in] */ HANDLE func,
-    /* [in] */ Byte* params,
+    /* [in] */ Byte *params,
     /* [in] */ Integer paramNum,
     /* [in] */ Integer stackParamNum,
     /* [in] */ struct ParameterInfo* paramInfos);
@@ -55,10 +55,10 @@ CMetaMethod::CMetaMethod()
 }
 
 CMetaMethod::CMetaMethod(
-    /* [in] */ MetaComponent* mc,
-    /* [in] */ CMetaInterface* miObj,
+    /* [in] */ MetaComponent *mc,
+    /* [in] */ CMetaInterface *miObj,
     /* [in] */ Integer index,
-    /* [in] */ MetaMethod* mm)
+    /* [in] */ MetaMethod *mm)
     : mMetadata(mm)
     , mOwner(miObj)
     , mIndex(index)

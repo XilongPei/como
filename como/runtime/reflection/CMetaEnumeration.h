@@ -31,9 +31,9 @@ class CMetaEnumeration
 {
 public:
     CMetaEnumeration(
-        /* [in] */ CMetaComponent* mcObj,
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ MetaEnumeration* me);
+        /* [in] */ CMetaComponent *mcObj,
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ MetaEnumeration *me);
 
     COMO_INTERFACE_DECL();
 

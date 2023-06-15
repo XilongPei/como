@@ -51,8 +51,8 @@ public:
     ECode GetExternalModuleName(
         /* [out] */ String& externalModuleName) override;
 
-    inline static CMetaType* From(
-        /* [in] */ IMetaType* comp);
+    inline static CMetaType *From(
+        /* [in] */ IMetaType *comp);
 
 private:
     String BuildName(
@@ -71,8 +71,8 @@ private:
     static const char *TAG;
 };
 
-CMetaType* CMetaType::From(
-    /* [in] */ IMetaType* comp)
+CMetaType *CMetaType::From(
+    /* [in] */ IMetaType *comp)
 {
     return (CMetaType*)comp;
 }

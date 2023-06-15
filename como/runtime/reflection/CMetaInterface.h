@@ -33,9 +33,9 @@ public:
     CMetaInterface() = default;
 
     CMetaInterface(
-        /* [in] */ CMetaComponent* mcObj,
-        /* [in] */ MetaComponent* mc,
-        /* [in] */ MetaInterface* mi);
+        /* [in] */ CMetaComponent *mcObj,
+        /* [in] */ MetaComponent *mc,
+        /* [in] */ MetaInterface *mi);
 
     COMO_INTERFACE_DECL();
 
@@ -105,17 +105,17 @@ private:
         /* [in] */ MetaInterface* mi);
 
 public:
-    MetaInterface* mMetadata = nullptr;
-    CMetaComponent* mOwner = nullptr;
-    InterfaceID mIid;
-    String mName;
-    String mNamespace;
-    String mStrFramacBlock;
-    CMetaInterface* mBaseInterface;
+    MetaInterface  *mMetadata = nullptr;
+    CMetaComponent *mOwner = nullptr;
+    InterfaceID     mIid;
+    String          mName;
+    String          mNamespace;
+    String          mStrFramacBlock;
+    CMetaInterface *mBaseInterface;
     Array<IMetaConstant*> mConstants;
-    Mutex mConstantsLock;
+    Mutex           mConstantsLock;
     Array<IMetaMethod*> mMethods;
-    Mutex mMethodsLock;
+    Mutex           mMethodsLock;
 };
 
 } // namespace como

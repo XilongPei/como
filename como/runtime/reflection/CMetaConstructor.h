@@ -32,10 +32,10 @@ class CMetaConstructor
 {
 public:
     CMetaConstructor(
-        /* [in] */ CMetaCoclass* mcObj,
-        /* [in] */ MetaInterface* mi,
+        /* [in] */ CMetaCoclass *mcObj,
+        /* [in] */ MetaInterface *mi,
         /* [in] */ Integer index,
-        /* [in] */ MetaMethod* mm);
+        /* [in] */ MetaMethod *mm);
 
     COMO_INTERFACE_DECL();
 
@@ -111,16 +111,16 @@ private:
     HANDLE mOpaque;
 
 public:
-    MetaMethod* mMetadata;
-    CMetaCoclass* mOwner;
-    MetaInterface* mClassObjectInterface;
-    Integer mIndex;
-    String mName;
-    String mSignature;
-    String mStrFramacBlock;
-    Boolean mIsDefault;
+    MetaMethod     *mMetadata;
+    CMetaCoclass   *mOwner;
+    MetaInterface  *mClassObjectInterface;
+    Integer         mIndex;
+    String          mName;
+    String          mSignature;
+    String          mStrFramacBlock;
+    Boolean         mIsDefault;
     Array<IMetaParameter*> mParameters;
-    Mutex mParametersLock;
+    Mutex           mParametersLock;
 };
 
 } // namespace como
