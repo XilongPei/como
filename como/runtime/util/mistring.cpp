@@ -284,7 +284,8 @@ char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
                 t[i++] = *s;
                 break;
            }
-        } else {
+        }
+        else {
             t[i++] = *s;
         }
         s++;
@@ -333,29 +334,33 @@ char *MiString::strToSourceC(char *t, char *s, char turnChar)
 /**
  * Call method:
  *      char *s1, *s2, *s3, *s4, *s;
- *      s = memNewBlockOnce(&s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ *      s = memNewBlockOnce(nullptr, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
  */
-char *MiString::memNewBlockOnce(char **ss, size_t memSize, ...)
+char *MiString::memNewBlockOnce(size_t *poolSize, char **ss, size_t memSize, ...)
 {
     va_list ap;
     char **ss1;
     char *pool;
-    unsigned short poolSize, count;
+    size_t count;
 
-    poolSize = memSize;
+    count = memSize;
 
     // count mem alloc
     va_start(ap, memSize);
     while ((ss1 = va_arg(ap, char **)) != nullptr) {
-        poolSize += va_arg(ap, size_t);
+        count += va_arg(ap, size_t);
     }
     va_end(ap);
-    if (poolSize <= 0)
+    if (count <= 0)
         return  nullptr;
 
-    if ((pool = (char*)malloc(poolSize) ) == nullptr)
+    if ((pool = (char*)malloc(count)) == nullptr)
         return  nullptr;
-    memset( pool, 0, poolSize );
+
+    memset(pool, 0, count);
+
+    if (nullptr != poolSize)
+        *poolSize = count;
 
     *ss = pool;
     count = memSize;
@@ -371,11 +376,59 @@ char *MiString::memNewBlockOnce(char **ss, size_t memSize, ...)
 
 } // end of function memNewBlockOnce()
 
+/**
+ * Call method:
+ *      char *s1, *s2, *s3, *s4;
+ *      char buf[4096];
+ *      s = memGetBlockOnce(buf, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ */
+char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char **ss, size_t memSize, ...)
+{
+    va_list ap;
+    char **ss1;
+    size_t count;
+
+    if (nullptr == pool)
+        return nullptr;
+
+    *ss = pool;
+
+    if (0 == memSize)
+        count = strlen(pool) + 1;
+    else
+        count = memSize;
+
+    va_start(ap, memSize);
+    while ((ss1 = va_arg(ap, char **)) != nullptr) {
+        *ss1 = (char *)(pool + count);
+
+        memSize = va_arg(ap, size_t);
+        if (0 == memSize)
+            count += strlen(*ss1) + 1;
+        else
+            count += memSize;
+
+        if (count > poolSize)
+            return nullptr;
+
+    }
+    va_end(ap);
+
+    return pool;
+
+} // end of function memNewBlockOnce()
+
 } // namespace como
 
 #if 0
 int main(int argc, char *argv[])
 {
+
+    char *s1, *s2, *s3, *s4, *sp;
+    char buff[4096];
+    sp = como::MiString::memGetBlockOnce(buff, 4096, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+
+
     int num = 2;
     char *word[3];
     char  buf[256];

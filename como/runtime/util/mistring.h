@@ -51,10 +51,9 @@ public:
 
     static char *strToSourceC(char *t, char *s, char turnChar);
 
-    static char *memNewBlockOnce(char **ss, size_t memSize, ...);
+    static char *memNewBlockOnce(size_t *poolSize, char **ss, size_t memSize, ...);
 
-
-
+    static char *memGetBlockOnce(char *pool, size_t poolSize, char **ss, size_t memSize, ...);
 };
 
 } // namespace como

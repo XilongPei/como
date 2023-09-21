@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "mistring.h"
 #include "ServiceManager.h"
 
 namespace jing {
@@ -43,7 +44,9 @@ ECode ServiceManager::AddService(
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;
+    ipack->mCid.mCid = nullptr;
     ipack->mIid = object.mIid;
+    ipack->mIid.mCid = nullptr;
     ipack->mIsParcelable = object.mIsParcelable;
     ipack->mServerObjectId = object.mServerObjectId;
 
@@ -52,6 +55,24 @@ ECode ServiceManager::AddService(
         delete ipack;
         return E_OUT_OF_MEMORY_ERROR;
     }
+
+#if 0
+// temp code
+    size_t poolSize;
+    char *s1, *s2, *s3, *s4, *s5, *s6, *s;
+    s = MiString::memNewBlockOnce(&poolSize,
+                                  &s1, ipack->mServerName.GetLength(),
+                                  &s2, ipack->mDBusName.GetLength(),
+                                  &s3, sizeof(ipack->mCid),
+                                  &s4, sizeof(ipack->mIid),
+                                  &s5, sizeof(ipack->mIsParcelable),
+                                  &s6, sizeof(ipack->mServerObjectId),
+                                  nullptr);
+    strcpy(s1, ipack->mServerName.string());
+    strcpy(s2, ipack->mDBusName.string());
+    *(CoclassID *)&s3 = ipack->mCid;
+    *(InterfaceID *)&s4 = ipack->mIid;
+#endif
 
     return NOERROR;
 }
