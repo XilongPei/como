@@ -204,6 +204,31 @@ TEST(Mistring, teststrZcpy)
     EXPECT_EQ(strlen(t2), 0);
 }
 
+TEST(Mistring, testMemNewBlockOnce)
+{
+    char *s1, *s2, *s3, *s4, *s;
+    size_t poolSize;
+    s = MiString::memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    EXPECT_NE(s, nullptr);
+}
+
+TEST(Mistring, memGetBlockOnce)
+{
+    char *s;
+    int  i;
+    char buf[4096];
+    char buf_s1[32];
+
+    strcpy(buf, "tongji");
+    *(int *)&buf[7] = 4800;
+    s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
+    EXPECT_NE(s, nullptr);
+
+    //printf("===: %s %d\n", buf_s1, i);
+    EXPECT_STREQ("tongji", (char*)buf_s1);
+    EXPECT_EQ(4800, i);
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

@@ -53,7 +53,7 @@ public:
 
     static char *memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t memSize, ...);
 
-    static char *memGetBlockOnce(char *pool, size_t poolSize, char **ss, size_t memSize, ...);
+    static char *memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t memSize, ...);
 };
 
 } // namespace como

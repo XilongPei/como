@@ -334,7 +334,8 @@ char *MiString::strToSourceC(char *t, char *s, char turnChar)
 /**
  * Call method:
  *      char *s1, *s2, *s3, *s4, *s;
- *      s = memNewBlockOnce(nullptr, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ *      size_t poolSize;
+ *      s = memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
  */
 char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t memSize, ...)
 {
@@ -384,35 +385,43 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
 
 /**
  * Call method:
- *      char *s1, *s2, *s3, *s4;
+ *      char *s;
+ *      int  i;
  *      char buf[4096];
- *      s = memGetBlockOnce(buf, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ *      char buf_s1[32];
+ *      strcpy(buf, "tongji");
+ *      *(int *)&buf[7] = 4800;
+ *      s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
  */
-char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char **ss, size_t memSize, ...)
+char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t memSize, ...)
 {
     va_list ap;
-    char **ss1;
+    char *ss1;
     size_t count;
 
     if (nullptr == pool)
         return nullptr;
 
-    *ss = pool;
-
-    if (0 == memSize)
+    if (0 == memSize) {
         count = strlen(pool) + 1;
-    else
+        strcpy(ss, pool);
+    }
+    else {
         count = memSize;
+        memcpy(ss, pool, memSize);
+    }
 
     va_start(ap, memSize);
-    while ((ss1 = va_arg(ap, char **)) != nullptr) {
-        *ss1 = (char *)(pool + count);
-
+    while ((ss1 = va_arg(ap, char *)) != nullptr) {
         memSize = va_arg(ap, size_t);
-        if (0 == memSize)
-            count += strlen(*ss1) + 1;
-        else
+        if (0 == memSize) {
+            strcpy(ss1, (char *)(pool + count));
+            count += strlen((char *)(pool + count)) + 1;
+        }
+        else {
+            memcpy(ss1, (char *)(pool + count), memSize);
             count += memSize;
+        }
 
         if (count > poolSize)
             return nullptr;
