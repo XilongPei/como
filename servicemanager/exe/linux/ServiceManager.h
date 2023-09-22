@@ -23,6 +23,7 @@
 #include "hashmap.h"
 #include "mutex.h"
 #include <dbus/dbus.h>
+#include "SmOptions.h"
 
 namespace jing {
 
@@ -77,8 +78,11 @@ private:
 
     HashMap<String, InterfacePack*> mServices;
     Mutex mServicesLock;
+
+public:
+    static SmOptions *options;
 };
 
-}
+} // namespace jing
 
 #endif // __JING_SERVICEMANAGER_H__

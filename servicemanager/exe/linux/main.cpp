@@ -18,7 +18,6 @@
 #include <comolog.h>
 #include <dbus/dbus.h>
 #include <cstdio>
-#include "SmOptions.h"
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "RpcOverZeroMQ.h"
@@ -27,17 +26,19 @@
 using como::Logger;
 using jing::ServiceManager;
 
+jing::SmOptions *ServiceManager::options = nullptr;
+
 int main(int argc, char** argv)
 {
-    jing::SmOptions options(argc, argv);
+    ServiceManager::options = new jing::SmOptions(argc, argv);
 
-    if (options.DoShowUsage()) {
-        options.ShowUsage();
+    if (ServiceManager::options->DoShowUsage()) {
+        ServiceManager::options->ShowUsage();
         return 0;
     }
 
-    if (options.HasErrors()) {
-        options.ShowErrors();
+    if (ServiceManager::options->HasErrors()) {
+        ServiceManager::options->ShowErrors();
         return 0;
     }
 

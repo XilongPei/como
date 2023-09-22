@@ -56,7 +56,7 @@ ECode ServiceManager::AddService(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-#if 0
+#ifdef COMO_FUNCTION_SAFETY
 // temp code
     size_t poolSize;
     char *s1, *s2, *s3, *s4, *s5, *s6, *s;
