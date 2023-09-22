@@ -62,6 +62,7 @@ include_directories(
 set(SOURCES
     ServiceManager.cpp
     main.cpp
+    SmOptions.cpp
     ${RPC_ZeroMQ_SOURCES}
 )
 

@@ -60,7 +60,7 @@ ECode ServiceManager::AddService(
 // temp code
     size_t poolSize;
     char *s1, *s2, *s3, *s4, *s5, *s6, *s;
-    s = MiString::memNewBlockOnce(&poolSize,
+    s = MiString::memNewBlockOnce(nullptr, &poolSize,
                                   &s1, ipack->mServerName.GetLength(),
                                   &s2, ipack->mDBusName.GetLength(),
                                   &s3, sizeof(ipack->mCid),

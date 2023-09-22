@@ -51,7 +51,7 @@ public:
 
     static char *strToSourceC(char *t, char *s, char turnChar);
 
-    static char *memNewBlockOnce(size_t *poolSize, char **ss, size_t memSize, ...);
+    static char *memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t memSize, ...);
 
     static char *memGetBlockOnce(char *pool, size_t poolSize, char **ss, size_t memSize, ...);
 };

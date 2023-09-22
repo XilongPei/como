@@ -336,7 +336,7 @@ char *MiString::strToSourceC(char *t, char *s, char turnChar)
  *      char *s1, *s2, *s3, *s4, *s;
  *      s = memNewBlockOnce(nullptr, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
  */
-char *MiString::memNewBlockOnce(size_t *poolSize, char **ss, size_t memSize, ...)
+char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t memSize, ...)
 {
     va_list ap;
     char **ss1;
@@ -354,8 +354,14 @@ char *MiString::memNewBlockOnce(size_t *poolSize, char **ss, size_t memSize, ...
     if (count <= 0)
         return  nullptr;
 
-    if ((pool = (char*)malloc(count)) == nullptr)
-        return  nullptr;
+    if (nullptr != buf) {
+        if ((nullptr != poolSize) && (*poolSize < count))
+            return nullptr;
+    }
+    else {
+        if ((pool = (char*)malloc(count)) == nullptr)
+            return  nullptr;
+    }
 
     memset(pool, 0, count);
 
