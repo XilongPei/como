@@ -35,6 +35,9 @@ void SmOptions::Parse(
         else if (option.Equals("--help")) {
             mShowUsage = true;
         }
+        else if (option.Equals("-paxos")) {
+            mPaxosServer = argv[i++];
+        }
         else {
             mIllegalOptions += option;
             mIllegalOptions += ":";

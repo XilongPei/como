@@ -31,6 +31,10 @@ jing::SmOptions *ServiceManager::options = nullptr;
 int main(int argc, char** argv)
 {
     ServiceManager::options = new jing::SmOptions(argc, argv);
+    if (nullptr == ServiceManager::options) {
+        Logger_E("ServiceManager", "No memory, new jing::SmOptions()");
+        return 1;
+    }
 
     if (ServiceManager::options->DoShowUsage()) {
         ServiceManager::options->ShowUsage();

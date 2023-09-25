@@ -57,7 +57,17 @@ include_directories(
     /usr/include/dbus-1.0
     /usr/lib/x86_64-linux-gnu/dbus-1.0/include
     ${RPC_ZeroMQ_INC}
+    ${EXTERNAL_DIR}/phxpaxos/export_como
+    ${EXTERNAL_DIR}/phxpaxos/include
 )
+
+if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
+    set(PhxpaxosLib
+        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+    )
+else()
+    set(PhxpaxosLib "")
+endif()
 
 set(SOURCES
     ServiceManager.cpp
@@ -76,6 +86,7 @@ target_link_libraries(servicemanager
     comort.so
     dbus-1
     ${RPC_ZeroMQ_LIBS}
+    ${PhxpaxosLib}
 )
 add_dependencies(servicemanager comort)
 

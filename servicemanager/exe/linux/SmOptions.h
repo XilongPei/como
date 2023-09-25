@@ -31,6 +31,7 @@ public:
         /* [in] */ char** argv);
 
     inline bool DoShowUsage() const;
+    inline String GetPaxosServer() const;
 
     bool HasErrors() const;
 
@@ -46,6 +47,7 @@ private:
 private:
     String mProgram;
     String mIllegalOptions;
+    String mPaxosServer;
 
     bool mShowUsage = false;
     bool mShowVersion = false;
@@ -54,6 +56,7 @@ private:
 SmOptions::SmOptions(
     /* [in] */ int argc,
     /* [in] */ char** argv)
+    : mPaxosServer(nullptr)
 {
     Parse(argc, argv);
 }
@@ -61,6 +64,11 @@ SmOptions::SmOptions(
 bool SmOptions::DoShowUsage() const
 {
     return mShowUsage;
+}
+
+String SmOptions::GetPaxosServer() const
+{
+    return mPaxosServer;
 }
 
 } // namespace jing
