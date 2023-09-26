@@ -394,18 +394,18 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
  *      *(int *)&buf[7] = 4800;
  *      s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
  */
-char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t memSize, ...)
+char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, int memSize, ...)
 {
     va_list ap;
     char *ss1;
-    size_t count;
+    int count;
 
     if (nullptr == pool)
         return nullptr;
 
-    if (0 == memSize) {
+    if (memSize < 0) {
         count = strlen(pool) + 1;
-        strcpy(ss, pool);
+        strZcpy(ss, pool, memSize);
     }
     else {
         count = memSize;
@@ -414,9 +414,9 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
 
     va_start(ap, memSize);
     while ((ss1 = va_arg(ap, char *)) != nullptr) {
-        memSize = va_arg(ap, size_t);
-        if (0 == memSize) {
-            strcpy(ss1, (char *)(pool + count));
+        memSize = va_arg(ap, int);
+        if (memSize < 0) {
+            strZcpy(ss1, (char *)(pool + count), -memSize);
             count += strlen((char *)(pool + count)) + 1;
         }
         else {

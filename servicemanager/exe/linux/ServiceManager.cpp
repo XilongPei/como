@@ -134,8 +134,8 @@ ECode ServiceManager::GetService(
         char buf1[4096];
         char buf2[4096];
         s = MiString::memGetBlockOnce((char *)value.c_str(), value.length(),
-                                      buf1, 0,
-                                      buf2, 0,
+                                      buf1, -4096,
+                                      buf2, -4096,
                                       ipack->mCid, sizeof(ipack->mCid),
                                       ipack->mIid, sizeof(ipack->mIid),
                                       ipack->mIsParcelable, sizeof(ipack->mIsParcelable),
