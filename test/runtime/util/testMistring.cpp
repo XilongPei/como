@@ -230,7 +230,7 @@ TEST(Mistring, memGetBlockOnce)
 
     strcpy(buf, "tongji");
     *(int *)&buf[7] = 4800;
-    s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
+    s = MiString::memGetBlockOnce(buf, 4096, buf_s1, -32, (char*)&i, sizeof(int), nullptr);
     EXPECT_NE(s, nullptr);
 
     //printf("===: %s %d\n", buf_s1, i);
