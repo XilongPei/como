@@ -210,6 +210,15 @@ TEST(Mistring, testMemNewBlockOnce)
     size_t poolSize;
     s = MiString::memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
+
+    poolSize = 4096;
+    char buf[4096];
+    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    EXPECT_NE(s, nullptr);
+
+    poolSize = 8;
+    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    EXPECT_EQ(s, nullptr);
 }
 
 TEST(Mistring, memGetBlockOnce)

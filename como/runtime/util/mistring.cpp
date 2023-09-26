@@ -358,6 +358,7 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
     if (nullptr != buf) {
         if ((nullptr != poolSize) && (*poolSize < count))
             return nullptr;
+        pool = buf;
     }
     else {
         if ((pool = (char*)malloc(count)) == nullptr)
