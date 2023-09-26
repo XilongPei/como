@@ -115,10 +115,36 @@ ECode ServiceManager::GetService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+#ifndef COMO_FUNCTION_SAFETY
     Mutex::AutoLock lock(mServicesLock);
     *object = mServices.Get(name);
     if (nullptr == *object)
         return E_NOT_FOUND_EXCEPTION;
+#else
+    if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
+        std::string value;
+        if (como::ComoPhxUtils::GetStateData(std::string(name), value).empty())
+            return E_NOT_FOUND_EXCEPTION;
+
+        InterfacePack *ipack = new InterfacePack();
+        if (nullptr == ipack)
+            return E_OUT_OF_MEMORY_ERROR;
+
+        char *s;
+        char buf1[4096];
+        char buf2[4096];
+        s = MiString::memGetBlockOnce((char *)value.c_str(), value.length(),
+                                      buf1, 0,
+                                      buf2, 0,
+                                      ipack->mCid, sizeof(ipack->mCid),
+                                      ipack->mIid, sizeof(ipack->mIid),
+                                      ipack->mIsParcelable, sizeof(ipack->mIsParcelable),
+                                      ipack->mServerObjectId, sizeof(ipack->mServerObjectId),
+                                      nullptr);
+        if (nullptr == s)
+            return E_OUT_OF_MEMORY_ERROR;
+    }
+#endif
 
     return NOERROR;
 }
@@ -130,7 +156,8 @@ ECode ServiceManager::RemoveService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    InterfacePack* ipack;
+#ifndef COMO_FUNCTION_SAFETY
+    InterfacePack *ipack;
     {
         Mutex::AutoLock lock(mServicesLock);
         ipack = mServices.Get(name);
@@ -140,6 +167,13 @@ ECode ServiceManager::RemoveService(
     ReleaseCoclassID(ipack->mCid);
     ReleaseInterfaceID(ipack->mIid);
     delete ipack;
+#else
+    if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
+        if (! como::ComoPhxUtils::DelStateData(std::string(name)))
+            return E_NOT_FOUND_EXCEPTION;
+    }
+#endif
+
     return NOERROR;
 }
 
@@ -340,6 +374,6 @@ DBusHandlerResult ServiceManager::HandleMessage(
     }
 
     return DBUS_HANDLER_RESULT_HANDLED;
-}
+} // ServiceManager::HandleMessage()
 
-}
+} // namespace jing

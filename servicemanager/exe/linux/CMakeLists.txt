@@ -73,7 +73,10 @@ if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
         ${EXTERNAL_DIR}/phxpaxos/export_como/echo_server.cpp
         ${EXTERNAL_DIR}/phxpaxos/export_como/echo_sm.cpp
     )
-    set(Phxpaxos_DEFINITIONS -DCOMO_FUNCTION_SAFETY)
+
+    # <command-line>: warning: "COMO_FUNCTION_SAFETY" redefined
+    #set(Phxpaxos_DEFINITIONS -DCOMO_FUNCTION_SAFETY)
+    set(Phxpaxos_DEFINITIONS "")
 else()
     set(PhxpaxosLib "")
     set(PhxpaxosSrc "")
