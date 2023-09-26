@@ -32,7 +32,9 @@ using como::Logger;
 using jing::ServiceManager;
 
 jing::SmOptions *ServiceManager::options = nullptr;
+#ifdef COMO_FUNCTION_SAFETY
 como::PhxEchoServer *ServiceManager::oEchoServer = nullptr;
+#endif
 
 int main(int argc, char** argv)
 {

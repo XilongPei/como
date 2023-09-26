@@ -85,7 +85,9 @@ private:
 
 public:
     static SmOptions *options;
+#ifdef COMO_FUNCTION_SAFETY
     static como::PhxEchoServer *oEchoServer;
+#endif
 };
 
 } // namespace jing
