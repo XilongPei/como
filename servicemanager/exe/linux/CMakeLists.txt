@@ -64,9 +64,20 @@ include_directories(
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     set(PhxpaxosLib
         ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
     )
+    set(PhxpaxosSrc
+        ${EXTERNAL_DIR}/phxpaxos/export_como/ComoPhxUtils.cpp
+        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_server.cpp
+        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_sm.cpp
+    )
+    set(Phxpaxos_DEFINITIONS -DCOMO_FUNCTION_SAFETY)
 else()
     set(PhxpaxosLib "")
+    set(PhxpaxosSrc "")
+    set(Phxpaxos_DEFINITIONS "")
 endif()
 
 set(SOURCES
@@ -74,17 +85,19 @@ set(SOURCES
     main.cpp
     SmOptions.cpp
     ${RPC_ZeroMQ_SOURCES}
+    ${PhxpaxosSrc}
 )
 
 IMPORT_LIBRARY(comort.so)
 
-add_definitions(-DCOMO_WITH_RPC ${RPC_ZeroMQ_DEFINITIONS})
+add_definitions(-DCOMO_WITH_RPC ${RPC_ZeroMQ_DEFINITIONS} ${Phxpaxos_DEFINITIONS})
 
 add_executable(servicemanager
     ${SOURCES})
 target_link_libraries(servicemanager
     comort.so
     dbus-1
+    pthread
     ${RPC_ZeroMQ_LIBS}
     ${PhxpaxosLib}
 )

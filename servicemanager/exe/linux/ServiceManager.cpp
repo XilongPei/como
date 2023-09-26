@@ -38,7 +38,7 @@ ECode ServiceManager::AddService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    InterfacePack* ipack = new InterfacePack();
+    InterfacePack *ipack = new InterfacePack();
     if (nullptr == ipack)
         return E_OUT_OF_MEMORY_ERROR;
 
@@ -54,13 +54,13 @@ ECode ServiceManager::AddService(
     ipack->mIsParcelable = object.mIsParcelable;
     ipack->mServerObjectId = object.mServerObjectId;
 
+#ifndef COMO_FUNCTION_SAFETY
     Mutex::AutoLock lock(mServicesLock);
     if (mServices.Put(name, ipack) != 0) {
         delete ipack;
         return E_OUT_OF_MEMORY_ERROR;
     }
-
-#ifdef COMO_FUNCTION_SAFETY
+#else
     if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
         size_t poolSize;
         char *s1, *s2, *s3, *s4, *s5, *s6, *s;
@@ -77,6 +77,30 @@ ECode ServiceManager::AddService(
         strcpy(s2, ipack->mDBusName.string());
         *(CoclassID *)&s3 = ipack->mCid;
         *(InterfaceID *)&s4 = ipack->mIid;
+
+        delete ipack;
+
+        std::string sEchoReqValue;
+        std::string sEchoRespValue;
+        std::string sname = std::string(name.string());
+        std::string ss = std::string(s);
+        int ret = oEchoServer->Echo(como::ComoPhxUtils::MsgEncode(como::ComoPhxUtils::LevelDbWrite, sname, ss),
+                                    sEchoRespValue);
+
+        ret = como::ComoPhxUtils::SyncStateData(oEchoServer,
+                                                como::ComoPhxUtils::LevelDbWrite, sname, ss,
+                                                sEchoRespValue);
+
+        if (ret != 0) {
+            printf("Echo fail, ret %d\n", ret);
+        }
+    }
+    else {
+        Mutex::AutoLock lock(mServicesLock);
+        if (mServices.Put(name, ipack) != 0) {
+            delete ipack;
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
 #endif
 

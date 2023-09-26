@@ -18,15 +18,21 @@
 #include <comolog.h>
 #include <dbus/dbus.h>
 #include <cstdio>
+#include "mistring.h"
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 #include "RpcOverZeroMQ.h"
+#endif
+
+#ifdef COMO_FUNCTION_SAFETY
+#include "ComoPhxUtils.h"
 #endif
 
 using como::Logger;
 using jing::ServiceManager;
 
 jing::SmOptions *ServiceManager::options = nullptr;
+como::PhxEchoServer *ServiceManager::oEchoServer = nullptr;
 
 int main(int argc, char** argv)
 {
@@ -45,6 +51,33 @@ int main(int argc, char** argv)
         ServiceManager::options->ShowErrors();
         return 0;
     }
+
+#ifdef COMO_FUNCTION_SAFETY
+    if ((nullptr != ServiceManager::options) &&
+                                (! ServiceManager::options->GetPaxosServer().IsNull())) {
+        int num = 2;
+        char *word[3];
+        char buf[4096];
+        como::MiString::strZcpy(buf, ServiceManager::options->GetPaxosServer().string(), 4096);
+        char *str = como::MiString::WordBreak(buf, num, word, (char*)";");
+        if (num < 2) {
+            Logger_E("ServiceManager", "PaxosServer error");
+            return 2;
+        }
+
+        NodeInfo oMyNode;
+        NodeInfoList vecNodeInfoList;
+
+        if (como::ComoPhxUtils::RunPaxos(word[0], oMyNode, word[1], vecNodeInfoList,
+                                                    &ServiceManager::oEchoServer) != 0) {
+            Logger_E("ServiceManager", "RunPaxos fail\n");
+            return 3;
+        }
+
+        Logger_D("ServiceManager echo server start, ip %s port %d\n", oMyNode.GetIP().c_str(), oMyNode.GetPort());
+
+    }
+#endif
 
     DBusError err;
 

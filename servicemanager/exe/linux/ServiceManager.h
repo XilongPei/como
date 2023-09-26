@@ -25,6 +25,10 @@
 #include <dbus/dbus.h>
 #include "SmOptions.h"
 
+#ifdef COMO_FUNCTION_SAFETY
+#include "ComoPhxUtils.h"
+#endif
+
 namespace jing {
 
 class ServiceManager
@@ -81,6 +85,7 @@ private:
 
 public:
     static SmOptions *options;
+    static como::PhxEchoServer *oEchoServer;
 };
 
 } // namespace jing
