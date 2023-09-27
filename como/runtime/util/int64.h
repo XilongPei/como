@@ -20,33 +20,46 @@
 namespace como {
 
 #pragma pack(1)
+
 typedef union tagInt64 {
     bool            bVal;
-    short           shortVal;
+    int             i8Val;      // i8.i8_7
+    short           i16Val;     // i16.i16_low_low
+    int             i32Val;     // i32.i32_low
     long long int   i64Val;
+    float           floatVal;
     double          doubleVal;
-    char           *charpVal;
+    void           *pVal;
+
+    // Low32 High32
     struct {
         int i32_low;
         int i32_high;
     } i32;
+
+    // Low16 High16 Low16 High16
+    // `----\/----/ `----\/----/
+    //     Low32       High32
     struct {
         short i16_low_low;
         short i16_low_high;
         short i16_high_low;
         short i16_high_high;
     } i16;
+
+    // char7 char6 char5 char4 char3 char2 char1 char0
     struct {
-        char chr7;
-        char chr6;
-        char chr5;
-        char chr4;
-        char chr3;
-        char chr2;
-        char chr1;
-        char chr0;
-    } chr;
+        char i8_7;
+        char i8_6;
+        char i8_5;
+        char i8_4;
+        char i8_3;
+        char i8_2;
+        char i8_1;
+        char i8_0;
+    } i8;
 } Int64;
+
 #pragma pack()
 
 } // namespace como
