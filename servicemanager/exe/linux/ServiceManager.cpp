@@ -39,6 +39,7 @@ ECode ServiceManager::AddService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+#ifndef COMO_FUNCTION_SAFETY
     InterfacePack *ipack = new InterfacePack();
     if (nullptr == ipack)
         return E_OUT_OF_MEMORY_ERROR;
@@ -55,7 +56,6 @@ ECode ServiceManager::AddService(
     ipack->mIsParcelable = object.mIsParcelable;
     ipack->mServerObjectId = object.mServerObjectId;
 
-#ifndef COMO_FUNCTION_SAFETY
     Mutex::AutoLock lock(mServicesLock);
     if (mServices.Put(name, ipack) != 0) {
         delete ipack;
@@ -63,21 +63,27 @@ ECode ServiceManager::AddService(
     }
 #else
     if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
-        size_t poolSize;
+        size_t poolSize = 8192;
+        char buf[8192];
         char *s1, *s2, *s3, *s4, *s5, *s6, *s;
 
-        s = MiString::memNewBlockOnce(nullptr, &poolSize,
-                                      &s1, ipack->mServerName.GetLength(),
-                                      &s2, ipack->mDBusName.GetLength(),
-                                      &s3, sizeof(ipack->mCid),
-                                      &s4, sizeof(ipack->mIid),
-                                      &s5, sizeof(ipack->mIsParcelable),
-                                      &s6, sizeof(ipack->mServerObjectId),
+        s = MiString::memNewBlockOnce(buf, &poolSize,
+                                      &s1, object.mServerName.GetLength(),
+                                      &s2, object.mDBusName.GetLength(),
+                                      &s3, sizeof(object.mCid),
+                                      &s4, sizeof(object.mIid),
+                                      &s5, sizeof(object.mIsParcelable),
+                                      &s6, sizeof(object.mServerObjectId),
                                       nullptr);
-        strcpy(s1, ipack->mServerName.string());
-        strcpy(s2, ipack->mDBusName.string());
-        *(CoclassID *)&s3 = ipack->mCid;
-        *(InterfaceID *)&s4 = ipack->mIid;
+        if (nullptr == s)
+            return E_OUT_OF_MEMORY_ERROR;
+
+        strcpy(s1, object.mServerName.string());
+        strcpy(s2, object.mDBusName.string());
+        *(CoclassID *)&s3 = object.mCid;
+        *(InterfaceID *)&s4 = object.mIid;
+        *(InterfaceID *)&s5 = object.mIsParcelable;
+        *(InterfaceID *)&s6 = object.mServerObjectId;
 
         delete ipack;
 
@@ -97,6 +103,22 @@ ECode ServiceManager::AddService(
         }
     }
     else {
+        InterfacePack *ipack = new InterfacePack();
+        if (nullptr == ipack)
+            return E_OUT_OF_MEMORY_ERROR;
+
+        // Because it involves the deep replication of objects in members, we can't
+        // simply make a memory directly copy here.
+        //memcpy(ipack, &object, sizeof(InterfacePack));
+        ipack->mServerName = object.mServerName;
+        ipack->mDBusName = object.mDBusName;
+        ipack->mCid = object.mCid;
+        ipack->mCid.mCid = nullptr;
+        ipack->mIid = object.mIid;
+        ipack->mIid.mCid = nullptr;
+        ipack->mIsParcelable = object.mIsParcelable;
+        ipack->mServerObjectId = object.mServerObjectId;
+
         Mutex::AutoLock lock(mServicesLock);
         if (mServices.Put(name, ipack) != 0) {
             delete ipack;
@@ -383,3 +405,4 @@ DBusHandlerResult ServiceManager::HandleMessage(
 } // ServiceManager::HandleMessage()
 
 } // namespace jing
+
