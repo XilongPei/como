@@ -51,4 +51,4 @@ typedef union tagInt64 {
 
 } // namespace como
 
-#endif
+#endif // __INT64_H__

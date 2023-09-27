@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <cassert>
+#include "int64.h"
 #include "mistring.h"
 
 namespace como {
@@ -394,7 +395,7 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
  *      *(int *)&buf[7] = 4800;
  *      s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
  */
-char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, int memSize, ...)
+char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t memSize, ...)
 {
     va_list ap;
     char *ss1;
@@ -414,9 +415,11 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, int memSi
 
     va_start(ap, memSize);
     while ((ss1 = va_arg(ap, char *)) != nullptr) {
-        memSize = va_arg(ap, int);
-        if (memSize < 0) {
-            strZcpy(ss1, (char *)(pool + count), -memSize);
+        memSize = va_arg(ap, size_t);
+
+        if ((*(Int64 *)&memSize).i32.i32_high != 0) {
+            (*(Int64 *)&memSize).i32.i32_high = 0;
+            strZcpy(ss1, (char *)(pool + count), memSize);
             count += strlen((char *)(pool + count)) + 1;
         }
         else {

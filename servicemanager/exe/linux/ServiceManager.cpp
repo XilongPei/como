@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include "int64.h"
 #include "mistring.h"
 #include "ServiceManager.h"
 
@@ -133,9 +134,14 @@ ECode ServiceManager::GetService(
         char *s;
         char buf1[4096];
         char buf2[4096];
+        size_t memSize;
+
+        memSize = 4096;
+        (*(Int64 *)&memSize).i32.i32_high = 1;   // a value not 0
+
         s = MiString::memGetBlockOnce((char *)value.c_str(), value.length(),
-                                      buf1, -4096,
-                                      buf2, -4096,
+                                      buf1, memSize,
+                                      buf2, memSize,
                                       ipack->mCid, sizeof(ipack->mCid),
                                       ipack->mIid, sizeof(ipack->mIid),
                                       ipack->mIsParcelable, sizeof(ipack->mIsParcelable),
