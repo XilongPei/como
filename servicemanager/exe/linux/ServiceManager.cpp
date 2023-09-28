@@ -82,10 +82,8 @@ ECode ServiceManager::AddService(
         strcpy(s2, object.mDBusName.string());
         *(CoclassID *)&s3 = object.mCid;
         *(InterfaceID *)&s4 = object.mIid;
-        *(InterfaceID *)&s5 = object.mIsParcelable;
-        *(InterfaceID *)&s6 = object.mServerObjectId;
-
-        delete ipack;
+        *(Boolean *)&s5 = object.mIsParcelable;
+        *(Long *)&s6 = object.mServerObjectId;
 
         std::string sEchoReqValue;
         std::string sEchoRespValue;
