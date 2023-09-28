@@ -23,6 +23,8 @@
 #include <sys/resource.h>
 #include "ThreadStack.h"
 
+namespace como {
+
 __attribute__((noinline)) void ThreadStack::rb_gc_set_stack_end(uintptr_t **stack_end_p)
 {
     uintptr_t stack_end;
@@ -172,3 +174,5 @@ int ThreadStack::CheckStackOverflow(const pthread_t thread_id, const void *addr,
     }
     return 0;
 }
+
+} // namespace como

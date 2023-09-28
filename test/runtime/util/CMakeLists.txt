@@ -48,6 +48,11 @@ set(SOURCES4
     testInt64.cpp
 )
 
+set(SOURCES5
+    testThreadStack.cpp
+    ${PROJECT_DIR}/como/runtime/util/ThreadStack.cpp
+)
+
 IMPORT_LIBRARY(comort.so)
 IMPORT_GTEST()
 
@@ -66,6 +71,9 @@ add_executable(testMistring
 add_executable(testInt64
     ${SOURCES4})
 
+add_executable(testThreadStack
+    ${SOURCES5})
+
 target_link_libraries(testMac comort.so ${GTEST_LIBS})
 add_dependencies(testMac comort gtest gtest_main)
 
@@ -81,11 +89,17 @@ add_dependencies(testMistring comort gtest gtest_main)
 target_link_libraries(testInt64 comort.so ${GTEST_LIBS})
 add_dependencies(testInt64 comort gtest gtest_main)
 
+target_link_libraries(testThreadStack comort.so ${GTEST_LIBS})
+add_dependencies(testThreadStack comort gtest gtest_main)
+
+
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 COPY(testMac ${UTIL_OBJ_DIR}/testMac ${BIN_DIR})
 COPY(testVerifiedU64Pointer ${UTIL_OBJ_DIR}/testVerifiedU64Pointer ${BIN_DIR})
 COPY(testMistring ${UTIL_OBJ_DIR}/testMistring ${BIN_DIR})
 COPY(testInt64 ${UTIL_OBJ_DIR}/testInt64 ${BIN_DIR})
+COPY(testThreadStack ${UTIL_OBJ_DIR}/testThreadStack ${BIN_DIR})
+
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil

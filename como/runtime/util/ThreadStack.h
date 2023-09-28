@@ -19,6 +19,8 @@
 
 #include <stdint.h>
 
+namespace como {
+
 class ThreadStack
 {
 public:
@@ -39,5 +41,7 @@ public:
     static int CheckStackOverflow(const pthread_t thread_id, const void *addr,
                                             size_t stack_maxsize, char *stack_start);
 };
+
+} // namespace como
 
 #endif  // __THREADSTACK_H__
