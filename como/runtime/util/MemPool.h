@@ -20,9 +20,9 @@
 namespace como {
 
 enum TryToUseMemPool {
-	DONT_USE_MEM_POOL,
-	MUST_USE_MEM_POOL,
-	TRY_TO_USE_MEM_POOL
+    DONT_USE_MEM_POOL,
+    MUST_USE_MEM_POOL,
+    TRY_TO_USE_MEM_POOL
 };
 
 class CMemPool

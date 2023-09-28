@@ -122,7 +122,7 @@ bool CMemPool::SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
  * will call system function.
  *
  * Parameters:
- *     [in] ulSize       	  Memory unit size.
+ *     [in] ulSize            Memory unit size.
  *     [in] iTryToUseMemPool  Whether use memory pool.
  *
  * Return Values:
@@ -131,11 +131,11 @@ bool CMemPool::SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
 void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
     if (ulSize > m_ulUnitSize ||
-            			 nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock) {
+                         nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock) {
         if (MUST_USE_MEM_POOL == iTryToUseMemPool)
-        	return nullptr;
+            return nullptr;
 
-    	return ::malloc(ulSize);
+        return ::malloc(ulSize);
     }
 
     // Now FreeList isn`t empty
