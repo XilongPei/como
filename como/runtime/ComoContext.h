@@ -40,6 +40,9 @@ public:
 
     // ---
     Mutex contextLock;
+
+    // --- for phxpaxos
+    static void *gEchoServer;       // como::PhxEchoServer
 };
 
 } // namespace como

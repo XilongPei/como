@@ -24,6 +24,8 @@ namespace como {
 ComoContext *ComoContext::gComoContext = nullptr;
 pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
+void *ComoContext::gEchoServer = nullptr;
+
 ComoContext::ComoContext()
     : funComoMalloc(nullptr)
     , freeMemInArea(nullptr)
