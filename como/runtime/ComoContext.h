@@ -43,6 +43,7 @@ public:
 
     // --- for phxpaxos
     static void *gEchoServer;       // como::PhxEchoServer
+    static int   socketTCP;         // a TCP socket lisetning to 'port' ready to accept connections.
 };
 
 } // namespace como

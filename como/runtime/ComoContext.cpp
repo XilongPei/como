@@ -25,6 +25,7 @@ ComoContext *ComoContext::gComoContext = nullptr;
 pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
 void *ComoContext::gEchoServer = nullptr;
+int   ComoContext::socketTCP = 0;
 
 ComoContext::ComoContext()
     : funComoMalloc(nullptr)
