@@ -17,7 +17,7 @@ sudo yum groupinstall 'Development Tools'
 ```
 ###### Ubuntu
 ```shell
-1. sudo apt install build-essential
+sudo apt install build-essential
 ```
 
 ### Install cmake
@@ -27,10 +27,10 @@ sudo yum install cmake
 ```
 ###### Ubuntu
 ```shell
-1. sudo apt-get install software-properties-common
-2. sudo add-apt-repository ppa:george-edison55/cmake-3.x
-3. sudo apt-get update
-4. sudo apt-get install cmake
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:george-edison55/cmake-3.x
+sudo apt-get update
+sudo apt-get install cmake
 ```
 
 ### Install DBus
@@ -56,8 +56,8 @@ $ locate dbus-arch-deps.h
 ```
 ###### Ubuntu
 ```shell
-1. sudo apt-get update
-2. sudo apt-get install libdbus-1-dev
+sudo apt-get update
+sudo apt-get install libdbus-1-dev
 ```
 
 ### Install Unwind
@@ -150,3 +150,15 @@ if the build target is android aarch64, you need copy building results to the de
 + <code>root</code> to change to como root directory
 + <code>out</code> to change to out directory
 + <code>bin</code> to change to bin directory
+
+-------------------------------------
+
+# build external/ directory
+
+build external with program:
+
+```shell
+./MakeOptionalExternal.sh
+```
+
+It needs python interpreator in your PATH environment.
