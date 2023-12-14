@@ -246,13 +246,20 @@ ECode CMetaInterface::GetMethod(
 {
     method = nullptr;
 
-    if (index < 0 || index >= mMethods.GetLength()) {
+    if ((index < 0) || (index >= mMethods.GetLength())) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     FAIL_RETURN(BuildAllMethods());
 
     method = mMethods[index];
+    return NOERROR;
+}
+
+ECode CMetaInterface::IsExternal(
+    /* [out] */ Boolean& isExternal)
+{
+    isExternal = (mProperties & (unsigned char)TYPE_EXTERNAL);
     return NOERROR;
 }
 
@@ -277,8 +284,9 @@ ECode CMetaInterface::BuildBaseInterface()
     if (mMetadata->mBaseInterfaceIndex != -1) {
         AutoPtr<IMetaInterface> base =
                         mOwner->BuildInterface(mMetadata->mBaseInterfaceIndex);
-        if (nullptr == base)
+        if (nullptr == base) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 
         mBaseInterface = static_cast<CMetaInterface*>(base.Get());
     }
@@ -293,8 +301,9 @@ ECode CMetaInterface::BuildAllConstants()
             for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
-                if ((nullptr == mcObj) || (nullptr == mcObj->mValue))
+                if ((nullptr == mcObj) || (nullptr == mcObj->mValue)) {
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 mConstants.Set(i, mcObj);
             }
@@ -308,8 +317,9 @@ ECode CMetaInterface::BuildAllMethods()
     if (mMethods[0] == nullptr) {
         Mutex::AutoLock lock(mMethodsLock);
         if (mMethods[0] == nullptr) {
-            if (BuildInterfaceMethod(mMetadata) < 0)
+            if (BuildInterfaceMethod(mMetadata) < 0) {
                 return E_OUT_OF_MEMORY_ERROR;
+            }
         }
     }
     return NOERROR;
@@ -322,8 +332,9 @@ Integer CMetaInterface::BuildInterfaceMethod(
     if (mi->mBaseInterfaceIndex != -1) {
         startIndex = BuildInterfaceMethod(mOwner->mMetadata->mInterfaces[
                                                       mi->mBaseInterfaceIndex]);
-        if (startIndex < 0)
+        if (startIndex < 0) {
             return startIndex;
+        }
     }
 
     for (Integer i = 0;  i < mi->mMethodNumber;  i++) {

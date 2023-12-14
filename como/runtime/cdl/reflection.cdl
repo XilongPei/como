@@ -335,6 +335,9 @@ interface IMetaInterface
     GetMethod(
         [in] Integer index,
         [out] IMetaMethod&& method);
+
+    IsExternal(
+        [out] Boolean& isExternal);
 }
 
 [

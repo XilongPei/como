@@ -24,8 +24,12 @@ namespace jing {
 
 ECode RpcHelpers::ReleaseService(
     /* [in] */ const String& name,
-    /* [in] */ IInterface* intfService)
+    /* [in] */ IInterface *intfService)
 {
+    if (nullptr == intfService) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     IProxy* proxy = IProxy::Probe(intfService);
     if (proxy != nullptr) {
         Boolean alive;
@@ -40,11 +44,15 @@ ECode RpcHelpers::ReleaseService(
 }
 
 ECode RpcHelpers::ReleaseRemoteObject(
-    /* [in] */ IInterface* intfService,
-    /* [in] */ IInterface* obj)
+    /* [in] */ IInterface *intfService,
+    /* [in] */ IInterface *obj)
 {
     ECode ec;
     Long hash;
+
+    if ((nullptr == intfService) || (nullptr == obj)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     IProxy* proxy = IProxy::Probe(intfService);
     if (nullptr != proxy) {
@@ -65,17 +73,20 @@ ECode RpcHelpers::ReleaseRemoteObject(
 
     // It implements the COMO class of IParcelable interface. Its method
     // execution is executed on the client side.
-    IObject::Probe(obj)->GetHashCode(hash);
-    return proxy->ReleaseObject(hash);
+    return IObject::Probe(obj)->Release();
 }
 
 ECode RpcHelpers::ReleaseImportObject(
-    /* [in] */ IInterface* intfService,
-    /* [in] */ IInterface* obj)
+    /* [in] */ IInterface *intfService,
+    /* [in] */ IInterface *obj)
 {
     ECode ec;
     Long hash;
     Long channelId;
+
+    if ((nullptr == intfService) || (nullptr == obj)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     IProxy* proxy = IProxy::Probe(intfService);
     if (nullptr != proxy) {
@@ -101,8 +112,9 @@ ECode RpcHelpers::ReleaseImportObject(
 
         AutoPtr<como::IInterfacePack> ipack;
         ec = proxy->GetIpack(ipack);
-        if (FAILED(ec))
+        if (FAILED(ec)) {
             return ec;
+        }
 
         ipack->GetProxyInfo(channelId);
 
@@ -113,8 +125,6 @@ ECode RpcHelpers::ReleaseImportObject(
     // execution is executed on the client side.
     IObject::Probe(obj)->GetHashCode(hash);
     return como::CoUnregisterImportObject(RPCType::Remote, hash);
-
-    return proxy->ReleaseObject(hash);
 }
 
 } // namespace jing

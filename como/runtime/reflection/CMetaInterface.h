@@ -92,6 +92,9 @@ public:
         /* [in] */ Integer index,
         /* [out] */ AutoPtr<IMetaMethod>& method) override;
 
+    ECode IsExternal(
+        /* [out] */ Boolean& isExternal) override;
+
 private:
     Integer CalculateMethodNumber();
 

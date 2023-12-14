@@ -541,21 +541,23 @@ ECode CMetaComponent::BuildAllInterfaces()
 AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
     /* [in] */ Integer index)
 {
-    if (index < 0 || index >= mMetadata->mInterfaceNumber) {
+    if ((index < 0) || (index >= mMetadata->mInterfaceNumber)) {
         return nullptr;
     }
 
     MetaInterface *mi = mMetadata->mInterfaces[index];
     String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
-    if (fullName.IsEmpty())
+    if (fullName.IsEmpty()) {
         return nullptr;
+    }
 
     if (! mInterfaceNameMap.ContainsKey(fullName)) {
         Mutex::AutoLock lock(mInterfacesLock);
         if (! mInterfaceNameMap.ContainsKey(fullName)) {
             AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
-            if (nullptr == miObj)
+            if (nullptr == miObj) {
                 return nullptr;
+            }
 
             Integer realIndex = index;
             for (Integer i = 0;  i <= index;  i++) {
@@ -563,14 +565,17 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
                     realIndex--;
                 }
             }
+            
             if (! (mi->mProperties & TYPE_EXTERNAL)) {
                 mInterfaces.Set(realIndex, miObj);
             }
+
             mInterfaceNameMap.Put(fullName, miObj);
             mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
             return miObj;
         }
     }
+
     return mInterfaceNameMap.Get(fullName);
 }
 
@@ -579,8 +584,9 @@ ECode CMetaComponent::LoadAllClassObjectGetters()
     if (mComponent->mSoGetAllClassObjects != nullptr) {
         Integer N;
         ClassObjectGetter *getters = mComponent->mSoGetAllClassObjects(N);
-        if (nullptr == getters)
+        if (nullptr == getters) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 
         for (Integer i = 0;  i < N;  i++) {
             const CoclassID& cid = getters[i].mCid;

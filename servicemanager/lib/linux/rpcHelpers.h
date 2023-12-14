@@ -28,15 +28,15 @@ class COM_PUBLIC RpcHelpers
 public:
     static ECode ReleaseService(
         /* [in] */ const String& name,
-        /* [in] */ IInterface* intfService);
+        /* [in] */ IInterface *intfService);
 
     static ECode ReleaseRemoteObject(
-        /* [in] */ IInterface* intfService,
-        /* [in] */ IInterface* obj);
+        /* [in] */ IInterface *intfService,
+        /* [in] */ IInterface *obj);
 
     static ECode ReleaseImportObject(
-        /* [in] */ IInterface* intfService,
-        /* [in] */ IInterface* obj);
+        /* [in] */ IInterface *intfService,
+        /* [in] */ IInterface *obj);
 };
 
 } // namespace jing
