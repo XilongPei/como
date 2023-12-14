@@ -36,6 +36,8 @@ CMetaInterface::CMetaInterface(
     , mConstants(mi->mConstantNumber)
     , mMethods(mi->mMethodNumber)
 {
+    mProperties = mi->mProperties;
+
     mIid.mUuid = mi->mUuid;
     mIid.mCid = &mcObj->mCid;
     BuildBaseInterface();

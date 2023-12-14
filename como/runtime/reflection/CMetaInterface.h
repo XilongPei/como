@@ -116,6 +116,7 @@ public:
     Mutex           mConstantsLock;
     Array<IMetaMethod*> mMethods;
     Mutex           mMethodsLock;
+    unsigned char   mProperties;
 };
 
 } // namespace como
