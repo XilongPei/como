@@ -139,8 +139,8 @@ static RTM_CpuMemoryStatus GetRtmCpuMemoryStatus()
     RTM_CpuMemoryStatus status;
     status.cpuUsagePercent = CpuCoreUtils::GetProcCpuUsagePercent(getpid());
 
-    struct mallinfo mi;
-    mi = mallinfo();
+    struct mallinfo2 mi;
+    mi = mallinfo2();
     status.totalAllocdSpace = mi.uordblks;
     status.totalFreeSpace = mi.fordblks;
 
