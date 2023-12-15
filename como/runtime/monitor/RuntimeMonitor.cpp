@@ -139,11 +139,19 @@ static RTM_CpuMemoryStatus GetRtmCpuMemoryStatus()
     RTM_CpuMemoryStatus status;
     status.cpuUsagePercent = CpuCoreUtils::GetProcCpuUsagePercent(getpid());
 
+#if defined __GLIBC__ && defined __linux__
+#if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 33
     struct mallinfo2 mi;
     mi = mallinfo2();
     status.totalAllocdSpace = mi.uordblks;
     status.totalFreeSpace = mi.fordblks;
-
+#else
+    struct mallinfo mi;
+    mi = mallinfo();
+    status.totalAllocdSpace = mi.uordblks;
+    status.totalFreeSpace = mi.fordblks;
+#endif
+#endif
     return status;
 }
 
