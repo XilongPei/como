@@ -52,6 +52,8 @@ public:
             ec = NOERROR;
         else
             ec = E_OUT_OF_MEMORY_ERROR;
+
+        m_Lock = new Mutex(true);
     }
 
     ~CircleBuffer()
@@ -60,6 +62,7 @@ public:
             delete[] m_pBuf;
             m_pBuf = nullptr;
         }
+        delete m_Lock;
     }
 
     bool isFull()
@@ -477,7 +480,7 @@ private:
     int m_nReadPos;
     int m_nWritePos;
 
-    Mutex m_Lock;
+    Mutex *m_Lock;
 };
 
 } // namespace como
