@@ -33,27 +33,33 @@ char *MiString::WordBreak(char *string, int& num, char *word[], char *breakChar)
     char *rp;
     int maxNum = num;
 
-    if (maxNum < 1)
+    if (maxNum < 1) {
         maxNum = 1;
+    }
 
-    if ((nullptr == string) || (nullptr == word) || (nullptr == breakChar))
+    if ((nullptr == string) || (nullptr == word) || (nullptr == breakChar)) {
         return nullptr;
+    }
 
     num = 0;
     rp = string;
 
     // skip the leading breakChar
-    while (isspace(*rp) || strchr(breakChar, *rp)) {
-        rp++;
-        if (*rp == '\0')
-            break;
+    if ('\0' != *rp) {
+        while (isspace(*rp) || strchr(breakChar, *rp)) {
+            rp++;
+            if (*rp == '\0') {
+                break;
+            }
+        }
     }
 
     word[num] = rp;
-    while (*rp) {
+    while ('\0' != *rp) {
 
-        while ((!isspace(*rp)) && (!strchr(breakChar, *rp)) && (*rp != '\0'))
+        while ((!isspace(*rp)) && (!strchr(breakChar, *rp)) && (*rp != '\0')) {
             rp++;
+        }
 
         if (*rp != '\0') {
             *rp = '\0';
@@ -67,15 +73,19 @@ char *MiString::WordBreak(char *string, int& num, char *word[], char *breakChar)
         // skip to next word
         while (isspace(*rp) || strchr(breakChar, *rp)) {
             rp++;
-            if (*rp == '\0')
+            if (*rp == '\0') {
                 break;
+            }
         }
 
-        if (*rp == '\0')
+        if (*rp == '\0') {
+            num++;
             break;
+        }
 
-        if (num >= maxNum)
+        if (num >= maxNum) {
             break;
+        }
 
         word[++num] = rp;
     }
@@ -94,12 +104,17 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
 {
     char *sz;
 
-    if (seeds == nullptr) {
+    if (nullptr == s) {
+        return nullptr;
+    }
+
+    if (nullptr == seeds) {
         seedsCapacity = 2;
         sz = s;
         while (*sz != '\0') {
-            if (*sz++ == seperator)
+            if (*sz++ == seperator) {
                 seedsCapacity++;
+            }
         }
         if ((seeds = (char **)calloc(seedsCapacity, sizeof(char *))) == nullptr) {
             return nullptr;
@@ -109,20 +124,23 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     int maxNum = seedsCapacity;
     seedsCapacity = 0;
 
-    while (*s == seperator)
+    while (*s == seperator) {
         s++;
+    }
 
     seeds[seedsCapacity] = s;
     while (*s != '\0') {
-        if (seedsCapacity >= maxNum)
+        if (seedsCapacity >= maxNum) {
             break;
+        }
 
         if (*s == seperator)   {
             *s = '\0';
             seeds[++seedsCapacity] = ++s;
 
-            while (*s == seperator)
+            while (*s == seperator) {
                 s++;
+            }
         }
         else {
             s++;
@@ -148,14 +166,17 @@ ECode MiString::SeperateStr(
     int separatorCount = 1;
     sz = s;
     while (*sz != '\0') {
-        if (*sz++ == seperator)
+        if (*sz++ == seperator) {
             separatorCount++;
+        }
     }
 
-    if (limit <= 0)
+    if (limit <= 0) {
         limit = separatorCount;
-    else if (separatorCount > limit)
+    }
+    else if (separatorCount > limit) {
         separatorCount = limit;
+    }
 
     Array<String> result(separatorCount);
     if (result.IsNull()) {
@@ -171,8 +192,9 @@ ECode MiString::SeperateStr(
             *s = seperator;
             sz = s + 1;
 
-            if (i >= separatorCount)
+            if (i >= separatorCount) {
                 break;
+            }
         }
         s++;
     }
@@ -194,8 +216,9 @@ char *MiString::shrink(char *dst, int dstSize, const char *src)
 {
     int j = 0;
 
-    if (dstSize <= 0)
+    if (dstSize <= 0) {
         return nullptr;
+    }
 
     dstSize--;
     dst[dstSize] = '\0';
@@ -204,8 +227,9 @@ char *MiString::shrink(char *dst, int dstSize, const char *src)
             dst[i] = '\0';
             break;
         }
-        while (isspace(src[j]))
+        while (isspace(src[j])) {
             j++;
+        }
         dst[i] = src[j++];
     }
 
@@ -220,8 +244,8 @@ char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
     short i = 0;
 
     size--;     //for hold tail 0
-    while ( *s != '\0' && *s != '"' && i < size ) {
-        if ( *s == turnChar ) {
+    while (*s != '\0' && *s != '"' && i < size) {
+        if (*s == turnChar) {
            switch( *(++s) ) {
             case 't':
                 t[i++] = '\t';
@@ -248,10 +272,12 @@ char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
                 s++;
                 for (j = 0;  j < 2 && *s;  j++ ) {
                     *s = toupper(*s);
-                    if ( *s >= 'A' && *s <= 'Z' )
+                    if ( *s >= 'A' && *s <= 'Z' ) {
                         num = num * 16 + (*s - 'A' + 10 );
-                    else if ( isdigit(*s) )
+                    }
+                    else if ( isdigit(*s) ) {
                         num = num * 16 + (*s - '0') ;
+                    }
                     s++;
                 }
 
@@ -270,7 +296,8 @@ char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
                 for (j = 0;  j < 3 && *s;  j++ ) {
                     if (isdigit(*s)) {
                         num = num * 10 + (*s - '0') ;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                     s++;
@@ -321,7 +348,8 @@ char *MiString::strToSourceC(char *t, char *s, char turnChar)
         if( *s == turnChar ) {
             *sz++ = turnChar;
             *sz++ = turnChar;
-        } else {
+        }
+        else {
             *sz++ = *s;
         }
         s++;
@@ -357,19 +385,22 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
         return  nullptr;
 
     if (nullptr != buf) {
-        if ((nullptr != poolSize) && (*poolSize < count))
+        if ((nullptr != poolSize) && (*poolSize < count)) {
             return nullptr;
+        }
         pool = buf;
     }
     else {
-        if ((pool = (char*)malloc(count)) == nullptr)
+        if ((pool = (char*)malloc(count)) == nullptr) {
             return  nullptr;
+        }
     }
 
     memset(pool, 0, count);
 
-    if (nullptr != poolSize)
+    if (nullptr != poolSize) {
         *poolSize = count;
+    }
 
     *ss = pool;
     count = memSize;
@@ -401,8 +432,9 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
     char *ss1;
     int count;
 
-    if (nullptr == pool)
+    if (nullptr == pool) {
         return nullptr;
+    }
 
     if (memSize < 0) {
         count = strlen(pool) + 1;
@@ -427,8 +459,9 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
             count += memSize;
         }
 
-        if (count > poolSize)
+        if (count > poolSize) {
             return nullptr;
+        }
 
     }
     va_end(ap);

@@ -174,7 +174,7 @@ TEST(Mistring, testWordBreak3)
     memset(word, 0, sizeof(word));
     num = 5;
     ret = MiString::WordBreak(str, num, word, br);
-    EXPECT_EQ(num, 4);
+    EXPECT_EQ(num, 3);
     EXPECT_STREQ(word[0], ",");
     EXPECT_STREQ(word[1], ".");
     EXPECT_STREQ(word[2], ".");
