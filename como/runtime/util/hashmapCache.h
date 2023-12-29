@@ -74,8 +74,9 @@ public:
     {
         mBucketSize = get_next_prime(size);
         mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
-        if (nullptr == mBuckets)
+        if (nullptr == mBuckets) {
             mBucketSize = 0;
+        }
         mThreshold = mBucketSize * LOAD_FACTOR;
         clock_gettime(CLOCK_REALTIME, &mLastCheanTime);
     }
@@ -113,8 +114,9 @@ public:
         unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
-            if (nullptr == b)
+            if (nullptr == b) {
                 return -2;
+            }
 
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
@@ -139,12 +141,14 @@ public:
                 prev = prev->mNext;
             }
 
-            if (nullptr == prev)
+            if (nullptr == prev) {
                 return -3;
+            }
 
             Bucket* b = new Bucket();
-            if (nullptr == b)
+            if (nullptr == b) {
                 return -2;
+            }
 
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
@@ -365,8 +369,9 @@ public:
                         mCount--;
                         curr = next;
                     }
-                    if (curr != nullptr)
+                    if (curr != nullptr) {
                         curr = curr->mNext;
+                    }
                 }
             }
         }
@@ -390,8 +395,9 @@ public:
                         }
                         curr = next;
                     }
-                    if (curr != nullptr)
+                    if (curr != nullptr) {
                         curr = curr->mNext;
+                    }
                 }
             }
         }
@@ -462,7 +468,7 @@ private:
     unsigned int mThreshold;
     unsigned int mCount;
     unsigned int mBucketSize;
-    Bucket** mBuckets;
+    Bucket     **mBuckets;
     struct timespec mLastCheanTime;
 };
 

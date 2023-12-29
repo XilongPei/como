@@ -96,8 +96,9 @@ public:
     {
         mBucketSize = get_next_prime(size);
         mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
-        if (nullptr == mBuckets)
+        if (nullptr == mBuckets) {
             mBucketSize = 0;
+        }
         mThreshold = mBucketSize * LOAD_FACTOR;
     }
 
@@ -133,8 +134,9 @@ public:
         unsigned int index = hash % mBucketSize;
         if (mBuckets[index] == nullptr) {
             Bucket* b = new Bucket();
-            if (nullptr == b)
+            if (nullptr == b) {
                 return -2;
+            }
 
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
@@ -146,7 +148,7 @@ public:
         else {
             Bucket* prev = mBuckets[index];
             while (prev != nullptr) {
-                if (!compareF(prev->mKey, key)) {
+                if (! compareF(prev->mKey, key)) {
                     assignValF(&prev->mValue, value, this);
                     return 0;
                 }
@@ -156,12 +158,14 @@ public:
                 prev = prev->mNext;
             }
 
-            if (nullptr == prev)
+            if (nullptr == prev) {
                 return -3;
+            }
 
             Bucket* b = new Bucket();
-            if (nullptr == b)
+            if (nullptr == b) {
                 return -2;
+            }
 
             b->mHash = hash;
             assignKeyF(&b->mKey, key, this);
@@ -181,8 +185,9 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key))
+            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
                 return true;
+            }
             curr = curr->mNext;
         }
 
@@ -198,8 +203,9 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key))
+            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
                 return curr->mValue;
+            }
             curr = curr->mNext;
         }
 
@@ -378,7 +384,7 @@ private:
     unsigned int mThreshold;
     unsigned int mCount;
     unsigned int mBucketSize;
-    Bucket** mBuckets;
+    Bucket     **mBuckets;
 };
 
 } // namespace como
