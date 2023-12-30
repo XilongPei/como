@@ -49,8 +49,8 @@ ECode ServiceManager::AddService(
     //memcpy(ipack, &object, sizeof(InterfacePack));
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
-    ipack->mCid = object.mCid;
-    ipack->mIid = object.mIid;
+    ipack->mCid = CloneCoclassID(object.mCid);
+    ipack->mIid = CloneInterfaceID(object.mIid);
     ipack->mIsParcelable = object.mIsParcelable;
     ipack->mServerObjectId = object.mServerObjectId;
 
