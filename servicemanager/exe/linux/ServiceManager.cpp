@@ -41,8 +41,9 @@ ECode ServiceManager::AddService(
 
 #ifndef COMO_FUNCTION_SAFETY
     InterfacePack *ipack = new InterfacePack();
-    if (nullptr == ipack)
+    if (nullptr == ipack) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     // Because it involves the deep replication of objects in members, we can't
     // simply make a memory directly copy here.
@@ -56,6 +57,17 @@ ECode ServiceManager::AddService(
 
     Mutex::AutoLock lock(mServicesLock);
     if (mServices.Put(name, ipack) != 0) {
+        /*
+         * These two pieces of malloc memory will be held by HashMap mServices,
+         * if the mServices.Put succeeds.
+         */
+        if (nullptr != ipack->mCid.mCid) {
+            free((void*)(ipack->mCid.mCid));
+        }
+        if (nullptr != ipack->mIid.mCid) {
+            free((void*)(ipack->mCid.mCid));
+        }
+
         delete ipack;
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -73,8 +85,9 @@ ECode ServiceManager::AddService(
                                       &s5, sizeof(object.mIsParcelable),
                                       &s6, sizeof(object.mServerObjectId),
                                       nullptr);
-        if (nullptr == s)
+        if (nullptr == s) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 
         strcpy(s1, object.mServerName.string());
         strcpy(s2, object.mDBusName.string());
@@ -95,28 +108,38 @@ ECode ServiceManager::AddService(
                                                 sEchoRespValue);
 
         if (ret != 0) {
-            printf("Echo fail, ret %d\n", ret);
+            Logger_D("ServiceManager", "ServiceManager::HandleMessage AddService. Echo fail, ret %d\n", ret);
         }
     }
     else {
         InterfacePack *ipack = new InterfacePack();
-        if (nullptr == ipack)
+        if (nullptr == ipack) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 
         // Because it involves the deep replication of objects in members, we can't
         // simply make a memory directly copy here.
         //memcpy(ipack, &object, sizeof(InterfacePack));
         ipack->mServerName = object.mServerName;
         ipack->mDBusName = object.mDBusName;
-        ipack->mCid = object.mCid;
-        ipack->mCid.mCid = nullptr;
-        ipack->mIid = object.mIid;
-        ipack->mIid.mCid = nullptr;
+        ipack->mCid = CloneCoclassID(object.mCid);
+        ipack->mIid = CloneInterfaceID(object.mIid);
         ipack->mIsParcelable = object.mIsParcelable;
         ipack->mServerObjectId = object.mServerObjectId;
 
         Mutex::AutoLock lock(mServicesLock);
         if (mServices.Put(name, ipack) != 0) {
+            /*
+             * These two pieces of malloc memory will be held by HashMap mServices,
+             * if the mServices.Put succeeds.
+             */
+            if (nullptr != ipack->mCid.mCid) {
+                free((void*)(ipack->mCid.mCid));
+            }
+            if (nullptr != ipack->mIid.mCid) {
+                free((void*)(ipack->mCid.mCid));
+            }
+
             delete ipack;
             return E_OUT_OF_MEMORY_ERROR;
         }
@@ -137,17 +160,20 @@ ECode ServiceManager::GetService(
 #ifndef COMO_FUNCTION_SAFETY
     Mutex::AutoLock lock(mServicesLock);
     *object = mServices.Get(name);
-    if (nullptr == *object)
+    if (nullptr == *object) {
         return E_NOT_FOUND_EXCEPTION;
+    }
 #else
     if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
         std::string value;
-        if (como::ComoPhxUtils::GetStateData(std::string(name), value).empty())
+        if (como::ComoPhxUtils::GetStateData(std::string(name), value).empty()) {
             return E_NOT_FOUND_EXCEPTION;
+        }
 
         InterfacePack *ipack = new InterfacePack();
-        if (nullptr == ipack)
+        if (nullptr == ipack) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 
         char *s;
         char buf1[4096];
@@ -165,8 +191,9 @@ ECode ServiceManager::GetService(
                                       ipack->mIsParcelable, sizeof(ipack->mIsParcelable),
                                       ipack->mServerObjectId, sizeof(ipack->mServerObjectId),
                                       nullptr);
-        if (nullptr == s)
+        if (nullptr == s) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
     }
 #endif
 
@@ -180,7 +207,15 @@ ECode ServiceManager::RemoveService(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-#ifndef COMO_FUNCTION_SAFETY
+#ifdef COMO_FUNCTION_SAFETY
+    if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
+        if (! como::ComoPhxUtils::DelStateData(std::string(name))) {
+            return E_NOT_FOUND_EXCEPTION;
+        }
+        return NOERROR;
+    }
+#endif
+
     InterfacePack *ipack;
     {
         Mutex::AutoLock lock(mServicesLock);
@@ -191,12 +226,6 @@ ECode ServiceManager::RemoveService(
     ReleaseCoclassID(ipack->mCid);
     ReleaseInterfaceID(ipack->mIid);
     delete ipack;
-#else
-    if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
-        if (! como::ComoPhxUtils::DelStateData(std::string(name)))
-            return E_NOT_FOUND_EXCEPTION;
-    }
-#endif
 
     return NOERROR;
 }
@@ -209,16 +238,16 @@ DBusHandlerResult ServiceManager::HandleMessage(
     if (dbus_message_is_method_call(msg, INTERFACE_PATH, "AddService")) {
         DBusMessageIter args;
         DBusMessageIter subArg;
-        void* data = nullptr;
-        Integer size = 0;
-        const char* str;
+        void*           data = nullptr;
+        Integer         size = 0;
+        const char*     str;
         AutoPtr<IParcel> parcel;
-        InterfacePack ipack;
-        ECode ec = NOERROR;
+        InterfacePack   ipack;
+        ECode           ec = NOERROR;
 
         Logger_D("ServiceManager", "ServiceManager::HandleMessage AddService.");
 
-        if (!dbus_message_iter_init(msg, &args)) {
+        if (! dbus_message_iter_init(msg, &args)) {
             Logger_E("ServiceManager", "AddService message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto AddServiceExit;
@@ -260,7 +289,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
@@ -276,7 +305,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         Long resSize = 0;
         AutoPtr<IParcel> parcel;
 
-        if (!dbus_message_iter_init(msg, &args)) {
+        if (! dbus_message_iter_init(msg, &args)) {
             Logger_E("ServiceManager", "GetService message has no arguments.");
             ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
             goto GetServiceExit;
@@ -302,16 +331,18 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
 
-        if (FAILED(ec))
+        if (FAILED(ec)) {
             goto GetServiceExit_2;
+        }
 
         if (ipack != nullptr) {
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
             if (ipack->mServerName.IsEmpty()) {
 #endif
                 ec = CoCreateParcel(RPCType::Local, parcel);
-                if (FAILED(ec))
+                if (FAILED(ec)) {
                     goto GetServiceExit_2;
+                }
 
                 // Consistent with InterfacePack::WriteToParcel() write order
                 parcel->WriteString(ipack->mDBusName);
@@ -325,8 +356,9 @@ DBusHandlerResult ServiceManager::HandleMessage(
                 // Keep the same order with InterfacePack::ReadFromParcel() in
                 // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
                 ec = CoCreateParcel(RPCType::Remote, parcel);
-                if (FAILED(ec))
+                if (FAILED(ec)) {
                     goto GetServiceExit_2;
+                }
 
                 parcel->WriteCoclassID(ipack->mCid);
                 parcel->WriteInterfaceID(ipack->mIid);
@@ -347,7 +379,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         }
 
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
@@ -359,7 +391,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         const char* str;
         ECode ec = NOERROR;
 
-        if (!dbus_message_iter_init(msg, &args)) {
+        if (! dbus_message_iter_init(msg, &args)) {
             Logger_E("ServiceManager", "RemoveService message has no arguments.");
             goto RemoveServiceExit;
         }
@@ -383,7 +415,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
         dbus_message_iter_init_append(reply, &args);
         dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &ec);
         dbus_uint32_t serial = 0;
-        if (!dbus_connection_send(conn, reply, &serial)) {
+        if (! dbus_connection_send(conn, reply, &serial)) {
             Logger_E("ServiceManager", "Send reply message failed.");
         }
         dbus_connection_flush(conn);
