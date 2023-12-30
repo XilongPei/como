@@ -50,9 +50,7 @@ ECode ServiceManager::AddService(
     ipack->mServerName = object.mServerName;
     ipack->mDBusName = object.mDBusName;
     ipack->mCid = object.mCid;
-    ipack->mCid.mCid = nullptr;
     ipack->mIid = object.mIid;
-    ipack->mIid.mCid = nullptr;
     ipack->mIsParcelable = object.mIsParcelable;
     ipack->mServerObjectId = object.mServerObjectId;
 
