@@ -61,12 +61,8 @@ ECode ServiceManager::AddService(
          * These two pieces of malloc memory will be held by HashMap mServices,
          * if the mServices.Put succeeds.
          */
-        if (nullptr != ipack->mCid.mCid) {
-            free((void*)(ipack->mCid.mCid));
-        }
-        if (nullptr != ipack->mIid.mCid) {
-            free((void*)(ipack->mCid.mCid));
-        }
+        ReleaseCoclassID(ipack->mCid);
+        ReleaseInterfaceID(ipack->mIid);
 
         delete ipack;
         return E_OUT_OF_MEMORY_ERROR;
@@ -133,12 +129,8 @@ ECode ServiceManager::AddService(
              * These two pieces of malloc memory will be held by HashMap mServices,
              * if the mServices.Put succeeds.
              */
-            if (nullptr != ipack->mCid.mCid) {
-                free((void*)(ipack->mCid.mCid));
-            }
-            if (nullptr != ipack->mIid.mCid) {
-                free((void*)(ipack->mCid.mCid));
-            }
+            ReleaseCoclassID(ipack->mCid);
+            ReleaseInterfaceID(ipack->mIid);
 
             delete ipack;
             return E_OUT_OF_MEMORY_ERROR;
