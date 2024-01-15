@@ -16,11 +16,12 @@
 
 set(LIBCORE_LIBCORE_SRC_DIR ${LIBCORE_DIR}/src/libcore)
 
-if($ENV{COMO_WITH_ICU} STREQUAL "icu")
+if("$ENV{COMO_WITH_ICU}" STREQUAL "icu")
 endif()
 
 add_subdirectory(icu)
 add_subdirectory(io)
 add_subdirectory(math)
 add_subdirectory(util)
+
 
