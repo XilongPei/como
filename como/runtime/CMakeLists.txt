@@ -27,12 +27,12 @@ add_subdirectory(type)
 add_subdirectory(util)
 add_subdirectory(monitor)
 
-if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
     add_subdirectory(rpc)
     add_definitions(-DCOMO_WITH_RPC)
 endif()
 
-if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
     include_directories(
         ./
         component
@@ -77,7 +77,7 @@ set(SOURCES
     runtime.cpp
 )
 
-if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
     set(COMORT_LINK_LIBS
         -Wl,--whole-archive
         cdl

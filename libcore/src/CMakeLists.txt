@@ -138,7 +138,7 @@ add_custom_target(build_libcore
         deploy_libcore_headers
         ${GENERATED_SOURCES})
 
-if($ENV{COMO_WITH_ICU} STREQUAL "icu")
+if("$ENV{COMO_WITH_ICU}" STREQUAL "icu")
     set(COMO_WITH_ICU_libcore_icu "libcore_icu")
 else()
     set(COMO_WITH_ICU_libcore_icu "")
@@ -174,7 +174,7 @@ add_library(libcore
     SHARED
     ${GENERATED_SOURCES})
 
-if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
+if("$ENV{COMO_WITH_MATH_BIG_NUMBER}" STREQUAL "bn")
     set(MATH_BIG_NUMBER_LIB
         ${EXTERNAL_DIR}/boringssl/lib/$ENV{ARCH}/libcrypto.so)
 else()

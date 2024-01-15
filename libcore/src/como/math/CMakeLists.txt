@@ -33,7 +33,7 @@ include_directories(
     ${LIBCORE_OBJ_DIR})
 endif()
 
-if($ENV{COMO_WITH_MATH_BIG_NUMBER} STREQUAL "bn")
+if("$ENV{COMO_WITH_MATH_BIG_NUMBER}" STREQUAL "bn")
     set(MATH_BIG_NUMBER_SRCS
         BigDecimal.cpp
         BigDecimalFactory.cpp
