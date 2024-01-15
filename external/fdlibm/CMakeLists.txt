@@ -6,11 +6,16 @@ if(MSVC)
     add_compile_options("/W4" "$<$<CONFIG:RELEASE>:/O1>")
 else()
     add_compile_options("-Wall" "-Wextra" "-Werror" "$<$<CONFIG:RELEASE>:-O3>" "-fno-strict-aliasing")
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        add_compile_options("-stdlib=libc++")
-    else()
-        # nothing special for gcc at the moment
-    endif()
+
+    #
+    # clang.real: error: argument unused during compilation: '-stdlib=libc++' [-Werror,-Wunused-command-line-argument]
+    # -?------------------------
+    #
+    #if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    #    add_compile_options("-stdlib=libc++")
+    #else()
+    #    # nothing special for gcc at the moment
+    #endif()
 endif()
 
 

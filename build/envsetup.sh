@@ -198,7 +198,10 @@ function como_android_aarch64()
     export COMORT_PATH=$BIN_PATH/comort.so
     export CLASS_PATH=
     export COMO_ROOT=
-    export CDLC=$ROOT/tools/cdlc
+
+    # The host environment supports only x64
+    export CDLC=$ROOT/tools/x64/cdlc
+
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin
 
     if [ ! -d "$ROOT/out/target" ]; then
@@ -242,7 +245,10 @@ function como_openEuler_riscv()
     export COMORT_PATH=$BIN_PATH/comort.so
     export CLASS_PATH=
     export COMO_ROOT=
-    export CDLC=$ROOT/tools/cdlc
+
+    # The host environment supports only x64
+    export CDLC=$ROOT/tools/x64/cdlc
+
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin
 
     if [ ! -d "$ROOT/out/target" ]; then

@@ -44,7 +44,7 @@ set(SOURCES
 
 add_library(RuntimeMonitor STATIC
     ${SOURCES})
-add_dependencies(RuntimeMonitor cdl)
+add_dependencies(RuntimeMonitor cdl component)
 
 COPY(RuntimeMonitor ${MONITOR_SRC_DIR}/RuntimeMonitor.h ${INC_DIR})
 COPY(RuntimeMonitor ${MONITOR_SRC_DIR}/CpuCoreUtils.h ${INC_DIR})

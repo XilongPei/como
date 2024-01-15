@@ -614,7 +614,7 @@ struct AutoPtrConvertImpl
     AutoPtr<IInterface>& operator()(
         /* [in] */ const AutoPtr<U>* lvalue)
     {
-        return *reinterpret_cast<AutoPtr<IInterface>*>(nullptr);
+        return *static_cast<AutoPtr<IInterface>*>(nullptr);
     }
 };
 
