@@ -37,7 +37,11 @@ int CpuCoreUtils::SetThreadAffinity(pthread_t thread, int iCore)
     CPU_ZERO(&cpuset);
     CPU_SET(iCore, &cpuset);
 
+#if defined __GLIBC__ && defined __linux__
    return pthread_setaffinity_np(thread, sizeof(cpuset), &cpuset);
+#else
+   return sched_setaffinity(thread, sizeof(cpuset), &cpuset);
+#endif
 }
 
 int CpuCoreUtils::SetProcessAffinity(pid_t pid, int iCore)
