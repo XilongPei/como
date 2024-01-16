@@ -53,6 +53,9 @@ public:
     ECode GetType(
         /* [out] */ AutoPtr<IMetaType>& type) override;
 
+    inline static CMetaParameter *From(
+        /* [in] */ IMetaParameter *comp);
+
 private:
     IOAttribute BuildIOAttribute(
         /* [in] */ unsigned char properties);
@@ -70,6 +73,12 @@ public:
     IOAttribute         mIOAttr;
     AutoPtr<IMetaType>  mType;
 };
+
+CMetaParameter *CMetaParameter::From(
+    /* [in] */ IMetaParameter *comp)
+{
+    return (CMetaParameter*)comp;
+}
 
 } // namespace como
 

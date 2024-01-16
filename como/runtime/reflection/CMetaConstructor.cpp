@@ -103,7 +103,7 @@ ECode CMetaConstructor::GetAllParameters(
     FAIL_RETURN(BuildAllParameters());
 
     Integer N = MIN(mParameters.GetLength(), params.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         params.Set(i, mParameters[i]);
     }
     return NOERROR;
@@ -113,7 +113,7 @@ ECode CMetaConstructor::GetParameter(
     /* [in] */ Integer index,
     /* [out] */ AutoPtr<IMetaParameter>& param)
 {
-    if (index < 0 || index > mParameters.GetLength()) {
+    if ((index < 0) || (index > mParameters.GetLength())) {
         param = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -232,8 +232,9 @@ ECode CMetaConstructor::InvokeImpl(
     reinterpret_cast<HANDLE*>(params)[0] = reinterpret_cast<HANDLE>(vobj);
     HANDLE methodAddr = vobj->mVtab->mMethods[mIndex];
 
-    if (invokeImpl == nullptr)
+    if (nullptr == invokeImpl) {
         return invoke(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+    }
 
     return invokeImpl(methodAddr, params, paramNum + 1, stackParamNum, paramInfos);
 }
@@ -347,8 +348,9 @@ ECode CMetaConstructor::BuildAllParameters()
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
                                         mOwner->mOwner->mMetadata, this, mp, i);
                 if ((nullptr == mpObj) || (nullptr == mpObj->mType)) {
-                    for (Integer j = 0;  j < i;  j++)
-                        delete mParameters[j];
+                    for (Integer j = 0;  j < i;  j++) {
+                        delete CMetaParameter::From(mParameters[j]);
+                    }
                     return E_OUT_OF_MEMORY_ERROR;
                 }
                 mParameters.Set(i, mpObj);
