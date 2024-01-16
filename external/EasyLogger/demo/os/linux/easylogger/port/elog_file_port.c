@@ -104,23 +104,26 @@ static void lock_init(void)
     struct sembuf sembuf;
 
     id = semget(ELOG_FILE_SEM_KEY, 1, IPC_CREAT | IPC_EXCL | 0666);
-    if(likely(id == -1)) {
+    if (likely(id == -1)) {
         id = lock_open();
         if (id == -1)
             goto __exit;
-    } else {
+    }
+    else {
         arg.val = 0;
         rc = semctl(id, 0, SETVAL, arg);
-        if (rc == -1)
+        if (rc == -1) {
             goto __exit;
+        }
 
         sembuf.sem_num = 0;
         sembuf.sem_op = 1;
         sembuf.sem_flg = 0;
 
         rc = semop(id, &sembuf, 1);
-        if (rc == -1)
+        if (rc == -1) {
             goto __exit;
+        }
     }
 
     semid = id;
@@ -138,24 +141,28 @@ static int lock_open(void)
     struct semid_ds ds;
 
     id = semget(ELOG_FILE_SEM_KEY, 1, 0666);
-    if(unlikely(id == -1))
+    if (unlikely(id == -1)) {
         goto err;
+    }
 
     arg.buf = &ds;
 
     for (i = 0; i < 10; i++) {
         rc = semctl(id, 0, IPC_STAT, arg);
-        if (unlikely(rc == -1))
+        if (unlikely(rc == -1)) {
             goto err;
+        }
 
-        if(ds.sem_otime != 0)
+        if (ds.sem_otime != 0) {
             break;
+        }
 
         usleep(10 * 1000);
     }
 
-    if (unlikely(ds.sem_otime == 0))
+    if (unlikely(ds.sem_otime == 0)) {
         goto err;
+    }
 
     return id;
 err:

@@ -138,24 +138,28 @@ static int lock_open(void)
     struct semid_ds ds;
 
     id = semget(ELOG_FILE_SEM_KEY, 1, 0666);
-    if(unlikely(id == -1))
+    if (unlikely(id == -1)) {
         goto err;
+    }
 
     arg.buf = &ds;
 
     for (i = 0; i < 10; i++) {
         rc = semctl(id, 0, IPC_STAT, arg);
-        if (unlikely(rc == -1))
+        if (unlikely(rc == -1)) {
             goto err;
+        }
 
-        if(ds.sem_otime != 0)
+        if(ds.sem_otime != 0) {
             break;
+        }
 
         usleep(10 * 1000);
     }
 
-    if (unlikely(ds.sem_otime == 0))
+    if (unlikely(ds.sem_otime == 0)) {
         goto err;
+    }
 
     return id;
 err:

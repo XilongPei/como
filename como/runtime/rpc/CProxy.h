@@ -356,7 +356,7 @@ public:
         /* [out] */ AutoPtr<IDeathRecipient>* outRecipient = nullptr) override;
 
     ECode GetIpack(
-        /* [out] */ AutoPtr<IInterfacePack>& ipack);
+        /* [out] */ AutoPtr<IInterfacePack>& ipack) override;
 
     ECode MonitorRuntime(
         /* [in] */ const Array<Byte>& request,

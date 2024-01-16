@@ -79,7 +79,14 @@ static bool elog_file_rotate(void)
     fclose(fp);
 
     for (n = local_cfg.max_rotate - 1; n >= 0; --n) {
-        snprintf(oldpath + base, sizeof(oldpath) - 1 - base, n ? ".%d" : "", n - 1);
+        /**
+         * clang, warning: format string is empty [-Wformat-zero-length]
+         */
+        //snprintf(oldpath + base, sizeof(oldpath) - 1 - base, n ? ".%d" : "", n - 1);
+        if (n > 0) {
+            snprintf(oldpath + base, sizeof(oldpath) - 1 - base, ".%d" , n - 1);
+        }
+
         snprintf(newpath + base, sizeof(newpath) - 1 - base, ".%d", n);
         /* remove the old file */
         if ((tmp_fp = fopen(newpath , "r")) != NULL) {
