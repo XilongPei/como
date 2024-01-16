@@ -17,11 +17,18 @@
 #include "comorpc.h"
 #include "CProxy.h"
 #include "CStub.h"
+
+/*
+ * use dbus always (?)
+ *
 #if defined(__android__)
 #include "binder/CBinderChannelFactory.h"
 #elif defined(__linux__)
 #include "dbus/CDBusChannelFactory.h"
 #endif
+*/
+#include "dbus/CDBusChannelFactory.h"
+
 #if defined(RPC_OVER_ZeroMQ_SUPPORT)
 #include "ZeroMQ/CZMQChannelFactory.h"
 #include "ZeroMQ/CZMQUtils.h"
@@ -32,7 +39,12 @@
 namespace como {
 
 #if defined(__android__)
+/*
+ * use dbus always (?)
+ *
 static AutoPtr<IRPCChannelFactory> sLocalFactory = new CBinderChannelFactory(RPCType::Local);
+*/
+static AutoPtr<IRPCChannelFactory> sLocalFactory = new CDBusChannelFactory(RPCType::Local);
 #elif defined(__linux__)
 static AutoPtr<IRPCChannelFactory> sLocalFactory = new CDBusChannelFactory(RPCType::Local);
 #endif

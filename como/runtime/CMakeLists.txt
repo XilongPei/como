@@ -120,7 +120,13 @@ elseif($ENV{PLATFORM} STREQUAL "android")
     set(COMORT_LINK_LIBS
         ${COMORT_LINK_LIBS}
         -Wl,--whole-archive
-        rpc-binder
+
+        #
+        # use dbus always (?)
+        #
+        #rpc-binder
+        rpc-dbus
+
         -Wl,--no-whole-archive)
 endif()
 
@@ -142,7 +148,11 @@ if($ENV{PLATFORM} STREQUAL "linux")
     endif()
 elseif($ENV{PLATFORM} STREQUAL "android")
     target_link_libraries(comort
-        binder
+        #
+        # use dbus always (?)
+        #
+        #binder
+        dbus-1
         log
         utils)
 endif()
@@ -179,4 +189,3 @@ install(FILES
         GROUP_EXECUTE
         WORLD_READ
         WORLD_EXECUTE)
-
