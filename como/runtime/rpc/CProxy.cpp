@@ -2049,7 +2049,7 @@ ECode CProxy::MonitorRuntime(
 
             String strBuffer = "[";
 
-            while(! lwrb_get_free(RuntimeMonitor::rtmLwRB_ClientQueue) != 0) {
+            while(lwrb_get_free(RuntimeMonitor::rtmLwRB_ClientQueue) != 0) {
                 size_t len;
                 if (lwrb_peek(RuntimeMonitor::rtmLwRB_ClientQueue, 0, &len,
                                                         sizeof(size_t)) != sizeof(size_t)) {
@@ -2091,6 +2091,10 @@ ECode CProxy::MonitorRuntime(
             }
             return NOERROR;
         }
+
+        // server side command: CMD_BY_STRING, CMD_Server_Activate_InvokeMethod, CMD_Server_Deactivate_InvokeMethod
+        default:
+            ;
     }
 
     // Monitoring command cannot be handled by client, send it to the server.

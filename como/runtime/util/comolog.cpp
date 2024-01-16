@@ -20,9 +20,8 @@
 #include <cstdarg>
 #if defined(__android__)
 #include <android/log.h>
-#elif defined(__linux__)
-#include <cstdio>
 #endif
+#include <cstdio>
 #include <time.h>
 #include <string.h>
 #include <sys/time.h>

@@ -436,7 +436,7 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
         return nullptr;
     }
 
-    if (memSize < 0) {
+    if (memSize <= 0) {
         count = strlen(pool) + 1;
         strZcpy(ss, pool, memSize);
     }

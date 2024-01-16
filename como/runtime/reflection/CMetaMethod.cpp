@@ -72,17 +72,18 @@ CMetaMethod::CMetaMethod(
     , mHotCode(0)
 {
     // there is no metadata in this component for external method
-    if (miObj->mMetadata->mProperties & TYPE_EXTERNAL)
+    if (miObj->mMetadata->mProperties & TYPE_EXTERNAL) {
         mReturnType = nullptr;
+    }
     else {
         mReturnType = new CMetaType(mc, mc->mTypes[mm->mReturnTypeIndex]);
 
         if (nullptr == mReturnType) {
-            Logger::E("CMetaMethod::CMetaMethod", "E_OUT_OF_MEMORY_ERROR, %s", mName);
+            Logger::E("CMetaMethod::CMetaMethod", "E_OUT_OF_MEMORY_ERROR, %s", mName.string());
         }
 
         if (nullptr == CMetaType::From(mReturnType)->mName) {
-            delete mReturnType;
+            delete CMetaType::From(mReturnType);
             mReturnType = nullptr;
         }
     }

@@ -46,6 +46,12 @@ static int TypeKindSizeOf(TypeKind typeKind)
             return sizeof(ECode);
         case TypeKind::Enum:
             return sizeof(Integer);
+        /**
+         * clang, warning: 10 enumeration values not handled in switch: 'Unknown',
+         * 'String', 'CoclassID'... [-Wswitch]
+         */
+        default:
+            ;
     }
     return 0;
 }

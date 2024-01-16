@@ -37,8 +37,9 @@ CMetaConstant::CMetaConstant(
     if ((nullptr == mType) || (nullptr == CMetaType::From(mType)->mName)) {
         Logger::E("CMetaConstant::CMetaConstant", "new CMetaType failed.");
 
-        if (nullptr != mType)
-            delete mType;
+        if (nullptr != mType) {
+            delete CMetaType::From(mType);
+        }
 
         // The caller uses mValue to determine whether the construct is wrong
         mValue = nullptr;

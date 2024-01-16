@@ -16,11 +16,15 @@
 
 set(RPC_SRC_DIR ${RUNTIME_SRC_DIR}/rpc)
 
-if("$ENV{PLATFORM}" STREQUAL "linux")
-    add_subdirectory(dbus)
-elseif("$ENV{PLATFORM}" STREQUAL "android")
-    add_subdirectory(binder)
-endif()
+#
+# use dbus always (?)
+#
+#if("$ENV{PLATFORM}" STREQUAL "linux")
+#    add_subdirectory(dbus)
+#elseif("$ENV{PLATFORM}" STREQUAL "android")
+#    add_subdirectory(binder)
+#endif()
+add_subdirectory(dbus)
 
 if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     # ====== COMO Over ZeroMQ Support ======
