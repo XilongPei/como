@@ -99,20 +99,20 @@ void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
 /* Read/Write functions */
 size_t lwrb_write(lwrb_t* buff, const void* data, size_t btw);
 size_t lwrb_read(lwrb_t* buff, void* data, size_t btr);
-size_t lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp);
+size_t lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t lwrb_get_free(const lwrb_t* buff);
-size_t lwrb_get_full(const lwrb_t* buff);
+size_t lwrb_get_free(lwrb_t* buff);
+size_t lwrb_get_full(lwrb_t* buff);
 
 /* Read data block management */
-void* lwrb_get_linear_block_read_address(const lwrb_t* buff);
-size_t lwrb_get_linear_block_read_length(const lwrb_t* buff);
+void* lwrb_get_linear_block_read_address(lwrb_t* buff);
+size_t lwrb_get_linear_block_read_length(lwrb_t* buff);
 size_t lwrb_skip(lwrb_t* buff, size_t len);
 
 /* Write data block management */
-void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
-size_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
+void* lwrb_get_linear_block_write_address(lwrb_t* buff);
+size_t lwrb_get_linear_block_write_length(lwrb_t* buff);
 size_t lwrb_advance(lwrb_t* buff, size_t len);
 
 /* Read/Write record functions */
