@@ -22,10 +22,4 @@ endif()
 add_subdirectory(googletest)
 add_subdirectory(fdlibm)
 add_subdirectory(EasyLogger/export_como)
-
-add_custom_target(build_libcrc ALL
-    COMMAND make
-    WORKING_DIRECTORY ${EXTERNAL_DIR}/libcrc
-    COMMENT "libcrc makefile")
-add_library(libcrc STATIC IMPORTED)
-add_dependencies(libcrc build_libcrc)
+add_subdirectory(libcrc/export_como)

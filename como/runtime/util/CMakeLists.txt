@@ -61,7 +61,7 @@ add_dependencies(util cdl)
 
 target_link_libraries(util
     $ENV{OUT_PATH}/external/EasyLogger/export_como/libEasyLogger.a
-    ${EXTERNAL_DIR}/libcrc/lib/libcrc.a
+    $ENV{OUT_PATH}/external/libcrc/export_como/libLibCRC.a
 )
 
 COPY(util ${UTIL_SRC_DIR}/comosp.h ${INC_DIR})
