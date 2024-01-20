@@ -62,7 +62,8 @@ static void lock_deinit(void);
  *
  * @return result
  */
-ElogErrCode elog_file_port_init(void) {
+ElogErrCode elog_file_port_init(void)
+{
     ElogErrCode result = ELOG_NO_ERR;
 
     lock_init();
@@ -75,7 +76,9 @@ ElogErrCode elog_file_port_init(void) {
  */
 void inline elog_file_port_lock(void)
 {
-    semid == -1 ? -1 : semop(semid, (struct sembuf *)&down, 1);
+    if (semid != -1) {
+        semop(semid, (struct sembuf *)&down, 1);
+    }
 }
 
 /**
@@ -83,7 +86,9 @@ void inline elog_file_port_lock(void)
  */
 void inline elog_file_port_unlock(void)
 {
-    semid == -1 ? -1 : semop(semid, (struct sembuf *)&up, 1);
+    if (semid != -1) {
+        semop(semid, (struct sembuf *)&up, 1);
+    }
 }
 
 /**
@@ -106,21 +111,24 @@ static void lock_init(void)
     id = semget(ELOG_FILE_SEM_KEY, 1, IPC_CREAT | IPC_EXCL | 0666);
     if(likely(id == -1)) {
         id = lock_open();
-        if (id == -1)
+        if (id == -1) {
             goto __exit;
+        }
     } else {
         arg.val = 0;
         rc = semctl(id, 0, SETVAL, arg);
-        if (rc == -1)
+        if (rc == -1) {
             goto __exit;
+        }
 
         sembuf.sem_num = 0;
         sembuf.sem_op = 1;
         sembuf.sem_flg = 0;
 
         rc = semop(id, &sembuf, 1);
-        if (rc == -1)
+        if (rc == -1) {
             goto __exit;
+        }
     }
 
     semid = id;
@@ -142,7 +150,11 @@ static int lock_open(void)
         goto err;
     }
 
-    arg.buf = &ds;
+    /**
+     * If not cast to (void *) , warning: incompatible pointer types assigning to
+     * 'struct __kernel_legacy_semid_ds *' from 'struct semid64_ds *' [-Wincompatible-pointer-types]
+     */
+    arg.buf = (void *)&ds;
 
     for (i = 0; i < 10; i++) {
         rc = semctl(id, 0, IPC_STAT, arg);
@@ -150,7 +162,7 @@ static int lock_open(void)
             goto err;
         }
 
-        if(ds.sem_otime != 0) {
+        if (ds.sem_otime != 0) {
             break;
         }
 
