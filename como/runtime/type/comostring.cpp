@@ -69,8 +69,9 @@ static char* GetEmptyString()
 static char* AllocFromUTF8(
     /* [in] */ const char* string, size_t byteSize)
 {
-    if (0 == byteSize)
+    if (0 == byteSize) {
         return GetEmptyString();
+    }
     if (byteSize > INT_MAX) {
         Logger::E("String", "Invalid buffer size %zu", byteSize);
         return nullptr;
@@ -141,8 +142,9 @@ String::String(
     , mCharCount(0)
 {
     ECode ec = WriteCharArray(charArray, start, charArray.GetLength());
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         Logger::E("String", "String failed: 0x%X", ec);
+    }
 }
 
 String::String(
@@ -153,8 +155,9 @@ String::String(
     , mCharCount(0)
 {
     ECode ec = WriteCharArray(charArray, start, length);
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         Logger::E("String", "String failed: 0x%X", ec);
+    }
 }
 
 String::String(
@@ -164,7 +167,7 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
-    if (start >= 0 && length > 0 && (start + length < bytes.GetLength())) {
+    if ((start >= 0) && (length > 0) && (start + length < bytes.GetLength())) {
         mString = AllocFromUTF8(reinterpret_cast<char*>(bytes.GetPayload()) + start, length);
     }
 }
@@ -180,10 +183,12 @@ String::~String()
 
 Integer String::GetLength() const
 {
-    if (IsEmpty())
+    if (IsEmpty()) {
         return 0;
-    if (IsCounted())
+    }
+    if (IsCounted()) {
         return GetCharCount();
+    }
 
     Integer charCount = 0;
     Integer byteSize;
@@ -191,8 +196,9 @@ Integer String::GetLength() const
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
+        }
         p += byteSize;
         charCount++;
     }
@@ -204,8 +210,9 @@ Integer String::GetLength() const
 Integer String::GetUTF16Length(
     /* [in] */ Integer start) const
 {
-    if (IsEmpty())
+    if (IsEmpty()) {
         return 0;
+    }
 
     Integer utf16Count = 0, charCount = 0;
     Integer byteSize;
@@ -213,7 +220,7 @@ Integer String::GetUTF16Length(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) {
+        if ((byteSize == 0) || (p + byteSize >= end)) {
             break;
         }
 
@@ -231,8 +238,9 @@ Integer String::GetUTF16Length(
 
 Integer String::GetByteLength() const
 {
-    if (nullptr == mString || mString[0] == '\0')
+    if ((nullptr == mString) || (mString[0] == '\0')) {
         return 0;
+    }
 
     return (Integer)SharedBuffer::GetBufferFromData(mString)->GetSize() - 1;
 }
@@ -244,7 +252,7 @@ Long String::GetHashCode() const
     Long hash = 0;
 
     const char* string = mString;
-    if (string) {
+    if (nullptr != string) {
         for ( ;  *string;  ++string) {
             hash = hash * seed + (*string);
         }
@@ -255,16 +263,18 @@ Long String::GetHashCode() const
 Char String::GetChar(
     /* [in] */ Integer index) const
 {
-    if (IsEmpty() || index < 0)
+    if (IsEmpty() || (index < 0)) {
         return INVALID_CHAR;
+    }
 
     Integer byteSize;
     const char* p = mString;
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
+        }
         if (index == 0) {
             return unicode;
         }
@@ -290,8 +300,9 @@ Array<Char> String::GetChars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((byteSize == 0) || (p + byteSize >= end)) {
             break;
+        }
         if (i >= start) {
             charArray[i - start] = unicode;
         }
@@ -308,8 +319,8 @@ ECode String::GetChars(
     /* [out] */ Array<Char>& dst,
     /* [in] */ Integer dstBegin) const
 {
-    if (srcBegin < 0 || srcEnd > GetLength() ||
-                        srcEnd < srcBegin || dst.IsNull() || dstBegin < 0 ||
+    if ((srcBegin < 0) || (srcEnd > GetLength()) ||
+                        (srcEnd < srcBegin) || dst.IsNull() || (dstBegin < 0) ||
                         dstBegin > dst.GetLength() ||
                         (srcEnd - srcBegin > dst.GetLength() - dstBegin)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -320,12 +331,14 @@ ECode String::GetChars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
-        if (i >= srcBegin && i < srcEnd) {
+        }
+        if ((i >= srcBegin) && (i < srcEnd)) {
             dst[dstBegin + i - srcBegin] = unicode;
-            if (i == srcEnd - 1)
+            if (i == (srcEnd - 1)) {
                 break;
+            }
         }
         p += byteSize;
         i++;
@@ -348,7 +361,7 @@ Array<Short> String::GetUTF16Chars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) {
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
         }
 
@@ -388,11 +401,11 @@ ECode String::GetUTF16Chars(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         Char unicode = GetCharInternal(p, &byteSize);
-        if (byteSize == 0 || p + byteSize >= end) {
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
         }
 
-        if (count >= srcBegin && count < srcEnd) {
+        if ((count >= srcBegin) && (count < srcEnd)) {
             if (unicode <= 0xFFFF) {
                 dst[i++] = unicode;
             }
@@ -402,8 +415,9 @@ ECode String::GetUTF16Chars(
                 dst[i++] = (Short)((unicode >> 10) + 0xD800U);
                 dst[i++] = (Short)((unicode & 0x3FF) + 0xDC00U);
             }
-            if (count == srcEnd - 1)
+            if (count == (srcEnd - 1)) {
                 break;
+            }
         }
         p += byteSize;
         count++;
@@ -414,14 +428,18 @@ ECode String::GetUTF16Chars(
 Integer String::Compare(
     /* [in] */ const char* string) const
 {
-    if (mString == string)
+    if (mString == string) {
         return 0;
-    if (mString == nullptr)
+    }
+    if (mString == nullptr) {
         return -1;
-    if (string == nullptr)
+    }
+    if (string == nullptr) {
         return 1;
-    if (mString[0] == '\0' && string[0] == '\0')
+    }
+    if ((mString[0] == '\0') && (string[0] == '\0')) {
         return 0;
+    }
 
     return strcmp(mString, string);
 }
@@ -429,14 +447,18 @@ Integer String::Compare(
 Integer String::CompareIgnoreCase(
     /* [in] */ const char* string) const
 {
-    if (mString == string)
+    if (mString == string) {
         return 0;
-    if (mString == nullptr)
+    }
+    if (mString == nullptr) {
         return -1;
-    if (string == nullptr)
+    }
+    if (string == nullptr) {
         return 1;
-    if (mString[0] == '\0' && string[0] == '\0')
+    }
+    if ((mString[0] == '\0') && (string[0] == '\0')) {
         return 0;
+    }
 
     return strcasecmp(mString, string);
 }
@@ -454,6 +476,7 @@ Boolean String::RegionMatches(
                                     || (ooffset > other.GetLength() - len)) {
         return false;
     }
+
     Integer tsize, osize;
     const char* tstr = mString + ToByteIndex(toffset);
     const char* ostr = other.string() + ToByteIndex(ooffset);
@@ -502,8 +525,9 @@ String String::Substring(
     /* [in] */ Integer charStart,
     /* [in] */ Integer charEnd) const
 {
-    if (mString == nullptr)
+    if (nullptr == mString) {
         return String();
+    }
     if (charStart < 0 || charEnd < 0 ||
                             charStart > charEnd || charStart >= GetLength()) {
         return String("");
@@ -539,8 +563,9 @@ Integer String::IndexOf(
     /* [in] */ Char c,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (fromCharIndex < 0)
+    if (fromCharIndex < 0) {
         return -1;
+    }
 
     Integer byteSize, i = 0;
     const char* p = mString;
@@ -552,8 +577,9 @@ Integer String::IndexOf(
         }
 
         if (i >= fromCharIndex) {
-            if (c == unicode)
+            if (c == unicode) {
                 return i;
+            }
         }
         p += byteSize;
         i++;
@@ -565,8 +591,9 @@ Integer String::IndexOf(
     /* [in] */ const char* string,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (string == nullptr || string[0] == '\0')
+    if ((nullptr == string) || (string[0] == '\0')) {
         return -1;
+    }
 
     Integer i = 0;
     Integer byteSize;
@@ -575,7 +602,7 @@ Integer String::IndexOf(
     const char* psub = nullptr;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) {
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
         }
 
@@ -618,8 +645,9 @@ Integer String::LastIndexOf(
 Integer String::LastIndexOf(
     /* [in] */ const char* string) const
 {
-    if (string == nullptr || string[0] == '\0')
+    if ((string == nullptr) || (string[0] == '\0')) {
         return -1;
+    }
 
     Integer byteIndex = LastByteIndexOfInternal(string, GetByteLength() - 1);
     return ToCharIndex(byteIndex);
@@ -629,8 +657,9 @@ Integer String::LastIndexOf(
     /* [in] */ const char* string,
     /* [in] */ Integer fromCharIndex) const
 {
-    if (string == nullptr || string[0] == '\0')
+    if ((string == nullptr) || (string[0] == '\0')) {
         return -1;
+    }
 
     Integer charByteSize;
     Integer fromByteIndex = ToByteIndex(
@@ -650,11 +679,13 @@ Boolean String::EndsWith(
 String& String::operator=(
     /* [in] */ const String& other)
 {
-    if (mString == other.mString)
+    if (mString == other.mString) {
         return *this;
+    }
 
-    if (other.mString != nullptr)
+    if (other.mString != nullptr) {
         SharedBuffer::GetBufferFromData(other.mString)->AddRef();
+    }
 
     if (mString != nullptr) {
         SharedBuffer::GetBufferFromData(mString)->Release();
@@ -667,8 +698,9 @@ String& String::operator=(
 String& String::operator=(
     /* [in] */ String&& other)
 {
-    if (mString != nullptr)
+    if (mString != nullptr) {
         SharedBuffer::GetBufferFromData(mString)->Release();
+    }
 
     mString = other.mString;
     mCharCount = other.mCharCount;
@@ -679,11 +711,12 @@ String& String::operator=(
 String& String::operator=(
     /* [in] */ const char* string)
 {
-    if (mString != nullptr)
+    if (mString != nullptr) {
         SharedBuffer::GetBufferFromData(mString)->Release();
+    }
 
-    mString = string != nullptr ?
-                            AllocFromUTF8(string, strlen(string)) : nullptr;
+    mString = (string != nullptr ?
+                            AllocFromUTF8(string, strlen(string)) : nullptr);
     mCharCount = 0;
     return *this;
 }
@@ -691,14 +724,16 @@ String& String::operator=(
 String& String::operator+=(
     /* [in] */ const String& other)
 {
-    if (other.IsEmpty())
+    if (other.IsEmpty()) {
         return *this;
+    }
 
     Integer origByteSize = GetByteLength();
     Integer newByteSize = origByteSize + other.GetByteLength();
     char* buf = LockBuffer(newByteSize);
-    if (nullptr == buf)
+    if (nullptr == buf) {
         return *this;
+    }
 
     memcpy(buf + origByteSize, other.string(), other.GetByteLength());
     buf[newByteSize] = '\0';
@@ -710,15 +745,17 @@ String& String::operator+=(
 String& String::operator+=(
     /* [in] */ const char* string)
 {
-    if (string == nullptr || string[0] == '\0')
+    if ((nullptr == string) || (string[0] == '\0')) {
         return *this;
+    }
 
     Integer origByteSize = GetByteLength();
     Integer stringByteSize = strlen(string);
     Integer newByteSize = origByteSize + stringByteSize;
     char* buf = LockBuffer(newByteSize);
-    if (nullptr == buf)
+    if (nullptr == buf) {
         return *this;
+    }
 
     memcpy(buf + origByteSize, string, stringByteSize);
     buf[newByteSize] = '\0';
@@ -783,8 +820,9 @@ String String::Replace(
     /* [in] */ Char oldChar,
     /* [in] */ Char newChar) const
 {
-    if (oldChar == newChar)
+    if (oldChar == newChar) {
         return *this;
+    }
 
     String newStr(nullptr);
 
@@ -806,12 +844,14 @@ String String::Replace(
     /* [in] */ const char* target,
     /* [in] */ const char* replacement) const
 {
-    if (target == nullptr || target[0] == '\0' || replacement == nullptr)
+    if ((nullptr == target) || ('\0' == target[0]) || (nullptr == replacement)) {
         return *this;
+    }
 
     char* index = strstr(mString, target);
-    if (index == nullptr)
+    if (nullptr == index) {
         return *this;
+    }
 
     String newStr(nullptr);
     char* p = mString;
@@ -819,27 +859,31 @@ String String::Replace(
     Integer replacementSize = strlen(replacement);
     while (index != nullptr) {
         ECode ec = newStr.AppendBytes(p, index - p);
-        if (FAILED(ec))
+        if (FAILED(ec)) {
             return *this;
+        }
 
         ec = newStr.AppendBytes(replacement, replacementSize);
-        if (FAILED(ec))
+        if (FAILED(ec)) {
             return *this;
+        }
 
         p = index + step;
         index = strstr(p, target);
     }
 
-    if (*p != '\0')
+    if (*p != '\0') {
         newStr.AppendBytes(p, strlen(p));
+    }
 
     return newStr;
 }
 
 String String::Trim() const
 {
-    if (nullptr == mString)
+    if (nullptr == mString) {
         return String(nullptr);
+    }
 
     Integer byteSize = GetByteLength();
 
@@ -863,8 +907,9 @@ String String::Trim() const
 
 String String::TrimStart() const
 {
-    if (nullptr == mString)
+    if (nullptr == mString) {
         return String(nullptr);
+    }
 
     Integer byteSize = GetByteLength();
 
@@ -878,8 +923,9 @@ String String::TrimStart() const
 
 String String::TrimEnd() const
 {
-    if (nullptr == mString)
+    if (nullptr == mString) {
         return String(nullptr);
+    }
 
     const char* end = mString + GetByteLength() - 1;
     while (isspace(*end) && end >= mString) {
@@ -892,8 +938,9 @@ Integer String::ToByteIndex(
     /* [in] */ Integer charIndex,
     /* [in] */ Integer* charByteSize) const
 {
-    if (charIndex < 0 || charIndex >= GetLength())
+    if ((charIndex < 0) || (charIndex >= GetLength())) {
         return -1;
+    }
 
     Integer charCount = 0;
     Integer byteSize;
@@ -901,8 +948,9 @@ Integer String::ToByteIndex(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
+        }
         if (charCount == charIndex) {
             if (charByteSize != nullptr) {
                 *charByteSize = byteSize;
@@ -920,8 +968,9 @@ Integer String::ToCharIndex(
     /* [in] */ Integer byteIndex,
     /* [in] */ Integer* charByteSize) const
 {
-    if (byteIndex < 0 || byteIndex > GetByteLength())
+    if ((byteIndex < 0) || (byteIndex > GetByteLength())) {
         return -1;
+    }
 
     Integer charIndex = 0;
     Integer byteSize;
@@ -1072,8 +1121,9 @@ ECode String::AppendBytes(
     Integer oldSize = GetByteLength();
     Integer newByteSize = oldSize + byteSize;
     char* buf = LockBuffer(newByteSize);
-    if (nullptr == buf)
+    if (nullptr == buf) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     memcpy(buf + oldSize, string, byteSize);
     UnlockBuffer(newByteSize);
@@ -1124,8 +1174,9 @@ startSearchForLastChar:
 char* String::LockBuffer(
     /* [in] */ Integer byteSize)
 {
-    if (byteSize < 0)
+    if (byteSize < 0) {
         return nullptr;
+    }
 
     SharedBuffer* buf;
     if (mString != nullptr) {
@@ -1149,8 +1200,9 @@ char* String::LockBuffer(
 ECode String::UnlockBuffer(
     /* [in] */ Integer byteSize)
 {
-    if (byteSize < 0)
+    if (byteSize < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     if (byteSize != GetByteLength()) {
         SharedBuffer* buf;
@@ -1262,26 +1314,30 @@ void String::WriteUTF8Bytes(
 ECode String::Reserve(
         /* [in] */ size_t newCapacity)
 {
-    if ((nullptr == mString) || (0 == newCapacity))
+    if ((nullptr == mString) || (0 == newCapacity)) {
         return NOERROR;
+    }
 
     SharedBuffer *sb = SharedBuffer::GetBufferFromData(mString);
     size_t size_ = sb->GetSize();
     sb = sb->Reserve(newCapacity);
-    if (nullptr == sb)
+    if (nullptr == sb) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     mString = (char*)(sb->GetData());
-    if (size_ != sb->GetSize())
+    if (size_ != sb->GetSize()) {
         ClearCounted();
+    }
 
     return NOERROR;
 }
 
 size_t String::GetCapacity() const
 {
-    if (nullptr == mString)
+    if (nullptr == mString) {
         return 0;
+    }
 
     return SharedBuffer::GetBufferFromData(mString)->GetCapacity();
 }
