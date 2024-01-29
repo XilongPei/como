@@ -192,19 +192,31 @@ size_t SharedBuffer::GetCapacity() const
 SharedBuffer* SharedBuffer::GetBufferFromData(
     /* [in] */ void* data)
 {
-    return data != nullptr ? static_cast<SharedBuffer *>(data) - 1 : 0;
+    if (data != nullptr) {
+        return static_cast<SharedBuffer *>(data) - 1;
+    }
+
+    return 0;
 }
 
 const SharedBuffer* SharedBuffer::GetBufferFromData(
     /* [in] */ const void* data)
 {
-    return data !=  nullptr ? static_cast<const SharedBuffer *>(data) - 1 : 0;
+    if (data !=  nullptr) {
+        return static_cast<const SharedBuffer *>(data) - 1;
+    }
+
+    return 0;
 }
 
 size_t SharedBuffer::GetSizeFromData(
     /* [in] */ const void* data)
 {
-    return data != nullptr ? GetBufferFromData(data)->mSize : 0;
+    if (data != nullptr) {
+        return GetBufferFromData(data)->mSize;
+    }
+
+    return 0;
 }
 
 bool SharedBuffer::OnlyOwner() const

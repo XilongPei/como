@@ -30,10 +30,14 @@ namespace como {
 #define ECode_CircleBuffer(circleBuf)  circleBuf->ec
 
 /**
- * A reasonable state is that there is always more than half of the space here,
+ * (1) A reasonable state is that there is always more than half of the space here,
  * so that the writing speed can be guaranteed. Because normal control logic is
  * the most important, monitor is an auxiliary means.
- * Discard the old data so that the new data can be saved in time.
+ *
+ * (2) Discard the old data so that the new data can be saved in time.
+ *
+ * (3) CircleBuffer must not be full, and if the content to be written is just
+ * enough to fit in CircleBuffer, the buffer will be DiscardedRead() first.
  */
 template<typename T>
 class CircleBuffer
@@ -117,16 +121,20 @@ public:
 
         // GetLength() first
         unsigned int length;
-        if (m_bEmpty)
+        if (m_bEmpty) {
             length = 0;
-        else if (m_bFull)
+        }
+        else if (m_bFull) {
             length = m_nBufSize;
-        else if (m_nReadPos < m_nWritePos)
+        }
+        else if (m_nReadPos < m_nWritePos) {
             length = m_nWritePos - m_nReadPos;
-        else
+        }
+        else {
             length = m_nBufSize - m_nReadPos + m_nWritePos;
+        }
 
-        if (m_nBufSize - length < count) {
+        if ((m_nBufSize - length) <= count) {
             // clear some buffer to hold new content
             if (DiscardedRead(count) < count) {
                 return 0;
@@ -448,14 +456,15 @@ public:
 
     int Write(const String &string)
     {
-        return Write((const char*)string, string.GetByteLength());
+        return Write((const char*)string, string.GetByteLength()+1);
     }
 
     int ReadString(String &string) {
         int len = GetLength();
         ECode ec = string.Reserve(len + 1);
-        if (FAILED(ec))
+        if (FAILED(ec)) {
             return -1;
+        }
 
         return Read((char*)(const char*)string, len);
     }
@@ -474,13 +483,13 @@ public:
     ECode ec;
 
 private:
-    bool m_bEmpty, m_bFull;
-    T * m_pBuf;
-    size_t m_nBufSize;
-    int m_nReadPos;
-    int m_nWritePos;
+    bool    m_bEmpty, m_bFull;
+    T      *m_pBuf;
+    size_t  m_nBufSize;
+    int     m_nReadPos;
+    int     m_nWritePos;
 
-    Mutex *m_Lock;
+    Mutex  *m_Lock;
 };
 
 } // namespace como
