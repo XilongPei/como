@@ -114,9 +114,18 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
         while (*sz != '\0') {
             if (*sz++ == seperator) {
                 seedsCapacity++;
+
+                while (*sz == seperator) {
+                    sz++;
+                }
             }
         }
         if ((seeds = (char **)calloc(seedsCapacity, sizeof(char *))) == nullptr) {
+            return nullptr;
+        }
+    }
+    else {
+        if (seedsCapacity <= 0) {
             return nullptr;
         }
     }
@@ -128,19 +137,25 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
         s++;
     }
 
-    seeds[seedsCapacity] = s;
+    seeds[seedsCapacity++] = s;
     while (*s != '\0') {
         if (seedsCapacity >= maxNum) {
+            while ((*s != '\0') && (*s != seperator)) {
+                s++;
+            }
+            *s = '\0';
+
             break;
         }
 
         if (*s == seperator)   {
-            *s = '\0';
-            seeds[++seedsCapacity] = ++s;
+            *s++ = '\0';
 
             while (*s == seperator) {
                 s++;
             }
+            seeds[seedsCapacity++] = s++;
+
         }
         else {
             s++;

@@ -195,22 +195,22 @@ TEST(Mistring, testSeperateStr1)
     seedsCapacity = 5;
     ret = MiString::SeperateStr(nullptr, seperator, seeds, seedsCapacity);
     printf("OK\n");
-    EXPECT_EQ(seedsCapacity, 0);
+    EXPECT_EQ(seedsCapacity, 5);
 
     // seeds = nullptr
     strcpy(str, testStr);
     char** nullSeeds = nullptr;
-    seedsCapacity = 5;
+    seedsCapacity = 0;
     ret = MiString::SeperateStr(str, seperator, nullSeeds, seedsCapacity);
     printf("OK\n");
     EXPECT_EQ(seedsCapacity, 5);
-    EXPECT_STREQ(seeds[0], "abcdefg");
-    EXPECT_STREQ(seeds[1], "hijklmn");
-    EXPECT_STREQ(seeds[2], "opq");
-    EXPECT_STREQ(seeds[3], "rst");
-    EXPECT_STREQ(seeds[4], "uvwxyz");
-    if (nullSeeds != nullptr)
-        free(nullSeeds);
+    EXPECT_STREQ(ret[0], "abcdefg");
+    EXPECT_STREQ(ret[1], "hijklmn");
+    EXPECT_STREQ(ret[2], "opq");
+    EXPECT_STREQ(ret[3], "rst");
+    EXPECT_STREQ(ret[4], "uvwxyz");
+    if (ret != nullptr)
+        free(ret);
 }
 
 // Test 2.2: MiString::SeperateStr (Return char **) (Different seedsCapacity value)
@@ -228,7 +228,7 @@ TEST(Mistring, testSeperateStr2)
     memset(seeds, 0, sizeof(seeds));
     seedsCapacity = -5;
     ret = MiString::SeperateStr(str, seperator, seeds, seedsCapacity);
-    EXPECT_EQ(seedsCapacity, 0);
+    EXPECT_EQ(ret, nullptr);
 
     // seedsCapacity = 0
     strcpy(str, testStr);
