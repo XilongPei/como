@@ -109,7 +109,7 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     }
 
     if (nullptr == seeds) {
-        seedsCapacity = 2;
+        seedsCapacity = 1;
         sz = s;
         while (*sz != '\0') {
             if (*sz++ == seperator) {
@@ -154,7 +154,10 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
             while (*s == seperator) {
                 s++;
             }
-            seeds[seedsCapacity++] = s++;
+
+            if (*s != '\0') {
+                seeds[seedsCapacity++] = s++;
+            }
 
         }
         else {
@@ -174,15 +177,28 @@ ECode MiString::SeperateStr(
     /* [in] */ Integer limit,
     /* [out, callee] */ Array<String>* strArray)
 {
-    if ((nullptr == s) || (nullptr == strArray))
+    if ((nullptr == s) || (nullptr == strArray)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     char *sz;
     int separatorCount = 1;
     sz = s;
     while (*sz != '\0') {
         if (*sz++ == seperator) {
-            separatorCount++;
+
+            while (*sz != '\0') {
+                if (*sz == seperator) {
+                    sz++;
+                }
+                else {
+                    break;
+                }
+            }
+
+            if (*sz != '\0') {
+                separatorCount++;
+            }
         }
     }
 
@@ -205,10 +221,22 @@ ECode MiString::SeperateStr(
             *s = '\0';
             result[i++] = String(sz);
             *s = seperator;
-            sz = s + 1;
 
             if (i >= separatorCount) {
                 break;
+            }
+
+            while (*s != '\0') {
+                if (*s == seperator) {
+                    s++;
+                }
+                else {
+                    break;
+                }
+            }
+
+            if (*s != '\0') {
+                sz = s;
             }
         }
         s++;
@@ -259,7 +287,7 @@ char *MiString::cnStrToStr(char *t, char *s, char turnChar, size_t size)
     short i = 0;
 
     size--;     //for hold tail 0
-    while (*s != '\0' && *s != '"' && i < size) {
+    while ((*s != '\0') && (i < size)) {
         if (*s == turnChar) {
            switch( *(++s) ) {
             case 't':
