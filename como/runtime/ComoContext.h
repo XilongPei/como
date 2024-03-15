@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include "comoref.h"
 #include "mutex.h"
+#include "lamport_clock.h"
 
 namespace como {
 
@@ -30,13 +31,15 @@ class COM_PUBLIC ComoContext
 public:
     ComoContext();
 
-    static ComoContext *gComoContext;
-    static pthread_mutex_t gContextLock;
+    static ComoContext     *gComoContext;
+    static pthread_mutex_t  gContextLock;
+
+    static LamportClock    *gLamportClock;
 
     // --- Memory Area
-    Short iCurrentMemArea;
-    COMO_MALLOC funComoMalloc;
-    FREE_MEM_FUNCTION freeMemInArea;
+    Short               iCurrentMemArea;
+    COMO_MALLOC         funComoMalloc;
+    FREE_MEM_FUNCTION   freeMemInArea;
 
     // ---
     Mutex contextLock;
