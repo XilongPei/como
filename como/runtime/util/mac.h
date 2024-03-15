@@ -29,6 +29,8 @@ public:
     static Long GetThisServiceId(unsigned short port);
 
     static Long GetUuid64(Long& uuid64);
+
+    static Long CompoundUuid64(Long& uuid64);
 };
 
 } // namespace como

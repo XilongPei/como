@@ -33,6 +33,7 @@
 #include "component/CBootClassLoader.h"
 #include "rpc/comorpc.h"
 #include "rpc/CProxy.h"
+#include "ComoContext.h"
 #include "util/comolog.h"
 #include "reflection/reflHelpers.h"
 #include "reflection/CMetaMethod.h"
@@ -1755,8 +1756,17 @@ ECode InterfaceProxy::ProxyEntry(
     inParcel->WriteInteger(thisObj->mIndex);    // interfaceIndex
     inParcel->WriteInteger(methodIndex + 4);
 
+    /**
+     * In distributed computing, nodes do not synchronize time. Lamport clock is
+     * used to define the sequence of events.
+     */
     Long uuid64;
+#if 0
     inParcel->WriteLong(Mac::GetUuid64(uuid64));
+#else
+    uuid64 = ComoContext::gComoContext->gLamportClock->send_event();
+    inParcel->WriteLong(Mac::CompoundUuid64(uuid64));
+#endif
 
     ec = thisObj->MarshalArguments(regs, method, inParcel);
     if (FAILED(ec)) {

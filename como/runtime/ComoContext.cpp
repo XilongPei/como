@@ -24,7 +24,7 @@ namespace como {
 ComoContext *ComoContext::gComoContext = nullptr;
 pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
-LamportClock *ComoContext::gLamportClock = nullptr;
+LamportClock *ComoContext::gLamportClock = new LamportClock();
 
 void *ComoContext::gEchoServer = nullptr;
 int   ComoContext::socketTCP = 0;
@@ -33,8 +33,6 @@ ComoContext::ComoContext()
     : funComoMalloc(nullptr)
     , freeMemInArea(nullptr)
 {
-    gLamportClock = new LamportClock();
-
     if (ComoConfig::numFscpMemAreaInfo > 0) {
 /*
         int ret =  MimallocUtils::setupFscpMemAreas(ComoConfig::FscpMemAreaInfo,

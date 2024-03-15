@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "mac.h"
+#include "lamport_clock.h"
 
 namespace como {
 
@@ -98,6 +99,19 @@ Long Mac::GetUuid64(Long& uuid64)
     // This value is not repeated within 49.710 days.
     // 0xFFFFFFFF(millisecond) / 3600,000(millisecond/hour) / 24(hour/day) ~= 49.710(day)
     //    4 3 2 1
+    uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFF);
+                                          // 4 3 2 1
+    return uuid64;
+}
+
+/**
+ * When distributed computing, the input uuid64 could come from LamportClock
+ */
+Long Mac::CompoundUuid64(Long& uuid64)
+{
+    if (0 == g_lMacAddr)
+        Mac::GetMacAddress(g_lMacAddr);
+
     uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFF);
                                           // 4 3 2 1
     return uuid64;
