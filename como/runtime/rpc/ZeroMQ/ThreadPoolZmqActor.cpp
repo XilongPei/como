@@ -19,6 +19,7 @@
 #include <cerrno>
 #include <csignal>
 #include <pthread.h>
+#include <limits.h>
 #include "mutex.h"
 #include "zmq.h"
 #include "util/comolog.h"
