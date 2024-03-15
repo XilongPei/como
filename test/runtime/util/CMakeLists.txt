@@ -73,6 +73,10 @@ set(SOURCES9
     ${PROJECT_DIR}/como/runtime/util/mutex.cpp
 )
 
+set(SOURCES10
+    testLamportClock.cpp
+)
+
 IMPORT_LIBRARY(comort.so)
 IMPORT_GTEST()
 
@@ -105,6 +109,9 @@ add_executable(testMutex
 
 add_executable(testCircleBuffer
     ${SOURCES9})
+
+add_executable(testLamportClock
+    ${SOURCES10})
 
 target_link_libraries(testMac comort.so ${GTEST_LIBS})
 add_dependencies(testMac comort gtest gtest_main)
@@ -139,6 +146,9 @@ target_include_directories(testCircleBuffer
     PRIVATE ${PROJECT_DIR}/como/runtime/util)
 add_dependencies(testCircleBuffer comort gtest gtest_main)
 
+target_link_libraries(testLamportClock comort.so ${GTEST_LIBS})
+add_dependencies(testLamportClock comort gtest gtest_main)
+
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 COPY(testMac ${UTIL_OBJ_DIR}/testMac ${BIN_DIR})
 COPY(testVerifiedU64Pointer ${UTIL_OBJ_DIR}/testVerifiedU64Pointer ${BIN_DIR})
@@ -149,6 +159,7 @@ COPY(testMempool1 ${UTIL_OBJ_DIR}/testMempool1 ${BIN_DIR})
 COPY(testMistring1 ${UTIL_OBJ_DIR}/testMistring1 ${BIN_DIR})
 COPY(testMutex ${UTIL_OBJ_DIR}/testMutex ${BIN_DIR})
 COPY(testCircleBuffer ${UTIL_OBJ_DIR}/testCircleBuffer ${BIN_DIR})
+COPY(testLamportClock ${UTIL_OBJ_DIR}/testLamportClock ${BIN_DIR})
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil

@@ -78,6 +78,7 @@ COPY(util ${UTIL_SRC_DIR}/MemPool.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/mac.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/int64.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/ThreadStack.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/lamport_clock.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comosp.h
@@ -92,6 +93,7 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/mac.h
     ${UTIL_SRC_DIR}/int64.h
     ${UTIL_SRC_DIR}/ThreadStack.h
+    ${UTIL_SRC_DIR}/lamport_clock.h
 )
 
 install(FILES
