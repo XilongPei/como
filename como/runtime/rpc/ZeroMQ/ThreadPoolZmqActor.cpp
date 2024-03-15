@@ -575,6 +575,44 @@ bool ThreadPoolZmqActor::signal_;
 pthread_mutex_t ThreadPoolZmqActor::pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPoolZmqActor::pthreadCond = PTHREAD_COND_INITIALIZER;
 
+
+static int MakeRealtimePthread_attr(pthread_attr_t& attr)
+{
+    struct sched_param param;
+    int ret;
+
+    // Initialize pthread attributes (default values)
+    ret = pthread_attr_init(&attr);
+    if (0 != ret) {
+        return ret;
+    }
+
+    // Set a specific stack size
+    ret = pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN);
+    if (0 != ret) {
+        return ret;
+    }
+
+    // Set scheduler policy and priority of pthread
+    ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+    if (0 != ret) {
+        return ret;
+    }
+    param.sched_priority = 80;
+    ret = pthread_attr_setschedparam(&attr, &param);
+    if (0 != ret) {
+        return ret;
+    }
+    // Use scheduling parameters of attr
+    ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    if (0 != ret) {
+        return ret;
+    }
+
+    return 0;
+}
+
+
 ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 {
     if (CZMQUtils::CzmqGetSockets(nullptr, nullptr) < 0) {
@@ -595,6 +633,10 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
                              ThreadPoolZmqActor::threadManager, nullptr) != 0) {
         Logger::E("ThreadPoolZmqActor", "pthread_create() error");
     }
+
+    pthread_attr_t attr;
+    int ret = MakeRealtimePthread_attr(attr);
+    (void)ret;
 
     for (size_t i = 0;  i < mThreadNum;  i++) {
         if (pthread_create(&pthread_id_HandleMessage[i], nullptr,
@@ -619,11 +661,13 @@ int ThreadPoolZmqActor::AddTask(
     pthread_mutex_lock(&pthreadMutex);
 
     for (i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
+        if (nullptr == mWorkerList[i]) {
             break;
+        }
 
-        if (LivingWorker(mWorkerList[i]))
+        if (LivingWorker(mWorkerList[i])) {
             continue;
+        }
 
         if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
            /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
@@ -666,11 +710,13 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
     pthread_mutex_lock(&pthreadMutex);
 
     for (i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
+        if (nullptr == mWorkerList[i]) {
             continue;
+        }
 
-        if (mWorkerList[i]->mChannel == hChannel)
+        if (mWorkerList[i]->mChannel == hChannel) {
             break;
+        }
     }
     if (i < mWorkerList.size()) {
         w = mWorkerList[i];
@@ -692,13 +738,15 @@ TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
 
 int ThreadPoolZmqActor::CleanTask(int posWorkerList)
 {
-    if (posWorkerList < 0 || (posWorkerList >= mWorkerList.size()))
+    if ((posWorkerList < 0) || (posWorkerList >= mWorkerList.size())) {
         return -1;
+    }
 
     pthread_mutex_lock(&pthreadMutex);
 
-    if (nullptr != mWorkerList[posWorkerList])
+    if (nullptr != mWorkerList[posWorkerList]) {
         REFCOUNT_RELEASE(mWorkerList[posWorkerList]);
+    }
 
     mWorkerList[posWorkerList] = nullptr;
     pthread_mutex_unlock(&pthreadMutex);
@@ -715,7 +763,7 @@ int ThreadPoolZmqActor::StopAll()
     shutdown = true;
     pthread_cond_broadcast(&pthreadCond);
 
-    for (int i = 0; i < mThreadNum; i++) {
+    for (int i = 0;  i < mThreadNum;  i++) {
         pthread_join(pthread_id_HandleMessage[i], nullptr);
     }
     free(pthread_id_HandleMessage);
@@ -745,11 +793,13 @@ ECode ThreadPoolZmqActor::CleanWorkerByChannelHandle(HANDLE hChannel)
     pthread_mutex_lock(&pthreadMutex);
 
     for (i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
+        if (nullptr == mWorkerList[i]) {
             continue;
+        }
 
-        if (mWorkerList[i]->mChannel == hChannel)
+        if (mWorkerList[i]->mChannel == hChannel) {
             break;
+        }
     }
     if (i < mWorkerList.size()) {
         //@ `ReleaseWorkerWhenPickIt`
