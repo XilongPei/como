@@ -27,7 +27,7 @@ namespace como {
 
 class ZmqFunCode {
 public:
-    enum {
+    enum  : std::uint16_t {
         GetComponentMetadata = 0x0,
         Method_Invoke        = 0x0101U,
         Actor_IsPeerAlive    = 0x0102U,

@@ -217,11 +217,12 @@ ECode CZMQParcel::ReadString(
 ECode CZMQParcel::WriteString(
     /* [in] */ const String& value)
 {
-    if (value.IsNull())
+    if (value.IsNull()) {
         return WriteInteger(-1);
+    }
 
     ECode ec = WriteInteger(value.GetByteLength());
-    if (value.GetByteLength() > 0 && SUCCEEDED(ec)) {
+    if ((value.GetByteLength() > 0) && SUCCEEDED(ec)) {
         ec = Write(value.string(), value.GetByteLength() + 1);
     }
     return ec;
@@ -289,8 +290,9 @@ ECode CZMQParcel::ReadComponentID(
     }
 
     const char *uri = (const char *)ReadInplace(size + 1);
-    if (nullptr == uri)
+    if (nullptr == uri) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     value.mUri = (const char *)malloc(size + 1);
     if (nullptr != value.mUri) {
@@ -311,7 +313,7 @@ ECode CZMQParcel::WriteComponentID(
 
     Integer size = (value.mUri == nullptr) ? 0 : strlen(value.mUri);
     ECode ec = WriteInteger(size);
-    if (size > 0 && SUCCEEDED(ec)) {
+    if ((size > 0) && SUCCEEDED(ec)) {
         ec = Write(value.mUri, size + 1);
     }
     return ec;
@@ -399,12 +401,11 @@ ECode CZMQParcel::ReadArray(
     TypeKind kind = (TypeKind)value;
     Long size;
     ec = ReadLong(size);
-    if (size <= 0 || FAILED(ec)) {
+    if ((size <= 0) || FAILED(ec)) {
         t->mData = nullptr;
         t->mSize = 0;
         t->mType = kind;
-        return FAILED(ec) ? ec : size < 0 ?
-                E_RUNTIME_EXCEPTION : NOERROR;
+        return FAILED(ec) ? ec : ((size < 0) ? E_RUNTIME_EXCEPTION : NOERROR);
     }
 
     switch (kind) {
@@ -691,7 +692,7 @@ ECode CZMQParcel::WriteArray(
             ec = Write(t->mData, sizeof(Boolean) * t->mSize);
             break;
         case TypeKind::String: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const String& str = reinterpret_cast<String*>(t->mData)[i];
                 ec = WriteString(str);
                 if (FAILED(ec)) {
@@ -711,7 +712,7 @@ ECode CZMQParcel::WriteArray(
             break;
         }
         case TypeKind::ComponentID: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const ComponentID& cid = reinterpret_cast<ComponentID*>(t->mData)[i];
                 ec = WriteComponentID(cid);
                 if (FAILED(ec)) {
@@ -721,7 +722,7 @@ ECode CZMQParcel::WriteArray(
             break;
         }
         case TypeKind::InterfaceID: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const InterfaceID& iid = reinterpret_cast<InterfaceID*>(t->mData)[i];
                 ec = WriteInterfaceID(iid);
                 if (FAILED(ec)) {
@@ -737,7 +738,7 @@ ECode CZMQParcel::WriteArray(
             ec = Write(t->mData, sizeof(Integer) * t->mSize);
             break;
         case TypeKind::Array: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const Triple& tt = reinterpret_cast<Triple*>(t->mData)[i];
                 ec = WriteArray(tt);
                 if (FAILED(ec)) {
@@ -747,7 +748,7 @@ ECode CZMQParcel::WriteArray(
             break;
         }
         case TypeKind::Interface: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 IInterface* intf = reinterpret_cast<IInterface**>(t->mData)[i];
                 ec = WriteInterface(intf);
                 if (FAILED(ec)) {
@@ -996,8 +997,9 @@ restart_write:
     }
 
     ECode ec = GrowData(padded);
-    if (SUCCEEDED(ec))
+    if (SUCCEEDED(ec)) {
         goto restart_write;
+    }
 
     return nullptr;
 }
@@ -1157,8 +1159,9 @@ restart_write:
     }
 
     ECode ec = GrowData(mDataPos - oldDataPos + sizeof(value));
-    if (SUCCEEDED(ec))
+    if (SUCCEEDED(ec)) {
         goto restart_write;
+    }
 
     return ec;
 }
@@ -1167,8 +1170,9 @@ ECode CZMQParcel::CreateObject(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CZMQParcel();
-    if (nullptr == parcel)
+    if (nullptr == parcel) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     return NOERROR;
 }

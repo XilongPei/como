@@ -53,8 +53,9 @@ void *CZMQUtils::CzmqGetContext() {
 
 void *CZMQUtils::CzmqGetPollitemsSocket(int idSocket)
 {
-    if ((idSocket >= 0) && (idSocket < zmq_pollitemNum))
+    if ((idSocket >= 0) && (idSocket < zmq_pollitemNum)) {
         return zmq_pollitems[idSocket].socket;
+    }
     return nullptr;
 }
 
@@ -192,8 +193,9 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize)
 {
-    if (bufSize == 0)
+    if (bufSize == 0) {
         return -1;
+    }
 
     Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), bufSize);
 
@@ -395,12 +397,14 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
     pthread_t thread ;
     // REP socket monitor, all events
     int rc = zmq_socket_monitor(endpointSocket->socket, endpointSocket->endpoint.c_str(), ZMQ_EVENT_ALL);
-    if (0 != rc)
+    if (0 != rc) {
         return nullptr;
+    }
 
     rc = pthread_create(&thread, NULL, rep_socket_monitor, endpointSocket);
-    if (0 != rc)
+    if (0 != rc) {
         return nullptr;
+    }
 
     return nullptr;
 }
@@ -469,8 +473,9 @@ static void *rep_socket_monitor(void *endpointSocket)
     if (nullptr == socketZMQ_PAIR) {
         socketZMQ_PAIR = zmq_socket(CZMQUtils::CzmqGetContext(), ZMQ_PAIR);
     }
-    if (nullptr == socketZMQ_PAIR)
+    if (nullptr == socketZMQ_PAIR) {
         return nullptr;
+    }
 
     uint32_t value;
     static char msg_data[1025];
@@ -584,22 +589,27 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 {
     zmq_pollitemNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
     zmq_pollitems = (zmq_pollitem_t*)malloc(sizeof(zmq_pollitem_t) * zmq_pollitemNum);
-    if (nullptr == zmq_pollitems)
+    if (nullptr == zmq_pollitems) {
         return -1;
+    }
 
-    if (nullptr == context)
+    if (nullptr == context) {
         context = CzmqGetContext();
+    }
 
     for (int i = 0;  i < zmq_pollitemNum;  i++) {
         // Socket to talk to dispatcher
         void *socket = zmq_socket(context, ZMQ_REP);
-        if (nullptr == socket)
+        if (nullptr == socket) {
             return -1;
+        }
 
-        if (nullptr == endpoint)
+        if (nullptr == endpoint) {
             zmq_connect(socket, "inproc://workers");
-        else
+        }
+        else {
             zmq_connect(socket, endpoint);
+        }
 
         //
         // ZMQ_POLLIN
@@ -630,23 +640,28 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
                                                      const char *inprocEndpoint)
 {
-    if (nullptr == context)
+    if (nullptr == context) {
         context = CzmqGetContext();
+    }
 
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
-    if (nullptr != tcpEndpoint)
+    if (nullptr != tcpEndpoint) {
         zmq_bind(clients, tcpEndpoint);
-    else
+    }
+    else {
         zmq_bind(clients, "tcp://127.0.0.1:4800");
+    }
 
     // Socket to talk to workers
     void *workers = zmq_socket(context, ZMQ_DEALER);
 
-    if (nullptr != inprocEndpoint)
+    if (nullptr != inprocEndpoint) {
         zmq_bind(workers, inprocEndpoint);
-    else
+    }
+    else {
         zmq_bind(workers, "inproc://workers");
+    }
 
 
     // Connect Worker threads to client threads via a queue proxy
