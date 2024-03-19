@@ -101,7 +101,7 @@ static void InitTimeSpec(
 void Mutex::Lock()
 {
     if (!mRecursive || mExclusiveOwner != GetTid()) {
-        Boolean done = false;
+        bool done = false;
         do {
             int32_t curState = mState.load(std::memory_order_relaxed);
             if (LIKELY(curState == 0)) {
@@ -131,7 +131,7 @@ void Mutex::Unlock()
 {
     mRecursionCount--;
     if (!mRecursive || mRecursionCount == 0) {
-        Boolean done = false;
+        bool done = false;
         do {
             int32_t curState = mState.load(std::memory_order_relaxed);
             if (LIKELY(curState == 1)) {
@@ -181,11 +181,11 @@ void Condition::Wait()
     mGuard.mRecursionCount = oldRecursionCount;
 }
 
-Boolean Condition::TimedWait(
+bool Condition::TimedWait(
     /* [in] */ int64_t ms,
     /* [in] */ int32_t ns)
 {
-    Boolean timedOut = false;
+    bool timedOut = false;
     unsigned int oldRecursionCount = mGuard.mRecursionCount;
     timespec rel_ts;
     InitTimeSpec(false, CLOCK_REALTIME, ms, ns, &rel_ts);
@@ -233,7 +233,7 @@ void Condition::SignalAll()
 {
     if (mNumWaiters > 0) {
         mSequence++;  // Indicate the broadcast occurred.
-        Boolean done = false;
+        bool done = false;
         do {
             int32_t curSequence = mSequence.load(std::memory_order_relaxed);
             // Requeue waiters onto mutex. The waiter holds the contender count on the mutex high ensuring

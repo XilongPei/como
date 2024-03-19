@@ -17,6 +17,8 @@
 #ifndef __MEMPOOL_H__
 #define __MEMPOOL_H__
 
+#include "mutex.h"
+
 namespace como {
 
 enum TryToUseMemPool {
@@ -42,6 +44,8 @@ private:
 
     size_t m_ulUnitSize;             // Memory unit size. There are much unit in memory pool.
     size_t m_ulBlockSize;            // Memory pool size. Memory pool is make of memory unit.
+
+    Mutex  m_Lock;
 
 public:
     CMemPool();

@@ -130,6 +130,8 @@ bool CMemPool::SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
  */
 void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
+    Mutex::AutoLock lock(m_Lock);
+
     if (ulSize > m_ulUnitSize ||
                          nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock) {
         if (MUST_USE_MEM_POOL == iTryToUseMemPool) {
@@ -169,6 +171,8 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
  */
 void CMemPool::Free(void *p)
 {
+    Mutex::AutoLock lock(m_Lock);
+
     if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize))) {
         struct _Unit *pCurUnit = (struct _Unit *)((char *)p - sizeof(struct _Unit));
 

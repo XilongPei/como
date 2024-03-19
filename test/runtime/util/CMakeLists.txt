@@ -27,6 +27,7 @@ include_directories(
 set(SOURCES
     testMempool.cpp
     ${PROJECT_DIR}/como/runtime/util/MemPool.cpp
+    ${PROJECT_DIR}/como/runtime/util/mutex.cpp
 )
 
 set(SOURCES1
@@ -56,6 +57,7 @@ set(SOURCES5
 set(SOURCES6
     testMempool1.cpp
     ${PROJECT_DIR}/como/runtime/util/MemPool.cpp
+    ${PROJECT_DIR}/como/runtime/util/mutex.cpp
 )
 
 set(SOURCES7

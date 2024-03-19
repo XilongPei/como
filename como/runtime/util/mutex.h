@@ -33,7 +33,6 @@
 #ifndef __COMO_MUTEX_H__
 #define __COMO_MUTEX_H__
 
-#include "comotypes.h"
 #include <atomic>
 
 namespace como {
@@ -58,7 +57,7 @@ public:
 
 public:
     inline Mutex(
-        /* [in] */ Boolean recursive = false);
+        /* [in] */ bool recursive = false);
 
     void Lock();
 
@@ -69,11 +68,14 @@ private:
 
     // 0 is unheld, 1 is held.
     std::atomic<int32_t> mState { 0 };
+
     // Exclusive owner.
     volatile uint64_t mExclusiveOwner = 0;
+
     // Number of waiting contenders.
     std::atomic<int32_t> mNumContenders { 0 };
-    const Boolean mRecursive;
+
+    const bool mRecursive;
     unsigned int mRecursionCount = 0;
 };
 
@@ -97,7 +99,7 @@ inline Mutex::AutoLock::~AutoLock()
 }
 
 inline Mutex::Mutex(
-    /* [in] */ Boolean recursive)
+    /* [in] */ bool recursive)
     : mRecursive(recursive)
 {}
 
@@ -111,7 +113,7 @@ public:
 
     void Wait();
 
-    Boolean TimedWait(
+    bool TimedWait(
         /* [in] */ int64_t ms,
         /* [in] */ int32_t ns);
 
