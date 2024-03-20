@@ -1,3 +1,19 @@
+//=========================================================================
+// Copyright (C) 2024 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
 // Ref: https://gitee.com/tjopenlab/scratch/blob/master/misc/hashmap.c
 
 // A compact, single function string-to-string hash map
@@ -28,6 +44,10 @@
 // tuple and the value is at the second index.
 //
 // Delete: Lookup and set the value to a gravestone of your choice.
+
+/**
+ * hashmap
+ */
 char **hashmap(char *key, void *heap, ptrdiff_t *heaplen)
 {
     enum { ARY = 2 }; // 1=slowest+small, 2=faster+larger, 3=fastest+large
@@ -50,7 +70,7 @@ char **hashmap(char *key, void *heap, ptrdiff_t *heaplen)
         return nullptr;
     }
     else if ((! key) && (heaplen == heap)) { // first key
-        return map->head ? &map->head->key : 0;
+        return map->head ? &map->head->key : nullptr;
     }
     else if (heaplen == heap) {             // next key
         node *next = ((node *)(key - sizeof(node)))->next;
@@ -64,7 +84,7 @@ char **hashmap(char *key, void *heap, ptrdiff_t *heaplen)
     }
 
     node **n = &map->head;
-    for (;  *n;  hash <<= ARY) {
+    for (;  0 != *n;  hash <<= ARY) {
         if (! strcmp(key, (*n)->key)) {
             return &(*n)->value;
         }
@@ -91,6 +111,81 @@ char **hashmap(char *key, void *heap, ptrdiff_t *heaplen)
     return &(*n)->value;
 }
 
+/**
+ * hashmap_stdstring
+ *
+ * key_stdstring = std::string(key\0value\0)
+ */
+char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heaplen, char **pvalue)
+{
+    enum { ARY = 2 }; // 1=slowest+small, 2=faster+larger, 3=fastest+large
+    typedef struct node node;
+    struct node {
+        node *child[1 << ARY];
+        node *next;
+        char *key;
+        char *value;        // TODO: remove this line
+    };
+    struct tagMap {
+        node  *head;
+        node **tail;
+    } *map = (struct tagMap *)heap;
+
+    if ((! key_stdstring) && (heaplen != heap)) {     // init
+        *heaplen &= -sizeof(void *);        // align high end
+        map->head = 0;
+        map->tail = &map->head;
+        return nullptr;
+    }
+    else if ((! key_stdstring) && (heaplen == heap)) { // first key
+        return map->head ? &map->head->key : nullptr;
+    }
+    else if (heaplen == heap) {             // next key
+        node *next = ((node *)(key_stdstring - sizeof(node)))->next;
+        return next ? &next->key : nullptr;
+    }
+
+    uint64_t hash = 0x100;
+    ptrdiff_t keylen = 0;
+    const char *key = key_stdstring->c_str();
+    for (;  key[keylen++];  hash *= 0x100000001b3) {
+        hash ^= key[keylen] & 255;
+    }
+    keylen = key_stdstring->size();
+
+    node **n = &map->head;
+    for (;  0 != *n;  hash <<= ARY) {
+        if (! strcmp(key, (*n)->key)) {
+            *pvalue = (*n)->key;
+            *pvalue += strlen(*pvalue) + 1;     // +1 for tail '\0'
+
+            // return &(*n)->value;
+            return pvalue;
+        }
+        n = &(*n)->child[hash >> (64 - ARY)];
+    }
+    if (! heaplen) {
+        return nullptr;                     // lookup failed
+    }
+
+    ptrdiff_t total = sizeof(node) + keylen + (-keylen & (sizeof(void *) - 1));
+    if (*heaplen - (ptrdiff_t)sizeof(*map) < total) {
+        return nullptr;                     // out of memory
+    }
+
+    *n = (node *)((char *)heap + (*heaplen -= total));
+    memset(*n, 0, sizeof(node));
+
+    (*n)->key = (char *)*n + sizeof(node);
+    memcpy((*n)->key, key, key_stdstring->size());
+
+    *map->tail = *n;
+    map->tail = &(*n)->next;
+
+    //return pvalue;
+    return &(*n)->value;
+}
+
 #define DEMO
 #ifdef DEMO
 #include <stdio.h>
@@ -111,6 +206,49 @@ int main(void)
         printf("k:%s\tv:%s\n", e[0], e[1]);
     }
 
+    /////////////////////////////////////////////
+
+    char *pvalue;
+    hashmap_stdstring(0, heap, &len, &pvalue);
+
+    std::string str = std::string("hello", 6) + std::string("world", 6);
+    hashmap_stdstring(&str, heap, &len, &pvalue);
+
+    str = std::string("foo", 4) + std::string("bar", 4);
+    hashmap_stdstring(&str, heap, &len, &pvalue);
+
+    str = std::string("foo");
+    puts(*hashmap_stdstring(&str, heap, 0, &pvalue));
+
+    str = std::string("hello");
+    puts(*hashmap_stdstring(&str, heap, 0, &pvalue));
+
+    for (char **e = 0; (e = hashmap(e ? *e : 0, heap, (ptrdiff_t*)heap));) {
+        if (nullptr == e)
+            break;
+
+        printf("k:%s\tv:%s\n", e[0], e[1]);
+    }
+#if 0
+    char **e = 0;
+    while (1) {
+        if (e) {
+            str = std::string(*e);
+            e = hashmap_stdstring(&str, heap, (ptrdiff_t*)heap, &pvalue);
+        }
+        else {
+            e = hashmap_stdstring(nullptr, heap, (ptrdiff_t*)heap, &pvalue);
+        }
+
+        if (nullptr != e) {
+            printf("k:%s\tv:%s\n", e[0], e[0]);
+        }
+        else {
+            break;
+        }
+
+    }
+#endif
     free(heap);  // destroy the hashmap
 }
 

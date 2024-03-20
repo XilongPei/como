@@ -23,9 +23,13 @@
 #ifndef __STRINGTOSTRINGHASHMAP_H__
 #define __STRINGTOSTRINGHASHMAP_H__
 
+#include <string>
+
 namespace como {
 
 char **hashmap(char *key, void *heap, ptrdiff_t *heaplen);
+
+char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heaplen, char **pvalue);
 
 } // namespace como
 
