@@ -141,7 +141,7 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
         return map->head ? &map->head->key : nullptr;
     }
     else if (heaplen == heap) {                         // next key
-        node *next = ((node *)(key_stdstring - sizeof(node)))->next;
+        node *next = ((node *)((char *)key_stdstring - sizeof(node)))->next;
         return next ? &next->key : nullptr;
     }
 
