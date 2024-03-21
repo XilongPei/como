@@ -36,6 +36,10 @@ __attribute__((noinline)) void ThreadStack::rb_gc_set_stack_end(uintptr_t **stac
  * fix intermittent SIGBUS on Linux, by reserving the stack virtual address
  * space at process start up, so that it will not clash with the heap space.
  */
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-local-addr"
+#endif
 __attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char *stack_start, size_t size)
 {
     struct rlimit rl;
@@ -70,17 +74,19 @@ __attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char
 
     return stack_start;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #define HAVE_PTHREAD_GETATTR_NP
+#define CHECK_ERR(expr)             \
+    {int err = (expr); if (err) return err;}
 
 /*
  * Get the initial address and size of current thread's stack
  */
 int ThreadStack::GetStack(void **addr, size_t *size)
 {
-#define CHECK_ERR(expr)             \
-    {int err = (expr); if (err) return err;}
-
 #ifdef HAVE_PTHREAD_GETATTR_NP /* Linux */
 
     pthread_attr_t attr;
