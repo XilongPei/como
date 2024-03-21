@@ -131,16 +131,16 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
         node **tail;
     } *map = (struct tagMap *)heap;
 
-    if ((! key_stdstring) && (heaplen != heap)) {     // init
-        *heaplen &= -sizeof(void *);        // align high end
+    if ((! key_stdstring) && (heaplen != heap)) {       // init
+        *heaplen &= -sizeof(void *);                    // align high end
         map->head = 0;
         map->tail = &map->head;
         return nullptr;
     }
-    else if ((! key_stdstring) && (heaplen == heap)) { // first key
+    else if ((! key_stdstring) && (heaplen == heap)) {  // first key
         return map->head ? &map->head->key : nullptr;
     }
-    else if (heaplen == heap) {             // next key
+    else if (heaplen == heap) {                         // next key
         node *next = ((node *)(key_stdstring - sizeof(node)))->next;
         return next ? &next->key : nullptr;
     }
@@ -151,13 +151,12 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
     for (;  key[keylen++];  hash *= 0x100000001b3) {
         hash ^= key[keylen] & 255;
     }
-    keylen = key_stdstring->size();
 
     node **n = &map->head;
     for (;  0 != *n;  hash <<= ARY) {
         if (! strcmp(key, (*n)->key)) {
             *pvalue = (*n)->key;
-            *pvalue += strlen(*pvalue) + 1;     // +1 for tail '\0'
+            *pvalue += strlen(*pvalue) + 1;             // +1 for tail '\0'
 
             // return &(*n)->value;
             return pvalue;
@@ -165,9 +164,10 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
         n = &(*n)->child[hash >> (64 - ARY)];
     }
     if (! heaplen) {
-        return nullptr;                     // lookup failed
+        return nullptr;                                 // lookup failed
     }
 
+    keylen = key_stdstring->size();
     ptrdiff_t total = sizeof(node) + keylen + (-keylen & (sizeof(void *) - 1));
     if (*heaplen - (ptrdiff_t)sizeof(*map) < total) {
         return nullptr;                     // out of memory
@@ -177,13 +177,13 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
     memset(*n, 0, sizeof(node));
 
     (*n)->key = (char *)*n + sizeof(node);
-    memcpy((*n)->key, key, key_stdstring->size());
+    memcpy((*n)->key, key, keylen);
 
     *map->tail = *n;
     map->tail = &(*n)->next;
 
-    //return pvalue;
-    return &(*n)->value;
+    return pvalue;
+    //return &(*n)->value;
 }
 
 #define DEMO
@@ -229,26 +229,14 @@ int main(void)
 
         printf("k:%s\tv:%s\n", e[0], e[1]);
     }
-#if 0
-    char **e = 0;
-    while (1) {
-        if (e) {
-            str = std::string(*e);
-            e = hashmap_stdstring(&str, heap, (ptrdiff_t*)heap, &pvalue);
-        }
-        else {
-            e = hashmap_stdstring(nullptr, heap, (ptrdiff_t*)heap, &pvalue);
-        }
-
-        if (nullptr != e) {
-            printf("k:%s\tv:%s\n", e[0], e[0]);
-        }
-        else {
+////////////////////
+    for (char **e = 0; (e = hashmap_stdstring(e ? (std::string *)*e : 0, heap, (ptrdiff_t*)heap, &pvalue));) {
+        if (nullptr == e)
             break;
-        }
 
+        printf("k:%s\tv:%s\n", e[0], e[1]);
     }
-#endif
+
     free(heap);  // destroy the hashmap
 }
 
