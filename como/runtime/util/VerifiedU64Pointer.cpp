@@ -132,7 +132,7 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
     by1->b6 = L->b7_6 ^ L->b6_7 ^ L->b6_6 ^ L->b6_5 ^ L->b6_4 ^ L->b6_3 ^ L->b6_2 ^ L->b6_1 ^ L->b6_0;
 
     if (('\0' == b1) && ('\0' == b0)) {
-        *((unsigned short *)&l + 3) = 0;
+        *((unsigned short *)&l + 3u) = 0;
         return l;
     }
 
@@ -144,14 +144,14 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
     // }
 
     // fix the pointer
-    int n1, n0;
+    unsigned int n1, n0;
     unsigned char *b;
-    for (n1 = 0;  n1 < 6;  n1++) {
-        if ((b1 >> n1) & 1) {
-            for (n0 = 0;  n0 < 8;  n0++) {
-                if ((b0 >> n0) & 1) {
+    for (n1 = 0;  n1 < 6u;  n1++) {
+        if ((b1 >> n1) & 1u) {
+            for (n0 = 0;  n0 < 8u;  n0++) {
+                if ((b0 >> n0) & 1u) {
                     b = (unsigned char *)&l + n1;
-                    *b ^= (1 << n0);
+                    *b ^= (1u << n0);
                     gFixedMemError++;
                 }
             }
@@ -159,7 +159,7 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
     }
 
     // set highest 2 bytes of l to 0
-    *((unsigned short *)&l + 3) = 0;
+    *((unsigned short *)&l + 3u) = 0;
     return l;
 }
 

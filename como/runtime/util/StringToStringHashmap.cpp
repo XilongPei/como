@@ -220,10 +220,8 @@ int main(void)
     str = std::string("hello");
     puts(*hashmap_stdstring(&str, heap, 0, &pvalue));
 
-    for (char **e = 0; (e = hashmap_stdstring(e ? (std::string *)*e : 0, heap, (ptrdiff_t*)heap, &pvalue));) {
-        if (nullptr == e)
-            break;
-
+    for (char **e = 0; (e = hashmap_stdstring(e ? (std::string *)*e : 0, heap,
+                                                (ptrdiff_t*)heap, &pvalue));) {
         printf("k:%s\tv:%s\n", e[0], &e[0][strlen(e[0]) + 1]);
     }
 
