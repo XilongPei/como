@@ -256,16 +256,17 @@ int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
     return 0;
 }
 
-ComoFunctionSafetyObject *CFSO_VECTOR::cfso_get(unsigned int index) {
-    if (_size < 1 || _size <= index)
+ComoFunctionSafetyObject *CFSO_VECTOR::cfso_get(int index) {
+    if ((_size < 1) || (index >= _size)) {
         return nullptr;
+    }
     return *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
                                                         index * sizeof(ComoFunctionSafetyObject*));
 }
 
 int CFSO_VECTOR::cfso_find(ComoFunctionSafetyObject *cfso)
 {
-    for (unsigned int i = 0;  i < _size;  i++) {
+    for (int i = 0;  i < _size;  i++) {
         if (cfso == *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + i *
                                                             sizeof(ComoFunctionSafetyObject*))) {
             return i;
@@ -275,9 +276,10 @@ int CFSO_VECTOR::cfso_find(ComoFunctionSafetyObject *cfso)
     return -1;
 }
 
-int CFSO_VECTOR::cfso_del(unsigned int index) {
-    if (_size < 1 || _size <= index)
+int CFSO_VECTOR::cfso_del(int index) {
+    if ((_size < 1) || (index >= _size)) {
         return -1;
+    }
 
     if (numNullArray >= CFSO_VECTOR_SizeNullArray) {
         for ( ;  numNullArray >= 0;  numNullArray--) {
