@@ -124,7 +124,6 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
         node *child[1 << ARY];
         node *next;
         char *key;
-        char *value;        // TODO: remove this line
     };
     struct tagMap {
         node  *head;
@@ -158,7 +157,6 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
             *pvalue = (*n)->key;
             *pvalue += strlen(*pvalue) + 1;             // +1 for tail '\0'
 
-            // return &(*n)->value;
             return pvalue;
         }
         n = &(*n)->child[hash >> (64 - ARY)];
@@ -183,7 +181,6 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
     map->tail = &(*n)->next;
 
     return pvalue;
-    //return &(*n)->value;
 }
 
 #define DEMO
@@ -223,18 +220,11 @@ int main(void)
     str = std::string("hello");
     puts(*hashmap_stdstring(&str, heap, 0, &pvalue));
 
-    for (char **e = 0; (e = hashmap(e ? *e : 0, heap, (ptrdiff_t*)heap));) {
-        if (nullptr == e)
-            break;
-
-        printf("k:%s\tv:%s\n", e[0], e[1]);
-    }
-////////////////////
     for (char **e = 0; (e = hashmap_stdstring(e ? (std::string *)*e : 0, heap, (ptrdiff_t*)heap, &pvalue));) {
         if (nullptr == e)
             break;
 
-        printf("k:%s\tv:%s\n", e[0], e[1]);
+        printf("k:%s\tv:%s\n", e[0], &e[0][strlen(e[0]) + 1]);
     }
 
     free(heap);  // destroy the hashmap
