@@ -15,6 +15,12 @@
 //=========================================================================
 
 // Ref: https://gitee.com/tjopenlab/scratch/blob/master/misc/hashmap.c
+/**
+ * about 0x100000001b3:
+ * Fowler–Noll–Vo hash function
+ * Ref: https://gitee.com/tjopenlab/como-grammar-manual/blob/master/%E5%BC%80%E5%8F%91COMO%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3/Fowler%E2%80%93Noll%E2%80%93Vo%20hash%20function%20-%20Wikipedia.pdf
+ * The FNV_prime is the 64-bit FNV prime value: 1099511628211 (in hex, 0x100000001b3).
+ */
 
 // A compact, single function string-to-string hash map
 // Ref: https://old.reddit.com/r/C_Programming/comments/18iwhw0
