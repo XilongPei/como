@@ -73,6 +73,6 @@ if [ ! -n "${ROOT}" ]; then
 fi
 
 build_libzmq;
-#build_phxpaxos;
+build_phxpaxos;
 
 psucc "COMO build, Make optional external done."
