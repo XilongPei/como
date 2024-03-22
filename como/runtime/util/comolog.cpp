@@ -225,7 +225,7 @@ int Logger::GetLevel()
 void Logger::SetSamplingTag(
     /* [in] */ const char *szSamplingTag_)
 {
-    strncpy(szSamplingTag, szSamplingTag_, 32);
+    (void)strncpy(szSamplingTag, szSamplingTag_, 32);
     szSamplingTag[31] = '\0';
 }
 
@@ -244,10 +244,10 @@ static void GetLocalTimeWithMs(char *currentTime, size_t maxChars)
     char timezone[8];
     struct tm nowTime;
     localtime_r(&curTime.tv_sec, &nowTime);
-    strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
-    strftime(timezone, sizeof(timezone), "%z", &nowTime);
+    (void)strftime(ymdhms, sizeof(ymdhms), "%Y-%m-%d %H:%M:%S", &nowTime);
+    (void)strftime(timezone, sizeof(timezone), "%z", &nowTime);
 
-    snprintf(currentTime, maxChars, "%s.%03d %s", ymdhms, milli, timezone);
+    (void)snprintf(currentTime, maxChars, "%s.%03d %s", ymdhms, milli, timezone);
 }
 
 void Logger::Monitor(

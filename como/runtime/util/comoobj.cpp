@@ -204,7 +204,10 @@ String Object::GetFuncSafetySetting(
         }
 
         if (mc != nullptr) {
-            mc->GetFuncSafetySetting(funcSafetySetting);
+            ec = mc->GetFuncSafetySetting(funcSafetySetting);
+            if (UNLIKELY(FAILED(ec))) {               // This shouldn't happen
+                return funcSafetySetting;
+            }
         }
 
         return funcSafetySetting;

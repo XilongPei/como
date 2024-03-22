@@ -258,7 +258,7 @@ CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num)
 CMemPoolSet::CMemPoolSet(MemPoolItem *memPoolItems, size_t num,
                                           size_t g_lUnitNum, size_t g_lUnitSize)
 {
-    CMemPoolSet(memPoolItems, num);
+    (void)CMemPoolSet(memPoolItems, num);
     (void)CreateGeneralMemPool(g_lUnitNum, g_lUnitSize);
 }
 

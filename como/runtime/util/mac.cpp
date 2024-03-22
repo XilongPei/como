@@ -76,7 +76,7 @@ Long Mac::GetMacAddress(Long& lMacAddr)
 Long Mac::GetThisServiceId(unsigned short port)
 {
     if (0 == g_lMacAddr) {
-        Mac::GetMacAddress(g_lMacAddr);
+        (void)Mac::GetMacAddress(g_lMacAddr);
     }
 
     Long lMacAddr = g_lMacAddr;
@@ -93,8 +93,9 @@ Long Mac::GetUuid64(Long& uuid64)
     // millisecond
     uuid64 = tsTime.tv_sec * 1000 + tsTime.tv_nsec / 1000000;
                                                    // 654321
-    if (0 == g_lMacAddr)
-        Mac::GetMacAddress(g_lMacAddr);
+    if (0 == g_lMacAddr) {
+        (void)Mac::GetMacAddress(g_lMacAddr);
+    }
 
     // This value is not repeated within 49.710 days.
     // 0xFFFFFFFF(millisecond) / 3600,000(millisecond/hour) / 24(hour/day) ~= 49.710(day)
@@ -109,8 +110,9 @@ Long Mac::GetUuid64(Long& uuid64)
  */
 Long Mac::CompoundUuid64(Long& uuid64)
 {
-    if (0 == g_lMacAddr)
-        Mac::GetMacAddress(g_lMacAddr);
+    if (0 == g_lMacAddr) {
+        (void)Mac::GetMacAddress(g_lMacAddr);
+    }
 
     uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFF);
                                           // 4 3 2 1

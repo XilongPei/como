@@ -377,7 +377,7 @@ char *MiString::strZcpy(char *dest, const char *src, size_t maxlen)
 {
     maxlen--;
     dest[maxlen] = '\0';
-    return  strncpy(dest, src, maxlen);
+    return strncpy(dest, src, maxlen);
 }
 
 /**
@@ -424,8 +424,9 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
         count += va_arg(ap, size_t);
     }
     va_end(ap);
-    if (count <= 0)
+    if (count <= 0) {
         return  nullptr;
+    }
 
     if (nullptr != buf) {
         if ((nullptr != poolSize) && (*poolSize < count)) {
@@ -439,7 +440,7 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
         }
     }
 
-    memset(pool, 0, count);
+    (void)memset(pool, 0, count);
 
     if (nullptr != poolSize) {
         *poolSize = count;
@@ -481,11 +482,11 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
 
     if (memSize <= 0) {
         count = strlen(pool) + 1;
-        strZcpy(ss, pool, memSize);
+        (void)strZcpy(ss, pool, memSize);
     }
     else {
         count = memSize;
-        memcpy(ss, pool, memSize);
+        (void)memcpy(ss, pool, memSize);
     }
 
     va_start(ap, memSize);
@@ -494,11 +495,11 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
 
         if ((*(Int64 *)&memSize).i32.i32_high != 0) {
             (*(Int64 *)&memSize).i32.i32_high = 0;
-            strZcpy(ss1, (char *)(pool + count), memSize);
+            (void)strZcpy(ss1, (char *)(pool + count), memSize);
             count += strlen((char *)(pool + count)) + 1;
         }
         else {
-            memcpy(ss1, (char *)(pool + count), memSize);
+            (void)memcpy(ss1, (char *)(pool + count), memSize);
             count += memSize;
         }
 

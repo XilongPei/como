@@ -143,7 +143,11 @@ void Mutex::Unlock()
                 done =  mState.compare_exchange_weak(curState, desired, std::memory_order_seq_cst);
                 if (LIKELY(done)) {
                     if (UNLIKELY(mNumContenders.load(std::memory_order_relaxed) > 0)) {
-                        futex((int32_t*)&mState, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+                        if (futex((int32_t*)&mState, FUTEX_WAKE, 1, nullptr, nullptr, 0) != 0) {
+                            if ((errno != EAGAIN) && (errno != EINTR)) {
+                                Logger::E("Mutex", "futex wake failed");
+                            }
+                        }
                     }
                 }
             }

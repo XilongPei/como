@@ -101,6 +101,7 @@ ECode ComoFunctionSafetyObject::AfterConstruction()
     pthread_mutex_lock(&funSafetyLock);
     if (objsLifeCycleExpires.cfso_push(this) < 0) {
         Logger::E("ComoFunctionSafetyObject", "Construct Object error");
+        return E_OUT_OF_MEMORY_ERROR;
     }
     pthread_mutex_unlock(&funSafetyLock);
 
@@ -113,7 +114,7 @@ ComoFunctionSafetyObject::~ComoFunctionSafetyObject()
         pthread_mutex_lock(&funSafetyLock);
         int index = objsLifeCycleExpires.cfso_find(this);
         if (index >= 0) {
-            objsLifeCycleExpires.cfso_del(index);
+            (void)objsLifeCycleExpires.cfso_del(index);
         }
         else {
             Logger::E("ComoFunctionSafetyObject", "lost object: %lx", this);
@@ -133,7 +134,10 @@ ECode ComoFunctionSafetyObject::SetExpires(
     mExpires = expires;
 
     if (objsLifeCycleExpires.cfso_find(this) < 0) {
-        objsLifeCycleExpires.cfso_push(this);
+        if (objsLifeCycleExpires.cfso_push(this) < 0) {
+            Logger::E("ComoFunctionSafetyObject", "SetExpires error");
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
 
     return NOERROR;
@@ -206,7 +210,9 @@ CFSO_VECTOR::CFSO_VECTOR()
     _extra = 0;
     extra = CFSO_VECTOR_Size_ONCE_ALLOC;
     numNullArray = 0;
-    cfso_allocate();
+    if (cfso_allocate() <= 0) {
+        Logger::D("CFSO_VECTOR::CFSO_VECTOR", "cfso_allocate error");
+    }
 }
 
 CFSO_VECTOR::~CFSO_VECTOR()
@@ -243,8 +249,9 @@ int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
         return -1;
 #else
-        if (cfso_allocate() <= 0)
+        if (cfso_allocate() <= 0) {
             return -1;
+        }
 #endif
     }
 
