@@ -24,9 +24,10 @@ function check_dir_exist()
 {
     dir_path=$current_path"/$1";
     if [ ! -d $dir_path ]; then
-        perror $dir_path" dir not exist.";
-        exit 1;
+        return 1;
     fi
+
+    return 0;
 }
 
 function check_file_exist()
@@ -40,7 +41,16 @@ function check_file_exist()
 function build_libzmq()
 {
     cd ${ROOT}/external/libzmq;
-    mkdir build && cd build;
+
+    check_dir_exist build
+    if [ $? -eq 0 ]; then
+        rm -rf CMakeFiles
+        rm -rf CMakeCache.txt
+        cd build;
+    else
+        mkdir build && cd build;
+    fi
+
     cmake ..;
     make;
     go_back;
@@ -63,6 +73,6 @@ if [ ! -n "${ROOT}" ]; then
 fi
 
 build_libzmq;
-build_phxpaxos;
+#build_phxpaxos;
 
 psucc "COMO build, Make optional external done."
