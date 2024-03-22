@@ -90,7 +90,7 @@ public:
     // Walker for struct Bucket
     using HashMapWalker = void(*)(String&,Key&,Val&);
 
-    HashMap(
+    explicit HashMap(
         /* [in] */ unsigned int size = 50)
         : mCount(0)
     {

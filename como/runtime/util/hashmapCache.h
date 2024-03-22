@@ -68,7 +68,7 @@ public:
     // Walker for struct Bucket
     using HashMapWalker = void(*)(String&,Key&,Val&,struct timespec&);
 
-    HashMapCache(
+    explicit HashMapCache(
         /* [in] */ unsigned int size = 50)
         : mCount(0)
     {

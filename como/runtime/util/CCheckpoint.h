@@ -29,7 +29,7 @@ class COM_PUBLIC CCheckpoint
     : public ICheckpoint
 {
 public:
-    CCheckpoint(Integer ckpointId)
+    explicit CCheckpoint(Integer ckpointId)
         : mCkpointId(ckpointId)
     {}
 
