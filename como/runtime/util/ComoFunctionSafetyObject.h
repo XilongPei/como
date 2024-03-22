@@ -84,7 +84,7 @@ public:
 
     int cfso_push(ComoFunctionSafetyObject *cfso);
     int cfso_del(unsigned int index);
-    ComoFunctionSafetyObject *cfso_get(int index);
+    ComoFunctionSafetyObject *cfso_get(unsigned int index);
     int cfso_find(ComoFunctionSafetyObject *cfso);
 
 private:

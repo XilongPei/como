@@ -69,21 +69,21 @@ public:
     using HashMapWalker = void(*)(String&,Key&,Val&,struct timespec&);
 
     explicit HashMapCache(
-        /* [in] */ unsigned int size = 50)
+        /* [in] */ unsigned int size = 50u)
         : mCount(0)
     {
         mBucketSize = get_next_prime(size);
         mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
         if (nullptr == mBuckets) {
-            mBucketSize = 0;
+            mBucketSize = 0u;
         }
-        mThreshold = mBucketSize * LOAD_FACTOR;
+        mThreshold = (unsigned int)((double)mBucketSize * LOAD_FACTOR);
         clock_gettime(CLOCK_REALTIME, &mLastCheanTime);
     }
 
     ~HashMapCache()
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -170,7 +170,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
                 clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
                 return true;
             }
@@ -189,7 +189,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
                 clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
                 curr->mReferenceCount++;
                 return curr->mValue;
@@ -210,7 +210,7 @@ public:
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
                 if (curr == mBuckets[index]) {
                     mBuckets[index] = curr->mNext;
                 }
@@ -249,7 +249,7 @@ public:
                 }
 
                 curr->mReferenceCount--;
-                if (0 == curr->mReferenceCount) {
+                if (0u == curr->mReferenceCount) {
                     delete curr;
                     mCount--;
                 }
@@ -265,7 +265,7 @@ public:
 
     void Clear()
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -282,7 +282,7 @@ public:
     Array<Val> GetValues()
     {
         Long N = 0;
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -299,7 +299,7 @@ public:
 
         if (N > 0) {
             Long idx = 0;
-            for (unsigned int i = 0;  i < mBucketSize;  i++) {
+            for (unsigned int i = 0u;  i < mBucketSize;  i++) {
                 if (mBuckets[i] != nullptr) {
                     Bucket* curr = mBuckets[i];
                     while (curr != nullptr) {
@@ -315,7 +315,7 @@ public:
 
     Val GetValue(HashMapCacheCmp2PVoid fun, void* param)
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -332,7 +332,7 @@ public:
 
     void GetValues(String& str, HashMapWalker walker)
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -358,7 +358,7 @@ public:
 
         mLastCheanTime = currentTime;
 
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -381,14 +381,14 @@ public:
     {
         int num = 0;
 
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
                     if (curr->mlValue == value) {
                         Bucket* next = curr->mNext;
                         curr->mReferenceCount--;
-                        if (0 == curr->mReferenceCount) {
+                        if (0u == curr->mReferenceCount) {
                             delete curr;
                             mCount--;
                             num++;
@@ -418,8 +418,8 @@ private:
             return;
         }
         unsigned int oldBucketSize = mBucketSize;
-        mBucketSize = oldBucketSize * 2 + 1;
-        if (mBucketSize > MAX_BUCKET_SIZE || mBucketSize < 0) {
+        mBucketSize = oldBucketSize * 2u + 1u;
+        if (mBucketSize > MAX_BUCKET_SIZE || mBucketSize < 0u) {
             mBucketSize = MAX_BUCKET_SIZE;
         }
         Bucket** newBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
@@ -427,7 +427,7 @@ private:
             mBucketSize = oldBucketSize;
             return;
         }
-        for (unsigned int i = 0; i < oldBucketSize; i++) {
+        for (unsigned int i = 0u;  i < oldBucketSize;  i++) {
             Bucket* curr = mBuckets[i];
             while (curr != nullptr) {
                 Bucket* next = curr->mNext;
@@ -438,7 +438,7 @@ private:
         }
         free(mBuckets);
         mBuckets = newBuckets;
-        mThreshold = mBucketSize * LOAD_FACTOR;
+        mThreshold = (unsigned int)((double)mBucketSize * LOAD_FACTOR);
     }
 
     void PutBucket(

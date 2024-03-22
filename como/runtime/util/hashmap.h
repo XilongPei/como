@@ -26,29 +26,31 @@ namespace como {
 
 using HashMapCacheCmp2PVoid = Boolean(*)(void*,void*);
 
-static const int prime_list[11] =
+static const unsigned int prime_list[11] =
 {
     5ul,    11ul,   23ul,   53ul,   97ul,   193ul,
     389ul,  769ul,  1543ul, 3079ul, 6151ul
 };
 
-static int get_lower_bound(const int* first, const int* last, int n)
+static unsigned int get_lower_bound(const unsigned int* first, const unsigned int* last, int n)
 {
-    if (n <= *first)
+    if (n <= *first) {
         return *first;
-    if (n >= *last)
+    }
+    if (n >= *last) {
         return *last;
-    for (int i = 0; first + i != last; i++) {
-        int l = *(first + i);
-        int r = *(first + i + 1);
-        if (l <= n && n < r) {
+    }
+    for (unsigned int i = 0;  first + i != last;  i++) {
+        unsigned int l = *(first + i);
+        unsigned int r = *(first + i + 1);
+        if ((l <= n) && (n < r)) {
             return (n - l) < (r - n) ? l : r;
         }
     }
     return *last;
 }
 
-inline int get_next_prime(int n)
+inline unsigned int get_next_prime(int n)
 {
     return get_lower_bound(&prime_list[0], &prime_list[10], n);
 }
@@ -91,20 +93,20 @@ public:
     using HashMapWalker = void(*)(String&,Key&,Val&);
 
     explicit HashMap(
-        /* [in] */ unsigned int size = 50)
-        : mCount(0)
+        /* [in] */ unsigned int size = 50u)
+        : mCount(0u)
     {
         mBucketSize = get_next_prime(size);
         mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
         if (nullptr == mBuckets) {
-            mBucketSize = 0;
+            mBucketSize = 0u;
         }
-        mThreshold = mBucketSize * LOAD_FACTOR;
+        mThreshold = (unsigned int)((double)mBucketSize * LOAD_FACTOR);
     }
 
     ~HashMap()
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -242,7 +244,7 @@ public:
 
     void Clear()
     {
-        for (unsigned int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -258,7 +260,7 @@ public:
 
     Val GetValue(HashMapCacheCmp2PVoid fun, void* param)
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -275,7 +277,7 @@ public:
     Array<Val> GetValues()
     {
         Long N = 0;
-        for (unsigned int i = 0; i < mBucketSize; i++) {
+        for (unsigned int i = 0u; i < mBucketSize; i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -308,7 +310,7 @@ public:
 
     void GetValues(String& str, HashMapWalker walker)
     {
-        for (unsigned int i = 0;  i < mBucketSize;  i++) {
+        for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
@@ -338,15 +340,16 @@ private:
             return;
         }
         unsigned int oldBucketSize = mBucketSize;
-        mBucketSize = oldBucketSize * 2 + 1;
+        mBucketSize = oldBucketSize * 2u + 1u;
         if (mBucketSize > MAX_BUCKET_SIZE || mBucketSize < 0) {
             mBucketSize = MAX_BUCKET_SIZE;
         }
         Bucket** newBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
-        if (newBuckets == nullptr)
+        if (newBuckets == nullptr) {
             return;
+        }
 
-        for (unsigned int i = 0; i < oldBucketSize; i++) {
+        for (unsigned int i = 0u;  i < oldBucketSize;  i++) {
             Bucket* curr = mBuckets[i];
             while (curr != nullptr) {
                 Bucket* next = curr->mNext;
@@ -357,7 +360,7 @@ private:
         }
         free(mBuckets);
         mBuckets = newBuckets;
-        mThreshold = mBucketSize * LOAD_FACTOR;
+        mThreshold = (unsigned int)((double)mBucketSize * LOAD_FACTOR);
     }
 
     void PutBucket(
