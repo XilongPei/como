@@ -84,7 +84,8 @@ ECode Object::GetCoclass(
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
     if (mComponent == nullptr) {
-        klass = nullptr;
+        klass = nullptr;    //AutoPtr<T>::operator= is overloaded.
+                            //NOT: MISRA-C++: Pointer assignment to wider scope.
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return mComponent->GetCoclass(mCoclassName, klass);
@@ -149,6 +150,8 @@ ECode Object::GetWeakReference(
 void Object::OnLastStrongRef(
     /* [in] */ const void* id)
 {
+    (void)id;
+
     if (UNLIKELY(mObserver != nullptr)) {
         mObserver->OnLastStrongRef(this);
     }
@@ -157,6 +160,8 @@ void Object::OnLastStrongRef(
 void Object::OnLastWeakRef(
     /* [in] */ const void* id)
 {
+    (void)id;
+
     if (UNLIKELY(mObserver != nullptr)) {
         mObserver->OnLastWeakRef(this);
     }
@@ -300,7 +305,7 @@ Boolean Object::Equals(
 String Object::ToString(
     /* [in] */ IInterface* obj)
 {
-    if (obj == nullptr) {
+    if (nullptr == obj) {
         return "null";
     }
     else {
@@ -318,7 +323,7 @@ AutoPtr<IWeakReference> Object::GetWeakReference(
     /* [in] */ IInterface* obj)
 {
     IWeakReferenceSource* wrSource = IWeakReferenceSource::Probe(obj);
-    if (wrSource == nullptr) {
+    if (nullptr == wrSource) {
         return nullptr;
     }
     AutoPtr<IWeakReference> wr;
@@ -330,8 +335,8 @@ Boolean Object::InstanceOf(
     /* [in] */ IInterface* obj,
     /* [in] */ const CoclassID& cid)
 {
-    Object* o = static_cast<Object*>(IObject::Probe(obj));
-    if (o == nullptr) {
+    Object *o = static_cast<Object*>(IObject::Probe(obj));
+    if (nullptr == o) {
         return false;
     }
     return InstanceOf(o, cid);

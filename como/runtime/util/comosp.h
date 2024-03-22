@@ -692,7 +692,9 @@ template<typename T>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ T* other)
 {
-    if (mPtr == other) return *this;
+    if (mPtr == other) {
+        return *this;
+    }
 
     if (other != nullptr) {
         other->AddRef(reinterpret_cast<HANDLE>(this));
@@ -708,7 +710,9 @@ template<typename T>
 AutoPtr<T>& AutoPtr<T>::operator=(
     /* [in] */ const AutoPtr<T>& other)
 {
-    if (mPtr == other.mPtr) return *this;
+    if (mPtr == other.mPtr) {
+        return *this;
+    }
 
     if (other.mPtr != nullptr) {
         other.mPtr->AddRef(reinterpret_cast<HANDLE>(this));

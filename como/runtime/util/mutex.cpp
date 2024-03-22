@@ -85,7 +85,7 @@ static void InitTimeSpec(
         if (ms != int64_max && ms != int64_max / (1000 * 1000)) {
             Logger::V("NativeTimeUtils", "Note: end time exceeds INT32_MAX: %d", end_sec);
         }
-        end_sec = int32_max - 1;  // Allow for increment below.
+        end_sec = int64_t(int32_max - 1);  // Allow for increment below.
     }
     ts->tv_sec = end_sec;
     ts->tv_nsec = (ts->tv_nsec + (ms % 1000) * 1000000) + ns;
@@ -100,11 +100,11 @@ static void InitTimeSpec(
 
 void Mutex::Lock()
 {
-    if (!mRecursive || mExclusiveOwner != GetTid()) {
+    if ((! mRecursive) || (mExclusiveOwner != GetTid())) {
         bool done = false;
         do {
             int32_t curState = mState.load(std::memory_order_relaxed);
-            if (LIKELY(curState == 0)) {
+            if (LIKELY(0 == curState)) {
                 // Change state from 0 to 1 and impose load/store ordering appropriate for lock acquisition.
                 int32_t expected = 0, desired = 1;
                 done = mState.compare_exchange_weak(expected, desired, std::memory_order_acquire);
@@ -120,7 +120,7 @@ void Mutex::Lock()
                 }
                 mNumContenders--;
             }
-        } while (!done);
+        } while (! done);
 
         mExclusiveOwner = GetTid();
     }
@@ -130,11 +130,11 @@ void Mutex::Lock()
 void Mutex::Unlock()
 {
     mRecursionCount--;
-    if (!mRecursive || mRecursionCount == 0) {
+    if ((! mRecursive) || (mRecursionCount == 0)) {
         bool done = false;
         do {
             int32_t curState = mState.load(std::memory_order_relaxed);
-            if (LIKELY(curState == 1)) {
+            if (LIKELY(1 == curState)) {
                 // We're no longer the owner.
                 mExclusiveOwner = 0;
                 // Change state to 0 and impose load/store ordering appropriate for lock release.
@@ -154,7 +154,7 @@ void Mutex::Unlock()
             else {
                 Logger::E("Mutex", "Unexpected state_ in unlock %d", curState);
             }
-        } while (!done);
+        } while (! done);
     }
 }
 

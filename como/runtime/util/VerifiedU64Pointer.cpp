@@ -151,7 +151,7 @@ unsigned long VerifiedU64Pointer::decodeUnsignedLong(unsigned long l)
             for (n0 = 0;  n0 < 8u;  n0++) {
                 if ((b0 >> n0) & 1u) {
                     b = (unsigned char *)&l + n1;
-                    *b ^= (1u << n0);
+                    *b ^= (unsigned char)(1u << n0);
                     gFixedMemError++;
                 }
             }

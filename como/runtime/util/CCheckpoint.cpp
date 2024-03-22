@@ -80,9 +80,7 @@ ECode CCheckpoint::SetParam(
     /* [in] */ const String& name,
     /* [in] */ IObject* object)
 {
-    if (mParams.Put(name, object) != 0) {
-        return E_OUT_OF_MEMORY_ERROR;
-    }
+    mParams.Put(name, object);
     return NOERROR;
 }
 

@@ -49,8 +49,9 @@ __attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char
     if ((! getrlimit(RLIMIT_STACK, &rl)) && (rl.rlim_cur == RLIM_INFINITY))
         return 0;
 
-    if (size < stack_check_margin)
+    if (size < stack_check_margin) {
         return 0;
+    }
 
     size -= stack_check_margin;
 

@@ -218,6 +218,8 @@ LightRefBase::~LightRefBase()
 Integer LightRefBase::AddRef(
     /* [in] */ HANDLE id) const
 {
+    (void)id;
+
     Integer c = mCount.fetch_add(1, std::memory_order_relaxed);
     return c + 1;
 }
@@ -225,6 +227,8 @@ Integer LightRefBase::AddRef(
 Integer LightRefBase::Release(
     /* [in] */ HANDLE id) const
 {
+    (void)id;
+
     Integer c = mCount.fetch_sub(1, std::memory_order_release);
     if (c == 1) {
         std::atomic_thread_fence(std::memory_order_acquire);
@@ -254,6 +258,8 @@ Integer LightRefBase::Release(
 IInterface* LightRefBase::Probe(
     /* [in] */ const InterfaceID& iid) const
 {
+    (void)iid;
+
     return nullptr;
 }
 
@@ -261,6 +267,9 @@ ECode LightRefBase::GetInterfaceID(
     /* [in] */ IInterface* object,
     /* [out] */ InterfaceID& iid) const
 {
+    (void)object;
+    (void)iid;
+
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -272,7 +281,7 @@ Integer LightRefBase::GetStrongCount() const
 void LightRefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
 {
     funFreeMem = (static_cast<HANDLE>(shortPara) << 48) |
-                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFF);
+                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFFu);
                                                                 // 5 4 3 2 1 0
 }
 
