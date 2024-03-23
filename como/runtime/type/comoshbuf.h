@@ -45,7 +45,7 @@ class COM_PUBLIC SharedBuffer
 public:
     /* flags to use with release() */
     enum {
-        eKeepStorage = 0x00000001
+        eKeepStorage = 0x00000001u
     };
 
     /*! allocate a buffer of size 'size' and acquire() it.

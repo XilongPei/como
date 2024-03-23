@@ -83,9 +83,9 @@ char **hashmap(char *key, void *heap, ptrdiff_t *heaplen)
         return next ? &next->key : nullptr;
     }
 
-    uint64_t hash = 0x100;
+    uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
-    for (;  key[keylen++];  hash *= 0x100000001b3) {
+    for (;  key[keylen++];  hash *= 0x100000001b3u) {
         hash ^= key[keylen] & 255;
     }
 
@@ -150,10 +150,10 @@ char **hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heap
         return next ? &next->key : nullptr;
     }
 
-    uint64_t hash = 0x100;
+    uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
     const char *key = key_stdstring->c_str();
-    for (;  key[keylen++];  hash *= 0x100000001b3) {
+    for (;  key[keylen++];  hash *= 0x100000001b3u) {
         hash ^= key[keylen] & 255;
     }
 

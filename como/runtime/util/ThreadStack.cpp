@@ -44,7 +44,7 @@ __attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char
 {
     struct rlimit rl;
     volatile char buf[0x100];
-    enum {stack_check_margin = 0x1000}; /* for -fstack-check */
+    enum {stack_check_margin = 0x1000u}; /* for -fstack-check */
 
     if ((! getrlimit(RLIMIT_STACK, &rl)) && (rl.rlim_cur == RLIM_INFINITY))
         return 0;

@@ -83,9 +83,10 @@ static int handler(void* user, const char* section, const char* name, const char
 ECode ComoFunctionSafetyObject::AfterConstruction()
 {
     AutoPtr<IMetaCoclass> klass;
-    IObject::Probe(this)->GetCoclass(klass);
+    FAIL_RETURN(IObject::Probe(this)->GetCoclass(klass));
+
     String funcSafetySetting;
-    klass->GetFuncSafetySetting(funcSafetySetting);
+    FAIL_RETURN(klass->GetFuncSafetySetting(funcSafetySetting));
 
     if (funcSafetySetting.IsEmpty()) {
         mExpires = CFSO_ExpireVALID;
@@ -97,8 +98,8 @@ ECode ComoFunctionSafetyObject::AfterConstruction()
         }
     }
 
-    clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
-    pthread_mutex_lock(&funSafetyLock);
+    (void)clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+    (void)pthread_mutex_lock(&funSafetyLock);
     if (objsLifeCycleExpires.cfso_push(this) < 0) {
         Logger::E("ComoFunctionSafetyObject", "Construct Object error");
         return E_OUT_OF_MEMORY_ERROR;
@@ -111,7 +112,7 @@ ECode ComoFunctionSafetyObject::AfterConstruction()
 ComoFunctionSafetyObject::~ComoFunctionSafetyObject()
 {
     if (mExpires > 0) {
-        pthread_mutex_lock(&funSafetyLock);
+        (void)pthread_mutex_lock(&funSafetyLock);
         int index = objsLifeCycleExpires.cfso_find(this);
         if (index >= 0) {
             (void)objsLifeCycleExpires.cfso_del(index);
@@ -119,7 +120,7 @@ ComoFunctionSafetyObject::~ComoFunctionSafetyObject()
         else {
             Logger::E("ComoFunctionSafetyObject", "lost object: %lx", this);
         }
-        pthread_mutex_unlock(&funSafetyLock);
+        (void)pthread_mutex_unlock(&funSafetyLock);
     }
 }
 
@@ -145,7 +146,7 @@ ECode ComoFunctionSafetyObject::SetExpires(
 
 ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
 {
-    clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+    (void)clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
 
     return NOERROR;
 }
@@ -157,7 +158,7 @@ ECode ComoFunctionSafetyObject::IsValid(
         /* [out] */ Integer& isValid)
 {
     struct timespec time;
-    clock_gettime(CLOCK_REALTIME, &time);
+    (void)clock_gettime(CLOCK_REALTIME, &time);
 
     if (1000000000L * (mLastModifiedTime.tv_sec - time.tv_sec) +
        /*987654321*/    (mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {
@@ -294,8 +295,9 @@ int CFSO_VECTOR::cfso_del(unsigned int index) {
             for ( ;  _size > 0;  _size--) {
                 cfso = *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
                                                         (_size-1) * sizeof(ComoFunctionSafetyObject*));
-                if (cfso != nullptr)
+                if (cfso != nullptr) {
                     break;
+                }
             }
             if (cfso != nullptr) {
                 *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
