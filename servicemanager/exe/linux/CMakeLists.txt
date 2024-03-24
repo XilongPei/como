@@ -28,6 +28,7 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         ${COMO_RUNTIME_DIR}/rpc
         ${COMO_RUNTIME_DIR}/rpc/ZeroMQ
         ${EXTERNAL_DIR}/libzmq/include
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/include
     )
     set(RPC_ZeroMQ_SOURCES
         RpcOverZeroMQ.cpp

@@ -96,10 +96,7 @@ ECode ServiceManager::AddService(
         std::string sEchoRespValue;
         std::string sname = std::string(name.string());
         std::string ss = std::string(s);
-        int ret = oEchoServer->Echo(como::ComoPhxUtils::MsgEncode(como::ComoPhxUtils::LevelDbWrite, sname, ss),
-                                    sEchoRespValue);
-
-        ret = como::ComoPhxUtils::SyncStateData(oEchoServer,
+        int ret = como::ComoPhxUtils::SyncStateData(oEchoServer,
                                                 como::ComoPhxUtils::LevelDbWrite, sname, ss,
                                                 sEchoRespValue);
 
