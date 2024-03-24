@@ -18,3 +18,10 @@ export RPC_OVER_ZeroMQ_SUPPORT_Enable=enable
 ./test/runtime/rpc/service/testRPCSrv
 ./test/runtime/rpc/client/testRPCCli
 
+
+source build/envsetup.sh
+como_linux_aarch64
+clobber all
+debug
+export RPC_OVER_ZeroMQ_SUPPORT_Enable=enable
+export COMO_FUNCTION_SAFETY=enable

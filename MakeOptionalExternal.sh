@@ -41,11 +41,11 @@ function check_file_exist()
 function build_libzmq()
 {
     cd ${ROOT}/external/libzmq;
+    rm -rf CMakeFiles
+    rm -rf CMakeCache.txt
 
     check_dir_exist build
-    if [ $? -eq 0 ]; then
-        rm -rf CMakeFiles
-        rm -rf CMakeCache.txt
+    if [ $? -eq 1 ]; then
         cd build;
     else
         mkdir build && cd build;
