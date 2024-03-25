@@ -82,7 +82,7 @@ static void InitTimeSpec(
         // problem. The former generally uses the largest possible millisecond
         // or nanosecond value.  Log only in the latter case.
         constexpr int64_t int64_max = std::numeric_limits<int64_t>::max();
-        if (ms != int64_max && ms != int64_max / (1000 * 1000)) {
+        if ((ms != int64_max) && (ms != int64_max / (1000 * 1000))) {
             Logger::V("NativeTimeUtils", "Note: end time exceeds INT32_MAX: %d", end_sec);
         }
         end_sec = int64_t(int32_max - 1);  // Allow for increment below.
@@ -106,7 +106,8 @@ void Mutex::Lock()
             int32_t curState = mState.load(std::memory_order_relaxed);
             if (LIKELY(0 == curState)) {
                 // Change state from 0 to 1 and impose load/store ordering appropriate for lock acquisition.
-                int32_t expected = 0, desired = 1;
+                int32_t expected = 0;
+                int32_t desired = 1;
                 done = mState.compare_exchange_weak(expected, desired, std::memory_order_acquire);
             }
             else {
@@ -130,7 +131,7 @@ void Mutex::Lock()
 void Mutex::Unlock()
 {
     mRecursionCount--;
-    if ((! mRecursive) || (mRecursionCount == 0)) {
+    if ((! mRecursive) || (0 == mRecursionCount)) {
         bool done = false;
         do {
             int32_t curState = mState.load(std::memory_order_relaxed);
@@ -246,7 +247,7 @@ void Condition::SignalAll()
                        reinterpret_cast<const timespec*>(std::numeric_limits<int32_t>::max()),
                        (int32_t*)&mGuard.mState, curSequence) != -1;
             if (!done) {
-                if (errno != EAGAIN && errno != EINTR) {
+                if ((errno != EAGAIN) && (errno != EINTR)) {
                     Logger::E("Condition", "futex cmp requeue failed");
                 }
             }
