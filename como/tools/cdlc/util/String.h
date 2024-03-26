@@ -205,12 +205,12 @@ String::String()
 
 bool String::IsNull() const
 {
-    return mString == nullptr;
+    return (nullptr == mString);
 }
 
 bool String::IsEmpty() const
 {
-    return IsNull() || mString[0] == '\0';
+    return (IsNull() || ('\0' == mString[0]));
 }
 
 const char* String::string() const

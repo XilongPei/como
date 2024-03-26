@@ -38,7 +38,7 @@
 
 namespace como {
 
-SharedBuffer* SharedBuffer::Alloc(
+SharedBuffer *SharedBuffer::Alloc(
     /* [in] */ size_t size)
 {
     // Don't overflow if the combined size of the buffer / header is larger than
@@ -66,7 +66,7 @@ SharedBuffer* SharedBuffer::Alloc(
 }
 
 void SharedBuffer::Dealloc(
-    /* [in] */ const SharedBuffer* released)
+    /* [in] */ const SharedBuffer *released)
 {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     MemPoolFree(0, const_cast<SharedBuffer*>(released));
@@ -75,12 +75,12 @@ void SharedBuffer::Dealloc(
 #endif
 }
 
-SharedBuffer* SharedBuffer::Edit() const
+SharedBuffer *SharedBuffer::Edit() const
 {
     if (OnlyOwner()) {
         return const_cast<SharedBuffer*>(this);
     }
-    SharedBuffer* sb = Alloc(mSize);
+    SharedBuffer *sb = Alloc(mSize);
     if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), GetSize());
         Release();
@@ -88,13 +88,14 @@ SharedBuffer* SharedBuffer::Edit() const
     return sb;
 }
 
-SharedBuffer* SharedBuffer::EditResize(
+SharedBuffer *SharedBuffer::EditResize(
     /* [in] */ size_t newSize) const
 {
     if (OnlyOwner()) {
-        SharedBuffer* buf = const_cast<SharedBuffer*>(this);
-        if (buf->mSize == newSize)
+        SharedBuffer *buf = const_cast<SharedBuffer*>(this);
+        if (buf->mSize == newSize) {
             return buf;
+        }
         // Don't overflow if the combined size of the new buffer / header is larger than
         // size_max.
         if (newSize >= (SIZE_MAX - sizeof(SharedBuffer))) {
@@ -102,14 +103,22 @@ SharedBuffer* SharedBuffer::EditResize(
             return nullptr;
         }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        SharedBuffer *buf_tmp;
+        buf_tmp = static_cast<SharedBuffer *>(MemPoolAlloc(sizeof(SharedBuffer) + newSize));
+        memcpy(buf_tmp, buf, buf->GetCapacity());
+        MemPoolFree(buf);
+        buf = buf_tmp;
+#else
         buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newSize);
+#endif
         if (nullptr != buf) {
             buf->mSize = newSize;
             buf->mCapacity = newSize;
             return buf;
         }
     }
-    SharedBuffer* sb = Alloc(newSize);
+    SharedBuffer *sb = Alloc(newSize);
     if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), newSize < mSize ? newSize : mSize);
         Release();
@@ -117,7 +126,7 @@ SharedBuffer* SharedBuffer::EditResize(
     return sb;
 }
 
-SharedBuffer* SharedBuffer::AttemptEdit() const
+SharedBuffer *SharedBuffer::AttemptEdit() const
 {
     if (OnlyOwner()) {
         return const_cast<SharedBuffer*>(this);
@@ -125,23 +134,24 @@ SharedBuffer* SharedBuffer::AttemptEdit() const
     return 0;
 }
 
-SharedBuffer* SharedBuffer::Reset(
+SharedBuffer *SharedBuffer::Reset(
     /* [in] */ size_t new_size) const
 {
-    SharedBuffer* sb = Alloc(new_size);
+    SharedBuffer *sb = Alloc(new_size);
     if (nullptr != sb) {
         Release();
     }
     return sb;
 }
 
-SharedBuffer* SharedBuffer::Reserve(
+SharedBuffer *SharedBuffer::Reserve(
         /* [in] */ size_t newCapacity) const
 {
     if (OnlyOwner()) {
-        SharedBuffer* buf = const_cast<SharedBuffer*>(this);
-        if (buf->mSize == newCapacity)
+        SharedBuffer *buf = const_cast<SharedBuffer*>(this);
+        if (buf->mSize == newCapacity) {
             return buf;
+        }
         // Don't overflow if the combined size of the new buffer / header is larger than
         // size_max.
         if (newCapacity >= (SIZE_MAX - sizeof(SharedBuffer))) {
@@ -149,16 +159,25 @@ SharedBuffer* SharedBuffer::Reserve(
             return nullptr;
         }
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+        SharedBuffer *buf_tmp;
+        buf_tmp = static_cast<SharedBuffer *>(MemPoolAlloc(sizeof(SharedBuffer) + newCapacity));
+        memcpy(buf_tmp, buf, buf->GetCapacity());
+        MemPoolFree(buf);
+        buf = buf_tmp;
+#else
         buf = (SharedBuffer*)realloc(buf, sizeof(SharedBuffer) + newCapacity);
+#endif
         if (buf != nullptr) {
-            if (newCapacity < buf->mSize)
+            if (newCapacity < buf->mSize) {
                 buf->mSize = newCapacity;
+            }
 
             buf->mCapacity = newCapacity;
             return buf;
         }
     }
-    SharedBuffer* sb = Alloc(newCapacity);
+    SharedBuffer *sb = Alloc(newCapacity);
     if (nullptr != sb) {
         memcpy(sb->GetData(), GetData(), newCapacity < mSize ? newCapacity : mSize);
         Release();
@@ -207,6 +226,7 @@ void *SharedBuffer::MemPoolAlloc(size_t ulSize)
 
 void SharedBuffer::MemPoolFree(short id, const void *p)
 {
+    (void)id;
     memPoolSet->Free((void *)p);
 }
 

@@ -200,13 +200,13 @@ ECode CZMQParcel::ReadString(
         return NOERROR;
     }
 
-    if (size == 0) {
+    if (0 == size) {
         value = "";
         return NOERROR;
     }
 
     const char* str = (const char*)ReadInplace(size + 1);
-    if (str == nullptr) {
+    if (nullptr == str) {
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -243,7 +243,7 @@ ECode CZMQParcel::ReadCoclassID(
     }
 
     ComponentID* cid = (ComponentID*)malloc(sizeof(ComponentID));
-    if (cid == nullptr) {
+    if (nullptr == cid) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     value.mCid = cid;
@@ -254,13 +254,13 @@ ECode CZMQParcel::WriteCoclassID(
     /* [in] */ const CoclassID& value)
 {
     CoclassID* cid = (CoclassID*)WriteInplace(sizeof(CoclassID));
-    if (cid == nullptr) {
+    if (nullptr == cid) {
         return E_RUNTIME_EXCEPTION;
     }
     memcpy(cid, &value, sizeof(CoclassID));
     cid->mCid = nullptr;
 
-    if (value.mCid == nullptr) {
+    if (nullptr == value.mCid) {
         return WriteInteger(TAG_NULL);
     }
 
@@ -281,7 +281,7 @@ ECode CZMQParcel::ReadComponentID(
 
     Integer size;
     ReadInteger(size);
-    if (size == 0) {
+    if (0 == size) {
         return NOERROR;
     }
 
@@ -305,13 +305,13 @@ ECode CZMQParcel::WriteComponentID(
     /* [in] */ const ComponentID& value)
 {
     ComponentID *cid = (ComponentID*)WriteInplace(sizeof(ComponentID));
-    if (cid == nullptr) {
+    if (nullptr == cid) {
         return E_RUNTIME_EXCEPTION;
     }
     memcpy(cid, &value, sizeof(ComponentID));
     cid->mUri = nullptr;
 
-    Integer size = (value.mUri == nullptr) ? 0 : strlen(value.mUri);
+    Integer size = (nullptr == value.mUri) ? 0 : strlen(value.mUri);
     ECode ec = WriteInteger(size);
     if ((size > 0) && SUCCEEDED(ec)) {
         ec = Write(value.mUri, size + 1);
@@ -334,7 +334,7 @@ ECode CZMQParcel::ReadInterfaceID(
     }
 
     ComponentID *cid = (ComponentID*)malloc(sizeof(ComponentID));
-    if (cid == nullptr) {
+    if (nullptr == cid) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     value.mCid = cid;
@@ -345,13 +345,13 @@ ECode CZMQParcel::WriteInterfaceID(
     /* [in] */ const InterfaceID& value)
 {
     InterfaceID *iid = (InterfaceID*)WriteInplace(sizeof(InterfaceID));
-    if (iid == nullptr) {
+    if (nullptr == iid) {
         return E_RUNTIME_EXCEPTION;
     }
     memcpy(iid, &value, sizeof(InterfaceID));
     iid->mCid = nullptr;
 
-    if (value.mCid == nullptr) {
+    if (nullptr == value.mCid) {
         return WriteInteger(TAG_NULL);
     }
 
@@ -1056,7 +1056,7 @@ ECode CZMQParcel::RestartWrite(
         data = (Byte*)malloc(desired);
     }
 
-    if (data == nullptr && desired > mDataCapacity) {
+    if ((nullptr == data) && (desired > mDataCapacity)) {
         mError = E_OUT_OF_MEMORY_ERROR;
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -1101,7 +1101,7 @@ ECode CZMQParcel::ContinueWrite(
     else {
         if (desired > mDataCapacity) {
             Byte* data = (Byte*)malloc(desired);
-            if (data == nullptr) {
+            if (nullptr == data) {
                 mError = E_OUT_OF_MEMORY_ERROR;
                 return E_OUT_OF_MEMORY_ERROR;
             }

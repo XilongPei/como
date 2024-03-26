@@ -412,7 +412,7 @@ ECode CZMQChannel::Invoke(
             if (nullptr != resParcel) {
                 Integer hasOutArgs;
                 method->GetOutArgumentsNumber(hasOutArgs);
-                if (hasOutArgs) {
+                if (hasOutArgs != 0) {
                     resParcel->SetData(reinterpret_cast<HANDLE>(zmq_msg_data(&msg)),
                                                                 zmq_msg_size(&msg));
                 }

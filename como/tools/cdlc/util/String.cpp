@@ -83,7 +83,7 @@ void* SharedBuffer::Alloc(
 int SharedBuffer::AddRef(
     /* [in] */ void* data)
 {
-    if (data == nullptr) {
+    if (nullptr == data) {
         return 0;
     }
 
@@ -98,13 +98,13 @@ int SharedBuffer::AddRef(
 int SharedBuffer::Release(
     /* [in] */ void* data)
 {
-    if (data == nullptr) {
+    if (nullptr == data) {
         return 0;
     }
 
     SharedBuffer* buffer = reinterpret_cast<SharedBuffer*>(data) - 1;
     int count = buffer->mRefCount.fetch_sub(1, std::memory_order_relaxed);
-    if (count == 1) {
+    if (1 == count) {
         std::atomic_thread_fence(std::memory_order_acquire);
         free(buffer);
     }
@@ -117,7 +117,7 @@ int SharedBuffer::Release(
 int SharedBuffer::GetSize(
     /* [in] */ void* data)
 {
-    if (data == nullptr) {
+    if (nullptr == data) {
         return 0;
     }
 
@@ -130,7 +130,7 @@ int SharedBuffer::GetSize(
 String::String(
     /* [in] */ const char* string)
 {
-    if (string == nullptr) {
+    if (nullptr == string) {
         return;
     }
 
@@ -144,11 +144,11 @@ String::String(
     /* [in] */ const char* string,
     /* [in] */ int size)
 {
-    if (string == nullptr) {
+    if (nullptr == string) {
         return;
     }
 
-    if (size <= 0 || size > strlen(string)) {
+    if ((size <= 0) || (size > strlen(string))) {
         return;
     }
 
@@ -194,7 +194,7 @@ String& String::operator=(
 {
     SharedBuffer::Release(mString);
 
-    if (string == nullptr) {
+    if (nullptr == string) {
         mString = nullptr;
     }
     else {
@@ -234,14 +234,14 @@ String& String::operator=(
 String& String::operator+=(
     /* [in] */ const char* string)
 {
-    if (string == nullptr || string[0] == '\0') {
+    if ((nullptr == string) || ('\0' == string[0])) {
         return *this;
     }
 
     int oldLen = GetLength();
     int newLen = oldLen + strlen(string);
     char* newString = reinterpret_cast<char*>(SharedBuffer::Alloc(newLen));
-    if (newString == nullptr) {
+    if (nullptr == newString) {
         return *this;
     }
 
