@@ -21,7 +21,8 @@
 
 namespace como {
 
-class Mac {
+class Mac
+{
 public:
 
     static Long GetMacAddress(Long& lMacAddr);
