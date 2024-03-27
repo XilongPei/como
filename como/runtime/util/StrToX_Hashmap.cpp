@@ -43,16 +43,25 @@ StrToX_Hashmap::StrToX_Hashmap(void *heap, size_t heaplen)
 /**
  * vHashmap
  */
-char **StrToX_Hashmap::vHashmap(char *key)
+char **StrToX_Hashmap::vHashmap(char *key, bool wantToFind)
 {
+    if (wantToFind) {
+        return hashmap(key, mHeap, (ptrdiff_t*)0);
+    }
+
     return hashmap(key, mHeap, (ptrdiff_t*)&mHeaplen);
 }
 
 /**
  * vHashmap_stdstring
  */
-char **StrToX_Hashmap::vHashmap_stdstring(std::string *key_stdstring, char **pvalue)
+char **StrToX_Hashmap::vHashmap_stdstring(std::string *key_stdstring,
+                                                 char **pvalue, bool wantToFind)
 {
+    if (wantToFind) {
+        return hashmap_stdstring(key_stdstring, mHeap, (ptrdiff_t*)0, pvalue);
+    }
+
     return hashmap_stdstring(key_stdstring, mHeap, (ptrdiff_t*)&mHeaplen, pvalue);
 }
 
@@ -120,7 +129,7 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
         if (! strcmp(key, (*n)->key)) {
             return &(*n)->value;
         }
-        n = &(*n)->child[hash >> (64 - ARY)];
+        n = &(*n)->child[hash >> (sizeof(hash) - ARY)];
     }
     if (! heaplen) {
         return nullptr;                     // lookup failed
@@ -191,7 +200,7 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
 
             return pvalue;
         }
-        n = &(*n)->child[hash >> (64 - ARY)];
+        n = &(*n)->child[hash >> (sizeof(hash) - ARY)];
     }
     if (! heaplen) {
         return nullptr;                                 // lookup failed

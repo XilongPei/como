@@ -106,15 +106,16 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
             return endpointSocket->socket;
         }
 #else
-        char **p = heap_StrToX->vHashmap(bufEndpoint);
+        char **p = heap_StrToX->vHashmap(bufEndpoint, true);
         if (nullptr != p) {
             return ((EndpointSocket*)*p)->socket;
         }
 #endif
     }
 
-    if (nullptr == context)
+    if (nullptr == context) {
         context = CzmqGetContext();
+    }
 
     void *socket;
     if (ZMQ_REP != type) {      // I am client
@@ -163,9 +164,13 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 #ifndef COMO_FUNCTION_SAFETY_RTOS
             zmq_sockets.emplace(bufEndpoint, endpointSocket);
 #else
-            char **p = heap_StrToX->vHashmap(bufEndpoint);
+            char **p = heap_StrToX->vHashmap(bufEndpoint, false);
             if (nullptr != p) {
                 *p = (char*)endpointSocket;
+            }
+            else {
+                Logger::E("CZMQUtils::CzmqGetSocket", "heap_StrToX, Out of memory");
+                return nullptr;
             }
 #endif
         }
@@ -189,7 +194,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
     if (iter != zmq_sockets.end()) {
         endpointSocket = iter->second;
 #else
-    char **p = heap_StrToX->vHashmap((char*)serverName);
+    char **p = heap_StrToX->vHashmap((char*)serverName, true);
     if (nullptr != p) {
         endpointSocket = (EndpointSocket*)*p;
 #endif
@@ -408,7 +413,7 @@ EndpointSocket *CZMQUtils::CzmqFindSocket(std::string& endpoint)
         return iter->second;
     }
 #else
-    char **p = heap_StrToX->vHashmap((char*)endpoint.c_str());
+    char **p = heap_StrToX->vHashmap((char*)endpoint.c_str(), true);
     if (nullptr != p) {
         return (EndpointSocket*)*p;
     }

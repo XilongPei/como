@@ -27,9 +27,10 @@ class COM_PUBLIC StrToX_Hashmap
 public:
     StrToX_Hashmap(void *heap, size_t heaplen);
 
-    char **vHashmap(char *key);
+    char **vHashmap(char *key, bool wantToFind=false);
 
-    char **vHashmap_stdstring(std::string *key_stdstring, char **pvalue);
+    char **vHashmap_stdstring(std::string *key_stdstring, char **pvalue,
+                                                        bool wantToFind=false);
 
     static char **hashmap(char *key, void *heap, ptrdiff_t *heaplen);
 
