@@ -25,10 +25,19 @@ namespace como {
 class COM_PUBLIC StrToX_Hashmap
 {
 public:
+    StrToX_Hashmap(void *heap, size_t heaplen);
+
+    char **vHashmap(char *key);
+
+    char **vHashmap_stdstring(std::string *key_stdstring, char **pvalue);
+
     static char **hashmap(char *key, void *heap, ptrdiff_t *heaplen);
 
     static char **hashmap_stdstring(std::string *key_stdstring, void *heap,
                                             ptrdiff_t *heaplen, char **pvalue);
+
+    size_t  mHeaplen;
+    void   *mHeap;
 };
 
 } // namespace como

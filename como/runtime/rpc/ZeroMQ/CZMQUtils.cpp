@@ -21,11 +21,18 @@
 #include "checksum.h"
 #include "ComoConfig.h"
 #include "CZMQUtils.h"
+#include "StrToX_Hashmap.h"
 #include <stdio.h>
 
 namespace como {
 
-static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    static char heap_StrToX_Hashmap[ComoConfig::ZMQ_SOCKETS_HEAPSIZE];
+    static StrToX_Hashmap *heap_StrToX = new StrToX_Hashmap(heap_StrToX_Hashmap,
+                                                    sizeof(heap_StrToX_Hashmap));
+#else
+    static std::unordered_map<std::string, EndpointSocket*> zmq_sockets;
+#endif
 
 static zmq_pollitem_t *zmq_pollitems = nullptr;
 static int zmq_pollitemNum = 0;
@@ -91,12 +98,19 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
     {
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
         std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                      zmq_sockets.find(std::string(bufEndpoint));
         if (iter != zmq_sockets.end()) {
             endpointSocket = iter->second;
             return endpointSocket->socket;
         }
+#else
+        char **p = heap_StrToX->vHashmap(bufEndpoint);
+        if (nullptr != p) {
+            return ((EndpointSocket*)*p)->socket;
+        }
+#endif
     }
 
     if (nullptr == context)
@@ -146,7 +160,14 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
         {
             Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
             zmq_sockets.emplace(bufEndpoint, endpointSocket);
+#else
+            char **p = heap_StrToX->vHashmap(bufEndpoint);
+            if (nullptr != p) {
+                *p = (char*)endpointSocket;
+            }
+#endif
         }
     }
 
@@ -162,10 +183,16 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 
     Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
     std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                         zmq_sockets.find(std::string(serverName));
     if (iter != zmq_sockets.end()) {
         endpointSocket = iter->second;
+#else
+    char **p = heap_StrToX->vHashmap((char*)serverName);
+    if (nullptr != p) {
+        endpointSocket = (EndpointSocket*)*p;
+#endif
 
         int rc;
         rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
@@ -177,7 +204,13 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         }
 
         delete(endpointSocket);
+#ifndef COMO_FUNCTION_SAFETY_RTOS
         int delNum = zmq_sockets.erase(std::string(serverName));
+#else
+        int delNum;
+        *p = nullptr;
+        delNum = 1;
+#endif
         if (1 != delNum) {
             Logger::E("CZMQUtils::CzmqCloseSocket", "serverName should be unique name");
         }
@@ -368,11 +401,18 @@ EndpointSocket *CZMQUtils::CzmqFindSocket(std::string& endpoint)
 {
     Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
+#ifndef COMO_FUNCTION_SAFETY_RTOS
     std::unordered_map<std::string, EndpointSocket*>::iterator iter =
                                                      zmq_sockets.find(endpoint);
     if (iter != zmq_sockets.end()) {
         return iter->second;
     }
+#else
+    char **p = heap_StrToX->vHashmap((char*)endpoint.c_str());
+    if (nullptr != p) {
+        return (EndpointSocket*)*p;
+    }
+#endif
 
     return nullptr;
 }
@@ -382,6 +422,7 @@ static void *rep_socket_monitor(void *endpointSocket);
 
 void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
 {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
     EndpointSocket *endpointSocket;
 
     {
@@ -405,7 +446,7 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
     if (0 != rc) {
         return nullptr;
     }
-
+#endif
     return nullptr;
 }
 
@@ -470,6 +511,7 @@ static bool shutdown = false;
 // REP socket monitor thread
 static void *rep_socket_monitor(void *endpointSocket)
 {
+#ifndef COMO_FUNCTION_SAFETY_RTOS
     if (nullptr == socketZMQ_PAIR) {
         socketZMQ_PAIR = zmq_socket(CZMQUtils::CzmqGetContext(), ZMQ_PAIR);
     }
@@ -545,6 +587,7 @@ static void *rep_socket_monitor(void *endpointSocket)
         }
     }
     zmq_close(socketZMQ_PAIR);
+#endif
     return nullptr;
 }
 

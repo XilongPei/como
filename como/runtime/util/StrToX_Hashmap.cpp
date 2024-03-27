@@ -33,6 +33,30 @@
 
 namespace como {
 
+StrToX_Hashmap::StrToX_Hashmap(void *heap, size_t heaplen)
+    : mHeap(heap)
+    , mHeaplen(heaplen)
+{
+    hashmap(0, mHeap, (ptrdiff_t*)&mHeaplen);
+}
+
+/**
+ * vHashmap
+ */
+char **StrToX_Hashmap::vHashmap(char *key)
+{
+    return hashmap(key, mHeap, (ptrdiff_t*)&mHeaplen);
+}
+
+/**
+ * vHashmap_stdstring
+ */
+char **StrToX_Hashmap::vHashmap_stdstring(std::string *key_stdstring, char **pvalue)
+{
+    return hashmap_stdstring(key_stdstring, mHeap, (ptrdiff_t*)&mHeaplen, pvalue);
+}
+
+
 // Initialization: Call with null key. A heap can have only one map at a
 // time, and all alloctions will come from this heap. The heap must be
 // pointer-aligned and have space for at least two pointers.

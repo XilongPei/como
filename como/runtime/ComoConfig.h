@@ -109,6 +109,8 @@ public:
     static int unitSizeGeneralBuffer;
 
     static int MAX_SIZE_Parcel;
+
+    static constexpr int ZMQ_SOCKETS_HEAPSIZE = (1 << 16);
 };
 
 // defined in VerifiedU64Pointer.cpp
