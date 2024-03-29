@@ -231,7 +231,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
 Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize)
 {
-    if (bufSize == 0) {
+    if (0 == bufSize) {
         return -1;
     }
 
@@ -256,13 +256,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
     else {
         Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send funCodeAndCRC64 errno, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
-        return -1;
+        return (-2 - zmq_errno());
     }
 
     if (numberOfBytes == -1) {
         Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send buffer errno, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
-        return -1;
+        return (-2 - zmq_errno());
     }
 
     return numberOfBytes;
@@ -274,6 +274,10 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
 Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
                           void *socket, void *buf, size_t bufSize, int flags)
 {
+    if (0 == bufSize) {
+        return -1;
+    }
+
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
 
@@ -286,7 +290,7 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
         Logger::E("CZMQUtils::CzmqRecvBuf", "error: %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-        return -1;
+        return (-2 - zmq_errno());
     }
     else {
         int more;
@@ -303,7 +307,7 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
             if (numberOfBytes >= bufSize) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "Message is bigger than the buffer");
                 eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-                return -1;
+                return (-2 - zmq_errno());
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(buf), numberOfBytes);
@@ -317,7 +321,7 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
             if ((crcTmp != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-                return -1;
+                return (-2 - zmq_errno());
             }
             eventCode = funCodeAndCRC64.eCode;
             hChannel = funCodeAndCRC64.hChannel;
@@ -330,7 +334,7 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
     if (numberOfBytes == -1) {
         Logger::E("CZMQUtils::CzmqSendBuf", "errno %d", zmq_errno());
         eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-        return -1;
+        return (-2 - zmq_errno());
     }
 
     return numberOfBytes;
@@ -347,13 +351,14 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
 
     // Block until a message is available to be received from socket if flags != ZMQ_DONTWAIT
     numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
-    if (numberOfBytes == -1) {
+    if (-1 == numberOfBytes) {
         if (EAGAIN == errno) {
             return 0;
         }
         Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
-        return -1;
+        eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+        return (-2 - zmq_errno());
     }
     else {
         int more;
@@ -364,7 +369,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             if (0 != rc) {
                 Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_init error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
-                return -1;
+                eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+                return (-2 - zmq_errno());
             }
 
             // Block until a message is available to be received from socket
@@ -373,7 +379,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
                 Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_recv error, %d %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
                 // msg has already been zmq_msg_init
-                return -2;
+                eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+                return (-2 - zmq_errno());
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(
@@ -388,7 +395,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             if ((crcTmp != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
                 // msg has already been zmq_msg_init
-                return -3;
+                eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+                return (-2 - zmq_errno());
             }
             eventCode = funCodeAndCRC64.eCode;
             hChannel = funCodeAndCRC64.hChannel;
