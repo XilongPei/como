@@ -127,6 +127,8 @@ ECode CZMQChannel::IsPeerAlive(
                                         ZmqFunCode::Actor_IsPeerAlive, socket,
                                                  (void *)&lvalue, sizeof(Long));
     if (-1 == rc) {
+        lvalue = rc;
+        alive = false;
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -149,12 +151,15 @@ ECode CZMQChannel::IsPeerAlive(
             alive = peerState->alive;
         }
         else {
+            lvalue = rc;
             alive = false;
             Logger::E("CZMQChannel::ReleasePeer",
                     "ObjectId: 0x%llX, Fail, ECode: 0x%X", mServerObjectId, ec);
         }
     }
     else {
+        lvalue = rc;
+        alive = false;
         ec = ZMQ_BAD_REPLY_DATA;
         Logger::E("CZMQChannel::ReleasePeer", "RCZMQUtils::CzmqRecvMsg().");
     }
@@ -204,6 +209,7 @@ ECode CZMQChannel::ReleasePeer(
         }
     }
     else {
+        alive = false;
         ec = ZMQ_BAD_REPLY_DATA;
         Logger::E("CZMQChannel::ReleasePeer", "RCZMQUtils::CzmqRecvMsg().");
     }

@@ -658,7 +658,9 @@ ECode CDBusChannel::IsPeerAlive(
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel",
                  "Connect to bus daemon failed, error is \"%s\".", err.message);
+        alive = false;
         ec = E_RUNTIME_EXCEPTION;
+        dbus_error_free(&err);
         goto Exit;
     }
 
@@ -666,6 +668,7 @@ ECode CDBusChannel::IsPeerAlive(
                                             STUB_INTERFACE_PATH, "IsPeerAlive");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
+        alive = false;
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
     }
@@ -676,18 +679,22 @@ ECode CDBusChannel::IsPeerAlive(
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel.IsPeerAlive()",
                           "Fail to send message, error is \"%s\"", err.message);
+        alive = false;
         ec = E_REMOTE_EXCEPTION;
+        dbus_error_free(&err);
         goto Exit;
     }
 
     if (! dbus_message_iter_init(reply, &args)) {
         Logger::E("CDBusChannel", "Reply has no results.");
+        alive = false;
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
 
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
         Logger::E("CDBusChannel", "The first result is not Integer.");
+        alive = false;
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -697,21 +704,24 @@ ECode CDBusChannel::IsPeerAlive(
     if (SUCCEEDED(ec)) {
         if (! dbus_message_iter_next(&args)) {
             Logger::E("CDBusChannel", "Reply has no out arguments.");
+            alive = false;
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
         if (DBUS_TYPE_BOOLEAN != dbus_message_iter_get_arg_type(&args)) {
             Logger::E("CDBusChannel", "Reply arguments is not BOOLEAN.");
+                alive = false;
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
 
         dbus_bool_t val;
         dbus_message_iter_get_basic(&args, &val);
-        alive = val == TRUE ? true : false;
+        alive = ((val == TRUE) ? true : false);
     }
     else {
         Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
+        alive = false;
     }
 
 Exit:
