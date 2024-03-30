@@ -17,7 +17,7 @@
 #ifndef __COMO_HASHMAP_H__
 #define __COMO_HASHMAP_H__
 
-#include "type/comoarray.h"
+#include "comoarray.h"
 #include <cstdlib>
 #include <cstring>
 #include <assert.h>
@@ -289,8 +289,9 @@ public:
         assert(mCount == N);
 
         Array<Val> values(N);
-        if (values.IsNull())
+        if (values.IsNull()) {
             return values;
+        }
 
         if (N > 0) {
             Long idx = 0;

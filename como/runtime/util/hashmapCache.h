@@ -21,7 +21,7 @@
 #include <cstring>
 #include <assert.h>
 #include "ComoConfig.h"
-#include "type/comoarray.h"
+#include "comoarray.h"
 #include "hashmap.h"
 
 namespace como {
