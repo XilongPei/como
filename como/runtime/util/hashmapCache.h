@@ -68,9 +68,11 @@ public:
     // Walker for struct Bucket
     using HashMapWalker = void(*)(String&,Key&,Val&,struct timespec&);
 
-    explicit HashMapCache(
-        /* [in] */ unsigned int size = 50u)
+    HashMapCache(
+        /* [in] */ unsigned int size = 50u,
+        /* [in] */ unsigned int timeoutBucket = 600)
         : mCount(0)
+        , mTimeoutBucket(timeoutBucket)
     {
         mBucketSize = get_next_prime(size);
         mBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
@@ -112,7 +114,7 @@ public:
 
         unsigned long long int hash = HashKey(key);
         unsigned int index = hash % mBucketSize;
-        if (mBuckets[index] == nullptr) {
+        if (nullptr == mBuckets[index]) {
             Bucket* b = new Bucket();
             if (nullptr == b) {
                 return -2;
@@ -135,7 +137,7 @@ public:
                     prev->mlValue = lvalue;
                     return 0;
                 }
-                else if (prev->mNext == nullptr) {
+                else if (nullptr == prev->mNext) {
                     break;
                 }
                 prev = prev->mNext;
@@ -363,7 +365,7 @@ public:
                 Bucket* curr = mBuckets[i];
                 while (curr != nullptr) {
                     if ((currentTime.tv_sec - curr->lastAccessTime.tv_sec) >
-                                                               TIMEOUT_BUCKET) {
+                                                               mTimeoutBucket) {
                         Bucket* next = curr->mNext;
                         delete curr;
                         mCount--;
@@ -423,7 +425,7 @@ private:
             mBucketSize = MAX_BUCKET_SIZE;
         }
         Bucket** newBuckets = static_cast<Bucket**>(calloc(sizeof(Bucket*), mBucketSize));
-        if (newBuckets == nullptr) {
+        if (nullptr == newBuckets) {
             mBucketSize = oldBucketSize;
             return;
         }
@@ -447,7 +449,7 @@ private:
         /* [in] */ Bucket* bucket)
     {
         unsigned int index = bucket->mHash % bucketSize;
-        if (buckets[index] == nullptr) {
+        if (nullptr == buckets[index]) {
             buckets[index] = bucket;
         }
         else {
@@ -463,8 +465,8 @@ private:
     static constexpr float LOAD_FACTOR = 0.75;
     static constexpr int MAX_BUCKET_SIZE = INT32_MAX - 8;
     static constexpr int CHECK_EXPIRES_PERIOD = 300;
-    static constexpr int TIMEOUT_BUCKET = 600;
 
+    unsigned int mTimeoutBucket = 600;
     unsigned int mThreshold;
     unsigned int mCount;
     unsigned int mBucketSize;

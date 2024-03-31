@@ -20,7 +20,7 @@
 #include <comoapi.h>
 #include <comosp.h>
 #include <comoref.h>
-#include "hashmap.h"
+#include "hashmapCache.h"
 #include "mutex.h"
 #include <dbus/dbus.h>
 #include "SmOptions.h"
@@ -80,7 +80,7 @@ public:
 private:
     static AutoPtr<ServiceManager> sInstance;
 
-    HashMap<String, InterfacePack*> mServices;
+    hashmapCache<String, InterfacePack*> mServices;
     Mutex mServicesLock;
 
 public:

@@ -81,6 +81,7 @@ COPY(util ${UTIL_SRC_DIR}/int64.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/ThreadStack.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/lamport_clock.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/hashmap.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/hashmapCache.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/StrToX_Hashmap.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
@@ -98,6 +99,7 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/ThreadStack.h
     ${UTIL_SRC_DIR}/lamport_clock.h
     ${UTIL_SRC_DIR}/hashmap.h
+    ${UTIL_SRC_DIR}/hashmapCache.h
     ${UTIL_SRC_DIR}/StrToX_Hashmap.h
 )
 

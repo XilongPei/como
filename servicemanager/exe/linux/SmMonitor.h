@@ -20,7 +20,7 @@
 #include <comoapi.h>
 #include <comosp.h>
 #include <comoref.h>
-#include "hashmap.h"
+#include "hashmapCache.h"
 
 namespace jing {
 
