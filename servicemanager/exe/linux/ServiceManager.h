@@ -80,7 +80,7 @@ public:
 private:
     static AutoPtr<ServiceManager> sInstance;
 
-    hashmapCache<String, InterfacePack*> mServices;
+    HashMapCache<String, InterfacePack*> mServices;
     Mutex mServicesLock;
 
 public:

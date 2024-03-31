@@ -56,7 +56,7 @@ ECode ServiceManager::AddService(
     ipack->mServerObjectId = object.mServerObjectId;
 
     Mutex::AutoLock lock(mServicesLock);
-    if (mServices.Put(name, ipack) != 0) {
+    if (mServices.Put(name, ipack, 0) != 0) {
         /*
          * These two pieces of malloc memory will be held by HashMap mServices,
          * if the mServices.Put succeeds.
