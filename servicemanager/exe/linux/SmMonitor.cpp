@@ -21,15 +21,41 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <time.h>
+#include "ServiceManager.h"
 #include "SmMonitor.h"
 
+static unsigned int gTimeout = 600;
+
 namespace jing {
+
+//using HashMapWalker = void(*)(String&,Key&,Val&,struct timespec&);
+static void ServicesWalker(String& str, String& strKey, ServiceManager::InterfacePack*& itfPack,
+                                                struct timespec& ts)
+{
+    struct timespec curTime;
+    clock_gettime(CLOCK_REALTIME, &curTime);
+
+    Long msts  = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+    Long msCur = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+                           // 654321
+
+    if ((msCur - msts) > gTimeout) {
+        ;
+    }
+}
 
 SmMonitor::SmMonitor(AutoPtr<ServiceManager> sm)
 {}
 
 static void *QoS_monitor(void *p)
 {
+    AutoPtr<ServiceManager> instance = ServiceManager::GetInstance();
+
+    Mutex::AutoLock lock(instance->mServicesLock);
+    String strBuffer;
+    instance->mServices.GetValues(strBuffer, ServicesWalker);
+
     return nullptr;
 }
 
@@ -42,12 +68,12 @@ void *SmMonitor::STartSmMonitor(const char *serverName)
     pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
 
     // monitor, all events
-    int rc = pthread_create(&thread, threadAddr, QoS_monitor, nullptr);
+    int rc = pthread_create(&thread, &threadAddr, QoS_monitor, nullptr);
     if (0 != rc) {
         return nullptr;
     }
 
-    pthread_join(pthread_id[i], nullptr);
+    pthread_join(thread, nullptr);
 
     return nullptr;
 }

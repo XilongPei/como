@@ -88,6 +88,7 @@ set(SOURCES
     ServiceManager.cpp
     main.cpp
     SmOptions.cpp
+    SmMonitor.cpp
     ${RPC_ZeroMQ_SOURCES}
     ${PhxpaxosSrc}
 )

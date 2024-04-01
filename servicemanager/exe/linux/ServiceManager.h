@@ -80,10 +80,10 @@ public:
 private:
     static AutoPtr<ServiceManager> sInstance;
 
+public:
     HashMapCache<String, InterfacePack*> mServices;
     Mutex mServicesLock;
 
-public:
     static SmOptions *options;
 #ifdef COMO_FUNCTION_SAFETY
     static como::PhxEchoServer *oEchoServer;

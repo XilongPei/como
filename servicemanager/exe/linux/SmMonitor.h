@@ -34,6 +34,7 @@ public:
 private:
     AutoPtr<ServiceManager> sm;
 
+    unsigned int mTimeout = 600;
 };
 
 } // namespace jing
