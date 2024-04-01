@@ -29,11 +29,12 @@ class SmMonitor
 public:
     SmMonitor(AutoPtr<ServiceManager> sm);
 
-    void *STartSmMonitor(const char *serverName);
+    void *StartSmMonitor(const char *serverName);
+
+    static constexpr int CHECK_EXPIRES_PERIOD = 300;    // second
 
 private:
     AutoPtr<ServiceManager> sm;
-
     unsigned int mTimeout = 600;
 };
 

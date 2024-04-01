@@ -296,8 +296,9 @@ public:
         assert(mCount == N);
 
         Array<Val> values(N);
-        if (values.IsNull())
+        if (values.IsNull()) {
             return values;
+        }
 
         if (N > 0) {
             Long idx = 0;
@@ -355,8 +356,9 @@ public:
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
 
-        if ((currentTime.tv_sec - mLastCheanTime.tv_sec) < CHECK_EXPIRES_PERIOD)
+        if ((currentTime.tv_sec - mLastCheanTime.tv_sec) < CHECK_EXPIRES_PERIOD) {
             return;
+        }
 
         mLastCheanTime = currentTime;
 
@@ -464,7 +466,7 @@ private:
 private:
     static constexpr float LOAD_FACTOR = 0.75;
     static constexpr int MAX_BUCKET_SIZE = INT32_MAX - 8;
-    static constexpr int CHECK_EXPIRES_PERIOD = 300;
+    static constexpr int CHECK_EXPIRES_PERIOD = 300;        // second
 
     unsigned int mTimeoutBucket = 600;
     unsigned int mThreshold;
