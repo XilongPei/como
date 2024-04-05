@@ -63,6 +63,14 @@ TEST(StrToX_Hashmap, Test_hashmap)
     free(heap);  // destroy the hashmap
 }
 
+TEST(StrToX_Hashmap, Test_StrToX_Hashmap)
+{
+    void *heap = malloc(1 << 16);
+    StrToX_Hashmap *map = new StrToX_Hashmap(heap, 1 << 16);
+    *(map->vHashmap((char*)"hello")) = (char *)"world";
+    puts(*(map->vHashmap((char*)"hello", true)));
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

@@ -37,67 +37,67 @@ public:
     static char **hashmap_stdstring(std::string *key_stdstring, void *heap,
                                             ptrdiff_t *heaplen, char **pvalue);
 
-    inline std::string MakeKey_X(std::string& key_stdstring, Byte x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Short x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Integer x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Long x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Float x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Double x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Char x);
-    inline std::string MakeKey_X(std::string& key_stdstring, Boolean x);
-    inline std::string MakeKey_X(std::string& key_stdstring, HANDLE x);
-    inline std::string MakeKey_X(std::string& key_stdstring, char *x);
+    static inline std::string MakeKey_X(char *key, Byte x);
+    static inline std::string MakeKey_X(char *key, Short x);
+    static inline std::string MakeKey_X(char *key, Integer x);
+    static inline std::string MakeKey_X(char *key, Long x);
+    static inline std::string MakeKey_X(char *key, Float x);
+    static inline std::string MakeKey_X(char *key, Double x);
+    static inline std::string MakeKey_X(char *key, Char x);
+    static inline std::string MakeKey_X(char *key, Boolean x);
+    static inline std::string MakeKey_X(char *key, HANDLE x);
+    static inline std::string MakeKey_X(char *key, char *x);
 
     size_t  mHeaplen;
     void   *mHeap;
 };
 
-inline std::string MakeKey_X(char *key, Byte x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Byte x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Short x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Short x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Integer x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Integer x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Long x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Long x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Float x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Float x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Double x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Double x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Char x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Char x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, Boolean x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, Boolean x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, HANDLE x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, HANDLE x)
 {
     return std::string(key, strlen(key)+1) + std::string((char*)&x, sizeof(x));
 }
 
-inline std::string MakeKey_X(char *key, char *x)
+inline std::string StrToX_Hashmap::MakeKey_X(char *key, char *x)
 {
     return std::string(key, strlen(key)+1) + std::string(x, strlen(x)+1);
 }
