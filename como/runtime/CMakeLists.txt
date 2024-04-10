@@ -98,12 +98,11 @@ else()
         reflection
         type
         util
-        RuntimeMonitor
         -Wl,--no-whole-archive)
 endif()
 
-if($ENV{PLATFORM} STREQUAL "linux")
-    if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+if("$ENV{PLATFORM}" STREQUAL "linux")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
@@ -116,18 +115,25 @@ if($ENV{PLATFORM} STREQUAL "linux")
             -Wl,--whole-archive
             -Wl,--no-whole-archive)
     endif()
-elseif($ENV{PLATFORM} STREQUAL "android")
-    set(COMORT_LINK_LIBS
-        ${COMORT_LINK_LIBS}
-        -Wl,--whole-archive
+elseif("$ENV{PLATFORM}" STREQUAL "android")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
 
-        #
-        # use dbus always (?)
-        #
-        #rpc-binder
-        rpc-dbus
+            #
+            # use dbus always (?)
+            #
+            #rpc-binder
+            rpc-dbus
 
-        -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive)
+    else()
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
+            -Wl,--no-whole-archive)
+    endif()
 endif()
 
 add_library(comort
@@ -136,8 +142,8 @@ add_library(comort
 target_link_libraries(comort
     ${COMORT_LINK_LIBS}
     dl)
-if($ENV{PLATFORM} STREQUAL "linux")
-    if($ENV{COMO_WITH_RPC} STREQUAL "rpc")
+if("$ENV{PLATFORM}" STREQUAL "linux")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         target_link_libraries(comort
             pthread
             ${RPC_ZeroMQ_SYS_LIBS}
@@ -146,15 +152,20 @@ if($ENV{PLATFORM} STREQUAL "linux")
         target_link_libraries(comort
             pthread)
     endif()
-elseif($ENV{PLATFORM} STREQUAL "android")
-    target_link_libraries(comort
-        #
-        # use dbus always (?)
-        #
-        #binder
-        dbus-1
-        log
-        utils)
+elseif("$ENV{PLATFORM}" STREQUAL "android")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+        target_link_libraries(comort
+            #
+            # use dbus always (?)
+            #
+            #binder
+            dbus-1
+            log
+            utils)
+    else()
+        target_link_libraries(comort
+            ${PREBUILT_DIR}/usr/lib/libc++.so)
+    endif()
 endif()
 
 COPY(comort ${RUNTIME_SRC_DIR}/comoapi.h ${INC_DIR})

@@ -38,6 +38,12 @@ else()
     set(ComoFunctionSafetyObject)
 endif()
 
+if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+    set(WITH_CCheckpoint CCheckpoint.cpp)
+else()
+    set(WITH_CCheckpoint)
+endif()
+
 set(SOURCES
     comoclsobj.cpp
     comolog.cpp
@@ -49,7 +55,7 @@ set(SOURCES
     ${EXTERNAL_DIR}/cityhash/export_como/cityhash.cc
     mistring.cpp
     mac.cpp
-    CCheckpoint.cpp
+    ${WITH_CCheckpoint}
     MemPool.cpp
     ThreadStack.cpp
     ${EXTERNAL_DIR}/inih/ini.c
