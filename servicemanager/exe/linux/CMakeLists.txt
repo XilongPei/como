@@ -28,7 +28,6 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
         ${COMO_RUNTIME_DIR}/rpc
         ${COMO_RUNTIME_DIR}/rpc/ZeroMQ
         ${EXTERNAL_DIR}/libzmq/include
-        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/include
     )
     set(RPC_ZeroMQ_SOURCES
         RpcOverZeroMQ.cpp
@@ -60,6 +59,7 @@ include_directories(
     ${RPC_ZeroMQ_INC}
     ${EXTERNAL_DIR}/phxpaxos/export_como
     ${EXTERNAL_DIR}/phxpaxos/include
+    ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/include
 )
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
