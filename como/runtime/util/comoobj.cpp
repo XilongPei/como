@@ -83,7 +83,7 @@ ECode Object::GetCoclassID(
 ECode Object::GetCoclass(
     /* [out] */ AutoPtr<IMetaCoclass>& klass)
 {
-    if (mComponent == nullptr) {
+    if (nullptr == mComponent) {
         klass = nullptr;    //AutoPtr<T>::operator= is overloaded.
                             //NOT: MISRA-C++: Pointer assignment to wider scope.
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -109,7 +109,7 @@ ECode Object::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean& same)
 {
-    same = IObject::Probe(obj) == (IObject*)this;
+    same = (IObject::Probe(obj) == (IObject*)this);
     return NOERROR;
 }
 
@@ -171,21 +171,21 @@ ECode Object::GetCoclassID(
     /* [in] */ IInterface* obj,
     /* [out] */ CoclassID& cid)
 {
-    IObject* o = IObject::Probe(obj);
-    if (o == nullptr) {
+    IObject* objTmp = IObject::Probe(obj);
+    if (nullptr == objTmp) {
         cid = CoclassID::Null;
         return NOERROR;
     }
-    return o->GetCoclassID(cid);
+    return objTmp->GetCoclassID(cid);
 }
 
 AutoPtr<IMetaCoclass> Object::GetCoclass(
     /* [in] */ IInterface* obj)
 {
-    IObject* o = IObject::Probe(obj);
-    if (o != nullptr) {
+    IObject* objTmp = IObject::Probe(obj);
+    if (objTmp != nullptr) {
         AutoPtr<IMetaCoclass> mc;
-        ECode ec = o->GetCoclass(mc);
+        ECode ec = objTmp->GetCoclass(mc);
         if (FAILED(ec)) {
             return nullptr;
         }
@@ -200,10 +200,10 @@ String Object::GetFuncSafetySetting(
 {
     String funcSafetySetting;
 
-    IObject* o = IObject::Probe(obj);
-    if (o != nullptr) {
+    IObject* objTmp = IObject::Probe(obj);
+    if (objTmp != nullptr) {
         AutoPtr<IMetaCoclass> mc;
-        ECode ec = o->GetCoclass(mc);
+        ECode ec = objTmp->GetCoclass(mc);
         if (FAILED(ec)) {
             return funcSafetySetting;
         }
@@ -223,11 +223,11 @@ String Object::GetFuncSafetySetting(
 String Object::GetCoclassName(
     /* [in] */ IInterface* obj)
 {
-    Object* o = static_cast<Object*>(IObject::Probe(obj));
-    if (o == nullptr) {
+    Object* objTmp = static_cast<Object*>(IObject::Probe(obj));
+    if (nullptr == objTmp) {
         return nullptr;
     }
-    return GetCoclassName(o);
+    return GetCoclassName(objTmp);
 }
 
 String Object::GetCoclassName(
@@ -249,11 +249,11 @@ String Object::GetCoclassName(
 Long Object::GetHashCode(
     /* [in] */ IInterface* obj)
 {
-    Object* o = (Object*)IObject::Probe(obj);
-    if (o == nullptr) {
+    Object* objTmp = (Object*)IObject::Probe(obj);
+    if (nullptr == objTmp) {
         return reinterpret_cast<uintptr_t>(IInterface::Probe(obj));
     }
-    return GetHashCode(o);
+    return GetHashCode(objTmp);
 }
 
 Long Object::GetHashCode(
@@ -309,10 +309,10 @@ String Object::ToString(
         return "null";
     }
     else {
-        IObject* o = IObject::Probe(obj);
-        if (o != nullptr) {
+        IObject* objTmp = IObject::Probe(obj);
+        if (objTmp != nullptr) {
             String info;
-            o->ToString(info);
+            objTmp->ToString(info);
             return info;
         }
         return "not a coclass object.";
@@ -335,11 +335,11 @@ Boolean Object::InstanceOf(
     /* [in] */ IInterface* obj,
     /* [in] */ const CoclassID& cid)
 {
-    Object *o = static_cast<Object*>(IObject::Probe(obj));
-    if (nullptr == o) {
+    Object *objTmp = static_cast<Object*>(IObject::Probe(obj));
+    if (nullptr == objTmp) {
         return false;
     }
-    return InstanceOf(o, cid);
+    return InstanceOf(objTmp, cid);
 }
 
 Boolean Object::InstanceOf(
@@ -400,10 +400,12 @@ InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, Short iMemAr
     memcpy((Byte*)&iid.mUuid.mData1, (Byte*)&i128, sizeof(uint128));
 #endif
 
-    if ((iMemArea < 0) || (iMemArea > 4096))
+    if ((iMemArea < 0) || (iMemArea > 4096)) {
         iid.mCid = nullptr;
-    else
+    }
+    else {
         iid.mCid = (const ComponentID*)(static_cast<HANDLE>(iMemArea + 1));
+    }
 
     return iid;
 }
@@ -413,10 +415,12 @@ InterfaceID InterfaceIDWithMemArea(const InterfaceID& iid, Short iMemArea)
     InterfaceID value;
 
     value = iid;
-    if ((iMemArea < 0) || (iMemArea > 4096))
+    if ((iMemArea < 0) || (iMemArea > 4096)) {
         value.mCid = nullptr;
-    else
+    }
+    else {
         value.mCid = (const ComponentID*)(static_cast<HANDLE>(iMemArea + 1));
+    }
 
     return value;
 }
