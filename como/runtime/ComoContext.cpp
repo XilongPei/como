@@ -44,5 +44,10 @@ ComoContext::ComoContext()
 */    }
 }
 
+void ComoContext::SetFscpMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree)
+{
+    gComoContext->funComoMalloc = mimalloc;
+    gComoContext->freeMemInArea = mifree;
+}
 
 } // namespace como

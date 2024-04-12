@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <gtest/gtest.h>
+#include <ComoContext.h>
 
 using namespace como;
 
@@ -72,9 +73,24 @@ TEST(TestFunctionSafetyProgram, testGetChecksum)
     EXPECT_EQ(lastChecksum, currentChecksum);
 }
 
+
+static void *area_malloc(Short iMemArea, size_t size)
+{
+    (void)iMemArea;
+
+    return malloc(size);
+}
+
+static void area_free(Short iMemArea, const void* ptr)
+{
+    (void)iMemArea;
+
+    free((void*)ptr);
+}
+
 int main(int argc, char **argv)
 {
-    ComoContext *mComoContext = ComoContext();
+    ComoContext::gComoContext->SetFscpMemFun(area_malloc, area_free);
 
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
