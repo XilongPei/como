@@ -44,10 +44,23 @@ ComoContext::ComoContext()
 */    }
 }
 
-void ComoContext::SetFscpMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree)
+/**
+ * Set_gComoContext_MemFun
+ */
+ECode ComoContext::SetGctxMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree)
 {
+    if (nullptr == gComoContext) {
+        gComoContext = new ComoContext();
+    }
+
+    if (nullptr == gComoContext) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     gComoContext->funComoMalloc = mimalloc;
     gComoContext->freeMemInArea = mifree;
+
+    return NOERROR;
 }
 
 } // namespace como

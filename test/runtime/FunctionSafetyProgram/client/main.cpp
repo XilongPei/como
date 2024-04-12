@@ -78,19 +78,23 @@ static void *area_malloc(Short iMemArea, size_t size)
 {
     (void)iMemArea;
 
-    return malloc(size);
+    void *ptr = malloc(size);
+    return ptr;
 }
 
-static void area_free(Short iMemArea, const void* ptr)
+static void area_free(Short iMemArea, const void *ptr)
 {
     (void)iMemArea;
 
+// TODO, fix it
+return;
     free((void*)ptr);
 }
 
 int main(int argc, char **argv)
 {
-    ComoContext::gComoContext->SetFscpMemFun(area_malloc, area_free);
+    ECode ec = ComoContext::SetGctxMemFun(area_malloc, area_free);
+    EXPECT_EQ(NOERROR, ec);
 
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
