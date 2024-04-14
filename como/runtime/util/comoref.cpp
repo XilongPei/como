@@ -30,16 +30,15 @@
  * limitations under the License.
  */
 
-#include "comolog.h"
-#include "comoref.h"
-#include "mutex.h"
-
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
-#include <stdio.h>
 #include <unistd.h>
+#include "comolog.h"
+#include "comoref.h"
+#include "mutex.h"
+#include "comoobj.h"
 
 namespace como {
 
@@ -535,7 +534,7 @@ Integer RefBase::DecStrong(
                  * memory is sourced from a memory pool.
                  */
                 if (LIKELY(nullptr != func)) {
-                    func(shortPara, this);
+                    func(shortPara, (const char *)this - OBJECTSIZE_Object);
                 }
             }
         }
