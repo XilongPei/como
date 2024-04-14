@@ -180,7 +180,10 @@ set(DEPLOY_HEADERS
     ${RUNTIME_SRC_DIR}/comoapi.h
     ${RUNTIME_SRC_DIR}/comodef.h
     ${RUNTIME_SRC_DIR}/comoerror.h
-    ${RUNTIME_SRC_DIR}/comotypes.h)
+    ${RUNTIME_SRC_DIR}/comotypes.h
+    ${RUNTIME_SRC_DIR}/ComoConfig.h
+    ${RUNTIME_SRC_DIR}/ComoContext.h
+)
 
 set(DEPLOY_LIBS
     ${RUNTIME_OBJ_DIR}/comort.so)
