@@ -246,7 +246,7 @@ RefBase::WeakRefImpl::WeakRefImpl(
 RefBase::WeakRefImpl::~WeakRefImpl()
 {
     Boolean dumpStack = false;
-    if (!mRetain && mStrongRefs != nullptr) {
+    if ((! mRetain) && (mStrongRefs != nullptr)) {
         dumpStack = true;
         Logger::E("RefBase", "Strong references remain:");
         RefEntry* refs = mStrongRefs;
@@ -260,7 +260,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         }
     }
 
-    if (!mRetain && mWeakRefs != nullptr) {
+    if ((! mRetain) && (mWeakRefs != nullptr)) {
         dumpStack = true;
         Logger::E("RefBase", "Weak references remain!");
         RefEntry* refs = mWeakRefs;
@@ -534,7 +534,7 @@ Integer RefBase::DecStrong(
                  * memory is sourced from a memory pool.
                  */
                 if (LIKELY(nullptr != func)) {
-                    func(shortPara, (const char *)this - OBJECTSIZE_Object);
+                    func(shortPara, reinterpret_cast<const char *>(this) - OBJECTSIZE_Object);
                 }
             }
         }
@@ -607,7 +607,9 @@ void RefBase::WeakRef::DecWeak(
         Logger::E("RefBase", "decWeak called on %p too many times", this);
         assert(0);
     }
-    if (c != 1) return;
+    if (c != 1) {
+        return;
+    }
     atomic_thread_fence(std::memory_order_acquire);
 
     Integer flags = impl->mFlags.load(std::memory_order_relaxed);
@@ -916,7 +918,7 @@ ECode WeakReferenceImpl::Resolve(
 {
     if ((nullptr != mObject) && mRef->AttemptIncStrong(object)) {
         *object = mObject->Probe(iid);
-        if (*object == nullptr) {
+        if (nullptr == *object) {
             mObject->Release();
         }
     }
@@ -927,3 +929,4 @@ ECode WeakReferenceImpl::Resolve(
 }
 
 } // namespace como
+
