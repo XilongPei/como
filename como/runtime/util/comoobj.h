@@ -120,6 +120,17 @@ private:
     Integer mObjSize;
 };
 
+/**
+ * ptrdiff_t is type of 'this' pointer, 4 'this' pointer of:
+ *   Object
+ *   RefBase
+ *   IObject
+ *   IWeakReferenceSource
+ */
+#ifndef OBJECTSIZE_Object
+#define OBJECTSIZE_Object (sizeof(Object) - sizeof(ptrdiff_t) * 4)
+#endif
+
 inline void Object::SetObjSize(Integer objSize)
 {
     mObjSize = objSize;
