@@ -14,27 +14,11 @@
 # limitations under the License.
 #=========================================================================
 
-set(RUNTIME_SRC_DIR ${TEST_SRC_DIR}/runtime)
-set(RUNTIME_OBJ_DIR ${TEST_OBJ_DIR}/runtime)
+project(test-rpc-extra CXX)
 
-add_subdirectory(array)
-add_subdirectory(autoptr)
-add_subdirectory(char)
-add_subdirectory(comostring)
-add_subdirectory(localstaticvariable)
-add_subdirectory(macro)
-# testMutex tests mutex in comort, so running testMutex needs export
-# mutex.h and related methods from comort.so
-#add_subdirectory(mutex)
-add_subdirectory(nestedinterface)
-add_subdirectory(outreferencetype)
-add_subdirectory(reflection)
-add_subdirectory(rpc)
-add_subdirectory(rpc_extra)
-add_subdirectory(ComoConfig)
-add_subdirectory(IDfromName)
-add_subdirectory(util)
+set(RPC_EX_SRC_DIR ${RUNTIME_SRC_DIR}/rpc_extra)
+set(RPC_EX_OBJ_DIR ${RUNTIME_OBJ_DIR}/rpc_extra)
 
-if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
-    add_subdirectory(FunctionSafetyProgram)
-endif()
+add_subdirectory(component)
+add_subdirectory(client)
+add_subdirectory(service)
