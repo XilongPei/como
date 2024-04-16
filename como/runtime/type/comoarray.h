@@ -390,7 +390,7 @@ Long Array<T>::Copy(
         return N;
     }
     T* array = static_cast<T*>(mData);
-    for (Long i = 0; i < N; i++) {
+    for (Long i = 0;  i < N;  i++) {
         AssignFunc<T> assignF;
         assignF(&array[i], srcArray[i], mData);
     }
@@ -454,12 +454,12 @@ Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long length)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
     Long N = MIN(mSize - thisPos, MIN(srcArray.mSize, length));
-    if (mData == srcArray.mData && thisPos == 0) {
+    if ((mData == srcArray.mData) && (thisPos == 0)) {
         return N;
     }
     T* array = static_cast<T*>(mData) + thisPos;
@@ -485,7 +485,7 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
@@ -524,7 +524,6 @@ void Array<T>::Set(
     /* [in] */ Long index,
     /* [in] */ T value)
 {
-    // TODO, fix bug
     if ((index < 0) || (index > mSize)) {
         return;
     }
@@ -584,7 +583,7 @@ Array<T>& Array<T>::operator=(
         SharedBuffer* sb = SharedBuffer::GetBufferFromData(mData);
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
-            for (Long i = 0; i < mSize; i++) {
+            for (Long i = 0;  i < mSize;  i++) {
                 deleteF(&static_cast<T*>(mData)[i], this);
             }
         }
@@ -631,7 +630,9 @@ T& Array<T>::operator[](
     T* array = static_cast<T*>(mData);
 
     // TODO, fix bug
+    // Can not throw exceptions, how to inform the caller parameter error
     if ((index < 0) || (index > mSize)) {
+        Logger::E("Array<T>::operator[]", "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
     }
 
@@ -645,7 +646,9 @@ const T& Array<T>::operator[](
     T* array = static_cast<T*>(mData);
 
     // TODO, fix bug
+    // Can not throw exceptions, how to inform the caller parameter error
     if ((index < 0) || (index > mSize)) {
+        Logger::E("Array<T>::operator[]", "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
     }
 
@@ -753,6 +756,6 @@ Array<T>::operator Array<IInterface*>()
     return impl(this);
 }
 
-}
+} // namespace como
 
 #endif //__COMO_ARRAY_H__

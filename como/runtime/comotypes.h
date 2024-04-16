@@ -71,8 +71,9 @@ inline bool operator==(
     /* [in] */ const InterfaceID& iid2)
 {
 #ifdef __SIZEOF_INT128__
-    if (*(__int128 *)&iid1.mUuid == *(__int128 *)&iid2.mUuid)
+    if (*(__int128 *)&iid1.mUuid == *(__int128 *)&iid2.mUuid) {
         return true;
+    }
     return false;
 #else
     return !memcmp(&iid1.mUuid, &iid2.mUuid, sizeof(UUID));
@@ -84,8 +85,9 @@ inline bool operator!=(
     /* [in] */ const InterfaceID& iid2)
 {
 #ifdef __SIZEOF_INT128__
-    if (*(__int128 *)&iid1.mUuid != *(__int128 *)&iid2.mUuid)
+    if (*(__int128 *)&iid1.mUuid != *(__int128 *)&iid2.mUuid) {
         return true;
+    }
     return false;
 #else
     return memcmp(&iid1.mUuid, &iid2.mUuid, sizeof(UUID));
@@ -103,8 +105,9 @@ inline bool operator==(
     /* [in] */ const ComponentID& cid2)
 {
 #ifdef __SIZEOF_INT128__
-    if (*(__int128 *)&cid1.mUuid == *(__int128 *)&cid2.mUuid)
+    if (*(__int128 *)&cid1.mUuid == *(__int128 *)&cid2.mUuid) {
         return true;
+    }
     return false;
 #else
     return !memcmp(&cid1.mUuid, &cid2.mUuid, sizeof(UUID));
@@ -116,8 +119,9 @@ inline bool operator!=(
     /* [in] */ const ComponentID& cid2)
 {
 #ifdef __SIZEOF_INT128__
-    if (*(__int128 *)&cid1.mUuid != *(__int128 *)&cid2.mUuid)
+    if (*(__int128 *)&cid1.mUuid != *(__int128 *)&cid2.mUuid) {
         return true;
+    }
     return false;
 #else
     return memcmp(&cid1.mUuid, &cid2.mUuid, sizeof(UUID));
@@ -164,7 +168,7 @@ interface IInterface
     inline static IInterface* Probe(
         /* [in] */ IInterface* object)
     {
-        if (object == nullptr) {
+        if (nullptr == object) {
             return nullptr;
         }
         return object->Probe(IID_IInterface);
@@ -190,7 +194,7 @@ interface IInterface
         if (object1 == object2) {
             return true;
         }
-        if (object1 == nullptr || object2 == nullptr) {
+        if ((nullptr == object1) || (nullptr == object2)) {
             return false;
         }
         return IInterface::Probe(object1) == IInterface::Probe(object2);
@@ -218,7 +222,7 @@ struct COM_PUBLIC Triple
     Triple(
         /* [in] */ Triple&& other);
 
-    void AllocData(
+    Long AllocData(
         /* [in] */ Long dataSize);
 
     void FreeData();
@@ -364,6 +368,8 @@ struct InitFunc
         /* [in] */ T* data,
         /* [in] */ void* id)
     {
+        (void)id;
+
         *data = nullptr;
     }
 };
@@ -375,6 +381,8 @@ struct InitFunc<T, true>
         /* [in] */ T* data,
         /* [in] */ void* id)
     {
+        (void)id;
+
         *data = 0;
     }
 };
@@ -386,6 +394,8 @@ struct InitFunc<UUID, true>
         /* [in] */ UUID* data,
         /* [in] */ void* id)
     {
+        (void)id;
+
         memset(data, 0, sizeof(UUID));
     }
 };
@@ -471,11 +481,11 @@ struct DeleteTriple<Array<T>, true>
             if (sb->OnlyOwner()) {
                 if (Type2Kind<T>::isStringType) {
                     String* payload = reinterpret_cast<String*>(data->mData);
-                    for (Long i = 0; i < data->mSize; i++) {
+                    for (Long i = 0;  i < data->mSize;  i++) {
                         payload[i] = nullptr;
                     }
                 }
-                if (!Type2Kind<T>::isPrimitiveType) {
+                if (! Type2Kind<T>::isPrimitiveType) {
                     IInterface** payload = reinterpret_cast<IInterface**>(data->mData);
                     for (Long i = 0; i < data->mSize; i++) {
                         payload[i]->Release();
@@ -544,6 +554,8 @@ struct DeleteFunc<String, true>
         /* [in] */ String* data,
         /* [in] */ void* id)
     {
+        (void)id;
+
         *data = nullptr;
     }
 };
@@ -557,8 +569,12 @@ struct CompareFunc
         /* [in] */ const T& lvalue,
         /* [in] */ const T& rvalue)
     {
-        if (lvalue > rvalue) return 1;
-        if (lvalue == rvalue) return 0;
+        if (lvalue > rvalue) {
+            return 1;
+        }
+        if (lvalue == rvalue) {
+            return 0;
+        }
         return -1;
     }
 };
@@ -581,7 +597,7 @@ struct CompareFunc<UUID>
         /* [in] */ const UUID& lvalue,
         /* [in] */ const UUID& rvalue)
     {
-        return lvalue == rvalue ? 0 : -1;
+        return (lvalue == rvalue) ? 0 : -1;
     }
 };
 

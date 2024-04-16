@@ -37,20 +37,23 @@ Triple::Triple(
     other.mSize = 0;
 }
 
-void Triple::AllocData(
+Long Triple::AllocData(
     /* [in] */ Long dataSize)
 {
     SharedBuffer* buf = SharedBuffer::Alloc(dataSize);
-    if (buf == nullptr) {
+    if (nullptr == buf) {
         Logger::E("Triple", "Malloc data which size is %lld failed.", dataSize);
         mData = nullptr;
         mSize = 0;
-        return;
+        return mSize;
     }
+
     void* data = buf->GetData();
     memset(data, 0, dataSize);
     mData = data;
     mSize = dataSize;
+
+    return mSize;
 }
 
 void Triple::FreeData()
