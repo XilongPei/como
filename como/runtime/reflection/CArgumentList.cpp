@@ -68,7 +68,7 @@ ECode CArgumentList::GetInputArgumentOfByte(
     /* [out] */ Byte& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -90,7 +90,7 @@ ECode CArgumentList::SetInputArgumentOfByte(
     /* [in] */ Byte value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -112,7 +112,7 @@ ECode CArgumentList::GetInputArgumentOfShort(
     /* [out] */ Short& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -134,7 +134,7 @@ ECode CArgumentList::SetInputArgumentOfShort(
     /* [in] */ Short value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -156,7 +156,7 @@ ECode CArgumentList::GetInputArgumentOfInteger(
     /* [out] */ Integer& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -178,7 +178,7 @@ ECode CArgumentList::SetInputArgumentOfInteger(
     /* [in] */ Integer value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -200,7 +200,7 @@ ECode CArgumentList::GetInputArgumentOfLong(
     /* [out] */ Long& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -222,7 +222,7 @@ ECode CArgumentList::SetInputArgumentOfLong(
     /* [in] */ Long value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -244,7 +244,7 @@ ECode CArgumentList::GetInputArgumentOfFloat(
     /* [out] */ Float& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -266,7 +266,7 @@ ECode CArgumentList::SetInputArgumentOfFloat(
     /* [out] */ Float value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -288,7 +288,7 @@ ECode CArgumentList::GetInputArgumentOfDouble(
     /* [out] */ Double& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -310,7 +310,7 @@ ECode CArgumentList::SetInputArgumentOfDouble(
     /* [in] */ Double value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -332,7 +332,7 @@ ECode CArgumentList::GetInputArgumentOfChar(
     /* [out] */ Char& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -354,7 +354,7 @@ ECode CArgumentList::SetInputArgumentOfChar(
     /* [in] */ Char value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -376,7 +376,7 @@ ECode CArgumentList::GetInputArgumentOfBoolean(
     /* [out] */ Boolean& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -398,7 +398,7 @@ ECode CArgumentList::SetInputArgumentOfBoolean(
     /* [in] */ Boolean value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -420,7 +420,7 @@ ECode CArgumentList::GetInputArgumentOfString(
     /* [out] */ String& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -442,7 +442,7 @@ ECode CArgumentList::SetInputArgumentOfString(
     /* [in] */ const String& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -464,7 +464,7 @@ ECode CArgumentList::GetInputArgumentOfHANDLE(
     /* [out] */ HANDLE& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -486,7 +486,7 @@ ECode CArgumentList::SetInputArgumentOfHANDLE(
     /* [in] */ HANDLE value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -508,7 +508,7 @@ ECode CArgumentList::GetInputArgumentOfECode(
     /* [out] */ ECode& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -530,7 +530,7 @@ ECode CArgumentList::SetInputArgumentOfECode(
     /* [in] */ ECode value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -552,7 +552,7 @@ ECode CArgumentList::GetInputArgumentOfCoclassID(
     /* [out] */ CoclassID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -574,7 +574,7 @@ ECode CArgumentList::SetInputArgumentOfCoclassID(
     /* [in] */ const CoclassID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -597,7 +597,7 @@ ECode CArgumentList::GetInputArgumentOfComponentID(
     /* [out] */ ComponentID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -619,7 +619,7 @@ ECode CArgumentList::SetInputArgumentOfComponentID(
     /* [in] */ const ComponentID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -642,7 +642,7 @@ ECode CArgumentList::GetInputArgumentOfInterfaceID(
     /* [out] */ InterfaceID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -664,7 +664,7 @@ ECode CArgumentList::SetInputArgumentOfInterfaceID(
     /* [in] */ const InterfaceID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -687,7 +687,7 @@ ECode CArgumentList::GetInputArgumentOfArray(
     /* [out] */ Triple& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -709,7 +709,7 @@ ECode CArgumentList::SetInputArgumentOfArray(
     /* [in] */ const Triple& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -731,7 +731,7 @@ ECode CArgumentList::GetInputArgumentOfEnumeration(
     /* [out] */ Integer& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -753,7 +753,7 @@ ECode CArgumentList::SetInputArgumentOfEnumeration(
     /* [in] */ Integer value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -775,7 +775,7 @@ ECode CArgumentList::GetInputArgumentOfInterface(
     /* [out] */ AutoPtr<IInterface>& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -797,7 +797,7 @@ ECode CArgumentList::SetInputArgumentOfInterface(
     /* [in] */ IInterface* value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -819,7 +819,7 @@ ECode CArgumentList::AssignOutputArgumentOfByte(
     /* [in] */ Byte value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -827,8 +827,8 @@ ECode CArgumentList::AssignOutputArgumentOfByte(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -843,7 +843,7 @@ ECode CArgumentList::SetOutputArgumentOfByte(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -851,8 +851,8 @@ ECode CArgumentList::SetOutputArgumentOfByte(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -866,7 +866,7 @@ ECode CArgumentList::AssignOutputArgumentOfShort(
     /* [in] */ Short value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -874,8 +874,8 @@ ECode CArgumentList::AssignOutputArgumentOfShort(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -890,7 +890,7 @@ ECode CArgumentList::SetOutputArgumentOfShort(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -898,8 +898,8 @@ ECode CArgumentList::SetOutputArgumentOfShort(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -913,7 +913,7 @@ ECode CArgumentList::AssignOutputArgumentOfInteger(
     /* [in] */ Integer value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -921,8 +921,8 @@ ECode CArgumentList::AssignOutputArgumentOfInteger(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -937,7 +937,7 @@ ECode CArgumentList::SetOutputArgumentOfInteger(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -945,8 +945,8 @@ ECode CArgumentList::SetOutputArgumentOfInteger(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -960,7 +960,7 @@ ECode CArgumentList::AssignOutputArgumentOfLong(
     /* [in] */ Long value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -968,8 +968,8 @@ ECode CArgumentList::AssignOutputArgumentOfLong(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -984,7 +984,7 @@ ECode CArgumentList::SetOutputArgumentOfLong(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -992,8 +992,8 @@ ECode CArgumentList::SetOutputArgumentOfLong(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1007,7 +1007,7 @@ ECode CArgumentList::AssignOutputArgumentOfFloat(
     /* [in] */ Float value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1015,8 +1015,8 @@ ECode CArgumentList::AssignOutputArgumentOfFloat(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1031,7 +1031,7 @@ ECode CArgumentList::SetOutputArgumentOfFloat(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1039,8 +1039,8 @@ ECode CArgumentList::SetOutputArgumentOfFloat(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1054,7 +1054,7 @@ ECode CArgumentList::AssignOutputArgumentOfDouble(
     /* [in] */ Double value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1062,8 +1062,8 @@ ECode CArgumentList::AssignOutputArgumentOfDouble(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1078,7 +1078,7 @@ ECode CArgumentList::SetOutputArgumentOfDouble(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1086,8 +1086,8 @@ ECode CArgumentList::SetOutputArgumentOfDouble(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1101,7 +1101,7 @@ ECode CArgumentList::AssignOutputArgumentOfChar(
     /* [in] */ Char value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1109,8 +1109,8 @@ ECode CArgumentList::AssignOutputArgumentOfChar(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1125,7 +1125,7 @@ ECode CArgumentList::SetOutputArgumentOfChar(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1133,8 +1133,8 @@ ECode CArgumentList::SetOutputArgumentOfChar(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1148,7 +1148,7 @@ ECode CArgumentList::AssignOutputArgumentOfBoolean(
     /* [in] */ Boolean value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1156,8 +1156,8 @@ ECode CArgumentList::AssignOutputArgumentOfBoolean(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1172,7 +1172,7 @@ ECode CArgumentList::SetOutputArgumentOfBoolean(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1180,8 +1180,8 @@ ECode CArgumentList::SetOutputArgumentOfBoolean(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1195,7 +1195,7 @@ ECode CArgumentList::AssignOutputArgumentOfString(
     /* [in] */ const String& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1203,8 +1203,8 @@ ECode CArgumentList::AssignOutputArgumentOfString(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1219,7 +1219,7 @@ ECode CArgumentList::SetOutputArgumentOfString(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1227,8 +1227,8 @@ ECode CArgumentList::SetOutputArgumentOfString(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1242,7 +1242,7 @@ ECode CArgumentList::AssignOutputArgumentOfHANDLE(
     /* [in] */ HANDLE value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1250,8 +1250,8 @@ ECode CArgumentList::AssignOutputArgumentOfHANDLE(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1266,7 +1266,7 @@ ECode CArgumentList::SetOutputArgumentOfHANDLE(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1274,8 +1274,8 @@ ECode CArgumentList::SetOutputArgumentOfHANDLE(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1289,7 +1289,7 @@ ECode CArgumentList::AssignOutputArgumentOfECode(
     /* [in] */ ECode value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1297,8 +1297,8 @@ ECode CArgumentList::AssignOutputArgumentOfECode(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1313,7 +1313,7 @@ ECode CArgumentList::SetOutputArgumentOfECode(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1321,8 +1321,8 @@ ECode CArgumentList::SetOutputArgumentOfECode(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1336,7 +1336,7 @@ ECode CArgumentList::AssignOutputArgumentOfCoclassID(
     /* [in] */ const CoclassID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1344,8 +1344,8 @@ ECode CArgumentList::AssignOutputArgumentOfCoclassID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1360,7 +1360,7 @@ ECode CArgumentList::SetOutputArgumentOfCoclassID(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1368,8 +1368,8 @@ ECode CArgumentList::SetOutputArgumentOfCoclassID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1383,7 +1383,7 @@ ECode CArgumentList::AssignOutputArgumentOfComponentID(
     /* [in] */ const ComponentID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1391,8 +1391,8 @@ ECode CArgumentList::AssignOutputArgumentOfComponentID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1407,7 +1407,7 @@ ECode CArgumentList::SetOutputArgumentOfComponentID(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1415,8 +1415,8 @@ ECode CArgumentList::SetOutputArgumentOfComponentID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1430,7 +1430,7 @@ ECode CArgumentList::AssignOutputArgumentOfInterfaceID(
     /* [in] */ const InterfaceID& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1438,8 +1438,8 @@ ECode CArgumentList::AssignOutputArgumentOfInterfaceID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1454,7 +1454,7 @@ ECode CArgumentList::SetOutputArgumentOfInterfaceID(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1462,8 +1462,8 @@ ECode CArgumentList::SetOutputArgumentOfInterfaceID(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1477,7 +1477,7 @@ ECode CArgumentList::AssignOutputArgumentOfArray(
     /* [in] */ const Triple& value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1485,8 +1485,8 @@ ECode CArgumentList::AssignOutputArgumentOfArray(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1501,7 +1501,7 @@ ECode CArgumentList::SetOutputArgumentOfArray(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1509,8 +1509,8 @@ ECode CArgumentList::SetOutputArgumentOfArray(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1524,7 +1524,7 @@ ECode CArgumentList::AssignOutputArgumentOfEnumeration(
     /* [in] */ Integer value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1532,8 +1532,8 @@ ECode CArgumentList::AssignOutputArgumentOfEnumeration(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1548,7 +1548,7 @@ ECode CArgumentList::SetOutputArgumentOfEnumeration(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1556,8 +1556,8 @@ ECode CArgumentList::SetOutputArgumentOfEnumeration(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1571,7 +1571,7 @@ ECode CArgumentList::AssignOutputArgumentOfInterface(
     /* [in] */ IInterface* value)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1579,8 +1579,8 @@ ECode CArgumentList::AssignOutputArgumentOfInterface(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1595,7 +1595,7 @@ ECode CArgumentList::SetOutputArgumentOfInterface(
     /* [in] */ HANDLE addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -1603,8 +1603,8 @@ ECode CArgumentList::SetOutputArgumentOfInterface(
             return E_TYPE_MISMATCH_EXCEPTION;
         }
 
-        if (mParameterInfos[index].mIOAttr != IOAttribute::OUT &&
-                mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT) {
+        if ((mParameterInfos[index].mIOAttr != IOAttribute::OUT) &&
+                (mParameterInfos[index].mIOAttr != IOAttribute::IN_OUT)) {
             return E_IOATTRIBUTE_MISMATCH_EXCEPTION;
         }
     }
@@ -1618,7 +1618,7 @@ ECode CArgumentList::GetArgumentAddress(
     /* [out] */ HANDLE& addr)
 {
     if (UNLIKELY(! mHotCode)) {
-        if (index < 0 || index >= mParameterNumber) {
+        if ((index < 0) || (index >= mParameterNumber)) {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }

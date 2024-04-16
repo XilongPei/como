@@ -414,7 +414,12 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
-                    argParcel->ReadArray(t);
+                    /**
+                     * The callee is responsible for requesting memory and does not
+                     * need to copy data from the caller.
+                     */
+                    //argParcel->ReadArray(t);
+
                     argList->SetOutputArgumentOfArray(i, reinterpret_cast<HANDLE>(t));
                     break;
                 }

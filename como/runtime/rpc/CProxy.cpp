@@ -569,7 +569,8 @@ ECode InterfaceProxy::MarshalArguments(
     /* [in] */ IMetaMethod* method,
     /* [in] */ IParcel* argParcel)
 {
-    Integer intParamIndex = 1, fpParamIndex = 0;
+    Integer intParamIndex = 1;
+    Integer fpParamIndex = 0;
     CMetaMethod* cMethod = CMetaMethod::From(method);
     Integer N = cMethod->mParameters.GetLength();
     if (N > 0) {
@@ -596,67 +597,67 @@ ECode InterfaceProxy::MarshalArguments(
             switch (kind) {
                 case TypeKind::Char: {
                     Char value = (Char)GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteChar(value);
+                    FAIL_RETURN(argParcel->WriteChar(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte value = (Byte)GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteByte(value);
+                    FAIL_RETURN(argParcel->WriteByte(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Short: {
                     Short value = (Short)GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteShort(value);
+                    FAIL_RETURN(argParcel->WriteShort(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Integer: {
                     Integer value = GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteInteger(value);
+                    FAIL_RETURN(argParcel->WriteInteger(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Long: {
                     Long value = GetLongValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteLong(value);
+                    FAIL_RETURN(argParcel->WriteLong(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Float: {
                     Float value = GetFloatValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteFloat(value);
+                    FAIL_RETURN(argParcel->WriteFloat(value));
                     fpParamIndex++;
                     break;
                 }
                 case TypeKind::Double: {
                     Double value = GetDoubleValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteDouble(value);
+                    FAIL_RETURN(argParcel->WriteDouble(value));
                     fpParamIndex++;
                     break;
                 }
                 case TypeKind::Boolean: {
                     Boolean value = (Boolean)GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteBoolean(value);
+                    FAIL_RETURN(argParcel->WriteBoolean(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::String: {
                     String value = *reinterpret_cast<String*>(GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteString(value);
+                    FAIL_RETURN(argParcel->WriteString(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::ECode: {
                     ECode value = (ECode)GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteECode(value);
+                    FAIL_RETURN(argParcel->WriteECode(value));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Enum: {
                     Integer value = GetIntegerValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteEnumeration(value);
+                    FAIL_RETURN(argParcel->WriteEnumeration(value));
                     intParamIndex++;
                     break;
                 }
@@ -678,14 +679,15 @@ ECode InterfaceProxy::MarshalArguments(
                     }
 
                     HANDLE value = GetHANDLEValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteArray(*reinterpret_cast<Triple*>(value));
+                    FAIL_RETURN(argParcel->WriteArray(*reinterpret_cast<Triple*>(value)));
+
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Interface: {
                     IInterface* value = reinterpret_cast<IInterface*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteInterface(value);
+                    FAIL_RETURN(argParcel->WriteInterface(value));
                     intParamIndex++;
                     break;
                 }
@@ -704,35 +706,35 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::Char: {
                     Char* addr = reinterpret_cast<Char*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteChar(*addr);
+                    FAIL_RETURN(argParcel->WriteChar(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte* addr = reinterpret_cast<Byte*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteByte(*addr);
+                    FAIL_RETURN(argParcel->WriteByte(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Short: {
                     Short* addr = reinterpret_cast<Short*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteShort(*addr);
+                    FAIL_RETURN(argParcel->WriteShort(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Integer: {
                     Integer* addr = reinterpret_cast<Integer*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteInteger(*addr);
+                    FAIL_RETURN(argParcel->WriteInteger(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Long: {
                     Long* addr = reinterpret_cast<Long*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteLong(*addr);
+                    FAIL_RETURN(argParcel->WriteLong(*addr));
                     intParamIndex++;
                     break;
                 }
@@ -746,35 +748,35 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::Double: {
                     Double* addr = reinterpret_cast<Double*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteDouble(*addr);
+                    FAIL_RETURN(argParcel->WriteDouble(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Boolean: {
                     Boolean* addr = reinterpret_cast<Boolean*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteBoolean(*addr);
+                    FAIL_RETURN(argParcel->WriteBoolean(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::String: {
                     String* addr = reinterpret_cast<String*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteString(*addr);
+                    FAIL_RETURN(argParcel->WriteString(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::ECode: {
                     ECode* addr = reinterpret_cast<ECode*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteECode(*addr);
+                    FAIL_RETURN(argParcel->WriteECode(*addr));
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Enum: {
                     Integer* addr = reinterpret_cast<Integer*>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteInteger(*addr);
+                    FAIL_RETURN(argParcel->WriteInteger(*addr));
                     intParamIndex++;
                     break;
                 }
@@ -796,14 +798,16 @@ ECode InterfaceProxy::MarshalArguments(
                     }
 
                     HANDLE value = GetHANDLEValue(regs, intParamIndex, fpParamIndex);
-                    argParcel->WriteArray(*reinterpret_cast<Triple*>(value));
+                    FAIL_RETURN(argParcel->WriteArray(*reinterpret_cast<Triple*>(value)));
+
+                    delete reinterpret_cast<Triple*>(value);
                     intParamIndex++;
                     break;
                 }
                 case TypeKind::Interface: {
                     IInterface** value = reinterpret_cast<IInterface**>(
                             GetHANDLEValue(regs, intParamIndex, fpParamIndex));
-                    argParcel->WriteInterface(*value);
+                    FAIL_RETURN(argParcel->WriteInterface(*value));
                     intParamIndex++;
                     break;
                 }
