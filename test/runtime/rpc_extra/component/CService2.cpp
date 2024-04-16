@@ -58,32 +58,31 @@ ECode CService2::TestMethod3(
         /* [in] */ TestEnum arg1,
         /* [out] */ String& result1)
 {
-    switch (arg1)
-    {
-    case TestEnum::Monday:
-        result1 = "Monday";
-        break;
-    case TestEnum::Tuesday:
-        result1 = "Tuesday";
-        break;
-    case TestEnum::Wednesday:
-        result1 = "Wednesday";
-        break;
-    case TestEnum::Thursday:
-        result1 = "Thursday";
-        break;
-    case TestEnum::Friday:
-        result1 = "Friday";
-        break;
-    case TestEnum::Saturday:
-        result1 = "Saturday";
-        break;
-    case TestEnum::Sunday:
-        result1 = "Sunday";
-        break;
-    default:
-        return E_NOT_FOUND_EXCEPTION;
-        break;
+    switch (arg1) {
+        case TestEnum::Monday:
+            result1 = "Monday";
+            break;
+        case TestEnum::Tuesday:
+            result1 = "Tuesday";
+            break;
+        case TestEnum::Wednesday:
+            result1 = "Wednesday";
+            break;
+        case TestEnum::Thursday:
+            result1 = "Thursday";
+            break;
+        case TestEnum::Friday:
+            result1 = "Friday";
+            break;
+        case TestEnum::Saturday:
+            result1 = "Saturday";
+            break;
+        case TestEnum::Sunday:
+            result1 = "Sunday";
+            break;
+        default:
+            return E_NOT_FOUND_EXCEPTION;
+            break;
     }
     return NOERROR;
 }

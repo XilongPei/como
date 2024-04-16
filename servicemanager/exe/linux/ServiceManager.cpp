@@ -67,6 +67,13 @@ ECode ServiceManager::AddService(
         delete ipack;
         return E_OUT_OF_MEMORY_ERROR;
     }
+
+    {
+        String uuidStr;
+        uuidStr = DumpUUID(ipack->mCid.mUuid);
+        Logger_D("ServiceManager", "ServiceManager::AddService \"%s\" [%s]",
+                                                name.string(), uuidStr.string());
+    }
 #else
     if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
         size_t poolSize = 8192;
@@ -132,10 +139,16 @@ ECode ServiceManager::AddService(
             delete ipack;
             return E_OUT_OF_MEMORY_ERROR;
         }
+
+        {
+            String uuidStr;
+            uuidStr = DumpUUID(ipack->mCid.mUuid);
+            Logger_D("ServiceManager", "ServiceManager::AddService \"%s\" [%s]",
+                                                    name.string(), uuidStr.string());
+        }
     }
 #endif
 
-    Logger_D("ServiceManager", "ServiceManager::AddService \"%s\"", name.string());
     return NOERROR;
 }
 
@@ -151,17 +164,23 @@ ECode ServiceManager::GetService(
     Mutex::AutoLock lock(mServicesLock);
     *object = mServices.Get(name);
     if (nullptr == *object) {
+        Logger_D("ServiceManager",
+            "ServiceManager::GetService \"%s\" [E_NOT_FOUND_EXCEPTION]", name.string());
         return E_NOT_FOUND_EXCEPTION;
     }
 #else
     if ((nullptr != options) && (! options->GetPaxosServer().IsNull())) {
         std::string value;
         if (como::ComoPhxUtils::GetStateData(std::string(name), value).empty()) {
+            Logger_D("ServiceManager",
+                "ServiceManager::GetService \"%s\" [E_NOT_FOUND_EXCEPTION]", name.string());
             return E_NOT_FOUND_EXCEPTION;
         }
 
         InterfacePack *ipack = new InterfacePack();
         if (nullptr == ipack) {
+            Logger_D("ServiceManager",
+                "ServiceManager::GetService \"%s\" [E_OUT_OF_MEMORY_ERROR]", name.string());
             return E_OUT_OF_MEMORY_ERROR;
         }
 
@@ -185,11 +204,20 @@ ECode ServiceManager::GetService(
             return E_OUT_OF_MEMORY_ERROR;
         }
     }
+    else {
+        Mutex::AutoLock lock(mServicesLock);
+        *object = mServices.Get(name);
+        if (nullptr == *object) {
+            Logger_D("ServiceManager",
+                "ServiceManager::GetService \"%s\" [E_NOT_FOUND_EXCEPTION]", name.string());
+            return E_NOT_FOUND_EXCEPTION;
+        }
+    }
 #endif
 
     {
         String uuidStr;
-        //uuidStr = DumpUUID(ipack->mCid.mUuid);
+        uuidStr = DumpUUID((*object)->mCid.mUuid);
         Logger_D("ServiceManager", "ServiceManager::GetService \"%s\" [%s]",
                                                 name.string(), uuidStr.string());
     }

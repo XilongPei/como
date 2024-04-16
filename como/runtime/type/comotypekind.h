@@ -22,26 +22,26 @@ namespace como {
 enum class TypeKind
 {
     Unknown,
-    Char = 1,
-    Byte,
-    Short,
-    Integer,
-    Long,
-    Float,
-    Double,
-    Boolean,
-    String,
-    CoclassID,
-    ComponentID,
-    InterfaceID,
-    HANDLE,
-    ECode,
-    Enum,
-    Array,
-    Interface,
-    Coclass,
-    Triple,
-    TypeKind,
+    Char = 1,       // 1
+    Byte,           // 2
+    Short,          // 3
+    Integer,        // 4
+    Long,           // 5
+    Float,          // 6
+    Double,         // 7
+    Boolean,        // 8
+    String,         // 9
+    CoclassID,      // 10
+    ComponentID,    // 11
+    InterfaceID,    // 12
+    HANDLE,         // 13
+    ECode,          // 14
+    Enum,           // 15
+    Array,          // 16
+    Interface,      // 17
+    Coclass,        // 18
+    Triple,         // 19
+    TypeKind,       // 20
 };
 
 } // namespace como

@@ -577,8 +577,9 @@ ECode InterfaceProxy::MarshalArguments(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
-    else
+    else {
         return NOERROR;
+    }
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];
