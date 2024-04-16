@@ -39,6 +39,10 @@ int main(int argv, char** argc)
         return 1;
     }
 
+    String uuidStr;
+    uuidStr = DumpUUID(IID_IService2.mUuid);
+    printf("CService2, IID_IService2: %s\n", uuidStr.string());
+
     ServiceManager::GetInstance()->AddService(String("rpcservice2"), srv);
 
     printf("==== rpc service wait for calling ====\n");

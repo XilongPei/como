@@ -101,7 +101,7 @@ ECode ServiceManager::AddService(
                                                 sEchoRespValue);
 
         if (ret != 0) {
-            Logger_D("ServiceManager", "ServiceManager::HandleMessage AddService. Echo fail, ret %d\n", ret);
+            Logger_E("ServiceManager", "ServiceManager::AddService. SyncStateData fail, ret %d", ret);
         }
     }
     else {
@@ -135,6 +135,7 @@ ECode ServiceManager::AddService(
     }
 #endif
 
+    Logger_D("ServiceManager", "ServiceManager::AddService \"%s\"", name.string());
     return NOERROR;
 }
 
@@ -186,6 +187,12 @@ ECode ServiceManager::GetService(
     }
 #endif
 
+    {
+        String uuidStr;
+        //uuidStr = DumpUUID(ipack->mCid.mUuid);
+        Logger_D("ServiceManager", "ServiceManager::GetService \"%s\" [%s]",
+                                                name.string(), uuidStr.string());
+    }
     return NOERROR;
 }
 

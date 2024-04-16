@@ -45,8 +45,9 @@ TEST(RPCTest, TestCallTestMethod1)
     ECode ec = SERVICE->TestMethod1(arg1, result1);
     EXPECT_EQ(0, ec);
 
-    for(int i = 0; i < size; i++)
+    for(int i = 0;  i < size;  i++) {
         EXPECT_EQ((*result1)[i], arg1[size - i - 1]);
+    }
 
     delete result1;
 }

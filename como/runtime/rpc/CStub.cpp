@@ -850,8 +850,9 @@ ECode CStub::CreateObject(
     Logger::D("CStub", "Object's CoclassID is %s", DumpUUID(cid.mUuid).string());
 
     AutoPtr<CStub> stubObj = new CStub();
-    if (nullptr == stubObj)
+    if (nullptr == stubObj) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     stubObj->mTarget = obj;
     stubObj->mCid = cid;
@@ -913,13 +914,23 @@ ECode CStub::CreateObject(
             Logger::E("CStub", "Object does not have \"%s::%s\" interface.",
                                                     ns.string(), name.string());
             // rollback this transaction
-            for (Integer j = 0;  j < i;  j++)
+            for (Integer j = 0;  j < i;  j++) {
                 delete stubObj->mInterfaces[j];
+            }
             delete stubObj;
 
             return E_INTERFACE_NOT_FOUND_EXCEPTION;
         }
         stubObj->mInterfaces[i] = istub;
+
+        {
+            String name, ns, uuidStr;
+            interfaces[i]->GetNamespace(ns);
+            interfaces[i]->GetName(name);
+            uuidStr = DumpUUID(istub->mIid.mUuid);
+            Logger::D("CStub", "Object has \"%s::%s\" [%s] interface.",
+                                    ns.string(), name.string(), uuidStr.string());
+        }
     }
 
     ec = channel->StartListening(stubObj);
