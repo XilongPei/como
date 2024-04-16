@@ -75,6 +75,7 @@ set(SOURCES
     ComoConfig.cpp
     ComoContext.cpp
     runtime.cpp
+    comoerrorHelper.cpp
 )
 
 if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")

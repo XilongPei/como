@@ -414,6 +414,7 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
+                    argParcel->ReadArray(t);
                     argList->SetOutputArgumentOfArray(i, reinterpret_cast<HANDLE>(t));
                     break;
                 }
@@ -652,7 +653,7 @@ ECode InterfaceStub::Invoke(
     Integer methodIndex, methodNumber;
     argParcel->ReadInteger(methodIndex);
     mTargetMetadata->GetMethodNumber(methodNumber);
-    if (methodIndex < 0 || methodIndex >= methodNumber) {
+    if ((methodIndex < 0) || (methodIndex >= methodNumber)) {
         Logger::E("CStub", "MethodIndex %d is invalid.", methodIndex);
         return E_RUNTIME_EXCEPTION;
     }

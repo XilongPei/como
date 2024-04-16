@@ -50,6 +50,7 @@ void Triple::AllocData(
     void* data = buf->GetData();
     memset(data, 0, dataSize);
     mData = data;
+    mSize = dataSize;
 }
 
 void Triple::FreeData()

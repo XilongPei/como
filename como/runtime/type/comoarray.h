@@ -157,7 +157,7 @@ template<typename T>
 Boolean Array<T>::Alloc(
     /* [in] */ Long size)
 {
-    if (size < 0 || size > SIZE_MAX) {
+    if ((size < 0) || (size > SIZE_MAX)) {
         Logger::E("Array", "Invalid array size %lld", size);
         mData = nullptr;
         mSize = 0;
@@ -166,7 +166,7 @@ Boolean Array<T>::Alloc(
 
     Long byteSize = sizeof(T) * size;
     SharedBuffer* buf = SharedBuffer::Alloc(byteSize);
-    if (buf == nullptr) {
+    if (nullptr == buf) {
         Logger::E("Array", "Malloc array which size is %lld failed.", byteSize);
         mData = nullptr;
         mSize = 0;
@@ -226,7 +226,7 @@ Array<T>::Array(
     if (Alloc(list.size())) {
         Long i;
         typename std::initializer_list<T>::const_iterator it;
-        for (it = list.begin(), i = 0; it != list.end(); ++it, ++i) {
+        for (it = list.begin(), i = 0;  it != list.end();  ++it, ++i) {
             Set(i, *it);
         }
     }
@@ -239,7 +239,7 @@ Array<T>::~Array()
         SharedBuffer* sb = SharedBuffer::GetBufferFromData(mData);
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
-            for (Long i = 0; i < mSize; i++) {
+            for (Long i = 0;  i < mSize;  i++) {
                 deleteF(&static_cast<T*>(mData)[i], this);
             }
         }
@@ -278,15 +278,16 @@ Long Array<T>::Copy(
     /* [in] */ T const* srcData,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr)
+    if (nullptr == srcData) {
         return 0;
+    }
 
     Long N = MIN(mSize, length);
     if (mData == srcData) {
         return N;
     }
     T* array = static_cast<T*>(mData);
-    for (Long i = 0; i < N; i++) {
+    for (Long i = 0;  i < N;  i++) {
         AssignFunc<T> assignF;
         assignF(&array[i], srcData[i], mData);
     }
@@ -299,22 +300,23 @@ Long Array<T>::Copy(
     /* [in] */ T const* srcData,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr)
+    if (nullptr == srcData) {
         return 0;
+    }
 
     Long N = MIN(mSize - thisPos, length);
-    if (mData == srcData && thisPos == 0) {
+    if ((mData == srcData) && (0 == thisPos)) {
         return N;
     }
     T* array = static_cast<T*>(mData) + thisPos;
     if (mData != srcData) {
-        for (Long i = 0; i < N; i++) {
+        for (Long i = 0;  i < N;  i++) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcData[i], mData);
         }
     }
     else {
-        for (Long i = N - 1; i >= 0; i--) {
+        for (Long i = N - 1;  i >= 0;  i--) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcData[i], mData);
         }
@@ -329,23 +331,24 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if (srcData == nullptr)
+    if (nullptr == srcData) {
         return 0;
+    }
 
     Long N = MIN(mSize - thisPos, length);
-    if (mData == srcData && thisPos == srcPos) {
+    if ((mData == srcData) && (thisPos == srcPos)) {
         return N;
     }
     T* array = static_cast<T*>(mData) + thisPos;
     srcData += srcPos;
-    if (mData != srcData || thisPos < srcPos) {
-        for (Long i = 0; i < N; i++) {
+    if ((mData != srcData) || (thisPos < srcPos)) {
+        for (Long i = 0;  i < N;  i++) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcData[i], mData);
         }
     }
     else {
-        for (Long i = N - 1; i >= 0; i--) {
+        for (Long i = N - 1;  i >= 0;  i--) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcData[i], mData);
         }
@@ -357,7 +360,7 @@ template<typename T>
 Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
@@ -366,7 +369,7 @@ Long Array<T>::Copy(
         return N;
     }
     T* array = static_cast<T*>(mData);
-    for (Long i = 0; i < N; i++) {
+    for (Long i = 0;  i < N;  i++) {
         AssignFunc<T> assignF;
         assignF(&array[i], srcArray[i], mData);
     }
@@ -378,7 +381,7 @@ Long Array<T>::Copy(
     /* [in] */ const Array<T>& srcArray,
     /* [in] */ Long length)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
@@ -400,16 +403,16 @@ Long Array<T>::Copy(
     /* [in] */ Long srcPos,
     /* [in] */ Long length)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
     Long N = MIN(mSize, MIN(srcArray.mSize - srcPos, length));
-    if (mData == srcArray.mData && srcPos == 0) {
+    if ((mData == srcArray.mData) && (0 == srcPos)) {
         return N;
     }
     T* array = static_cast<T*>(mData);
-    for (Long i = 0; i < N; i++) {
+    for (Long i = 0;  i < N;  i++) {
         AssignFunc<T> assignF;
         assignF(&array[i], srcArray[srcPos + i], mData);
     }
@@ -421,23 +424,23 @@ Long Array<T>::Copy(
     /* [in] */ Long thisPos,
     /* [in] */ const Array<T>& srcArray)
 {
-    if ((srcArray.mData == nullptr) || (srcArray.mSize == 0)) {
+    if ((nullptr == srcArray.mData) || (0 == srcArray.mSize)) {
         return 0;
     }
 
     Long N = MIN(mSize - thisPos, srcArray.mSize);
-    if (mData == srcArray.mData && thisPos == 0) {
+    if ((mData == srcArray.mData) && (0 == thisPos)) {
         return N;
     }
     T* array = static_cast<T*>(mData) + thisPos;
     if (mData != srcArray.mData) {
-        for (Long i = 0; i < N; i++) {
+        for (Long i = 0;  i < N;  i++) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[i], mData);
         }
     }
     else {
-        for (Long i = N - 1; i >= 0; i--) {
+        for (Long i = N - 1;  i >= 0;  i--) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[i], mData);
         }
@@ -461,13 +464,13 @@ Long Array<T>::Copy(
     }
     T* array = static_cast<T*>(mData) + thisPos;
     if (mData != srcArray.mData) {
-        for (Long i = 0; i < N; i++) {
+        for (Long i = 0;  i < N;  i++) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[i], mData);
         }
     }
     else {
-        for (Long i = N - 1; i >= 0; i--) {
+        for (Long i = N - 1;  i >= 0;  i--) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[i], mData);
         }
@@ -487,18 +490,18 @@ Long Array<T>::Copy(
     }
 
     Long N = MIN(mSize - thisPos, MIN(srcArray.mSize - srcPos, length));
-    if (mData == srcArray.mData && thisPos == srcPos) {
+    if ((mData == srcArray.mData) && (thisPos == srcPos)) {
         return N;
     }
     T* array = static_cast<T*>(mData) + thisPos;
-    if (mData != srcArray.mData || thisPos < srcPos) {
-        for (Long i = 0; i < N; i++) {
+    if ((mData != srcArray.mData) || (thisPos < srcPos)) {
+        for (Long i = 0;  i < N;  i++) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[srcPos + i], mData);
         }
     }
     else {
-        for (Long i = N - 1; i >= 0; i--) {
+        for (Long i = N - 1;  i >= 0;  i--) {
             AssignFunc<T> assignF;
             assignF(&array[i], srcArray[srcPos + i], mData);
         }
@@ -521,6 +524,11 @@ void Array<T>::Set(
     /* [in] */ Long index,
     /* [in] */ T value)
 {
+    // TODO, fix bug
+    if ((index < 0) || (index > mSize)) {
+        return;
+    }
+
     T* array = static_cast<T*>(mData);
     AssignFunc<T> assignF;
     assignF(&array[index], value, mData);
@@ -530,16 +538,16 @@ template<typename T>
 Boolean Array<T>::Equals(
     /* [in] */ const Array<T>& other) const
 {
-    return mData == other.mData && mSize == other.mSize &&
-            mType == other.mType;
+    return (mData == other.mData) && (mSize == other.mSize) &&
+            (mType == other.mType);
 }
 
 template<typename T>
 Boolean Array<T>::operator==(
     /* [in] */ const Array<T>& other) const
 {
-    return mData == other.mData && mSize == other.mSize &&
-            mType == other.mType;
+    return (mData == other.mData) && (mSize == other.mSize) &&
+            (mType == other.mType);
 }
 
 template<typename T>
@@ -557,7 +565,7 @@ Array<T>& Array<T>::operator=(
         SharedBuffer* sb = SharedBuffer::GetBufferFromData(mData);
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
-            for (Long i = 0; i < mSize; i++) {
+            for (Long i = 0;  i < mSize;  i++) {
                 deleteF(&static_cast<T*>(mData)[i], this);
             }
         }
@@ -597,7 +605,7 @@ Array<T>& Array<T>::operator=(
         SharedBuffer* sb = SharedBuffer::GetBufferFromData(mData);
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
-            for (Long i = 0; i < mSize; i++) {
+            for (Long i = 0;  i < mSize;  i++) {
                 deleteF(&static_cast<T*>(mData)[i], this);
             }
         }
@@ -609,7 +617,7 @@ Array<T>& Array<T>::operator=(
     if (Alloc(list.size())) {
         Long i;
         typename std::initializer_list<T>::const_iterator it;
-        for (it = list.begin(), i = 0; it != list.end(); ++it, ++i) {
+        for (it = list.begin(), i = 0;  it != list.end();  ++it, ++i) {
             Set(i, *it);
         }
     }
@@ -621,6 +629,12 @@ T& Array<T>::operator[](
     /* [in] */ Long index)
 {
     T* array = static_cast<T*>(mData);
+
+    // TODO, fix bug
+    if ((index < 0) || (index > mSize)) {
+        return array[0];
+    }
+
     return array[index];
 }
 
@@ -629,6 +643,12 @@ const T& Array<T>::operator[](
     /* [in] */ Long index) const
 {
     T* array = static_cast<T*>(mData);
+
+    // TODO, fix bug
+    if ((index < 0) || (index > mSize)) {
+        return array[0];
+    }
+
     return array[index];
 }
 
@@ -663,7 +683,7 @@ void Array<T>::Clear()
         SharedBuffer* sb = SharedBuffer::GetBufferFromData(mData);
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
-            for (Long i = 0; i < mSize; i++) {
+            for (Long i = 0;  i < mSize;  i++) {
                 deleteF(&static_cast<T*>(mData)[i], this);
             }
         }
@@ -678,13 +698,13 @@ Array<T> Array<T>::Clone() const
 {
     Array<T> newArray;
 
-    if (!newArray.Alloc(mSize)) {
+    if (! newArray.Alloc(mSize)) {
         return newArray;
     }
 
     T* src = static_cast<T*>(mData);
     T* des = static_cast<T*>(newArray.mData);
-    for (Long i = 0; i < mSize; i++) {
+    for (Long i = 0;  i < mSize;  i++) {
         AssignFunc<T> assignF;
         assignF(&des[i], src[i], des);
     }

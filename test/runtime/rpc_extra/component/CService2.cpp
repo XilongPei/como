@@ -14,6 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
+#include <stdio.h>
 #include "CService2.h"
 
 namespace como {
@@ -33,10 +34,23 @@ ECode CService2::TestMethod1(
         /* [in] */ const Array<Integer>& arg1,
         /* [out] */ Array<Integer>* result1)
 {
+
     Long size = arg1.GetLength();
+    Long size1 = (*result1).GetLength();
+    Logger::D("CService2", "in CService2::TestMethod1 [in]size: %ld %ld, [out]result1: %p",
+                                                                    size, size1, result1);
     
-    for (int i = 0; i < size - 1; i++)
+    *result1 = Array<Integer>::Allocate(size);
+    //(*result1).AllocData(size);
+
+    Long size12 = (*result1).GetLength();
+    Logger::D("CService2", "$debug$, in CService2::TestMethod1 [in]size: %ld %ld, [out]result1: %p",
+                                                                    size, size12, result1);
+    for (int i = 0;  i < size - 1;  i++) {
         (*result1)[size - i - 1] = arg1[i];
+    }
+
+    Logger::D("CService2", "out CService2::TestMethod1");
     return NOERROR;
 }
 
