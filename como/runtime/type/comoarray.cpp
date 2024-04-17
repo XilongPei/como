@@ -37,21 +37,28 @@ Triple::Triple(
     other.mSize = 0;
 }
 
-Long Triple::AllocData(
+void Triple::AllocData(
     /* [in] */ Long dataSize)
 {
     SharedBuffer* buf = SharedBuffer::Alloc(dataSize);
     if (nullptr == buf) {
         Logger::E("Triple", "Malloc data which size is %lld failed.", dataSize);
         mData = nullptr;
-        return mSize;
+    }
+    else {
+        mData = buf->GetData();
+        memset(mData, 0, dataSize);
     }
 
-    void* data = buf->GetData();
-    memset(data, 0, dataSize);
-    mData = data;
-
-    return mSize;
+    /**
+     * There is no record of dataSize, because the class inherited from Triple
+     * will have information about the size of the element, at which point the
+     * dataSize will be rewritten so that it represents the number of elements,
+     * not the amount of memory used.
+     *
+     * This function does not return a value. Success is determined by
+     * whether `->mData` is nullptr.
+     */
 }
 
 void Triple::FreeData()

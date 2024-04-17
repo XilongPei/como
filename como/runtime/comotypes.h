@@ -222,7 +222,7 @@ struct COM_PUBLIC Triple
     Triple(
         /* [in] */ Triple&& other);
 
-    Long AllocData(
+    void AllocData(
         /* [in] */ Long dataSize);
 
     void FreeData();
