@@ -44,14 +44,12 @@ Long Triple::AllocData(
     if (nullptr == buf) {
         Logger::E("Triple", "Malloc data which size is %lld failed.", dataSize);
         mData = nullptr;
-        mSize = 0;
         return mSize;
     }
 
     void* data = buf->GetData();
     memset(data, 0, dataSize);
     mData = data;
-    mSize = dataSize;
 
     return mSize;
 }

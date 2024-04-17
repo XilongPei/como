@@ -852,11 +852,11 @@ ECode InterfaceProxy::MarshalArguments(
                         Logger::E("CProxy", "Invalid [out] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
-                    intParamIndex++;
 
                     HANDLE value = GetHANDLEValue(regs, intParamIndex, fpParamIndex);
                     FAIL_RETURN(argParcel->WriteArray(*reinterpret_cast<Triple*>(value)));
 
+                    intParamIndex++;
                     break;
                 }
                 case TypeKind::CoclassID:
