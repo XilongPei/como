@@ -93,49 +93,81 @@ ECode InterfaceStub::UnmarshalArguments(
             switch (kind) {
                 case TypeKind::Char: {
                     Char value;
-                    argParcel->ReadChar(value);
+                    ec = argParcel->ReadChar(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfChar(i, value);
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte value;
-                    argParcel->ReadByte(value);
+                    ec = argParcel->ReadByte(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfByte(i, value);
                     break;
                 }
                 case TypeKind::Short: {
                     Short value;
-                    argParcel->ReadShort(value);
+                    ec = argParcel->ReadShort(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfShort(i, value);
                     break;
                 }
                 case TypeKind::Integer: {
                     Integer value;
-                    argParcel->ReadInteger(value);
+                    ec = argParcel->ReadInteger(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfInteger(i, value);
                     break;
                 }
                 case TypeKind::Long: {
                     Long value;
-                    argParcel->ReadLong(value);
+                    ec = argParcel->ReadLong(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfLong(i, value);
                     break;
                 }
                 case TypeKind::Float: {
                     Float value;
-                    argParcel->ReadFloat(value);
+                    ec = argParcel->ReadFloat(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfFloat(i, value);
                     break;
                 }
                 case TypeKind::Double: {
                     Double value;
-                    argParcel->ReadDouble(value);
+                    ec = argParcel->ReadDouble(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfDouble(i, value);
                     break;
                 }
                 case TypeKind::Boolean: {
                     Boolean value;
-                    argParcel->ReadBoolean(value);
+                    ec = argParcel->ReadBoolean(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadBoolean error");
+                    }
+
                     argList->SetInputArgumentOfBoolean(i, value);
                     break;
                 }
@@ -146,19 +178,31 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
-                    argParcel->ReadString(*value);
+                    ec = argParcel->ReadString(*value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfString(i, *value);
                     break;
                 }
                 case TypeKind::ECode: {
                     ECode value;
-                    argParcel->ReadECode(value);
+                    ec = argParcel->ReadECode(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfECode(i, value);
                     break;
                 }
                 case TypeKind::Enum: {
                     Integer value;
-                    argParcel->ReadEnumeration(value);
+                    ec = argParcel->ReadEnumeration(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                    }
+
                     argList->SetInputArgumentOfEnumeration(i, value);
                     break;
                 }
@@ -169,13 +213,21 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
-                    argParcel->ReadArray(t);
+                    ec = argParcel->ReadArray(t);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadArray error");
+                    }
+
                     argList->SetInputArgumentOfArray(i, *t);
                     break;
                 }
                 case TypeKind::Interface: {
                     AutoPtr<IInterface> value;
-                    argParcel->ReadInterface(value);
+                    ec = argParcel->ReadInterface(value);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadInterface error");
+                    }
+
                     argList->SetInputArgumentOfInterface(i, value);
 
                     //@ `REFCOUNT`
@@ -379,7 +431,10 @@ ECode InterfaceStub::UnmarshalArguments(
                     // An empty array is passed in, even if it is not of type
                     // IN_OUT(ioAttr == IOAttribute::IN_OUT), because the type of
                     // the array element is to be carried
-                    argParcel->ReadArray(t);
+                    ec = argParcel->ReadArray(t);
+                    if (FAILED(ec)) {
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadArray error");
+                    }
 
                     argList->SetOutputArgumentOfArray(i, reinterpret_cast<HANDLE>(t));
                     break;

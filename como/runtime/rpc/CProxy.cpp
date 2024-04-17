@@ -800,7 +800,6 @@ ECode InterfaceProxy::MarshalArguments(
                     HANDLE value = GetHANDLEValue(regs, intParamIndex, fpParamIndex);
                     FAIL_RETURN(argParcel->WriteArray(*reinterpret_cast<Triple*>(value)));
 
-                    delete reinterpret_cast<Triple*>(value);
                     intParamIndex++;
                     break;
                 }
@@ -854,6 +853,10 @@ ECode InterfaceProxy::MarshalArguments(
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
                     intParamIndex++;
+
+                    HANDLE value = GetHANDLEValue(regs, intParamIndex, fpParamIndex);
+                    FAIL_RETURN(argParcel->WriteArray(*reinterpret_cast<Triple*>(value)));
+
                     break;
                 }
                 case TypeKind::CoclassID:
