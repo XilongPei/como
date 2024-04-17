@@ -401,121 +401,104 @@ ECode CDBusParcel::ReadArray(
         t->mData = nullptr;
         t->mSize = 0;
         t->mType = kind;
-        return FAILED(ec) ? ec : size < 0 ?
-                E_RUNTIME_EXCEPTION : NOERROR;
+        return FAILED(ec) ? ec : (size < 0) ? E_RUNTIME_EXCEPTION : NOERROR;
     }
 
     switch (kind) {
         case TypeKind::Char: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Char;
-            tt.AllocData(sizeof(Char) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Char) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Char;
+            t->AllocData(sizeof(Char) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Char) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Byte: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Byte;
-            tt.AllocData(sizeof(Byte) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Byte) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Byte;
+            t->AllocData(sizeof(Byte) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Byte) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Short: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Short;
-            tt.AllocData(sizeof(Short) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Short) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Short;
+            t->AllocData(sizeof(Short) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Short) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Integer: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Integer;
-            tt.AllocData(sizeof(Integer) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Integer) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Integer;
+            t->AllocData(sizeof(Integer) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Integer) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Long: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Long;
-            tt.AllocData(sizeof(Long) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Long) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Long;
+            t->AllocData(sizeof(Long) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Long) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Float: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Float;
-            tt.AllocData(sizeof(Float) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Float) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Float;
+            t->AllocData(sizeof(Float) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Float) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Double: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Double;
-            tt.AllocData(sizeof(Double) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Double) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Double;
+            t->AllocData(sizeof(Double) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Double) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Boolean: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Boolean;
-            tt.AllocData(sizeof(Boolean) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Boolean) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Boolean;
+            t->AllocData(sizeof(Boolean) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Boolean) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::String: {
@@ -580,46 +563,41 @@ ECode CDBusParcel::ReadArray(
             break;
         }
         case TypeKind::ECode: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::ECode;
-            tt.AllocData(sizeof(ECode) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(ECode) * size);
+            t->mSize = size;
+            t->mType = TypeKind::ECode;
+            t->AllocData(sizeof(ECode) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(ECode) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Enum: {
-            Triple tt;
-            tt.mSize = size;
-            tt.mType = TypeKind::Enum;
-            tt.AllocData(sizeof(Integer) * size);
-            if (tt.mData != nullptr) {
-                ec = Read(tt.mData, sizeof(Integer) * size);
+            t->mSize = size;
+            t->mType = TypeKind::Enum;
+            t->AllocData(sizeof(Integer) * size);
+            if (t->mData != nullptr) {
+                ec = Read(t->mData, sizeof(Integer) * size);
             }
             else {
                 ec = E_OUT_OF_MEMORY_ERROR;
             }
-            *t = std::move(tt);
             break;
         }
         case TypeKind::Array: {
             Array<Triple> triArray(size);
             for (Long i = 0;  i < size;  i++) {
-                Triple tt;
-                ec = ReadArray(&tt);
+                ec = ReadArray(&(triArray[i]));
                 if (FAILED(ec)) {
                     t->mData = nullptr;
                     t->mSize = 0;
                     t->mType = kind;
                     return ec;
                 }
-                triArray[i] = std::move(tt);
             }
+            t->mType = TypeKind::Array;
             *t = triArray;
             break;
         }
