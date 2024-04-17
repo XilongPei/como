@@ -58,8 +58,9 @@ ECode InterfaceStub::UnmarshalArguments(
     /* [out] */ AutoPtr<IArgumentList>& argList)
 {
     ECode ec = method->CreateArgumentList(argList);
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         return ec;
+    }
 
     Integer iOutParam = 0;
     CArgumentList* cArglist = CArgumentList::From(argList);
@@ -72,8 +73,9 @@ ECode InterfaceStub::UnmarshalArguments(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
-    else
+    else {
         return NOERROR;
+    }
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];
@@ -198,7 +200,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
-        else if (ioAttr == IOAttribute::IN_OUT || ioAttr == IOAttribute::OUT) {
+        else if ((ioAttr == IOAttribute::IN_OUT) || (ioAttr == IOAttribute::OUT)) {
             switch (kind) {
                 case TypeKind::Char: {
                     //@ `SMALL_PARAM_BUFFER`
@@ -374,9 +376,11 @@ ECode InterfaceStub::UnmarshalArguments(
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
-                    if (ioAttr == IOAttribute::IN_OUT) {
-                        argParcel->ReadArray(t);
-                    }
+                    // An empty array is passed in, even if it is not of type
+                    // IN_OUT(ioAttr == IOAttribute::IN_OUT), because the type of
+                    // the array element is to be carried
+                    argParcel->ReadArray(t);
+
                     argList->SetOutputArgumentOfArray(i, reinterpret_cast<HANDLE>(t));
                     break;
                 }
@@ -463,8 +467,9 @@ ECode InterfaceStub::MarshalResults(
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
     }
-    else
+    else {
         return NOERROR;
+    }
 
     for (Integer i = 0;  i < N;  i++) {
         IMetaParameter* param = cMethod->mParameters[i];

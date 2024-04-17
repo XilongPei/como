@@ -39,9 +39,7 @@ ECode CService2::TestMethod1(
     Long size1 = (*result1).GetLength();
     Logger::D("CService2", "in CService2::TestMethod1 [in]size: %ld %ld, [out]result1: %p",
                                                                     size, size1, result1);
-    
-    *result1 = Array<Integer>::Allocate(size);
-    //(*result1).AllocData(size);
+    (*result1).Alloc(size);
 
     Long size12 = (*result1).GetLength();
     Logger::D("CService2", "$debug$, in CService2::TestMethod1 [in]size: %ld %ld, [out]result1: %p",

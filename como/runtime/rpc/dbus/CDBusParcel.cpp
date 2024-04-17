@@ -397,7 +397,7 @@ ECode CDBusParcel::ReadArray(
     TypeKind kind = (TypeKind)value;
     Long size;
     ec = ReadLong(size);
-    if (size <= 0 || FAILED(ec)) {
+    if ((size <= 0) || FAILED(ec)) {
         t->mData = nullptr;
         t->mSize = 0;
         t->mType = kind;
@@ -609,7 +609,7 @@ ECode CDBusParcel::ReadArray(
         }
         case TypeKind::Array: {
             Array<Triple> triArray(size);
-            for (Long i = 0; i < size; i++) {
+            for (Long i = 0;  i < size;  i++) {
                 Triple tt;
                 ec = ReadArray(&tt);
                 if (FAILED(ec)) {
@@ -625,7 +625,7 @@ ECode CDBusParcel::ReadArray(
         }
         case TypeKind::Interface: {
             Array<IInterface*> intfArray(size);
-            for (Long i = 0; i < size; i++) {
+            for (Long i = 0;  i < size;  i++) {
                 AutoPtr<IInterface> obj;
                 ec = ReadInterface(obj);
                 if (FAILED(ec)) {
@@ -659,7 +659,7 @@ ECode CDBusParcel::WriteArray(
     }
 
     ec = WriteLong(t->mSize);
-    if (t->mSize == 0 || FAILED(ec)) {
+    if ((0 == t->mSize) || FAILED(ec)) {
         return ec;
     }
 
@@ -689,7 +689,7 @@ ECode CDBusParcel::WriteArray(
             ec = Write(t->mData, sizeof(Boolean) * t->mSize);
             break;
         case TypeKind::String: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const String& str = reinterpret_cast<String*>(t->mData)[i];
                 ec = WriteString(str);
                 if (FAILED(ec)) {
@@ -699,7 +699,7 @@ ECode CDBusParcel::WriteArray(
             break;
         }
         case TypeKind::CoclassID: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const CoclassID& cid = reinterpret_cast<CoclassID*>(t->mData)[i];
                 ec = WriteCoclassID(cid);
                 if (FAILED(ec)) {

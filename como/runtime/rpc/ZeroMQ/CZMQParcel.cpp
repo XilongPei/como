@@ -662,7 +662,7 @@ ECode CZMQParcel::WriteArray(
     }
 
     ec = WriteLong(t->mSize);
-    if (t->mSize == 0 || FAILED(ec)) {
+    if ((0 == t->mSize) || FAILED(ec)) {
         return ec;
     }
 

@@ -148,7 +148,6 @@ public:
 
     operator Array<IInterface*>();
 
-private:
     Boolean Alloc(
         /* [in] */ Long size);
 };
@@ -193,7 +192,9 @@ Array<T>::Array(
     /* [in] */ Long size)
 {
     mType = Type2Kind<T>::Kind();
-    Alloc(size);
+
+    // In case of an error, function Alloc has already printed log
+    (void)Alloc(size);
 }
 
 template<typename T>
