@@ -44,7 +44,7 @@ ECode CService2::TestMethod1(
     Long size12 = (*result1).GetLength();
     Logger::D("CService2", "$debug$, in CService2::TestMethod1 [in]size: %ld %ld, [out]result1: %p",
                                                                     size, size12, result1);
-    for (int i = 0;  i < size - 1;  i++) {
+    for (int i = 0;  i < size;  i++) {
         (*result1)[size - i - 1] = arg1[i];
     }
 

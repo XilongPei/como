@@ -892,7 +892,7 @@ ECode CDBusParcel::Read(
     }
 
     if ((mDataPos + ALIGN4(len)) >= mDataPos &&
-                  (mDataPos + ALIGN4(len)) <= mDataSize && len <= ALIGN4(len)) {
+              ((mDataPos + ALIGN4(len)) <= mDataSize) && (len <= ALIGN4(len))) {
         memcpy(outData, mData + mDataPos, len);
         mDataPos += ALIGN4(len);
         return NOERROR;
@@ -1128,8 +1128,9 @@ restart_write:
     }
 
     ECode ec = GrowData(mDataPos - oldDataPos + sizeof(value));
-    if (SUCCEEDED(ec))
+    if (SUCCEEDED(ec)) {
         goto restart_write;
+    }
 
     return ec;
 }
@@ -1138,6 +1139,10 @@ ECode CDBusParcel::CreateObject(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     parcel = new CDBusParcel();
+    if (nullptr == parcel) {
+        return E_OUT_OF_MEMORY_ERROR;
+    }
+
     return NOERROR;
 }
 

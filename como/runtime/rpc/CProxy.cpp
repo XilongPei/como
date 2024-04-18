@@ -989,7 +989,7 @@ ECode InterfaceProxy::UnmarshalResults(
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
-        else if (ioAttr == IOAttribute::OUT || ioAttr == IOAttribute::IN_OUT) {
+        else if ((ioAttr == IOAttribute::OUT) || (ioAttr == IOAttribute::IN_OUT)) {
             switch (kind) {
                 case TypeKind::Char: {
                     Char* addr = reinterpret_cast<Char*>(
