@@ -22,7 +22,7 @@ namespace como {
 class DebugUtils
 {
 public:
-    static void HexDump(const char *desc, void *addr, int len);
+    static int HexDump(char *bufStr, int bufSize, void *addr, int len);
 
 }; // class DebugUtils
 
