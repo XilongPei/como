@@ -121,14 +121,19 @@ private:
 };
 
 /**
- * ptrdiff_t is type of 'this' pointer, 4 'this' pointer of:
- *   Object
- *   RefBase
- *   IObject
- *   IWeakReferenceSource
+ * The inheritance relationship of Object is as follows:
+ * class Object
+ *     : public RefBase
+ *     , public IObject
+ *     , public IWeakReferenceSource
+ *
+ * sizeof(Object)               = 80
+ * sizeof(RefBase)              = 24
+ * sizeof(IObject)              = 8
+ * sizeof(IWeakReferenceSource) = 8
  */
-#ifndef OBJECTSIZE_Object
-#define OBJECTSIZE_Object (sizeof(Object) - sizeof(ptrdiff_t) * 4)
+#ifndef OBJECTSIZE_Offset
+#define OBJECTSIZE_Offset (sizeof(RefBase) + sizeof(IObject) + sizeof(IWeakReferenceSource))
 #endif
 
 inline void Object::SetObjSize(Integer objSize)
