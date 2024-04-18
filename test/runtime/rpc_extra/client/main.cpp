@@ -94,17 +94,22 @@ TEST(RPCTest, TestCallTestMethod4)
     Triple arg1;
     String arg2 = "TestStr";
     Char* result1;
-    Long arg3 = 10, result2;
+    Long arg3 = 8, result2;
     TypeKind arg4 = TypeKind::Byte, result3;
     arg1.mData = (void*)arg2.string();
     arg1.mSize = arg3;
     arg1.mType = arg4;
 
     ECode ec = SERVICE->TestMethod4(arg1, result1, result2, result3);
-    EXPECT_EQ(0, ec);
+    EXPECT_EQ(E_ILLEGAL_ARGUMENT_EXCEPTION, ec);
+
+    // Triple is an internal data structure that cannot be used directly on
+    // interface functions
+    #if 0
     EXPECT_STREQ(arg2.string(), (char*)result1);
     EXPECT_EQ(arg3, result2);
     EXPECT_EQ(arg4, result3);
+    #endif
 }
 
 int main(int argc, char **argv)
