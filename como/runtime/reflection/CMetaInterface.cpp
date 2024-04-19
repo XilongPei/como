@@ -74,7 +74,7 @@ ECode CMetaInterface::GetName(
 ECode CMetaInterface::GetNamespace(
     /* [out] */ String& ns)
 {
-    ns = mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace;
+    ns = (mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace);
     return NOERROR;
 }
 
@@ -130,7 +130,7 @@ ECode CMetaInterface::GetConstant(
 
     FAIL_RETURN(BuildAllConstants());
 
-    for (Integer i = 0; i < mConstants.GetLength(); i++) {
+    for (Integer i = 0;  i < mConstants.GetLength();  i++) {
         String mcName;
         mConstants[i]->GetName(mcName);
         if (mcName.Equals(name)) {
@@ -148,7 +148,7 @@ ECode CMetaInterface::GetConstant(
 {
     constt = nullptr;
 
-    if (index < 0 || index >= mConstants.GetLength()) {
+    if ((index < 0) || (index >= mConstants.GetLength())) {
         constt = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -192,7 +192,7 @@ ECode CMetaInterface::GetDeclaredMethods(
 
     Integer offset = mMethods.GetLength() - mMetadata->mMethodNumber;
     Integer N = MIN(mMetadata->mMethodNumber, methods.GetLength());
-    for (Integer i = 0;   i < N;   i++) {
+    for (Integer i = 0;  i < N;  i++) {
         methods.Set(i, mMethods[i + offset]);
     }
     return NOERROR;

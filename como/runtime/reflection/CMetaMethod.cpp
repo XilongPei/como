@@ -130,7 +130,7 @@ ECode CMetaMethod::GetAllParameters(
     FAIL_RETURN(BuildAllParameters());
 
     Integer N = MIN(mParameters.GetLength(), params.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         params.Set(i, mParameters[i]);
     }
     return NOERROR;
@@ -162,7 +162,7 @@ ECode CMetaMethod::GetParameter(
 
     FAIL_RETURN(BuildAllParameters());
 
-    for (Integer i = 0; i < mParameters.GetLength(); i++) {
+    for (Integer i = 0;  i < mParameters.GetLength();  i++) {
         IMetaParameter* mpObj = mParameters[i];
         String mpName;
         mpObj->GetName(mpName);
@@ -226,7 +226,7 @@ ECode CMetaMethod::InvokeImpl(
     Integer paramNum = args->GetParameterNumber();
     ParameterInfo* paramInfos = args->GetParameterInfos();
     Integer intParamNum = 1, fpParamNum = 0;
-    for (Integer i = 0; i < paramNum; i++) {
+    for (Integer i = 0;  i < paramNum;  i++) {
         if (paramInfos[i].mNumberType == NUMBER_TYPE_INTEGER) {
             intParamNum++;
         }

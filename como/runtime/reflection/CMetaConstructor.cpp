@@ -160,8 +160,9 @@ ECode CMetaConstructor::CreateArgumentList(
     FAIL_RETURN(BuildAllParameters());
 
     argList = new CArgumentList(mParameters);
-    if (nullptr == argList)
+    if (nullptr == argList) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     return NOERROR;
 }

@@ -71,7 +71,7 @@ ECode CMetaEnumeration::GetName(
 ECode CMetaEnumeration::GetNamespace(
     /* [out] */ String& ns)
 {
-    ns = mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace;
+    ns = (mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace);
     return NOERROR;
 }
 

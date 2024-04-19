@@ -302,8 +302,9 @@ ECode CMetaCoclass::GetAllMethods(
     /* [out] */ Array<IMetaMethod*>& methods)
 {
     ECode ec = BuildAllMethods();
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         return ec;
+    }
 
     Integer N = MIN(mMethods.GetLength(), methods.GetLength());
     for (Integer i = 0;  i < N;  i++) {
@@ -317,8 +318,9 @@ ECode CMetaCoclass::GetAllMethodsOverrideInfo(
     /* [out] */ Array<Boolean>& overridesInfo)
 {
     ECode ec = BuildAllMethods();
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         return ec;
+    }
 
     Integer N = MIN(mOverridesInfo.GetLength(), overridesInfo.GetLength());
     for (Integer i = 0;  i < N;  i++) {
@@ -340,8 +342,9 @@ ECode CMetaCoclass::GetMethod(
     }
 
     ECode ec = BuildAllMethods();
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         return ec;
+    }
 
     // fullName style: nameSpace.methodName
     Integer pos = fullName.IndexOf('.');
@@ -576,7 +579,7 @@ ECode CMetaCoclass::GetAllConstants(
     FAIL_RETURN(BuildAllConstants());
 
     Integer N = MIN(mConstants.GetLength(), consts.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         consts.Set(i, mConstants[i]);
     }
     return NOERROR;
@@ -609,7 +612,7 @@ ECode CMetaCoclass::GetConstant(
     /* [in] */ Integer index,
     /* [out] */ AutoPtr<IMetaConstant>& constt)
 {
-    if (index < 0 || index >= mConstants.GetLength()) {
+    if ((index < 0) || (index >= mConstants.GetLength())) {
         constt = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -628,10 +631,12 @@ ECode CMetaCoclass::BuildAllConstants()
             for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
-                if (nullptr != mcObj)
+                if (nullptr != mcObj) {
                     mConstants.Set(i, mcObj);
-                else
+                }
+                else {
                     return E_OUT_OF_MEMORY_ERROR;
+                }
             }
         }
     }
