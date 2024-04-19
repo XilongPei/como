@@ -325,7 +325,7 @@ public:
     Integer mHotCode;
 
 private:
-    void Init(
+    int Init(
         /* [in] */ const Array<IMetaParameter*>& parameters);
 
     void InitParameterInfo(

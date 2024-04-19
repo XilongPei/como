@@ -28,7 +28,12 @@ CArgumentList::CArgumentList(
     , mHasOutArguments(0)
     , mHotCode(0)
 {
-    Init(parameters);
+    (void)Init(parameters);
+
+    /**
+     * Judging whether member mParameterBuffer is nullptr determines whether the
+     * object is successfully constructed.
+     */
 }
 
 CArgumentList::CArgumentList(
@@ -38,7 +43,12 @@ CArgumentList::CArgumentList(
     , mHasOutArguments(hasOutArguments)
     , mHotCode(0)
 {
-    Init(parameters);
+    (void)Init(parameters);
+
+    /**
+     * Judging ......
+     * (see above)
+     */
 }
 
 CArgumentList::~CArgumentList()
@@ -1627,7 +1637,7 @@ ECode CArgumentList::GetArgumentAddress(
     return NOERROR;
 }
 
-void CArgumentList::Init(
+int CArgumentList::Init(
     /* [in] */ const Array<IMetaParameter*>& parameters)
 {
     Integer bufferPos = sizeof(HANDLE);     // for this pointer
@@ -1635,17 +1645,23 @@ void CArgumentList::Init(
     if (mParameterNumber > 0) {
         mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(
                                       sizeof(ParameterInfo), mParameterNumber));
-        if (mParameterInfos == nullptr) {
+        if (nullptr == mParameterInfos) {
             Logger::E("CArgumentList", "Out of memory.");
-            return;
+            return 1;
         }
 
-        for (Integer i = 0; i < mParameterNumber; i++) {
+        for (Integer i = 0;  i < mParameterNumber;  i++) {
             InitParameterInfo(bufferPos, parameters[i], mParameterInfos[i]);
         }
     }
 
     mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), bufferPos));
+    if (nullptr == mParameterBuffer) {
+        Logger::E("CArgumentList", "Out of memory.");
+        return 2;
+    }
+
+    return 0;
 }
 
 void CArgumentList::InitParameterInfo(
@@ -1654,9 +1670,10 @@ void CArgumentList::InitParameterInfo(
     /* [out] */ ParameterInfo& paramInfo)
 {
     AutoPtr<IMetaType> type;
-    parameter->GetType(type);
-    parameter->GetIOAttribute(paramInfo.mIOAttr);
-    type->GetTypeKind(paramInfo.mKind);
+    (void)parameter->GetType(type);
+    (void)parameter->GetIOAttribute(paramInfo.mIOAttr);
+    (void)type->GetTypeKind(paramInfo.mKind);
+
     if (paramInfo.mIOAttr == IOAttribute::IN) {
         switch(paramInfo.mKind) {
             case TypeKind::Char:

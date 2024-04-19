@@ -159,11 +159,12 @@ ECode CMetaConstructor::CreateArgumentList(
 {
     FAIL_RETURN(BuildAllParameters());
 
-    argList = new CArgumentList(mParameters);
-    if (nullptr == argList) {
+    CArgumentList* args = new CArgumentList(mParameters);
+    if ((nullptr == args) || (nullptr == args->GetParameterBuffer())) {
         return E_OUT_OF_MEMORY_ERROR;
     }
 
+    argList = args;
     return NOERROR;
 }
 
@@ -188,7 +189,7 @@ ECode CMetaConstructor::InvokeImpl(
     Integer paramNum = args->GetParameterNumber();
     ParameterInfo* paramInfos = args->GetParameterInfos();
     Integer intParamNum = 1, fpParamNum = 0;
-    for (Integer i = 0; i < paramNum; i++) {
+    for (Integer i = 0;  i < paramNum;  i++) {
         if (paramInfos[i].mNumberType == NUMBER_TYPE_INTEGER) {
             intParamNum++;
         }
