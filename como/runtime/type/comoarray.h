@@ -152,6 +152,10 @@ public:
         /* [in] */ Long size);
 };
 
+/**
+ * Request memory, regardless of whether the original mData is already pointing
+ * to memory.
+ */
 template<typename T>
 Boolean Array<T>::Alloc(
     /* [in] */ Long size)

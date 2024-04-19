@@ -91,7 +91,7 @@ int DebugUtils::HexDump(char *bufStr, int bufSize, void *addr, int len)
 
 } // namespace como
 
-
+#if 0
 int main()
 {
     const char *str = "// Pad out last line if not exactly 16 characters.// Pad "
@@ -102,3 +102,4 @@ int main()
     int i = como::DebugUtils::HexDump(bufStr, 4096, (void*)str, strlen(str));
     printf("%d\n%s", i, bufStr);
 }
+#endif

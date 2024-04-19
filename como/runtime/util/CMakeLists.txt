@@ -60,6 +60,7 @@ set(SOURCES
     ThreadStack.cpp
     ${EXTERNAL_DIR}/inih/ini.c
     StrToX_Hashmap.cpp
+    DebugUtils.cpp
 )
 
 add_library(util STATIC
@@ -89,6 +90,7 @@ COPY(util ${UTIL_SRC_DIR}/lamport_clock.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/hashmapCache.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/StrToX_Hashmap.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/DebugUtils.h ${INC_DIR})
 
 set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/comosp.h
@@ -107,6 +109,7 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/hashmap.h
     ${UTIL_SRC_DIR}/hashmapCache.h
     ${UTIL_SRC_DIR}/StrToX_Hashmap.h
+    ${UTIL_SRC_DIR}/DebugUtils.h
 )
 
 install(FILES
