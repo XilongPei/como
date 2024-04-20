@@ -28,7 +28,7 @@ CArgumentList::CArgumentList(
     , mHasOutArguments(0)
     , mHotCode(0)
 {
-    (void)Init(parameters);
+    mParameterBufferSize = Init(parameters);
 
     /**
      * Judging whether member mParameterBuffer is nullptr determines whether the
@@ -43,7 +43,7 @@ CArgumentList::CArgumentList(
     , mHasOutArguments(hasOutArguments)
     , mHotCode(0)
 {
-    (void)Init(parameters);
+    mParameterBufferSize = Init(parameters);
 
     /**
      * Judging ......
@@ -1646,8 +1646,8 @@ int CArgumentList::Init(
         mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(
                                       sizeof(ParameterInfo), mParameterNumber));
         if (nullptr == mParameterInfos) {
-            Logger::E("CArgumentList", "Out of memory.");
-            return 1;
+            Logger::E("CArgumentList::Init", "Out of memory.");
+            return -1;
         }
 
         for (Integer i = 0;  i < mParameterNumber;  i++) {
@@ -1657,11 +1657,37 @@ int CArgumentList::Init(
 
     mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), bufferPos));
     if (nullptr == mParameterBuffer) {
-        Logger::E("CArgumentList", "Out of memory.");
-        return 2;
+        Logger::E("CArgumentList::Init", "Out of memory.");
+        return -2;
     }
 
-    return 0;
+    return bufferPos;
+}
+
+int CArgumentList::Init_FromMemory(
+    /* [in] */ CArgumentList* argsMemory,
+    /* [in] */ const Array<IMetaParameter*>& parameters)
+{
+    if (mParameterNumber > 0) {
+        mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(
+                                      sizeof(ParameterInfo), argsMemory->mParameterNumber));
+        if (nullptr == mParameterInfos) {
+            Logger::E("CArgumentList::Init_FromMemory", "Out of memory.");
+            return -1;
+        }
+
+        memcpy(mParameterInfos, argsMemory->mParameterInfos,
+                                sizeof(ParameterInfo) * argsMemory->mParameterNumber);
+    }
+
+    mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), mParameterBufferSize));
+    if (nullptr == mParameterBuffer) {
+        Logger::E("CArgumentList::Init_FromMemory", "Out of memory.");
+        return -2;
+    }
+
+    memcpy(mParameterBuffer, argsMemory->mParameterBuffer, mParameterBufferSize);
+    return mParameterBufferSize;
 }
 
 void CArgumentList::InitParameterInfo(
@@ -1680,19 +1706,22 @@ void CArgumentList::InitParameterInfo(
             case TypeKind::Byte:
             case TypeKind::Short:
             case TypeKind::Integer:
-            case TypeKind::Float:
             case TypeKind::Boolean:
             case TypeKind::ECode:
             case TypeKind::Enum:
             case TypeKind::TypeKind:
-                paramInfo.mNumberType = paramInfo.mKind != TypeKind::Float
-                        ? NUMBER_TYPE_INTEGER : NUMBER_TYPE_FLOATING_POINT;
+                paramInfo.mNumberType = NUMBER_TYPE_INTEGER;
+                paramInfo.mPos = bufferPos;
+                paramInfo.mSize = 4;
+                break;
+
+            case TypeKind::Float:
+                paramInfo.mNumberType = NUMBER_TYPE_FLOATING_POINT;
                 paramInfo.mPos = bufferPos;
                 paramInfo.mSize = 4;
                 break;
 
             case TypeKind::Long:
-            case TypeKind::Double:
             case TypeKind::String:
             case TypeKind::CoclassID:
             case TypeKind::ComponentID:
@@ -1701,11 +1730,17 @@ void CArgumentList::InitParameterInfo(
             case TypeKind::Array:
             case TypeKind::Interface:
             case TypeKind::Triple:
-                paramInfo.mNumberType = paramInfo.mKind != TypeKind::Double
-                        ? NUMBER_TYPE_INTEGER : NUMBER_TYPE_FLOATING_POINT;
+                paramInfo.mNumberType = NUMBER_TYPE_INTEGER;
                 paramInfo.mPos = ALIGN8(bufferPos);
                 paramInfo.mSize = 8;
                 break;
+
+            case TypeKind::Double:
+                paramInfo.mNumberType = NUMBER_TYPE_FLOATING_POINT;
+                paramInfo.mPos = ALIGN8(bufferPos);
+                paramInfo.mSize = 8;
+                break;
+
             default:
                 CHECK(0);
                 break;

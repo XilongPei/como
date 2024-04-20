@@ -443,11 +443,13 @@ ECode CMetaComponent::BuildAllCoclasses()
         AutoPtr<CMetaCoclass> mcObj = new CMetaCoclass(this, mMetadata, mc);
         if ((nullptr != mcObj) && (! fullName.IsEmpty())) {
             mCoclasses.Set(i, mcObj);
-            if (0 != mCoclassNameMap.Put(fullName, mcObj))
+            if (0 != mCoclassNameMap.Put(fullName, mcObj)) {
                 return E_OUT_OF_MEMORY_ERROR;
+            }
 
-            if (0 != mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj))
+            if (0 != mCoclassIdMap.Put(mcObj->mCid.mUuid, mcObj)) {
                 return E_OUT_OF_MEMORY_ERROR;
+            }
         }
         else {
             // roll back this transaction?
@@ -498,7 +500,7 @@ ECode CMetaComponent::BuildAllEnumerations()
 
 ECode CMetaComponent::BuildAllInterfaces()
 {
-    if (mMetadata->mInterfaceNumber == 0) {
+    if (0 == mMetadata->mInterfaceNumber) {
         return NOERROR;
     }
 

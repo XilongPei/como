@@ -140,7 +140,7 @@ ECode CMetaMethod::GetParameter(
     /* [in] */ Integer index,
     /* [out] */ AutoPtr<IMetaParameter>& param)
 {
-    if (index < 0 || index >= mMetadata->mParameterNumber) {
+    if ((index < 0) || (index >= mMetadata->mParameterNumber)) {
         param = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -197,6 +197,7 @@ ECode CMetaMethod::CreateArgumentList(
     }
 
     CArgumentList *cArgList = new(addr) CArgumentList(mParameters, mHasOutArguments);
+    // In-place construction, cArgList won't be nullptr
     if (nullptr == cArgList->GetParameterBuffer()) {
         free(addr);
         return E_OUT_OF_MEMORY_ERROR;
@@ -260,9 +261,10 @@ ECode CMetaMethod::InvokeImpl(
     Integer stackParamNum = (intParamNum > 6 ? intParamNum - 6 : 0) +
                             (fpParamNum > 8 ? fpParamNum - 8 : 0);
 #elif defined(__riscv)
-    #if (__riscv_xlen == 64)
+    #if (__riscv_xlen == 64) {
         Integer stackParamNum = (intParamNum > 8 ? intParamNum - 8 : 0) +
                                 (fpParamNum > 8 ? fpParamNum - 8 : 0);
+    }
     #endif
 #else
     #error Unknown Architecture
@@ -272,12 +274,14 @@ ECode CMetaMethod::InvokeImpl(
         mVobj = reinterpret_cast<HANDLE>(vobj);
         reinterpret_cast<HANDLE*>(params)[0] = mVobj;
         mMethodAddr = vobj->mVtab->mMethods[mIndex];
-    } else {
+    }
+    else {
         reinterpret_cast<HANDLE*>(params)[0] = mVobj;
     }
 
-    if (invokeImpl == nullptr)
+    if (invokeImpl == nullptr) {
         return invoke(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
+    }
 
     return invokeImpl(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
 }
@@ -350,10 +354,10 @@ ECode CMetaMethod::GetOpaque(
 
 ECode CMetaMethod::BuildAllParameters()
 {
-    if (mParameters[0] == nullptr) {
+    if (nullptr == mParameters[0]) {
         Mutex::AutoLock lock(mParametersLock);
-        if (mParameters[0] == nullptr) {
-            for (Integer i = 0; i < mMetadata->mParameterNumber; i++) {
+        if (nullptr == mParameters[0]) {
+            for (Integer i = 0;  i < mMetadata->mParameterNumber;  i++) {
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
                                                 mOwner->mOwner->mMetadata, this,
                                                   mMetadata->mParameters[i], i);

@@ -463,7 +463,7 @@ void Init_Proxy_Entry()
 
 #if defined(__aarch64__)
     Byte* p = (Byte*)PROXY_ENTRY;
-    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+    for (Integer i = 0;  i < PROXY_ENTRY_NUMBER;  i++) {
         memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
         Integer* codes = reinterpret_cast<Integer*>(p);
         codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
@@ -471,7 +471,7 @@ void Init_Proxy_Entry()
     }
 #elif defined(__arm__)
     Byte* p = (Byte*)PROXY_ENTRY;
-    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+    for (Integer i = 0;  i < PROXY_ENTRY_NUMBER;  i++) {
         memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
         Integer* codes = reinterpret_cast<Integer*>(p);
         codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
@@ -479,14 +479,14 @@ void Init_Proxy_Entry()
     }
 #elif defined(__x86_64__)
     Byte* p = (Byte*)PROXY_ENTRY;
-    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+    for (Integer i = 0;  i < PROXY_ENTRY_NUMBER;  i++) {
         memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
         p[PROXY_INDEX_OFFSET] = i;
         p += PROXY_ENTRY_SIZE;
     }
 #elif defined(__i386__)
     Byte* p = (Byte*)PROXY_ENTRY;
-    for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+    for (Integer i = 0;  i < PROXY_ENTRY_NUMBER;  i++) {
         memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
         p[PROXY_INDEX_OFFSET] = i;
         p += PROXY_ENTRY_SIZE;
@@ -494,7 +494,7 @@ void Init_Proxy_Entry()
 #elif defined(__riscv)
     #if (__riscv_xlen == 64)
         Byte* p = (Byte*)PROXY_ENTRY;
-        for (Integer i = 0; i < PROXY_ENTRY_NUMBER; i++) {
+        for (Integer i = 0;  i < PROXY_ENTRY_NUMBER;  i++) {
             memcpy(p, reinterpret_cast<void*>(&__entry), PROXY_ENTRY_SIZE);
             Integer* codes = reinterpret_cast<Integer*>(p);
             codes[PROXY_INDEX_OFFSET] = codes[PROXY_INDEX_OFFSET] | (i << 5);
@@ -507,7 +507,7 @@ void Init_Proxy_Entry()
     sProxyVtable[1] = reinterpret_cast<HANDLE>(&InterfaceProxy::S_Release);
     sProxyVtable[2] = reinterpret_cast<HANDLE>(&InterfaceProxy::S_Probe);
     sProxyVtable[3] = reinterpret_cast<HANDLE>(&InterfaceProxy::S_GetInterfaceID);
-    for (Integer i = 4; i < METHOD_MAX_NUMBER; i++) {
+    for (Integer i = 4;  i < METHOD_MAX_NUMBER;  i++) {
         sProxyVtable[i] = PROXY_ENTRY + ((i - 4) << PROXY_ENTRY_SHIFT);
     }
 }
@@ -928,8 +928,9 @@ ECode InterfaceProxy::UnmarshalResults(
         // Help me to call BuildAllParameters once.
         Integer outArgs;
         method->GetOutArgumentsNumber(outArgs);
-        if (outArgs <= 0)
+        if (outArgs <= 0) {
             return NOERROR;
+        }
     }
     else
         return NOERROR;
@@ -1854,10 +1855,12 @@ ECode InterfaceProxy::ProxyEntry(
 
         int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
                              &(ThreadPoolChannelInvoke::mWorkerList[pos]->mMutex), &curTime);
-        if (ret != ETIMEDOUT /*110, time out*/)
+        if (ret != ETIMEDOUT /*110, time out*/) {
             ec = ThreadPoolChannelInvoke::mWorkerList[pos]->ec;
-        else
+        }
+        else {
             ec = FUNCTION_SAFETY_CALL_TIMEOUT;
+        }
 
         TPCI_Executor::GetInstance()->CleanTask(pos);
 
@@ -2181,8 +2184,9 @@ ECode CProxy::CreateObject(
     cProxy->SetFunFreeMem(MemPoolFree, 0);
 #else
     AutoPtr<CProxy> proxyObj = new CProxy();
-    if (nullptr == proxyObj)
+    if (nullptr == proxyObj) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 #endif
 
     mc->GetCoclassID(proxyObj->mCid);
@@ -2206,13 +2210,15 @@ ECode CProxy::CreateObject(
     Integer interfaceNumber;
     mc->GetInterfaceNumber(interfaceNumber);
     Array<IMetaInterface*> interfaces(interfaceNumber);
-    if (interfaces.IsNull())
+    if (interfaces.IsNull()) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     mc->GetAllInterfaces(interfaces);
     proxyObj->mInterfaces = Array<InterfaceProxy*>(interfaceNumber);
-    if (proxyObj->mInterfaces.IsNull())
+    if (proxyObj->mInterfaces.IsNull()) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     channel->GetServerName(proxyObj->mServerName);
     channel->GetServerObjectId(proxyObj->mServerObjectId);
@@ -2228,8 +2234,9 @@ ECode CProxy::CreateObject(
         AutoPtr<InterfaceProxy> iproxy = interfaceProxy;
 #else
         AutoPtr<InterfaceProxy> iproxy = new InterfaceProxy();
-        if (nullptr == iproxy)
+        if (nullptr == iproxy) {
             return E_OUT_OF_MEMORY_ERROR;
+        }
 #endif
 
         iproxy->mIndex = i;
@@ -2304,6 +2311,5 @@ void InterfaceProxy::MemPoolFree(Short id, const void *p)
 {
     memPool->Free((void *)p);
 }
-
 
 } // namespace como

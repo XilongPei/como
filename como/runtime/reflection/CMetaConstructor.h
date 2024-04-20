@@ -121,6 +121,8 @@ public:
     Boolean         mIsDefault;
     Array<IMetaParameter*> mParameters;
     Mutex           mParametersLock;
+
+    IArgumentList  *mArgListMemory;
 };
 
 } // namespace como

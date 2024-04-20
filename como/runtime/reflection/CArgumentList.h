@@ -328,6 +328,10 @@ private:
     int Init(
         /* [in] */ const Array<IMetaParameter*>& parameters);
 
+    int Init_FromMemory(
+        /* [in] */ CArgumentList* argsMemory,
+        /* [in] */ const Array<IMetaParameter*>& parameters);
+
     void InitParameterInfo(
         /* [in, out] */ Integer& bufferPos,
         /* [in] */ IMetaParameter* parameter,
@@ -343,6 +347,7 @@ private:
     Integer mParameterNumber;
     ParameterInfo* mParameterInfos = nullptr;
     Byte* mParameterBuffer = nullptr;
+    Integer mParameterBufferSize;
 
     Integer mHasOutArguments;
 

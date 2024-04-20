@@ -48,6 +48,7 @@ CMetaConstructor::CMetaConstructor(
     , mIsDefault(mcObj->mMetadata->mProperties & COCLASS_CONSTRUCTOR_DEFAULT)
     , mParameters(mm->mParameterNumber)
     , mOpaque(0)
+    , mArgListMemory(nullptr)
 {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
@@ -165,6 +166,7 @@ ECode CMetaConstructor::CreateArgumentList(
     }
 
     argList = args;
+    mArgListMemory = args;
     return NOERROR;
 }
 
@@ -342,9 +344,9 @@ ECode CMetaConstructor::GetOpaque(
 
 ECode CMetaConstructor::BuildAllParameters()
 {
-    if (mParameters[0] == nullptr) {
+    if (nullptr == mParameters[0]) {
         Mutex::AutoLock lock(mParametersLock);
-        if (mParameters[0] == nullptr) {
+        if (nullptr == mParameters[0]) {
             for (Integer i = 0;  i < mMetadata->mParameterNumber;  i++) {
                 MetaParameter* mp = mMetadata->mParameters[i];
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
