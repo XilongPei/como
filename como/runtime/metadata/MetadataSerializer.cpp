@@ -37,35 +37,35 @@ void MetadataSerializer::Serialize()
     SerializeMetaNamespace(mc->mGlobalNamespace);
     mc->mGlobalNamespace = reinterpret_cast<MetaNamespace*>(SerializeAdjust(mc->mGlobalNamespace));
 
-    for (int i = 0; i < mc->mConstantNumber; i++) {
+    for (int i = 0;  i < mc->mConstantNumber;  i++) {
         MetaConstant* mk = mc->mConstants[i];
         SerializeMetaConstant(mk);
         mc->mConstants[i] = reinterpret_cast<MetaConstant*>(SerializeAdjust(mk));
     }
     mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
 
-    for (int i = 0; i < mc->mCoclassNumber; i++) {
+    for (int i = 0;  i < mc->mCoclassNumber;  i++) {
         MetaCoclass* mk = mc->mCoclasses[i];
         SerializeMetaCoclass(mk);
         mc->mCoclasses[i] = reinterpret_cast<MetaCoclass*>(SerializeAdjust(mk));
     }
     mc->mCoclasses = reinterpret_cast<MetaCoclass**>(SerializeAdjust(mc->mCoclasses));
 
-    for (int i = 0; i < mc->mEnumerationNumber; i++) {
+    for (int i = 0;  i < mc->mEnumerationNumber;  i++) {
         MetaEnumeration* me = mc->mEnumerations[i];
         SerializeMetaEnumeration(me);
         mc->mEnumerations[i] = reinterpret_cast<MetaEnumeration*>(SerializeAdjust(me));
     }
     mc->mEnumerations = reinterpret_cast<MetaEnumeration**>(SerializeAdjust(mc->mEnumerations));
 
-    for (int i = 0; i < mc->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mc->mInterfaceNumber;  i++) {
         MetaInterface* mi = mc->mInterfaces[i];
         SerializeMetaInterface(mi);
         mc->mInterfaces[i] = reinterpret_cast<MetaInterface*>(SerializeAdjust(mi));
     }
     mc->mInterfaces = reinterpret_cast<MetaInterface**>(SerializeAdjust(mc->mInterfaces));
 
-    for (int i = 0; i < mc->mTypeNumber; i++) {
+    for (int i = 0;  i < mc->mTypeNumber;  i++) {
         MetaType* mt = mc->mTypes[i];
         SerializeMetaType(mt);
         mc->mTypes[i] = reinterpret_cast<MetaType*>(SerializeAdjust(mt));
@@ -80,7 +80,7 @@ void MetadataSerializer::SerializeMetaNamespace(
 {
     mn->mName = reinterpret_cast<char*>(SerializeAdjust(mn->mName));
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         MetaNamespace* innerMn = mn->mNamespaces[i];
         SerializeMetaNamespace(innerMn);
         mn->mNamespaces[i] = reinterpret_cast<MetaNamespace*>(SerializeAdjust(innerMn));
@@ -99,7 +99,7 @@ void MetadataSerializer::SerializeMetaConstant(
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mc->mNamespace));
     TypeKind kind = mComponent->mTypes[mc->mTypeIndex]->mKind;
-    if (kind == TypeKind::String || kind == TypeKind::Enum) {
+    if ((kind == TypeKind::String) || (kind == TypeKind::Enum)) {
         mc->mValue.mStringValue = reinterpret_cast<char*>(SerializeAdjust(mc->mValue.mStringValue));
     }
 }
@@ -114,7 +114,7 @@ void MetadataSerializer::SerializeMetaCoclass(
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
-    for (int i = 0; i < mc->mConstantNumber; i++) {
+    for (int i = 0;  i < mc->mConstantNumber;  i++) {
         MetaConstant* mconst = mc->mConstants[i];
         SerializeMetaConstant(mconst);
         mc->mConstants[i] = reinterpret_cast<MetaConstant*>(SerializeAdjust(mconst));
@@ -126,7 +126,7 @@ void MetadataSerializer::SerializeMetaEnumeration(
 {
     me->mName = reinterpret_cast<char*>(SerializeAdjust(me->mName));
     me->mNamespace = reinterpret_cast<char*>(SerializeAdjust(me->mNamespace));
-    for (int i = 0; i < me->mEnumeratorNumber; i++) {
+    for (int i = 0;  i < me->mEnumeratorNumber;  i++) {
         MetaEnumerator* mr = me->mEnumerators[i];
         SerializeMetaEnumerator(mr);
         me->mEnumerators[i] = reinterpret_cast<MetaEnumerator*>(SerializeAdjust(mr));
@@ -153,14 +153,14 @@ void MetadataSerializer::SerializeMetaInterface(
     mi->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mi->mStrFramacBlock));
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mi->mNestedInterfaceIndexes));
 
-    for (int i = 0; i < mi->mConstantNumber; i++) {
+    for (int i = 0;  i < mi->mConstantNumber;  i++) {
         MetaConstant* mc = mi->mConstants[i];
         SerializeMetaConstant(mc);
         mi->mConstants[i] = reinterpret_cast<MetaConstant*>(SerializeAdjust(mc));
     }
     mi->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mi->mConstants));
 
-    for (int i = 0; i < mi->mMethodNumber; i++) {
+    for (int i = 0;  i < mi->mMethodNumber;  i++) {
         MetaMethod* mm = mi->mMethods[i];
         SerializeMetaMethod(mm);
         mi->mMethods[i] = reinterpret_cast<MetaMethod*>(SerializeAdjust(mm));
@@ -180,7 +180,7 @@ void MetadataSerializer::SerializeMetaMethod(
     mm->mSignature = reinterpret_cast<char*>(SerializeAdjust(mm->mSignature));
     mm->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mm->mStrFramacBlock));
 
-    for (int i = 0; i < mm->mParameterNumber; i++) {
+    for (int i = 0;  i < mm->mParameterNumber;  i++) {
         MetaParameter* mp = mm->mParameters[i];
         SerializeMetaParameter(mp);
         mm->mParameters[i] = reinterpret_cast<MetaParameter*>(SerializeAdjust(mp));
@@ -203,7 +203,7 @@ void MetadataSerializer::SerializeMetaValue(
     /* [in] */ MetaType* mt,
     /* [in] */ MetaValue* mv)
 {
-    if (mt->mKind == TypeKind::String || mt->mKind == TypeKind::Enum) {
+    if ((mt->mKind == TypeKind::String) || (mt->mKind == TypeKind::Enum)) {
         mv->mStringValue = reinterpret_cast<char*>(SerializeAdjust(mv->mStringValue));
     }
 }
@@ -220,7 +220,7 @@ void MetadataSerializer::SerializeMetaType(
 ptrdiff_t MetadataSerializer::SerializeAdjust(
     /* [in] */ void* addr)
 {
-    return addr != nullptr ? reinterpret_cast<uintptr_t>(addr) - mBasePtr : 0;
+    return (addr != nullptr) ? reinterpret_cast<uintptr_t>(addr) - mBasePtr : 0;
 }
 
 void MetadataSerializer::Deserialize(
@@ -235,7 +235,7 @@ void MetadataSerializer::Deserialize(
     mc->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrFramacBlock));
 
     mc->mTypes = reinterpret_cast<MetaType**>(DeserializeAdjust(mc->mTypes));
-    for (int i = 0; i < mc->mTypeNumber; i++) {
+    for (int i = 0;  i < mc->mTypeNumber;  i++) {
         mc->mTypes[i] = reinterpret_cast<MetaType*>(DeserializeAdjust(mc->mTypes[i]));
         DeserializeMetaType(mc->mTypes[i]);
     }
@@ -244,25 +244,25 @@ void MetadataSerializer::Deserialize(
     DeserializeMetaNamespace(mc->mGlobalNamespace);
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mc->mConstants));
-    for (int i = 0; i < mc->mConstantNumber; i++) {
+    for (int i = 0;  i < mc->mConstantNumber;  i++) {
         mc->mConstants[i] = reinterpret_cast<MetaConstant*>(DeserializeAdjust(mc->mConstants[i]));
         DeserializeMetaConstant(mc->mConstants[i]);
     }
 
     mc->mCoclasses = reinterpret_cast<MetaCoclass**>(DeserializeAdjust(mc->mCoclasses));
-    for (int i = 0; i < mc->mCoclassNumber; i++) {
+    for (int i = 0;  i < mc->mCoclassNumber;  i++) {
         mc->mCoclasses[i] = reinterpret_cast<MetaCoclass*>(DeserializeAdjust(mc->mCoclasses[i]));
         DeserializeMetaCoclass(mc->mCoclasses[i]);
     }
 
     mc->mEnumerations = reinterpret_cast<MetaEnumeration**>(DeserializeAdjust(mc->mEnumerations));
-    for (int i = 0; i < mc->mEnumerationNumber; i++) {
+    for (int i = 0;  i < mc->mEnumerationNumber;  i++) {
         mc->mEnumerations[i] = reinterpret_cast<MetaEnumeration*>(DeserializeAdjust(mc->mEnumerations[i]));
         DeserializeMetaEnumeration(mc->mEnumerations[i]);
     }
 
     mc->mInterfaces = reinterpret_cast<MetaInterface**>(DeserializeAdjust(mc->mInterfaces));
-    for (int i = 0; i < mc->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mc->mInterfaceNumber;  i++) {
         mc->mInterfaces[i] = reinterpret_cast<MetaInterface*>(DeserializeAdjust(mc->mInterfaces[i]));
         DeserializeMetaInterface(mc->mInterfaces[i]);
     }
@@ -276,7 +276,7 @@ void MetadataSerializer::DeserializeMetaNamespace(
     mn->mName = reinterpret_cast<char*>(DeserializeAdjust(mn->mName));
 
     mn->mNamespaces = reinterpret_cast<MetaNamespace**>(DeserializeAdjust(mn->mNamespaces));
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         mn->mNamespaces[i] = reinterpret_cast<MetaNamespace*>(DeserializeAdjust(mn->mNamespaces[i]));
         DeserializeMetaNamespace(mn->mNamespaces[i]);
     }
@@ -293,7 +293,7 @@ void MetadataSerializer::DeserializeMetaConstant(
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mc->mNamespace));
     TypeKind kind = mComponent->mTypes[mc->mTypeIndex]->mKind;
-    if (kind == TypeKind::String || kind == TypeKind::Enum) {
+    if ((kind == TypeKind::String) || (kind == TypeKind::Enum)) {
         mc->mValue.mStringValue = reinterpret_cast<char*>(DeserializeAdjust(mc->mValue.mStringValue));
     }
 }
@@ -308,7 +308,7 @@ void MetadataSerializer::DeserializeMetaCoclass(
     mc->mInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mc->mConstants));
-    for (int i = 0; i < mc->mConstantNumber; i++) {
+    for (int i = 0;  i < mc->mConstantNumber;  i++) {
         mc->mConstants[i] = reinterpret_cast<MetaConstant*>(DeserializeAdjust(mc->mConstants[i]));
         DeserializeMetaConstant(mc->mConstants[i]);
     }
@@ -321,7 +321,7 @@ void MetadataSerializer::DeserializeMetaEnumeration(
     me->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(me->mNamespace));
 
     me->mEnumerators = reinterpret_cast<MetaEnumerator**>(DeserializeAdjust(me->mEnumerators));
-    for (int i = 0; i < me->mEnumeratorNumber; i++) {
+    for (int i = 0;  i < me->mEnumeratorNumber;  i++) {
         me->mEnumerators[i] = reinterpret_cast<MetaEnumerator*>(DeserializeAdjust(me->mEnumerators[i]));
         DeserializeMetaEnumerator(me->mEnumerators[i]);
     }
@@ -347,13 +347,13 @@ void MetadataSerializer::DeserializeMetaInterface(
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mi->mNestedInterfaceIndexes));
 
     mi->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mi->mConstants));
-    for (int i = 0; i < mi->mConstantNumber; i++) {
+    for (int i = 0;  i < mi->mConstantNumber;  i++) {
         mi->mConstants[i] = reinterpret_cast<MetaConstant*>(DeserializeAdjust(mi->mConstants[i]));
         DeserializeMetaConstant(mi->mConstants[i]);
     }
 
     mi->mMethods = reinterpret_cast<MetaMethod**>(DeserializeAdjust(mi->mMethods));
-    for (int i = 0; i < mi->mMethodNumber; i++) {
+    for (int i = 0;  i < mi->mMethodNumber;  i++) {
         mi->mMethods[i] = reinterpret_cast<MetaMethod*>(DeserializeAdjust(mi->mMethods[i]));
         DeserializeMetaMethod(mi->mMethods[i]);
     }
@@ -372,7 +372,7 @@ void MetadataSerializer::DeserializeMetaMethod(
     mm->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mm->mStrFramacBlock));
 
     mm->mParameters = reinterpret_cast<MetaParameter**>(DeserializeAdjust(mm->mParameters));
-    for (int i = 0; i < mm->mParameterNumber; i++) {
+    for (int i = 0;  i < mm->mParameterNumber;  i++) {
         mm->mParameters[i] = reinterpret_cast<MetaParameter*>(DeserializeAdjust(mm->mParameters[i]));
         DeserializeMetaParameter(mm->mParameters[i]);
     }
@@ -393,7 +393,7 @@ void MetadataSerializer::DeserializeMetaValue(
     /* [in] */ MetaType* mt,
     /* [in] */ MetaValue* mv)
 {
-    if (mt->mKind == TypeKind::String || mt->mKind == TypeKind::Enum) {
+    if ((mt->mKind == TypeKind::String) || (mt->mKind == TypeKind::Enum)) {
         mv->mStringValue = reinterpret_cast<char*>(DeserializeAdjust(mv->mStringValue));
     }
 }
@@ -410,7 +410,7 @@ void MetadataSerializer::DeserializeMetaType(
 uintptr_t MetadataSerializer::DeserializeAdjust(
     /* [in] */ void* addr)
 {
-    return addr != nullptr ? reinterpret_cast<ptrdiff_t>(addr) + mBasePtr : 0;
+    return (addr != nullptr) ? (reinterpret_cast<ptrdiff_t>(addr) + mBasePtr) : 0;
 }
 
 } // namespace como

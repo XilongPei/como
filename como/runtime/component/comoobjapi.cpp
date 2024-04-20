@@ -30,7 +30,7 @@ ECode CoCreateObjectInstance(
 {
     VALIDATE_NOT_NULL(object);
 
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
@@ -49,7 +49,7 @@ ECode CoAcquireClassFactory(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IClassObject>& object)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
@@ -92,7 +92,7 @@ ECode CoClassForName(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaCoclass>& mc)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 

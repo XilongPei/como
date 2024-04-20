@@ -44,7 +44,7 @@ CBootClassLoader::CBootClassLoader()
 
 AutoPtr<IClassLoader> CBootClassLoader::GetSystemClassLoader()
 {
-    return sSystemClassLoader != nullptr ? sSystemClassLoader : GetInstance();
+    return (sSystemClassLoader != nullptr) ? sSystemClassLoader : GetInstance();
 }
 
 AutoPtr<IClassLoader> CBootClassLoader::GetInstance()
@@ -72,7 +72,7 @@ ECode CBootClassLoader::LoadComponent(
     }
 
     void* handle = dlopen(path.string(), RTLD_NOW);
-    if (handle == nullptr) {
+    if (nullptr == handle) {
         Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
                                                 path.string(), strerror(errno));
         component = nullptr;
@@ -104,7 +104,7 @@ ECode CBootClassLoader::LoadComponent(
     {
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponents.Get(compId.mUuid);
-        if (mc == nullptr) {
+        if (nullptr == mc) {
             mComponents.Put(compId.mUuid, component);
             mComponentPaths.Put(path, component);
         }
@@ -143,7 +143,7 @@ ECode CBootClassLoader::LoadComponent(
     }
 
     void *handle = dlopen(compPath.string(), RTLD_NOW);
-    if (handle == nullptr) {
+    if (nullptr == handle) {
         Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
                                             compPath.string(), strerror(errno));
         component = nullptr;
@@ -176,7 +176,7 @@ ECode CBootClassLoader::LoadComponent(
     {
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponents.Get(compId.mUuid);
-        if (mc == nullptr) {
+        if (nullptr == mc) {
             mComponents.Put(compId.mUuid, component);
             mComponentPaths.Put(compPath, component);
         }
@@ -223,7 +223,7 @@ ECode CBootClassLoader::FindComponent(
             break;
         }
     }
-    if (fd == nullptr) {
+    if (nullptr == fd) {
         Logger::E(TAG, "Cannot find \"%s\" component.", compFile.string());
         compPath = nullptr;
         return E_COMPONENT_NOT_FOUND_EXCEPTION;
@@ -297,7 +297,7 @@ ECode CBootClassLoader::FindComponent(
     }
 
     Elf64_Shdr* mdSec = nullptr;
-    for (int i = 0; i < ehdr.e_shnum; i++) {
+    for (int i = 0;  i < ehdr.e_shnum;  i++) {
         const char* secName = strTable + shdrs[i].sh_name;
         if (! strncmp(secName, ".metadata", 9)) {
             mdSec = shdrs + i;
@@ -350,7 +350,7 @@ ECode CBootClassLoader::UnloadComponent(
 {
     Mutex::AutoLock lock(mComponentsLock);
     CMetaComponent* mcObj = static_cast<CMetaComponent*>(mComponents.Get(compId.mUuid));
-    if (mcObj == nullptr) {
+    if (nullptr == mcObj) {
         return E_COMPONENT_NOT_FOUND_EXCEPTION;
     }
     Boolean canUnload;
@@ -439,9 +439,10 @@ ECode CBootClassLoader::LoadCoclass(
 static Boolean Cmp_PVoid_Coclass_cid(void *p1, void *p2)
 {
     AutoPtr<IMetaCoclass> klass;
-    ((IMetaComponent*)p1)->GetCoclass(*(CoclassID*)p2, klass);
-    if (nullptr != klass)
+    (void)((IMetaComponent*)p1)->GetCoclass(*(CoclassID*)p2, klass);
+    if (klass != nullptr) {
         return true;
+    }
 
     return false;
 }
@@ -469,8 +470,9 @@ static Boolean Cmp_PVoid(void *p1, void *p2)
 {
     AutoPtr<IMetaInterface> intf;
     ((IMetaComponent*)p1)->GetInterface(*(String*)p2, intf);
-    if (nullptr != intf)
+    if (nullptr != intf) {
         return true;
+    }
 
     return false;
 }
