@@ -40,6 +40,7 @@ CMetaMethod::CMetaMethod()
     , mOpaque(0)
     , mMethodAddr(0)
     , mHotCode(0)
+    , mArgListMemory(nullptr)
 {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
@@ -70,6 +71,7 @@ CMetaMethod::CMetaMethod(
     , mOpaque(0)
     , mMethodAddr(0)
     , mHotCode(0)
+    , mArgListMemory(nullptr)
 {
     // there is no metadata in this component for external method
     if (miObj->mMetadata->mProperties & TYPE_EXTERNAL) {
@@ -196,13 +198,26 @@ ECode CMetaMethod::CreateArgumentList(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    CArgumentList *cArgList = new(addr) CArgumentList(mParameters, mHasOutArguments);
-    // In-place construction, cArgList won't be nullptr
-    if (nullptr == cArgList->GetParameterBuffer()) {
-        free(addr);
-        return E_OUT_OF_MEMORY_ERROR;
+    if (true) {
+    //if (nullptr == mArgListMemory) {
+        CArgumentList *cArgList = new(addr) CArgumentList(mParameters, mHasOutArguments);
+        // In-place construction, cArgList won't be nullptr
+        if (nullptr == cArgList->GetParameterBuffer()) {
+            free(addr);
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+        argList = (IArgumentList*)cArgList;
+        mArgListMemory = cArgList;
     }
-    argList = (IArgumentList*)cArgList;
+    else {
+        CArgumentList *cArgList = new(addr) CArgumentList(mArgListMemory);
+        // In-place construction, cArgList won't be nullptr
+        if (nullptr == cArgList->GetParameterBuffer()) {
+            free(addr);
+            return E_OUT_OF_MEMORY_ERROR;
+        }
+        argList = (IArgumentList*)cArgList;
+    }
 
     return NOERROR;
 }

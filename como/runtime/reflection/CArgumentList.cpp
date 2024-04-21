@@ -51,6 +51,23 @@ CArgumentList::CArgumentList(
      */
 }
 
+/**
+ * Construct an object with reference to an existing CArgumentList(argList).
+ */
+CArgumentList::CArgumentList(
+    /* [in] */ IArgumentList* argList)
+    : mHotCode(0)
+{
+    mParameterNumber = From(argList)->mParameterNumber;
+    mHasOutArguments = From(argList)->mHasOutArguments;
+    mParameterBufferSize = Init_FromMemory(From(argList));
+
+    /**
+     * Judging ......
+     * (see above)
+     */
+}
+
 CArgumentList::~CArgumentList()
 {
     if (mParameterInfos != nullptr) {
@@ -1665,8 +1682,7 @@ int CArgumentList::Init(
 }
 
 int CArgumentList::Init_FromMemory(
-    /* [in] */ CArgumentList* argsMemory,
-    /* [in] */ const Array<IMetaParameter*>& parameters)
+    /* [in] */ CArgumentList* argsMemory)
 {
     if (mParameterNumber > 0) {
         mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(

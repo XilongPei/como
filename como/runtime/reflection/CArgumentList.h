@@ -38,6 +38,9 @@ public:
         /* [in] */ const Array<IMetaParameter*>& parameters,
         /* [in] */ Integer hasOutArguments);
 
+    CArgumentList(
+        /* [in] */ IArgumentList* argList);
+
     ~CArgumentList();
 
     COMO_INTERFACE_DECL();
@@ -329,8 +332,7 @@ private:
         /* [in] */ const Array<IMetaParameter*>& parameters);
 
     int Init_FromMemory(
-        /* [in] */ CArgumentList* argsMemory,
-        /* [in] */ const Array<IMetaParameter*>& parameters);
+        /* [in] */ CArgumentList* argsMemory);
 
     void InitParameterInfo(
         /* [in, out] */ Integer& bufferPos,

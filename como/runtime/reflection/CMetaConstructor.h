@@ -122,7 +122,7 @@ public:
     Array<IMetaParameter*> mParameters;
     Mutex           mParametersLock;
 
-    IArgumentList  *mArgListMemory;
+    AutoPtr<IArgumentList>  mArgListMemory;
 };
 
 } // namespace como

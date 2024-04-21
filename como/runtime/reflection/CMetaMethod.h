@@ -121,6 +121,8 @@ public:
 
     HANDLE          mMethodAddr;
     HANDLE          mVobj;
+
+    AutoPtr<IArgumentList>  mArgListMemory;
 };
 
 CMetaMethod *CMetaMethod::From(IMetaMethod* method)
