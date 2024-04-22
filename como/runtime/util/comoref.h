@@ -248,9 +248,18 @@ Integer LightRefBase::Release(
              * One can use this design to allow the owner of an object to
              * release memory in a controlled manner, for example, when the
              * memory is sourced from a memory pool.
+             *
+             * COMO objects are defined this way：
+             * class C...
+             *     : public LightRefBase
+             *     , public ...
+             *
+             * LightRefBase is the first base class, therefore, we must make an
+             * adjustment [- sizeof(LightRefBase)] to the current object
+             * pointer (this) in order to get the original COMO object pointer.
              */
             if (LIKELY(nullptr != func)) {
-                func(shortPara, this);
+                func(shortPara, reinterpret_cast<const char *>(this) - sizeof(LightRefBase));
             }
         }
     }
