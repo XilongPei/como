@@ -250,7 +250,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         dumpStack = true;
         Logger::E("RefBase", "Strong references remain:");
         RefEntry* refs = mStrongRefs;
-        while (refs) {
+        while (nullptr != refs) {
             char inc = refs->mRef >= 0 ? '+' : '-';
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
 #if DEBUG_REFS_CALLSTACK_ENABLED
@@ -264,7 +264,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         dumpStack = true;
         Logger::E("RefBase", "Weak references remain!");
         RefEntry* refs = mWeakRefs;
-        while (refs) {
+        while (nullptr != refs) {
             char inc = refs->mRef >= 0 ? '+' : '-';
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
 #if DEBUG_REFS_CALLSTACK_ENABLED
@@ -348,6 +348,8 @@ void RefBase::WeakRefImpl::PrintRefs() const
         PrintRefsLocked(&text, mWeakRefs);
     }
 
+    Logger::D("RefBase", "STACK TRACE for %p\n%s", this, text.string());
+
     char name[100];
     snprintf(name, sizeof(name), DEBUG_REFS_CALLSTACK_PATH "/%p.stack", this);
     Integer rc = open(name, O_RDWR | O_CREAT | O_APPEND, 644);
@@ -356,8 +358,10 @@ void RefBase::WeakRefImpl::PrintRefs() const
         close(rc);
         Logger::D("RefBase", "STACK TRACE for %p saved in %s", this, name);
     }
-    else Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
+    else {
+        Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
                                                             name, strerror(errno));
+    }
 }
 
 void RefBase::WeakRefImpl::TrackMe(
@@ -417,7 +421,7 @@ void RefBase::WeakRefImpl::RemoveRef(
                                             id, mBase, this);
         ref = head;
         while (ref) {
-            char inc = ref->mRef >= 0 ? '+' : '-';
+            char inc = (ref->mRef >= 0) ? '+' : '-';
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
             ref = ref->mNext;
         }
@@ -656,7 +660,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
         assert(0);
     }
 
-    while (curCount > 0 && curCount != INITIAL_STRONG_VALUE) {
+    while ((curCount > 0) && (curCount != INITIAL_STRONG_VALUE)) {
         // we're in the easy/common case of promoting a weak-reference
         // from an existing strong reference.
         if (impl->mStrong.compare_exchange_weak(curCount, curCount + 1,
@@ -667,7 +671,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
         // situation. curCount was updated by compare_exchange_weak.
     }
 
-    if (curCount <= 0 || curCount == INITIAL_STRONG_VALUE) {
+    if ((curCount <= 0) || (curCount == INITIAL_STRONG_VALUE)) {
         // we're now in the harder case of either:
         // - there never was a strong reference on us
         // - or, all strong references have been released
@@ -773,7 +777,7 @@ Boolean RefBase::WeakRef::AttemptIncWeak(
 Integer RefBase::WeakRef::GetWeakCount() const
 {
     return static_cast<const WeakRefImpl*>(this)->mWeak.load(
-            std::memory_order_relaxed);
+                                                        std::memory_order_relaxed);
 }
 
 void RefBase::WeakRef::PrintRefs() const

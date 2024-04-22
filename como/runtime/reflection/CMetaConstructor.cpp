@@ -167,7 +167,7 @@ ECode CMetaConstructor::CreateArgumentList(
         }
 
         argList = args;
-        mArgListMemory = args;
+        mArgListMemory = argList;   // hold it with AutoPtr
     }
     else {
         CArgumentList* args = new CArgumentList(mArgListMemory);
