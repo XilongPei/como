@@ -176,7 +176,9 @@ void RefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
                                                                 // 5 4 3 2 1 0
 }
 
-// LightRefBase
+/**
+ * LightRefBase, base class of COMO object.
+ */
 class COM_PUBLIC LightRefBase
 {
 public:
@@ -221,7 +223,7 @@ Integer LightRefBase::AddRef(
     (void)id;
 
     Integer c = mCount.fetch_add(1, std::memory_order_relaxed);
-    return c + 1;
+    return (c + 1);
 }
 
 Integer LightRefBase::Release(
@@ -230,7 +232,7 @@ Integer LightRefBase::Release(
     (void)id;
 
     Integer c = mCount.fetch_sub(1, std::memory_order_release);
-    if (c == 1) {
+    if (1 == c) {
         std::atomic_thread_fence(std::memory_order_acquire);
         if (LIKELY(0 == funFreeMem)) {
             delete this;

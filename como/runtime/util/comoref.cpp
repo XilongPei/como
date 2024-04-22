@@ -68,6 +68,8 @@ namespace como {
 
 class COM_LOCAL RefBase::WeakRefImpl : public RefBase::WeakRef
 {
+
+// #if !DEBUG_REFS -------------------------------------------------------------
 #if !DEBUG_REFS
 
 public:
@@ -100,6 +102,7 @@ public:
         /* [in] */ Boolean,
         /* [in] */ Boolean);
 
+// #else of !DEBUG_REFS --------------------------------------------------------
 #else
 
 private:
@@ -164,6 +167,7 @@ private:
         /* [out] */ String* out,
         /* [in] */ const RefEntry* refs) const;
 
+// #endif !DEBUG_REFS ----------------------------------------------------------
 #endif // !DEBUG_REFS
 
 public:
@@ -185,6 +189,7 @@ private:
 #endif
 };
 
+// #if !DEBUG_REFS -------------------------------------------------------------
 #if !DEBUG_REFS
 
 RefBase::WeakRefImpl::WeakRefImpl(
@@ -229,6 +234,7 @@ void RefBase::WeakRefImpl::TrackMe(
     /* [in] */ Boolean retain)
 {}
 
+// #else !DEBUG_REFS -----------------------------------------------------------
 #else
 
 RefBase::WeakRefImpl::WeakRefImpl(
@@ -475,10 +481,9 @@ void RefBase::WeakRefImpl::PrintRefsLocked(
     }
 }
 
+// #endif !DEBUG_REFS ----------------------------------------------------------
 #endif // !DEBUG_REFS
 
-
-// ---------------------------------------------------------------------------
 
 Integer RefBase::IncStrong(
     /* [in] */ const void* id) const
@@ -497,7 +502,7 @@ Integer RefBase::IncStrong(
     Logger::D("RefBase", "IncStrong of %p from %p: cnt=%d\n", this, id, c);
 #endif
     if (c != INITIAL_STRONG_VALUE)  {
-        return c + 1;
+        return (c + 1);
     }
 
     Integer old = refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
@@ -811,9 +816,13 @@ RefBase::WeakRef* RefBase::GetWeakRefs() const
 }
 
 RefBase::RefBase()
-    : mRefs(new WeakRefImpl(this))
+    : mRefs(new WeakRefImpl(this))  // const member should be initialized
     , funFreeMem(0)
-{}
+{
+    if (nullptr == mRefs) {
+        Logger::E("RefBase", "Out of memory");
+    }
+}
 
 RefBase::~RefBase()
 {
@@ -845,13 +854,11 @@ void RefBase::ExtendObjectLifetime(
 }
 
 void RefBase::OnFirstRef()
-{
-}
+{}
 
 void RefBase::OnLastStrongRef(
     /* [in] */ const void* /*id*/)
-{
-}
+{}
 
 Boolean RefBase::OnIncStrongAttempted(
     /* [in] */ Integer flags,
@@ -862,8 +869,7 @@ Boolean RefBase::OnIncStrongAttempted(
 
 void RefBase::OnLastWeakRef(
     /* [in] */ const void* /*id*/)
-{
-}
+{}
 
 // ---------------------------------------------------------------------------
 
