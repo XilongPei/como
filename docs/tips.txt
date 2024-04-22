@@ -1,0 +1,18 @@
+/**
+  * Here is a record of some difficult to write program statement writing.
+  */
+
+CStub.cpp
+--------------------------------------------------------------------------------
+ECode InterfaceStub::UnmarshalArguments(
+    /* [in] */ IMetaMethod* method,
+    /* [in] */ IParcel* argParcel,
+    /* [out] */ AutoPtr<IArgumentList>& argList)
+{
+    ECode ec = method->CreateArgumentList(argList);
+    if (FAILED(ec)) {
+        return ec;
+    }
+
+    Logger::E("InterfaceStub::UnmarshalArguments", "=!=!=!=!=!=!= COMO interface: %p    REFCOUNT: %d",
+                        CArgumentList::From(argList), CArgumentList::From(argList)->GetStrongCount());

@@ -35,6 +35,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "comolog.h"
 #include "comoref.h"
 #include "mutex.h"
@@ -251,7 +252,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         Logger::E("RefBase", "Strong references remain:");
         RefEntry* refs = mStrongRefs;
         while (nullptr != refs) {
-            char inc = refs->mRef >= 0 ? '+' : '-';
+            char inc = ((refs->mRef >= 0) ? '+' : '-');
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
 #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
@@ -265,7 +266,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         Logger::E("RefBase", "Weak references remain!");
         RefEntry* refs = mWeakRefs;
         while (nullptr != refs) {
-            char inc = refs->mRef >= 0 ? '+' : '-';
+            char inc = ((refs->mRef >= 0) ? '+' : '-');
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
 #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
@@ -354,9 +355,14 @@ void RefBase::WeakRefImpl::PrintRefs() const
     snprintf(name, sizeof(name), DEBUG_REFS_CALLSTACK_PATH "/%p.stack", this);
     Integer rc = open(name, O_RDWR | O_CREAT | O_APPEND, 644);
     if (rc >= 0) {
-        write(rc, text.string(), text.GetByteLength());
+        if (write(rc, text.string(), text.GetByteLength()) < text.GetByteLength()) {
+            Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
+                                                            name, strerror(errno));
+        }
+        else {
+            Logger::D("RefBase", "STACK TRACE for %p saved in %s", this, name);
+        }
         close(rc);
-        Logger::D("RefBase", "STACK TRACE for %p saved in %s", this, name);
     }
     else {
         Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
@@ -420,8 +426,8 @@ void RefBase::WeakRefImpl::RemoveRef(
                                             "(WeakRef %p) that doesn't exist!",
                                             id, mBase, this);
         ref = head;
-        while (ref) {
-            char inc = (ref->mRef >= 0) ? '+' : '-';
+        while (ref != nullptr) {
+            char inc = ((ref->mRef >= 0) ? '+' : '-');
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
             ref = ref->mNext;
         }
@@ -456,7 +462,7 @@ void RefBase::WeakRefImpl::PrintRefsLocked(
 {
     char buf[128];
     while (refs) {
-        char inc = refs->mRef >= 0 ? '+' : '-';
+        char inc = ((refs->mRef >= 0) ? '+' : '-');
         snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
                                                     inc, refs->mId, refs->mRef);
         *out += buf;
@@ -710,7 +716,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
             // this object has an "extended" life-time, i.e.: it can be
             // revived from a weak-reference only.
             // Ask the object's implementation if it agrees to be revived
-            if (!impl->mBase->OnIncStrongAttempted(FIRST_INC_STRONG, id)) {
+            if (! impl->mBase->OnIncStrongAttempted(FIRST_INC_STRONG, id)) {
                 // it didn't so give-up.
                 DecWeak(id);
                 return false;
@@ -723,7 +729,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
             // an unneeded reference.  So call onLastStrongRef() here to remove it.
             // (No, this is not pretty.)  Note that we MUST NOT do this if we
             // are in fact acquiring the first reference.
-            if (curCount != 0 && curCount != INITIAL_STRONG_VALUE) {
+            if ((curCount != 0) && (curCount != INITIAL_STRONG_VALUE)) {
                 impl->mBase->OnLastStrongRef(id);
             }
         }
