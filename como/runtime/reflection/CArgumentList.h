@@ -376,7 +376,7 @@ Byte* CArgumentList::GetParameterBuffer()
 
 Long *CArgumentList::GetOutParamBuffer(int iOutParam)
 {
-    if (iOutParam < mHasOutArguments) {
+    if ((iOutParam >= 0) && (iOutParam < mHasOutArguments)) {
         return &mOutParameterBuffer[iOutParam];
     }
     return nullptr;

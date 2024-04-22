@@ -1686,24 +1686,24 @@ int CArgumentList::Init_FromMemory(
 {
     if (mParameterNumber > 0) {
         mParameterInfos = reinterpret_cast<ParameterInfo*>(calloc(
-                                      sizeof(ParameterInfo), argsMemory->mParameterNumber));
+                                        sizeof(ParameterInfo), mParameterNumber));
         if (nullptr == mParameterInfos) {
             Logger::E("CArgumentList::Init_FromMemory", "Out of memory.");
             return -1;
         }
 
         memcpy(mParameterInfos, argsMemory->mParameterInfos,
-                                sizeof(ParameterInfo) * argsMemory->mParameterNumber);
+                                        sizeof(ParameterInfo) * mParameterNumber);
     }
 
-    mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), mParameterBufferSize));
+    mParameterBuffer = reinterpret_cast<Byte*>(calloc(sizeof(Byte), argsMemory->mParameterBufferSize));
     if (nullptr == mParameterBuffer) {
         Logger::E("CArgumentList::Init_FromMemory", "Out of memory.");
         return -2;
     }
 
-    memcpy(mParameterBuffer, argsMemory->mParameterBuffer, mParameterBufferSize);
-    return mParameterBufferSize;
+    memcpy(mParameterBuffer, argsMemory->mParameterBuffer, argsMemory->mParameterBufferSize);
+    return argsMemory->mParameterBufferSize;
 }
 
 void CArgumentList::InitParameterInfo(

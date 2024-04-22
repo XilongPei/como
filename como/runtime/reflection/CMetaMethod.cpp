@@ -198,8 +198,7 @@ ECode CMetaMethod::CreateArgumentList(
         return E_OUT_OF_MEMORY_ERROR;
     }
 
-    if (true) {
-    //if (nullptr == mArgListMemory) {
+    if (nullptr == mArgListMemory) {
         CArgumentList *cArgList = new(addr) CArgumentList(mParameters, mHasOutArguments);
         // In-place construction, cArgList won't be nullptr
         if (nullptr == cArgList->GetParameterBuffer()) {
