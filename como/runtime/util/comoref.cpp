@@ -511,7 +511,7 @@ Integer RefBase::IncStrong(
         Logger::E("RefBase", "0x%x too small", old);
         assert(0);
     }
-    refs->mBase->OnFirstRef();
+    refs->mBase->OnFirstRef(id);
     return 1;
 }
 
@@ -582,7 +582,7 @@ Integer RefBase::ForceIncStrong(
                                                     std::memory_order_relaxed);
             // fall through...
         case 0:
-            refs->mBase->OnFirstRef();
+            refs->mBase->OnFirstRef(id);
             return 1;
         default:
             return c + 1;
@@ -853,7 +853,8 @@ void RefBase::ExtendObjectLifetime(
     mRefs->mFlags.fetch_or(mode, std::memory_order_relaxed);
 }
 
-void RefBase::OnFirstRef()
+void RefBase::OnFirstRef(
+    /* [in] */ const void* /*id*/)
 {}
 
 void RefBase::OnLastStrongRef(

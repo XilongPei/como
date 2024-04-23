@@ -59,6 +59,9 @@ public:
     ECode GetWeakReference(
         /* [out] */ AutoPtr<IWeakReference>& wr) override;
 
+    void OnFirstRef(
+        /* [in] */ const void* id) override;
+
     void OnLastStrongRef(
         /* [in] */ const void* id) override;
 

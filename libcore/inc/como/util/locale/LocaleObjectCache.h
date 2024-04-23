@@ -47,11 +47,17 @@ private:
 
         COMO_INTERFACE_DECL();
 
+        ECode OnFirstRef(
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value) override;
+
         ECode OnLastStrongRef(
-            /* [in] */ IObject* obj) override;
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value) override;
 
         ECode OnLastWeakRef(
-            /* [in] */ IObject* obj) override;
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value) override;
 
         static CacheEntry* From(
             /* [in] */ IInterface* entry)

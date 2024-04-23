@@ -162,23 +162,27 @@ ECode Object::GetWeakReference(
     return NOERROR;
 }
 
+void Object::OnFirstRef(
+    /* [in] */ const void* id)
+{
+    if (UNLIKELY(mObserver != nullptr)) {
+        mObserver->OnFirstRef(this, reinterpret_cast<HANDLE>(id));
+    }
+}
+
 void Object::OnLastStrongRef(
     /* [in] */ const void* id)
 {
-    (void)id;
-
     if (UNLIKELY(mObserver != nullptr)) {
-        mObserver->OnLastStrongRef(this);
+        mObserver->OnLastStrongRef(this, reinterpret_cast<HANDLE>(id));
     }
 }
 
 void Object::OnLastWeakRef(
     /* [in] */ const void* id)
 {
-    (void)id;
-
     if (UNLIKELY(mObserver != nullptr)) {
-        mObserver->OnLastWeakRef(this);
+        mObserver->OnLastWeakRef(this, reinterpret_cast<HANDLE>(id));
     }
 }
 

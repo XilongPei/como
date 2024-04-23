@@ -136,11 +136,17 @@ interface IWeakReferenceSource
 ]
 interface IObjectObserver
 {
+    OnFirstRef(
+        [in] IObject* obj,
+        [in] HANDLE value);
+
     OnLastStrongRef(
-        [in] IObject* obj);
+        [in] IObject* obj,
+        [in] HANDLE value);
 
     OnLastWeakRef(
-        [in] IObject* obj);
+        [in] IObject* obj,
+        [in] HANDLE value);
 }
 
 [

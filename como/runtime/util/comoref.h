@@ -119,7 +119,8 @@ protected:
         FIRST_INC_STRONG = 0x0001
     };
 
-    virtual void OnFirstRef();
+    virtual void OnFirstRef(
+        /* [in] */ const void* id);
 
     virtual void OnLastStrongRef(
         /* [in] */ const void* id);

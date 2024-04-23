@@ -129,18 +129,34 @@ LocaleObjectCache::CacheEntry::CacheEntry(
     mValue = Object::GetWeakReference(value);
 }
 
-ECode LocaleObjectCache::CacheEntry::OnLastStrongRef(
-    /* [in] */ IObject* obj)
+ECode LocaleObjectCache::CacheEntry::OnFirstRef(
+    /* [in] */ IObject* obj,
+    /* [in] */ HANDLE value)
 {
+    (void)value;
+
+    return mQueue->Add(obj);
+}
+
+ECode LocaleObjectCache::CacheEntry::OnLastStrongRef(
+    /* [in] */ IObject* obj,
+    /* [in] */ HANDLE value)
+{
+    (void)value;
+
     return mQueue->Add(obj);
 }
 
 ECode LocaleObjectCache::CacheEntry::OnLastWeakRef(
-    /* [in] */ IObject* obj)
+    /* [in] */ IObject* obj,
+    /* [in] */ HANDLE value)
 {
+    (void)obj;
+    (void)value;
+
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace locale
+} // namespace util
+} // namespace como
