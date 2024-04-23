@@ -101,7 +101,22 @@ ECode Object::GetHashCode(
 ECode Object::GetCRC64(
     /* [out] */ Long& crc64)
 {
-    crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(this), mObjSize);
+    /**
+     * COMO objects (come from coclass, defined in CDL) are defined this way：
+     * class C...       // such as: CArrayClassObject, coclass CArray in libcore
+     *     : public ClassObject
+     *     , public ...
+     *
+     * class COM_PUBLIC ClassObject
+     *     : public Object
+     *     , public IClassObject
+
+     * Object is the first base class, therefore, we must make an
+     * adjustment [- sizeof(Object)] to the current object pointer (this) in
+     * order to get the original COMO object pointer.
+     */
+    crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(this),
+                                                    mObjSize - sizeof(Object));
     return NOERROR;
 }
 

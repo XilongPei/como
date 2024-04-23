@@ -249,7 +249,7 @@ Integer LightRefBase::Release(
              * release memory in a controlled manner, for example, when the
              * memory is sourced from a memory pool.
              *
-             * COMO objects are defined this way：
+             * COMO objects (lifecycle management by count) are defined this way：
              * class C...
              *     : public LightRefBase
              *     , public ...

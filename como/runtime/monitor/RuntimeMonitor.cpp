@@ -561,10 +561,12 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
 
     parcel->SetData((HANDLE)rtm_InvokeMethod->parcel, len);
 
-    if (rtm_InvokeMethod->in_out == RTM_ParamTransDirection::CALL_METHOD)
+    if (rtm_InvokeMethod->in_out == RTM_ParamTransDirection::CALL_METHOD) {
         MarshalUtils::UnMarshalArguments(method, parcel, strArgBuffer);
-    else
+    }
+    else {
         MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer);
+    }
 
     strBuffer += "\"parcel\":" + strArgBuffer;
 
