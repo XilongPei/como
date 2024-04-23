@@ -114,9 +114,20 @@ ECode Object::GetCRC64(
      * Object is the first base class, therefore, we must make an
      * adjustment [- sizeof(Object)] to the current object pointer (this) in
      * order to get the original COMO object pointer.
+     *
+     * The inheritance relationship of Object is as follows:
+     * class Object
+     *     : public RefBase
+     *     , public IObject
+     *     , public IWeakReferenceSource
+     *
+     * sizeof(Object)               = 80
+     * sizeof(RefBase)              = 24
+     * sizeof(IObject)              = 8
+     * sizeof(IWeakReferenceSource) = 8
      */
     crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(this),
-                                                    mObjSize - sizeof(Object));
+                                                  mObjSize - OBJECTSIZE_Offset);
     return NOERROR;
 }
 
