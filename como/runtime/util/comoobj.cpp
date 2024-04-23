@@ -300,11 +300,14 @@ Long Object::GetCRC64(
     // Sometimes, for example, in function safety calculation, because the object
     // in the object inherits ComoFunctionSafetyObject, Object* is not the header
     // pointer of the whole object
-    Object* obj = (Object*)IObject::Probe(intf);
+    Object* obj = reinterpret_cast<Object*>(IObject::Probe(intf));
     if (nullptr == obj) {
         return 0L;
     }
-    return crc_64_ecma(reinterpret_cast<const unsigned char *>(intf), obj->mObjSize);
+
+    // reference to: Object::GetCRC64(Long& crc64)
+    return crc_64_ecma(reinterpret_cast<const unsigned char *>(obj),
+                                             obj->mObjSize - OBJECTSIZE_Offset);
 }
 
 Long Object::GetCRC64(
