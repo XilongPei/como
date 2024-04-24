@@ -384,6 +384,20 @@ Boolean Object::InstanceOf(
     return ocid == cid;
 }
 
+
+void Object::TrackMe(
+    /* [in] */ Boolean enable,
+    /* [in] */ Boolean retain)
+{
+    return RefBase::TrackMe(enable, retain);
+}
+
+void Object::PrintRefs() const
+{
+    return RefBase::PrintRefs();
+}
+
+
 ComponentID ComponentIDfromName(String name, const char* uri)
 {
     ComponentID mid;

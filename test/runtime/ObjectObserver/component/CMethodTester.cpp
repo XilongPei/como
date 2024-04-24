@@ -177,6 +177,21 @@ ECode CMethodTester::TestMethod6(
     return NOERROR;
 }
 
+ECode CMethodTester::OnFirstRef(
+        /* [in] */ IObject* obj,
+        /* [in] */ HANDLE value)
+{}
+
+ECode CMethodTester::OnLastStrongRef(
+        /* [in] */ IObject* obj,
+        /* [in] */ HANDLE value)
+{}
+
+ECode CMethodTester::OnLastWeakRef(
+        /* [in] */ IObject* obj,
+        /* [in] */ HANDLE value)
+{}
+
 }
 }
 }

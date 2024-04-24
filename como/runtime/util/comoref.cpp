@@ -467,7 +467,7 @@ void RefBase::WeakRefImpl::PrintRefsLocked(
     /* [in] */ const RefEntry* refs) const
 {
     char buf[128];
-    while (refs) {
+    while (refs != nullptr) {
         char inc = ((refs->mRef >= 0) ? '+' : '-');
         snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
                                                     inc, refs->mId, refs->mRef);

@@ -116,6 +116,14 @@ public:
         /* [in] */ Object* obj,
         /* [in] */ const CoclassID& cid);
 
+    void TrackMe(
+        /* [in] */ Boolean enable,
+        /* [in] */ Boolean retain);
+
+    void PrintRefs() const;
+
+    inline static Object* From(IObject* obj);
+
 private:
     IMetaComponent* mComponent;
     String mCoclassName;
@@ -142,6 +150,11 @@ private:
 inline void Object::SetObjSize(Integer objSize)
 {
     mObjSize = objSize;
+}
+
+Object* Object::From(IObject* obj)
+{
+    return (Object*)obj;
 }
 
 // generate a ComponentID from module name or

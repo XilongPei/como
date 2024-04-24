@@ -103,6 +103,18 @@ public:
         /* [in] */ Float arg16,
         /* [out] */ Integer& result1,
         /* [out] */ Double& result2) override;
+
+    ECode OnFirstRef(
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value);
+
+    ECode OnLastStrongRef(
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value);
+
+    ECode OnLastWeakRef(
+            /* [in] */ IObject* obj,
+            /* [in] */ HANDLE value);
 };
 
 }

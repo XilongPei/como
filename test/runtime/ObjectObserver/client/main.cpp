@@ -17,15 +17,40 @@
 #include <stdio.h>
 #include <gtest/gtest.h>
 #include <comoapi.h>
+#include <comoobj.h>
 #include "ObjectObserverTestUnit.h"
 
 TEST(testObjectObserverTest, TesttestObjectObserver)
 {
     AutoPtr<IMetaComponent> mc;
     CoGetComponentMetadata(CID_ObjectObserverTestUnit, nullptr, mc);
-    String name;
-    mc->GetName(name);
-    EXPECT_STREQ("ObjectObserverTestUnit", name.string());
+    AutoPtr<IMetaCoclass> klass;
+    mc->GetCoclass("como::test::reflection::CMethodTester", klass);
+    AutoPtr<IInterface> obj;
+    klass->CreateObject(IID_IInterface, &obj);
+
+    IObjectObserver* observer = IObjectObserver::Probe(obj);
+    IObject::Probe(obj)->SetObjectObserver(observer);
+
+    como::Object *objTmp = Object::From(IObject::Probe(obj));
+    objTmp->TrackMe(true, true);
+    objTmp->PrintRefs();
+
+    AutoPtr<IMetaMethod> method;
+    klass->GetMethod("TestMethod2", "(FF&)E", method);
+    AutoPtr<IArgumentList> args;
+    method->CreateArgumentList(args);
+    Float arg = 9.9, result;
+    args->SetInputArgumentOfFloat(0, arg);
+    args->SetOutputArgumentOfFloat(1, reinterpret_cast<HANDLE>(&result));
+    method->Invoke(obj, args);
+    IObject::Probe(obj)->GetCoclass(klass);
+    EXPECT_FLOAT_EQ(arg, result);
+    String name, ns;
+    klass->GetName(name);
+    klass->GetNamespace(ns);
+    EXPECT_STREQ("como::test::reflection", ns.string());
+    EXPECT_STREQ("CMethodTester", name.string());
 }
 
 int main(int argc, char **argv)

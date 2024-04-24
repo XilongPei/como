@@ -106,6 +106,7 @@ coclass CMethodTester
 {
     //interface IComoFunctionSafetyObject;
     interface IMethodTest;
+    interface IObjectObserver;
 }
 
 }

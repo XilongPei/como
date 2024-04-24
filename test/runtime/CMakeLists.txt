@@ -34,6 +34,7 @@ add_subdirectory(rpc_extra)
 add_subdirectory(ComoConfig)
 add_subdirectory(IDfromName)
 add_subdirectory(util)
+add_subdirectory(ObjectObserver)
 
 if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     add_subdirectory(FunctionSafetyProgram)
