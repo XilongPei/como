@@ -923,7 +923,7 @@ ECode WeakReferenceImpl::Resolve(
     /* [in] */ const InterfaceID& iid,
     /* [out] */ IInterface** object)
 {
-    if ((nullptr != mObject) && mRef->AttemptIncStrong(object)) {
+    if ((mObject != nullptr) && mRef->AttemptIncStrong(object)) {
         *object = mObject->Probe(iid);
         if (nullptr == *object) {
             mObject->Release();
@@ -934,5 +934,210 @@ ECode WeakReferenceImpl::Resolve(
     }
     return NOERROR;
 }
+
+/**
+ * class LightRefBase
+ */
+LightRefBase::LightRefBase()
+    : mCount(0)
+    , funFreeMem(0)
+{
+#if DEBUG_REFS_LightRefBase
+    mRefs = nullptr;
+#endif
+}
+
+LightRefBase::~LightRefBase()
+{
+#if DEBUG_REFS_LightRefBase
+    if ((! mRetain) && (mRefs != nullptr)) {
+        Logger::E("RefBase", "Strong references remain:");
+        RefEntry* refs = mRefs;
+        while (refs != nullptr) {
+            char inc = ((refs->mRef >= 0) ? '+' : '-');
+            Logger::D("RefBase", "\t%c ID %p (ref %d):\n",
+                                           inc, refs->mId, refs->mRef);
+#if DEBUG_REFS_CALLSTACK_ENABLED
+            refs->mStack.log("RefBase");
+#endif
+            refs = refs->mNext;
+        }
+    }
+#endif
+}
+
+Integer LightRefBase::AddRef(
+    /* [in] */ HANDLE id)
+{
+    (void)id;
+
+    Integer c = mCount.fetch_add(1, std::memory_order_relaxed);
+
+#if DEBUG_REFS_LightRefBase
+    RefEntry* ref = new RefEntry();
+    if (nullptr == ref) {
+        Logger::E("RefBase", "new RefEntry() == nullptr");
+        return (c + 1);
+    }
+
+    ref->mRef = mCount.load(std::memory_order_relaxed);
+    ref->mId = id;
+#if DEBUG_REFS_CALLSTACK_ENABLED
+    ref->mStack.update(2);
+#endif
+    ref->mNext = mRefs;
+    mRefs = ref;
+#endif
+
+    return (c + 1);
+}
+
+Integer LightRefBase::Release(
+    /* [in] */ HANDLE id)
+{
+#if DEBUG_REFS_LightRefBase
+    bool notFoundIt = true;
+
+    if (mTrackEnabled) {
+        Mutex::AutoLock lock(mMutex);
+
+        RefEntry* refLast = nullptr;
+        RefEntry* ref = mRefs;
+        while (ref != nullptr) {
+            if (ref->mId == id) {
+                notFoundIt = false;
+
+                if (nullptr == refLast) {
+                    mRefs = nullptr;
+                }
+                else {
+                    refLast->mNext = ref->mNext;
+                    delete ref;
+                    break;
+                }
+            }
+            refLast = ref;
+            ref = ref->mNext;
+        }
+
+        if (notFoundIt) {
+            Logger::D("LightRefBase::Release",
+                      "removing id %p on RefBase %p, it doesn't exist!",
+                      (void *)id, this);
+            ref = mRefs;
+            while (ref != nullptr) {
+                char inc = ((ref->mRef >= 0) ? '+' : '-');
+                Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
+                ref = ref->mNext;
+            }
+
+#if DEBUG_REFS_CALLSTACK_ENABLED
+            CallStack stack(LOG_TAG);
+#endif
+        }
+    }
+#endif
+
+    Integer c = mCount.fetch_sub(1, std::memory_order_release);
+    if (1 == c) {
+        std::atomic_thread_fence(std::memory_order_acquire);
+        if (LIKELY(0 == funFreeMem)) {
+            delete this;
+        }
+        else {
+            FREE_MEM_FUNCTION func;
+            func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
+                                                                    // 5 4 3 2 1 0
+            Short shortPara = (Short)(funFreeMem >> 48);
+            (void)this->~LightRefBase();
+
+            /**
+             * One can use this design to allow the owner of an object to
+             * release memory in a controlled manner, for example, when the
+             * memory is sourced from a memory pool.
+             *
+             * COMO objects (lifecycle management by count) are defined this way：
+             * class C...
+             *     : public LightRefBase
+             *     , public ...
+             *
+             * LightRefBase is the first base class, therefore, we must make an
+             * adjustment [- sizeof(LightRefBase)] to the current object
+             * pointer (this) in order to get the original COMO object pointer.
+             */
+            if (LIKELY(nullptr != func)) {
+                func(shortPara, reinterpret_cast<const char *>(this) - sizeof(LightRefBase));
+            }
+        }
+    }
+    return (c - 1);
+}
+
+IInterface* LightRefBase::Probe(
+    /* [in] */ const InterfaceID& iid) const
+{
+    (void)iid;
+
+    return nullptr;
+}
+
+ECode LightRefBase::GetInterfaceID(
+    /* [in] */ IInterface* object,
+    /* [out] */ InterfaceID& iid) const
+{
+    (void)object;
+    (void)iid;
+
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+}
+
+Integer LightRefBase::GetStrongCount() const
+{
+    return mCount.load(std::memory_order_relaxed);
+}
+
+void LightRefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
+{
+    funFreeMem = (static_cast<HANDLE>(shortPara) << 48) |
+                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFFu);
+                                                                // 5 4 3 2 1 0
+}
+
+#if DEBUG_REFS_LightRefBase
+void LightRefBase::PrintRefs(const char* objInfo)
+{
+    String text;
+    char buf[128];
+
+    Mutex::AutoLock lock(mMutex);
+
+    snprintf(buf, sizeof(buf),
+        "References [%s, reference count: %d] on RefBase %p\n",
+                    objInfo, mCount.load(std::memory_order_relaxed), this);
+    text += buf;
+
+    RefEntry* refs = mRefs;
+    while (refs != nullptr) {
+        char inc = ((refs->mRef >= 0) ? '+' : '-');
+        snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
+                                           inc, refs->mId, refs->mRef);
+        text += buf;
+#if DEBUG_REFS_CALLSTACK_ENABLED
+        text += refs->stack.toString("\t\t");
+#else
+        text += "\t\t(call stacks disabled)";
+#endif
+        refs = refs->mNext;
+    }
+}
+
+void LightRefBase::TrackMe(
+    /* [in] */ Boolean track,
+    /* [in] */ Boolean retain)
+{
+    mTrackEnabled = track;
+    mRetain = retain;
+}
+#endif
 
 } // namespace como

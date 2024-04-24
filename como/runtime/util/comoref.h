@@ -39,6 +39,15 @@
 
 namespace como {
 
+// compile with refcounting debugging enabled
+#define DEBUG_REFS                      1
+#define DEBUG_REFS_LightRefBase         1
+// #define DEBUG_REFS_FATAL_SANITY_CHECKS  0
+#define DEBUG_REFS_ENABLED_BY_DEFAULT   1
+#define DEBUG_REFS_CALLSTACK_ENABLED    0
+// log all reference counting operations
+#define PRINT_REFS                      1
+
 using FREE_MEM_FUNCTION = void(*)(Short,const void*);
 
 class COM_PUBLIC RefBase
@@ -183,119 +192,55 @@ void RefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
 class COM_PUBLIC LightRefBase
 {
 public:
-    inline LightRefBase();
+    LightRefBase();
 
-    inline Integer AddRef(
-        /* [in] */ HANDLE id = 0) const;
+    Integer AddRef(
+        /* [in] */ HANDLE id = 0);
 
-    inline Integer Release(
-        /* [in] */ HANDLE id = 0) const;
+    Integer Release(
+        /* [in] */ HANDLE id = 0);
 
-    inline IInterface* Probe(
+    IInterface* Probe(
         /* [in] */ const InterfaceID& iid) const;
 
-    inline ECode GetInterfaceID(
+    ECode GetInterfaceID(
         /* [in] */ IInterface* object,
         /* [out] */ InterfaceID& iid) const;
 
-    inline Integer GetStrongCount() const;
+    Integer GetStrongCount() const;
 
-    inline void SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara);
+    void SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara);
 
 protected:
-    inline virtual ~LightRefBase();
+    virtual ~LightRefBase();
 
 private:
     mutable std::atomic<Integer> mCount;
     HANDLE funFreeMem;
+
+#if DEBUG_REFS_LightRefBase
+public:
+    struct RefEntry
+    {
+        RefEntry* mNext;
+        HANDLE mId;
+#if DEBUG_REFS_CALLSTACK_ENABLED
+        CallStack mStack;
+#endif
+        Integer mRef;
+    };
+    Boolean mTrackEnabled;
+    Boolean mRetain;
+    mutable Mutex mMutex;
+    RefEntry* mRefs;
+
+    void PrintRefs(const char* objInfo);
+
+    void TrackMe(
+        /* [in] */ Boolean track,
+        /* [in] */ Boolean retain);
+#endif
 };
-
-LightRefBase::LightRefBase()
-    : mCount(0)
-    , funFreeMem(0)
-{}
-
-LightRefBase::~LightRefBase()
-{}
-
-Integer LightRefBase::AddRef(
-    /* [in] */ HANDLE id) const
-{
-    (void)id;
-
-    Integer c = mCount.fetch_add(1, std::memory_order_relaxed);
-    return (c + 1);
-}
-
-Integer LightRefBase::Release(
-    /* [in] */ HANDLE id) const
-{
-    (void)id;
-
-    Integer c = mCount.fetch_sub(1, std::memory_order_release);
-    if (1 == c) {
-        std::atomic_thread_fence(std::memory_order_acquire);
-        if (LIKELY(0 == funFreeMem)) {
-            delete this;
-        }
-        else {
-            FREE_MEM_FUNCTION func;
-            func = reinterpret_cast<FREE_MEM_FUNCTION>(funFreeMem & 0xFFFFFFFFFFFF);
-                                                                    // 5 4 3 2 1 0
-            Short shortPara = (Short)(funFreeMem >> 48);
-            (void)this->~LightRefBase();
-
-            /**
-             * One can use this design to allow the owner of an object to
-             * release memory in a controlled manner, for example, when the
-             * memory is sourced from a memory pool.
-             *
-             * COMO objects (lifecycle management by count) are defined this way：
-             * class C...
-             *     : public LightRefBase
-             *     , public ...
-             *
-             * LightRefBase is the first base class, therefore, we must make an
-             * adjustment [- sizeof(LightRefBase)] to the current object
-             * pointer (this) in order to get the original COMO object pointer.
-             */
-            if (LIKELY(nullptr != func)) {
-                func(shortPara, reinterpret_cast<const char *>(this) - sizeof(LightRefBase));
-            }
-        }
-    }
-    return c - 1;
-}
-
-IInterface* LightRefBase::Probe(
-    /* [in] */ const InterfaceID& iid) const
-{
-    (void)iid;
-
-    return nullptr;
-}
-
-ECode LightRefBase::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID& iid) const
-{
-    (void)object;
-    (void)iid;
-
-    return E_ILLEGAL_ARGUMENT_EXCEPTION;
-}
-
-Integer LightRefBase::GetStrongCount() const
-{
-    return mCount.load(std::memory_order_relaxed);
-}
-
-void LightRefBase::SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara)
-{
-    funFreeMem = (static_cast<HANDLE>(shortPara) << 48) |
-                              (reinterpret_cast<HANDLE>(func) & 0xFFFFFFFFFFFFu);
-                                                                // 5 4 3 2 1 0
-}
 
 // WeakReferenceImpl
 class COM_PUBLIC WeakReferenceImpl
