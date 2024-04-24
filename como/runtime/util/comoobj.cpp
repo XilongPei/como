@@ -381,9 +381,8 @@ Boolean Object::InstanceOf(
 {
     CoclassID ocid;
     obj->GetCoclassID(ocid);
-    return ocid == cid;
+    return (ocid == cid);
 }
-
 
 void Object::TrackMe(
     /* [in] */ Boolean enable,
@@ -392,11 +391,10 @@ void Object::TrackMe(
     return RefBase::TrackMe(enable, retain);
 }
 
-void Object::PrintRefs() const
+void Object::PrintRefs(const char* objInfo) const
 {
-    return RefBase::PrintRefs();
+    return RefBase::PrintRefs(objInfo);
 }
-
 
 ComponentID ComponentIDfromName(String name, const char* uri)
 {

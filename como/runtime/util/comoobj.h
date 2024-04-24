@@ -120,7 +120,7 @@ public:
         /* [in] */ Boolean enable,
         /* [in] */ Boolean retain);
 
-    void PrintRefs() const;
+    void PrintRefs(const char* objInfo) const;
 
     inline static Object* From(IObject* obj);
 

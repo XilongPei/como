@@ -34,7 +34,7 @@ TEST(testObjectObserverTest, TesttestObjectObserver)
 
     como::Object *objTmp = Object::From(IObject::Probe(obj));
     objTmp->TrackMe(true, true);
-    objTmp->PrintRefs();
+    objTmp->PrintRefs("tongji");
 
     AutoPtr<IMetaMethod> method;
     klass->GetMethod("TestMethod2", "(FF&)E", method);

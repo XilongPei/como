@@ -63,7 +63,7 @@ public:
 
         Integer GetWeakCount() const;
 
-        void PrintRefs() const;
+        void PrintRefs(const char* objInfo) const;
 
         void TrackMe(
             /* [in] */ Boolean enable,
@@ -89,7 +89,7 @@ public:
 
     inline void SetFunFreeMem(FREE_MEM_FUNCTION func, Short shortPara);
 
-    inline void PrintRefs() const;
+    inline void PrintRefs(const char* objInfo) const;
 
     inline void TrackMe(
         /* [in] */ Boolean enable,
@@ -146,9 +146,9 @@ private:
     HANDLE funFreeMem;
 };
 
-void RefBase::PrintRefs() const
+void RefBase::PrintRefs(const char* objInfo) const
 {
-    GetWeakRefs()->PrintRefs();
+    GetWeakRefs()->PrintRefs(objInfo);
 }
 
 void RefBase::TrackMe(

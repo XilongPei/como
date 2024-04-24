@@ -44,17 +44,17 @@
 namespace como {
 
 // compile with refcounting debugging enabled
-#define DEBUG_REFS                      0
+#define DEBUG_REFS                      1
 // #define DEBUG_REFS_FATAL_SANITY_CHECKS  0
 #define DEBUG_REFS_ENABLED_BY_DEFAULT   1
 #define DEBUG_REFS_CALLSTACK_ENABLED    0
 
 // log all reference counting operations
-#define PRINT_REFS                      0
+#define PRINT_REFS                      1
 
 #define INITIAL_STRONG_VALUE (1<<28)
 
-#define MAX_COUNT 0xfffff
+#define MAX_COUNT 0xFFFFu
 
 #define BAD_STRONG(c) \
         ((c) == 0 || ((c) & (~(MAX_COUNT | INITIAL_STRONG_VALUE))) != 0)
@@ -92,7 +92,7 @@ public:
         /* [in] */ const void* /*old_id*/,
         /* [in] */ const void* /*new_id*/);
 
-    void PrintRefs() const;
+    void PrintRefs(const char* objInfo) const;
 
     void TrackMe(
         /* [in] */ Boolean,
@@ -138,7 +138,7 @@ public:
         /* [in] */ const void* oldId,
         /* [in] */ const void* newId);
 
-    void PrintRefs() const;
+    void PrintRefs(const char* objInfo) const;
 
     void TrackMe(
         /* [in] */ Boolean,
@@ -222,7 +222,7 @@ void RefBase::WeakRefImpl::RenameWeakRefId(
     /* [in] */ const void* /*new_id*/)
 {}
 
-void RefBase::WeakRefImpl::PrintRefs() const
+void RefBase::WeakRefImpl::PrintRefs(const char* objInfo) const
 {}
 
 void RefBase::WeakRefImpl::TrackMe(
@@ -332,24 +332,23 @@ void RefBase::WeakRefImpl::RenameWeakRefId(
     RenameRefsId(mWeakRefs, oldId, newId);
 }
 
-void RefBase::WeakRefImpl::PrintRefs() const
+void RefBase::WeakRefImpl::PrintRefs(const char* objInfo) const
 {
     String text;
+    char buf[128];
 
-    {
-        Mutex::AutoLock lock(mMutex);
-        char buf[128];
-        snprintf(buf, sizeof(buf),
-                                "Strong references on RefBase %p (WeakRef %p):\n",
-                                mBase, this);
-        text += buf;
-        PrintRefsLocked(&text, mStrongRefs);
-        snprintf(buf, sizeof(buf),
-                                "Weak references on RefBase %p (WeakRef %p):\n",
-                                mBase, this);
-        text += buf;
-        PrintRefsLocked(&text, mWeakRefs);
-    }
+    Mutex::AutoLock lock(mMutex);
+
+    snprintf(buf, sizeof(buf),
+        "Strong references [%s, reference count: %d] on RefBase %p (WeakRef %p):\n",
+        objInfo, mBase->GetStrongCount(), mBase, this);
+    text += buf;
+    PrintRefsLocked(&text, mStrongRefs);
+    snprintf(buf, sizeof(buf),
+        "Weak references [%s, reference count: %d] on RefBase %p (WeakRef %p):\n",
+        objInfo, GetWeakCount(), mBase, this);
+    text += buf;
+    PrintRefsLocked(&text, mWeakRefs);
 
     Logger::D("RefBase", "STACK TRACE for %p\n%s", this, text.string());
 }
@@ -448,7 +447,7 @@ void RefBase::WeakRefImpl::PrintRefsLocked(
     while (refs != nullptr) {
         char inc = ((refs->mRef >= 0) ? '+' : '-');
         snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
-                                                    inc, refs->mId, refs->mRef);
+                                           inc, refs->mId, refs->mRef);
         *out += buf;
 #if DEBUG_REFS_CALLSTACK_ENABLED
         *out += refs->stack.toString("\t\t");
@@ -506,7 +505,7 @@ Integer RefBase::DecStrong(
         Logger::E("RefBase", "DecStrong() called on %p too many times", refs);
         assert(0);
     }
-    if (c == 1) {
+    if (1 == c) {
         std::atomic_thread_fence(std::memory_order_acquire);
         refs->mBase->OnLastStrongRef(id);
         Integer flags = refs->mFlags.load(std::memory_order_relaxed);
@@ -533,7 +532,7 @@ Integer RefBase::DecStrong(
         }
     }
     refs->DecWeak(id);
-    return c - 1;
+    return (c - 1);
 }
 
 Integer RefBase::ForceIncStrong(
@@ -563,7 +562,7 @@ Integer RefBase::ForceIncStrong(
             refs->mBase->OnFirstRef(id);
             return 1;
         default:
-            return c + 1;
+            return (c + 1);
     }
 
 }
@@ -769,9 +768,9 @@ Integer RefBase::WeakRef::GetWeakCount() const
                                                         std::memory_order_relaxed);
 }
 
-void RefBase::WeakRef::PrintRefs() const
+void RefBase::WeakRef::PrintRefs(const char* objInfo) const
 {
-    static_cast<const WeakRefImpl*>(this)->PrintRefs();
+    static_cast<const WeakRefImpl*>(this)->PrintRefs(objInfo);
 }
 
 void RefBase::WeakRef::TrackMe(
@@ -924,4 +923,3 @@ ECode WeakReferenceImpl::Resolve(
 }
 
 } // namespace como
-
