@@ -49,10 +49,6 @@ namespace como {
 #define DEBUG_REFS_ENABLED_BY_DEFAULT   1
 #define DEBUG_REFS_CALLSTACK_ENABLED    0
 
-// folder where stack traces are saved when DEBUG_REFS is enabled
-// this folder needs to exist and be writable
-#define DEBUG_REFS_CALLSTACK_PATH       "./debug"
-
 // log all reference counting operations
 #define PRINT_REFS                      0
 
@@ -356,24 +352,6 @@ void RefBase::WeakRefImpl::PrintRefs() const
     }
 
     Logger::D("RefBase", "STACK TRACE for %p\n%s", this, text.string());
-
-    char name[100];
-    snprintf(name, sizeof(name), DEBUG_REFS_CALLSTACK_PATH "/%p.stack", this);
-    Integer rc = open(name, O_RDWR | O_CREAT | O_APPEND, 644);
-    if (rc >= 0) {
-        if (write(rc, text.string(), text.GetByteLength()) < text.GetByteLength()) {
-            Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
-                                                            name, strerror(errno));
-        }
-        else {
-            Logger::D("RefBase", "STACK TRACE for %p saved in %s", this, name);
-        }
-        close(rc);
-    }
-    else {
-        Logger::E("RefBase", "FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
-                                                            name, strerror(errno));
-    }
 }
 
 void RefBase::WeakRefImpl::TrackMe(
