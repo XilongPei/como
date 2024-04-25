@@ -180,18 +180,24 @@ ECode CMethodTester::TestMethod6(
 ECode CMethodTester::OnFirstRef(
         /* [in] */ IObject* obj,
         /* [in] */ HANDLE value)
-{}
+{
+    return NOERROR;
+}
 
 ECode CMethodTester::OnLastStrongRef(
         /* [in] */ IObject* obj,
         /* [in] */ HANDLE value)
-{}
+{
+    return NOERROR;
+}
 
 ECode CMethodTester::OnLastWeakRef(
         /* [in] */ IObject* obj,
         /* [in] */ HANDLE value)
-{}
+{
+    return NOERROR;
+}
 
-}
-}
-}
+} // namespace test
+} // namespace reflection
+} // namespace como

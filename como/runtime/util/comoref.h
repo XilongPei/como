@@ -224,9 +224,9 @@ public:
     {
         RefEntry* mNext;
         HANDLE mId;
-#if DEBUG_REFS_CALLSTACK_ENABLED
+  #if DEBUG_REFS_CALLSTACK_ENABLED
         CallStack mStack;
-#endif
+  #endif
         Integer mRef;
     };
     Boolean mTrackEnabled;

@@ -43,15 +43,6 @@
 
 namespace como {
 
-// compile with refcounting debugging enabled
-#define DEBUG_REFS                      1
-// #define DEBUG_REFS_FATAL_SANITY_CHECKS  0
-#define DEBUG_REFS_ENABLED_BY_DEFAULT   1
-#define DEBUG_REFS_CALLSTACK_ENABLED    0
-
-// log all reference counting operations
-#define PRINT_REFS                      1
-
 #define INITIAL_STRONG_VALUE (1<<28)
 
 #define MAX_COUNT 0xFFFFu
@@ -265,7 +256,7 @@ RefBase::WeakRefImpl::~WeakRefImpl()
 
     if ((! mRetain) && (mWeakRefs != nullptr)) {
         dumpStack = true;
-        Logger::E("RefBase", "Weak references remain!");
+        Logger::E("RefBase", "Weak references remain:");
         RefEntry* refs = mWeakRefs;
         while (nullptr != refs) {
             char inc = ((refs->mRef >= 0) ? '+' : '-');
@@ -393,22 +384,27 @@ void RefBase::WeakRefImpl::RemoveRef(
     if (mTrackEnabled) {
         Mutex::AutoLock lock(mMutex);
 
-        RefEntry* const head = *refs;
-        RefEntry* ref = head;
+        RefEntry* refTmp = nullptr;
+        RefEntry* ref = *refs;
         while (ref != nullptr) {
             if (ref->mId == id) {
-                *refs = ref->mNext;
+                if (nullptr != refTmp) {
+                    refTmp->mNext = ref->mNext;
+                }
+                else {
+                    *refs = ref->mNext;
+                }
                 delete ref;
                 return;
             }
-            refs = &ref->mNext;
-            ref = *refs;
+            refTmp = ref;
+            ref = ref->mNext;
         }
 
         Logger::D("RefBase::WeakRefImpl::RemoveRef",
                   "removing id %p on RefBase %p (WeakRef %p), it doesn't exist!",
                   id, mBase, this);
-        ref = head;
+        ref = *refs;
         while (ref != nullptr) {
             char inc = ((ref->mRef >= 0) ? '+' : '-');
             Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
@@ -944,23 +940,30 @@ LightRefBase::LightRefBase()
 {
 #if DEBUG_REFS_LightRefBase
     mRefs = nullptr;
+    mTrackEnabled = false;
+    mRetain = false;
 #endif
 }
 
 LightRefBase::~LightRefBase()
 {
 #if DEBUG_REFS_LightRefBase
-    if ((! mRetain) && (mRefs != nullptr)) {
-        Logger::E("RefBase", "Strong references remain:");
-        RefEntry* refs = mRefs;
-        while (refs != nullptr) {
-            char inc = ((refs->mRef >= 0) ? '+' : '-');
-            Logger::D("RefBase", "\t%c ID %p (ref %d):\n",
-                                           inc, refs->mId, refs->mRef);
-#if DEBUG_REFS_CALLSTACK_ENABLED
-            refs->mStack.log("RefBase");
-#endif
-            refs = refs->mNext;
+    if (mTrackEnabled) {
+        if ((! mRetain) && (mRefs != nullptr)) {
+            Logger::E("~LightRefBase",
+                      "References remain [reference count: %d] on LightRefBase %p:",
+                      mCount.load(std::memory_order_relaxed), this);
+
+            RefEntry* refs = mRefs;
+            while (refs != nullptr) {
+                char inc = ((refs->mRef >= 0) ? '+' : '-');
+                Logger::D("~LightRefBase", "\t%c ID %p (ref %d):\n",
+                                                        inc, refs->mId, refs->mRef);
+      #if DEBUG_REFS_CALLSTACK_ENABLED
+                refs->mStack.log("~LightRefBase");
+      #endif
+                refs = refs->mNext;
+            }
         }
     }
 #endif
@@ -969,24 +972,28 @@ LightRefBase::~LightRefBase()
 Integer LightRefBase::AddRef(
     /* [in] */ HANDLE id)
 {
+#if !DEBUG_REFS_LightRefBase
     (void)id;
+#endif
 
     Integer c = mCount.fetch_add(1, std::memory_order_relaxed);
 
 #if DEBUG_REFS_LightRefBase
-    RefEntry* ref = new RefEntry();
-    if (nullptr == ref) {
-        Logger::E("RefBase", "new RefEntry() == nullptr");
-        return (c + 1);
-    }
+    if (mTrackEnabled) {
+        RefEntry* ref = new RefEntry();
+        if (nullptr == ref) {
+            Logger::E("LightRefBase::AddRef", "new RefEntry() == nullptr");
+            return (c + 1);
+        }
 
-    ref->mRef = mCount.load(std::memory_order_relaxed);
-    ref->mId = id;
-#if DEBUG_REFS_CALLSTACK_ENABLED
-    ref->mStack.update(2);
-#endif
-    ref->mNext = mRefs;
-    mRefs = ref;
+        ref->mRef = mCount.load(std::memory_order_relaxed);
+        ref->mId = id;
+      #if DEBUG_REFS_CALLSTACK_ENABLED
+        ref->mStack.update(2);
+      #endif
+        ref->mNext = mRefs;
+        mRefs = ref;
+    }
 #endif
 
     return (c + 1);
@@ -1008,7 +1015,7 @@ Integer LightRefBase::Release(
                 notFoundIt = false;
 
                 if (nullptr == refLast) {
-                    mRefs = nullptr;
+                    mRefs = ref->mNext;
                 }
                 else {
                     refLast->mNext = ref->mNext;
@@ -1031,9 +1038,9 @@ Integer LightRefBase::Release(
                 ref = ref->mNext;
             }
 
-#if DEBUG_REFS_CALLSTACK_ENABLED
+  #if DEBUG_REFS_CALLSTACK_ENABLED
             CallStack stack(LOG_TAG);
-#endif
+  #endif
         }
     }
 #endif
@@ -1120,11 +1127,11 @@ void LightRefBase::PrintRefs(const char* objInfo)
     while (refs != nullptr) {
         char inc = ((refs->mRef >= 0) ? '+' : '-');
         snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d):\n",
-                                           inc, refs->mId, refs->mRef);
+                                          inc, (void *)(refs->mId), refs->mRef);
         text += buf;
-#if DEBUG_REFS_CALLSTACK_ENABLED
+  #if DEBUG_REFS_CALLSTACK_ENABLED
         text += refs->stack.toString("\t\t");
-#else
+  #else
         text += "\t\t(call stacks disabled)";
 #endif
         refs = refs->mNext;
