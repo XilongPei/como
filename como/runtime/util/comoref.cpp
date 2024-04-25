@@ -980,6 +980,8 @@ Integer LightRefBase::AddRef(
 
 #if DEBUG_REFS_LightRefBase
     if (mTrackEnabled) {
+        Mutex::AutoLock lock(mMutex);
+
         RefEntry* ref = new RefEntry();
         if (nullptr == ref) {
             Logger::E("LightRefBase::AddRef", "new RefEntry() == nullptr");
@@ -1034,7 +1036,8 @@ Integer LightRefBase::Release(
             ref = mRefs;
             while (ref != nullptr) {
                 char inc = ((ref->mRef >= 0) ? '+' : '-');
-                Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
+                Logger::D("LightRefBase::Release", "\t%c ID %p (ref %d):",
+                                                      inc, ref->mId, ref->mRef);
                 ref = ref->mNext;
             }
 
@@ -1119,7 +1122,7 @@ void LightRefBase::PrintRefs(const char* objInfo)
     Mutex::AutoLock lock(mMutex);
 
     snprintf(buf, sizeof(buf),
-        "References [%s, reference count: %d] on RefBase %p\n",
+        "References [%s, reference count: %d] on LightRefBase %p\n",
                     objInfo, mCount.load(std::memory_order_relaxed), this);
     text += buf;
 
@@ -1136,6 +1139,8 @@ void LightRefBase::PrintRefs(const char* objInfo)
 #endif
         refs = refs->mNext;
     }
+
+    Logger::D("LightRefBase", "%s", text.string());
 }
 
 void LightRefBase::TrackMe(
