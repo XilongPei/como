@@ -239,40 +239,53 @@ RefBase::WeakRefImpl::WeakRefImpl(
 
 RefBase::WeakRefImpl::~WeakRefImpl()
 {
+#if DEBUG_REFS
     Boolean dumpStack = false;
+    String text = "\n";
+    char buf[128];
+
     if ((! mRetain) && (mStrongRefs != nullptr)) {
         dumpStack = true;
-        Logger::E("RefBase", "Strong references remain:");
+        text += "Strong references remain:\n";
         RefEntry* refs = mStrongRefs;
         while (nullptr != refs) {
             char inc = ((refs->mRef >= 0) ? '+' : '-');
-            Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
-#if DEBUG_REFS_CALLSTACK_ENABLED
+            snprintf(buf, sizeof(buf),
+                            "\t%c ID %p (ref %d)\n", inc, refs->mId, refs->mRef);
+            text += buf;
+  #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
-#endif
+  #endif
             refs = refs->mNext;
         }
     }
 
     if ((! mRetain) && (mWeakRefs != nullptr)) {
         dumpStack = true;
-        Logger::E("RefBase", "Weak references remain:");
+        text += "Weak references remain:\n";
         RefEntry* refs = mWeakRefs;
         while (nullptr != refs) {
             char inc = ((refs->mRef >= 0) ? '+' : '-');
-            Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, refs->mId, refs->mRef);
-#if DEBUG_REFS_CALLSTACK_ENABLED
+            snprintf(buf, sizeof(buf),
+                            "\t%c ID %p (ref %d)\n", inc, refs->mId, refs->mRef);
+            text += buf;
+  #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
-#endif
+  #endif
             refs = refs->mNext;
         }
     }
     if (dumpStack) {
-#if DEBUG_REFS_CALLSTACK_ENABLED
-        Logger::E("RefBase", "above errors at:");
+  #if DEBUG_REFS_CALLSTACK_ENABLED
+        text += "RefBase", "above errors at:\n";
         CallStack stack("RefBase");
-#endif
+  #endif
     }
+
+    if (text.GetByteLength() > 1) {
+        Logger::D("RefBase::WeakRefImpl::~WeakRefImpl", text.string());
+    }
+#endif
 }
 
 void RefBase::WeakRefImpl::AddStrongRef(
@@ -401,18 +414,29 @@ void RefBase::WeakRefImpl::RemoveRef(
             ref = ref->mNext;
         }
 
-        Logger::D("RefBase::WeakRefImpl::RemoveRef",
-                  "removing id %p on RefBase %p (WeakRef %p), it doesn't exist!",
-                  id, mBase, this);
+#if DEBUG_REFS
+        String text;
+        char buf[128];
+
+        snprintf(buf, sizeof(buf),
+                 "removing id %p on RefBase %p (WeakRef %p), it doesn't exist!\n",
+                 id, mBase, this);
+        text += buf;
+
         ref = *refs;
         while (ref != nullptr) {
             char inc = ((ref->mRef >= 0) ? '+' : '-');
-            Logger::D("RefBase", "\t%c ID %p (ref %d):", inc, ref->mId, ref->mRef);
+            snprintf(buf, sizeof(buf),
+                             "\t%c ID %p (ref %d)\n", inc, ref->mId, ref->mRef);
+            text += buf;
+
             ref = ref->mNext;
         }
 
-#if DEBUG_REFS_CALLSTACK_ENABLED
+  #if DEBUG_REFS_CALLSTACK_ENABLED
         CallStack stack(LOG_TAG);
+  #endif
+        Logger::D("RefBase::WeakRefImpl::RemoveRef", text.string());
 #endif
     }
 }
@@ -950,20 +974,28 @@ LightRefBase::~LightRefBase()
 #if DEBUG_REFS_LightRefBase
     if (mTrackEnabled) {
         if ((! mRetain) && (mRefs != nullptr)) {
-            Logger::E("~LightRefBase",
-                      "References remain [reference count: %d] on LightRefBase %p:",
-                      mCount.load(std::memory_order_relaxed), this);
+            String text;
+            char buf[128];
+
+            snprintf(buf, sizeof(buf),
+                "References remain [reference count: %d] on LightRefBase %p:\n",
+                mCount.load(std::memory_order_relaxed), this);
+            text += buf;
 
             RefEntry* refs = mRefs;
             while (refs != nullptr) {
                 char inc = ((refs->mRef >= 0) ? '+' : '-');
-                Logger::D("~LightRefBase", "\t%c ID %p (ref %d):\n",
-                                                        inc, refs->mId, refs->mRef);
+                snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d)\n",
+                                          inc, (void *)(refs->mId), refs->mRef);
+                text += buf;
+
       #if DEBUG_REFS_CALLSTACK_ENABLED
                 refs->mStack.log("~LightRefBase");
       #endif
                 refs = refs->mNext;
             }
+
+            Logger::D("~LightRefBase", text.string());
         }
     }
 #endif
@@ -1004,7 +1036,6 @@ Integer LightRefBase::AddRef(
 Integer LightRefBase::Release(
     /* [in] */ HANDLE id)
 {
-#if DEBUG_REFS_LightRefBase
     bool notFoundIt = true;
 
     if (mTrackEnabled) {
@@ -1029,21 +1060,30 @@ Integer LightRefBase::Release(
             ref = ref->mNext;
         }
 
+#if DEBUG_REFS_LightRefBase
         if (notFoundIt) {
-            Logger::D("LightRefBase::Release",
-                      "removing id %p on RefBase %p, it doesn't exist!",
-                      (void *)id, this);
+            String text;
+            char buf[128];
+
+            snprintf(buf, sizeof(buf),
+                            "removing id %p on RefBase %p, it doesn't exist!\n",
+                            (void *)id, this);
+            text += buf;
+
             ref = mRefs;
             while (ref != nullptr) {
                 char inc = ((ref->mRef >= 0) ? '+' : '-');
-                Logger::D("LightRefBase::Release", "\t%c ID %p (ref %d):",
-                                                      inc, ref->mId, ref->mRef);
+                snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d)\n",
+                                            inc, (void *)(ref->mId), ref->mRef);
+                text += buf;
+
                 ref = ref->mNext;
             }
 
   #if DEBUG_REFS_CALLSTACK_ENABLED
             CallStack stack(LOG_TAG);
   #endif
+            Logger::D("LightRefBase::Release", text.string());
         }
     }
 #endif
