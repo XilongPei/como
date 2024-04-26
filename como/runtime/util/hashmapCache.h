@@ -132,7 +132,7 @@ public:
         else {
             Bucket* prev = mBuckets[index];
             while (prev != nullptr) {
-                if (!compareF(prev->mKey, key)) {
+                if (! compareF(prev->mKey, key)) {
                     assignValF(&prev->mValue, value, this);
                     prev->mlValue = lvalue;
                     return 0;
@@ -172,7 +172,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
                 return true;
             }
@@ -191,7 +191,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
                 curr->mReferenceCount++;
                 return curr->mValue;
@@ -212,7 +212,7 @@ public:
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
-            if ((curr->mHash == hash) && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 if (curr == mBuckets[index]) {
                     mBuckets[index] = curr->mNext;
                 }

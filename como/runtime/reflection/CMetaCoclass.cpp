@@ -128,7 +128,7 @@ ECode CMetaCoclass::GetAllConstructors(
     FAIL_RETURN(BuildAllConstructors());
 
     Integer N = MIN(mConstructors.GetLength(), constrs.GetLength());
-    for (Integer i = 0; i < N; i++) {
+    for (Integer i = 0;  i < N;  i++) {
         constrs.Set(i, mConstructors[i]);
     }
     return NOERROR;
@@ -358,12 +358,14 @@ ECode CMetaCoclass::GetMethod(
             String name, ns;
             miObj->GetName(name);
             miObj->GetNamespace(ns);
-            if (nameSpace.Equals(ns + "::" + name))
+            if (nameSpace.Equals(ns + "::" + name)) {
                 break;
+            }
         }
 
-        if (i < mInterfaces.GetLength())
+        if (i < mInterfaces.GetLength()) {
             return miObj->GetMethod(methodName, signature, method);
+        }
 
         return NOERROR;
     }
@@ -422,17 +424,18 @@ ECode CMetaCoclass::CreateObject(
 
 ECode CMetaCoclass::BuildAllConstructors()
 {
-    if (mConstructors[0] == nullptr) {
+    if (nullptr == mConstructors[0]) {
         Mutex::AutoLock lock(mConstructorsLock);
-        if (mConstructors[0] == nullptr) {
+        if (nullptr == mConstructors[0]) {
             MetaInterface* mi = mOwner->mMetadata->mInterfaces[
                  mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
-            for (Integer i = 0; i < mi->mMethodNumber; i++) {
+            for (Integer i = 0;  i < mi->mMethodNumber;  i++) {
                 MetaMethod* mm = mi->mMethods[i];
                 AutoPtr<IMetaConstructor> mcObj = new CMetaConstructor(
                                                                this, mi, i, mm);
-                if (nullptr == mcObj)
+                if (nullptr == mcObj) {
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 mConstructors.Set(i, mcObj);
             }
@@ -444,14 +447,15 @@ ECode CMetaCoclass::BuildAllConstructors()
 
 ECode CMetaCoclass::BuildAllInterfaces()
 {
-    if (mInterfaces[0] == nullptr) {
+    if (nullptr == mInterfaces[0]) {
         Mutex::AutoLock lock(mInterfacesLock);
-        if (mInterfaces[0] == nullptr) {
+        if (nullptr == mInterfaces[0]) {
             for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 Integer intfIndex = mMetadata->mInterfaceIndexes[i];
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(intfIndex);
-                if (nullptr == miObj)
+                if (nullptr == miObj) {
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 mInterfaces.Set(i, miObj);
             }
@@ -466,16 +470,17 @@ ECode CMetaCoclass::BuildAllMethods()
     Integer number;
     GetMethodNumber(number);
 
-    if (mMethods[0] == nullptr) {
+    if (nullptr == mMethods[0]) {
         Mutex::AutoLock lock(mMethodsLock);
-        if (mMethods[0] == nullptr) {
+        if (nullptr == mMethods[0]) {
             Integer index = 0;
             FAIL_RETURN(BuildInterfaceMethodLocked(mOwner->mIInterface, index));
             for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 AutoPtr<IMetaInterface> miObj = mOwner->BuildInterface(
                                                 mMetadata->mInterfaceIndexes[i]);
-                if (nullptr == miObj)
+                if (nullptr == miObj) {
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 String name, ns, nsName;
                 miObj->GetName(name);
@@ -484,24 +489,37 @@ ECode CMetaCoclass::BuildAllMethods()
 
                 static String nsName_interface = String("como::IInterface");
 
-                if (mOwner->ChkExternalInterface(mMetadata->mInterfaceIndexes[i]))
+                if (mOwner->ChkExternalInterface(mMetadata->mInterfaceIndexes[i])) {
                     continue;
+                }
 
-                if (nsName_interface.Equals(nsName))
+                if (nsName_interface.Equals(nsName)) {
                     continue;
+                }
 
                 FAIL_RETURN(BuildInterfaceMethodLocked(miObj, index));
             }
 
-            Integer methodNumber = mMethods.GetLength();
+            /**
+             * These 2 values (index, mMethods.GetLength()) may not be equal
+             * because of ExternalInterface or como::IInterface, checked by upper
+             * 2 continue statements.
+             *
+             * So in this case the statement is wrong:
+             * Integer methodNumber = mMethods.GetLength();
+             */
+            Integer methodNumber = index;
+
             mOverridesInfo = Array<Boolean>(methodNumber);
 
-            for (Integer i = 0;  i < methodNumber;  i++)
+            for (Integer i = 0;  i < methodNumber;  i++) {
                 mOverridesInfo[i] = false;
+            }
 
             for (Integer idxMethod = 0;  idxMethod < methodNumber;  idxMethod++) {
-                if (mOverridesInfo[idxMethod])
+                if (mOverridesInfo[idxMethod]) {
                     continue;
+                }
 
                 String strMethodName;
                 mMethods[idxMethod]->GetName(strMethodName);
@@ -596,7 +614,7 @@ ECode CMetaCoclass::GetConstant(
 
     FAIL_RETURN(BuildAllConstants());
 
-    for (Integer i = 0; i < mConstants.GetLength(); i++) {
+    for (Integer i = 0;  i < mConstants.GetLength();  i++) {
         String mcName;
         mConstants[i]->GetName(mcName);
         if (mcName.Equals(name)) {

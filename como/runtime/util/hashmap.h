@@ -187,7 +187,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 return true;
             }
             curr = curr->mNext;
@@ -205,7 +205,7 @@ public:
         unsigned int index = hash % mBucketSize;
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 return curr->mValue;
             }
             curr = curr->mNext;
@@ -224,7 +224,7 @@ public:
         Bucket* curr = mBuckets[index];
         Bucket* prev = curr;
         while (curr != nullptr) {
-            if (curr->mHash == hash && !compareF(curr->mKey, key)) {
+            if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
                 if (curr == mBuckets[index]) {
                     mBuckets[index] = curr->mNext;
                 }
