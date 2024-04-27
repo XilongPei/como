@@ -40,9 +40,11 @@ TEST(testObjectObserverTest, TesttestObjectObserver)
     AutoPtr<IMetaMethod> method;
     klass->GetMethod("TestMethod2", "(FF&)E", method);
 
+#if DEBUG_REFS_LightRefBase
     CMetaMethod *cmethod = CMetaMethod::From(method);
     cmethod->TrackMe(true, true);
     cmethod->PrintRefs("Obj_2");
+#endif
 
     AutoPtr<IArgumentList> args;
     method->CreateArgumentList(args);

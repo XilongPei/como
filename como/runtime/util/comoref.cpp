@@ -394,7 +394,7 @@ void RefBase::WeakRefImpl::RemoveRef(
     /* [in] */ RefEntry** refs,
     /* [in] */ const void* id)
 {
-    if (mTrackEnabled) {
+    if (mTrackEnabled && (mStrong.load(std::memory_order_relaxed) > 1)) {
         Mutex::AutoLock lock(mMutex);
 
         RefEntry* refTmp = nullptr;
@@ -1027,6 +1027,9 @@ Integer LightRefBase::AddRef(
       #endif
         ref->mNext = mRefs;
         mRefs = ref;
+
+        Logger::D("LightRefBase::AddRef", "ID %p (ref %d)",
+                                                 (void *)(ref->mId), ref->mRef);
     }
 #endif
 
@@ -1036,60 +1039,60 @@ Integer LightRefBase::AddRef(
 Integer LightRefBase::Release(
     /* [in] */ HANDLE id)
 {
-    bool notFoundIt = true;
-
-    if (mTrackEnabled) {
-        Mutex::AutoLock lock(mMutex);
-
-        RefEntry* refLast = nullptr;
-        RefEntry* ref = mRefs;
-        while (ref != nullptr) {
-            if (ref->mId == id) {
-                notFoundIt = false;
-
-                if (nullptr == refLast) {
-                    mRefs = ref->mNext;
-                }
-                else {
-                    refLast->mNext = ref->mNext;
-                    delete ref;
-                    break;
-                }
-            }
-            refLast = ref;
-            ref = ref->mNext;
-        }
-
+    Integer c = mCount.fetch_sub(1, std::memory_order_release);
+    if (1 == c) {
 #if DEBUG_REFS_LightRefBase
-        if (notFoundIt) {
-            String text;
-            char buf[128];
+        bool notFoundIt = true;
 
-            snprintf(buf, sizeof(buf),
-                            "removing id %p on RefBase %p, it doesn't exist!\n",
-                            (void *)id, this);
-            text += buf;
+        if (mTrackEnabled) {
+            Mutex::AutoLock lock(mMutex);
 
-            ref = mRefs;
+            RefEntry* refLast = nullptr;
+            RefEntry* ref = mRefs;
             while (ref != nullptr) {
-                char inc = ((ref->mRef >= 0) ? '+' : '-');
-                snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d)\n",
-                                            inc, (void *)(ref->mId), ref->mRef);
-                text += buf;
+                if (ref->mId == id) {
+                    notFoundIt = false;
 
+                    if (nullptr == refLast) {
+                        mRefs = ref->mNext;
+                    }
+                    else {
+                        refLast->mNext = ref->mNext;
+                        delete ref;
+                        break;
+                    }
+                }
+                refLast = ref;
                 ref = ref->mNext;
             }
 
-  #if DEBUG_REFS_CALLSTACK_ENABLED
-            CallStack stack(LOG_TAG);
-  #endif
-            Logger::D("LightRefBase::Release", text.string());
+            if (notFoundIt) {
+                String text;
+                char buf[128];
+
+                snprintf(buf, sizeof(buf),
+                            "removing id %p on RefBase %p, it doesn't exist!\n",
+                            (void *)id, this);
+                text += buf;
+
+                ref = mRefs;
+                while (ref != nullptr) {
+                    char inc = ((ref->mRef >= 0) ? '+' : '-');
+                    snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d)\n",
+                                            inc, (void *)(ref->mId), ref->mRef);
+                    text += buf;
+
+                    ref = ref->mNext;
+                }
+
+              #if DEBUG_REFS_CALLSTACK_ENABLED
+                CallStack stack(LOG_TAG);
+              #endif
+                Logger::D("LightRefBase::Release", text.string());
+            }
         }
-    }
 #endif
 
-    Integer c = mCount.fetch_sub(1, std::memory_order_release);
-    if (1 == c) {
         std::atomic_thread_fence(std::memory_order_acquire);
         if (LIKELY(0 == funFreeMem)) {
             delete this;
