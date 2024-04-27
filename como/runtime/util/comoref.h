@@ -115,6 +115,7 @@ protected:
 
     virtual ~RefBase();
 
+    // Flags for ExtendObjectLifetime()
     enum {
         OBJECT_LIFETIME_STRONG  = 0x0000,
         OBJECT_LIFETIME_WEAK    = 0x0001,
@@ -124,15 +125,16 @@ protected:
     void ExtendObjectLifetime(
         /* [in] */ Integer mode);
 
-    enum {
-        FIRST_INC_STRONG = 0x0001
-    };
-
     virtual void OnFirstRef(
         /* [in] */ const void* id);
 
     virtual void OnLastStrongRef(
         /* [in] */ const void* id);
+
+    // Flags for OnIncStrongAttempted()
+    enum {
+        FIRST_INC_STRONG = 0x0001
+    };
 
     virtual Boolean OnIncStrongAttempted(
         /* [in] */ Integer flags,

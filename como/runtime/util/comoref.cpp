@@ -526,8 +526,9 @@ Integer RefBase::DecStrong(
         assert(0);
     }
     if (1 == c) {
-        std::atomic_thread_fence(std::memory_order_acquire);
         refs->mBase->OnLastStrongRef(id);
+
+        std::atomic_thread_fence(std::memory_order_acquire);
         Integer flags = refs->mFlags.load(std::memory_order_relaxed);
         if ((flags & OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_STRONG) {
             if (LIKELY(0 == funFreeMem)) {
@@ -622,8 +623,8 @@ void RefBase::WeakRef::DecWeak(
     if (c != 1) {
         return;
     }
-    atomic_thread_fence(std::memory_order_acquire);
 
+    atomic_thread_fence(std::memory_order_acquire);
     Integer flags = impl->mFlags.load(std::memory_order_relaxed);
     if ((flags & OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_STRONG) {
         // This is the regular lifetime case. The object is destroyed
@@ -1093,7 +1094,6 @@ Integer LightRefBase::Release(
         }
 #endif
 
-        std::atomic_thread_fence(std::memory_order_acquire);
         if (LIKELY(0 == funFreeMem)) {
             delete this;
         }
