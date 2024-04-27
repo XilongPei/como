@@ -22,6 +22,7 @@ set(CLIENT_OBJ_DIR ${ObjectObserver_OBJ_DIR}/client)
 include_directories(
     ./
     ${INC_DIR}
+    $ENV{ROOT}/como/runtime
     ${CLIENT_OBJ_DIR})
 
 set(SOURCES

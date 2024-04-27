@@ -356,8 +356,8 @@ ECode CMetaCoclass::GetMethod(
         for (i = 0;  i < mInterfaces.GetLength();  i++) {
             miObj = mInterfaces[i];
             String name, ns;
-            miObj->GetName(name);
-            miObj->GetNamespace(ns);
+            (void)miObj->GetName(name);
+            (void)miObj->GetNamespace(ns);
             if (nameSpace.Equals(ns + "::" + name)) {
                 break;
             }
@@ -373,14 +373,14 @@ ECode CMetaCoclass::GetMethod(
     for (i = 0;  i < mMethods.GetLength();  i++) {
         IMetaMethod* mmObj = mMethods[i];
         String mmName, mmSignature;
-        mmObj->GetName(mmName);
+        (void)mmObj->GetName(mmName);
         if (mmName.Equals(fullName)) {
             if (! mOverridesInfo[i]) {
                 if (signature.IsEmpty()) {
                     method = mmObj;
                     return NOERROR;
                 }
-                mmObj->GetSignature(mmSignature);
+                (void)mmObj->GetSignature(mmSignature);
                 if (mmSignature.Equals(signature)) {
                     method = mmObj;
                     return NOERROR;
@@ -388,7 +388,7 @@ ECode CMetaCoclass::GetMethod(
                 break;
             }
 
-            mmObj->GetSignature(mmSignature);
+            (void)mmObj->GetSignature(mmSignature);
             if (mmSignature.Equals(signature)) {
                 method = mmObj;
                 return NOERROR;
@@ -483,8 +483,8 @@ ECode CMetaCoclass::BuildAllMethods()
                 }
 
                 String name, ns, nsName;
-                miObj->GetName(name);
-                miObj->GetNamespace(ns);
+                (void)miObj->GetName(name);
+                (void)miObj->GetNamespace(ns);
                 nsName = ns + "::" + name;
 
                 static String nsName_interface = String("como::IInterface");
@@ -522,12 +522,12 @@ ECode CMetaCoclass::BuildAllMethods()
                 }
 
                 String strMethodName;
-                mMethods[idxMethod]->GetName(strMethodName);
+                (void)mMethods[idxMethod]->GetName(strMethodName);
                 String str_;
                 for (Integer i = 0;  i < methodNumber;  i++) {
                     if (i < idxMethod) {
                         if (mOverridesInfo[i]) {
-                            mMethods[i]->GetName(str_);
+                            (void)mMethods[i]->GetName(str_);
                             if (strMethodName.Equals(str_)) {
                                 mOverridesInfo[idxMethod] = true;
                                 break;
@@ -535,7 +535,7 @@ ECode CMetaCoclass::BuildAllMethods()
                         }
                     }
                     else if (i > idxMethod) {
-                        mMethods[i]->GetName(str_);
+                        (void)mMethods[i]->GetName(str_);
                         if (strMethodName.Equals(str_)) {
                             mOverridesInfo[idxMethod] = true;
                             mOverridesInfo[i] = true;
@@ -558,7 +558,7 @@ ECode CMetaCoclass::BuildInterfaceMethodLocked(
     miObj->GetMethodNumber(N);
     for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4);  i < N;  i++) {
         AutoPtr<IMetaMethod> mmObj;
-        miObj->GetMethod(i, mmObj);
+        FAIL_RETURN(miObj->GetMethod(i, mmObj));
         if (nullptr == (IMetaMethod *)mmObj) {
             return E_RUNTIME_EXCEPTION;
         }

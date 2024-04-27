@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <comoapi.h>
 #include <comoobj.h>
+#include "reflection/CMetaMethod.h"
 #include "ObjectObserverTestUnit.h"
 
 TEST(testObjectObserverTest, TesttestObjectObserver)
@@ -34,10 +35,15 @@ TEST(testObjectObserverTest, TesttestObjectObserver)
 
     como::Object *objTmp = Object::From(IObject::Probe(obj));
     objTmp->TrackMe(true, true);
-    objTmp->PrintRefs("tongji");
+    objTmp->PrintRefs("Obj_1");
 
     AutoPtr<IMetaMethod> method;
     klass->GetMethod("TestMethod2", "(FF&)E", method);
+
+    CMetaMethod *cmethod = CMetaMethod::From(method);
+    cmethod->TrackMe(true, true);
+    cmethod->PrintRefs("Obj_2");
+
     AutoPtr<IArgumentList> args;
     method->CreateArgumentList(args);
     Float arg = 9.9, result;
