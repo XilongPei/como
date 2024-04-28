@@ -241,17 +241,19 @@ RefBase::WeakRefImpl::~WeakRefImpl()
 {
 #if DEBUG_REFS
     Boolean dumpStack = false;
-    String text = "\n";
     char buf[128];
+
+    snprintf(buf, sizeof(buf), "\nRefBase:%p\n", mBase);
+    String text = buf;
 
     if ((! mRetain) && (mStrongRefs != nullptr)) {
         dumpStack = true;
         text += "Strong references remain:\n";
         RefEntry* refs = mStrongRefs;
-        while (nullptr != refs) {
+        while (refs != nullptr) {
             char inc = ((refs->mRef >= 0) ? '+' : '-');
             snprintf(buf, sizeof(buf),
-                            "\t%c ID %p (ref %d)\n", inc, refs->mId, refs->mRef);
+                      "\t%c ID %p (refCount %d)\n", inc, refs->mId, refs->mRef);
             text += buf;
   #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
@@ -264,10 +266,10 @@ RefBase::WeakRefImpl::~WeakRefImpl()
         dumpStack = true;
         text += "Weak references remain:\n";
         RefEntry* refs = mWeakRefs;
-        while (nullptr != refs) {
+        while (refs != nullptr) {
             char inc = ((refs->mRef >= 0) ? '+' : '-');
             snprintf(buf, sizeof(buf),
-                            "\t%c ID %p (ref %d)\n", inc, refs->mId, refs->mRef);
+                      "\t%c ID %p (refCount %d)\n", inc, refs->mId, refs->mRef);
             text += buf;
   #if DEBUG_REFS_CALLSTACK_ENABLED
             refs->mStack.log("RefBase");
@@ -431,7 +433,7 @@ void RefBase::WeakRefImpl::RemoveRef(
             while (ref != nullptr) {
                 char inc = ((ref->mRef >= 0) ? '+' : '-');
                 snprintf(buf, sizeof(buf),
-                                 "\t%c ID %p (ref %d)\n", inc, ref->mId, ref->mRef);
+                                 "\t%c ID %p (refCount %d)\n", inc, ref->mId, ref->mRef);
                 text += buf;
 
                 ref = ref->mNext;
@@ -494,26 +496,32 @@ Integer RefBase::IncStrong(
     refs->IncWeak(id);
 
     refs->AddStrongRef(id);
-    const Integer c = refs->mStrong.fetch_add(1, std::memory_order_relaxed);
-    if (c <= 0) {
+    const Integer cnt = refs->mStrong.fetch_add(1, std::memory_order_relaxed);
+    if (cnt <= 0) {
         Logger::E("RefBase", "IncStrong() called on %p after last strong ref",
                                                                           refs);
         assert(0);
     }
+
+    if (cnt != INITIAL_STRONG_VALUE)  {
 #if PRINT_REFS
-    Logger::D("RefBase", "IncStrong of %p from %p: cnt=%d\n", this, id, c);
+        Logger::D("RefBase", "IncStrong, RefBase:%p id:%p mCount:%d\n", this,
+                                                                    id, (cnt+1));
 #endif
-    if (c != INITIAL_STRONG_VALUE)  {
-        return (c + 1);
+        return (cnt + 1);
     }
 
     Integer old = refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
                                                     std::memory_order_relaxed);
     if (old <= INITIAL_STRONG_VALUE) {
-        Logger::E("RefBase", "0x%x too small", old);
+        Logger::E("RefBase", "mCount:0x%x too small", old);
         assert(0);
     }
     refs->mBase->OnFirstRef(id);
+
+#if PRINT_REFS
+    Logger::D("RefBase", "IncStrong, RefBase:%p id:%p mCount:1\n", this, id);
+#endif
     return 1;
 }
 
@@ -522,15 +530,14 @@ Integer RefBase::DecStrong(
 {
     WeakRefImpl* const refs = mRefs;
     refs->RemoveStrongRef(id);
-    const Integer c = refs->mStrong.fetch_sub(1, std::memory_order_release);
-#if PRINT_REFS
-    Logger::D("RefBase", "DecStrong of %p from %p: cnt=%d\n", this, id, c);
-#endif
-    if (BAD_STRONG(c)) {
+
+    const Integer cnt = refs->mStrong.fetch_sub(1, std::memory_order_release);
+    if (BAD_STRONG(cnt)) {
         Logger::E("RefBase", "DecStrong() called on %p too many times", refs);
         assert(0);
     }
-    if (1 == c) {
+
+    if (1 == cnt) {
         refs->mBase->OnLastStrongRef(id);
 
         std::atomic_thread_fence(std::memory_order_acquire);
@@ -557,8 +564,13 @@ Integer RefBase::DecStrong(
             }
         }
     }
+
+#if PRINT_REFS
+    Logger::D("RefBase", "DecStrong, RefBase:%p id:%p mCount:%d\n", this, id, (cnt-1));
+#endif
     refs->DecWeak(id);
-    return (c - 1);
+
+    return (cnt - 1);
 }
 
 Integer RefBase::ForceIncStrong(
@@ -1045,8 +1057,8 @@ Integer LightRefBase::AddRef(
 Integer LightRefBase::Release(
     /* [in] */ HANDLE id)
 {
-    Integer c = mCount.fetch_sub(1, std::memory_order_release);
-    if (1 == c) {
+    Integer cnt = mCount.fetch_sub(1, std::memory_order_release);
+    if (1 == cnt) {
 #if DEBUG_REFS_LightRefBase
         bool notFoundIt = true;
 
@@ -1084,7 +1096,7 @@ Integer LightRefBase::Release(
                 ref = mRefs;
                 while (ref != nullptr) {
                     char inc = ((ref->mRef >= 0) ? '+' : '-');
-                    snprintf(buf, sizeof(buf), "\t%c ID %p (ref %d)\n",
+                    snprintf(buf, sizeof(buf), "\t%c ID %p (refCount %d)\n",
                                             inc, (void *)(ref->mId), ref->mRef);
                     text += buf;
 
@@ -1128,7 +1140,7 @@ Integer LightRefBase::Release(
             }
         }
     }
-    return (c - 1);
+    return (cnt - 1);
 }
 
 IInterface* LightRefBase::Probe(
