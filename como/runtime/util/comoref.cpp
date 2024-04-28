@@ -394,7 +394,10 @@ void RefBase::WeakRefImpl::RemoveRef(
     /* [in] */ RefEntry** refs,
     /* [in] */ const void* id)
 {
-    if (mTrackEnabled && (mStrong.load(std::memory_order_relaxed) > 1)) {
+    // The value of mTrackEnabled may be changed at any time during the object
+    // life cycle and cannot be used as a basis for determining whether to
+    // delete *refs
+    if ((*refs != nullptr) && (mStrong.load(std::memory_order_relaxed) > 1)) {
         Mutex::AutoLock lock(mMutex);
 
         RefEntry* refTmp = nullptr;
