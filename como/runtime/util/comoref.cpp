@@ -397,7 +397,7 @@ void RefBase::WeakRefImpl::RemoveRef(
     // The value of mTrackEnabled may be changed at any time during the object
     // life cycle and cannot be used as a basis for determining whether to
     // delete *refs
-    if ((*refs != nullptr) && (mStrong.load(std::memory_order_relaxed) > 1)) {
+    if (*refs != nullptr) {
         Mutex::AutoLock lock(mMutex);
 
         RefEntry* refTmp = nullptr;
@@ -418,28 +418,30 @@ void RefBase::WeakRefImpl::RemoveRef(
         }
 
 #if DEBUG_REFS
-        String text;
-        char buf[128];
+        if (mStrong.load(std::memory_order_relaxed) > 1) {
+            String text;
+            char buf[128];
 
-        snprintf(buf, sizeof(buf),
-                 "removing id %p on RefBase %p (WeakRef %p), it doesn't exist!\n",
-                 id, mBase, this);
-        text += buf;
-
-        ref = *refs;
-        while (ref != nullptr) {
-            char inc = ((ref->mRef >= 0) ? '+' : '-');
             snprintf(buf, sizeof(buf),
-                             "\t%c ID %p (ref %d)\n", inc, ref->mId, ref->mRef);
+                     "removing id %p on RefBase %p (WeakRef %p), it doesn't exist!\n",
+                     id, mBase, this);
             text += buf;
 
-            ref = ref->mNext;
-        }
+            ref = *refs;
+            while (ref != nullptr) {
+                char inc = ((ref->mRef >= 0) ? '+' : '-');
+                snprintf(buf, sizeof(buf),
+                                 "\t%c ID %p (ref %d)\n", inc, ref->mId, ref->mRef);
+                text += buf;
 
-  #if DEBUG_REFS_CALLSTACK_ENABLED
-        CallStack stack(LOG_TAG);
-  #endif
-        Logger::D("RefBase::WeakRefImpl::RemoveRef", text.string());
+                ref = ref->mNext;
+            }
+
+          #if DEBUG_REFS_CALLSTACK_ENABLED
+            CallStack stack(LOG_TAG);
+          #endif
+            Logger::D("RefBase::WeakRefImpl::RemoveRef", text.string());
+        }
 #endif
     }
 }
