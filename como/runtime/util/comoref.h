@@ -116,7 +116,7 @@ protected:
     virtual ~RefBase();
 
     // Flags for ExtendObjectLifetime()
-    enum {
+    enum OBJECT_LIFETIME {
         OBJECT_LIFETIME_STRONG  = 0x0000,
         OBJECT_LIFETIME_WEAK    = 0x0001,
         OBJECT_LIFETIME_MASK    = 0x0001

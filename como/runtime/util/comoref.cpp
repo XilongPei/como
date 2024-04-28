@@ -161,6 +161,9 @@ public:
     std::atomic<Integer> mStrong;
     std::atomic<Integer> mWeak;
     RefBase* const mBase;
+
+    // Specifies strong reference or weak reference
+    // enum OBJECT_LIFETIME_RefBase
     std::atomic<Integer> mFlags;
 
 #if DEBUG_REFS
@@ -234,8 +237,7 @@ RefBase::WeakRefImpl::WeakRefImpl(
     , mWeakRefs(nullptr)
     , mTrackEnabled(!!DEBUG_REFS_ENABLED_BY_DEFAULT)
     , mRetain(false)
-{
-}
+{}
 
 RefBase::WeakRefImpl::~WeakRefImpl()
 {
@@ -511,10 +513,20 @@ Integer RefBase::IncStrong(
         return (cnt + 1);
     }
 
-    Integer old = refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
+    /**
+     * The initial value of refs->mStrong is INITIAL_STRONG_VALUE(1<<28), after
+     * refs->mStrong.fetch_add(1 ......    (see above)
+     *
+     * refs->mStrong+1, its value (stored in variable oldCnt, return by
+     * refs->mStrong.fetch_sub) must be greater than INITIAL_STRONG_VALUE, after
+     * refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE, ...... (see below)
+     *
+     * so it must be: old > INITIAL_STRONG_VALUE
+     */
+    Integer oldCnt = refs->mStrong.fetch_sub(INITIAL_STRONG_VALUE,
                                                     std::memory_order_relaxed);
-    if (old <= INITIAL_STRONG_VALUE) {
-        Logger::E("RefBase", "mCount:0x%x too small", old);
+    if (oldCnt <= INITIAL_STRONG_VALUE) {
+        Logger::E("RefBase", "mCount:0x%x too small", oldCnt);
         assert(0);
     }
     refs->mBase->OnFirstRef(id);
@@ -975,6 +987,8 @@ ECode WeakReferenceImpl::Resolve(
 
 /**
  * class LightRefBase
+ *
+ * LightRefBase is not thread-safe, only thread-safe for mCount.
  */
 LightRefBase::LightRefBase()
     : mCount(0)
