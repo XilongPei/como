@@ -674,7 +674,8 @@ ECode InterfaceProxy::MarshalArguments(
                             elemKind == TypeKind::ComponentID ||
                             elemKind == TypeKind::InterfaceID ||
                             elemKind == TypeKind::HANDLE) {
-                        Logger::E("CProxy", "Invalid [in] Array(%d), param index: %d", elemKind, i);
+                        Logger::E("CProxy", "Invalid [in] Array(%s), param index: %d",
+                                            TypeKindHelper::GetTypeName(elemKind), i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
 
@@ -697,7 +698,8 @@ ECode InterfaceProxy::MarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d", kind, i);
+                    Logger::E("CProxy", "Invalid [in] type(%s), param index: %d",
+                                            TypeKindHelper::GetTypeName(kind), i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -986,7 +988,8 @@ ECode InterfaceProxy::UnmarshalResults(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CProxy", "Invalid [in] type(%d), param index: %d", kind, i);
+                    Logger::E("CProxy", "Invalid [in] type(%s), param index: %d",
+                                            TypeKindHelper::GetTypeName(kind), i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }

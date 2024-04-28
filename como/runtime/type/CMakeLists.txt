@@ -27,7 +27,9 @@ set(SOURCES
     comoshbuf.cpp
     comostring.cpp
     comouuid.cpp
-    ucase.cpp)
+    ucase.cpp
+    comotypekind.cpp
+)
 
 add_library(type STATIC
     ${SOURCES})

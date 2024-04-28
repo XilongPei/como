@@ -17,6 +17,8 @@
 #ifndef __COMO_TYPEKIND_H__
 #define __COMO_TYPEKIND_H__
 
+#include "comodef.h"
+
 namespace como {
 
 enum class TypeKind
@@ -42,6 +44,12 @@ enum class TypeKind
     Coclass,        // 18
     Triple,         // 19
     TypeKind,       // 20
+};
+
+class COM_PUBLIC TypeKindHelper
+{
+public:
+    static const char *GetTypeName(TypeKind type);
 };
 
 } // namespace como

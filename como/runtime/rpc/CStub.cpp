@@ -248,7 +248,9 @@ ECode InterfaceStub::UnmarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CStub", "Invalid [in] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("InterfaceStub::UnmarshalArguments",
+                                    "Invalid [in] type(%s), param index: %d.\n",
+                                    TypeKindHelper::GetTypeName(kind), i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -581,7 +583,8 @@ ECode InterfaceStub::MarshalResults(
                 case TypeKind::Triple:
                 default:
                     Logger::E("InterfaceStub::MarshalResults",
-                          "Invalid [in] type(%d), param index: %d.\n", kind, i);
+                                    "Invalid [in] type(%s), param index: %d.\n",
+                                    TypeKindHelper::GetTypeName(kind), i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
