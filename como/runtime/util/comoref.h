@@ -125,9 +125,12 @@ protected:
     void ExtendObjectLifetime(
         /* [in] */ Integer mode);
 
+    // Invoked after creation of initial strong pointer/reference.
     virtual void OnFirstRef(
         /* [in] */ const void* id);
 
+    // Invoked when either the last strong reference goes away, or we need to undo
+    // the effect of an unnecessary onIncStrongAttempted.
     virtual void OnLastStrongRef(
         /* [in] */ const void* id);
 
@@ -136,10 +139,15 @@ protected:
         FIRST_INC_STRONG = 0x0001
     };
 
+    // Only called in OBJECT_LIFETIME_WEAK case.  Returns true if OK to promote to
+    // strong reference. May have side effects if it returns true.
+    // The first flags argument is always FIRST_INC_STRONG.
     virtual Boolean OnIncStrongAttempted(
         /* [in] */ Integer flags,
         /* [in] */ const void* id);
 
+    // Invoked in the OBJECT_LIFETIME_WEAK case when the last reference of either
+    // kind goes away.
     virtual void OnLastWeakRef(
         /* [in] */ const void* id);
 
