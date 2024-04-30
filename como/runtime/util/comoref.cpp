@@ -361,6 +361,14 @@ void RefBase::WeakRefImpl::PrintRefs(const char* objInfo) const
     Logger::D("RefBase", "STACK TRACE for %p\n%s", this, text.string());
 }
 
+/**
+ * Enable tracking for this object.
+ *    enable -- enable/disable tracking
+ *    retain -- when tracking is enable, if true, then we save a stack trace
+ *              for each reference and dereference; when retain == false, we
+ *              match up references and dereferences and keep only the
+ *              outstanding ones.
+ */
 void RefBase::WeakRefImpl::TrackMe(
     /* [in] */ Boolean track,
     /* [in] */ Boolean retain)
@@ -595,8 +603,8 @@ Integer RefBase::ForceIncStrong(
     refs->AddStrongRef(id);
     const Integer c = refs->mStrong.fetch_add(1, std::memory_order_relaxed);
     if (c < 0) {
-        Logger::E("RefBase", "forceIncStrong called on %p after ref count underflow",
-                                                                                refs);
+        Logger::E("RefBase",
+                  "forceIncStrong called on %p after ref count underflow", refs);
         assert(0);
     }
 #if PRINT_REFS
@@ -685,6 +693,15 @@ void RefBase::WeakRef::DecWeak(
     }
 }
 
+/**
+ * RefBase::WeakRef::AttemptIncStrong is an internal function of the COMO system,
+ * usually used for processing the reference count. The RefBase class is one of
+ * the base classes used to implement reference counting, which is used to manage
+ * the lifecycle of objects. WeakRef is a nested class of RefBase that handles
+ * weak references. AttemptIncStrong function is mainly used to try to increase
+ * the strong reference count of an object while keeping the weak reference count
+ * unchanged.
+ */
 Boolean RefBase::WeakRef::AttemptIncStrong(
     /* [in] */ const void* id)
 {
@@ -702,7 +719,7 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
         // we're in the easy/common case of promoting a weak-reference
         // from an existing strong reference.
         if (impl->mStrong.compare_exchange_weak(curCount, curCount + 1,
-                std::memory_order_relaxed)) {
+                                                   std::memory_order_relaxed)) {
             break;
         }
         // the strong count has changed on us, we need to re-assert our
@@ -770,7 +787,8 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
     impl->AddStrongRef(id);
 
 #if PRINT_REFS
-    Logger::D("RefBase", "attemptIncStrong of %p from %p: cnt=%d\n", this, id, curCount);
+    Logger::D("RefBase", "attemptIncStrong, RefBase:%p ID:%p: count=%d\n",
+                                                            this, id, curCount);
 #endif
 
     // curCount is the value of mStrong before we incremented it.
@@ -799,7 +817,7 @@ Boolean RefBase::WeakRef::AttemptIncWeak(
     }
     while (curCount > 0) {
         if (impl->mWeak.compare_exchange_weak(curCount, curCount + 1,
-                                                    std::memory_order_relaxed)) {
+                                                   std::memory_order_relaxed)) {
             break;
         }
         // curCount has been updated.
@@ -815,7 +833,7 @@ Boolean RefBase::WeakRef::AttemptIncWeak(
 Integer RefBase::WeakRef::GetWeakCount() const
 {
     return static_cast<const WeakRefImpl*>(this)->mWeak.load(
-                                                        std::memory_order_relaxed);
+                                                     std::memory_order_relaxed);
 }
 
 void RefBase::WeakRef::PrintRefs(const char* objInfo) const
@@ -855,7 +873,7 @@ RefBase::~RefBase()
 {
     Integer flags = mRefs->mFlags.load(std::memory_order_relaxed);
     // Life-time of this object is extended to WEAK, in
-    // which case weakref_impl doesn't out-live the object and we
+    // which case WeakRefImpl doesn't out-live the object and we
     // can free it now.
     if ((flags & OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_WEAK) {
         // It's possible that the weak count is not 0 if the object
@@ -865,7 +883,7 @@ RefBase::~RefBase()
         }
     }
     else if (mRefs->mStrong.load(std::memory_order_relaxed)
-                                                    == INITIAL_STRONG_VALUE) {
+                                                      == INITIAL_STRONG_VALUE) {
         // We never acquired a strong reference on this object.
         delete mRefs;
     }
