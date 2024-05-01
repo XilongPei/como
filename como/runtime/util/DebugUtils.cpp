@@ -90,18 +90,10 @@ int DebugUtils::HexDump(char *bufStr, int bufSize, void *addr, int len)
     return posBuf;
 }
 
-/**
- * for example:
- *     AutoPtr<IClassLoader> CBootClassLoader::sInstance = ......
- *     AutoPtrINSPECT(&CBootClassLoader::sInstance, "test");
- */
-#define AutoPtrINSPECT(autoPtr, logTAG) \
-                         AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
-
 void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG)
 {
     if (nullptr == logTAG) {
-        logTAG = "";
+        logTAG = (char*)"";
     }
 
 #ifdef __DEBUG__

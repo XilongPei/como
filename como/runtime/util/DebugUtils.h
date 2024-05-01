@@ -24,8 +24,13 @@ class DebugUtils
 public:
     static int HexDump(char *bufStr, int bufSize, void *addr, int len);
 
+    /**
+     * usage, for example:
+     *     AutoPtr<IClassLoader> CBootClassLoader::sInstance = ......
+     *     AutoPtrINSPECT(&CBootClassLoader::sInstance, (char*)"test");
+     */
     #define AutoPtrINSPECT(autoPtr, logTAG) \
-                         AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
+             DebugUtils::AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
 
     static void AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG);
 }; // class DebugUtils
