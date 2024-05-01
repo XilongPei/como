@@ -24,6 +24,10 @@ class DebugUtils
 public:
     static int HexDump(char *bufStr, int bufSize, void *addr, int len);
 
+    #define AutoPtrINSPECT(autoPtr, logTAG) \
+                         AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
+
+    static void AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG);
 }; // class DebugUtils
 
 } // namespace como

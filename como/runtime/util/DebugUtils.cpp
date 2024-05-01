@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "util/comolog.h"
 #include "DebugUtils.h"
 
 namespace como {
@@ -87,6 +88,28 @@ int DebugUtils::HexDump(char *bufStr, int bufSize, void *addr, int len)
     }
 
     return posBuf;
+}
+
+/**
+ * for example:
+ *     AutoPtr<IClassLoader> CBootClassLoader::sInstance = ......
+ *     AutoPtrINSPECT(&CBootClassLoader::sInstance, "test");
+ */
+#define AutoPtrINSPECT(autoPtr, logTAG) \
+                         AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
+
+void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG)
+{
+    if (nullptr == logTAG) {
+        logTAG = "";
+    }
+
+#ifdef __DEBUG__
+    Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p, File:%s, Functin:%s, Line:%d",
+                   autoPtr, AuptrMPtr, __FILE__, __PRETTY_FUNCTION__, __LINE__);
+#else
+    Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p", autoPtr, AuptrMPtr);
+#endif
 }
 
 } // namespace como
