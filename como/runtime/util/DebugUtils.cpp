@@ -90,18 +90,15 @@ int DebugUtils::HexDump(char *bufStr, int bufSize, void *addr, int len)
     return posBuf;
 }
 
-void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG)
+void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG,
+                                const char *file, const char *func, int line)
 {
     if (nullptr == logTAG) {
         logTAG = (char*)"";
     }
 
-#ifdef __DEBUG__
     Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p, File:%s, Functin:%s, Line:%d",
-                   autoPtr, AuptrMPtr, __FILE__, __PRETTY_FUNCTION__, __LINE__);
-#else
-    Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p", autoPtr, AuptrMPtr);
-#endif
+                   autoPtr, AuptrMPtr, file, func, line);
 }
 
 } // namespace como

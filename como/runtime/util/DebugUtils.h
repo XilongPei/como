@@ -29,10 +29,12 @@ public:
      *     AutoPtr<IClassLoader> CBootClassLoader::sInstance = ......
      *     AutoPtrINSPECT(&CBootClassLoader::sInstance, (char*)"test");
      */
-    #define AutoPtrINSPECT(autoPtr, logTAG) \
-             DebugUtils::AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG)
+    #define AutoPtrINSPECT(autoPtr, logTAG)                                     \
+           DebugUtils::AutoPtrInspect((void*)autoPtr, (void*)*autoPtr, logTAG,  \
+                                        __FILE__, __PRETTY_FUNCTION__, __LINE__)
 
-    static void AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG);
+    static void AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG,
+                               const char *file, const char *func, int line);
 }; // class DebugUtils
 
 } // namespace como
