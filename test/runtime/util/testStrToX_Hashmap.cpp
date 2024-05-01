@@ -71,6 +71,30 @@ TEST(StrToX_Hashmap, Test_StrToX_Hashmap)
     puts(*(map->vHashmap((char*)"hello", true)));
 }
 
+TEST(StrToX_Hashmap, Test_Hashmap_BENCH)
+{
+    ptrdiff_t len = 1 << 28;
+    void *heap = malloc(len);
+    StrToX_Hashmap::hashmap(0, heap, &len);
+
+    char key[8] = {0};
+    for (int i = 0;  i < 1000000;  i++) {
+        char *end = key + 7;
+        int t = i;
+        do {
+            *--end = (char)(t % 10) + '0';
+        } while (t /= 10);
+        *StrToX_Hashmap::hashmap(end, heap, &len) = (char *)(intptr_t)i;
+    }
+
+    int i = 0;
+    for (char **e = 0; (e = StrToX_Hashmap::hashmap(e ? *e : 0, heap, (ptrdiff_t*)heap));) {
+        if ((intptr_t)e[1] != i++) {
+            *(volatile int *)0 = 0;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

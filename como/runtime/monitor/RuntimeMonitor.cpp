@@ -339,7 +339,7 @@ static ECode SerializeComponentID(
     /* [out] */ Array<Byte>& arrCid)
 {
     const char* mUri_ = cid->mUri;
-    if (mUri_== nullptr) {
+    if (nullptr == mUri_) {
         mUri_ = "";
     }
 

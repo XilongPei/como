@@ -52,10 +52,12 @@ public:
         m_bFull = false;
 
         m_pBuf = new T[m_nBufSize];
-        if (nullptr == m_pBuf)
+        if (nullptr == m_pBuf) {
             ec = NOERROR;
-        else
+        }
+        else {
             ec = E_OUT_OF_MEMORY_ERROR;
+        }
 
         m_Lock = new Mutex(true);
     }
@@ -64,9 +66,11 @@ public:
     {
         if (nullptr != m_pBuf) {
             delete[] m_pBuf;
-            m_pBuf = nullptr;
         }
-        delete m_Lock;
+
+        if (nullptr != m_Lock) {
+            delete m_Lock;
+        }
     }
 
     bool isFull()

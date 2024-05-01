@@ -82,10 +82,10 @@ static const char* get_items(const char*buffer , unsigned int item)
     int len = strlen(buffer);
     int count = 0;
 
-    for (int i = 0; i < len; i++) {
+    for (int i = 0;  i < len;  i++) {
         if (' ' == *p) {
             count ++;
-            if (count == item - 1) {
+            if (count == (item - 1)) {
                 p++;
                 break;
             }
@@ -108,8 +108,9 @@ unsigned long CpuCoreUtils::GetCpuTotalOccupy()
         return 0;
     }
 
-    if (fgets(buff, sizeof(buff), fd) == nullptr)
+    if (fgets(buff, sizeof(buff), fd) == nullptr) {
         return 0;
+    }
 
     char name[64] = {0};
     sscanf(buff, "%s %ld %ld %ld %ld", name, &t.user, &t.nice, &t.system, &t.idle);
@@ -204,7 +205,7 @@ unsigned int CpuCoreUtils::GetProcMem(unsigned int pid)
 
     char name[64];
     int vmrss;
-    for (int i = 0; i < VMRSS_LINE - 1; i++) {
+    for (int i = 0;  i < VMRSS_LINE - 1;  i++) {
         if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
             return 0;
         }
@@ -235,7 +236,7 @@ unsigned int CpuCoreUtils::GetProcVirtualmem(unsigned int pid)
 
     char name[64];
     int vmsize;
-    for (int i = 0; i < VMSIZE_LINE - 1; i++) {
+    for (int i = 0;  i < VMSIZE_LINE - 1;  i++) {
         if (fgets(line_buff, sizeof(line_buff), fd) == nullptr) {
             return 0;
         }

@@ -134,7 +134,7 @@ ECode MarshalUtils::UnMarshalArguments(
     argParcel->SetDataPosition(8 * 3);
 
     String methodName;
-    method->GetName(methodName);
+    (void)method->GetName(methodName);
     strBuffer += ("{\"" + methodName + "\":{");
 
     Integer N;
@@ -148,20 +148,22 @@ ECode MarshalUtils::UnMarshalArguments(
         TypeKind kind;
         IOAttribute ioAttr;
 
-        param->GetName(paramName);
-        param->GetType(type);
-        param->GetIOAttribute(ioAttr);
-        type->GetTypeKind(kind);
+        (void)param->GetName(paramName);
+        (void)param->GetType(type);
+        (void)param->GetIOAttribute(ioAttr);
+        (void)type->GetTypeKind(kind);
 
         if ((ioAttr == IOAttribute::IN) || (ioAttr == IOAttribute::IN_OUT))  {
             switch (kind) {
                 case TypeKind::Char: {
                     Char value;
                     argParcel->ReadChar(value);
-                    if ('"' != value)
+                    if ('"' != value) {
                         strBuffer += MakeParamString(String::Format("\"%c\"", value));
-                    else
+                    }
+                    else {
                         strBuffer += MakeParamString("\"\\\"\"");
+                    }
                     break;
                 }
                 case TypeKind::Byte: {
@@ -206,10 +208,12 @@ ECode MarshalUtils::UnMarshalArguments(
                 case TypeKind::Boolean: {
                     Boolean value;
                     argParcel->ReadBoolean(value);
-                    if (value)
+                    if (value) {
                         strBuffer += MakeParamString("true");
-                    else
+                    }
+                    else {
                         strBuffer += MakeParamString("false");
+                    }
                     break;
                 }
                 case TypeKind::String: {
@@ -266,8 +270,9 @@ ECode MarshalUtils::UnMarshalArguments(
             strBuffer += MakeParamString("null");
         }
 
-        if (i < (N - 1))
+        if (i < (N - 1)) {
             strBuffer += ",";
+        }
     } //for
 
     strBuffer += "}}";
@@ -293,7 +298,7 @@ ECode MarshalUtils::UnUnmarshalResults(
     resParcel->SetDataPosition(8 * 2);
 
     String methodName;
-    method->GetName(methodName);
+    (void)method->GetName(methodName);
     strBuffer += ("{\"" + methodName + "\":{");
 
     Integer N;
@@ -307,29 +312,33 @@ ECode MarshalUtils::UnUnmarshalResults(
         TypeKind kind;
         IOAttribute ioAttr;
 
-        param->GetName(paramName);
-        param->GetType(type);
-        param->GetIOAttribute(ioAttr);
-        type->GetTypeKind(kind);
+        (void)param->GetName(paramName);
+        (void)param->GetType(type);
+        (void)param->GetIOAttribute(ioAttr);
+        (void)type->GetTypeKind(kind);
 
-        if (ioAttr == IOAttribute::OUT || ioAttr == IOAttribute::IN_OUT) {
+        if ((ioAttr == IOAttribute::OUT) || (ioAttr == IOAttribute::IN_OUT)) {
             switch (kind) {
                 case TypeKind::Char: {
                     Char value;
                     resParcel->ReadChar(value);
-                    if ('"' != value)
+                    if ('"' != value) {
                         strBuffer += MakeParamString(String::Format("\"%c\"", value));
-                    else
+                    }
+                    else {
                         strBuffer += MakeParamString("\"\\\"\"");
+                    }
                     break;
                 }
                 case TypeKind::Byte: {
                     Byte value;
                     resParcel->ReadByte(value);
-                    if ('"' != value)
+                    if ('"' != value) {
                         strBuffer += MakeParamString(String::Format("\"%c\"", value));
-                    else
+                    }
+                    else {
                         strBuffer += MakeParamString("\"\\\"\"");
+                    }
                     break;
                 }
                 case TypeKind::Short: {
@@ -365,10 +374,12 @@ ECode MarshalUtils::UnUnmarshalResults(
                 case TypeKind::Boolean: {
                     Boolean value;
                     resParcel->ReadBoolean(value);
-                    if (value)
+                    if (value) {
                         strBuffer += MakeParamString("true");
-                    else
+                    }
+                    else {
                         strBuffer += MakeParamString("false");
+                    }
                     break;
                 }
                 case TypeKind::String: {
@@ -464,8 +475,9 @@ ECode MarshalUtils::UnUnmarshalResults(
             strBuffer += MakeParamString("null");
         }
 
-        if (i < (N - 1))
+        if (i < (N - 1)) {
             strBuffer += ",";
+        }
     } // for
 
     strBuffer += "}}";
