@@ -39,6 +39,8 @@ COMO_INTERFACE_IMPL_1(CBootClassLoader, Object, IClassLoader);
 
 CBootClassLoader::CBootClassLoader()
 {
+    Logger::D(TAG, "new CBootClassLoader");
+
     InitComponentPath();
 }
 
