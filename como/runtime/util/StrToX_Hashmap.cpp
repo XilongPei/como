@@ -104,13 +104,13 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
         node **tail;
     } *map = (struct tagMap *)heap;
 
-    if ((! key) && (heaplen != heap)) {     // init
+    if ((nullptr == key) && (heaplen != heap)) {     // init
         *heaplen &= -sizeof(void *);        // align high end
-        map->head = 0;
+        map->head = nullptr;
         map->tail = &map->head;
         return nullptr;
     }
-    else if ((! key) && (heaplen == heap)) { // first key
+    else if ((nullptr == key) && (heaplen == heap)) { // first key
         return map->head ? &map->head->key : nullptr;
     }
     else if (heaplen == heap) {             // next key
@@ -120,24 +120,24 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
 
     uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
-    for (;  key[keylen++];  hash *= 0x100000001b3u) {
+    for (;  key[keylen++] != '\0';  hash *= 0x100000001b3u) {
         hash ^= (unsigned char)key[keylen];
     }
 
-    node **n = &map->head;
-    for (;  0 != *n;  hash <<= ARY) {
-        if (! strcmp(key, (*n)->key)) {
+    node **n = &(map->head);
+    for (;  *n != nullptr;  hash <<= ARY) {
+        if (strcmp(key, (*n)->key) == 0) {
             return &(*n)->value;
         }
-        n = &(*n)->child[hash >> (sizeof(hash) - ARY)];
+        n = &(*n)->child[hash >> (64 - ARY)];   // 64 = sizeof(hash) * 8
     }
-    if (! heaplen) {
-        return nullptr;                     // lookup failed
+    if (nullptr == heaplen) {
+        return nullptr;                         // lookup failed
     }
 
     ptrdiff_t total = sizeof(node) + keylen + (-keylen & (sizeof(void *) - 1));
     if (*heaplen - (ptrdiff_t)sizeof(*map) < total) {
-        return nullptr;                     // out of memory
+        return nullptr;                         // out of memory
     }
 
     *n = (node *)((char *)heap + (*heaplen -= total));
@@ -171,16 +171,16 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
         node **tail;
     } *map = (struct tagMap *)heap;
 
-    if ((! key_stdstring) && (heaplen != heap)) {       // init
+    if ((nullptr == key_stdstring) && (heaplen != heap)) {       // init
         *heaplen &= -sizeof(void *);                    // align high end
-        map->head = 0;
+        map->head = nullptr;
         map->tail = &map->head;
         return nullptr;
     }
-    else if ((! key_stdstring) && (heaplen == heap)) {  // first key
+    else if ((nullptr == key_stdstring) && (heaplen == heap)) {  // first key
         return map->head ? &map->head->key : nullptr;
     }
-    else if (heaplen == heap) {                         // next key
+    else if (heaplen == heap) {                                  // next key
         node *next = ((node *)((char *)key_stdstring - sizeof(node)))->next;
         return next ? &next->key : nullptr;
     }
@@ -188,21 +188,21 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
     uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
     const char *key = key_stdstring->c_str();
-    for (;  key[keylen++];  hash *= 0x100000001b3u) {
+    for (;  key[keylen++] != '\0';  hash *= 0x100000001b3u) {
         hash ^= (unsigned char)key[keylen];
     }
 
     node **n = &map->head;
-    for (;  0 != *n;  hash <<= ARY) {
-        if (! strcmp(key, (*n)->key)) {
+    for (;  *n != nullptr;  hash <<= ARY) {
+        if (strcmp(key, (*n)->key) == 0) {
             *pvalue = (*n)->key;
             *pvalue += strlen(*pvalue) + 1;             // +1 for tail '\0'
 
             return pvalue;
         }
-        n = &(*n)->child[hash >> (sizeof(hash) - ARY)];
+        n = &(*n)->child[hash >> (64 - ARY)];           // 64 = sizeof(hash) * 8
     }
-    if (! heaplen) {
+    if (nullptr == heaplen) {
         return nullptr;                                 // lookup failed
     }
 
