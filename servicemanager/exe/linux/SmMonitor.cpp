@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
+#include "comolog.h"
 #include "ServiceManager.h"
 #include "SmMonitor.h"
 
@@ -105,7 +106,10 @@ void *SmMonitor::StartSmMonitor(const char *serverName)
         return nullptr;
     }
 
-    pthread_join(thread, nullptr);
+    // Waits for the end of the thread specified by thread in a blocking manner
+    if (pthread_join(thread, nullptr)) {
+        Logger_E("SmMonitor::StartSmMonitor", "pthread_join() failed");
+    }
 
     return nullptr;
 }
