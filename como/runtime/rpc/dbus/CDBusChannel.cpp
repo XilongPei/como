@@ -1163,4 +1163,11 @@ ECode CDBusChannel::MonitorRuntime(
     return NOERROR;
 }
 
+ECode CDBusChannel::SetPubSocket(
+    /* [in] */ HANDLE pubSocket)
+{
+    mPubSocket = pubSocket;
+    return NOERROR;
+}
+
 } // namespace como

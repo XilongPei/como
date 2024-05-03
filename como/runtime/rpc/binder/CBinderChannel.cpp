@@ -404,4 +404,11 @@ ECode CBinderChannel::MonitorRuntime(
     return NOERROR;
 }
 
+ECode CBinderChannel::SetPubSocket(
+    /* [in] */ HANDLE pubSocket)
+{
+    mPubSocket = pubSocket;
+    return NOERROR;
+}
+
 } // namespace como

@@ -130,6 +130,9 @@ public:
         /* [in] */ const Array<Byte>& request,
         /* [out] */ Array<Byte>& response) override;
 
+    ECode SetPubSocket(
+        /* [in] */ HANDLE pubSocket);
+
     static CDBusChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
 
@@ -144,14 +147,15 @@ private:
 
     static CMemPool *memPool;
 
-    RPCType mType;
-    RPCPeer mPeer;
-    String mName;
-    String mServerName; // the same machine, ServerAddress is nullptr
-    Long mServerObjectId;
-    Boolean mStarted;
-    Mutex mLock;
-    Condition mCond;
+    RPCType     mType;
+    RPCPeer     mPeer;
+    String      mName;
+    String      mServerName;    // the same machine, ServerAddress is nullptr
+    Long        mServerObjectId;
+    Boolean     mStarted;
+    Mutex       mLock;
+    Condition   mCond;
+    HANDLE      mPubSocket;
 };
 
 inline CDBusChannel* CDBusChannel::GetProxyChannel(

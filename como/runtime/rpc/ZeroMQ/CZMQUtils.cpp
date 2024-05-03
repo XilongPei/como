@@ -91,7 +91,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 {
     EndpointSocket *endpointSocket;
     char bufEndpoint[4096];
-    MiString::shrink(bufEndpoint, 4096, endpoint);
+    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
 
     Logger::D("CZMQUtils::CzmqGetSocket",
               "endpoint: %s, ZMQ_REP(4)/ZMQ_REQ(3): %d", bufEndpoint, type);

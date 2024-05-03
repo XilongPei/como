@@ -106,6 +106,9 @@ public:
         /* [in] */ const Array<Byte>& request,
         /* [out] */ Array<Byte>& response) override;
 
+    ECode SetPubSocket(
+        /* [in] */ HANDLE pubSocket);
+
     static CZMQChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
 
@@ -122,13 +125,15 @@ private:
 
     static CMemPool *memPool;
 
-    RPCType mType;
-    RPCPeer mPeer;
-    String mName;
-    String mServerName;
-    Long mServerObjectId;
+    RPCType     mType;
+    RPCPeer     mPeer;
+    String      mName;
+    String      mServerName;
+    Long        mServerObjectId;
     std::string mEndpoint;
-    Boolean mStarted;
+    Boolean     mStarted;
+
+    HANDLE      mPubSocket;
 };
 
 inline CZMQChannel* CZMQChannel::GetProxyChannel(

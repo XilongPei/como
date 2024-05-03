@@ -2032,8 +2032,9 @@ ECode CProxy::MonitorRuntime(
     /* [in] */ const Array<Byte>& request,
     /* [out] */ Array<Byte>& response)
 {
-    if (request.GetLength() < sizeof(RTM_Command))
+    if (request.GetLength() < sizeof(RTM_Command)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     RTM_Command *rtmCommand = (RTM_Command *)request.GetPayload();
     switch (rtmCommand->command) {

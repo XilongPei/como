@@ -47,6 +47,7 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
     , mServerObjectId(0)
+    , mPubSocket(nullptr)
 {
     mEndpoint = ComoConfig::localhostInprocEndpoint;
 }
@@ -544,6 +545,13 @@ ECode CZMQChannel::MonitorRuntime(
     }
 
     return ec;
+}
+
+ECode CZMQChannel::SetPubSocket(
+    /* [in] */ HANDLE pubSocket)
+{
+    mPubSocket = pubSocket;
+    return NOERROR;
 }
 
 } // namespace como

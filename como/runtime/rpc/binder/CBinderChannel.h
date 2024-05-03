@@ -166,6 +166,9 @@ public:
         /* [in] */ const Array<Byte>& request,
         /* [out] */ Array<Byte>& response) override;
 
+    ECode SetPubSocket(
+        /* [in] */ HANDLE pubSocket);
+
     static CBinderChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
 
@@ -182,10 +185,11 @@ private:
 
     static CMemPool *memPool;
 
-    RPCType mType;
-    RPCPeer mPeer;
+    RPCType     mType;
+    RPCPeer     mPeer;
     android::sp<android::IBinder> mBinder;
     AutoPtr<DeathRecipientList> mOrgue;
+    HANDLE      mPubSocket;
 
     static Boolean sThreadPoolStarted;
     static Mutex sThreadPoolLock;
