@@ -47,7 +47,7 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
     , mServerObjectId(0)
-    , mPubSocket(nullptr)
+    , mPubSocket(0)
 {
     mEndpoint = ComoConfig::localhostInprocEndpoint;
 }
@@ -395,6 +395,17 @@ ECode CZMQChannel::Invoke(
     if (-1 == rc) {
         return E_RUNTIME_EXCEPTION;
     }
+
+//TODO
+#if 0
+    if (0 != mPubSocket) {
+        rc = CZMQUtils::CzmqSendBuf(mServerObjectId, ZmqFunCode::Method_Invoke,
+                                        (void *)mPubSocket, (void *)data, size);
+        if (-1 == rc) {
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+#endif
 
     HANDLE hChannel;
     zmq_msg_t msg;

@@ -583,6 +583,7 @@ CDBusChannel::CDBusChannel(
     , mServerObjectId(0)
     , mCond(mLock)
     , mServerName(nullptr)
+    , mPubSocket(0)
 {}
 
 CMemPool *CDBusChannel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Channel,

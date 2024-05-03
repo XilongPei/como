@@ -182,6 +182,7 @@ CBinderChannel::CBinderChannel(
     , mPeer(peer)
     , mOrgue(new DeathRecipientList())
     , mServerName(nullptr)
+    , mPubSocket(0)
 {}
 
 CMemPool *CBinderChannel::memPool = new CMemPool(nullptr, ComoConfig::POOL_SIZE_Channel,

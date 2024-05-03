@@ -107,7 +107,7 @@ public:
         /* [out] */ Array<Byte>& response) override;
 
     ECode SetPubSocket(
-        /* [in] */ HANDLE pubSocket);
+        /* [in] */ HANDLE pubSocket) override;
 
     static CZMQChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
@@ -132,7 +132,6 @@ private:
     Long        mServerObjectId;
     std::string mEndpoint;
     Boolean     mStarted;
-
     HANDLE      mPubSocket;
 };
 

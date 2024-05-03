@@ -95,6 +95,8 @@ public:
 
     static int CzmqGetSockets(void *context, const char *endpoint);
 
+    static void *CzmqGetPubSocket(void *context, const char *endpoint);
+
     // milliseconds
     static int ZMQ_RCV_TIMEOUT;
 };

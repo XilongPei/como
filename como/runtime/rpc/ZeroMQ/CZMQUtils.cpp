@@ -133,7 +133,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 
         if (ZMQ_REP != type) {   // create outgoing connection from socket
             rc = zmq_connect(socket, bufEndpoint);
-            if (rc != 0) {
+            if (0 != rc) {
                 Logger::E("CZMQUtils::CzmqGetSocket",
                           "zmq_connect error, %s errno %d %s", bufEndpoint,
                           zmq_errno(), zmq_strerror(zmq_errno()));
@@ -142,7 +142,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
         }
         else {                   // accept incoming connections on a socket
             rc = zmq_bind(socket, bufEndpoint);
-            if (rc != 0) {
+            if (0 != rc) {
                 Logger::E("CZMQUtils::CzmqGetSocket",
                           "zmq_bind error, %s errno %d %s", bufEndpoint,
                           zmq_errno(), zmq_strerror(zmq_errno()));
@@ -202,9 +202,9 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         int rc;
         rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
         if (0 != rc) {
-            rc = zmq_close(endpointSocket->socket);
             Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
+            (void)zmq_close(endpointSocket->socket);
             return rc;
         }
 
@@ -599,7 +599,7 @@ static void *rep_socket_monitor(void *endpointSocket)
             continue;
         }
     }
-    zmq_close(socketZMQ_PAIR);
+    (void)zmq_close(socketZMQ_PAIR);
 #endif
     return nullptr;
 }
@@ -696,6 +696,8 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
                                                      const char *inprocEndpoint)
 {
+    int rc;
+
     if (nullptr == context) {
         context = CzmqGetContext();
     }
@@ -703,32 +705,75 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
     if (nullptr != tcpEndpoint) {
-        zmq_bind(clients, tcpEndpoint);
+        rc = zmq_bind(clients, tcpEndpoint);
     }
     else {
-        zmq_bind(clients, "tcp://127.0.0.1:4800");
+        rc = zmq_bind(clients, "tcp://127.0.0.1:4800");
+    }
+    if (0 != rc) {
+        Logger::E("CZMQUtils::CzmqProxy",
+                  "zmq_bind error, %s errno %d %s", bufEndpoint,
+                  zmq_errno(), zmq_strerror(zmq_errno()));
+        return nullptr;
     }
 
     // Socket to talk to workers
     void *workers = zmq_socket(context, ZMQ_DEALER);
 
     if (nullptr != inprocEndpoint) {
-        zmq_bind(workers, inprocEndpoint);
+        rc = zmq_bind(workers, inprocEndpoint);
     }
     else {
-        zmq_bind(workers, "inproc://workers");
+        rc = zmq_bind(workers, "inproc://workers");
     }
-
+    if (0 != rc) {
+        Logger::E("CZMQUtils::CzmqProxy",
+                  "zmq_bind error, %s errno %d %s", bufEndpoint,
+                  zmq_errno(), zmq_strerror(zmq_errno()));
+        return nullptr;
+    }
 
     // Connect Worker threads to client threads via a queue proxy
     zmq_proxy(clients, workers, nullptr);
 
     // We never get here, but clean up anyhow
-    zmq_close(clients);
-    zmq_close(workers);
+    (void)zmq_close(clients);
+    (void)zmq_close(workers);
     zmq_ctx_destroy(context);
 
     return 0;
+}
+
+/**
+ * A socket of type ZMQ_PUB is used by a publisher to distribute data. Messages
+ * sent are distributed in a fan out fashion to all connected peers.
+ *
+ * The zmq_recv function is not implemented for this socket type. This means
+ * that it can only send messages, not receive messages.
+ *
+ * When a ZMQ_PUB socket enters the mute state due to having reached the high
+ * water mark for a subscriber, then any messages that would be sent to the
+ * subscriber in question shall instead be dropped until the mute state ends.
+ * The zmq_send() function shall never block for this socket type.
+ */
+void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
+{
+    void *publisher = zmq_socket(context, ZMQ_PUB);
+    if (nullptr != publisher) {
+        int rc = zmq_bind(publisher, endpoint);
+        if (0 != rc) {
+            Logger::E("CZMQUtils::CzmqGetPubSocket",
+                      "zmq_bind error, %s errno %d %s", bufEndpoint,
+                      zmq_errno(), zmq_strerror(zmq_errno()));
+            (void)zmq_close(endpointSocket->socket);
+            return nullptr;
+        }
+
+        //zmq_setsockopt(publisher, ZMQ_SNDHWM, &nMaxNum, sizeof(nMaxNum));
+        return publisher;
+    }
+
+    return nullptr;
 }
 
 } // namespace como

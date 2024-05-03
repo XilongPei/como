@@ -167,7 +167,7 @@ public:
         /* [out] */ Array<Byte>& response) override;
 
     ECode SetPubSocket(
-        /* [in] */ HANDLE pubSocket);
+        /* [in] */ HANDLE pubSocket) override;
 
     static CBinderChannel* GetProxyChannel(
         /* [in] */ IProxy* proxy);
