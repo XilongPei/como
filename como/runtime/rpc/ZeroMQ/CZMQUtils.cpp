@@ -698,8 +698,16 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 {
     int rc;
 
+    char bufEndpoint[4096];
+    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), tcpEndpoint);
+
     if (nullptr == context) {
         context = CzmqGetContext();
+    }
+
+    if (nullptr == context) {
+        Logger::E("CZMQUtils::CzmqProxy", "context is nullptr");
+        return -1;
     }
 
     // Socket to talk to clients
@@ -714,7 +722,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         Logger::E("CZMQUtils::CzmqProxy",
                   "zmq_bind error, %s errno %d %s", bufEndpoint,
                   zmq_errno(), zmq_strerror(zmq_errno()));
-        return nullptr;
+        return -2;
     }
 
     // Socket to talk to workers
@@ -730,7 +738,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         Logger::E("CZMQUtils::CzmqProxy",
                   "zmq_bind error, %s errno %d %s", bufEndpoint,
                   zmq_errno(), zmq_strerror(zmq_errno()));
-        return nullptr;
+        return -3;
     }
 
     // Connect Worker threads to client threads via a queue proxy
@@ -768,7 +776,7 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
             Logger::E("CZMQUtils::CzmqGetPubSocket",
                       "zmq_bind error, %s errno %d %s", bufEndpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
-            (void)zmq_close(endpointSocket->socket);
+            (void)zmq_close(publisher);
             return nullptr;
         }
 
@@ -798,12 +806,11 @@ void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
             Logger::E("CZMQUtils::CzmqGetSubSocket",
                       "zmq_connect error, %s errno %d %s", bufEndpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
-            (void)zmq_close(endpointSocket->socket);
+            (void)zmq_close(subscriber);
             return nullptr;
         }
 
-        //zmq_setsockopt(publisher, ZMQ_SNDHWM, &nMaxNum, sizeof(nMaxNum));
-        return publisher;
+        return subscriber;
     }
 
     return nullptr;

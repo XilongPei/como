@@ -473,7 +473,7 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
     if (nullptr == sInstance) {
         sInstance = new TPZA_Executor();
         if (nullptr != sInstance) {
-            threadPool = new ThreadPoolZmqActor(ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM);
+            threadPool = new ThreadPoolZmqActor();
         }
 
         if (nullptr == threadPool) {
@@ -632,20 +632,19 @@ static int MakeRealtimePthread_attr(pthread_attr_t& attr)
     return 0;
 }
 
-
-ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
+/**
+ * constructor of class ThreadPoolZmqActor
+ * create ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM socket.
+ *
+ * One thread corresponds to an zmq_pollitems element in CZMQUtils::CzmqGetSockets.
+ */
+ThreadPoolZmqActor::ThreadPoolZmqActor()
 {
-//TODO
-    /**
-     * create ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM socket,
-     *
-     * mThreadNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM + SUB thread number
-     */
     if (CZMQUtils::CzmqGetSockets(nullptr, nullptr) < 0) {
         Logger::E("ThreadPoolZmqActor", "CzmqGetSockets error");
     }
 
-    mThreadNum = threadNum;
+    mThreadNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
     pthread_id_HandleMessage = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == pthread_id_HandleMessage) {
         Logger::E("ThreadPoolChannelInvoke", "calloc() error");

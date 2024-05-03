@@ -114,7 +114,7 @@ public:
     static pthread_mutex_t pthreadMutex;
     static pthread_cond_t pthreadCond;
 
-    ThreadPoolZmqActor(int threadNum = 10);
+    ThreadPoolZmqActor();
 
     static int AddTask(
         /* [in] */ AutoPtr<TPZA_Executor::Worker> task);
