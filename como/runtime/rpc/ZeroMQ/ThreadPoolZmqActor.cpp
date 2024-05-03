@@ -75,6 +75,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     Integer   iRet;
     TPZA_Executor::Worker *worker;
 
+    // Each thread is responsible for one port, identified by threadData
     socket = CZMQUtils::CzmqGetPollitemsSocket((int)(Long)threadData);
     if (nullptr == socket) {
         Logger::E("threadHandleMessage", "socket is nullptr");
@@ -85,6 +86,23 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (iRet > 0) {
+
+//TODO
+#if 1
+        int option_value;
+        size_t option_len = sizeof(option_value);
+        int rc = zmq_getsockopt(socket, ZMQ_TYPE, &option_value, &option_len);
+        if (0 != rc) {
+            Logger::E("ThreadPoolZmqActor::threadHandleMessage",
+                                        "zmq_getsockopt error, errno %d %s",
+                                        zmq_errno(), zmq_strerror(zmq_errno()));
+            return nullptr;
+        }
+
+        if (ZMQ_SUB == option_value) {
+            //
+        }
+#endif
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
                 AutoPtr<IParcel> resParcel;
@@ -617,6 +635,12 @@ static int MakeRealtimePthread_attr(pthread_attr_t& attr)
 
 ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
 {
+//TODO
+    /**
+     * create ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM socket,
+     *
+     * mThreadNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM + SUB thread number
+     */
     if (CZMQUtils::CzmqGetSockets(nullptr, nullptr) < 0) {
         Logger::E("ThreadPoolZmqActor", "CzmqGetSockets error");
     }

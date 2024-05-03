@@ -866,7 +866,7 @@ ECode CStub::Invoke(
 
     Integer interfaceIndex;
     argParcel->ReadInteger(interfaceIndex);
-    if (interfaceIndex < 0 || interfaceIndex >= mInterfaces.GetLength()) {
+    if ((interfaceIndex < 0) || (interfaceIndex >= mInterfaces.GetLength())) {
         Logger::E("CStub", "InterfaceIndex %d is invalid.", interfaceIndex);
         return E_RUNTIME_EXCEPTION;
     }
@@ -897,7 +897,7 @@ ECode CStub::CreateObject(
     stub = nullptr;
 
     IObject* obj = IObject::Probe(object);
-    if (obj == nullptr) {
+    if (nullptr == obj) {
         Logger::E("CStub", "Object does not have \"IObject\" interface.");
         return E_INTERFACE_NOT_FOUND_EXCEPTION;
     }
@@ -909,7 +909,7 @@ ECode CStub::CreateObject(
 
     AutoPtr<IMetaCoclass> mc;
     obj->GetCoclass(mc);
-    if (mc == nullptr) {
+    if (nullptr == mc) {
         Logger::E("CStub", "Fail to get object's Coclass.");
         return E_NOT_FOUND_EXCEPTION;
     }
@@ -965,8 +965,9 @@ ECode CStub::CreateObject(
         AutoPtr<InterfaceStub> istub = new InterfaceStub();
         if (nullptr == istub) {
             // rollback this transaction
-            for (Integer j = 0;  j < i;  j++)
+            for (Integer j = 0;  j < i;  j++) {
                 delete stubObj->mInterfaces[j];
+            }
             delete stubObj;
 
             return E_OUT_OF_MEMORY_ERROR;
@@ -978,8 +979,8 @@ ECode CStub::CreateObject(
         istub->mObject = object->Probe(istub->mIid);
         if (nullptr == istub->mObject) {
             String name, ns;
-            interfaces[i]->GetNamespace(ns);
-            interfaces[i]->GetName(name);
+            (void)interfaces[i]->GetNamespace(ns);
+            (void)interfaces[i]->GetName(name);
             Logger::E("CStub", "Object does not have \"%s::%s\" interface.",
                                                     ns.string(), name.string());
             // rollback this transaction
@@ -994,8 +995,8 @@ ECode CStub::CreateObject(
 
         {
             String name, ns, uuidStr;
-            interfaces[i]->GetNamespace(ns);
-            interfaces[i]->GetName(name);
+            (void)interfaces[i]->GetNamespace(ns);
+            (void)interfaces[i]->GetName(name);
             uuidStr = DumpUUID(istub->mIid.mUuid);
             Logger::D("CStub", "Object has \"%s::%s\" [%s] interface.",
                                     ns.string(), name.string(), uuidStr.string());

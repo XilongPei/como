@@ -1070,7 +1070,7 @@ ECode CDBusChannel::StartListening(
 
     if (0 == ret) {
         Mutex::AutoLock lock(mLock);
-        while (!mStarted) {
+        while (! mStarted) {
             mCond.Wait();
         }
     }

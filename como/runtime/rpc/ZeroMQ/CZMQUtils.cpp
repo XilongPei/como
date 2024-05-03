@@ -758,12 +758,45 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
  */
 void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
 {
+    char bufEndpoint[4096];
+    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+
     void *publisher = zmq_socket(context, ZMQ_PUB);
     if (nullptr != publisher) {
         int rc = zmq_bind(publisher, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetPubSocket",
                       "zmq_bind error, %s errno %d %s", bufEndpoint,
+                      zmq_errno(), zmq_strerror(zmq_errno()));
+            (void)zmq_close(endpointSocket->socket);
+            return nullptr;
+        }
+
+        //zmq_setsockopt(publisher, ZMQ_SNDHWM, &nMaxNum, sizeof(nMaxNum));
+        return publisher;
+    }
+
+    return nullptr;
+}
+
+/**
+ * A socket of type ZMQ_SUB is used by a subscriber to subscribe to data
+ * distributed by a publisher. Initially a ZMQ_SUB socket is not subscribed to
+ * any messages, use the ZMQ_SUBSCRIBE option of zmq_setsockopt to specify which
+ * messages to subscribe to. The zmq_send() function is not implemented for this
+ * socket type.
+ */
+void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
+{
+    char bufEndpoint[4096];
+    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+
+    void *subscriber = zmq_socket(context, ZMQ_SUB);
+    if (nullptr != subscriber) {
+        int rc = zmq_connect(subscriber, endpoint);
+        if (0 != rc) {
+            Logger::E("CZMQUtils::CzmqGetSubSocket",
+                      "zmq_connect error, %s errno %d %s", bufEndpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(endpointSocket->socket);
             return nullptr;

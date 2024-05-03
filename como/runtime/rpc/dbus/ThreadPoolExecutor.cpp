@@ -71,8 +71,9 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
     Mutex::AutoLock lock(sInstanceLock);
     if (nullptr == sInstance) {
         sInstance = new ThreadPoolExecutor();
-        if (nullptr != sInstance)
+        if (nullptr != sInstance) {
             threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
+        }
 
         if (nullptr == threadPool) {
             delete sInstance;
