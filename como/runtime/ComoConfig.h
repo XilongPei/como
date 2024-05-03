@@ -83,6 +83,7 @@ public:
     static int Logger_sLevel;
 
     static int ThreadPoolZmqActor_MAX_THREAD_NUM;
+    static int ThreadPoolZmqActor_RC_THREAD_NUM;
 
     static int MAX_SIZE_WorkerList;
 

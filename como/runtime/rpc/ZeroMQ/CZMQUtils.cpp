@@ -643,7 +643,8 @@ void *CZMQUtils::CzmqPoll()
 
 int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 {
-    zmq_pollitemNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
+    zmq_pollitemNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM +
+                                        ComoConfig::ThreadPoolZmqActor_RC_THREAD_NUM;
     zmq_pollitems = (zmq_pollitem_t*)malloc(sizeof(zmq_pollitem_t) * zmq_pollitemNum);
     if (nullptr == zmq_pollitems) {
         return -1;
@@ -655,7 +656,13 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 
     for (int i = 0;  i < zmq_pollitemNum;  i++) {
         // Socket to talk to dispatcher
-        void *socket = zmq_socket(context, ZMQ_REP);
+        void *socket;
+        if (i < ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM) {
+            socket = zmq_socket(context, ZMQ_REP);    // I am server
+        }
+        else {
+            socket = zmq_socket(context, ZMQ_SUB);    // I am subscriber
+        }
         if (nullptr == socket) {
             return -1;
         }

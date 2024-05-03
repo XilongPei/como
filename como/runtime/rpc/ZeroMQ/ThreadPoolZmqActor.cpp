@@ -86,9 +86,8 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (iRet > 0) {
-
 //TODO
-#if 1
+#if 0
         int option_value;
         size_t option_len = sizeof(option_value);
         int rc = zmq_getsockopt(socket, ZMQ_TYPE, &option_value, &option_len);
