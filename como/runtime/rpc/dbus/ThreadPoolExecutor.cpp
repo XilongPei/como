@@ -33,6 +33,7 @@
 #include "ThreadPoolExecutor.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
+#include "ComoContext.h"
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
@@ -68,7 +69,7 @@ AutoPtr<ThreadPool> ThreadPoolExecutor::threadPool = nullptr;
 AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 {
     Mutex::AutoLock lock(sInstanceLock);
-    if (sInstance == nullptr) {
+    if (nullptr == sInstance) {
         sInstance = new ThreadPoolExecutor();
         if (nullptr != sInstance)
             threadPool = new ThreadPool(ComoConfig::ThreadPool_MAX_THREAD_NUM);
@@ -85,8 +86,9 @@ int ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
     AutoPtr<Worker> worker = new Worker(task, this);
-    if (nullptr == worker)
+    if (nullptr == worker) {
         return -1;
+    }
 
     return threadPool->addTask(worker);
 }
@@ -150,7 +152,7 @@ ThreadPool::ThreadPool(int threadNum)
         return;
     }
 
-    for (int i = 0; i < mThreadNum; i++) {
+    for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
@@ -161,14 +163,28 @@ ThreadPool::ThreadPool(int threadNum)
             Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
         }
     }
+
+    /**
+     * Put the thread handle in Context for determining if all threads have exited
+     */
+    ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
+                      sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum));
+    if (nullptr == ComoContext::gThreadsWorking) {
+        Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
+        return;
+    }
+    for (int i = 0;  i < mThreadNum;  i++) {
+        ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = pthread_ids[i];
+    }
 }
 
 int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 {
     pthread_mutex_lock(&m_pthreadMutex);
 
-    if (! mWorkerList.Add(task))
+    if (! mWorkerList.Add(task)) {
         return -1;
+    }
 
     pthread_mutex_unlock(&m_pthreadMutex);
     pthread_cond_signal(&m_pthreadCond);

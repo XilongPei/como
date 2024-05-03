@@ -24,6 +24,7 @@
 #include "zmq.h"
 #include "util/comolog.h"
 #include "ComoConfig.h"
+#include "ComoContext.h"
 #include "registry.h"
 #include "ThreadPoolZmqActor.h"
 #include "CZMQUtils.h"
@@ -644,6 +645,21 @@ ThreadPoolZmqActor::ThreadPoolZmqActor(int threadNum)
                                          threadHandleMessage, (void *)i) != 0) {
             Logger::E("ThreadPoolZmqActor", "pthread_create() error");
         }
+    }
+
+    /**
+     * Put the thread handle in Context for determining if all threads have exited
+     */
+    ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
+                  sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum + 1));
+    if (nullptr == ComoContext::gThreadsWorking) {
+        Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
+        return;
+    }
+    ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = pthread_id_Manager;
+    for (size_t i = 0;  i < mThreadNum;  i++) {
+        ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] =
+                                                               pthread_id_HandleMessage[i];
     }
 
     signal_ = false;

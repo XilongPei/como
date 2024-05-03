@@ -25,6 +25,8 @@ ComoContext *ComoContext::gComoContext = nullptr;
 pthread_mutex_t ComoContext::gContextLock = PTHREAD_MUTEX_INITIALIZER;
 
 LamportClock *ComoContext::gLamportClock = new LamportClock();
+pthread_t *ComoContext::gThreadsWorking = nullptr;
+int ComoContext::gThreadsWorkingNum = 0;
 
 void *ComoContext::gEchoServer = nullptr;
 int   ComoContext::socketTCP = 0;

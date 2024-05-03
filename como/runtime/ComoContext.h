@@ -36,6 +36,9 @@ public:
 
     static LamportClock    *gLamportClock;
 
+    static pthread_t       *gThreadsWorking;
+    static int              gThreadsWorkingNum;
+
     // --- Memory Area
     Short               iCurrentMemArea;
     COMO_MALLOC         funComoMalloc;
@@ -49,7 +52,6 @@ public:
     static int   socketTCP;         // a TCP socket lisetning to 'port' ready to accept connections.
 
     static ECode SetGctxMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
-
 };
 
 } // namespace como
