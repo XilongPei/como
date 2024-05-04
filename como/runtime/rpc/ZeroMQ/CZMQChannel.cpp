@@ -561,6 +561,21 @@ ECode CZMQChannel::MonitorRuntime(
 ECode CZMQChannel::SetPubSocket(
     /* [in] */ HANDLE pubSocket)
 {
+    int option_value;
+    size_t option_len = sizeof(option_value);
+    int rc = zmq_getsockopt((void*)pubSocket, ZMQ_TYPE, &option_value, &option_len);
+    if (0 != rc) {
+        Logger::E("CZMQChannel::SetPubSocket",
+                                    "zmq_getsockopt error, errno %d %s",
+                                    zmq_errno(), zmq_strerror(zmq_errno()));
+        return E_FAILED_EXCEPTION;
+    }
+
+    if (ZMQ_SUB != option_value) {
+        Logger::E("CZMQChannel::SetPubSocket", "pubSocket is no ZMQ_SUB type");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
     mPubSocket = pubSocket;
     return NOERROR;
 }
