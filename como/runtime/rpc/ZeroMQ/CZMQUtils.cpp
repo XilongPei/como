@@ -732,7 +732,17 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         return -2;
     }
 
-    // Socket to talk to workers
+    /**
+     * Socket to talk to workers
+     *
+     * Shared Queue
+     * When the frontend is a ZMQ_ROUTER socket, and the backend is a ZMQ_DEALER
+     * socket, the proxy shall act as a shared queue that collects requests from
+     * a set of clients, and distributes these fairly among a set of services.
+     * Requests shall be fair-queued from frontend connections and distributed
+     * evenly across backend connections. Replies shall automatically return to
+     * the client that made the original request.
+     */
     void *workers = zmq_socket(context, ZMQ_DEALER);
 
     if (nullptr != inprocEndpoint) {
@@ -748,8 +758,29 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         return -3;
     }
 
-    // Connect Worker threads to client threads via a queue proxy
-    zmq_proxy(clients, workers, nullptr);
+    /**
+     * Connect Worker threads to client threads via a queue proxy
+     * The zmq_proxy() function starts the built-in 0MQ proxy in the current
+     * application thread.
+     * The proxy connects a frontend socket to a backend socket. Conceptually,
+     * data flows from frontend to backend. Depending on the socket types,
+     * replies may flow in the opposite direction. The direction is conceptual
+     * only; the proxy is fully symmetric and there is no technical difference
+     * between frontend and backend.
+     *
+     * Before calling zmq_proxy() you must set any socket options, and connect
+     * or bind both frontend and backend sockets. The two conventional proxy
+     * models are:
+     * zmq_proxy() runs in the current thread and returns only if/when the
+     * current context is closed.
+     * If the capture socket is not NULL, the proxy shall send all messages,
+     * received on both frontend and backend, to the capture socket. The capture
+     * socket should be a ZMQ_PUB, ZMQ_DEALER, ZMQ_PUSH, or ZMQ_PAIR socket.
+     *
+     * The zmq_proxy() function always returns -1 and errno set to ETERM (the 0MQ
+     * context associated with either of the specified sockets was terminated).
+     */
+    (void)zmq_proxy(clients, workers, nullptr);
 
     // We never get here, but clean up anyhow
     (void)zmq_close(clients);

@@ -392,20 +392,21 @@ ECode CZMQChannel::Invoke(
     argParcel->GetDataSize(size);
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                          ZmqFunCode::Method_Invoke, socket, (void *)data, size);
-    if (-1 == rc) {
+    if (rc < 0) {
         return E_RUNTIME_EXCEPTION;
     }
 
-//TODO
-#if 0
+    /**
+     * It's time to send a request to the server, and if there are redundant
+     * computing requirements, I broadcast the request.
+     */
     if (0 != mPubSocket) {
         rc = CZMQUtils::CzmqSendBuf(mServerObjectId, ZmqFunCode::Method_Invoke,
                                         (void *)mPubSocket, (void *)data, size);
-        if (-1 == rc) {
+        if (rc < 0) {
             return E_RUNTIME_EXCEPTION;
         }
     }
-#endif
 
     HANDLE hChannel;
     zmq_msg_t msg;
