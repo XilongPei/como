@@ -52,7 +52,7 @@ add_custom_command(
         -d ${CLIENT_OBJ_DIR}
         -metadata-so "${BIN_DIR}/RPCTestUnit.so")
 
-COPY(testMonitorZmqCli ${CLIENT_OBJ_DIR}/testRedundantComputing ${BIN_DIR})
+COPY(testRedundantComputing ${CLIENT_OBJ_DIR}/testRedundantComputing ${BIN_DIR})
 
 install(FILES
     ${CLIENT_OBJ_DIR}/testRedundantComputing
