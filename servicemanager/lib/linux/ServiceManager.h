@@ -55,6 +55,8 @@ public:
         /* [in] */ const String& snServiceManager,
         /* [in] */ const String& name);
 
+    ECode WaitForRuntimeToEnd();
+
 private:
     ServiceManager() {}
     ServiceManager(
@@ -68,6 +70,6 @@ private:
     static AutoPtr<ServiceManager> sInstance;
 };
 
-}
+} // namespace jing
 
 #endif // __JING_SERVICEMANAGER_H__

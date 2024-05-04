@@ -16,6 +16,7 @@
 
 #include <unordered_map>
 #include <dbus/dbus.h>
+#include "ComoContext.h"
 #include "ServiceManager.h"
 #include "comolog.h"
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
@@ -730,5 +731,19 @@ ECode ServiceManager::GetRemoteService(
 }
 
 #endif
+
+ECode ServiceManager::WaitForRuntimeToEnd()
+{
+    if (ComoContext::gThreadsWorkingNum <= 0) {
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    for (int i = 0;  i < ComoContext::gThreadsWorkingNum;  i++) {
+        void *retval;
+        pthread_join(ComoContext::gThreadsWorking[i], &retval);
+    }
+
+    return NOERROR;
+}
 
 } // namespace jing

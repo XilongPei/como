@@ -20,7 +20,9 @@
 #include <ServiceManager.h>
 #include <cstdio>
 #include <unistd.h>
+#include "ComoContext.h"
 
+using namespace como;
 using como::test::rpc::CService;
 using como::test::rpc::IService;
 using como::test::rpc::IID_IService;
@@ -36,11 +38,17 @@ int main(int argv, char** argc)
         return 1;
     }
 
-    ServiceManager::GetInstance()->AddService(String("rpcservice"), srv);
+    AutoPtr<ServiceManager> instance = ServiceManager::GetInstance();
+    instance->AddService(String("rpcservice"), srv);
 
     printf("==== rpc service wait for calling ====\n");
-    while (true) {
-        sleep(5);
+
+    if (FAILED(instance->WaitForRuntimeToEnd())) {
+        while (true) {
+            printf(".");
+            sleep(5);
+        }
+        printf("\n");
     }
 
     return 0;

@@ -79,6 +79,7 @@ add_library(libservicemanager
 target_link_libraries(libservicemanager
     comort.so
     dbus-1
+    pthread
     ${RPC_ZeroMQ_LIBS}
 )
 add_dependencies(libservicemanager comort)
