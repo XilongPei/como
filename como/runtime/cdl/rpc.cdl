@@ -353,8 +353,10 @@ interface IProxy
         [out] Array<Byte>& response);
 
     GetUuidOrder(
-        [out] Long& uuidOrder
-    );
+        [out] Long& uuidOrder);
+
+    SetPubSocket(
+        [in] HANDLE pubSocket);
 }
 
 [

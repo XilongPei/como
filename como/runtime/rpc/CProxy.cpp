@@ -2273,6 +2273,13 @@ ECode CProxy::GetUuidOrder(
     return NOERROR;
 }
 
+ECode CProxy::SetPubSocket(
+    /* [in] */ HANDLE pubSocket)
+{
+    mChannel->SetPubSocket(pubSocket);
+    return NOERROR;
+}
+
 void CProxy::OnLastStrongRef(
     /* [in] */ const void* id)
 {

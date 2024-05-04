@@ -807,6 +807,13 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
 
+    if (nullptr == context) {
+        context = CzmqGetContext();
+        if (nullptr == context) {
+            return nullptr;
+        }
+    }
+
     void *publisher = zmq_socket(context, ZMQ_PUB);
     if (nullptr != publisher) {
         int rc = zmq_bind(publisher, endpoint);
@@ -836,6 +843,13 @@ void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
 {
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+
+    if (nullptr == context) {
+        context = CzmqGetContext();
+        if (nullptr == context) {
+            return nullptr;
+        }
+    }
 
     void *subscriber = zmq_socket(context, ZMQ_SUB);
     if (nullptr != subscriber) {

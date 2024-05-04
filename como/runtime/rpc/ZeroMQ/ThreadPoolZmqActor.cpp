@@ -86,9 +86,8 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
 
     if (iRet > 0) {
-//TODO
-#if 0
-        int option_value;
+        int option_value = -1;
+
         size_t option_len = sizeof(option_value);
         int rc = zmq_getsockopt(socket, ZMQ_TYPE, &option_value, &option_len);
         if (0 != rc) {
@@ -98,10 +97,14 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
             return nullptr;
         }
 
-        if (ZMQ_SUB == option_value) {
-            //
+        if ((ZMQ_SUB == option_value) && (ZmqFunCode::Method_Invoke != eventCode)) {
+            zmq_msg_close(&msg);
+            Logger::E("threadHandleMessage",
+                             "GetComponentMetadata, Bad socket type");
+            SendECode(0, socket, E_NOT_FOUND_EXCEPTION);
+            continue;
         }
-#endif
+
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
                 AutoPtr<IParcel> resParcel;
@@ -186,8 +189,20 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
 HandleMessage_Method_Invoke:
                 zmq_msg_close(&msg);
-                CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                if (ZMQ_SUB != option_value) {
+                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
+                }
+                else {
+                    // TODO
+                    /**
+                     * Redundant computing, by broadcasting incoming requests,
+                     * using a data synchronization mechanism to write out the
+                     * result.
+                     */
+                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                                        socket, (const void *)resData, resSize);
+                }
 
                 // `ReleaseWorker`, This Worker is a daemon
                 clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));

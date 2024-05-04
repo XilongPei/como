@@ -365,6 +365,9 @@ public:
     ECode GetUuidOrder(
         /* [out] */ Long& uuidOrder) override;
 
+    ECode SetPubSocket(
+        /* [in] */ HANDLE pubSocket) override;
+
     AutoPtr<IRPCChannel> GetChannel();
 
     CoclassID GetTargetCoclassID();
