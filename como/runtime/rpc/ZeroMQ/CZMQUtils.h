@@ -65,7 +65,7 @@ public:
     std::string endpoint;
 };
 
-class CZMQUtils {
+class COM_PUBLIC CZMQUtils {
 public:
     static void *CzmqGetContext();
 

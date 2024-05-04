@@ -15,15 +15,14 @@
 //=========================================================================
 
 #include "RPCTestUnit.h"
+#include <stdio.h>
 #include <comoapi.h>
 #include <comosp.h>
 #include <ServiceManager.h>
 #include <rpcHelpers.h>
 #include <gtest/gtest.h>
 #include "ComoConfig.h"
-#include "RuntimeMonitor.h"
 #include "CZMQUtils.h"
-#include <stdio.h>
 
 using como::test::rpc::CID_CService;
 using como::test::rpc::IService;

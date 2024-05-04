@@ -23,8 +23,7 @@ include_directories(
     ./
     ${INC_DIR}
     ${CLIENT_OBJ_DIR}
-    ${EXTERNAL_DIR}/circularbuffer
-    ${EXTERNAL_DIR}/lwrb
+    ${EXTERNAL_DIR}/libzmq/include
 )
 
 set(SOURCES
