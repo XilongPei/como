@@ -79,17 +79,23 @@ int main(int argv, char** argc)
             /* [in] */ const String& name,
             /* [in] */ IInterface* object)
     #endif
-    ServiceManager::GetInstance()->AddRemoteService(
-                                                String("localhost"),
-                                                String("ServiceManager"),
-                                                String("rpcserviceZMQ"), srv);
+    AutoPtr<ServiceManager> instance = ServiceManager::GetInstance();
+    instance->AddRemoteService(String("localhost"),
+                               String("ServiceManager"),
+                               String("rpcserviceZMQ"), srv);
 
     printf("RPC serviceZMQ waiting for calling endpoint: %s\n", endpoint.c_str());
 
+    //endpoint += "192.168.0.8:1239";   // RedundantComputing port
+
     CZMQUtils::CzmqProxy(nullptr, endpoint.c_str(), nullptr);
 
-    while (true) {
-        sleep(5);
+    if (FAILED(instance->WaitForRuntimeToEnd())) {
+        while (true) {
+            printf(".");
+            sleep(5);
+        }
+        printf("\n");
     }
 
     return 0;

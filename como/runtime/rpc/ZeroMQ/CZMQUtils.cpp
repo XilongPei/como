@@ -697,16 +697,28 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 
 /**
  * parameter example:
- *      tcpEndpoint: "tcp://127.0.0.1:5555"
+ *      tcpEndpoint:
+ *          "tcp://127.0.0.1:1239"
+ *          "tcp://127.0.0.1:1239;tcp://127.0.0.1:4800"
  *      inprocEndpoint: "inproc://workers"
  */
+#define MAX_TcpEndpoint_IN_PROXY    10
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
                                                      const char *inprocEndpoint)
 {
     int rc;
 
+    if (nullptr == tcpEndpoint) {
+        Logger::E("CZMQUtils::CzmqProxy", "tcpEndpoint is nullptr");
+        return -1;
+    }
+
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, sizeof(bufEndpoint), tcpEndpoint);
+
+    char *seeds[MAX_TcpEndpoint_IN_PROXY];
+    int seedsCapacity = MAX_TcpEndpoint_IN_PROXY;
+    como::MiString::SeperateStr(bufEndpoint, ';', seeds, seedsCapacity);
 
     if (nullptr == context) {
         context = CzmqGetContext();
@@ -719,17 +731,14 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
-    if (nullptr != tcpEndpoint) {
-        rc = zmq_bind(clients, tcpEndpoint);
-    }
-    else {
-        rc = zmq_bind(clients, "tcp://127.0.0.1:4800");
-    }
-    if (0 != rc) {
-        Logger::E("CZMQUtils::CzmqProxy",
-                  "zmq_bind error, %s errno %d %s", bufEndpoint,
-                  zmq_errno(), zmq_strerror(zmq_errno()));
-        return -2;
+    for (int i = 0;  i < seedsCapacity;  i++) {
+        rc = zmq_bind(clients, seeds[i]);
+        if (0 != rc) {
+            Logger::E("CZMQUtils::CzmqProxy",
+                      "zmq_bind error, %s errno %d %s", seeds[i],
+                      zmq_errno(), zmq_strerror(zmq_errno()));
+            return -2;
+        }
     }
 
     /**
@@ -753,7 +762,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
     }
     if (0 != rc) {
         Logger::E("CZMQUtils::CzmqProxy",
-                  "zmq_bind error, %s errno %d %s", bufEndpoint,
+                  "zmq_bind error, %s errno %d %s", inprocEndpoint,
                   zmq_errno(), zmq_strerror(zmq_errno()));
         return -3;
     }
