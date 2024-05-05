@@ -148,7 +148,7 @@ ECode ServiceManager::AddRemoteService(
     /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
-    if (name.IsEmpty() || object == nullptr) {
+    if (name.IsEmpty() || (nullptr == object)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -343,7 +343,7 @@ ECode ServiceManager::GetService(
     dbus_message_iter_get_basic(&args, &ec);
 
     if (SUCCEEDED(ec)) {
-        if (!dbus_message_iter_next(&args)) {
+        if (! dbus_message_iter_next(&args)) {
             Logger_E("ServiceManager::GetService", "Reply has no out arguments.");
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
@@ -465,7 +465,7 @@ ECode ServiceManager::RemoveService(
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger_E("ServiceManager", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;

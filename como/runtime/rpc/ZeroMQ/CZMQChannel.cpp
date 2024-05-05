@@ -127,7 +127,7 @@ ECode CZMQChannel::IsPeerAlive(
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                         ZmqFunCode::Actor_IsPeerAlive, socket,
                                                  (void *)&lvalue, sizeof(Long));
-    if (-1 == rc) {
+    if (rc <= 0) {
         lvalue = rc;
         alive = false;
         return E_RUNTIME_EXCEPTION;
@@ -192,7 +192,7 @@ ECode CZMQChannel::ReleasePeer(
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                         ZmqFunCode::ReleasePeer, socket,
                                         (void *)&mServerObjectId, sizeof(Long));
-    if (-1 == rc) {
+    if (rc <= 0) {
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -242,7 +242,7 @@ ECode CZMQChannel::ReleaseObject(
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                              ZmqFunCode::Object_Release, socket,
                                                (void *)&objectId, sizeof(Long));
-    if (-1 == rc) {
+    if (rc <= 0) {
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -317,7 +317,7 @@ ECode CZMQChannel::GetComponentMetadata(
               "Try to CzmqSendBuf to endpoint %s", mServerName.string());
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                   ZmqFunCode::GetComponentMetadata, socket, (void *)data, size);
-    if (-1 == rc) {
+    if (rc <= 0) {
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -392,7 +392,7 @@ ECode CZMQChannel::Invoke(
     argParcel->GetDataSize(size);
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                          ZmqFunCode::Method_Invoke, socket, (void *)data, size);
-    if (rc < 0) {
+    if (rc <= 0) {
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -403,7 +403,7 @@ ECode CZMQChannel::Invoke(
     if (0 != mPubSocket) {
         rc = CZMQUtils::CzmqSendBuf(mServerObjectId, ZmqFunCode::Method_Invoke,
                                         (void *)mPubSocket, (void *)data, size);
-        if (rc < 0) {
+        if (rc <= 0) {
             return E_RUNTIME_EXCEPTION;
         }
     }
@@ -528,7 +528,7 @@ ECode CZMQChannel::MonitorRuntime(
     int rc = CZMQUtils::CzmqSendBuf(mServerObjectId,
                                              ZmqFunCode::RuntimeMonitor, socket,
                                                       (void *)resData, resSize);
-    if (-1 == rc) {
+    if (rc <= 0) {
         return E_RUNTIME_EXCEPTION;
     }
 

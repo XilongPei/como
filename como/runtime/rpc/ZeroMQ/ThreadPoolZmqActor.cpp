@@ -57,9 +57,10 @@ TPZA_Executor::Worker::~Worker()
  */
 }
 
-static Integer SendECode(HANDLE hChannel, void *socket, ECode ec)
+static void SendECode(HANDLE hChannel, void *socket, ECode ec)
 {
-    return CZMQUtils::CzmqSendBuf(hChannel, ec, socket,
+    // Need log, CzmqSendBuf has output log, otherwise will have to continue
+    (void)CZMQUtils::CzmqSendBuf(hChannel, ec, socket,
                                               (const void *)&ec, sizeof(ECode));
 }
 
@@ -190,7 +191,9 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 HandleMessage_Method_Invoke:
                 zmq_msg_close(&msg);
                 if (ZMQ_SUB != option_value) {
-                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    // Need log, CzmqSendBuf has output log, otherwise will have
+                    // to continue
+                    (void)CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
                 }
                 else {
@@ -271,11 +274,11 @@ HandleMessage_Method_Invoke:
 
                 ReleaseCoclassID(cid);
                 if (SUCCEEDED(ec)) {
-                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    (void)CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                            socket, metadata.GetPayload(), metadata.GetLength());
                 }
                 else {
-                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    (void)CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                                           socket, (char*)"", 1);
                 }
 
@@ -286,7 +289,7 @@ HandleMessage_Method_Invoke:
 
 HandleMessage_GetComponentMetadata:
                 zmq_msg_close(&msg);
-                CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                (void)CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                                           socket, (char*)"", 1);
 
                 // `ReleaseWorker`, This Worker is a daemon
@@ -310,7 +313,7 @@ HandleMessage_GetComponentMetadata:
                     peerState.alive = false;
                 }
 
-                CZMQUtils::CzmqSendBuf(hChannel, NOERROR, socket,
+                (void)CZMQUtils::CzmqSendBuf(hChannel, NOERROR, socket,
                                    (const void *)&peerState, sizeof(peerState));
 
                 if (nullptr != worker) {
@@ -420,7 +423,7 @@ HandleMessage_Object_ReleasePeer:
 
                     resData = reinterpret_cast<HANDLE>(resBuffer.GetPayload());
                     resSize = resBuffer.GetLength();
-                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+                    (void)CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
                     zmq_msg_close(&msg);
                     // `ReleaseWorker` will NOT delete this work
