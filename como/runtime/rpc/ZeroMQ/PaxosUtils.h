@@ -24,7 +24,7 @@ namespace como {
 
 class PaxosUtils {
 public:
-    Integer PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer eventCode,
+    static Integer PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer eventCode,
                        void *socket, const void *buf, size_t bufSize);
 };
 

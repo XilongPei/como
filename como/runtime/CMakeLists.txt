@@ -70,6 +70,17 @@ else()
     set(RPC_ZeroMQ_SYS_LIBS "")
 endif()
 
+if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    set(PhxpaxosLib
+        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
+    )
+else()
+    set(PhxpaxosLib "")
+endif()
+
 set(SOURCES
     comoids.cpp
     ComoConfig.cpp
@@ -148,6 +159,7 @@ if("$ENV{PLATFORM}" STREQUAL "linux")
         target_link_libraries(comort
             pthread
             ${RPC_ZeroMQ_SYS_LIBS}
+            ${PhxpaxosLib}
             dbus-1)
     else()
         target_link_libraries(comort

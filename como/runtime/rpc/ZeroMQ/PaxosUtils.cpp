@@ -18,6 +18,8 @@
 #include "ComoPhxUtils.h"
 #include "PaxosUtils.h"
 
+namespace como {
+
 /**
  * In redundant computing, data is synchronized through PhxSendBuf
  */
@@ -33,8 +35,8 @@ Integer PaxosUtils::PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer event
     std::string sEchoReqValue;
     std::string sEchoRespValue;
     std::string sname = std::string("keyName");
-    std::string ss = std::string(&funCodeAndCRC64, sizeof(funCodeAndCRC64)) +
-                     std::string(buf, bufSize);
+    std::string ss = std::string((char*)&funCodeAndCRC64, sizeof(funCodeAndCRC64)) +
+                     std::string((char*)buf, bufSize);
     int ret = como::ComoPhxUtils::SyncStateData((PhxEchoServer *)oEchoServer,
                                     como::ComoPhxUtils::LevelDbWrite, sname, ss,
                                     sEchoRespValue);
@@ -44,3 +46,5 @@ Integer PaxosUtils::PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer event
 
     return 0;
 }
+
+} // namespace como
