@@ -39,7 +39,7 @@ add_library(ObjectObserverTestUnit
     ${SOURCES}
     ${GENERATED_SOURCES})
 target_link_libraries(ObjectObserverTestUnit comort.so)
-add_dependencies(ObjectObserverTestUnit comort ObjectObserverTestUnit.cdl)
+add_dependencies(ObjectObserverTestUnit comort)
 
 add_custom_command(
     OUTPUT
