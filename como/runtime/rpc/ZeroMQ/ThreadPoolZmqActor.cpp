@@ -30,6 +30,9 @@
 #include "CZMQUtils.h"
 #include "CZMQParcel.h"
 #include "RuntimeMonitor.h"
+#ifdef RedundantComputing_SUPPORT
+#include "PaxosUtils.h"
+#endif
 
 namespace como {
 
@@ -203,8 +206,12 @@ HandleMessage_Method_Invoke:
                      * using a data synchronization mechanism to write out the
                      * result.
                      */
-                    CZMQUtils::CzmqSendBuf(worker->mChannel, ec,
+
+#ifdef RedundantComputing_SUPPORT
+                    PaxosUtils::PhxSendBuf(ComoContext::gEchoServer,
+                                        worker->mChannel, ec,
                                         socket, (const void *)resData, resSize);
+#endif
                 }
 
                 // `ReleaseWorker`, This Worker is a daemon

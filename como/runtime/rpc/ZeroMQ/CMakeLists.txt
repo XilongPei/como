@@ -25,6 +25,24 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     add_definitions(-DRPC_OVER_ZeroMQ_SUPPORT)
 endif()
 
+if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    add_definitions(-DRedundantComputing_SUPPORT)
+    set(PhxpaxosLib
+        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
+    )
+    set(PhxpaxosSrc
+        ${EXTERNAL_DIR}/phxpaxos/export_como/ComoPhxUtils.cpp
+        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_server.cpp
+        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_sm.cpp
+    )
+else()
+    set(PhxpaxosLib "")
+    set(PhxpaxosSrc "")
+endif()
+
 include_directories(
     ./
     ../
@@ -37,6 +55,9 @@ include_directories(
     ${EXTERNAL_DIR}/libzmq/include
     ${EXTERNAL_DIR}/circularbuffer
     ${EXTERNAL_DIR}/lwrb
+if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    ${EXTERNAL_DIR}/phxpaxos/export_como
+endif()
 )
 
 set(SOURCES
@@ -46,10 +67,16 @@ set(SOURCES
     CZMQInterfacePack.cpp
     ThreadPoolZmqActor.cpp
     CZMQUtils.cpp
+if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    PaxosUtils.cpp
+    ${PhxpaxosSrc}
+endif()
 )
 
 add_library(rpc-ZeroMQ STATIC
-    ${SOURCES})
+    ${SOURCES}
+    ${PhxpaxosLib}
+)
 add_dependencies(rpc-ZeroMQ cdl)
 
 COPY(rpc-ZeroMQ ${RPCZeroMQ_SRC_DIR}/CZMQUtils.h ${INC_DIR})
