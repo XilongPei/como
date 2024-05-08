@@ -16,10 +16,11 @@
 
 #include "comotypes.h"
 #include "comoerror.h"
+#include "ComoerrorHelper.h"
 
 namespace como {
 
-struct tagComoEcErrors {
+static struct tagComoEcErrors {
     ECode ec;
     const char *info;
 } comoEcErrors[] = {
@@ -43,5 +44,16 @@ struct tagComoEcErrors {
 
     {E_OUT_OF_MEMORY_ERROR, "E_OUT_OF_MEMORY_ERROR"}                            // (0, 0xf0)
 };
+
+const char *ComoerrorHelper::GetEcErrorInfo(ECode ec)
+{
+    for (int i = 0;  i < sizeof(comoEcErrors) / sizeof(tagComoEcErrors);  i++) {
+        if (ec == comoEcErrors[i].ec) {
+            return comoEcErrors[i].info;
+        }
+    }
+
+    return (const char *)"";
+}
 
 } // namespace como

@@ -86,7 +86,7 @@ set(SOURCES
     ComoConfig.cpp
     ComoContext.cpp
     runtime.cpp
-    comoerrorHelper.cpp
+    ComoerrorHelper.cpp
 )
 
 if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
@@ -187,6 +187,7 @@ COPY(comort ${RUNTIME_SRC_DIR}/comoerror.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/comotypes.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/ComoConfig.h ${INC_DIR})
 COPY(comort ${RUNTIME_SRC_DIR}/ComoContext.h ${INC_DIR})
+COPY(comort ${RUNTIME_SRC_DIR}/ComoerrorHelper.h ${INC_DIR})
 COPY(comort ${RUNTIME_OBJ_DIR}/comort.so ${BIN_DIR})
 
 set(DEPLOY_HEADERS
@@ -196,6 +197,7 @@ set(DEPLOY_HEADERS
     ${RUNTIME_SRC_DIR}/comotypes.h
     ${RUNTIME_SRC_DIR}/ComoConfig.h
     ${RUNTIME_SRC_DIR}/ComoContext.h
+    ${RUNTIME_SRC_DIR}/ComoerrorHelper.h
 )
 
 set(DEPLOY_LIBS
