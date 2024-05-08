@@ -14,13 +14,24 @@
 // limitations under the License.
 //=========================================================================
 
+#ifndef __COMOERRORHELPER_h__
+#define __COMOERRORHELPER_h__
+
 #include "comotypes.h"
 
 namespace como {
 
+typedef struct tagComoEcError {
+    ECode ec;
+    const char *info;
+} ComoEcError;
+
 class ComoerrorHelper {
 public:
     static const char *GetEcErrorInfo(ECode ec);
+    static int RegisterEcErrors(ComoEcError *ecErrors, int num);
 };
 
 } // namespace como
+
+#endif // __COMOERRORHELPER_h__

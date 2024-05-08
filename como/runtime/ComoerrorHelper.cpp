@@ -20,10 +20,13 @@
 
 namespace como {
 
-static struct tagComoEcErrors {
-    ECode ec;
-    const char *info;
-} comoEcErrors[] = {
+typedef struct tagG_ComoEcErrors {
+    ComoEcError *ecErrors;
+    int num;
+    struct tagG_ComoEcErrors *next;
+} G_ComoEcErrors;
+
+static ComoEcError comoEcErrors[] = {
     {E_FAILED_EXCEPTION, "E_FAILED_EXCEPTION"},                                 // (0, 0x01)
     {E_ILLEGAL_ARGUMENT_EXCEPTION, "E_ILLEGAL_ARGUMENT_EXCEPTION"},             // (0, 0x02)
     {E_COMPONENT_NOT_FOUND_EXCEPTION, "E_COMPONENT_NOT_FOUND_EXCEPTION"},       // (0, 0x03)
@@ -45,15 +48,48 @@ static struct tagComoEcErrors {
     {E_OUT_OF_MEMORY_ERROR, "E_OUT_OF_MEMORY_ERROR"}                            // (0, 0xf0)
 };
 
+G_ComoEcErrors g_ComoEcErrors = {comoEcErrors,
+                         sizeof(comoEcErrors)/sizeof(ComoEcError), nullptr};
+G_ComoEcErrors *g_pComoEcErrors = &g_ComoEcErrors;
+
+/**
+ * GetEcErrorInfo
+ */
 const char *ComoerrorHelper::GetEcErrorInfo(ECode ec)
 {
-    for (int i = 0;  i < sizeof(comoEcErrors) / sizeof(tagComoEcErrors);  i++) {
-        if (ec == comoEcErrors[i].ec) {
-            return comoEcErrors[i].info;
+    G_ComoEcErrors *errs = g_pComoEcErrors;
+    while (nullptr != errs) {
+        for (int i = 0;  i < errs->num;  i++) {
+            if (ec == errs->ecErrors[i].ec) {
+                return errs->ecErrors[i].info;
+            }
         }
+
+        errs = errs->next;
     }
 
     return (const char *)"";
+}
+
+/**
+ * RegisterEcErrors
+ *
+ * ecErrors should be an array of ComoEcError.
+ */
+int ComoerrorHelper::RegisterEcErrors(ComoEcError *ecErrors, int num)
+{
+
+    G_ComoEcErrors *ers = new G_ComoEcErrors;
+    if (nullptr == ers) {
+        return -1;
+    }
+
+    ers->ecErrors = ecErrors;
+    ers->num = num;
+    ers->next = g_pComoEcErrors;
+    g_pComoEcErrors = ers;
+
+    return 0;
 }
 
 } // namespace como
