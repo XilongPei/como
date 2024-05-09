@@ -81,7 +81,7 @@ public:
 
     static int CzmqCloseSocketByName(const char *serverName);
 
-    static void CzmqCloseSocket(void *zmqSocket);
+    static int CzmqCloseSocket(void *zmqSocket);
 
     static Integer CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize);

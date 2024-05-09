@@ -229,7 +229,7 @@ int CZMQUtils::CzmqCloseSocketByName(const char *serverName)
 /**
  * CzmqCloseSocket by socket
  */
-void CZMQUtils::CzmqCloseSocket(void *zmqSocket)
+int CZMQUtils::CzmqCloseSocket(void *zmqSocket)
 {
     return zmq_close(zmqSocket);
 }
