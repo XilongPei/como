@@ -182,7 +182,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
 /**
  * serverName should be unique name
  */
-int CZMQUtils::CzmqCloseSocket(const char *serverName)
+int CZMQUtils::CzmqCloseSocketByName(const char *serverName)
 {
     EndpointSocket *endpointSocket;
 
@@ -202,7 +202,7 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         int rc;
         rc = zmq_disconnect(endpointSocket->socket, endpointSocket->endpoint.c_str());
         if (0 != rc) {
-            Logger::E("CZMQUtils::CzmqCloseSocket", "errno %d, %s",
+            Logger::E("CZMQUtils::CzmqCloseSocketByName", "errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(endpointSocket->socket);
             return rc;
@@ -217,12 +217,21 @@ int CZMQUtils::CzmqCloseSocket(const char *serverName)
         delNum = 1;
 #endif
         if (1 != delNum) {
-            Logger::E("CZMQUtils::CzmqCloseSocket", "serverName should be unique name");
+            Logger::E("CZMQUtils::CzmqCloseSocketByName",
+                                            "serverName should be unique name");
         }
         return delNum;
     }
 
     return 0;
+}
+
+/**
+ * CzmqCloseSocket by socket
+ */
+void CZMQUtils::CzmqCloseSocket(void *zmqSocket)
+{
+    return zmq_close(zmqSocket);
 }
 
 /**
@@ -589,7 +598,7 @@ static void *rep_socket_monitor(void *endpointSocket)
             default:
                 if (zmq_errno() != EAGAIN) {
                     // this socket is invalid, close it
-                    CZMQUtils::CzmqCloseSocket(endpoint);
+                    CZMQUtils::CzmqCloseSocketByName(endpoint);
                 }
         }
 

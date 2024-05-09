@@ -79,7 +79,9 @@ public:
     static Integer CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
                                     void *socket, zmq_msg_t& msg, int flags);
 
-    static int CzmqCloseSocket(const char *serverName);
+    static int CzmqCloseSocketByName(const char *serverName);
+
+    static void CzmqCloseSocket(void *zmqSocket);
 
     static Integer CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
                                                 const void *buf, size_t bufSize);
