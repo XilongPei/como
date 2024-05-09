@@ -26,7 +26,7 @@ typedef struct tagComoEcError {
     const char *info;
 } ComoEcError;
 
-class ComoerrorHelper {
+class COM_PUBLIC ComoerrorHelper {
 public:
     static const char *GetEcErrorInfo(ECode ec);
     static int RegisterEcErrors(ComoEcError *ecErrors, int num);
