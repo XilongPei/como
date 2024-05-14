@@ -99,8 +99,18 @@ ECode CDBusChannel::ServiceRunnable::Run()
     opVTable.unregister_function = nullptr;
     opVTable.message_function = CDBusChannel::ServiceRunnable::HandleMessage;
 
-    dbus_connection_register_object_path(conn,
-                         STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this));
+    if (! dbus_connection_register_object_path(conn,
+                       STUB_OBJECT_PATH, &opVTable, static_cast<void*>(this))) {
+
+        Logger::E("CDBusChannel::ServiceRunnable::Run",
+                                "dbus_connection_register_object_path failed.");
+        if (nullptr != conn) {
+            dbus_connection_close(conn);
+            dbus_connection_unref(conn);
+        }
+        dbus_error_free(&err);
+        return E_RUNTIME_EXCEPTION;
+    }
 
     {
         Mutex::AutoLock lock(mOwner->mLock);
