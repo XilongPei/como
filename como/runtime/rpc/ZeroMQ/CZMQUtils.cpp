@@ -208,6 +208,7 @@ int CZMQUtils::CzmqCloseSocketByName(const char *serverName)
             return rc;
         }
 
+        (void)zmq_close(endpointSocket->socket);
         delete(endpointSocket);
 #ifndef COMO_FUNCTION_SAFETY_RTOS
         int delNum = zmq_sockets.erase(std::string(serverName));

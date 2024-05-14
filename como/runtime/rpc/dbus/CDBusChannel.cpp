@@ -864,7 +864,10 @@ ECode CDBusChannel::GetComponentMetadata(
         goto Exit;
     }
 
-    parcel->WriteCoclassID(cid);
+    ec = parcel->WriteCoclassID(cid);
+    if (FAILED(ec)) {
+        goto Exit;
+    }
 
     dbus_error_init(&err);
 
@@ -976,7 +979,8 @@ ECode CDBusChannel::Invoke(
         goto Exit;
     }
 
-    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "Invoke");
+    msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
+                                                 STUB_INTERFACE_PATH, "Invoke");
     if (msg == nullptr) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
@@ -984,7 +988,8 @@ ECode CDBusChannel::Invoke(
     }
 
     dbus_message_iter_init_append(msg, &args);
-    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE_AS_STRING, &subArg);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+                                             DBUS_TYPE_BYTE_AS_STRING, &subArg);
     argParcel->GetData(data);
     argParcel->GetDataSize(size);
     dbus_message_iter_append_fixed_array(&subArg, DBUS_TYPE_BYTE, &data, size);
@@ -994,7 +999,8 @@ ECode CDBusChannel::Invoke(
 
     reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
     if (dbus_error_is_set(&err)) {
-        Logger::E("CDBusChannel.Invoke", "Fail to send message, error is \"%s\"", err.message);
+        Logger::E("CDBusChannel.Invoke",
+                          "Fail to send message, error is \"%s\"", err.message);
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
     }
@@ -1082,8 +1088,15 @@ ECode CDBusChannel::StartListening(
         if (nullptr == instance) {
             Logger::E("CDBusChannel::StartListening", "GetInstance error");
             delete runable;
+            runable = nullptr;
             return E_OUT_OF_MEMORY_ERROR;
         }
+
+        /**
+         * Although the argument to RunTask is bare pointer (variable Runnable* task),
+         * but it (variable instance->) remembers the task through a smart pointer
+         * (AutoPtr) before returning back.
+         */
         ret = instance->RunTask(runable);
     }
 

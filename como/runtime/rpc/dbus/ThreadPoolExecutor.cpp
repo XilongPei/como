@@ -86,6 +86,11 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 int ThreadPoolExecutor::RunTask(
     /* [in] */ Runnable* task)
 {
+    /**
+     * Although the argument `task` is bare pointer, but the object `worker`
+     * stores `task` in a smart pointer (AutoPtr): attribute mTask of the
+     * object `worker`.
+     */
     AutoPtr<Worker> worker = new Worker(task, this);
     if (nullptr == worker) {
         return -1;
