@@ -212,8 +212,9 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     // a status of DBUS_DISPATCH_DATA_REMAINS but not have a message yet.
                         clock_gettime(CLOCK_REALTIME, &(conns[i]->lastAccessTime));
                     }
-                    else
+                    else {
                         break;
+                    }
                 } while (! mRequestToQuit);
 
                 if (mRequestToQuit) {
@@ -283,7 +284,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         cdbusParcel->SetFunFreeMem(CDBusParcel::MemPoolFree, 0);
 #else
         AutoPtr<IParcel> argParcel = new CDBusParcel();
-        if (argParcel == nullptr) {
+        if (nullptr == argParcel) {
             Logger::E("CDBusChannel", "HandleMessage new CDBusParcel() error");
             return DBUS_HANDLER_RESULT_HANDLED;
         }
@@ -427,10 +428,12 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         ((CStub*)thisRunnable->mTarget)->GetChannel()->GetRPCType(type);
         IObject* obj = ((CStub*)thisRunnable->mTarget)->GetTarget();
         ECode ec = FindExportObject(type, obj, stub);
-        if (SUCCEEDED(ec) && (stub == thisRunnable->mTarget))
+        if (SUCCEEDED(ec) && (stub == thisRunnable->mTarget)) {
             pong = true;
-        else
+        }
+        else {
             pong = false;
+        }
 
         DBusMessage* reply = dbus_message_new_method_return(msg);
         if (nullptr != reply) {
@@ -721,7 +724,7 @@ ECode CDBusChannel::IsPeerAlive(
         }
         if (DBUS_TYPE_BOOLEAN != dbus_message_iter_get_arg_type(&args)) {
             Logger::E("CDBusChannel", "Reply arguments is not BOOLEAN.");
-                alive = false;
+            alive = false;
             ec = E_REMOTE_EXCEPTION;
             goto Exit;
         }
@@ -764,7 +767,7 @@ ECode CDBusChannel::ReleasePeer(
 
     msg = dbus_message_new_method_call(mName, STUB_OBJECT_PATH,
                                                 STUB_INTERFACE_PATH, "Release");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -808,7 +811,12 @@ ECode CDBusChannel::ReleasePeer(
 
         dbus_bool_t val;
         dbus_message_iter_get_basic(&args, &val);
-        alive = val == TRUE ? true : false;
+        if (TRUE == val) {
+            alive = true;
+        }
+        else {
+            alive = false;
+        }
     }
     else {
         Logger::D("CDBusChannel", "Remote call failed with ec = 0x%X.", ec);
@@ -852,8 +860,9 @@ ECode CDBusChannel::GetComponentMetadata(
 
     AutoPtr<IParcel> parcel;
     ECode ec = CoCreateParcel(RPCType::Local, parcel);
-    if (FAILED(ec))
+    if (FAILED(ec)) {
         goto Exit;
+    }
 
     parcel->WriteCoclassID(cid);
 
@@ -870,7 +879,7 @@ ECode CDBusChannel::GetComponentMetadata(
 
     msg = dbus_message_new_method_call(
             mName, STUB_OBJECT_PATH, STUB_INTERFACE_PATH, "GetComponentMetadata");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger::E("CDBusChannel", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -1020,7 +1029,7 @@ ECode CDBusChannel::Invoke(
         resParcel = new CDBusParcel();
         if (nullptr == resParcel) {
             Logger::E("CDBusChannel.Invoke", "Fail to new CDBusParcel()");
-            ec = E_REMOTE_EXCEPTION;
+            ec = E_OUT_OF_MEMORY_ERROR;
             goto Exit;
         }
 #endif
@@ -1142,7 +1151,7 @@ ECode CDBusChannel::ReleaseObject(
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger_E("CDBusChannel::ReleaseObject", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;

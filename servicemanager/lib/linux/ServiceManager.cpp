@@ -82,7 +82,7 @@ ECode ServiceManager::AddService(
 
     msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
                                                                   "AddService");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger_E("ServiceManager::AddService", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -105,7 +105,7 @@ ECode ServiceManager::AddService(
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger_E("ServiceManager::AddService", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -310,7 +310,7 @@ ECode ServiceManager::GetService(
 
     msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
                                                                   "GetService");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger_E("ServiceManager::GetService", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;
@@ -328,7 +328,7 @@ ECode ServiceManager::GetService(
         goto Exit;
     }
 
-    if (!dbus_message_iter_init(reply, &args)) {
+    if (! dbus_message_iter_init(reply, &args)) {
         Logger_E("ServiceManager::GetService", "Reply has no results.");
         ec = E_REMOTE_EXCEPTION;
         goto Exit;
@@ -447,7 +447,7 @@ ECode ServiceManager::RemoveService(
 
     msg = dbus_message_new_method_call(DBUS_NAME, OBJECT_PATH, INTERFACE_PATH,
                                                                 "RemoveService");
-    if (msg == nullptr) {
+    if (nullptr == msg) {
         Logger_E("ServiceManager::RemoveService", "Fail to create dbus message.");
         ec = E_RUNTIME_EXCEPTION;
         goto Exit;

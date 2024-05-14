@@ -364,6 +364,11 @@ ECode CBinderChannel::StartListening(
 {
     if (mPeer == RPCPeer::Stub) {
         mBinder = new ServiceRunnable(this, stub);
+        if (nullptr == mBinder) {
+            Logger::E("CBinderChannel::StartListening",
+                                                  "new ServiceRunnable failed");
+            return E_OUT_OF_MEMORY_ERROR;
+        }
 
         if (sThreadPoolStarted) {
             return NOERROR;
