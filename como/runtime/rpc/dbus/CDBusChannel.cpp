@@ -425,8 +425,8 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         RPCType type;
         AutoPtr<IStub> stub;
 
-        ((CStub*)thisRunnable->mTarget)->GetChannel()->GetRPCType(type);
-        IObject* obj = ((CStub*)thisRunnable->mTarget)->GetTarget();
+        ((CStub*)(thisRunnable->mTarget.Get()))->GetChannel()->GetRPCType(type);
+        IObject* obj = ((CStub*)(thisRunnable->mTarget.Get()))->GetTarget();
         ECode ec = FindExportObject(type, obj, stub);
         if (SUCCEEDED(ec) && (stub == thisRunnable->mTarget)) {
             pong = true;
@@ -1078,6 +1078,11 @@ ECode CDBusChannel::StartListening(
     int ret = 0;
 
     if (mPeer == RPCPeer::Stub) {
+        /**
+         * Although the argument `stub` is bare pointer, but the object `runable`
+         * stores `stub` in a smart pointer (AutoPtr): attribute mTarget of the
+         * object `stub`.
+         */
         AutoPtr<ThreadPoolExecutor::Runnable> runable = new ServiceRunnable(this, stub);
         if (nullptr == runable) {
             Logger::E("CDBusChannel::StartListening", "new ServiceRunnable error");
@@ -1088,7 +1093,9 @@ ECode CDBusChannel::StartListening(
         if (nullptr == instance) {
             Logger::E("CDBusChannel::StartListening", "GetInstance error");
             delete runable;
-            runable = nullptr;
+            runable = nullptr;  // To prevent AutoPtr variable `runable` from
+                                // having side effects, assign the value nullptr
+                                // to it.
             return E_OUT_OF_MEMORY_ERROR;
         }
 

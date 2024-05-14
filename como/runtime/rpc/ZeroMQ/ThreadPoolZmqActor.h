@@ -54,23 +54,21 @@ enum WORKER_STATUS {
 };
 
 // TPZA: Thread Pool ZeroMQ Actor
-class TPZA_Executor
-    : public LightRefBase
+class TPZA_Executor : public LightRefBase
 {
 public:
-    class Worker
-        : public Object
+    class Worker : public Object
     {
     public:
         Worker(CZMQChannel *channel, AutoPtr<IStub> stub, std::string& endpoint);
         ~Worker();
 
     public:
-        std::string mEndpoint;
-        Long mChannel;
-        AutoPtr<IStub> mStub;
+        std::string     mEndpoint;
+        Long            mChannel;
+        AutoPtr<IStub>  mStub;
         struct timespec lastAccessTime;
-        int mWorkerStatus;
+        int             mWorkerStatus;
 
         Long state;
     };
@@ -93,8 +91,7 @@ private:
     static Mutex sInstanceLock;
 };
 
-class ThreadPoolZmqActor
-    : public LightRefBase
+class ThreadPoolZmqActor : public LightRefBase
 {
 public:
     static std::vector<TPZA_Executor::Worker*> mWorkerList;     // task list
@@ -104,9 +101,9 @@ public:
                                                 HANDLE hChannel, bool isDaemon);
 private:
     static bool shutdown;
-    int mThreadNum;         // most thread number
-    pthread_t  pthread_id_Manager;
-    pthread_t *pthread_id_HandleMessage;
+    int         mThreadNum;         // most thread number
+    pthread_t   pthread_id_Manager;
+    pthread_t  *pthread_id_HandleMessage;
 
 public:
     static void *threadManager(void *threadData);

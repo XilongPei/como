@@ -1003,6 +1003,11 @@ ECode CStub::CreateObject(
         }
     }
 
+    /**
+     * Although the argument to StartListening is bare pointer (variable IStub*
+     * stubObj), but it (variable channel->) remembers the stubObj through a
+     * smart pointer (AutoPtr) before returning back.
+     */
     ec = channel->StartListening(stubObj);
     if (FAILED(ec)) {
         Logger::E("CStub", "Channel start listening failed with ec is 0x%X", ec);

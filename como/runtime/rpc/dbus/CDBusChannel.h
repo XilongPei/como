@@ -30,13 +30,10 @@ namespace como {
 extern const CoclassID CID_CDBusChannel;
 
 COCLASS_ID(8efc6167-e82e-4c7d-89aa-668f397b23cc)
-class CDBusChannel
-    : public Object
-    , public IRPCChannel
+class CDBusChannel : public Object, public IRPCChannel
 {
 private:
-    class ServiceRunnable
-        : public ThreadPoolExecutor::Runnable
+    class ServiceRunnable : public ThreadPoolExecutor::Runnable
     {
     public:
         ServiceRunnable(
@@ -52,9 +49,9 @@ private:
             /* [in] */ void* arg);
 
     private:
-        CDBusChannel* mOwner;
-        IStub* mTarget;
-        Boolean mRequestToQuit;
+        AutoPtr<CDBusChannel> mOwner;
+        AutoPtr<IStub>        mTarget;
+        Boolean               mRequestToQuit;
     };
 
 public:
