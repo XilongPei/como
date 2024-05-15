@@ -1,0 +1,51 @@
+//=========================================================================
+// Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+namespace como {
+namespace test {
+namespace expires {
+
+[
+    uuid(6e7582c4-e0ec-4474-9046-702732e1e96e),
+    version(0.1.0)
+]
+interface IExpiresTest
+{
+    Add(
+        [in] Integer arg1,
+        [in] Integer arg2,
+        [out] Integer& result);
+
+    Add_Wait(
+        [in] Integer arg1,
+        [in] Integer arg2,
+        [in] Integer wait_time,
+        [out] Integer& result);
+}
+
+[
+    uuid(b150ddc0-530b-411f-8462-b04252fd012d),
+    version(0.1.0),
+    FuncSafetySetting("timeout = 10000; delay = 0;")
+]
+coclass CExpiresTest
+{
+    interface IExpiresTest;
+}
+
+}
+}
+}
