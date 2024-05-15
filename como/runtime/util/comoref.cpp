@@ -510,7 +510,9 @@ Integer RefBase::IncStrong(
     if (cnt <= 0) {
         Logger::E("RefBase", "IncStrong() called on %p after last strong ref",
                                                                           refs);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
 
     if (cnt != INITIAL_STRONG_VALUE)  {
@@ -535,7 +537,9 @@ Integer RefBase::IncStrong(
                                                     std::memory_order_relaxed);
     if (oldCnt <= INITIAL_STRONG_VALUE) {
         Logger::E("RefBase", "mCount:0x%x too small", oldCnt);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
     refs->mBase->OnFirstRef(id);
 
@@ -554,7 +558,9 @@ Integer RefBase::DecStrong(
     const Integer cnt = refs->mStrong.fetch_sub(1, std::memory_order_release);
     if (BAD_STRONG(cnt)) {
         Logger::E("RefBase", "DecStrong() called on %p too many times", refs);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
 
     if (1 == cnt) {
@@ -605,7 +611,9 @@ Integer RefBase::ForceIncStrong(
     if (c < 0) {
         Logger::E("RefBase",
                   "forceIncStrong called on %p after ref count underflow", refs);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
 #if PRINT_REFS
     Logger::D("RefBase", "ForceIncStrong of %p from %p: cnt=%d\n", this, id, c);
@@ -643,7 +651,9 @@ void RefBase::WeakRef::IncWeak(
     const Integer c = impl->mWeak.fetch_add(1, std::memory_order_relaxed);
     if (c < 0) {
         Logger::E("RefBase", "IncWeak called on %p after last weak ref", this);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
 }
 
@@ -655,7 +665,9 @@ void RefBase::WeakRef::DecWeak(
     const Integer c = impl->mWeak.fetch_sub(1, std::memory_order_release);
     if (BAD_WEAK(c)) {
         Logger::E("RefBase", "decWeak called on %p too many times", this);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
     if (c != 1) {
         return;
@@ -712,7 +724,9 @@ Boolean RefBase::WeakRef::AttemptIncStrong(
 
     if (curCount < 0) {
         Logger::E("RefBase", "AttemptIncStrong called on %p after underflow", this);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
 
     while ((curCount > 0) && (curCount != INITIAL_STRONG_VALUE)) {
@@ -813,7 +827,9 @@ Boolean RefBase::WeakRef::AttemptIncWeak(
     Integer curCount = impl->mWeak.load(std::memory_order_relaxed);
     if (curCount < 0) {
         Logger::E("RefBase", "AttemptIncWeak called on %p after underflow", this);
+#if DEBUG_REFS
         assert(0);
+#endif
     }
     while (curCount > 0) {
         if (impl->mWeak.compare_exchange_weak(curCount, curCount + 1,

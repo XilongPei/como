@@ -31,7 +31,15 @@ TEST(testObjectObserverTest, TesttestObjectObserver)
     klass->CreateObject(IID_IInterface, &obj);
 
     IObjectObserver* observer = IObjectObserver::Probe(obj);
+    EXPECT_NE(nullptr, observer);
     IObject::Probe(obj)->SetObjectObserver(observer);
+
+    /**
+     * You can't monitor the first reference of `obj` because observer doesn't
+     * exist yet.
+     */
+    IObject::Probe(obj)->AddRef();  // ==== call OnFirstRef() ====
+    IObject::Probe(obj)->Release(); // ==== call OnLastStrongRef() ====
 
     como::Object *objTmp = Object::From(IObject::Probe(obj));
     objTmp->TrackMe(true, true);

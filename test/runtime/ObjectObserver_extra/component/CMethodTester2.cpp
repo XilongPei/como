@@ -22,7 +22,7 @@ namespace como {
 namespace test {
 namespace reflection {
 
-COMO_INTERFACE_IMPL_1(CMethodTester2, Object, IMethodTest2);
+COMO_INTERFACE_IMPL_2(CMethodTester2, Object, IMethodTest2, IObjectObserver);
 COMO_OBJECT_IMPL(CMethodTester2);
 
 CMethodTester2::CMethodTester2()
