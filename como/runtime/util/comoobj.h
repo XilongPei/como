@@ -143,6 +143,29 @@ private:
  * sizeof(IObject)              = 8
  * sizeof(IWeakReferenceSource) = 8
  * sizeof({vfptr}, HANDLE)      = 8
+ *
+ * The sizeof() operator returns the size of a particular type or object
+ * in bytes. sizeof() does not include the sizeof() `this` pointer.
+ * If a class has only virtual functions and no data members, its size is
+ * the size of the virtual table pointer.
+ *
+ * (class Object):
+ * +----+
+ * 0    | +- (base class RefBase) [sizeof(RefBase) = 24]
+ * 0    | {vfptr}
+ * 8    | members of class RefBase
+ *      +---
+ * 24   | +- (base class IObject)[sizeof(IObject) = 8]
+ * 24   | {vfptr}
+ * 32   | members of class IObject
+ *      +---
+ * 32   | +- (base class IWeakReferenceSource) [sizeof(IWeakReferenceSource) = 8]
+ * 32   | {vfptr}
+ * 40   | members of class IWeakReferenceSource
+ *      +---
+ * 40   | +- (class Object)
+ * 40   | {vfptr}
+ * 48   | members of class Object
  */
 #ifndef OBJECTSIZE_Offset
 #define OBJECTSIZE_Offset (sizeof(RefBase) + sizeof(IObject) + \
