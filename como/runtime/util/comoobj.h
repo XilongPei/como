@@ -124,6 +124,10 @@ public:
 
     inline static Object* From(IObject* obj);
 
+    inline static void* ObjToRefBasePtr(IObject* obj);
+
+    inline static void* IntfToRefBasePtr(IInterface* intf);
+
 private:
     IMetaComponent* mComponent;
     String mCoclassName;
@@ -184,6 +188,24 @@ Object* Object::From(IObject* obj)
     return (Object*)obj;
 }
 
+/**
+ * Calculate the RefBase object pointer from the IObject
+ */
+void* Object::ObjToRefBasePtr(IObject* obj)
+{
+    RefBase *refBase = (RefBase*)(Object*)obj;
+    return (void*)refBase;
+}
+
+/**
+ * Calculate the RefBase object pointer from the IInterface
+ */
+void* Object::IntfToRefBasePtr(IInterface* intf)
+{
+    RefBase *refBase = (RefBase*)(Object*)(IObject::Probe(intf));
+    return (void*)refBase;
+}
+
 // generate a ComponentID from module name or
 // a CoclassID from Coclass namespace::name or
 // an InterfaceID from Interface namespace::name
@@ -194,6 +216,5 @@ COM_PUBLIC InterfaceID InterfaceIDfromNameWithMemArea(String namespaceAndName, S
 COM_PUBLIC InterfaceID InterfaceIDWithMemArea(const InterfaceID& iid, Short iMemArea);
 
 } // namespace como
-
 
 #endif // __COMO_OBJECT_H__
