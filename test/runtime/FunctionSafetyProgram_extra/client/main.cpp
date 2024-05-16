@@ -61,7 +61,7 @@ TEST(TestFunctionSafetyProgram, testExpires)
     icfso->IsValid(isvalid);
     EXPECT_EQ(isvalid, CFSO_ExpireVALID);
 
-    wait_time = 20000;  // 20000ns
+    wait_time = 20000000;  // 20000ns
     result = 0;
     ec = ExpiresTest->Add_Wait(arg1, arg2, wait_time, result);
     EXPECT_NE(ec, 0);
@@ -81,8 +81,6 @@ static void area_free(Short iMemArea, const void *ptr)
 {
     (void)iMemArea;
 
-// TODO, fix it
-return;
     free((void*)ptr);
 }
 

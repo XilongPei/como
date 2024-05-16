@@ -142,9 +142,13 @@ private:
  * sizeof(RefBase)              = 24
  * sizeof(IObject)              = 8
  * sizeof(IWeakReferenceSource) = 8
+ * sizeof({vfptr}, HANDLE)      = 8
  */
 #ifndef OBJECTSIZE_Offset
-#define OBJECTSIZE_Offset (sizeof(RefBase) + sizeof(IObject) + sizeof(IWeakReferenceSource))
+#define OBJECTSIZE_Offset (sizeof(RefBase) + sizeof(IObject) + \
+                                                   sizeof(IWeakReferenceSource))
+#define REFBASESIZE_Offset (sizeof(RefBase) + sizeof(IObject) + \
+                                  sizeof(IWeakReferenceSource) + sizeof(HANDLE))
 #endif
 
 inline void Object::SetObjSize(Integer objSize)

@@ -585,7 +585,7 @@ Integer RefBase::DecStrong(
                  * memory is sourced from a memory pool.
                  */
                 if (LIKELY(nullptr != func)) {
-                    func(shortPara, reinterpret_cast<const char *>(this) - OBJECTSIZE_Offset);
+                    func(shortPara, reinterpret_cast<const char *>(this) - REFBASESIZE_Offset);
                 }
             }
         }

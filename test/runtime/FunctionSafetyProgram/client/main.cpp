@@ -86,8 +86,6 @@ static void area_free(Short iMemArea, const void *ptr)
 {
     (void)iMemArea;
 
-// TODO, fix it
-return;
     free((void*)ptr);
 }
 
