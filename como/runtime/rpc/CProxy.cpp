@@ -1842,10 +1842,11 @@ ECode InterfaceProxy::ProxyEntry(
         struct timespec curTime;
         clock_gettime(CLOCK_REALTIME, &curTime);
 
-        Long nsec = curTime.tv_nsec + thisObj->mTimeout % 1000000;
-                                              //123456
-        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + thisObj->mTimeout / 1000000000;
-                                                //123456789                      //123456789
+        // the unit of mTimeout is microsecond [Millisecond, microsecond, nanosecond]
+        Long nsec = curTime.tv_nsec + (thisObj->mTimeout % 1000000) * 1000;
+                                                          //123456     123
+        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + thisObj->mTimeout / 1000000;
+                                                //123456789                      //123456
         curTime.tv_nsec = nsec % 1000000000;
                                 //123456789
 
@@ -1855,7 +1856,6 @@ ECode InterfaceProxy::ProxyEntry(
             ec = FUNCTION_SAFETY_CALL_OUT_OF_MEMORY;
             goto ProxyExit;
         }
-
         int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
                              &(ThreadPoolChannelInvoke::mWorkerList[pos]->mMutex), &curTime);
         if (ret != ETIMEDOUT /*110, time out*/) {
