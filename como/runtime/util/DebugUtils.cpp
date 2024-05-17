@@ -98,7 +98,8 @@ void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG,
         logTAG = (char*)"";
     }
 
-    Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p, File:%s, Functin:%s, Line:%d",
+    Logger::D(logTAG, "AutoPtr: %p , AutoPtr->mPtr: %p , File: %s , "
+                      "Function: %s , Line: %d",
                    autoPtr, AuptrMPtr, file, func, line);
 }
 
@@ -109,7 +110,8 @@ void DebugUtils::AutoPtrRefBaseInspect(void *autoPtr, IInterface *intf,
         logTAG = (char*)"";
     }
 
-    Logger::D(logTAG, "AutoPtr:%p, RefBase:%p, File:%s, Functin:%s, Line:%d",
+    Logger::D(logTAG, "AutoPtr: %p , RefBase: %p , File: %s , "
+                      "Function: %s , Line: %d",
                      autoPtr, Object::IntfToRefBasePtr(intf), file, func, line);
 }
 
