@@ -207,7 +207,7 @@ ECode CBootClassLoader::FindComponent(
                                                                   uri.string());
 
     Integer index = uri.LastIndexOf("/");
-    String compFile = (index != -1 ? uri.Substring(index + 1) : uri);
+    String compFile = ((index != -1) ? uri.Substring(index + 1) : uri);
     if (compFile.IsEmpty()) {
         Logger::E(TAG, "The name of component is null or empty.");
         compPath = nullptr;
@@ -215,11 +215,11 @@ ECode CBootClassLoader::FindComponent(
     }
 
     FILE* fd = nullptr;
-    for (Long i = 0; i < mComponentPath.GetSize(); i++) {
+    for (Long i = 0;  i < mComponentPath.GetSize();  i++) {
         String filePath = mComponentPath.Get(i) + "/" + compFile;
         fd = fopen(filePath.string(), "rb");
         if (fd != nullptr) {
-            Logger::D(TAG, "Find \"%s\" component in directory \"%s\"",
+            Logger::D(TAG, "Found \"%s\" component in directory \"%s\"",
                              compFile.string(), mComponentPath.Get(i).string());
             compPath = filePath;
             break;
@@ -255,7 +255,7 @@ ECode CBootClassLoader::FindComponent(
     }
 
     Elf64_Shdr* shdrs = (Elf64_Shdr *)malloc(sizeof(Elf64_Shdr) * ehdr.e_shnum);
-    if (shdrs == nullptr) {
+    if (nullptr == shdrs) {
         Logger::E(TAG, "Malloc Elf64_Shdr failed.");
         fclose(fd);
         compPath = nullptr;
@@ -272,7 +272,7 @@ ECode CBootClassLoader::FindComponent(
 
     Elf64_Shdr* strShdr = shdrs + ehdr.e_shstrndx;
     char* strTable = (char *)malloc(strShdr->sh_size);
-    if (strTable == nullptr) {
+    if (nullptr == strTable) {
         Logger::E(TAG, "Malloc string table failed.");
         free(shdrs);
         fclose(fd);
@@ -307,7 +307,7 @@ ECode CBootClassLoader::FindComponent(
         }
     }
 
-    if (mdSec == nullptr) {
+    if (nullptr == mdSec) {
         Logger::E(TAG, "Find .metadata section of \"%s\" file failed.", compFile.string());
         free(shdrs);
         free(strTable);
@@ -359,7 +359,7 @@ ECode CBootClassLoader::UnloadComponent(
     mcObj->CanUnload(canUnload);
     if (canUnload) {
         int ret = dlclose(mcObj->mComponent->mSoHandle);
-        if (ret == 0) {
+        if (0 == ret) {
             mComponents.Remove(compId.mUuid);
             mComponentPaths.Remove(mcObj->mUri);
             return NOERROR;
@@ -413,8 +413,9 @@ static Boolean Cmp_PVoid_Coclass_fullName(void *p1, void *p2)
 {
     AutoPtr<IMetaCoclass> klass;
     ((IMetaComponent*)p1)->GetCoclass(*(String*)p2, klass);
-    if (nullptr != klass)
+    if (nullptr != klass) {
         return true;
+    }
 
     return false;
 }
