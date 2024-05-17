@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "comoobj.h"
 #include "util/comolog.h"
 #include "DebugUtils.h"
 
@@ -99,6 +100,17 @@ void DebugUtils::AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG,
 
     Logger::D(logTAG, "AutoPtr:%p, AutoPtr->mPtr:%p, File:%s, Functin:%s, Line:%d",
                    autoPtr, AuptrMPtr, file, func, line);
+}
+
+void DebugUtils::AutoPtrRefBaseInspect(void *autoPtr, IInterface *intf,
+               const char *logTAG, const char *file, const char *func, int line)
+{
+    if (nullptr == logTAG) {
+        logTAG = (char*)"";
+    }
+
+    Logger::D(logTAG, "AutoPtr:%p, RefBase:%p, File:%s, Functin:%s, Line:%d",
+                     autoPtr, Object::IntfToRefBasePtr(intf), file, func, line);
 }
 
 } // namespace como

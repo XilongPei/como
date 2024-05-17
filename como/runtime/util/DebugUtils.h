@@ -19,7 +19,7 @@
 
 namespace como {
 
-class DebugUtils
+class COM_PUBLIC DebugUtils
 {
 public:
     static int HexDump(char *bufStr, int bufSize, void *addr, int len);
@@ -34,7 +34,19 @@ public:
                                         __FILE__, __PRETTY_FUNCTION__, __LINE__)
 
     static void AutoPtrInspect(void *autoPtr, void *AuptrMPtr, char *logTAG,
-                               const char *file, const char *func, int line);
+                                  const char *file, const char *func, int line);
+
+    /**
+     * usage, for example:
+     *     AutoPtr<IClassLoader> CBootClassLoader::sInstance = ......
+     *     AutoPtrRefBaseINSPECT(&CBootClassLoader::sInstance, (char*)"test");
+     */
+    #define AutoPtrRefBaseINSPECT(autoPtr, logTAG)                              \
+           DebugUtils::AutoPtrRefBaseInspect((void*)autoPtr, autoPtr, logTAG,   \
+                                        __FILE__, __PRETTY_FUNCTION__, __LINE__)
+    static void AutoPtrRefBaseInspect(void *autoPtr, IInterface *intf,
+              const char *logTAG, const char *file, const char *func, int line);
+
 }; // class DebugUtils
 
 } // namespace como

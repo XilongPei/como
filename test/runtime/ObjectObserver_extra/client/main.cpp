@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <comoapi.h>
 #include <comoobj.h>
+#include "DebugUtils.h"
 #include "reflection/CMetaMethod.h"
 #include "ObjectObserverTestUnit2.h"
 
@@ -28,11 +29,16 @@ TEST(testObjectObserverTest, TesttestObjectObserver)
     AutoPtr<IMetaCoclass> klass;
     mc->GetCoclass("como::test::reflection::CMethodTester2", klass);
     AutoPtr<IInterface> obj;
-    klass->CreateObject(IID_IInterface, &obj);
 
-    IObjectObserver* observer = IObjectObserver::Probe(obj);
+    IInterface *objRaw;
+    klass->CreateObject(IID_IInterface, &objRaw);
+
+    IObjectObserver* observer = IObjectObserver::Probe(objRaw);
     EXPECT_NE(nullptr, observer);
-    IObject::Probe(obj)->SetObjectObserver(observer);
+    IObject::Probe(objRaw)->SetObjectObserver(observer);
+
+    obj = objRaw;
+    DebugUtils::AutoPtrRefBaseINSPECT(obj, "TJ_1239");
 
     /**
      * You can't monitor the first reference of `obj` because observer doesn't
