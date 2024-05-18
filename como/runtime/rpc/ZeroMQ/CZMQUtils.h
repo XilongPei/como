@@ -41,6 +41,9 @@ public:
     };
 };
 
+/**
+ * These ECode ecErrors are registered in ThreadPoolChannelInvoke.cpp
+ */
 constexpr ECode E_ZMQ_FUN_CODE_ERROR = MAKE_COMORT_ECODE(0, 0xE0U);
 constexpr ECode ZMQ_BAD_REPLY_DATA = MAKE_COMORT_ECODE(0, 0xE1U);
 constexpr ECode ZMQ_BAD_PACKET = MAKE_COMORT_ECODE(0, 0xE2U);

@@ -22,12 +22,20 @@
 #include "ComoConfig.h"
 #include "ComoerrorHelper.h"
 #include "ThreadPoolChannelInvoke.h"
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+    #include "ZeroMQ/CZMQUtils.h"
+#endif
 
 namespace como {
 
 static ComoEcError g_ecErrors[] = {
     {FUNCTION_SAFETY_CALL_TIMEOUT, "FUNCTION_SAFETY_CALL_TIMEOUT"},                                 // (0, 0x01)
-    {FUNCTION_SAFETY_CALL_OUT_OF_MEMORY, "FUNCTION_SAFETY_CALL_OUT_OF_MEMORY"}
+    {FUNCTION_SAFETY_CALL_OUT_OF_MEMORY, "FUNCTION_SAFETY_CALL_OUT_OF_MEMORY"},
+#if defined(RPC_OVER_ZeroMQ_SUPPORT)
+    {E_ZMQ_FUN_CODE_ERROR, "E_ZMQ_FUN_CODE_ERROR"},
+    {ZMQ_BAD_REPLY_DATA, "ZMQ_BAD_REPLY_DATA"},
+    {ZMQ_BAD_PACKET, "ZMQ_BAD_PACKET"}
+#endif
 };
 
 //-------------------------------------------------------------------------
