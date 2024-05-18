@@ -72,13 +72,13 @@ public:
 
 public:
     static AutoPtr<ThreadPoolExecutor> GetInstance();
+    static AutoPtr<ThreadPool> threadPool;
 
     int RunTask(
         /* [in] */ Runnable* task);
 
 private:
     static AutoPtr<ThreadPoolExecutor> sInstance;
-    static AutoPtr<ThreadPool> threadPool;
     static Mutex sInstanceLock;
 };
 

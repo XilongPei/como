@@ -66,6 +66,8 @@ public:
 
 public:
     static AutoPtr<TPCI_Executor> GetInstance();
+    static AutoPtr<TPCI_Executor> sInstance;
+    static AutoPtr<ThreadPoolChannelInvoke> threadPool;
 
     int RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                          AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel);
@@ -73,8 +75,6 @@ public:
     int CleanTask(int posWorkerList);
 
 private:
-    static AutoPtr<TPCI_Executor> sInstance;
-    static AutoPtr<ThreadPoolChannelInvoke> threadPool;
     static Mutex sInstanceLock;
 };
 

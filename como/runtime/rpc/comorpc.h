@@ -56,6 +56,8 @@ EXTERN_C COM_PUBLIC ECode CoUnregisterImportObject(
     /* [in] */ RPCType type,
     /* [in] */ Long channel);
 
+EXTERN_C COM_PUBLIC ECode CoStopAll();
+
 } // namespace como
 
 #endif // __COMO_COMORPC_H__

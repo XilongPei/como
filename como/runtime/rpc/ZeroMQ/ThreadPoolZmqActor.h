@@ -84,10 +84,10 @@ public:
     int SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func);
 
     static HANDLE_MESSAGE_FUNCTION defaultHandleMessage;
+    static AutoPtr<ThreadPoolZmqActor> threadPool;
 
 private:
     static AutoPtr<TPZA_Executor> sInstance;
-    static AutoPtr<ThreadPoolZmqActor> threadPool;
     static Mutex sInstanceLock;
 };
 

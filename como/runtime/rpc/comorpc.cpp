@@ -17,6 +17,7 @@
 #include "comorpc.h"
 #include "CProxy.h"
 #include "CStub.h"
+#include <ThreadPoolChannelInvoke.h>
 
 /*
  * use dbus always (?)
@@ -28,6 +29,7 @@
 #endif
 */
 #include "dbus/CDBusChannelFactory.h"
+#include "dbus/ThreadPoolExecutor.h"
 
 #if defined(RPC_OVER_ZeroMQ_SUPPORT)
 #include "ZeroMQ/CZMQChannelFactory.h"
@@ -59,7 +61,7 @@ ECode CoCreateParcel(
     /* [out] */ AutoPtr<IParcel>& parcel)
 {
     AutoPtr<IRPCChannelFactory> factory =
-                      (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     return factory->CreateParcel(parcel);
 }
 
@@ -68,7 +70,7 @@ ECode CoCreateInterfacePack(
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
     AutoPtr<IRPCChannelFactory> factory =
-                        type == RPCType::Local ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     return factory->CreateInterfacePack(ipack);
 }
 
@@ -79,7 +81,7 @@ ECode CoCreateProxy(
     /* [out] */ AutoPtr<IProxy>& proxy)
 {
     AutoPtr<IRPCChannelFactory> factory =
-                      (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     AutoPtr<IRPCChannel> channel;
     ECode ec = factory->CreateChannel(RPCPeer::Proxy, channel);
     if (FAILED(ec)) {
@@ -107,7 +109,7 @@ ECode CoCreateStub(
     /* [out] */ AutoPtr<IStub>& stub)
 {
     AutoPtr<IRPCChannelFactory> factory =
-                      (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     AutoPtr<IRPCChannel> channel;
     ECode ec = factory->CreateChannel(RPCPeer::Stub, channel);
     if (FAILED(ec)) {
@@ -122,13 +124,13 @@ ECode CoMarshalInterface(
     /* [in] */ RPCType type,
     /* [out] */ AutoPtr<IInterfacePack>& ipack)
 {
-    if (object == nullptr) {
+    if (nullptr == object) {
         ipack = nullptr;
         return NOERROR;
     }
 
     AutoPtr<IRPCChannelFactory> factory =
-                      (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     return factory->MarshalInterface(object, ipack);
 }
 
@@ -137,13 +139,13 @@ ECode CoUnmarshalInterface(
     /* [in] */ RPCType type,
     /* [out] */ AutoPtr<IInterface>& object)
 {
-    if (data == nullptr) {
+    if (nullptr == data) {
         object = nullptr;
         return NOERROR;
     }
 
     AutoPtr<IRPCChannelFactory> factory =
-                      (type == RPCType::Local) ? sLocalFactory : sRemoteFactory;
+                    ((type == RPCType::Local) ? sLocalFactory : sRemoteFactory);
     return factory->UnmarshalInterface(data, object);
 }
 
@@ -152,6 +154,24 @@ ECode CoUnregisterImportObject(
     /* [in] */ Long channel)
 {
     return UnregisterImportObjectByChannel(type, channel);
+}
+
+ECode CoStopAll()
+{
+    // rpc/dbus
+    (void)ThreadPoolExecutor::threadPool->stopAll();
+
+#ifdef RPC_OVER_ZeroMQ_SUPPORT
+    // rpc/ZeroMQ
+    TPZA_Executor::threadPool->StopAll();
+#endif
+
+#ifdef COMO_FUNCTION_SAFETY
+    // ThreadPoolChannelInvoke
+    TPCI_Executor::threadPool->stopAll();
+#endif
+
+    return NOERROR;
 }
 
 } // namespace como
