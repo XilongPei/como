@@ -31,20 +31,18 @@ constexpr ECode FUNCTION_SAFETY_CALL_TIMEOUT = MAKE_COMORT_ECODE(1, 0x1);
 constexpr ECode FUNCTION_SAFETY_CALL_OUT_OF_MEMORY = MAKE_COMORT_ECODE(1, 0x2);
 
 class ThreadPoolChannelInvoke;
-enum WORKER_STATUS {
-    WORKER_IDLE = 0,
-    WORKER_TASK_READY,
-    WORKER_TASK_RUNNING,
-    WORKER_TASK_FINISH
+enum TPCI_WORKER_STATUS {
+    TPCI_WORKER_IDLE = 0,
+    TPCI_WORKER_TASK_READY,
+    TPCI_WORKER_TASK_RUNNING,
+    TPCI_WORKER_TASK_FINISH
 };
 
 // TPCI: Thread Pool Channel Invoke
-class TPCI_Executor
-    : public LightRefBase
+class TPCI_Executor : public LightRefBase
 {
 public:
-    class Worker
-        : public Object
+    class Worker : public Object
     {
     public:
         Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
@@ -55,13 +53,13 @@ public:
     public:
         AutoPtr<IRPCChannel> mChannel;
         AutoPtr<IMetaMethod> mMethod;
-        AutoPtr<IParcel> mInParcel;
-        AutoPtr<IParcel> mOutParcel;
-        pthread_mutex_t mMutex;
-        pthread_cond_t mCond;
-        struct timespec mCreateTime;
-        int mWorkerStatus;
-        ECode ec;
+        AutoPtr<IParcel>     mInParcel;
+        AutoPtr<IParcel>     mOutParcel;
+        pthread_mutex_t      mMutex;
+        pthread_cond_t       mCond;
+        struct timespec      mCreateTime;
+        int                  mWorkerStatus;
+        ECode                ec;
     };
 
 public:
@@ -78,14 +76,13 @@ private:
     static Mutex sInstanceLock;
 };
 
-class ThreadPoolChannelInvoke
-    : public LightRefBase
+class ThreadPoolChannelInvoke : public LightRefBase
 {
 public:
     static std::vector<TPCI_Executor::Worker*> mWorkerList;     // task list
 
 private:
-    int mThreadNum;         // most thread number
+    int mThreadNum;         // Maximum number of threads
     pthread_t *pthread_id;
 
     static bool shutdown;

@@ -20,9 +20,15 @@
 #include <pthread.h>
 #include "util/comolog.h"
 #include "ComoConfig.h"
+#include "ComoerrorHelper.h"
 #include "ThreadPoolChannelInvoke.h"
 
 namespace como {
+
+static ComoEcError g_ecErrors[] = {
+    {FUNCTION_SAFETY_CALL_TIMEOUT, "FUNCTION_SAFETY_CALL_TIMEOUT"},                                 // (0, 0x01)
+    {FUNCTION_SAFETY_CALL_OUT_OF_MEMORY, "FUNCTION_SAFETY_CALL_OUT_OF_MEMORY"}
+};
 
 //-------------------------------------------------------------------------
 // TPCI : ThreadPoolChannelInvoke
@@ -32,7 +38,7 @@ TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod>
     , mMethod(method)
     , mInParcel(inParcel)
     , mOutParcel(outParcel)
-    , mWorkerStatus(WORKER_TASK_READY)
+    , mWorkerStatus(TPCI_WORKER_TASK_READY)
     , mCond(PTHREAD_COND_INITIALIZER)
     , ec(NOERROR)
 {
@@ -66,6 +72,9 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
             delete sInstance;
             return nullptr;
         }
+
+        ComoerrorHelper::RegisterEcErrors(g_ecErrors,
+                                        sizeof(g_ecErrors)/sizeof(ComoEcError));
     }
     return sInstance;
 }
@@ -88,10 +97,12 @@ int TPCI_Executor::CleanTask(int pos)
 int ThreadPoolChannelInvoke::LookingForReadyWorker()
 {
     for (int i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
+        if (nullptr == mWorkerList[i]) {
             return i;
-        if (WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus)
+        }
+        if (TPCI_WORKER_TASK_READY == mWorkerList[i]->mWorkerStatus) {
             return i;
+        }
     }
     return -1;
 }
@@ -120,7 +131,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
         }
 
         AutoPtr<TPCI_Executor::Worker> w = mWorkerList[i];
-        w->mWorkerStatus = WORKER_TASK_RUNNING;
+        w->mWorkerStatus = TPCI_WORKER_TASK_RUNNING;
 
         pthread_mutex_unlock(&m_pthreadMutex);
 
@@ -128,7 +139,7 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
         // finish this Worker. such as: CDBusChannel::Invoke()
         w->ec = w->Invoke();
 
-        w->mWorkerStatus = WORKER_TASK_FINISH;
+        w->mWorkerStatus = TPCI_WORKER_TASK_FINISH;
         pthread_cond_signal(&(w->mCond));
     }
 
@@ -179,15 +190,18 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
     pthread_mutex_lock(&m_pthreadMutex);
 
     for (i = 0;  i < mWorkerList.size();  i++) {
-        if (nullptr == mWorkerList[i])
+        if (nullptr == mWorkerList[i]) {
             break;
+        }
 
-        // COMO Runtime could set mWorkerStatus as WORKER_IDLE
-        if (WORKER_IDLE == mWorkerList[i]->mWorkerStatus)
+        // COMO Runtime could set mWorkerStatus as TPCI_WORKER_IDLE
+        if (TPCI_WORKER_IDLE == mWorkerList[i]->mWorkerStatus) {
             break;
+        }
 
-        if (WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus)
+        if (TPCI_WORKER_TASK_RUNNING == mWorkerList[i]->mWorkerStatus) {
             continue;
+        }
 
         if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->mCreateTime.tv_sec) +
            /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->mCreateTime.tv_nsec) >
@@ -196,8 +210,9 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
         }
     }
     if (i < mWorkerList.size()) {
-        if (nullptr != mWorkerList[i])
+        if (nullptr != mWorkerList[i]) {
             delete mWorkerList[i];
+        }
         mWorkerList[i] = task;
     }
     else {
@@ -213,8 +228,9 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
 
 int ThreadPoolChannelInvoke::cleanTask(int pos)
 {
-    if (pos < 0 || (pos >= mWorkerList.size()))
+    if ((pos < 0) || (pos >= mWorkerList.size())) {
         return -1;
+    }
 
     pthread_mutex_lock(&m_pthreadMutex);
     delete mWorkerList[pos];
@@ -233,7 +249,7 @@ int ThreadPoolChannelInvoke::stopAll()
     shutdown = true;
     pthread_cond_broadcast(&m_pthreadCond);
 
-    for (int i = 0; i < mThreadNum; i++) {
+    for (int i = 0;  i < mThreadNum;  i++) {
         pthread_join(pthread_id[i], nullptr);
     }
 
