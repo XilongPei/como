@@ -17,16 +17,19 @@
 #ifndef __INT64_H__
 #define __INT64_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 namespace como {
 
 #pragma pack(1)
 
 typedef union tagInt64 {
     bool            bVal;
-    int             i8Val;      // i8.i8_7
-    short           i16Val;     // i16.i16_low_low
-    int             i32Val;     // i32.i32_low
-    long long int   i64Val;
+    int8_t          i8Val;      // == i8.i8_7
+    int16_t         i16Val;     // == i16.i16_low_low
+    int32_t         i32Val;     // == i32.i32_low
+    int64_t         i64Val;
     float           floatVal;
     double          doubleVal;
     void           *pVal;
