@@ -66,18 +66,21 @@ public:
      * @return Long value;
      */
     Long receive_event(Long received_time) {
-        RECEIVE_EVENT:
+        while (true) {
+            Long cur = get_time();
 
-        Long cur = get_time();
+            // If received time is old, do nothing.
+            if (received_time < cur) {
+                return cur;
+            }
 
-        // If received time is old, do nothing.
-        if (received_time < cur) {
-            return cur;
-        }
-
-        // Ensure that local timer is at least one ahead.
-        if (! time_.compare_exchange_strong(cur, received_time + 1)) {
-            goto RECEIVE_EVENT;
+            // Ensure that local timer is at least one ahead.
+            if (! time_.compare_exchange_strong(cur, received_time + 1)) {
+                continue;
+            }
+            else {
+                break;
+            }
         }
 
         return received_time + 1;
