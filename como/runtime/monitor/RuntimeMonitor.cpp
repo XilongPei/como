@@ -98,6 +98,9 @@ ECode RuntimeMonitor::StartRuntimeMonitor()
         }
     }
     else {
+        delete logCircleBuf;
+        logCircleBuf = nullptr;
+
         return E_OUT_OF_MEMORY_ERROR;
     }
 
@@ -192,6 +195,7 @@ static int handler(void* user, const char* section, const char* name, const char
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer)
 {
     String string;
+
     RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
     switch (rtmCommand->command) {
         case RTM_CommandType::CMD_BY_STRING: {
@@ -207,6 +211,9 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             if (! resBuffer.IsNull()) {
                 // resBuffer.Copy works very slowly
                 memcpy(resBuffer.GetPayload(), (const char*)string, len);
+            }
+            else {
+                return E_OUT_OF_MEMORY_ERROR;
             }
 
             break;
@@ -226,6 +233,9 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
                     if (lwrb_read(rtmLwRB_ServerQueue, resBuffer.GetPayload(), len)!= len) {
                         return E_OUT_OF_MEMORY_ERROR;
                     }
+                }
+                else {
+                    return E_OUT_OF_MEMORY_ERROR;
                 }
             }
             break;
@@ -248,17 +258,22 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
                         return E_OUT_OF_MEMORY_ERROR;
                     }
                 }
+                else {
+                    return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 DeserializeRtmInvokeMethod(reinterpret_cast<como::RTM_InvokeMethod*>(
-                                                                        buffer.GetPayload()));
+                                                                    buffer.GetPayload()));
 
                 String str;
                 ECode ec = DumpRtmInvokeMethod(reinterpret_cast<como::RTM_InvokeMethod*>(
-                                                                    buffer.GetPayload()), str);
-                if (SUCCEEDED(ec))
+                                                                buffer.GetPayload()), str);
+                if (SUCCEEDED(ec)) {
                     strBuffer += (str + ",");
-                else
-                    break;
+                }
+                else {
+                    return ec;
+                }
             }
 
             if (strBuffer.GetByteLength() > 1) {
@@ -274,6 +289,9 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
             if (! resBuffer.IsNull()) {
                 resBuffer.CopyRaw((Byte*)strBuffer.string(), strBuffer.GetByteLength()+1);
             }
+            else {
+                return E_OUT_OF_MEMORY_ERROR;
+            }
             break;
         }
         case RTM_CommandType::CMD_Server_CpuMemoryStatus: {
@@ -284,7 +302,9 @@ ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& re
                 memcpy(resBuffer.GetPayload(), &status,
                                                    sizeof(RTM_CpuMemoryStatus));
             }
-
+            else {
+                return E_OUT_OF_MEMORY_ERROR;
+            }
             break;
         }
     }
@@ -321,10 +341,10 @@ ECode RuntimeMonitor::GetMethodFromRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeM
     intf->GetInterfaceID(intf, iid);
 
     AutoPtr<IMetaCoclass> klass;
-    IObject::Probe(intf)->GetCoclass(klass);
+    FAIL_RETURN(IObject::Probe(intf)->GetCoclass(klass));
     AutoPtr<IMetaInterface> imintf;
-    klass->GetInterface(iid, imintf);
-    imintf->GetMethod(rtm_InvokeMethod->methodIndexPlus4, method);
+    FAIL_RETURN(klass->GetInterface(iid, imintf));
+    FAIL_RETURN(imintf->GetMethod(rtm_InvokeMethod->methodIndexPlus4, method));
 
     return NOERROR;
 }
@@ -510,12 +530,12 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     snprintf(buf, sizeof(buf), "\"id\":%llu,", (unsigned long long)rtm_InvokeMethod->uuid64);
     strBuffer += buf;
 
-    struct timeval curTime;
-    curTime.tv_sec = rtm_InvokeMethod->time / 1000000;
+    struct timeval curTime;                  // 123456
+    curTime.tv_sec = rtm_InvokeMethod->time /  1000000;
     curTime.tv_usec = rtm_InvokeMethod->time % 1000000;
     int milli = curTime.tv_usec / 1000;
 
-    // 2021-11-30 12:34:56
+    // format examlpe: "2021-11-30 12:34:56"
     char ymdhms[20];
     // The +hhmm or -hhmm numeric timezone
     char timezone[8];
@@ -534,26 +554,26 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     AutoPtr<IMetaMethod> method;
     String name, ns;
 
-    klass->GetName(name);
-    klass->GetNamespace(ns);
+    FAIL_RETURN(klass->GetName(name));
+    FAIL_RETURN(klass->GetNamespace(ns));
     strBuffer += "\"coclass\":\"" + ns + "::" + name + "\",";
 
     memcpy(&iid, &(rtm_InvokeMethod->interfaceID_mUuid), sizeof(UUID));
-    klass->GetInterface(iid, intf);
-    klass->GetName(name);
-    klass->GetNamespace(ns);
+    FAIL_RETURN(klass->GetInterface(iid, intf));
+    FAIL_RETURN(klass->GetName(name));
+    FAIL_RETURN(klass->GetNamespace(ns));
     strBuffer += "\"interface\":\"" + ns + "::" + name + "\",";
 
     intf->GetMethod(rtm_InvokeMethod->methodIndexPlus4, method);
     String strMethod;
     String methodSignature;
-    method->GetName(strMethod);
-    method->GetSignature(methodSignature);
+    FAIL_RETURN(method->GetName(strMethod));
+    FAIL_RETURN(method->GetSignature(methodSignature));
     strBuffer += "\"method\":\"" + strMethod + "{" + methodSignature + "}\",";
 
     String strArgBuffer;
     AutoPtr<IParcel> parcel;
-    CoCreateParcel(RPCType::Remote, parcel);
+    FAIL_RETURN(CoCreateParcel(RPCType::Remote, parcel));
 
     Long len = rtm_InvokeMethod->length -
                           (sizeof(RTM_InvokeMethod) + sizeof(ComponentID) + 1) -
@@ -562,10 +582,10 @@ ECode RuntimeMonitor::DumpRtmInvokeMethod(RTM_InvokeMethod *rtm_InvokeMethod,
     parcel->SetData((HANDLE)rtm_InvokeMethod->parcel, len);
 
     if (rtm_InvokeMethod->in_out == RTM_ParamTransDirection::CALL_METHOD) {
-        MarshalUtils::UnMarshalArguments(method, parcel, strArgBuffer);
+        FAIL_RETURN(MarshalUtils::UnMarshalArguments(method, parcel, strArgBuffer));
     }
     else {
-        MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer);
+        FAIL_RETURN(MarshalUtils::UnUnmarshalResults(method, parcel, strArgBuffer));
     }
 
     strBuffer += "\"parcel\":" + strArgBuffer;
