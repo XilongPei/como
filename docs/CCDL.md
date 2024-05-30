@@ -246,6 +246,9 @@ There are two ways to add comments. One is using syntax "/* <*comment_literal*> 
 | Enum        | Lxx/xx;   |
 | Interface   | Lxx/xx;   |
 
+- Type signatures are mainly used when determining function overloading, such as GetSignature() in source code reflection/CMetaInterface.cpp
+
+
 #### Local Types
 A local type is the type which cannot be transact through rpc. Local types include HANDLE, CoclassID, ComponentID, InterfaceID and Array<*local types*>.
 

@@ -132,7 +132,8 @@ ECode CMetaInterface::GetConstant(
 
     for (Integer i = 0;  i < mConstants.GetLength();  i++) {
         String mcName;
-        mConstants[i]->GetName(mcName);
+        // It's just operation about reference count, No error checking required
+        (void)mConstants[i]->GetName(mcName);
         if (mcName.Equals(name)) {
             constt = mConstants[i];
             return NOERROR;
@@ -215,8 +216,8 @@ ECode CMetaInterface::GetMethod(
         for (Integer i = 0;  i < mMethods.GetLength();  i++) {
             IMetaMethod *mmObj = mMethods[i];
             String mmName, mmSignature;
-            mmObj->GetName(mmName);
-            mmObj->GetSignature(mmSignature);
+            (void)mmObj->GetName(mmName);
+            (void)mmObj->GetSignature(mmSignature);
             if (mmName.Equals(name) && mmSignature.Equals(signature)) {
                 method = mmObj;
                 return NOERROR;
@@ -227,7 +228,7 @@ ECode CMetaInterface::GetMethod(
         for (Integer i = 0;  i < mMethods.GetLength();  i++) {
             IMetaMethod *mmObj = mMethods[i];
             String mmName;
-            mmObj->GetName(mmName);
+            (void)mmObj->GetName(mmName);
             if (mmName.Equals(name)) {
                 if (nullptr != method)
                     return E_INVALID_SIGNATURE_EXCEPTION;;
