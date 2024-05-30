@@ -1737,8 +1737,9 @@ ECode InterfaceProxy::ProxyEntry(
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
         String name, ns;
-        thisObj->mTargetMetadata->GetName(name);
-        thisObj->mTargetMetadata->GetNamespace(ns);
+        // It's just operation about reference count, No error checking required
+        (void)thisObj->mTargetMetadata->GetName(name);
+        (void)thisObj->mTargetMetadata->GetNamespace(ns);
         Logger::D("CProxy", "Call ProxyEntry with interface \"%s::%s\"",
                 ns.string(), name.string());
     }
@@ -1748,8 +1749,8 @@ ECode InterfaceProxy::ProxyEntry(
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
         String name, signature;
-        method->GetName(name);
-        method->GetSignature(signature);
+        (void)method->GetName(name);
+        (void)method->GetSignature(signature);
         Logger::D("CProxy", "Call ProxyEntry with method \"%s(%s)\"",
                 name.string(), signature.string());
     }
@@ -1764,9 +1765,12 @@ ECode InterfaceProxy::ProxyEntry(
         goto ProxyExit;
     }
 
-    inParcel->WriteInteger(RPC_MAGIC_NUMBER);
-    inParcel->WriteInteger(thisObj->mIndex);    // interfaceIndex
-    inParcel->WriteInteger(methodIndex + 4);
+    ec = inParcel->WriteInteger(RPC_MAGIC_NUMBER);
+    ec |= inParcel->WriteInteger(thisObj->mIndex);    // interfaceIndex
+    ec |= inParcel->WriteInteger(methodIndex + 4);
+    if (FAILED(ec)) {
+        goto ProxyExit;
+    }
 
     /**
      * In distributed computing, nodes do not synchronize time. Lamport clock is
@@ -1774,10 +1778,16 @@ ECode InterfaceProxy::ProxyEntry(
      */
     Long uuid64;
 #if 0
-    inParcel->WriteLong(Mac::GetUuid64(uuid64));
+    ec = inParcel->WriteLong(Mac::GetUuid64(uuid64));
+    if (FAILED(ec)) {
+        goto ProxyExit;
+    }
 #else
     uuid64 = ComoContext::gComoContext->gLamportClock->send_event();
-    inParcel->WriteLong(Mac::CompoundUuid64(uuid64));
+    ec = inParcel->WriteLong(Mac::CompoundUuid64(uuid64));
+    if (FAILED(ec)) {
+        goto ProxyExit;
+    }
 #endif
 
     ec = thisObj->MarshalArguments(regs, method, inParcel);
@@ -1856,8 +1866,10 @@ ECode InterfaceProxy::ProxyEntry(
             ec = FUNCTION_SAFETY_CALL_OUT_OF_MEMORY;
             goto ProxyExit;
         }
-        int ret = pthread_cond_timedwait(&(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
-                             &(ThreadPoolChannelInvoke::mWorkerList[pos]->mMutex), &curTime);
+        int ret = pthread_cond_timedwait(
+                            &(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
+                            &(ThreadPoolChannelInvoke::mWorkerList[pos]->mMutex),
+                            &curTime);
         if (ret != ETIMEDOUT /*110, time out*/) {
             ec = ThreadPoolChannelInvoke::mWorkerList[pos]->ec;
         }
