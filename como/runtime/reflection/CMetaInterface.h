@@ -95,6 +95,9 @@ public:
     ECode IsExternal(
         /* [out] */ Boolean& isExternal) override;
 
+    ECode GetExternalModuleName(
+        /* [out] */ String& externalModuleName) override;
+
 private:
     Integer CalculateMethodNumber();
 
@@ -120,6 +123,7 @@ public:
     Array<IMetaMethod*> mMethods;
     Mutex           mMethodsLock;
     unsigned char   mProperties;
+    String          mExternalModuleName;
 };
 
 } // namespace como

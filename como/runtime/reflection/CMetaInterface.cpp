@@ -43,6 +43,14 @@ CMetaInterface::CMetaInterface(
     BuildBaseInterface();
     mMethods = Array<IMetaMethod*>(CalculateMethodNumber());
 
+    if (mi->mProperties & TYPE_EXTERNAL) {
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi + sizeof(MetaEnumeration)));
+        mExternalModuleName = String(*externalPtr);
+    }
+    else {
+        mExternalModuleName = nullptr;
+    }
+
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
      * In the functional safety calculation of RTOS, there shall be no dynamic
@@ -350,6 +358,13 @@ Integer CMetaInterface::BuildInterfaceMethod(
         mMethods.Set(startIndex + i, mmObj);
     }
     return startIndex + mi->mMethodNumber;
+}
+
+ECode CMetaInterface::GetExternalModuleName(
+    /* [out] */ String& externalModuleName)
+{
+    externalModuleName = mExternalModuleName;
+    return NOERROR;
 }
 
 } // namespace como

@@ -338,6 +338,9 @@ interface IMetaInterface
 
     IsExternal(
         [out] Boolean& isExternal);
+
+    GetExternalModuleName(
+        [out] String& externalModuleName);
 }
 
 [
