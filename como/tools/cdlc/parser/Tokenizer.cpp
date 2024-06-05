@@ -42,6 +42,7 @@ void Tokenizer::SetupKeywords()
     mKeywords["HANDLE"] = Token::HANDLE;
     mKeywords["in"] = Token::IN;
     mKeywords["include"] = Token::INCLUDE;
+    mKeywords["import"] = Token::IMPORT;
     mKeywords["Integer"] = Token::INTEGER;
     mKeywords["interface"] = Token::INTERFACE;
     mKeywords["InterfaceID"] = Token::INTERFACEID;
@@ -707,10 +708,12 @@ TokenInfo Tokenizer::ReadNumber(
     StringBuilder builder;
 
     builder.Append(c);
+
     int bit = 32;
     int radix = ((c == '0') ? 8 : 10);
     bool scientificNotation = false;
     int state = ((c == '0') ? NUMBER_INT_0 : NUMBER_INT);
+
     while (! mReader->IsEof()) {
         c = mReader->PeekChar();
         if (state == NUMBER_INT_0) {
@@ -990,4 +993,4 @@ void Tokenizer::SkipCurrentLine()
     }
 }
 
-}
+} // namespace cdlc

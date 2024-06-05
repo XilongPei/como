@@ -51,17 +51,17 @@ public:
         /* [in] */ TokenInfo& tokenInfo);
 
 public:
-    Token mToken = Token::UNKNOWN;
-    String mStringValue;
-    int mCharValue = 0;
+    Token         mToken = Token::UNKNOWN;
+    String        mStringValue;
+    int           mCharValue = 0;
     long long int mIntegralValue = 0;
-    double mFloatingPointValue = 0;
-    int mBit = 0;
-    int mRadix = 0;
-    bool mScientificNotation = false;
-    String mTokenFilePath;
-    int mTokenLineNo = 0;
-    int mTokenColumnNo = 0;
+    double        mFloatingPointValue = 0;
+    int           mBit = 0;
+    int           mRadix = 0;
+    bool          mScientificNotation = false;
+    String        mTokenFilePath;
+    int           mTokenLineNo = 0;
+    int           mTokenColumnNo = 0;
 };
 
 TokenInfo::TokenInfo()
@@ -85,9 +85,9 @@ bool TokenInfo::Is64Bit()
 
 bool TokenInfo::IsBuildinType()
 {
-    return Token::BOOLEAN <= mToken && mToken <= Token::TYPEKIND;
+    return (Token::BOOLEAN <= mToken) && (mToken <= Token::TYPEKIND);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_TOKENINFO_H__

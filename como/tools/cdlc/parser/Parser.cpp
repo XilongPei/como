@@ -14,6 +14,11 @@
 // limitations under the License.
 //=========================================================================
 
+#include <cstdlib>
+#include <unistd.h>
+#include <string.h>
+#include "metadata/Metadata.h"
+#include "metadata/MetadataUtils.h"
 #include "parser/Parser.h"
 #include "ast/ArrayType.h"
 #include "ast/PointerType.h"
@@ -31,9 +36,6 @@
 #include "util/UUID.h"
 #include "util/Options.h"
 #include "cityhash.h"
-#include <cstdlib>
-#include <unistd.h>
-#include <string.h>
 
 namespace cdlc {
 
@@ -108,7 +110,7 @@ bool Parser::ParseFile(
 {
     String filePath = tokenInfo.mStringValue;
     AutoPtr<MemoryFileReader> reader = new MemoryFileReader(filePath);
-    if (! reader->ReadIn(false)) {
+    if ((nullptr == reader) || (! reader->ReadIn(false))) {
         String message = String::Format("Fail to open the file \"%s\".",
                                         filePath.string());
         LogError(tokenInfo, message);
@@ -148,6 +150,10 @@ bool Parser::ParseFile(
             }
             case Token::INCLUDE: {
                 result = ParseInclude() && result;
+                break;
+            }
+            case Token::IMPORT: {
+                result = ParseImport() && result;
                 break;
             }
             case Token::INTERFACE: {
@@ -516,6 +522,10 @@ bool Parser::ParseModule(
                 result = ParseInclude() && result;
                 break;
             }
+            case Token::IMPORT: {
+                result = ParseImport() && result;
+                break;
+            }
             case Token::INTERFACE: {
                 Attributes attrs;
                 result = ParseInterface(attrs) && result;
@@ -609,6 +619,10 @@ bool Parser::ParseNamespace()
             }
             case Token::INCLUDE: {
                 result = ParseInclude() && result;
+                break;
+            }
+            case Token::IMPORT: {
+                result = ParseImport() && result;
                 break;
             }
             case Token::INTERFACE: {
@@ -2335,6 +2349,31 @@ bool Parser::ParseInclude()
     return ret;
 }
 
+bool Parser::ParseImport()
+{
+    // read "import"
+    mTokenizer.GetToken();
+    TokenInfo tokenInfo = mTokenizer.PeekToken();
+    if (tokenInfo.mToken != Token::STRING_LITERAL) {
+        LogError(tokenInfo, "A file path is expected.");
+        return false;
+    }
+    mTokenizer.GetToken();
+
+    String filePath = tokenInfo.mStringValue;
+    void *metadata = MetadataUtils::ReadMetadata(filePath, MetadataUtils::TYPE_SO);
+    if (nullptr == metadata) {
+        LogError(tokenInfo, "Load metadata from comort failed.");
+        return false;
+    }
+
+    como::MetadataSerializer serializer;
+    serializer.Deserialize(reinterpret_cast<uintptr_t>(metadata));
+    AutoPtr<Module> comort = Module::Resolve(metadata);
+    mWorld->AddDependentModule(comort);
+    return true;
+}
+
 void Parser::EnterBlockContext()
 {
     AutoPtr<BlockContext> context = new BlockContext();
@@ -2357,7 +2396,7 @@ AutoPtr<InterfaceType> Parser::FindInterface(
     /* [in] */ const String& interfaceName)
 {
     AutoPtr<Type> type = FindType(interfaceName, true);
-    if (type != nullptr && type->IsInterfaceType()) {
+    if ((type != nullptr) && type->IsInterfaceType()) {
         return InterfaceType::CastFrom(type);
     }
     return nullptr;

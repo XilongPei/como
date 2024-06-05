@@ -22,7 +22,7 @@ World* World::INSTANCE = nullptr;
 
 AutoPtr<World> World::GetInstance()
 {
-    if (INSTANCE == nullptr) {
+    if (nullptr == INSTANCE) {
         INSTANCE = new World();
     }
     return INSTANCE;
@@ -30,7 +30,7 @@ AutoPtr<World> World::GetInstance()
 
 AutoPtr<Module> World::GetWorkingModule()
 {
-    if (mWorkingModule == nullptr) {
+    if (nullptr == mWorkingModule) {
         mWorkingModule = new Module();
     }
     return mWorkingModule;

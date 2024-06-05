@@ -55,9 +55,10 @@ public:
 
 private:
     static World* INSTANCE;
+
     AutoPtr<Module> mCompilerRTModule;
-    std::vector<AutoPtr<Module>> mDependentModules;
     AutoPtr<Module> mWorkingModule;
+    std::vector<AutoPtr<Module>> mDependentModules;
 };
 
 World::World()

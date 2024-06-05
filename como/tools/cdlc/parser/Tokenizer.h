@@ -93,10 +93,10 @@ private:
 
 private:
     AutoPtr<Reader> mReader;
+    TokenInfo       mCurrentTokenInfo;
+    bool            mPeeked = false;
+    Token           mExpectedToken = Token::UNKNOWN;
     std::unordered_map<String, Token, StringHashFunc, StringEqualsFunc> mKeywords;
-    TokenInfo mCurrentTokenInfo;
-    bool mPeeked = false;
-    Token mExpectedToken = Token::UNKNOWN;
 };
 
 Tokenizer::Tokenizer()
@@ -156,6 +156,6 @@ bool Tokenizer::IsSpace(
     return isspace(c);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_TOKENIZER_H__

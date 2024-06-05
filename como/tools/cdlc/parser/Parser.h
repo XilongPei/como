@@ -233,6 +233,8 @@ private:
 
     bool ParseInclude();
 
+    bool ParseImport();
+
     void EnterBlockContext();
 
     void LeaveBlockContext();

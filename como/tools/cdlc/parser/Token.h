@@ -101,11 +101,13 @@ enum class Token
     VERSION_NUMBER,         // 73)
     FUNCTION_SAFETY_SETTING,    // 74)    FuncSafetySetting
     FRAMAC_BLOCK,           // 75 "/*@"
+
+    IMPORT,                 // 76)
 };
 
 char Token2Char(
     /* [in] */ Token token);
 
-}
+} // namespace cdlc
 
 #endif //__CDLC_TOKEN_H__

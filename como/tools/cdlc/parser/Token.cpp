@@ -33,4 +33,4 @@ char Token2Char(
     }
 }
 
-}
+} // namespace cdlc
