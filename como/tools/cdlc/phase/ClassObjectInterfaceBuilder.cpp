@@ -29,26 +29,26 @@ const char *ClassObjectInterfaceBuilder::TAG = "ClassObjectInterfaceBuilder";
 bool ClassObjectInterfaceBuilder::Process()
 {
     mIInterfaceType = mModule->FindType("como::IInterface");
-    if (mIInterfaceType == nullptr) {
+    if (nullptr == mIInterfaceType) {
         Logger::E(TAG, "Type \"como::IInterface\" not found.");
         return false;
     }
     mInterfaceIDType = mModule->FindType("como::InterfaceID");
-    if (mInterfaceIDType == nullptr) {
+    if (nullptr == mInterfaceIDType) {
         Logger::E(TAG, "Type \"como::InterfaceID\" not found.");
         return false;
     }
     mIClassObjectType = mModule->FindType("como::IClassObject");
-    if (mIClassObjectType == nullptr) {
+    if (nullptr == mIClassObjectType) {
         mIClassObjectType = mWorld->FindType("como::IClassObject");
-        if (mIClassObjectType == nullptr) {
+        if (nullptr == mIClassObjectType) {
             Logger::E(TAG, "Type \"como::IClassObject\" not found.");
             return false;
         }
         mIClassObjectType = mIClassObjectType->Clone(mModule, true);
     }
 
-    for (int i = 0; i < mModule->GetCoclassNumber(); i++) {
+    for (int i = 0;  i < mModule->GetCoclassNumber();  i++) {
         BuildCoclassObjectInterface(mModule->GetCoclass(i));
     }
 
@@ -88,7 +88,7 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
             p = new Parameter();
             p->SetName("object");
             AutoPtr<Type> t = mModule->FindType("como::IInterface**");
-            if (t == nullptr) {
+            if (nullptr == t) {
                 AutoPtr<PointerType> pointer = new PointerType();
                 pointer->SetBaseType(mIInterfaceType);
                 pointer->SetPointerNumber(2);

@@ -186,7 +186,7 @@ bool ParameterTypeChecker::IsTypeValid(
             return false;
         }
         if (isOut && ((pointerNumber + referenceNumber == 0) ||
-                                        (pointerNumber + referenceNumber > 2))) {
+                                       (pointerNumber + referenceNumber > 2))) {
             return false;
         }
     }

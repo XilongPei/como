@@ -116,7 +116,12 @@ void BuildinTypeBuilder::BuildPrimitiveType()
     type = new ECodeType();
     ns->AddType(type);
 
-    // add TypeKind
+    /**
+     * add TypeKind, defined in comotypekind.h
+     *
+     * The numeric argument in the function `AddEnumerator` call must be
+     * consistent with `enum class TypeKind`
+     */
     AutoPtr<EnumerationType> typeKindType = new EnumerationType();
     typeKindType->SetName("TypeKind");
     typeKindType->AddEnumerator("Unknown", 0);
