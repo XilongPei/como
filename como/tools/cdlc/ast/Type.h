@@ -124,12 +124,12 @@ protected:
         /* [in] */ Module* module);
 
 protected:
-    Module* mModule = nullptr;
-    String mName;
-    Namespace* mNamespace = nullptr;
-    bool mForwardDeclared = false;
-    String mExternalModuleName;
-    bool mDeepCopied = false;
+    Module     *mModule = nullptr;
+    String      mName;
+    Namespace  *mNamespace = nullptr;
+    bool        mForwardDeclared = false;
+    String      mExternalModuleName;
+    bool        mDeepCopied = false;
 };
 
 void Type::SetModule(
@@ -186,7 +186,7 @@ void Type::SetExternalModuleName(
 
 bool Type::IsExternal()
 {
-    return !mExternalModuleName.IsEmpty();
+    return ! mExternalModuleName.IsEmpty();
 }
 
 } // namespace cdlc

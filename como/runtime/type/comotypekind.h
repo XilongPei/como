@@ -17,7 +17,13 @@
 #ifndef __COMO_TYPEKIND_H__
 #define __COMO_TYPEKIND_H__
 
-#include "comodef.h"
+/**
+ * The macro `COM_PUBLIC` is defined in `comodef.h`. To avoid cross-referencing
+ * header files, write it directly here.
+ */
+#ifndef COM_PUBLIC
+#define COM_PUBLIC      __attribute__ ((visibility ("default")))
+#endif
 
 namespace como {
 

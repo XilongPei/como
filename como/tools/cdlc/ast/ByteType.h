@@ -45,6 +45,6 @@ ByteType::ByteType()
     mName = "Byte";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_BYTETYPE_H__

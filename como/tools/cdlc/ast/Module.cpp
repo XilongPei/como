@@ -42,9 +42,9 @@ AutoPtr<Namespace> Module::ParseNamespace(
     String nss = nsString + "::";
     AutoPtr<Namespace> parentNs, targetNs;
     int index;
-    while (!nss.IsEmpty() && ((index = nss.IndexOf("::")) != -1)) {
+    while ((! nss.IsEmpty()) && (((index = nss.IndexOf("::")) != -1))) {
         String targetNss = nss.Substring(0, index);
-        if (parentNs == nullptr) {
+        if (nullptr == parentNs) {
             targetNs = FindNamespace(targetNss);
             if (targetNs == nullptr) {
                 targetNs = new Namespace(targetNss, this);
@@ -54,7 +54,7 @@ AutoPtr<Namespace> Module::ParseNamespace(
         }
         else {
             targetNs = parentNs->FindNamespace(targetNss);
-            if (targetNs == nullptr) {
+            if (nullptr == targetNs) {
                 targetNs = new Namespace(targetNss, this);
                 parentNs->AddNamespace(targetNs);
             }
@@ -68,7 +68,7 @@ AutoPtr<Namespace> Module::ParseNamespace(
 AutoPtr<Constant> Module::GetConstant(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mConstants.size()) {
+    if ((i >= 0) && (i < mConstants.size())) {
         return mConstants[i];
     }
     return nullptr;
@@ -88,7 +88,7 @@ AutoPtr<EnumerationType> Module::FindEnumeration(
     /* [in] */ const String& fullName)
 {
     AutoPtr<Type> type = FindType(fullName);
-    if (type != nullptr && type->IsEnumerationType()) {
+    if ((type != nullptr) && type->IsEnumerationType()) {
         return (EnumerationType*)type.Get();
     }
     return nullptr;
@@ -97,7 +97,7 @@ AutoPtr<EnumerationType> Module::FindEnumeration(
 AutoPtr<EnumerationType> Module::GetEnumeration(
         /* [in] */ int i)
 {
-    if (i >= 0 && i < mEnumerations.size()) {
+    if ((i >= 0) && (i < mEnumerations.size())) {
         return mEnumerations[i];
     }
     return nullptr;
@@ -127,7 +127,7 @@ int Module::GetExternalEnumerationNumber()
 AutoPtr<InterfaceType> Module::GetInterface(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mInterfaces.size()) {
+    if ((i >= 0) && (i < mInterfaces.size())) {
         return mInterfaces[i];
     }
     return nullptr;
@@ -157,7 +157,7 @@ int Module::GetExternalInterfaceNumber()
 AutoPtr<CoclassType> Module::GetCoclass(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mKlasses.size()) {
+    if ((i >= 0) && (i < mKlasses.size())) {
         return mKlasses[i];
     }
     return nullptr;
@@ -202,13 +202,12 @@ AutoPtr<Type> Module::FindType(
     }
 
     int index = fullName.LastIndexOf("::");
-    AutoPtr<Namespace> ns = index == -1
-            ? mGlobalNamespace
-            : FindNamespace(fullName.Substring(0, index));
-    if (ns != nullptr && ns->NeedResolve()) {
-        return ResolveType(ns, index == -1
-                ? fullName
-                : fullName.Substring(index + 2));
+    AutoPtr<Namespace> ns = ((-1 == index)
+                                ? mGlobalNamespace
+                                : FindNamespace(fullName.Substring(0, index)));
+    if ((ns != nullptr) && ns->NeedResolve()) {
+        return ResolveType(ns, ((-1 == index) ? fullName
+                                              : fullName.Substring(index + 2)));
     }
     return nullptr;
 }
@@ -314,7 +313,7 @@ AutoPtr<Type> Module::ResolveType(
     /* [in] */ Namespace* ns,
     /* [in] */ const String& typeName)
 {
-    if (ns->mMetadata == nullptr) {
+    if (nullptr == ns->mMetadata) {
         return nullptr;
     }
 

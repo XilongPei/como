@@ -44,4 +44,4 @@ AutoPtr<Node> CoclassIDType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

@@ -26,7 +26,7 @@ void EnumerationType::AddEnumerator(
     /* [in] */ const String& name,
     /* [in] */ int value)
 {
-    if (!name.IsEmpty()) {
+    if (! name.IsEmpty()) {
         mEnumerators.push_back(new Enumerator(name, value));
     }
 }
@@ -45,7 +45,7 @@ bool EnumerationType::Contains(
 AutoPtr<EnumerationType::Enumerator> EnumerationType::GetEnumerator(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mEnumerators.size()) {
+    if ((i >= 0) && (i < mEnumerators.size())) {
         return mEnumerators[i];
     }
     return nullptr;
@@ -66,7 +66,7 @@ String EnumerationType::GetSignature()
     StringBuilder builder;
 
     builder.Append("L");
-    if (!mNamespace->IsGlobal()) {
+    if (! mNamespace->IsGlobal()) {
         builder.Append(mNamespace->ToString().Replace("::", "/"));
     }
     builder.Append("/");
@@ -104,10 +104,10 @@ AutoPtr<Node> EnumerationType::Clone(
 {
     AutoPtr<EnumerationType> clone = new EnumerationType();
     CloneBase(clone, module);
-    for (int i = 0; i < mEnumerators.size(); i++) {
+    for (int i = 0;  i < mEnumerators.size();  i++) {
         clone->AddEnumerator(mEnumerators[i]->mName, mEnumerators[i]->mValue);
     }
     return clone;
 }
 
-}
+} // namespace cdlc

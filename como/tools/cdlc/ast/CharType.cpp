@@ -49,4 +49,4 @@ AutoPtr<Node> CharType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

@@ -43,6 +43,6 @@ CoclassIDType::CoclassIDType()
     mName = "CoclassID";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_COCLASSIDTYPE_H__

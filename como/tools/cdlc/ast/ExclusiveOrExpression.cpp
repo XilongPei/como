@@ -43,10 +43,14 @@ int ExclusiveOrExpression::IntegerValue()
 long long int ExclusiveOrExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
+        long long int leftValue = (mLeftOperand->GetType()->IsIntegerType()
+                                     ? mLeftOperand->IntegerValue()
+                                     : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = (mRightOperand->GetType()->IsIntegerType()
+                                      ? mRightOperand->IntegerValue()
+                                      : mRightOperand->LongValue()
+                                   );
         return leftValue ^ rightValue;
     }
     else {
@@ -76,7 +80,7 @@ String ExclusiveOrExpression::EnumeratorValue()
 
 bool ExclusiveOrExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsPositiveInfinity();
@@ -84,7 +88,7 @@ bool ExclusiveOrExpression::IsPositiveInfinity()
 
 bool ExclusiveOrExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNegativeInfinity();
@@ -92,7 +96,7 @@ bool ExclusiveOrExpression::IsNegativeInfinity()
 
 bool ExclusiveOrExpression::IsNaN()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNaN();

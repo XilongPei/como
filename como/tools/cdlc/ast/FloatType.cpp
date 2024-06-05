@@ -49,4 +49,4 @@ AutoPtr<Node> FloatType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

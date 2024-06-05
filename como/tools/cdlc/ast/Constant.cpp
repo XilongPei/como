@@ -46,12 +46,12 @@ AutoPtr<Node> Constant::Clone(
 {
     AutoPtr<Constant> clone = new Constant();
     clone->mName = mName;
-    if (!deepCopy) {
+    if (! deepCopy) {
         clone->mType = mType;
     }
     else {
         AutoPtr<Type> type = module->FindType(mType->ToString());
-        if (type == nullptr) {
+        if (nullptr == type) {
             type = mType->Clone(module, false);;
         }
         clone->mType = type;
@@ -61,4 +61,4 @@ AutoPtr<Node> Constant::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

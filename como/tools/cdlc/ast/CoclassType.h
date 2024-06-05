@@ -90,14 +90,14 @@ public:
     inline String GetStrFramacBlock();
 
 private:
-    AutoPtr<UUID> mUuid;
-    String mVersion;
-    String mDescription;
-    String mFuncSafetySetting;
-    String mStrFramacBlock;
-    std::vector<AutoPtr<Method>> mConstructors;
+    AutoPtr<UUID>   mUuid;
+    String          mVersion;
+    String          mDescription;
+    String          mFuncSafetySetting;
+    String          mStrFramacBlock;
+    std::vector<AutoPtr<Method>>        mConstructors;
     std::vector<AutoPtr<InterfaceType>> mInterfaces;
-    std::vector<AutoPtr<Constant>> mConstants;
+    std::vector<AutoPtr<Constant>>      mConstants;
 };
 
 AutoPtr<UUID> CoclassType::GetUUID()

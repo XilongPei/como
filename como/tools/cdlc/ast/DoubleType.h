@@ -45,6 +45,6 @@ DoubleType::DoubleType()
     mName = "Double";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_DOUBLETYPE_H__

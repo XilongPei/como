@@ -43,6 +43,6 @@ BooleanType::BooleanType()
     mName = "Boolean";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_BOOLEANTYPE_H__

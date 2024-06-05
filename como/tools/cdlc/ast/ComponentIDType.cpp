@@ -44,4 +44,4 @@ AutoPtr<Node> ComponentIDType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

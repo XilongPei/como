@@ -43,6 +43,6 @@ HANDLEType::HANDLEType()
     mName = "HANDLE";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_HANDLETYPE_H__

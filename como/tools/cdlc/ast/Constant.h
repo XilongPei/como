@@ -110,6 +110,6 @@ void Constant::SetNamespace(
     mNamespace = ns;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_CONSTANT_H__

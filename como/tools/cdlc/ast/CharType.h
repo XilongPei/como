@@ -45,6 +45,6 @@ CharType::CharType()
     mName = "Char";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_CHARTYPE_H__

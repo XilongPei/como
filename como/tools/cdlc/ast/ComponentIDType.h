@@ -43,6 +43,6 @@ ComponentIDType::ComponentIDType()
     mName = "ComponentID";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_COMPONENTIDTYPE_H__

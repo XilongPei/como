@@ -45,6 +45,6 @@ FloatType::FloatType()
     mName = "Float";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_FLOATTYPE_H__

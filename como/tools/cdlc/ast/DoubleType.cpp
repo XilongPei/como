@@ -49,4 +49,4 @@ AutoPtr<Node> DoubleType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

@@ -44,4 +44,4 @@ AutoPtr<Node> ECodeType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

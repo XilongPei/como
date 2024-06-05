@@ -88,6 +88,6 @@ AutoPtr<EnumerationType> EnumerationType::CastFrom(
     return static_cast<EnumerationType*>(type);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_ENUMERATIONTYPE_H__

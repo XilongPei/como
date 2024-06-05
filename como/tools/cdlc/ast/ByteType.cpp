@@ -49,4 +49,4 @@ AutoPtr<Node> ByteType::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

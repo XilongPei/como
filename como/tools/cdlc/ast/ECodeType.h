@@ -43,6 +43,6 @@ ECodeType::ECodeType()
     mName = "ECode";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_ECODETYPE_H__

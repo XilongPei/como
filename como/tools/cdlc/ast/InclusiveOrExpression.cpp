@@ -32,8 +32,7 @@ char InclusiveOrExpression::CharacterValue()
 int InclusiveOrExpression::IntegerValue()
 {
     if (mLeftOperand != nullptr) {
-        return mLeftOperand->IntegerValue()
-                | mRightOperand->IntegerValue();
+        return (mLeftOperand->IntegerValue() | mRightOperand->IntegerValue());
     }
     else {
         return mRightOperand->IntegerValue();
@@ -43,11 +42,15 @@ int InclusiveOrExpression::IntegerValue()
 long long int InclusiveOrExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
-        return leftValue | rightValue;
+        long long int leftValue = (mLeftOperand->GetType()->IsIntegerType()
+                                     ? mLeftOperand->IntegerValue()
+                                     : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = (mRightOperand->GetType()->IsIntegerType()
+                                      ? mRightOperand->IntegerValue()
+                                      : mRightOperand->LongValue()
+                                   );
+        return (leftValue | rightValue);
     }
     else {
         return mRightOperand->LongValue();
@@ -76,7 +79,7 @@ String InclusiveOrExpression::EnumeratorValue()
 
 bool InclusiveOrExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand  == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsPositiveInfinity();
@@ -84,7 +87,7 @@ bool InclusiveOrExpression::IsPositiveInfinity()
 
 bool InclusiveOrExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNegativeInfinity();
@@ -92,7 +95,7 @@ bool InclusiveOrExpression::IsNegativeInfinity()
 
 bool InclusiveOrExpression::IsNaN()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((nullptr != mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNaN();
