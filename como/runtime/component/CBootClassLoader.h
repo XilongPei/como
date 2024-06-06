@@ -84,14 +84,14 @@ private:
         /* [out] */ String& compPath);
 
 private:
-    static const String TAG;
+    static const String          TAG;
     static AutoPtr<IClassLoader> sInstance;
     static AutoPtr<IClassLoader> sSystemClassLoader;
 
-    ArrayList<String> mComponentPath;
-    HashMap<UUID, IMetaComponent*> mComponents;
+    ArrayList<String>                mComponentPath;
+    HashMap<UUID, IMetaComponent*>   mComponents;
     HashMap<String, IMetaComponent*> mComponentPaths;
-    Mutex mComponentsLock;
+    Mutex                            mComponentsLock;
 };
 
 } // namespace como

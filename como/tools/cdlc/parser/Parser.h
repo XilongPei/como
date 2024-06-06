@@ -71,7 +71,7 @@ private:
 
     public:
         std::unordered_map<String, String, StringHashFunc, StringEqualsFunc>
-        mTypeForwardDeclarations;
+                                                        mTypeForwardDeclarations;
 
         AutoPtr<BlockContext> mNext;
     };
@@ -255,17 +255,18 @@ private:
 private:
     static const char* TAG;
 
-    AutoPtr<World> mWorld = World::GetInstance();
-    AutoPtr<Module> mModule;
-    AutoPtr<Namespace> mCurrentNamespace;
+    AutoPtr<World>        mWorld = World::GetInstance();
+    AutoPtr<Module>       mModule;
+    AutoPtr<Namespace>    mCurrentNamespace;
     AutoPtr<BlockContext> mCurrentContext;
-    AutoPtr<Type> mCurrentType;
+    AutoPtr<Type>         mCurrentType;
+    Tokenizer             mTokenizer;
+    std::vector<Error>    mErrors;
 
     std::vector<AutoPtr<Phase>> mBeforePhases;
     std::vector<AutoPtr<Phase>> mAfterPhases;
 
-    Tokenizer mTokenizer;
-    std::vector<Error> mErrors;
+    std::vector<String>         mComponentPath;
 };
 
 AutoPtr<Module> Parser::GetCompiledModule()
@@ -273,6 +274,6 @@ AutoPtr<Module> Parser::GetCompiledModule()
     return mModule;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_PARSER_H__

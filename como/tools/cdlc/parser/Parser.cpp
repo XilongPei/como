@@ -50,6 +50,30 @@ Parser::Parser()
     AddPhase(new ClassObjectInterfaceBuilder());
     AddPhase(new InterfaceIntegrityChecker());
     AddPhase(new ParameterTypeChecker());
+
+    /**
+     * Take the value of environment variable LIB_PATH and process it into an
+     * internally usable format.
+     */
+    String cpath(getenv("LIB_PATH"));
+    if (! cpath.IsEmpty()) {
+        int index = cpath.IndexOf(":");
+        while (index != -1) {
+            mComponentPath.push_back(cpath.Substring(0, index - 1));
+            cpath = cpath.Substring(index + 1);
+            index = cpath.IndexOf(":");
+        }
+        if (! cpath.IsEmpty()) {
+            mComponentPath.push_back(cpath);
+        }
+    }
+    else {
+        char* cwd = getcwd(nullptr, 0);
+        if (nullptr != cwd) {
+            mComponentPath.push_back(cwd);
+            free(cwd);
+        }
+    }
 }
 
 void Parser::AddPhase(
@@ -2360,11 +2384,24 @@ bool Parser::ParseImport()
     }
     mTokenizer.GetToken();
 
+    /**
+     * Using environmental variable LIB_PATH to find the component to import.
+     */
     String filePath = tokenInfo.mStringValue;
     void *metadata = MetadataUtils::ReadMetadata(filePath, MetadataUtils::TYPE_SO);
     if (nullptr == metadata) {
-        LogError(tokenInfo, "Load metadata from comort failed.");
-        return false;
+        for (String cpath : mComponentPath) {
+            String compPath = cpath + "/" + filePath;
+            metadata = MetadataUtils::ReadMetadata(compPath, MetadataUtils::TYPE_SO);
+            if (nullptr != metadata) {
+                break;
+            }
+        }
+
+        if (nullptr == metadata) {
+            LogError(tokenInfo, "Load metadata from comort failed.");
+            return false;
+        }
     }
 
     como::MetadataSerializer serializer;
