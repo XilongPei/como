@@ -37,7 +37,7 @@ AutoPtr<Type> MetadataResolver::ResolveType(
         if (typeName.Equals(me->mName)) {
             if (me->mProperties & TYPE_EXTERNAL) {
                 char** moduleNamePP = reinterpret_cast<char**>(
-                                            ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
+                          ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
                     return module->FindType(String::Format("%s::%s", me->mNamespace, me->mName));
@@ -55,7 +55,7 @@ AutoPtr<Type> MetadataResolver::ResolveType(
         if (typeName.Equals(mi->mName)) {
             if (mi->mProperties & TYPE_EXTERNAL) {
                 char** moduleNamePP = reinterpret_cast<char**>(
-                                            ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
+                            ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
                     return module->FindType(String::Format("%s::%s", mi->mNamespace, mi->mName));

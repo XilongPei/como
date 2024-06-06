@@ -43,7 +43,7 @@ void MetadataDumper::DumpMetaNamespaceLoop(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"%s\":\n", mn->mName);
     namespaceInfo = DumpMetaNamespace(mn, prefix + Properties::INDENT);
     builder.Append(namespaceInfo);
-    if (!lastOne) {
+    if (! lastOne) {
         builder.Append(",");
     }
     builder.Append("\n\n");
@@ -304,7 +304,8 @@ String MetadataDumper::DumpMetaInterface(
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mMethods\":[\n");
         for (int i = 0; i < mi->mMethodNumber; i++) {
-            String methodInfo = DumpMetaMethod(mi->mMethods[i], prefix + Properties::INDENT);
+            String methodInfo = DumpMetaMethod(mi->mMethods[i],
+                                                   prefix + Properties::INDENT);
             builder.Append(methodInfo);
             builder.AppendFormat("%s", i < mi->mMethodNumber - 1 ? ",\n" :"\n");
         }
@@ -315,17 +316,22 @@ String MetadataDumper::DumpMetaInterface(
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mNestedInterfaces\":[\n");
         for (int i = 0; i < mi->mNestedInterfaceNumber; i++) {
-            como::MetaInterface* interface = mComponent->mInterfaces[mi->mNestedInterfaceIndexes[i]];
-            String interfaceInfo = DumpMetaInterface(interface, prefix + Properties::INDENT);
+            como::MetaInterface* interface = mComponent->mInterfaces[
+                                                mi->mNestedInterfaceIndexes[i]];
+            String interfaceInfo = DumpMetaInterface(interface,
+                                                    prefix + Properties::INDENT);
             builder.Append(interfaceInfo);
-            builder.AppendFormat("%s", i < mi->mNestedInterfaceNumber - 1 ? ",\n" :"\n");
+            builder.AppendFormat("%s",
+                              i < mi->mNestedInterfaceNumber - 1 ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
     if (mi->mProperties & TYPE_EXTERNAL) {
         builder.Append(",\n");
-        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
-        builder.Append(prefix + Properties::INDENT).AppendFormat("\"mExternalModule\":\"%s\"\n", *externalPtr);
+        char** externalPtr = reinterpret_cast<char**>(
+                            ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
+        builder.Append(prefix + Properties::INDENT).AppendFormat(
+                                  "\"mExternalModule\":\"%s\"\n", *externalPtr);
     }
     else {
         builder.Append("\n");
@@ -342,11 +348,15 @@ String MetadataDumper::DumpMetaMethod(
     StringBuilder builder;
 
     builder.Append(prefix).Append("{\n");
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mName\":\"%s\",\n", mm->mName);
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mSignature\":\"%s\",\n", mm->mSignature);
+    builder.Append(prefix + Properties::INDENT).AppendFormat(
+                                              "\"mName\":\"%s\",\n", mm->mName);
+    builder.Append(prefix + Properties::INDENT).AppendFormat(
+                                    "\"mSignature\":\"%s\",\n", mm->mSignature);
     como::MetaType* type = mComponent->mTypes[mm->mReturnTypeIndex];
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"ReturnType\":\"%s\",\n", DumpMetaType(type).string());
-    builder.Append(prefix + Properties::INDENT).AppendFormat("\"mParameterNumber\":%d", mm->mParameterNumber);
+    builder.Append(prefix + Properties::INDENT).AppendFormat(
+                       "\"ReturnType\":\"%s\",\n", DumpMetaType(type).string());
+    builder.Append(prefix + Properties::INDENT).AppendFormat(
+                               "\"mParameterNumber\":%d", mm->mParameterNumber);
     if (mm->mProperties & METHOD_DELETED) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mProperties\":");
@@ -356,11 +366,11 @@ String MetadataDumper::DumpMetaMethod(
     if (mm->mParameterNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mParameters\":[\n");
-        for (int i = 0; i < mm->mParameterNumber; i++) {
+        for (int i = 0;  i < mm->mParameterNumber;  i++) {
             String parameterInfo = DumpMetaParameter(mm->mParameters[i],
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(parameterInfo);
-            builder.AppendFormat("%s", i < mm->mParameterNumber - 1 ? ",\n" :"\n");
+            builder.AppendFormat("%s", (i < mm->mParameterNumber - 1) ? ",\n" :"\n");
         }
         builder.Append(prefix + Properties::INDENT).Append("]");
     }
@@ -388,21 +398,26 @@ String MetadataDumper::DumpMetaParameter(
         needComma = true;
     }
     if (mp->mProperties & PARAMETER_OUT) {
-        if (needComma) builder.Append(" | ");
+        if (needComma) {
+            builder.Append(" | ");
+        }
         builder.Append("out");
         needComma = true;
     }
     if (mp->mProperties & PARAMETER_CALLEE) {
-        if (needComma) builder.Append(" | ");
+        if (needComma) {
+            builder.Append(" | ");
+        }
         builder.Append("callee");
     }
     builder.Append("\"");
     if (mp->mProperties & PARAMETER_VALUE_DEFAULT) {
         builder.Append(", ");
         como::MetaType* type = mComponent->mTypes[mp->mTypeIndex];
-        como::MetaValue* value = reinterpret_cast<como::MetaValue*>(ALIGN((uintptr_t)mp + sizeof(como::MetaParameter)));
+        como::MetaValue* value = reinterpret_cast<como::MetaValue*>(
+                            ALIGN((uintptr_t)mp + sizeof(como::MetaParameter)));
         builder.AppendFormat("\"value\":\"%s\"",
-                DumpMetaValue(type, value).string());
+                             DumpMetaValue(type, value).string());
     }
     builder.Append(" }");
 
@@ -479,7 +494,7 @@ String MetadataDumper::DumpMetaType(
 
     if ((mt->mProperties & TYPE_NUMBER_MASK) > 0) {
         int N = mt->mProperties & TYPE_NUMBER_MASK;
-        for (int i = N; i >= 1; i--) {
+        for (int i = N;  i >= 1;  i--) {
             if ((mt->mProperties >> (i * 2)) & TYPE_POINTER) {
                 builder.Append("*");
             }
@@ -490,7 +505,8 @@ String MetadataDumper::DumpMetaType(
     }
 
     if (mt->mProperties & TYPE_EXTERNAL) {
-        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mt +
+                                                       sizeof(como::MetaType)));
         builder.AppendFormat("(in %s)", *externalPtr);
     }
 
@@ -504,7 +520,7 @@ String MetadataDumper::DumpMetaValue(
     StringBuilder builder;
 
     if (mt->mProperties & TYPE_POINTER) {
-        if (mv->mIntegralValue == 0) {
+        if (0 == mv->mIntegralValue) {
             builder.Append("nullptr");
         }
         else {
@@ -559,4 +575,4 @@ String MetadataDumper::DumpUUID(
     return uuidStr;
 }
 
-}
+} // namespace cdlc

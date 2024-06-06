@@ -90,6 +90,6 @@ MetadataDumper::MetadataDumper(
     : mComponent(mc)
 {}
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_METADATADUMPER_H__

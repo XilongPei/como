@@ -75,6 +75,6 @@ MetadataResolver::MetadataResolver(
     , mComponent(mc)
 {}
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_METADATARESOLVER_H__

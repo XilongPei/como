@@ -24,9 +24,9 @@
 #define ALIGN8(v) (((v) + 7) & ~7)
 
 #if defined(__i386__) || defined(__arm__)
-#define ALIGN(v) ALIGN4(v)
+    #define ALIGN(v) ALIGN4(v)
 #elif defined(__x86_64__) || defined(__aarch64__)
-#define ALIGN(v) ALIGN8(v)
+    #define ALIGN(v) ALIGN8(v)
 #else
     #if defined(__riscv)
         #if (__riscv_xlen == 32)
@@ -36,6 +36,5 @@
         #endif
     #endif
 #endif
-
 
 #endif // __CDLC_METADATA_H__

@@ -126,10 +126,10 @@ private:
     static const char* TAG;
 
     AutoPtr<Module> mModule;
+    uintptr_t       mBasePtr = 0;
+    size_t          mSize = 0;
+    StringPool      mPool;
     std::shared_ptr<como::MetaComponent> mMetaComponent;
-    uintptr_t mBasePtr = 0;
-    size_t mSize = 0;
-    StringPool mPool;
 };
 
 MetadataBuilder::MetadataBuilder(
@@ -137,6 +137,6 @@ MetadataBuilder::MetadataBuilder(
     : mModule(module)
 {}
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_METADATABUILDER_H__

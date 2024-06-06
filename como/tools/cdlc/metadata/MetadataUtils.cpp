@@ -47,12 +47,12 @@ void* MetadataUtils::ReadMetadataFromElf64(
     }
 
     File file(filePath, File::READ);
-    if (!file.IsValid()) {
+    if (! file.IsValid()) {
         Logger::E("MetadataUtils", "Open \"%s\" file failed.", file.GetPath().string());
         return nullptr;
     }
 
-    if (!file.Seek(0, File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(0, File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         return nullptr;
     }
@@ -64,7 +64,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
         return nullptr;
     }
 
-    if (!file.Seek(ehdr.e_shoff, File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(ehdr.e_shoff, File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         return nullptr;
     }
@@ -90,7 +90,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
         return nullptr;
     }
 
-    if (!file.Seek(strShdr->sh_offset, File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(strShdr->sh_offset, File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         free(shdrs);
         free(strTable);
@@ -105,22 +105,22 @@ void* MetadataUtils::ReadMetadataFromElf64(
     }
 
     como::Elf64_Shdr* mdSec = nullptr;
-    for (int i = 0; i < ehdr.e_shnum; i++) {
+    for (int i = 0;  i < ehdr.e_shnum;  i++) {
         const char* secName = strTable + shdrs[i].sh_name;
-        if (!strncmp(secName, ".metadata", 9)) {
+        if (! strncmp(secName, ".metadata", 9)) {
             mdSec = shdrs + i;
             break;
         }
     }
 
-    if (mdSec == nullptr) {
+    if (nullptr == mdSec) {
         Logger::E("MetadataUtils", "Find .metadata section of \"%s\" file failed.", filePath.string());
         free(shdrs);
         free(strTable);
         return nullptr;
     }
 
-    if (!file.Seek(mdSec->sh_offset + sizeof(size_t), File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(mdSec->sh_offset + sizeof(size_t), File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         free(shdrs);
         free(strTable);
@@ -132,7 +132,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
     como::MetaComponent component;
 
     if (file.Read(reinterpret_cast<void*>(&component), sizeof(como::MetaComponent))
-            < sizeof(como::MetaComponent)) {
+                                                    < sizeof(como::MetaComponent)) {
         Logger::E("MetadataUtils", "Read \"%s\" file failed.", filePath.string());
         free(shdrs);
         return nullptr;
@@ -144,7 +144,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
         return nullptr;
     }
 
-    if (!file.Seek(mdSec->sh_offset + sizeof(size_t), File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(mdSec->sh_offset + sizeof(size_t), File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         free(shdrs);
         return nullptr;
@@ -153,11 +153,12 @@ void* MetadataUtils::ReadMetadataFromElf64(
     free(shdrs);
 
     void* metadata = malloc(component.mSize);
-    if (metadata == nullptr) {
+    if (nullptr == metadata) {
         Logger::E("MetadataUtils", "Malloc metadata buffer failed.");
         return nullptr;
     }
     if (file.Read(metadata, component.mSize) < component.mSize) {
+        free(metadata);
         Logger::E("MetadataUtils", "Read .metadata section of \"%s\" file failed.", filePath.string());
         return nullptr;
     }
@@ -174,12 +175,12 @@ void* MetadataUtils::ReadMetadataFromFile(
     }
 
     File file(filePath, File::READ);
-    if (!file.IsValid()) {
+    if (! file.IsValid()) {
         Logger::E("MetadataUtils", "Open \"%s\" file failed.", file.GetPath().string());
         return nullptr;
     }
 
-    if (!file.Seek(0, File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(0, File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         return nullptr;
     }
@@ -187,33 +188,35 @@ void* MetadataUtils::ReadMetadataFromFile(
     como::MetaComponent component;
 
     if (file.Read(reinterpret_cast<void*>(&component), sizeof(como::MetaComponent))
-            < sizeof(como::MetaComponent)) {
+                                                    < sizeof(como::MetaComponent)) {
         Logger::E("MetadataUtils", "Read \"%s\" file failed.", filePath.string());
         return nullptr;
     }
 
     if (component.mMagic != COMO_MAGIC) {
-        Logger::E("MetadataUtils", "Metadata info in \"%s\" file is bad.", filePath.string());
+        Logger::E("MetadataUtils",
+                  "Metadata info in \"%s\" file is bad.", filePath.string());
         return nullptr;
     }
 
-    if (!file.Seek(0, File::SEEK_FROM_BEGIN)) {
+    if (! file.Seek(0, File::SEEK_FROM_BEGIN)) {
         Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
         return nullptr;
     }
 
     void* metadata = malloc(component.mSize);
-    if (metadata == nullptr) {
+    if (nullptr == metadata) {
         Logger::E("MetadataUtils", "Malloc metadata buffer failed.");
         return nullptr;
     }
     if (file.Read(metadata, component.mSize) < component.mSize) {
-        Logger::E("MetadataUtils", "Read metadata content of \"%s\" file failed.", filePath.string());
+        free(metadata);
+        Logger::E("MetadataUtils",
+             "Read metadata content of \"%s\" file failed.", filePath.string());
         return nullptr;
     }
 
     return metadata;
 }
 
-}
-
+} // namespace cdlc

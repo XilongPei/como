@@ -41,6 +41,6 @@ public:
     static constexpr int TYPE_SO = 2;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_METADATAUTILS_H__

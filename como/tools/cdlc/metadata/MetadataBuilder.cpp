@@ -304,7 +304,7 @@ void MetadataBuilder::CalculateMetaInterface(
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaMethod*) * MN;
 
-    for (int i = 0; i < CN; i++) {
+    for (int i = 0;  i < CN;  i++) {
         CalculateMetaConstant(interface->GetConstant(i));
     }
 
@@ -335,7 +335,7 @@ void MetadataBuilder::CalculateMetaMethod(
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaParameter*) * PN;
 
-    for (int i = 0; i < PN; i++) {
+    for (int i = 0;  i < PN;  i++) {
         CalculateMetaParameter(method->GetParameter(i));
     }
 }
@@ -464,25 +464,25 @@ void MetadataBuilder::WriteMetaComponent(
 
     mc->mGlobalNamespace = WriteMetaNamespace(module->GetGlobalNamespace());
 
-    for (int i = 0; i < CN; i++) {
+    for (int i = 0;  i < CN;  i++) {
         mc->mConstants[i] = WriteMetaConstant(module->GetConstant(i));
     }
 
-    for (int i = 0; i < KN; i++) {
+    for (int i = 0;  i < KN;  i++) {
         mc->mCoclasses[i] = WriteMetaCoclass(module->GetCoclass(i));
     }
 
-    for (int i = 0; i < EN; i++) {
+    for (int i = 0;  i < EN;  i++) {
         mc->mEnumerations[i] = WriteMetaEnumeration(module->GetEnumeration(i));
     }
 
-    for (int i = 0; i < IN; i++) {
+    for (int i = 0;  i < IN;  i++) {
         mc->mInterfaces[i] = WriteMetaInterface(module->GetInterface(i));
     }
 
     auto& types = module->GetTypes();
     auto it = types.begin();
-    for (int i = 0; i < TN && it != types.end(); i++, it++) {
+    for (int i = 0;  (i < TN) && (it != types.end());  i++, it++) {
         mc->mTypes[i] = WriteMetaType(it->second);
     }
 }
@@ -526,19 +526,19 @@ como::MetaNamespace *MetadataBuilder::WriteMetaNamespace(
     // end address
     mBasePtr = mBasePtr + sizeof(int) * IN;
 
-    for (int i = 0; i < NN; i++) {
+    for (int i = 0;  i < NN;  i++) {
         mn->mNamespaces[i] = WriteMetaNamespace(ns->GetNamespace(i));
     }
 
-    for (int i = 0; i < CN; i++) {
+    for (int i = 0;  i < CN;  i++) {
         mn->mConstantIndexes[i] = mModule->IndexOf(ns->GetConstant(i));
     }
 
-    for (int i = 0; i < KN; i++) {
+    for (int i = 0;  i < KN;  i++) {
         mn->mCoclassIndexes[i] = mModule->IndexOf(ns->GetCoclass(i));
     }
 
-    for (int i = 0; i < EN; i++) {
+    for (int i = 0;  i < EN;  i++) {
         mn->mEnumerationIndexes[i] = mModule->IndexOf(ns->GetEnumeration(i));
     }
 
@@ -627,7 +627,7 @@ como::MetaCoclass *MetadataBuilder::WriteMetaCoclass(
     // end address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
 
-    for (int i = 0; i < IN; i++) {
+    for (int i = 0;  i < IN;  i++) {
         mc->mInterfaceIndexes[i] = mModule->IndexOf(klass->GetInterface(i));
 
         // TODO
@@ -683,7 +683,7 @@ como::MetaEnumeration *MetadataBuilder::WriteMetaEnumeration(
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaEnumerator*) * EN;
 
-    for (int i = 0; i < EN; i++) {
+    for (int i = 0;  i < EN;  i++) {
         me->mEnumerators[i] = WriteMetaEnumerator(enumeration->GetEnumerator(i));
     }
 
@@ -743,16 +743,16 @@ como::MetaInterface *MetadataBuilder::WriteMetaInterface(
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaMethod*) * MN;
 
-    for (int i = 0; i < IN; i++) {
+    for (int i = 0;  i < IN;  i++) {
         mi->mNestedInterfaceIndexes[i] = mModule->IndexOf(
                 interface->GetNestedInterface(i));
     }
 
-    for (int i = 0; i < CN; i++) {
+    for (int i = 0;  i < CN;  i++) {
         mi->mConstants[i] = WriteMetaConstant(interface->GetConstant(i));
     }
 
-    for (int i = 0; i < MN; i++) {
+    for (int i = 0;  i < MN;  i++) {
         mi->mMethods[i] = WriteMetaMethod(interface->GetMethod(i));
     }
 
@@ -782,7 +782,7 @@ como::MetaMethod *MetadataBuilder::WriteMetaMethod(
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaParameter*) * PN;
 
-    for (int i = 0; i < PN; i++) {
+    for (int i = 0;  i < PN;  i++) {
         mm->mParameters[i] = WriteMetaParameter(method->GetParameter(i));
     }
 
