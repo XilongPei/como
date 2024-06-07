@@ -103,6 +103,9 @@ AutoPtr<Node> EnumerationType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<EnumerationType> clone = new EnumerationType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     for (int i = 0;  i < mEnumerators.size();  i++) {
         clone->AddEnumerator(mEnumerators[i]->mName, mEnumerators[i]->mValue);

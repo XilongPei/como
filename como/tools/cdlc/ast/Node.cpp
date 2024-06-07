@@ -36,4 +36,4 @@ AutoPtr<Node> Node::Clone(
     return nullptr;
 }
 
-}
+} // namespace cdlc

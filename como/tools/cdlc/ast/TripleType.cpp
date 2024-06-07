@@ -35,8 +35,11 @@ AutoPtr<Node> TripleType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<TripleType> clone = new TripleType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }
 
-}
+} // namespace cdlc

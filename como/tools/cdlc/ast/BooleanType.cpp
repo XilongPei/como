@@ -40,6 +40,9 @@ AutoPtr<Node> BooleanType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<BooleanType> clone = new BooleanType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

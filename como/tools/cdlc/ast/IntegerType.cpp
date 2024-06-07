@@ -45,6 +45,9 @@ AutoPtr<Node> IntegerType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<IntegerType> clone = new IntegerType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

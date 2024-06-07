@@ -45,6 +45,6 @@ LongType::LongType()
     mName = "Long";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_LONGTYPE_H__

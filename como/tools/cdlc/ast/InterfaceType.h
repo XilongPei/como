@@ -104,15 +104,15 @@ public:
     static constexpr int METHOD_MAX_NUMBER = 240 + 4;
 
 private:
-    AutoPtr<UUID> mUuid;
-    String mVersion;
-    String mDescription;
-    String mStrFramacBlock;
-    InterfaceType *mBaseInterface = nullptr;
-    InterfaceType *mOuterInterface = nullptr;
+    AutoPtr<UUID>   mUuid;
+    String          mVersion;
+    String          mDescription;
+    String          mStrFramacBlock;
+    InterfaceType  *mBaseInterface = nullptr;
+    InterfaceType  *mOuterInterface = nullptr;
     std::vector<AutoPtr<InterfaceType>> mNestedInterfaces;
-    std::vector<AutoPtr<Constant>> mConstants;
-    std::vector<AutoPtr<Method>> mMethods;
+    std::vector<AutoPtr<Constant>>      mConstants;
+    std::vector<AutoPtr<Method>>        mMethods;
 };
 
 AutoPtr<UUID> InterfaceType::GetUUID()

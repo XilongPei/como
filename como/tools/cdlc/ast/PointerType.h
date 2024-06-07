@@ -83,6 +83,6 @@ AutoPtr<PointerType> PointerType::CastFrom(
     return static_cast<PointerType*>(type);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_POINTERTYPE_H__

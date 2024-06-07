@@ -40,6 +40,9 @@ AutoPtr<Node> CoclassIDType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<CoclassIDType> clone = new CoclassIDType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

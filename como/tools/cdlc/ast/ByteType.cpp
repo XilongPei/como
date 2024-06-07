@@ -45,6 +45,9 @@ AutoPtr<Node> ByteType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ByteType> clone = new ByteType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

@@ -48,6 +48,9 @@ AutoPtr<Node> PointerType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<PointerType> clone = new PointerType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     AutoPtr<Type> baseType = module->FindType(mBaseType->ToString());
     if (baseType == nullptr) {
@@ -59,5 +62,4 @@ AutoPtr<Node> PointerType::Clone(
     return clone;
 }
 
-}
-
+} // namespace cdlc

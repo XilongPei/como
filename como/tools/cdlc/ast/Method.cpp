@@ -95,4 +95,4 @@ AutoPtr<Node> Method::Clone(
     return clone;
 }
 
-}
+} // namespace cdlc

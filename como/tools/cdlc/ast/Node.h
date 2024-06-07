@@ -39,6 +39,6 @@ public:
         /* [in] */ bool deepCopy);
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_NODE_H__

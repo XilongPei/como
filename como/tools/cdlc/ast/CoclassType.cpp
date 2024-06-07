@@ -41,7 +41,7 @@ AutoPtr<Method> CoclassType::FindConstructor(
 {
     for (AutoPtr<Method> constructor : mConstructors) {
         if (constructor->GetName().Equals(name) &&
-                constructor->GetSignature().Equals(signature)) {
+                                constructor->GetSignature().Equals(signature)) {
             return constructor;
         }
     }

@@ -45,6 +45,9 @@ AutoPtr<Node> Constant::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Constant> clone = new Constant();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     clone->mName = mName;
     if (! deepCopy) {
         clone->mType = mType;

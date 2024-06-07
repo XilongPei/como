@@ -45,6 +45,9 @@ AutoPtr<Node> ShortType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ShortType> clone = new ShortType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

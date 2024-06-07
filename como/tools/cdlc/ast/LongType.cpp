@@ -45,8 +45,11 @@ AutoPtr<Node> LongType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<LongType> clone = new LongType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }
 
-}
+} // namespace cdlc

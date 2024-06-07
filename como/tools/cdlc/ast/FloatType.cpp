@@ -45,6 +45,9 @@ AutoPtr<Node> FloatType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<FloatType> clone = new FloatType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

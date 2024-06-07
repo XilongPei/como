@@ -40,6 +40,9 @@ AutoPtr<Node> ComponentIDType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ComponentIDType> clone = new ComponentIDType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

@@ -40,6 +40,9 @@ AutoPtr<Node> InterfaceIDType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<InterfaceIDType> clone = new InterfaceIDType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

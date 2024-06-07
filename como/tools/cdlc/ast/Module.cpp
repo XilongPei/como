@@ -56,6 +56,9 @@ AutoPtr<Namespace> Module::ParseNamespace(
             targetNs = parentNs->FindNamespace(targetNss);
             if (nullptr == targetNs) {
                 targetNs = new Namespace(targetNss, this);
+                if (nullptr == targetNs) {
+                    return nullptr;
+                }
                 parentNs->AddNamespace(targetNs);
             }
             parentNs = targetNs;

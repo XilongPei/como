@@ -40,6 +40,9 @@ AutoPtr<Node> HANDLEType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<HANDLEType> clone = new HANDLEType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

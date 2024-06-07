@@ -134,6 +134,6 @@ void Parameter::SetAttributes(
     mAttributes |= attrs;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_PARAMETER_H__

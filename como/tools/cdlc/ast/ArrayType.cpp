@@ -40,9 +40,13 @@ AutoPtr<Node> ArrayType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ArrayType> clone = new ArrayType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
+
     CloneBase(clone, module);
     AutoPtr<Type> elementType = module->FindType(mElementType->ToString());
-    if (elementType == nullptr) {
+    if (nullptr == elementType) {
         elementType = mElementType->Clone(module, deepCopy);
     }
     clone->mElementType = elementType;

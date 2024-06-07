@@ -43,6 +43,6 @@ InterfaceIDType::InterfaceIDType()
     mName = "InterfaceID";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_INTERFACEIDTYPE_H__

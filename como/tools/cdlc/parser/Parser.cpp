@@ -198,6 +198,12 @@ bool Parser::ParseFile(
                 break;
             }
         }
+
+        if (! result) {
+            LogError(tokenInfo, "ParseFile fail.");
+            return false;
+        }
+
         tokenInfo = mTokenizer.PeekToken();
     }
     mTokenizer.GetToken();
@@ -300,9 +306,9 @@ bool Parser::ParseAttributes(
             }
             if (! result) {
                 // jump to ',' or ']'
-                while (tokenInfo.mToken != Token::COMMA &&
-                                tokenInfo.mToken != Token::BRACKETS_CLOSE &&
-                                tokenInfo.mToken != Token::END_OF_FILE) {
+                while ((tokenInfo.mToken != Token::COMMA) &&
+                                (tokenInfo.mToken != Token::BRACKETS_CLOSE) &&
+                                (tokenInfo.mToken != Token::END_OF_FILE)) {
                     mTokenizer.GetToken();
                     tokenInfo = mTokenizer.PeekToken();
                 }
@@ -352,7 +358,7 @@ bool Parser::ParseUuid(
         return false;
     }
     attrs.mUuid = tokenInfo.mStringValue;
-    if (!UUID::IsValid(attrs.mUuid)) {
+    if (! UUID::IsValid(attrs.mUuid)) {
         LogError(tokenInfo, "uuid number is not valid.");
         result = false;
     }
@@ -569,6 +575,12 @@ bool Parser::ParseModule(
                 break;
             }
         }
+
+        if (! result) {
+            LogError(tokenInfo, "ParseModule fail.");
+            return false;
+        }
+
         tokenInfo = mTokenizer.PeekToken();
     }
     if (tokenInfo.mToken == Token::END_OF_FILE) {
@@ -609,8 +621,12 @@ bool Parser::ParseNamespace()
     mTokenizer.GetToken();
 
     AutoPtr<Namespace> ns = mCurrentNamespace->FindNamespace(namespaceName);
-    if (ns == nullptr) {
+    if (nullptr == ns) {
         ns = new Namespace(namespaceName, mModule);
+        if (nullptr == ns) {
+            LogError(tokenInfo, "new Namespace fail.");
+            return false;
+        }
         mCurrentNamespace->AddNamespace(ns);
     }
     mCurrentNamespace = ns;
@@ -661,13 +677,19 @@ bool Parser::ParseNamespace()
             }
             default: {
                 String message = String::Format("%s is not expected.",
-                        TokenInfo::Dump(tokenInfo).string());
+                                           TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 mTokenizer.GetToken();
                 result = false;
                 break;
             }
         }
+
+        if (! result) {
+            LogError(tokenInfo, "ParseNamespace fail.");
+            return false;
+        }
+
         tokenInfo = mTokenizer.PeekToken();
     }
     if (tokenInfo.mToken == Token::END_OF_FILE) {
@@ -799,8 +821,8 @@ bool Parser::ParseInterface(
         else {
             LogError(tokenInfo, "Base interface name is expected.");
             // jump over '{'
-            while (tokenInfo.mToken != Token::BRACES_OPEN &&
-                                       tokenInfo.mToken != Token::END_OF_FILE) {
+            while ((tokenInfo.mToken != Token::BRACES_OPEN) &&
+                                     (tokenInfo.mToken != Token::END_OF_FILE)) {
                 mTokenizer.GetToken();
                 tokenInfo = mTokenizer.PeekToken();
             }
@@ -884,7 +906,7 @@ bool Parser::ParseInterfaceBody(
         }
 
         if (! result) {
-            LogError(tokenInfo, "Methods token error.");
+            LogError(tokenInfo, "ParseInterfaceBody fail.");
             result = false;
             break;
         }
@@ -921,13 +943,13 @@ AutoPtr<Constant> Parser::ParseConstant()
         while (ns != nullptr) {
             String fullTypeName = ns->ToString() + "::" + typeName;
             type = FindType(fullTypeName, true);
-            if (type != nullptr && type->IsEnumerationType()) {
+            if ((type != nullptr) && type->IsEnumerationType()) {
                 enumeration = EnumerationType::CastFrom(type);
                 break;
             }
             ns = ns->GetParent();
         }
-        if (enumeration == nullptr) {
+        if (nullptr == enumeration) {
             String message = String::Format("Type \"%s\" is not declared.", typeName.string());
             LogError(tokenInfo, message);
             mTokenizer.SkipCurrentLine();
@@ -1524,21 +1546,23 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
             }
             if (nullptr == constant) {
                 AutoPtr<Type> idType = FindType(nsOrTypeName, true);
-                if (idType == nullptr) {
-                    String message = String::Format("Type \"%s\" is not found", nsOrTypeName.string());
+                if (nullptr == idType) {
+                    String message = String::Format("Type \"%s\" is not found",
+                                                    nsOrTypeName.string());
                     LogError(tokenInfo, message);
                     return nullptr;
                 }
                 if (! idType->IsInterfaceType()) {
-                    String message = String::Format("Type \"%s\" is not interface", idType->ToString().string());
+                    String message = String::Format("Type \"%s\" is not interface",
+                                                    idType->ToString().string());
                     LogError(tokenInfo, message);
                     return nullptr;
                 }
                 constant = InterfaceType::CastFrom(idType)->FindConstant(constName);
             }
-            if (constant == nullptr) {
+            if (nullptr == constant) {
                 String message = String::Format("\"%s\" is not a constant of %s",
-                        constName.string(), id.string());
+                                                constName.string(), id.string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
@@ -1549,7 +1573,8 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
             if (nullptr == constant) {
                 AutoPtr<Type> idType = mCurrentType;
                 if (! idType->IsInterfaceType()) {
-                    String message = String::Format("Type \"%s\" is not interface", idType->ToString().string());
+                    String message = String::Format("Type \"%s\" is not interface",
+                                                    idType->ToString().string());
                     LogError(tokenInfo, message);
                     return nullptr;
                 }
@@ -1557,14 +1582,14 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
             }
             if (constant == nullptr) {
                 String message = String::Format("\"%s\" is not a constant of %s",
-                        constName.string(), id.string());
+                                                constName.string(), id.string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
         }
         if (!constant->GetType()->IsNumericType()) {
             String message = String::Format("\"%s\" is not a numeric constant.",
-                    id.string());
+                                            id.string());
             LogError(tokenInfo, message);
             return nullptr;
         }
@@ -1617,7 +1642,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
     else if (type->IsEnumerationType()) {
         String id = tokenInfo.mStringValue;
         int idx = id.LastIndexOf("::");
-        if (idx == -1) {
+        if (-1 == idx) {
             String message = String::Format("\"%s\" is not a valid enumerator of %s",
                                             id.string(), type->GetName().string());
             LogError(tokenInfo, message);
@@ -1627,6 +1652,10 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
         String constName = id.Substring(idx + 2);
         if (type->GetName().Equals(typeName) && EnumerationType::CastFrom(type)->Contains(constName)) {
             AutoPtr<PostfixExpression> expr = new PostfixExpression();
+            if (nullptr == expr) {
+                LogError(tokenInfo, "new PostfixExpression() fail.");
+                return nullptr;
+            }
             expr->SetType(type);
             expr->SetEnumeratorName(constName);
             return expr;
@@ -1634,25 +1663,28 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
         else {
             AutoPtr<Type> type = FindType(typeName, true);
             if (type == nullptr) {
-                String message = String::Format("Type \"%s\" is not found", typeName.string());
+                String message = String::Format("Type \"%s\" is not found",
+                                                typeName.string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
-            if (!type->IsInterfaceType()) {
-                String message = String::Format("Type \"%s\" is not interface", type->ToString().string());
+            if (! type->IsInterfaceType()) {
+                String message = String::Format("Type \"%s\" is not interface",
+                                                type->ToString().string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
             AutoPtr<Constant> constant = InterfaceType::CastFrom(type)->FindConstant(constName);
             if (constant == nullptr) {
                 String message = String::Format("\"%s\" is not a constant of %s",
-                        constName.string(), typeName.string());
+                                                constName.string(), typeName.string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
             if (!constant->GetValue()->GetType()->IsIntegralType()) {
-                String message = String::Format("Constant \"%s\" is not an integral constant",
-                        id.string());
+                String message = String::Format(
+                                "Constant \"%s\" is not an integral constant",
+                                id.string());
                 LogError(tokenInfo, message);
                 return nullptr;
             }
@@ -1665,7 +1697,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
     }
 
     String message = String::Format("\"%s\" can not be assigned to \"%s\" type.",
-            tokenInfo.mStringValue.string(), type->GetName().string());
+                        tokenInfo.mStringValue.string(), type->GetName().string());
     LogError(tokenInfo, message);
     return nullptr;
 }
@@ -1774,8 +1806,8 @@ bool Parser::ParseParameter(
     }
 
     tokenInfo = mTokenizer.PeekToken();
-    while (tokenInfo.mToken != Token::BRACKETS_CLOSE &&
-            tokenInfo.mToken != Token::END_OF_FILE) {
+    while ((tokenInfo.mToken != Token::BRACKETS_CLOSE) &&
+            (tokenInfo.mToken != Token::END_OF_FILE)) {
         switch (tokenInfo.mToken) {
             case Token::IN: {
                 mTokenizer.GetToken();
@@ -1883,8 +1915,8 @@ AutoPtr<Type> Parser::ParseType()
     else if (tokenInfo.mToken == Token::IDENTIFIER) {
         mTokenizer.GetToken();
         type = FindType(tokenInfo.mStringValue, false);
-        if (type == nullptr && mCurrentType != nullptr &&
-                mCurrentType->GetName().Equals(tokenInfo.mStringValue)) {
+        if ((nullptr == type) && (mCurrentType != nullptr) &&
+                        mCurrentType->GetName().Equals(tokenInfo.mStringValue)) {
             type = mCurrentType;
         }
     }
@@ -1892,7 +1924,7 @@ AutoPtr<Type> Parser::ParseType()
         type = ParseArray();
     }
 
-    if (type == nullptr) {
+    if (nullptr == type) {
         String message = String::Format("Type \"%s\" was not declared in this scope.",
                                         TokenInfo::Dump(tokenInfo).string());
         LogError(tokenInfo, message);
@@ -1917,6 +1949,10 @@ AutoPtr<Type> Parser::ParseType()
             AutoPtr<PointerType> pointer = PointerType::CastFrom(mModule->FindType(ptrTypeName));
             if (nullptr == pointer) {
                 pointer = new PointerType();
+                if (nullptr == pointer) {
+                    LogError(tokenInfo, "new PointerType() fail.");
+                    return nullptr;
+                }
                 pointer->SetBaseType(type);
                 pointer->SetExternalModuleName(type->GetExternalModuleName());
                 pointer->SetPointerNumber(ptrNumber);
@@ -1992,6 +2028,9 @@ AutoPtr<Type> Parser::ParseArray()
     AutoPtr<ArrayType> array = ArrayType::CastFrom(mModule->FindType(arrayTypeName));
     if (nullptr == array) {
         array = new ArrayType();
+        if (nullptr == array) {
+            return nullptr;
+        }
         array->SetElementType(elementType);
         mModule->AddTemporaryType(array);
     }
@@ -2004,8 +2043,9 @@ bool Parser::ParseNestedInterface(
 {
     Attributes attrs;
     bool result = ParseAttributes(attrs);
-    if (! result)
+    if (! result) {
         return false;
+    }
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken != Token::INTERFACE) {
@@ -2015,8 +2055,12 @@ bool Parser::ParseNestedInterface(
     }
 
     AutoPtr<Namespace> ns = mCurrentNamespace->FindNamespace(outerInterface->GetName());
-    if (ns == nullptr) {
+    if (nullptr == ns) {
         ns = new Namespace(outerInterface, mModule);
+        if (nullptr == ns) {
+            LogError(tokenInfo, "new Namespace() fail.");
+            result = false;
+        }
         mCurrentNamespace->AddNamespace(ns);
     }
     mCurrentNamespace = ns;
@@ -2141,6 +2185,11 @@ bool Parser::ParseCoclassBody(
                 break;
             }
         }
+
+        if (! result) {
+            LogError(tokenInfo, "ParseCoclassBody fail.");
+            return false;
+        }
         tokenInfo = mTokenizer.PeekToken();
     }
     if (tokenInfo.mToken == Token::END_OF_FILE) {
@@ -2185,7 +2234,7 @@ bool Parser::ParseConstructor(
             LogError(tokenInfo, "\",\" or \")\" is expected.");
             result = false;
         }
-        if (!result) {
+        if (! result) {
             // jump to ',' or ')'
             while (tokenInfo.mToken != Token::COMMA &&
                     tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
@@ -2214,7 +2263,7 @@ bool Parser::ParseConstructor(
         }
         else {
             String message = String::Format("%s is not expected.",
-                    TokenInfo::Dump(tokenInfo).string());
+                                            TokenInfo::Dump(tokenInfo).string());
             LogError(tokenInfo, message);
             result = false;
         }
@@ -2229,7 +2278,7 @@ bool Parser::ParseConstructor(
     if (result) {
         if (klass->FindConstructor(method->GetName(), method->GetSignature()) != nullptr) {
             String message = String::Format("The Constructor \"%s\" is redeclared.",
-                    method->ToString().string());
+                                            method->ToString().string());
             LogError(tokenInfo, message);
             return false;
         }
@@ -2255,7 +2304,7 @@ bool Parser::ParseInterface(
 
     String interfaceName = tokenInfo.mStringValue;
     AutoPtr<InterfaceType> interface = FindInterface(interfaceName);
-    if (interface == nullptr) {
+    if (nullptr == interface) {
         String message = String::Format("Interface \"%s\" is not declared.", interfaceName.string());
         LogError(tokenInfo, message);
         result = false;
@@ -2307,7 +2356,7 @@ bool Parser::ParseEnumeration()
             }
             else {
                 String message = String::Format("Enumeration %s is name conflict with %s.",
-                        enumName.string(), type->ToString().string());
+                                                enumName.string(), type->ToString().string());
                 LogError(tokenInfo, message);
                 result = false;
             }

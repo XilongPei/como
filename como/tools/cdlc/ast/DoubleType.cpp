@@ -45,6 +45,9 @@ AutoPtr<Node> DoubleType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<DoubleType> clone = new DoubleType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

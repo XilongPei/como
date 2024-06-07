@@ -45,6 +45,6 @@ ShortType::ShortType()
     mName = "Short";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_SHORTTYPE_H__

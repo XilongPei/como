@@ -40,8 +40,11 @@ AutoPtr<Node> StringType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<StringType> clone = new StringType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }
 
-}
+} // namespace cdlc

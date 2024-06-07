@@ -82,6 +82,6 @@ AutoPtr<ReferenceType> ReferenceType::CastFrom(
     return static_cast<ReferenceType*>(type);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_REFERENCETYPE_H__

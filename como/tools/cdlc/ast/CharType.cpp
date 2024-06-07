@@ -45,6 +45,9 @@ AutoPtr<Node> CharType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<CharType> clone = new CharType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

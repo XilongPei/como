@@ -40,6 +40,9 @@ AutoPtr<Node> ECodeType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ECodeType> clone = new ECodeType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     CloneBase(clone, module);
     return clone;
 }

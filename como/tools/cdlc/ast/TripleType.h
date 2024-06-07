@@ -41,6 +41,6 @@ TripleType::TripleType()
     mName = "Triple";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_TRIPLETYPE_H__
