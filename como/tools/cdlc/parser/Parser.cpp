@@ -212,8 +212,9 @@ bool Parser::ParseDeclarationWithAttributes(
 {
     Attributes attrs;
     bool result = ParseAttributes(attrs);
-    if (! result)
+    if (! result) {
         return false;
+    }
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     switch (tokenInfo.mToken) {
@@ -705,7 +706,7 @@ bool Parser::ParseInterface(
         // interface forward declaration
         mTokenizer.GetToken();
         String fullTypeName = interfaceName;
-        if (!fullTypeName.Contains("::")) {
+        if (! fullTypeName.Contains("::")) {
             fullTypeName = mCurrentNamespace->ToString() + "::" + fullTypeName;
         }
         AutoPtr<Type> type = FindType(fullTypeName, false);
@@ -716,7 +717,7 @@ bool Parser::ParseInterface(
             }
             else {
                 String message = String::Format("Interface %s is name conflict with %s.",
-                        interfaceName.string(), type->ToString().string());
+                                        interfaceName.string(), type->ToString().string());
                 LogError(tokenInfo, message);
                 result = false;
             }
@@ -728,6 +729,9 @@ bool Parser::ParseInterface(
         interfaceName = fullTypeName.Substring(idx + 2);
 
         AutoPtr<InterfaceType> interface = new InterfaceType();
+        if (nullptr == interface) {
+            return false;
+        }
         interface->SetName(interfaceName);
         interface->SetNamespace(ns);
         interface->SetForwardDeclared(true);
@@ -744,16 +748,19 @@ bool Parser::ParseInterface(
             interface = InterfaceType::CastFrom(type);
         }
         else {
-            String message = type->IsInterfaceType()
+            String message = (type->IsInterfaceType()
                     ? String::Format("Interface %s has already been declared.", interfaceName.string())
-                    : String::Format("Interface %s is name conflict.", interfaceName.string());
+                    : String::Format("Interface %s is name conflict.", interfaceName.string()));
             LogError(tokenInfo, message);
             result = false;
         }
     }
 
-    if (interface == nullptr) {
+    if (nullptr == interface) {
         interface = new InterfaceType();
+        if (nullptr == interface) {
+            return false;
+        }
         interface->SetName(interfaceName);
         interface->SetNamespace(mCurrentNamespace);
     }
@@ -778,7 +785,7 @@ bool Parser::ParseInterface(
         if (tokenInfo.mToken == Token::IDENTIFIER) {
             mTokenizer.GetToken();
             AutoPtr<InterfaceType> baseInterface = FindInterface(tokenInfo.mStringValue);
-            if (baseInterface != nullptr && !baseInterface->IsForwardDeclared()) {
+            if ((baseInterface != nullptr) && (! baseInterface->IsForwardDeclared())) {
                 interface->SetBaseInterface(baseInterface);
             }
             else {
@@ -793,7 +800,7 @@ bool Parser::ParseInterface(
             LogError(tokenInfo, "Base interface name is expected.");
             // jump over '{'
             while (tokenInfo.mToken != Token::BRACES_OPEN &&
-                    tokenInfo.mToken != Token::END_OF_FILE) {
+                                       tokenInfo.mToken != Token::END_OF_FILE) {
                 mTokenizer.GetToken();
                 tokenInfo = mTokenizer.PeekToken();
             }
@@ -808,7 +815,6 @@ bool Parser::ParseInterface(
     mCurrentType = (Type*)interface.Get();
 
     result = ParseInterfaceBody(interface) && result;
-
     if (result) {
         interface->SetForwardDeclared(false);
         interface->SetAttributes(attrs);
