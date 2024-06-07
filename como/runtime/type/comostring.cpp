@@ -715,8 +715,13 @@ String& String::operator=(
         SharedBuffer::GetBufferFromData(mString)->Release();
     }
 
-    mString = (string != nullptr ?
-                            AllocFromUTF8(string, strlen(string)) : nullptr);
+    if (string != nullptr) {
+        mString = AllocFromUTF8(string, strlen(string));
+    }
+    else {
+        mString = nullptr;
+    }
+
     mCharCount = 0;
     return *this;
 }
@@ -726,6 +731,16 @@ String& String::operator+=(
 {
     if (other.IsEmpty()) {
         return *this;
+    }
+
+    // If the current String is nullptr, `+=` is equivalent to `=`
+    if (nullptr == mString) {
+        if (other.mString != nullptr) {
+            SharedBuffer::GetBufferFromData(other.mString)->AddRef();
+            mString = other.mString;
+            mCharCount = other.mCharCount;
+            return *this;
+        }
     }
 
     Integer origByteSize = GetByteLength();
@@ -746,6 +761,13 @@ String& String::operator+=(
     /* [in] */ const char* string)
 {
     if ((nullptr == string) || (string[0] == '\0')) {
+        return *this;
+    }
+
+    // If the current String is nullptr, `+=` is equivalent to `=`
+    if (nullptr == mString) {
+        mString = AllocFromUTF8(string, strlen(string));
+        mCharCount = 0;
         return *this;
     }
 
