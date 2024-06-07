@@ -73,12 +73,12 @@ private:
     void BuildSignature();
 
 private:
-    String mName;
-    String mSignature;
-    AutoPtr<Type> mReturnType;
+    String          mName;
+    String          mSignature;
+    AutoPtr<Type>   mReturnType;
+    bool            mDeleted = false;
+    String          mStrFramacBlock;
     std::vector<AutoPtr<Parameter>> mParameters;
-    bool mDeleted = false;
-    String mStrFramacBlock;
 };
 
 String Method::GetName()
@@ -143,7 +143,12 @@ String Method::GetStrFramacBlock()
 void Method::SetStrFramacBlock(
     /* [in] */ const String& strFramacBlock)
 {
-    mStrFramacBlock += strFramacBlock;
+    if (! mStrFramacBlock.IsNull()) {
+        mStrFramacBlock += strFramacBlock;
+    }
+    else {
+        mStrFramacBlock = strFramacBlock;
+    }
 }
 
 } // namespace cdlc

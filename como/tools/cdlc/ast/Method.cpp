@@ -25,7 +25,7 @@ namespace cdlc {
 AutoPtr<Parameter> Method::GetParameter(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mParameters.size()) {
+    if ((i >= 0) && (i < mParameters.size())) {
         return mParameters[i];
     }
     return nullptr;
@@ -40,7 +40,7 @@ void Method::BuildSignature()
         builder.Append(param->GetType()->GetSignature());
     }
     builder.Append(")");
-    builder.Append(mReturnType != nullptr ? mReturnType->GetSignature() : "E");
+    builder.Append((mReturnType != nullptr) ? mReturnType->GetSignature() : "E");
     mSignature = builder.ToString();
 }
 
@@ -73,20 +73,23 @@ AutoPtr<Node> Method::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Method> clone = new Method();
+    if (nullptr == clone) {
+        return nullptr;
+    }
     clone->mName = mName;
     clone->mSignature = mSignature;
     clone->mStrFramacBlock = mStrFramacBlock;
-    if (!deepCopy) {
+    if (! deepCopy) {
         clone->mReturnType = mReturnType;
         clone->mParameters = mParameters;
     }
     else {
         AutoPtr<Type> returnType = module->FindType(mReturnType->ToString());
-        if (returnType == nullptr) {
+        if (nullptr == returnType) {
             returnType = mReturnType->Clone(module, false);
         }
         clone->mReturnType = returnType;
-        for (int i = 0; i < mParameters.size(); i++) {
+        for (int i = 0;  i < mParameters.size();  i++) {
             AutoPtr<Parameter> parameter = mParameters[i]->Clone(module, true);
             clone->AddParameter(parameter);
         }

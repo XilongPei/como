@@ -234,7 +234,7 @@ String& String::operator=(
 String& String::operator+=(
     /* [in] */ const char* string)
 {
-    if ((nullptr == string) || ('\0' == string[0])) {
+    if ((nullptr == mString) || (nullptr == string) || ('\0' == string[0])) {
         return *this;
     }
 
@@ -256,6 +256,10 @@ String& String::operator+=(
 String& String::operator+=(
     /* [in] */ const String& other)
 {
+    if (nullptr == mString) {
+        return *this;
+    }
+
     if (other.IsEmpty()) {
         return *this;
     }

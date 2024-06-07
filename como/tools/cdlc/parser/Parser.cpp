@@ -265,8 +265,8 @@ bool Parser::ParseAttributes(
     if (tokenInfo.mToken == Token::BRACKETS_OPEN) {
         mTokenizer.GetToken();
         tokenInfo = mTokenizer.PeekToken(Token::FRAMAC_BLOCK);
-        while (tokenInfo.mToken != Token::BRACKETS_CLOSE &&
-                                       tokenInfo.mToken != Token::END_OF_FILE) {
+        while ((tokenInfo.mToken != Token::BRACKETS_CLOSE) &&
+                                     (tokenInfo.mToken != Token::END_OF_FILE)) {
             switch (tokenInfo.mToken) {
                 case Token::UUID: {
                     result = ParseUuid(attrs) && result;
@@ -291,14 +291,15 @@ bool Parser::ParseAttributes(
                 case Token::FRAMAC_BLOCK: {
                     tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
 
-                    if (! Options::disableFramacBlock)
+                    if (! Options::disableFramacBlock) {
                         attrs.mStrFramacBlock = tokenInfo.mStringValue;
+                    }
 
                     break;
                 }
                 default: {
                     String message = String::Format("\"%s\" is not expected.",
-                            TokenInfo::Dump(tokenInfo).string());
+                                            TokenInfo::Dump(tokenInfo).string());
                     LogError(tokenInfo, message);
                     result = false;
                     break;
@@ -632,8 +633,8 @@ bool Parser::ParseNamespace()
     mCurrentNamespace = ns;
 
     tokenInfo = mTokenizer.PeekToken();
-    while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-                                       tokenInfo.mToken != Token::END_OF_FILE) {
+    while ((tokenInfo.mToken != Token::BRACES_CLOSE) &&
+                                     (tokenInfo.mToken != Token::END_OF_FILE)) {
         switch (tokenInfo.mToken) {
             case Token::BRACKETS_OPEN: {
                 result = ParseDeclarationWithAttributes(true) && result;
@@ -892,8 +893,9 @@ bool Parser::ParseInterfaceBody(
             case Token::FRAMAC_BLOCK: {
                 tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
 
-                if (! Options::disableFramacBlock)
+                if (! Options::disableFramacBlock) {
                     tokenInfoLastStringValue = tokenInfo.mStringValue;
+                }
 
                 break;
             }
@@ -1681,7 +1683,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
                 LogError(tokenInfo, message);
                 return nullptr;
             }
-            if (!constant->GetValue()->GetType()->IsIntegralType()) {
+            if (! constant->GetValue()->GetType()->IsIntegralType()) {
                 String message = String::Format(
                                 "Constant \"%s\" is not an integral constant",
                                 id.string());
