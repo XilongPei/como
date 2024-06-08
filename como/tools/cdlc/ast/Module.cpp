@@ -328,7 +328,7 @@ AutoPtr<Module> Module::Resolve(
     /* [in] */ void* metadata)
 {
     AutoPtr<Module> module = new Module(
-                                reinterpret_cast<como::MetaComponent*>(metadata));
+                              reinterpret_cast<como::MetaComponent*>(metadata));
     return module;
 }
 

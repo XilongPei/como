@@ -138,4 +138,4 @@ void StringPool::Dump()
     }
 }
 
-}
+} // namespace cdlc

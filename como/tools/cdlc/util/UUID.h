@@ -60,6 +60,6 @@ public:
 UUID::UUID()
 {}
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_UUID_H__

@@ -86,4 +86,4 @@ void MemoryBuffer::Dump(
     fprintf(stream, "==== Dump End ====\n");
 }
 
-}
+} // namespace cdlc

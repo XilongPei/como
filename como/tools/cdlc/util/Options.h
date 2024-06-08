@@ -151,6 +151,6 @@ bool Options::DoComoMetadataReader() const
     return mComoMetadataReader;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_OPTIONS_H__

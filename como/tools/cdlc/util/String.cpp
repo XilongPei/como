@@ -729,4 +729,4 @@ String String::Replace(
     return *this;
 }
 
-}
+} // namespace cdlc

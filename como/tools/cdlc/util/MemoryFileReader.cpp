@@ -204,4 +204,4 @@ void MemoryFileReader::Dump(
     fprintf(stream, "==== Dump End ====\n");
 }
 
-}
+} // namespace cdlc

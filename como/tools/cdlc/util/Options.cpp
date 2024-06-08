@@ -106,7 +106,7 @@ void Options::Parse(
 
 bool Options::HasErrors() const
 {
-    if (!mIllegalOptions.IsEmpty()) {
+    if (! mIllegalOptions.IsEmpty()) {
         return true;
     }
 
@@ -114,7 +114,7 @@ bool Options::HasErrors() const
         return false;
     }
 
-    if (!mMetadataFile.IsEmpty()) {
+    if (! mMetadataFile.IsEmpty()) {
         return false;
     }
 
@@ -123,7 +123,7 @@ bool Options::HasErrors() const
 
 void Options::ShowErrors() const
 {
-    if (!mIllegalOptions.IsEmpty()) {
+    if (! mIllegalOptions.IsEmpty()) {
         String options = mIllegalOptions;
         int index;
         while ((index = options.IndexOf(":")) != -1) {
@@ -162,4 +162,4 @@ void Options::ShowUsage() const
         );
 }
 
-}
+} // namespace cdlc

@@ -61,6 +61,6 @@ size_t MemoryBuffer::GetPosition() const
     return mPosition;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_MEMORYBUFFER_H__

@@ -27,14 +27,14 @@ bool UUID::IsValid(
         return false;
     }
 
-    for (int i = 0; i < 36; i++) {
+    for (int i = 0;  i < 36;  i++) {
         char c = uuidStr.GetChar(i);
-        if (i == 8 || i == 13 || i == 18 || i == 23) {
+        if ((i == 8) || (i == 13) || (i == 18) || (i == 23)) {
             if (c != '-') {
                 return false;
             }
         }
-        else if (!isxdigit(c)) {
+        else if (! isxdigit(c)) {
             return false;
         }
     }
@@ -44,17 +44,20 @@ bool UUID::IsValid(
 AutoPtr<UUID> UUID::Parse(
     /* [in] */ const String& uuidStr)
 {
-    if (!IsValid(uuidStr)) {
+    if (! IsValid(uuidStr)) {
         return nullptr;
     }
 
     AutoPtr<UUID> uuid = new UUID();
+    if (nullptr == uuid) {
+        return nullptr;
+    }
 
     uuid->mData1 = strtol(uuidStr.Substring(0, 8).string(), nullptr, 16);
     uuid->mData2 = strtol(uuidStr.Substring(9, 13).string(), nullptr, 16);
     uuid->mData3 = strtol(uuidStr.Substring(14, 18).string(), nullptr, 16);
     uuid->mData4 = strtol(uuidStr.Substring(19, 23).string(), nullptr, 16);
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0;  i < 6;  i++) {
         uuid->mData5[i] = (ToDigit(uuidStr.GetChar(24 + 2 * i)) << 4) |
                            ToDigit(uuidStr.GetChar(24 + 2 * i + 1));
     }
@@ -66,6 +69,9 @@ AutoPtr<UUID> UUID::Parse(
     /* [in] */ const como::UUID& source)
 {
     AutoPtr<UUID> uuid = new UUID();
+    if (nullptr == uuid) {
+        return nullptr;
+    }
     memcpy(&uuid->mData1, &source, sizeof(como::UUID));
     return uuid;
 }
@@ -108,4 +114,4 @@ char UUID::ToDigit(
     }
 }
 
-}
+} // namespace cdlc

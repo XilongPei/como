@@ -73,4 +73,4 @@ void Logger::V(
     fprintf(sStream, "\n");
 }
 
-}
+} // namespace cdlc

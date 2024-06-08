@@ -95,7 +95,7 @@ TokenInfo Tokenizer::GetToken(
 TokenInfo Tokenizer::ReadToken(
     /* [in] */ Token expectedToken)
 {
-    while (!mReader->IsEof() && IsSpace(mReader->PeekChar())) {
+    while ((! mReader->IsEof()) && IsSpace(mReader->PeekChar())) {
         mReader->GetChar();
     }
 
@@ -116,7 +116,7 @@ TokenInfo Tokenizer::ReadToken(
         else if (IsSpace(c)) {
             continue;
         }
-        else if (c == '_' || IsAlphabet(c)) {
+        else if ((c == '_') || IsAlphabet(c)) {
             TokenInfo tokenInfo = ReadIdentifier(c);
             tokenInfo.mTokenFilePath = mReader->GetCurrentFilePath();
             tokenInfo.mTokenLineNo = lineNo;
@@ -386,7 +386,7 @@ TokenInfo Tokenizer::ReadUuidNumberToken()
 
     StringBuilder builder;
 
-    while (!mReader->IsEof() && IsSpace(mReader->PeekChar())) {
+    while ((! mReader->IsEof()) && IsSpace(mReader->PeekChar())) {
         mReader->GetChar();
     }
 
@@ -585,7 +585,7 @@ TokenInfo Tokenizer::ReadVersionNumberToken()
 
     StringBuilder builder;
 
-    while (!mReader->IsEof() && IsSpace(mReader->PeekChar())) {
+    while ((! mReader->IsEof()) && IsSpace(mReader->PeekChar())) {
         mReader->GetChar();
     }
 
@@ -666,7 +666,7 @@ TokenInfo Tokenizer::ReadIdentifier(
     builder.Append(c);
     while (! mReader->IsEof()) {
         c = mReader->PeekChar();
-        if (c == '_' || IsAlphabet(c) || IsDecimalDigital(c)) {
+        if ((c == '_') || IsAlphabet(c) || IsDecimalDigital(c)) {
             mReader->GetChar();
             builder.Append(c);
             continue;
@@ -739,12 +739,12 @@ TokenInfo Tokenizer::ReadNumber(
             break;
         }
         else if (state == NUMBER_INT) {
-            if (radix == 10 && IsDecimalDigital(c)) {
+            if ((radix == 10) && IsDecimalDigital(c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
             }
-            else if (radix == 16 && IsHexDigital(c)) {
+            else if ((radix == 16) && IsHexDigital(c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
@@ -771,7 +771,7 @@ TokenInfo Tokenizer::ReadNumber(
                 }
                 break;
             }
-            else if (c == 'e' || c == 'E') {
+            else if ((c == 'e') || (c == 'E')) {
                 mReader->GetChar();
                 builder.Append(c);
                 state = NUMBER_FP_EXP;
@@ -786,18 +786,18 @@ TokenInfo Tokenizer::ReadNumber(
                 builder.Append(c);
                 continue;
             }
-            else if (c == 'e' || c == 'E') {
+            else if ((c == 'e') || (c == 'E')) {
                 mReader->GetChar();
                 builder.Append(c);
                 state = NUMBER_FP_EXP;
                 scientificNotation = true;
                 continue;
             }
-            else if (c == 'f' || c == 'F') {
+            else if ((c == 'f') || (c == 'F')) {
                 mReader->GetChar();
                 break;
             }
-            else if (c == 'd' || c == 'D') {
+            else if ((c == 'd') || (c == 'D')) {
                 mReader->GetChar();
                 bit = 64;
                 break;
@@ -805,7 +805,7 @@ TokenInfo Tokenizer::ReadNumber(
             break;
         }
         else if (state == NUMBER_FP_EXP) {
-            if (c == '+' || c == '-') {
+            if ((c == '+') || (c == '-')) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
@@ -815,11 +815,11 @@ TokenInfo Tokenizer::ReadNumber(
                 builder.Append(c);
                 continue;
             }
-            else if (c == 'f' || c == 'F') {
+            else if ((c == 'f') || (c == 'F')) {
                 mReader->GetChar();
                 break;
             }
-            else if (c == 'd' || c == 'D') {
+            else if ((c == 'd') || (c == 'D')) {
                 mReader->GetChar();
                 bit = 64;
                 break;
@@ -828,7 +828,7 @@ TokenInfo Tokenizer::ReadNumber(
         }
     }
     String number = builder.ToString();
-    if (state == NUMBER_INT_0 || state == NUMBER_INT) {
+    if ((state == NUMBER_INT_0) || (state == NUMBER_INT)) {
         if (number.Equals("0x8000000000000000")) {
             number = String("-") + number;
         }
@@ -854,7 +854,7 @@ TokenInfo Tokenizer::ReadCharacter(
     /* [in] */ char c)
 {
     c = mReader->GetChar();
-    if (c == '\'') {
+    if ('\'' == c) {
         TokenInfo tokenInfo(Token::CHARACTER,
                             mReader->GetCurrentFilePath());
         tokenInfo.mCharValue = 0;
@@ -956,14 +956,14 @@ TokenInfo Tokenizer::ReadBlockComment(
 
     while (! mReader->IsEof()) {
         c = mReader->GetChar();
-        if (c == '\\' && !mReader->IsEof()) {
+        if ((c == '\\') && (! mReader->IsEof())) {
             builder.Append(c);
             c = mReader->GetChar();
             builder.Append(c);
             continue;
         }
 
-        if (c == '*' && mReader->PeekChar() == '/') {
+        if ((c == '*') && (mReader->PeekChar() == '/')) {
             mReader->GetChar();
             // builder.Append("*/");
             break;

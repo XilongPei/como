@@ -191,4 +191,4 @@ void File::Close()
     }
 }
 
-}
+} // namespace cdlc

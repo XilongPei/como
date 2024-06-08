@@ -45,6 +45,6 @@ public:
     virtual bool IsEof() = 0;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_READER_H__

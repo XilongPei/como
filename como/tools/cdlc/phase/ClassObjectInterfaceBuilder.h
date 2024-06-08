@@ -32,7 +32,7 @@ public:
     bool Process() override;
 
 private:
-    void BuildCoclassObjectInterface(
+    bool BuildCoclassObjectInterface(
         /* [in] */ CoclassType *klass);
 
 private:

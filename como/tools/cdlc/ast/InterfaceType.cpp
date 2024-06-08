@@ -22,6 +22,16 @@
 
 namespace cdlc {
 
+#ifndef NULL_RETURN
+#define NULL_RETURN(expr)                   \
+    do {                                    \
+        void *p = (void*)expr;              \
+        if (nullptr == p) {                 \
+            return nullptr;                 \
+        }                                   \
+    } while(0);
+#endif
+
 void InterfaceType::SetAttributes(
     /* [in] */ const Attributes& attrs)
 {
@@ -34,7 +44,7 @@ void InterfaceType::SetAttributes(
 AutoPtr<InterfaceType> InterfaceType::GetNestedInterface(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mNestedInterfaces.size()) {
+    if ((i >= 0) && (i < mNestedInterfaces.size())) {
         return mNestedInterfaces[i];
     }
     return nullptr;
@@ -54,7 +64,7 @@ AutoPtr<Constant> InterfaceType::FindConstant(
 AutoPtr<Constant> InterfaceType::GetConstant(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mConstants.size()) {
+    if ((i >= 0) && (i < mConstants.size())) {
         return mConstants[i];
     }
     return nullptr;
@@ -66,7 +76,7 @@ AutoPtr<Method> InterfaceType::FindMethod(
 {
     for (AutoPtr<Method> method : mMethods) {
         if (method->GetName().Equals(name) &&
-                method->GetSignature().Equals(signature)) {
+                                    method->GetSignature().Equals(signature)) {
             return method;
         }
     }
@@ -76,7 +86,7 @@ AutoPtr<Method> InterfaceType::FindMethod(
 AutoPtr<Method> InterfaceType::GetMethod(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mMethods.size()) {
+    if ((i >= 0) && (i < mMethods.size())) {
         return mMethods[i];
     }
     return nullptr;
@@ -125,13 +135,14 @@ String InterfaceType::Dump(
     }
     builder.AppendFormat("uuid:%s, ", mUuid->ToString().string());
     builder.AppendFormat("version:%s", mVersion.string());
-    if (!mDescription.IsEmpty()) {
+    if (! mDescription.IsEmpty()) {
         builder.AppendFormat(", description:%s", mDescription.string());
     }
     builder.Append("]\n");
 
     for (AutoPtr<InterfaceType> interface : mNestedInterfaces) {
-        String interfaceInfo = String::Format("Interface[name:%s]\n", interface->GetName().string());
+        String interfaceInfo = String::Format(
+                        "Interface[name:%s]\n", interface->GetName().string());
         builder.Append(prefix + Properties::INDENT).Append(interfaceInfo);
     }
     for (AutoPtr<Constant> constant : mConstants) {
@@ -151,6 +162,10 @@ AutoPtr<Node> InterfaceType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<InterfaceType> clone = new InterfaceType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
+
     CloneBase(clone, module);
     clone->mDeepCopied = deepCopy;
     clone->mUuid = mUuid;
@@ -168,31 +183,36 @@ AutoPtr<Node> InterfaceType::Clone(
     else {
         if (mBaseInterface != nullptr) {
             AutoPtr<Type> baseInterface = module->FindType(mBaseInterface->ToString());
-            if (baseInterface == nullptr) {
+            if (nullptr == baseInterface) {
                 baseInterface = mBaseInterface->Clone(module, false);
+                NULL_RETURN(baseInterface);
             }
             clone->mBaseInterface = InterfaceType::CastFrom(baseInterface);
         }
         if (mOuterInterface != nullptr) {
             AutoPtr<Type> outerInterface = module->FindType(mOuterInterface->ToString());
-            if (outerInterface == nullptr) {
+            if (nullptr == outerInterface) {
                 outerInterface = mOuterInterface->Clone(module, false);
+                NULL_RETURN(outerInterface);
             }
             clone->mOuterInterface = InterfaceType::CastFrom(outerInterface);
         }
-        for (int i = 0; i < mNestedInterfaces.size(); i++) {
+        for (int i = 0;  i < mNestedInterfaces.size();  i++) {
             AutoPtr<Type> nestedInterface = module->FindType(mNestedInterfaces[i]->ToString());
-            if (nestedInterface == nullptr) {
+            if (nullptr == nestedInterface) {
                 nestedInterface = mNestedInterfaces[i]->Clone(module, false);
+                NULL_RETURN(nestedInterface);
             }
             clone->AddNestedInterface(InterfaceType::CastFrom(nestedInterface));
         }
-        for (int i = 0; i < mConstants.size(); i++) {
+        for (int i = 0;  i < mConstants.size();  i++) {
             AutoPtr<Constant> constant = mConstants[i]->Clone(module, true);
+            NULL_RETURN(constant);
             clone->AddConstant(constant);
         }
-        for (int i = 0; i < mMethods.size(); i++) {
+        for (int i = 0;  i < mMethods.size();  i++) {
             AutoPtr<Method> method = mMethods[i]->Clone(module, true);
+            NULL_RETURN(method);
             clone->AddMethod(method);
         }
     }

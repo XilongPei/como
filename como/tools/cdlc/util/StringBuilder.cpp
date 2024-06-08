@@ -164,4 +164,4 @@ bool StringBuilder::Enlarge(
     return true;
 }
 
-}
+} // namespace cdlc

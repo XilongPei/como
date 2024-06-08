@@ -340,6 +340,6 @@ struct StringEqualsFunc
     }
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_STRING_H__

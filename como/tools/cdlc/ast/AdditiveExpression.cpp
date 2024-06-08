@@ -35,11 +35,11 @@ int AdditiveExpression::IntegerValue()
         switch (mOperator) {
             case OPERATOR_PLUS: {
                 return mLeftOperand->IntegerValue()
-                        + mRightOperand->IntegerValue();
+                                                + mRightOperand->IntegerValue();
             }
             case OPERATOR_MINUS: {
                 return mLeftOperand->IntegerValue()
-                        - mRightOperand->IntegerValue();
+                                                - mRightOperand->IntegerValue();
             }
             default: {
                 return 0;

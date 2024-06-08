@@ -37,6 +37,10 @@ bool ComoRTMetadataLoader::Process()
     como::MetadataSerializer serializer;
     serializer.Deserialize(reinterpret_cast<uintptr_t>(metadata));
     AutoPtr<Module> comort = Module::Resolve(metadata);
+    if (nullptr == comort) {
+        return false;
+    }
+
     mWorld->AddDependentModule(comort);
     return true;
 }

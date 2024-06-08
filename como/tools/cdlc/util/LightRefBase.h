@@ -55,7 +55,7 @@ int LightRefBase::AddRef() const
 int LightRefBase::Release() const
 {
     int count = mRefCount.fetch_sub(1, std::memory_order_relaxed);
-    if (count == 1) {
+    if (1 == count) {
         std::atomic_thread_fence(std::memory_order_acquire);
         delete this;
     }
@@ -67,7 +67,7 @@ int LightRefBase::GetRefCount() const
     return mRefCount.load(std::memory_order_relaxed);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_LIGHTREFBASE_H__
 

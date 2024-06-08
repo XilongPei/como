@@ -94,6 +94,6 @@ bool File::IsEof() const
     return mEof;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_FILE_H__

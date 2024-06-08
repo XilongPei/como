@@ -34,4 +34,4 @@ void Properties::AddSearchPath(
     }
 }
 
-}
+} // namespace cdlc

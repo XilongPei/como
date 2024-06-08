@@ -80,6 +80,6 @@ int Properties::GetMode()
     return mMode;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_PROPERTIES_H__

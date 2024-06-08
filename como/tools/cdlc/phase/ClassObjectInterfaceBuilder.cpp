@@ -49,13 +49,16 @@ bool ClassObjectInterfaceBuilder::Process()
     }
 
     for (int i = 0;  i < mModule->GetCoclassNumber();  i++) {
-        BuildCoclassObjectInterface(mModule->GetCoclass(i));
+        bool ret = BuildCoclassObjectInterface(mModule->GetCoclass(i));
+        if (! ret) {
+            return false;
+        }
     }
 
     return true;
 }
 
-void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
+bool ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
     /* [in] */ CoclassType *klass)
 {
     bool hasConstructorWithArguments = false;
@@ -69,6 +72,10 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
 
     if (hasConstructorWithArguments) {
         AutoPtr<InterfaceType> clsObjIntf = new InterfaceType();
+        if (nullptr == clsObjIntf) {
+            return false;
+        }
+
         Attributes attr;
         attr.mUuid = klass->GetUUID()->Dump();
         attr.mVersion = klass->GetVersion();
@@ -81,15 +88,28 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
             AutoPtr<Method> m = klass->GetConstructor(i);
             m->SetName("CreateObject");
             AutoPtr<Parameter> p = new Parameter();
+            if (nullptr == p) {
+                return false;
+            }
+
             p->SetName("iid");
             p->SetType(mInterfaceIDType);
             p->SetAttributes(Parameter::IN);
             m->AddParameter(p);
+
             p = new Parameter();
+            if (nullptr == p) {
+                return false;
+            }
+
             p->SetName("object");
             AutoPtr<Type> t = mModule->FindType("como::IInterface**");
             if (nullptr == t) {
                 AutoPtr<PointerType> pointer = new PointerType();
+                if (nullptr == pointer) {
+                    return false;
+                }
+
                 pointer->SetBaseType(mIInterfaceType);
                 pointer->SetPointerNumber(2);
                 mModule->AddTemporaryType(pointer);
@@ -104,6 +124,8 @@ void ClassObjectInterfaceBuilder::BuildCoclassObjectInterface(
     else {
         klass->AddInterface(InterfaceType::CastFrom(mIClassObjectType));
     }
+
+    return true;
 }
 
 } // namespace cdlc

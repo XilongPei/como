@@ -102,6 +102,6 @@ String StringBuilder::ToString()
     return String(mBuffer);
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_STRINGBUILDER_H__

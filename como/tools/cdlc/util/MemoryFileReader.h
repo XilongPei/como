@@ -110,6 +110,6 @@ AutoPtr<File> MemoryFileReader::GetFile()
     return mFile;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_MEMORYFILEREADER_H__

@@ -69,6 +69,6 @@ char* StringPool::GetData()
     return mData;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_STRINGPOOL_H__

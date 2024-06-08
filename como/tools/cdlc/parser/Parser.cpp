@@ -82,6 +82,9 @@ void Parser::AddPhase(
     if (phase != nullptr) {
         mAfterPhases.push_back(phase);
     }
+    else {
+        Logger::E(TAG, "Memory access error!");
+    }
 }
 
 bool Parser::Parse(
@@ -191,7 +194,7 @@ bool Parser::ParseFile(
             }
             default: {
                 String message = String::Format("%s is not expected.",
-                        TokenInfo::Dump(tokenInfo).string());
+                                            TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 mTokenizer.GetToken();
                 result = false;
@@ -934,7 +937,15 @@ AutoPtr<Constant> Parser::ParseConstant()
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.IsBuildinType()) {
         mTokenizer.GetToken();
-        type = FindType(String::Format("como::%s", TokenInfo::Dump(tokenInfo).string()), false);
+        type = FindType(String::Format(
+                        "como::%s", TokenInfo::Dump(tokenInfo).string()), false);
+        if (nullptr == type) {
+            String typeName = tokenInfo.mStringValue;
+            String message = String::Format(
+                        "BuildinType \"%s\" is not declared.", typeName.string());
+            LogError(tokenInfo, message);
+            return nullptr;
+        }
     }
     else {
         // enumeration
@@ -960,6 +971,10 @@ AutoPtr<Constant> Parser::ParseConstant()
     }
 
     AutoPtr<Constant> constant = new Constant();
+    if (nullptr == constant) {
+        LogError(tokenInfo, "new Constant() fail.");
+        return nullptr;
+    }
     constant->SetType(type);
 
     tokenInfo = mTokenizer.GetToken();
@@ -2539,7 +2554,7 @@ bool Parser::ParseImport()
 void Parser::EnterBlockContext()
 {
     AutoPtr<BlockContext> context = new BlockContext();
-    if (mCurrentContext == nullptr) {
+    if (nullptr == mCurrentContext) {
         mCurrentContext = std::move(context);
     }
     else {

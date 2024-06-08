@@ -64,6 +64,6 @@ void Logger::SetStream(
     sStream = stream;
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_LOGGER_H__

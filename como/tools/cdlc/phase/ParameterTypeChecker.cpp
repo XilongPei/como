@@ -35,7 +35,7 @@ bool ParameterTypeChecker::CheckInterfaces()
     bool ret = true;
 
     int N = mModule->GetInterfaceNumber();
-    for (int i = 0;  i < N;  i++) {
+    for (int i = 0;  (i < N) && ret;  i++) {
         mInterface = mModule->GetInterface(i);
         if (! mInterface->IsExternal()) {
             ret = CheckInterface(mInterface) && ret;
@@ -49,7 +49,7 @@ bool ParameterTypeChecker::CheckCoclasses()
     bool ret = true;
 
     int N = mModule->GetCoclassNumber();
-    for (int i = 0;  i < N;  i++) {
+    for (int i = 0;  (i < N) && ret;  i++) {
         mCoclass = mModule->GetCoclass(i);
         ret = CheckCoclass(mCoclass) && ret;
     }
@@ -62,7 +62,7 @@ bool ParameterTypeChecker::CheckInterface(
     bool ret = true;
 
     int N = interface->GetMethodNumber();
-    for (int i = 0;  i < N;  i++) {
+    for (int i = 0;  (i < N) && ret;  i++) {
         mMethod = interface->GetMethod(i);
         ret = CheckMethod(mMethod) && ret;
     }
@@ -75,7 +75,7 @@ bool ParameterTypeChecker::CheckCoclass(
     bool ret = true;
 
     int N = coclass->GetConstructorNumber();
-    for (int i = 0;  i < N;  i++) {
+    for (int i = 0;  (i < N) && ret;  i++) {
         mMethod = coclass->GetConstructor(i);
         ret = CheckConstructor(mMethod) && ret;
     }
@@ -88,7 +88,7 @@ bool ParameterTypeChecker::CheckMethod(
     bool ret = true;
 
     int N = method->GetParameterNumber();
-    for (int i = 0;  i < N;  i++) {
+    for (int i = 0;  (i < N) && ret;  i++) {
         AutoPtr<Parameter> parameter = method->GetParameter(i);
         ret = CheckMethodParameter(parameter) && ret;
     }
@@ -117,7 +117,7 @@ bool ParameterTypeChecker::CheckConstructor(
     bool ret = true;
 
     int N = method->GetParameterNumber();
-    for (int i = 0;  i < N - 2;  i++) {
+    for (int i = 0;  (i < (N - 2)) && ret;  i++) {
         AutoPtr<Parameter> parameter = method->GetParameter(i);
         ret = CheckConstructorParameter(parameter) && ret;
     }
@@ -162,14 +162,15 @@ bool ParameterTypeChecker::IsTypeValid(
         }
     }
 
-    if ((type->IsBuildinType() && !type->IsInterfaceType()) || type->IsEnumerationType()) {
+    if ((type->IsBuildinType() && (! type->IsInterfaceType())) ||
+                                                    type->IsEnumerationType()) {
         if (isCallee) {
             return false;
         }
-        if (isOut && (pointerNumber + referenceNumber > 1)) {
+        if (isOut && ((pointerNumber + referenceNumber) > 1)) {
             return false;
         }
-        if ((! isOut) && (pointerNumber + referenceNumber > 0)) {
+        if ((! isOut) && ((pointerNumber + referenceNumber) > 0)) {
             return false;
         }
     }
@@ -182,11 +183,11 @@ bool ParameterTypeChecker::IsTypeValid(
         if (isCallee) {
             return false;
         }
-        if (isIn && (pointerNumber + referenceNumber != 1)) {
+        if (isIn && ((pointerNumber + referenceNumber) != 1)) {
             return false;
         }
         if (isOut && ((pointerNumber + referenceNumber == 0) ||
-                                       (pointerNumber + referenceNumber > 2))) {
+                                    ((pointerNumber + referenceNumber) > 2))) {
             return false;
         }
     }
