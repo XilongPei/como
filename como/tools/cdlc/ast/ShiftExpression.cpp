@@ -34,16 +34,16 @@ int ShiftExpression::IntegerValue()
     if (mLeftOperand != nullptr) {
         switch (mOperator) {
             case OPERATOR_LEFT_SHIFT: {
-                return mLeftOperand->IntegerValue()
-                        << mRightOperand->IntegerValue();
+                return mLeftOperand->IntegerValue() <<
+                                                  mRightOperand->IntegerValue();
             }
             case OPERATOR_RIGHT_SHIFT: {
-                return mLeftOperand->IntegerValue()
-                        >> mRightOperand->IntegerValue();
+                return mLeftOperand->IntegerValue() >>
+                                                  mRightOperand->IntegerValue();
             }
             case OPERATOR_UNSIGNED_RIGHT_SHIFT: {
-                return ((unsigned int)mLeftOperand->IntegerValue())
-                        >> mRightOperand->IntegerValue();
+                return ((unsigned int)mLeftOperand->IntegerValue()) >>
+                                                  mRightOperand->IntegerValue();
             }
             default: {
                 return 0;
@@ -58,10 +58,14 @@ int ShiftExpression::IntegerValue()
 long long int ShiftExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
+        long long int leftValue = ( mLeftOperand->GetType()->IsIntegerType()
+                                    ? mLeftOperand->IntegerValue()
+                                    : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = ( mRightOperand->GetType()->IsIntegerType()
+                                     ? mRightOperand->IntegerValue()
+                                     : mRightOperand->LongValue()
+                                   );
         switch (mOperator) {
             case OPERATOR_LEFT_SHIFT: {
                 return leftValue << rightValue;
@@ -104,7 +108,7 @@ String ShiftExpression::EnumeratorValue()
 
 bool ShiftExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsPositiveInfinity();
@@ -112,7 +116,7 @@ bool ShiftExpression::IsPositiveInfinity()
 
 bool ShiftExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNegativeInfinity();
@@ -120,7 +124,7 @@ bool ShiftExpression::IsNegativeInfinity()
 
 bool ShiftExpression::IsNaN()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNaN();

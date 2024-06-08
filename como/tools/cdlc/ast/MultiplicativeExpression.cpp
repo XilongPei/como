@@ -35,16 +35,22 @@ int MultiplicativeExpression::IntegerValue()
     if (mLeftOperand != nullptr) {
         switch (mOperator) {
             case OPERATOR_MULTIPLE: {
-                return mLeftOperand->IntegerValue()
-                        * mRightOperand->IntegerValue();
+                return mLeftOperand->IntegerValue() *
+                                                  mRightOperand->IntegerValue();
             }
             case OPERATOR_DIVIDE: {
                 long long int divisor = mRightOperand->IntegerValue();
-                return divisor != 0 ? mLeftOperand->IntegerValue() / divisor : 0;
+                if (divisor != 0) {
+                    return (mLeftOperand->IntegerValue() / divisor);
+                }
+                return 0;
             }
             case OPERATOR_MODULO: {
                 long long int divisor = mRightOperand->IntegerValue();
-                return divisor != 0 ? mLeftOperand->IntegerValue() % divisor : 0;
+                if (divisor != 0) {
+                    return (mLeftOperand->IntegerValue() % divisor);
+                }
+                return 0;
             }
             default: {
                 return 0;
@@ -59,19 +65,29 @@ int MultiplicativeExpression::IntegerValue()
 long long int MultiplicativeExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
+        long long int leftValue = ( mLeftOperand->GetType()->IsIntegerType()
+                                    ? mLeftOperand->IntegerValue()
+                                    : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = ( mRightOperand->GetType()->IsIntegerType()
+                                     ? mRightOperand->IntegerValue()
+                                     : mRightOperand->LongValue()
+                                   );
         switch (mOperator) {
             case OPERATOR_MULTIPLE: {
                 return leftValue * rightValue;
             }
             case OPERATOR_DIVIDE: {
-                return rightValue != 0 ? leftValue / rightValue : 0;
+                if (rightValue != 0) {
+                    return leftValue / rightValue;
+                }
+                return 0;
             }
             case OPERATOR_MODULO: {
-                return rightValue != 0 ? leftValue % rightValue : 0;
+                if (rightValue != 0) {
+                    return leftValue % rightValue;
+                }
+                return 0;
             }
             default: {
                 return 0;
@@ -87,6 +103,7 @@ float MultiplicativeExpression::FloatValue()
 {
     if (mLeftOperand != nullptr) {
         float leftValue, rightValue;
+
         if (mLeftOperand->GetType()->IsIntegerType()) {
             leftValue = mLeftOperand->IntegerValue();
         }
@@ -96,6 +113,7 @@ float MultiplicativeExpression::FloatValue()
         else {
             leftValue = mLeftOperand->FloatValue();
         }
+
         if (mRightOperand->GetType()->IsIntegerType()) {
             rightValue = mRightOperand->IntegerValue();
         }
@@ -105,12 +123,16 @@ float MultiplicativeExpression::FloatValue()
         else {
             rightValue = mRightOperand->FloatValue();
         }
+
         switch (mOperator) {
             case OPERATOR_MULTIPLE: {
-                return leftValue * rightValue;
+                return (leftValue * rightValue);
             }
             case OPERATOR_DIVIDE: {
-                return fabs(rightValue) > 1e-10 ? leftValue / rightValue : 0.0;
+                if (fabs(rightValue) > 1e-10) {
+                    return (leftValue / rightValue);
+                }
+                return 0.0;
             }
             case OPERATOR_MODULO:
             default: {
@@ -156,7 +178,10 @@ double MultiplicativeExpression::DoubleValue()
                 return leftValue * rightValue;
             }
             case OPERATOR_DIVIDE: {
-                return fabs(rightValue) > 1e-10 ? leftValue / rightValue : 0.0;
+                if (fabs(rightValue) > 1e-10) {
+                    return leftValue / rightValue;
+                }
+                return 0.0;
             }
             case OPERATOR_MODULO:
             default: {
@@ -181,7 +206,7 @@ String MultiplicativeExpression::EnumeratorValue()
 
 bool MultiplicativeExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand == nullptr || mRightOperand == nullptr) {
+    if ((nullptr == mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return (mLeftOperand->DoubleValue() == 1.0) &&
@@ -191,7 +216,7 @@ bool MultiplicativeExpression::IsPositiveInfinity()
 
 bool MultiplicativeExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand == nullptr || mRightOperand == nullptr) {
+    if ((nullptr == mLeftOperand) || (nullptr == mRightOperand)) {
         return false;
     }
     return (mLeftOperand->DoubleValue() == -1.0) &&

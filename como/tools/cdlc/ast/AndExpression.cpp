@@ -32,8 +32,7 @@ char AndExpression::CharacterValue()
 int AndExpression::IntegerValue()
 {
     if (mLeftOperand != nullptr) {
-        return mLeftOperand->IntegerValue()
-                & mRightOperand->IntegerValue();
+        return mLeftOperand->IntegerValue() & mRightOperand->IntegerValue();
     }
     else {
         return mRightOperand->IntegerValue();
@@ -43,10 +42,14 @@ int AndExpression::IntegerValue()
 long long int AndExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
+        long long int leftValue = ( mLeftOperand->GetType()->IsIntegerType()
+                                    ? mLeftOperand->IntegerValue()
+                                    : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = ( mRightOperand->GetType()->IsIntegerType()
+                                     ? mRightOperand->IntegerValue()
+                                     : mRightOperand->LongValue()
+                                   );
         return leftValue & rightValue;
     }
     else {
@@ -76,7 +79,7 @@ String AndExpression::EnumeratorValue()
 
 bool AndExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsPositiveInfinity();
@@ -84,7 +87,7 @@ bool AndExpression::IsPositiveInfinity()
 
 bool AndExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNegativeInfinity();
@@ -92,7 +95,7 @@ bool AndExpression::IsNegativeInfinity()
 
 bool AndExpression::IsNaN()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNaN();

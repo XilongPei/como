@@ -54,10 +54,14 @@ int AdditiveExpression::IntegerValue()
 long long int AdditiveExpression::LongValue()
 {
     if (mLeftOperand != nullptr) {
-        long long int leftValue = mLeftOperand->GetType()->IsIntegerType()
-                ? mLeftOperand->IntegerValue() : mLeftOperand->LongValue();
-        long long int rightValue = mRightOperand->GetType()->IsIntegerType()
-                ? mRightOperand->IntegerValue() : mRightOperand->LongValue();
+        long long int leftValue = ( mLeftOperand->GetType()->IsIntegerType()
+                                    ? mLeftOperand->IntegerValue()
+                                    : mLeftOperand->LongValue()
+                                  );
+        long long int rightValue = ( mRightOperand->GetType()->IsIntegerType()
+                                     ? mRightOperand->IntegerValue()
+                                     : mRightOperand->LongValue()
+                                   );
         switch (mOperator) {
             case OPERATOR_PLUS: {
                 return leftValue + rightValue;
@@ -79,6 +83,7 @@ float AdditiveExpression::FloatValue()
 {
     if (mLeftOperand != nullptr) {
         float leftValue, rightValue;
+
         if (mLeftOperand->GetType()->IsIntegerType()) {
             leftValue = mLeftOperand->IntegerValue();
         }
@@ -118,6 +123,7 @@ double AdditiveExpression::DoubleValue()
 {
     if (mLeftOperand != nullptr) {
         double leftValue, rightValue;
+
         if (mLeftOperand->GetType()->IsIntegerType()) {
             leftValue = mLeftOperand->IntegerValue();
         }
@@ -171,7 +177,7 @@ String AdditiveExpression::EnumeratorValue()
 
 bool AdditiveExpression::IsPositiveInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsPositiveInfinity();
@@ -179,7 +185,7 @@ bool AdditiveExpression::IsPositiveInfinity()
 
 bool AdditiveExpression::IsNegativeInfinity()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNegativeInfinity();
@@ -187,7 +193,7 @@ bool AdditiveExpression::IsNegativeInfinity()
 
 bool AdditiveExpression::IsNaN()
 {
-    if (mLeftOperand != nullptr || mRightOperand == nullptr) {
+    if ((mLeftOperand != nullptr) || (nullptr == mRightOperand)) {
         return false;
     }
     return mRightOperand->IsNaN();

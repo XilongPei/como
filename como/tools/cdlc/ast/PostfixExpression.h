@@ -67,10 +67,10 @@ public:
 
 private:
     AutoPtr<Expression> mNestedExpression;
-    bool mBooleanValue = false;
-    long long int mIntegralValue = 0;
-    double mFloatingPointValue = 0.0;
-    String mStringValue;
+    bool                mBooleanValue = false;
+    long long int       mIntegralValue = 0;
+    double              mFloatingPointValue = 0.0;
+    String              mStringValue;
 };
 
 void PostfixExpression::SetExpression(
