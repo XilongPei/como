@@ -20,7 +20,7 @@
     description("This is the definition of TestModule.")
 ]
 
-//import "CompilerExtraUnit.so"
+import "CompilerExtraUnit.so"
 
 module TestModule
 {

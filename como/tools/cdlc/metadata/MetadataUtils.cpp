@@ -22,6 +22,8 @@
 
 namespace cdlc {
 
+bool MetadataUtils::tryDoit = false;
+
 void* MetadataUtils::ReadMetadata(
     /* [in] */ const String& filePath,
     /* [in] */ int fileType)
@@ -42,18 +44,24 @@ void* MetadataUtils::ReadMetadataFromElf64(
     /* [in] */ const String& filePath)
 {
     if (filePath.IsEmpty()) {
-        Logger::E("MetadataUtils", "The file path is null or empty.");
+        if (! MetadataUtils::tryDoit) {
+            Logger::E("MetadataUtils", "The file path is null or empty.");
+        }
         return nullptr;
     }
 
     File file(filePath, File::READ);
     if (! file.IsValid()) {
-        Logger::E("MetadataUtils", "Open \"%s\" file failed.", filePath.string());
+        if (! MetadataUtils::tryDoit) {
+            Logger::E("MetadataUtils", "Open \"%s\" file failed.", filePath.string());
+        }
         return nullptr;
     }
 
     if (! file.Seek(0, File::SEEK_FROM_BEGIN)) {
-        Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
+        if (! MetadataUtils::tryDoit) {
+            Logger::E("MetadataUtils", "Seek \"%s\" file failed.", filePath.string());
+        }
         return nullptr;
     }
 
@@ -70,13 +78,13 @@ void* MetadataUtils::ReadMetadataFromElf64(
     }
 
     como::Elf64_Shdr* shdrs = (como::Elf64_Shdr *)malloc(sizeof(como::Elf64_Shdr) * ehdr.e_shnum);
-    if (shdrs == nullptr) {
+    if (nullptr == shdrs) {
         Logger::E("MetadataUtils", "Malloc Elf64_Shdr failed.");
         return nullptr;
     }
 
     if (file.Read((void*)shdrs, sizeof(como::Elf64_Shdr) * ehdr.e_shnum) <
-            sizeof(como::Elf64_Shdr) * ehdr.e_shnum) {
+                                        sizeof(como::Elf64_Shdr) * ehdr.e_shnum) {
         Logger::E("MetadataUtils", "Read \"%s\" file failed.", filePath.string());
         free(shdrs);
         return nullptr;
@@ -84,7 +92,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
 
     como::Elf64_Shdr* strShdr = shdrs + ehdr.e_shstrndx;
     char* strTable = (char *)malloc(strShdr->sh_size);
-    if (strTable == nullptr) {
+    if (nullptr == strTable) {
         Logger::E("MetadataUtils", "Malloc string table failed.");
         free(shdrs);
         return nullptr;

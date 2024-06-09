@@ -193,7 +193,7 @@ bool Parser::ParseFile(
                 break;
             }
             default: {
-                String message = String::Format("%s is not expected.",
+                String message = String::Format("%s is not expected when ParseFile.",
                                             TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 mTokenizer.GetToken();
@@ -225,39 +225,47 @@ bool Parser::ParseDeclarationWithAttributes(
         return false;
     }
 
-    TokenInfo tokenInfo = mTokenizer.PeekToken();
-    switch (tokenInfo.mToken) {
-        case Token::COCLASS: {
-            result = ParseCoclass(attrs) && result;
-            break;
-        }
-        case Token::INTERFACE: {
-            result = ParseInterface(attrs) && result;
-            break;
-        }
-        case Token::MODULE: {
-            if (excludeModule) {
-                String message = String::Format("%s is not expected.",
-                                           TokenInfo::Dump(tokenInfo).string());
+    bool goon;
+    do {
+        goon = false;
+
+        TokenInfo tokenInfo = mTokenizer.PeekToken();
+        switch (tokenInfo.mToken) {
+            case Token::COCLASS: {
+                result = ParseCoclass(attrs);
+                break;
+            }
+            case Token::INTERFACE: {
+                result = ParseInterface(attrs);
+                break;
+            }
+            case Token::MODULE: {
+                if (excludeModule) {
+                    String message = String::Format(
+                        "keyword %s is not expected when ParseDeclarationWithAttributes.",
+                        TokenInfo::Dump(tokenInfo).string());
+                    LogError(tokenInfo, message);
+                    result = false;
+                    break;
+                }
+                result = ParseModule(attrs);
+                break;
+            }
+            case Token::IMPORT: {
+                result = ParseImport();
+                goon = true;
+                break;
+            }
+            default: {
+                String message = String::Format(
+                        "%s is not expected when ParseDeclarationWithAttributes.",
+                        TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 result = false;
                 break;
             }
-            result = ParseModule(attrs) && result;
-            break;
         }
-        case Token::IMPORT: {
-            result = ParseImport() && result;
-            break;
-        }
-        default: {
-            String message = String::Format("%s is not expected.",
-                                           TokenInfo::Dump(tokenInfo).string());
-            LogError(tokenInfo, message);
-            result = false;
-            break;
-        }
-    }
+    } while (goon && result);
 
     return result;
 }
@@ -305,8 +313,9 @@ bool Parser::ParseAttributes(
                     break;
                 }
                 default: {
-                    String message = String::Format("\"%s\" is not expected.",
-                                            TokenInfo::Dump(tokenInfo).string());
+                    String message = String::Format(
+                                "\"%s\" is not expected when ParseAttributes.",
+                                TokenInfo::Dump(tokenInfo).string());
                     LogError(tokenInfo, message);
                     result = false;
                     break;
@@ -575,8 +584,9 @@ bool Parser::ParseModule(
                 break;
             }
             default: {
-                String message = String::Format("%s is not expected.",
-                        TokenInfo::Dump(tokenInfo).string());
+                String message = String::Format(
+                                        "%s is not expected when ParseModule.",
+                                        TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 mTokenizer.GetToken();
                 result = false;
@@ -684,8 +694,9 @@ bool Parser::ParseNamespace()
                 break;
             }
             default: {
-                String message = String::Format("%s is not expected.",
-                                           TokenInfo::Dump(tokenInfo).string());
+                String message = String::Format(
+                                      "%s is not expected when ParseNamespace.",
+                                      TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 mTokenizer.GetToken();
                 result = false;
@@ -1435,8 +1446,9 @@ AutoPtr<PostfixExpression> Parser::ParsePostfixExpression(
             return expr;
         }
         default: {
-            String message = String::Format("%s is not expected.",
-                                        TokenInfo::Dump(tokenInfo).string());
+            String message = String::Format(
+                              "%s is not expected when ParsePostfixExpression.",
+                              TokenInfo::Dump(tokenInfo).string());
             LogError(tokenInfo, message);
             return nullptr;
         }
@@ -1846,8 +1858,9 @@ bool Parser::ParseParameter(
                 break;
             }
             default: {
-                String message = String::Format("%s is not expected.",
-                                           TokenInfo::Dump(tokenInfo).string());
+                String message = String::Format(
+                                      "%s is not expected when ParseParameter.",
+                                      TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 result = false;
                 break;
@@ -2070,7 +2083,9 @@ bool Parser::ParseNestedInterface(
 
     TokenInfo tokenInfo = mTokenizer.PeekToken();
     if (tokenInfo.mToken != Token::INTERFACE) {
-        String message = String::Format("%s is not expected.", TokenInfo::Dump(tokenInfo).string());
+        String message = String::Format(
+                                "%s is not expected when ParseNestedInterface.",
+                                TokenInfo::Dump(tokenInfo).string());
         LogError(tokenInfo, message);
         result = false;
     }
@@ -2283,8 +2298,9 @@ bool Parser::ParseConstructor(
             tokenInfo = mTokenizer.PeekToken();
         }
         else {
-            String message = String::Format("%s is not expected.",
-                                            TokenInfo::Dump(tokenInfo).string());
+            String message = String::Format(
+                                    "%s is not expected when ParseConstructor.",
+                                    TokenInfo::Dump(tokenInfo).string());
             LogError(tokenInfo, message);
             result = false;
         }
@@ -2532,11 +2548,15 @@ bool Parser::ParseImport()
      * Using environmental variable LIB_PATH to find the component to import.
      */
     String filePath = tokenInfo.mStringValue;
+    MetadataUtils::tryDoit = true;
     void *metadata = MetadataUtils::ReadMetadata(filePath, MetadataUtils::TYPE_SO);
+    MetadataUtils::tryDoit = false;
     if (nullptr == metadata) {
         for (String cpath : mComponentPath) {
             String compPath = cpath + "/" + filePath;
+            MetadataUtils::tryDoit = true;
             metadata = MetadataUtils::ReadMetadata(compPath, MetadataUtils::TYPE_SO);
+            MetadataUtils::tryDoit = false;
             if (nullptr != metadata) {
                 break;
             }
@@ -2552,8 +2572,8 @@ bool Parser::ParseImport()
 
     como::MetadataSerializer serializer;
     serializer.Deserialize(reinterpret_cast<uintptr_t>(metadata));
-    AutoPtr<Module> comort = Module::Resolve(metadata);
-    mWorld->AddDependentModule(comort);
+    AutoPtr<Module> comModule = Module::Resolve(metadata);
+    mWorld->AddDependentModule(comModule);
     return true;
 }
 

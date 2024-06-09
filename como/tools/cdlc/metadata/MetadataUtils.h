@@ -37,6 +37,7 @@ private:
         /* [in] */ const String& filePath);
 
 public:
+    static bool tryDoit;
     static constexpr int TYPE_METADATA = 1;
     static constexpr int TYPE_SO = 2;
 };
