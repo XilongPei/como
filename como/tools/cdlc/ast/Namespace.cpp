@@ -53,7 +53,7 @@ void Namespace::AddNamespace(
 AutoPtr<Namespace> Namespace::GetNamespace(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mChildren.size()) {
+    if ((i >= 0) && (i < mChildren.size())) {
         return mChildren[i];
     }
     return nullptr;
@@ -63,9 +63,10 @@ AutoPtr<Namespace> Namespace::FindNamespace(
     /* [in] */ const String& nsString)
 {
     int index = nsString.IndexOf("::");
-    String childNsString = index != -1
-            ? nsString.Substring(0, index)
-            : nsString;
+    String childNsString = ( (index != -1)
+                             ? nsString.Substring(0, index)
+                             : nsString
+                           );
     for (AutoPtr<Namespace> child : mChildren) {
         if (child->ToShortString().Equals(childNsString)) {
             if (index != -1) {
@@ -92,7 +93,7 @@ void Namespace::AddConstant(
 AutoPtr<Constant> Namespace::GetConstant(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mConstants.size()) {
+    if ((i >= 0) && (i < mConstants.size())) {
         return mConstants[i];
     }
     return nullptr;
@@ -123,7 +124,7 @@ void Namespace::AddEnumerationType(
 AutoPtr<EnumerationType> Namespace::GetEnumeration(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mEnumerations.size()) {
+    if ((i >= 0) && (i < mEnumerations.size())) {
         return mEnumerations[i];
     }
     return nullptr;
@@ -154,7 +155,7 @@ void Namespace::AddInterfaceType(
 AutoPtr<InterfaceType> Namespace::GetInterface(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mInterfaces.size()) {
+    if ((i >= 0) && (i < mInterfaces.size())) {
         return mInterfaces[i];
     }
     return nullptr;
@@ -185,7 +186,7 @@ void Namespace::AddCoclassType(
 AutoPtr<CoclassType> Namespace::GetCoclass(
     /* [in] */ int i)
 {
-    if (i >= 0 && i < mKlasses.size()) {
+    if ((i >= 0) && (i < mKlasses.size())) {
         return mKlasses[i];
     }
     return nullptr;
@@ -227,7 +228,7 @@ String Namespace::ToString()
 {
     String nsString = mName;
     Namespace* parent = mParent;
-    while (parent != nullptr && !parent->IsGlobal()) {
+    while ((parent != nullptr) && (! parent->IsGlobal())) {
         nsString = parent->mName + "::" + nsString;
         parent = parent->mParent;
     }

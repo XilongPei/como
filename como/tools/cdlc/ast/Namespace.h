@@ -131,20 +131,19 @@ public:
 
 private:
     // mName does not include "::"
-    String mName;
-    Namespace* mParent = nullptr;
+    String                          mName;
+    Namespace                      *mParent = nullptr;
+    bool                            mIsWrapper = false;
+    InterfaceType                  *mInterfaceWrapped = nullptr;
+    Module                         *mModule = nullptr;
+    bool                            mResolved = true;
+    como::MetaNamespace            *mMetadata = nullptr;
     std::vector<AutoPtr<Namespace>> mChildren;
-    std::vector<AutoPtr<Constant>> mConstants;
+    std::vector<AutoPtr<Constant>>  mConstants;
     std::vector<AutoPtr<EnumerationType>> mEnumerations;
-    std::vector<AutoPtr<InterfaceType>> mInterfaces;
-    std::vector<AutoPtr<CoclassType>> mKlasses;
-    std::vector<AutoPtr<Type>> mTypes;
-    bool mIsWrapper = false;
-    InterfaceType* mInterfaceWrapped = nullptr;
-
-    Module* mModule = nullptr;
-    bool mResolved = true;
-    como::MetaNamespace* mMetadata = nullptr;
+    std::vector<AutoPtr<InterfaceType>>   mInterfaces;
+    std::vector<AutoPtr<CoclassType>>     mKlasses;
+    std::vector<AutoPtr<Type>>            mTypes;
 };
 
 AutoPtr<Namespace> Namespace::GetParent()

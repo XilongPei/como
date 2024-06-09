@@ -106,8 +106,8 @@ public:
     AutoPtr<Type> FindType(
         /* [in] */ const String& fullName);
 
-    inline const std::unordered_map<String, AutoPtr<Type>, StringHashFunc, StringEqualsFunc>&
-    GetTypes();
+    inline const std::unordered_map<String, AutoPtr<Type>,
+                                StringHashFunc, StringEqualsFunc>&  GetTypes();
 
     int IndexOf(
         /* [in] */ Type* type);
@@ -154,23 +154,24 @@ private:
         /* [in] */ const String& typeName);
 
 private:
-    AutoPtr<UUID> mUuid;
-    String mVersion;
-    String mDescription;
-    String mUri;
-    String mName;
-    String mStrFramacBlock;
-    AutoPtr<Namespace> mGlobalNamespace;
+    AutoPtr<UUID>       mUuid;
+    String              mVersion;
+    String              mDescription;
+    String              mUri;
+    String              mName;
+    String              mStrFramacBlock;
+    AutoPtr<Namespace>  mGlobalNamespace;
 
-    std::vector<AutoPtr<Constant>> mConstants;
+    std::vector<AutoPtr<Constant>>        mConstants;
     std::vector<AutoPtr<EnumerationType>> mEnumerations;
-    std::vector<AutoPtr<InterfaceType>> mInterfaces;
-    std::vector<AutoPtr<CoclassType>> mKlasses;
-    std::unordered_map<String, AutoPtr<Type>, StringHashFunc, StringEqualsFunc> mAllTypeMap;
+    std::vector<AutoPtr<InterfaceType>>   mInterfaces;
+    std::vector<AutoPtr<CoclassType>>     mKlasses;
+    std::unordered_map<String, AutoPtr<Type>, StringHashFunc, StringEqualsFunc> \
+                                          mAllTypeMap;
 
-    std::vector<AutoPtr<Module>> mDependencies;
+    std::vector<AutoPtr<Module>>          mDependencies;
 
-    como::MetaComponent* mComponent = nullptr;
+    como::MetaComponent                  *mComponent = nullptr;
 };
 
 Module::Module()
@@ -272,8 +273,8 @@ void Module::AddCoclassType(
     AddType(klass);
 }
 
-const std::unordered_map<String, AutoPtr<Type>, StringHashFunc, StringEqualsFunc>&
-Module::GetTypes()
+const std::unordered_map<String, AutoPtr<Type>,
+                           StringHashFunc, StringEqualsFunc>& Module::GetTypes()
 {
     return mAllTypeMap;
 }

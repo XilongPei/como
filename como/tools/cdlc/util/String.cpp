@@ -267,7 +267,7 @@ String& String::operator+=(
     int oldLen = GetLength();
     int newLen = oldLen + other.GetLength();
     char* newString = reinterpret_cast<char*>(SharedBuffer::Alloc(newLen));
-    if (newString == nullptr) {
+    if (nullptr == newString) {
         return *this;
     }
 
@@ -313,7 +313,7 @@ int String::GetHashCode() const
 
     const char* string = mString;
     if (string) {
-        for ( ; *string; ++string) {
+        for ( ;  *string;  ++string) {
             hash = hash * seed + (*string);
         }
     }
@@ -336,10 +336,10 @@ int String::Compare(
     if (mString == string) {
         return 0;
     }
-    if (mString == nullptr) {
+    if ((nullptr == mString)) {
         return -1;
     }
-    if (string == nullptr) {
+    if ((nullptr == string)) {
         return 1;
     }
 
@@ -349,11 +349,11 @@ int String::Compare(
 bool String::Equals(
     /* [in] */ const char* string) const
 {
-    if (mString == nullptr && string == nullptr) {
+    if ((nullptr == mString) && (nullptr == string)) {
         return true;
     }
 
-    if (mString == nullptr || string == nullptr) {
+    if ((nullptr == mString) || (nullptr == string)) {
         return false;
     }
 
@@ -366,11 +366,11 @@ bool String::Equals(
 bool String::Equals(
     /* [in] */ const String& other) const
 {
-    if (mString == nullptr && other.mString == nullptr) {
+    if ((nullptr == mString) && (nullptr == other.mString)) {
         return true;
     }
 
-    if (mString == nullptr || other.mString == nullptr) {
+    if ((nullptr == mString) || (nullptr == other.mString)) {
         return false;
     }
 
@@ -386,11 +386,11 @@ bool String::Equals(
 bool String::EqualsIgnoreCase(
     /* [in] */ const char* string) const
 {
-    if (mString == nullptr && string == nullptr) {
+    if ((nullptr == mString) && (nullptr == string)) {
         return true;
     }
 
-    if (mString == nullptr || string == nullptr) {
+    if ((nullptr == mString) || (nullptr == string)) {
         return false;
     }
 
@@ -403,11 +403,11 @@ bool String::EqualsIgnoreCase(
 bool String::EqualsIgnoreCase(
     /* [in] */ const String& other) const
 {
-    if (mString == nullptr && other.mString == nullptr) {
+    if ((nullptr == mString) && (nullptr == other.mString)) {
         return true;
     }
 
-    if (mString == nullptr || other.mString == nullptr) {
+    if ((nullptr == mString) || (nullptr == other.mString)) {
         return false;
     }
 
@@ -424,11 +424,11 @@ int String::IndexOf(
     /* [in] */ const char* string,
     /* [in] */ int fromIndex) const
 {
-    if (string == nullptr || string[0] == '\0') {
+    if ((nullptr == string) || ('\0' == string[0])) {
         return -1;
     }
 
-    if (IsEmpty() || fromIndex >= GetLength()) {
+    if (IsEmpty() || (fromIndex >= GetLength())) {
         return -1;
     }
 
@@ -440,7 +440,7 @@ int String::IndexOf(
     /* [in] */ int c,
     /* [in] */ int fromIndex) const
 {
-    if (c <= 0 || c > 255) {
+    if ((c <= 0) || (c > 255)) {
         return -1;
     }
     if (IsEmpty() || fromIndex >= GetLength()) {
@@ -455,7 +455,7 @@ int String::LastIndexOf(
     /* [in] */ const char* string,
     /* [in] */ int fromIndex) const
 {
-    if (string == nullptr || string[0] == '\0') {
+    if ((nullptr == string) || ('\0' == string[0])) {
         return -1;
     }
 
@@ -464,7 +464,7 @@ int String::LastIndexOf(
     }
 
     return LastIndexOfInternal(mString, GetLength(),
-            string, strlen(string), fromIndex);
+                                            string, strlen(string), fromIndex);
 }
 
 int String::LastIndexOf(
@@ -480,21 +480,21 @@ int String::LastIndexOf(
     }
 
     return LastIndexOfInternal(mString, GetLength(),
-            other.mString, other.GetLength(), fromIndex);
+                                   other.mString, other.GetLength(), fromIndex);
 }
 
 int String::LastIndexOf(
     /* [in] */ int c,
     /* [in] */ int fromIndex) const
 {
-    if (c <= 0 || c > 255) {
+    if ((c <= 0) || (c > 255)) {
         return -1;
     }
-    if (IsEmpty() || fromIndex < 0) {
+    if (IsEmpty() || (fromIndex < 0)) {
         return -1;
     }
 
-    int pos = fromIndex < GetLength() ? fromIndex : GetLength() - 1;
+    int pos = ((fromIndex < GetLength()) ? fromIndex : GetLength() - 1);
     char* p = mString + pos;
     while (p != mString) {
         if (*p == c) {
@@ -548,7 +548,7 @@ bool String::EndsWith(
     /* [in] */ const char* suffix) const
 {
     int idx = LastIndexOf(suffix);
-    if (idx == -1) {
+    if (-1 == idx) {
         return false;
     }
     return idx + strlen(suffix) == GetLength();
@@ -558,7 +558,7 @@ bool String::EndsWith(
     /* [in] */ const String& suffix) const
 {
     int idx = LastIndexOf(suffix);
-    if (idx == -1) {
+    if (-1 == idx) {
         return false;
     }
     return idx + suffix.GetLength() == GetLength();
@@ -602,8 +602,7 @@ String String::TrimStart() const
     while (*start && isspace(*start)) {
         ++start;
     }
-    return start - mString >= len ? nullptr :
-            String(start, mString + len - start);
+    return (start - mString >= len) ? nullptr : String(start, mString + len - start);
 }
 
 String String::TrimEnd() const
@@ -613,11 +612,10 @@ String String::TrimEnd() const
     }
 
     const char* end = mString + GetLength() - 1;
-    while (isspace(*end) && end >= mString) {
+    while (isspace(*end) && (end >= mString)) {
         --end;
     }
-    return end < mString ? nullptr :
-            String(mString, end - mString + 1);
+    return (end < mString) ? nullptr : String(mString, end - mString + 1);
 }
 
 String String::ToLowerCase() const
@@ -628,7 +626,7 @@ String String::ToLowerCase() const
 
     int len = GetLength();
     String str(len);
-    for (int i = 0; i < len; i++) {
+    for (int i = 0;  i < len;  i++) {
         str.mString[i] = tolower(mString[i]);
     }
     str.mString[len] = '\0';
@@ -643,7 +641,7 @@ String String::ToUpperCase() const
 
     int len = GetLength();
     String str(len);
-    for (int i = 0; i < len; i++) {
+    for (int i = 0;  i < len;  i++) {
         str.mString[i] = toupper(mString[i]);
     }
     str.mString[len] = '\0';
@@ -653,7 +651,7 @@ String String::ToUpperCase() const
 String String::Substring(
     /* [in] */ int begin) const
 {
-    if (begin < 0 || begin >= GetLength()) {
+    if ((begin < 0) || (begin >= GetLength())) {
         return nullptr;
     }
 
@@ -664,11 +662,18 @@ String String::Substring(
     /* [in] */ int begin,
     /* [in] */ int end) const
 {
-    if (begin < 0 || begin > end || begin >= GetLength()) {
+    if ((begin < 0) || (begin > end) || (begin >= GetLength())) {
         return nullptr;
     }
 
-    int len = end < GetLength() ? end - begin : GetLength() - begin;
+    int len;
+    if (end < GetLength()) {
+        len = end - begin;
+    }
+    else {
+        len = GetLength() - begin;
+    }
+
     String str(len);
     memcpy(str.mString, mString + begin, len);
     str.mString[len] = '\0';
@@ -680,15 +685,15 @@ String String::Replace(
     /* [in] */ const char* target,
     /* [in] */ const char* replacement) const
 {
-    if (target == nullptr || target[0] == '\0') {
+    if ((nullptr == target) || ('\0' == target[0])) {
         return *this;
     }
-    if (replacement == nullptr) {
+    if (nullptr == replacement) {
         return *this;
     }
 
     int index = IndexOf(target);
-    if (index == -1) {
+    if (-1 == index) {
         return *this;
     }
 
@@ -715,10 +720,10 @@ String String::Replace(
     }
 
     int len = GetLength();
-    for (int i = 0; i < len; i++) {
+    for (int i = 0;  i < len;  i++) {
         if (mString[i] == oldChar) {
             String str(mString);
-            for (int j = i; j < len; j++) {
+            for (int j = i;  j < len;  j++) {
                 if (str.mString[j] == oldChar) {
                     str.mString[j] = newChar;
                 }

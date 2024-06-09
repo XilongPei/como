@@ -87,10 +87,16 @@ AutoPtr<Node> Method::Clone(
         AutoPtr<Type> returnType = module->FindType(mReturnType->ToString());
         if (nullptr == returnType) {
             returnType = mReturnType->Clone(module, false);
+            if (nullptr == returnType) {
+                return nullptr;
+            }
         }
         clone->mReturnType = returnType;
         for (int i = 0;  i < mParameters.size();  i++) {
             AutoPtr<Parameter> parameter = mParameters[i]->Clone(module, true);
+            if (nullptr == parameter) {
+                return nullptr;
+            }
             clone->AddParameter(parameter);
         }
     }

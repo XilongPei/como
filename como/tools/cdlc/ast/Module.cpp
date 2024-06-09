@@ -46,8 +46,11 @@ AutoPtr<Namespace> Module::ParseNamespace(
         String targetNss = nss.Substring(0, index);
         if (nullptr == parentNs) {
             targetNs = FindNamespace(targetNss);
-            if (targetNs == nullptr) {
+            if (nullptr == targetNs) {
                 targetNs = new Namespace(targetNss, this);
+                if (nullptr == targetNs) {
+                    return nullptr;
+                }
                 AddNamespace(targetNs);
             }
             parentNs = targetNs;
@@ -248,7 +251,7 @@ String Module::Dump(
     builder.AppendFormat("name:%s, ", mName.string());
     builder.AppendFormat("uuid:%s, ", mUuid->ToString().string());
     builder.AppendFormat("uri:%s", mUri.string());
-    if (!mDescription.IsEmpty()) {
+    if (! mDescription.IsEmpty()) {
         builder.AppendFormat(", description:%s", mDescription.string());
     }
     builder.Append("]\n");
@@ -329,6 +332,10 @@ AutoPtr<Module> Module::Resolve(
 {
     AutoPtr<Module> module = new Module(
                               reinterpret_cast<como::MetaComponent*>(metadata));
+
+    if (nullptr == module->mGlobalNamespace) {
+        return nullptr;
+    }
     return module;
 }
 

@@ -2572,8 +2572,16 @@ bool Parser::ParseImport()
 
     como::MetadataSerializer serializer;
     serializer.Deserialize(reinterpret_cast<uintptr_t>(metadata));
-    AutoPtr<Module> comModule = Module::Resolve(metadata);
-    mWorld->AddDependentModule(comModule);
+    AutoPtr<Module> comoModule = Module::Resolve(metadata);
+    if (nullptr == comoModule) {
+        String message = String::Format(
+             "import component file \"%s\" failed when call Module::Resolve().",
+             filePath.string());
+        LogError(tokenInfo, message);
+        return false;
+    }
+
+    mWorld->AddDependentModule(comoModule);
     return true;
 }
 
