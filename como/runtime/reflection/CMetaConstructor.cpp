@@ -136,7 +136,7 @@ ECode CMetaConstructor::GetParameter(
 
     FAIL_RETURN(BuildAllParameters());
 
-    for (Integer i = 0; i < mParameters.GetLength(); i++) {
+    for (Integer i = 0;  i < mParameters.GetLength();  i++) {
         String mpName;
         mParameters[i]->GetName(mpName);
         if (mpName.Equals(name)) {

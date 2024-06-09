@@ -79,7 +79,6 @@ CMetaMethod::CMetaMethod(
     }
     else {
         mReturnType = new CMetaType(mc, mc->mTypes[mm->mReturnTypeIndex]);
-
         if (nullptr == mReturnType) {
             Logger::E("CMetaMethod::CMetaMethod", "E_OUT_OF_MEMORY_ERROR, %s", mName.string());
         }
@@ -283,7 +282,7 @@ ECode CMetaMethod::InvokeImpl(
 #else
     #error Unknown Architecture
 #endif
-    if (mMethodAddr == 0) {
+    if (0 == mMethodAddr) {
         VObject* vobj = reinterpret_cast<VObject*>(thisObject->Probe(mOwner->mIid));
         mVobj = reinterpret_cast<HANDLE>(vobj);
         reinterpret_cast<HANDLE*>(params)[0] = mVobj;
@@ -293,7 +292,7 @@ ECode CMetaMethod::InvokeImpl(
         reinterpret_cast<HANDLE*>(params)[0] = mVobj;
     }
 
-    if (invokeImpl == nullptr) {
+    if (nullptr == invokeImpl) {
         return invoke(mMethodAddr, params, paramNum + 1, stackParamNum, paramInfos);
     }
 

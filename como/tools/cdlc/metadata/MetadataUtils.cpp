@@ -48,7 +48,7 @@ void* MetadataUtils::ReadMetadataFromElf64(
 
     File file(filePath, File::READ);
     if (! file.IsValid()) {
-        Logger::E("MetadataUtils", "Open \"%s\" file failed.", file.GetPath().string());
+        Logger::E("MetadataUtils", "Open \"%s\" file failed.", filePath.string());
         return nullptr;
     }
 

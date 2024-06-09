@@ -246,6 +246,10 @@ bool Parser::ParseDeclarationWithAttributes(
             result = ParseModule(attrs) && result;
             break;
         }
+        case Token::IMPORT: {
+            result = ParseImport() && result;
+            break;
+        }
         default: {
             String message = String::Format("%s is not expected.",
                                            TokenInfo::Dump(tokenInfo).string());
@@ -1843,7 +1847,7 @@ bool Parser::ParseParameter(
             }
             default: {
                 String message = String::Format("%s is not expected.",
-                        TokenInfo::Dump(tokenInfo).string());
+                                           TokenInfo::Dump(tokenInfo).string());
                 LogError(tokenInfo, message);
                 result = false;
                 break;
@@ -2539,7 +2543,9 @@ bool Parser::ParseImport()
         }
 
         if (nullptr == metadata) {
-            LogError(tokenInfo, "Load metadata from comort failed.");
+            String message = String::Format("import component file \"%s\" failed.",
+                                            filePath.string());
+            LogError(tokenInfo, message);
             return false;
         }
     }
@@ -2706,7 +2712,7 @@ void Parser::ShowErrors()
 {
     for (Error& error : mErrors) {
         if (! error.mFile.IsEmpty()) {
-            Logger::E(TAG, "%s[line %d, column %d] %s",
+            Logger::E(TAG, "%s [line %d, column %d] %s",
                     error.mFile.string(),
                     error.mLineNo,
                     error.mColumnNo,
