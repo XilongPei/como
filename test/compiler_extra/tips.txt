@@ -1,0 +1,9 @@
+cd /home/xilong/home/como/out/target/como.linux.x64.rls/test/runtime/reflection/component && /home/xilong/home/como/tools/x64/cdlc -gen -mode-component -i /home/xilong/home/como/test/runtime/reflection/component -d /home/xilong/home/como/out/target/como.linux.x64.rls/test/runtime/reflection/component -c /home/xilong/home/como/test/runtime/reflection/component/ReflectionTestUnit.cdl
+
+cd /home/xilong/home/como/out/target/como.linux.x64.rls/test/runtime/reflection/component
+
+/home/xilong/home/como/tools/x64/cdlc -gen -mode-component -i /home/xilong/home/como/test/compiler_extra/component -d ./ -c /home/xilong/home/como/test/compiler_extra/Module.cdl
+
+
+export LIB_PATH=/home/xilong/home/como/out/target/como.linux.x64.rls/test/compiler_extra/component
+/home/xilong/home/como/tools/x64/cdlc -gen -mode-component -i /home/xilong/home/como/test/compiler_extra -d /home/xilong/home/como/test/compiler_extra -c /home/xilong/home/como/test/compiler_extra/Module.cdl
