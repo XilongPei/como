@@ -814,9 +814,14 @@ bool Parser::ParseInterface(
 
     // interface definition
     if (attrs.mVersion.IsEmpty()) {
+        attrs.mVersion = "1.0.0.0";
+        /**
+         * If the version of coclass is not specified, the default value
+         * "1.0.0.0" is used
         String message = String::Format("Interface %s should have attributes.", interfaceName.string());
         LogError(tokenInfo, message);
         result = false;
+        */
     }
 
     if (mTokenizer.PeekToken().mToken == Token::COLON) {
@@ -2133,9 +2138,14 @@ bool Parser::ParseCoclass(
     }
 
     if (attrs.mVersion.IsEmpty()) {
+        attrs.mVersion = "1.0.0.0";
+        /**
+         * If the version of coclass is not specified, the default value
+         * "1.0.0.0" is used
         String message = String::Format("Coclass %s should have attributes.", className.string());
         LogError(tokenInfo, message);
         result = false;
+        */
     }
 
     AutoPtr<CoclassType> klass = new CoclassType();

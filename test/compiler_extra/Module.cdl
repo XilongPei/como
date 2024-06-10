@@ -30,4 +30,9 @@ include "Enumerations.cdl"
 include "Interfaces.cdl"
 include "Coclasses.cdl"
 
+coclass CFooExtra
+{
+    interface como::test::rpc::IService2;
+}
+
 }
