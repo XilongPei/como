@@ -637,7 +637,8 @@ T& Array<T>::operator[](
     // TODO, fix bug
     // Can not throw exceptions, how to inform the caller parameter error
     if ((index < 0) || (index > mSize)) {
-        Logger::E("Array<T>::operator[]", "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
+        Logger::E("Array<T>::operator[]",
+                  "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
     }
 
@@ -653,7 +654,8 @@ const T& Array<T>::operator[](
     // TODO, fix bug
     // Can not throw exceptions, how to inform the caller parameter error
     if ((index < 0) || (index > mSize)) {
-        Logger::E("Array<T>::operator[]", "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
+        Logger::E("Array<T>::operator[]",
+                  "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
     }
 

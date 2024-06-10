@@ -44,7 +44,8 @@ CMetaInterface::CMetaInterface(
     mMethods = Array<IMetaMethod*>(CalculateMethodNumber());
 
     if (mi->mProperties & TYPE_EXTERNAL) {
-        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi + sizeof(MetaEnumeration)));
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi +
+                                                        sizeof(MetaInterface)));
         mExternalModuleName = String(*externalPtr);
     }
     else {
@@ -323,9 +324,9 @@ ECode CMetaInterface::BuildAllConstants()
 
 ECode CMetaInterface::BuildAllMethods()
 {
-    if (mMethods[0] == nullptr) {
+    if (nullptr == mMethods[0]) {
         Mutex::AutoLock lock(mMethodsLock);
-        if (mMethods[0] == nullptr) {
+        if (nullptr == mMethods[0]) {
             if (BuildInterfaceMethod(mMetadata) < 0) {
                 return E_OUT_OF_MEMORY_ERROR;
             }
@@ -352,6 +353,9 @@ Integer CMetaInterface::BuildInterfaceMethod(
         // Methods in all interfaces return values of type ECode,
         // not TYPE_EXTERNAL, so mmObj->mReturnType shouldn't be nullptr here.
         if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
+            for (Integer j = i - 1;  j >= 0;  j--) {
+                delete mMethods[j];
+            }
             return -1;
         }
 

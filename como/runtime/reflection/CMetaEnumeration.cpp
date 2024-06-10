@@ -34,7 +34,8 @@ CMetaEnumeration::CMetaEnumeration(
     , mEnumerators(me->mEnumeratorNumber)
 {
     if (me->mProperties & TYPE_EXTERNAL) {
-        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)me + sizeof(MetaEnumeration)));
+        char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)me +
+                                                      sizeof(MetaEnumeration)));
         mExternalModuleName = String(*externalPtr);
     }
     else {
@@ -131,14 +132,18 @@ ECode CMetaEnumeration::GetExternalModuleName(
 
 ECode CMetaEnumeration::BuildAllEnumerators()
 {
-    if (mEnumerators[0] == nullptr) {
+    if (nullptr == mEnumerators[0]) {
         Mutex::AutoLock lock(mEnumeratorsLock);
-        if (mEnumerators[0] == nullptr) {
+        if (nullptr == mEnumerators[0]) {
             for (Integer i = 0;  i < mMetadata->mEnumeratorNumber;  i++) {
                 MetaEnumerator *me = mMetadata->mEnumerators[i];
                 AutoPtr<IMetaEnumerator> meObj = new CMetaEnumerator(this, me);
-                if (nullptr == meObj)
+                if (nullptr == meObj) {
+                    for (Integer j = i - 1;  j >= 0;  j--) {
+                        delete mEnumerators.Get(j);
+                    }
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 mEnumerators.Set(i, meObj);
             }
