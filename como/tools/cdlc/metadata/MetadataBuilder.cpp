@@ -733,13 +733,22 @@ como::MetaInterface *MetadataBuilder::WriteMetaInterface(
     }
     // mNestedInterfaceIndexes address
     mBasePtr = ALIGN(mBasePtr);
-    mi->mNestedInterfaceIndexes = IN > 0 ? reinterpret_cast<int*>(mBasePtr) : nullptr;
+    mi->mNestedInterfaceIndexes = ( (IN > 0)
+                                    ? reinterpret_cast<int*>(mBasePtr)
+                                    : nullptr
+                                  );
     // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(int) * IN);
-    mi->mConstants = CN > 0 ? reinterpret_cast<como::MetaConstant**>(mBasePtr) : nullptr;
+    mi->mConstants = ( (CN > 0)
+                       ? reinterpret_cast<como::MetaConstant**>(mBasePtr)
+                       : nullptr
+                     );
     // mMethods address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaConstant*) * CN);
-    mi->mMethods = MN > 0 ? reinterpret_cast<como::MetaMethod**>(mBasePtr) : nullptr;
+    mi->mMethods = ( (MN > 0)
+                     ? reinterpret_cast<como::MetaMethod**>(mBasePtr)
+                     : nullptr
+                   );
     // end address
     mBasePtr = mBasePtr + sizeof(como::MetaMethod*) * MN;
 
@@ -774,7 +783,10 @@ como::MetaMethod *MetadataBuilder::WriteMetaMethod(
     mm->mParameterNumber = PN;
     // mParameters address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaMethod));
-    mm->mParameters = PN > 0 ? reinterpret_cast<como::MetaParameter**>(mBasePtr) : nullptr;
+    mm->mParameters = ( (PN > 0)
+                        ? reinterpret_cast<como::MetaParameter**>(mBasePtr)
+                        : nullptr
+                      );
     mm->mProperties = 0;
     if (method->IsDeleted()) {
         mm->mProperties |= METHOD_DELETED;

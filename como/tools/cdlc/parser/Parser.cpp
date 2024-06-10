@@ -2591,6 +2591,34 @@ bool Parser::ParseImport()
         return false;
     }
 
+    const char *strComoMoudle = comoModule->GetName().string();
+    const char *strFilePath = filePath.string();
+    int lenComoMoudle = strlen(strComoMoudle);
+    int lenFilePath = strlen(strFilePath);
+    bool stdComoComponentName = true;
+    if ((strncmp(strComoMoudle, strFilePath, lenComoMoudle) == 0) &&
+                                                (lenFilePath > lenComoMoudle)) {
+        if ('.' == strFilePath[lenComoMoudle]) {
+            for (int i = lenComoMoudle + 1;  i < lenFilePath;  i++) {
+                if (('/' == strFilePath[i]) || ('\\' == strFilePath[i])) {
+                    stdComoComponentName = false;
+                    break;
+                }
+            }
+        }
+        else {
+            stdComoComponentName = false;
+        }
+    } else {
+        stdComoComponentName = false;
+    }
+
+    if (! stdComoComponentName) {
+        Logger::D(TAG, "Non-standard COMO component file name, "
+                       "module name: \"%s\", component file name: \"%s\"",
+                       strComoMoudle, strFilePath);
+    }
+
     mWorld->AddDependentModule(comoModule);
     return true;
 }

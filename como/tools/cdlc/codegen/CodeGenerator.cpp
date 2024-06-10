@@ -1156,7 +1156,7 @@ void CodeGenerator::ClientModeEmitter::EmitComponentCpp()
     builder.Append("\n");
     builder.AppendFormat("#include \"%s.h\"\n", mc->mName);
     if (mOwner->mMode & Properties::CODEGEN_SPLIT) {
-        for (int i = 0; i < mc->mInterfaceNumber; i++) {
+        for (int i = 0;  i < mc->mInterfaceNumber;  i++) {
             como::MetaInterface* mi = mc->mInterfaces[i];
             if ((mi->mProperties & TYPE_EXTERNAL) || (mi->mOuterInterfaceIndex != -1)) {
                 continue;
@@ -1166,7 +1166,7 @@ void CodeGenerator::ClientModeEmitter::EmitComponentCpp()
                     mi->mName);
             builder.AppendFormat("#include \"%s\"\n", header.string());
         }
-        for (int i = 0; i < mc->mCoclassNumber; i++) {
+        for (int i = 0;  i < mc->mCoclassNumber;  i++) {
             como::MetaCoclass* mk = mc->mCoclasses[i];
             String header = String::Format("%s%s.h",
                     ConcatString(CanonicalizeNamespace(mk->mNamespace), ".").Replace("::", ".").string(),

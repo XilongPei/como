@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
     if (options.DoCompile()) {
         Parser parser;
-        if (!parser.Parse(options.GetSourceFile())) {
+        if (! parser.Parse(options.GetSourceFile())) {
             Logger::E(TAG, "Parsing failed.");
             return -1;
         }
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
         if (options.DoSaveMetadata()) {
             File file(options.GetSaveFile(), File::WRITE);
-            if (!file.IsValid()) {
+            if (! file.IsValid()) {
                 Logger::E("cdlc", "Create metadata file \"%s\" failed.", file.GetPath().string());
                 return -1;
             }
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
             size_t metadataSize = serializer.GetSize();
             uintptr_t metadata = serializer.GetSerializedMetadata();
 
-            if (!file.Write(reinterpret_cast<void*>(metadata), metadataSize)) {
+            if (! file.Write(reinterpret_cast<void*>(metadata), metadataSize)) {
                 Logger::E("cdlc", "Write metadata file \"%s\" failed.", file.GetPath().string());
                 return -1;
             }
