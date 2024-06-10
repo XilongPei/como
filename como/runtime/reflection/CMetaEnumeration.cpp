@@ -140,7 +140,7 @@ ECode CMetaEnumeration::BuildAllEnumerators()
                 AutoPtr<IMetaEnumerator> meObj = new CMetaEnumerator(this, me);
                 if (nullptr == meObj) {
                     for (Integer j = i - 1;  j >= 0;  j--) {
-                        delete mEnumerators.Get(j);
+                        delete mEnumerators[j];
                     }
                     return E_OUT_OF_MEMORY_ERROR;
                 }
