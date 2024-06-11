@@ -194,6 +194,13 @@ struct MetaParameter
 #define TYPE_REFERENCE              0x02
 #define TYPE_EXTERNAL               0x80
 
+/**
+ *        8421 8421
+ * 0x80 = 1000 0000 , TYPE_EXTERNAL
+ * 0x90 = 1001 0000
+ */
+#define TYPE_COMO_INSIDE_EXTERNAL   0x90
+
 /*
  * If the type is in other module, then it's MetaType will
  * be followed by the name of the module.

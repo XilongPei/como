@@ -540,8 +540,8 @@ bool Parser::ParseModule(
     mTokenizer.GetToken();
 
     tokenInfo = mTokenizer.PeekToken();
-    while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-                                       tokenInfo.mToken != Token::END_OF_FILE) {
+    while ((tokenInfo.mToken != Token::BRACES_CLOSE) &&
+                                     (tokenInfo.mToken != Token::END_OF_FILE)) {
         switch (tokenInfo.mToken) {
             case Token::BRACKETS_OPEN: {
                 result = ParseDeclarationWithAttributes(true) && result;
@@ -2149,6 +2149,11 @@ bool Parser::ParseCoclass(
     }
 
     AutoPtr<CoclassType> klass = new CoclassType();
+    if (nullptr == klass) {
+        LogError(tokenInfo, "new CoclassType failed.");
+        result = false;
+    }
+
     klass->SetName(className);
     klass->SetNamespace(mCurrentNamespace);
 
@@ -2174,9 +2179,11 @@ bool Parser::ParseCoclass(
             if (! str.IsEmpty()) {
                 int i;
                 for (i = 0;  (i < klass->GetInterfaceNumber()) &&
-                             (klass->GetInterfaceUUID(i) != uuidIComoFunctionSafetyObject);  i++);
+                    (klass->GetInterfaceUUID(i) != uuidIComoFunctionSafetyObject);
+                    i++);
                 if (i >= klass->GetInterfaceNumber()) {
-                    AutoPtr<InterfaceType> interface = FindInterface(String("como::IComoFunctionSafetyObject"));
+                    AutoPtr<InterfaceType> interface = FindInterface(
+                                        String("como::IComoFunctionSafetyObject"));
                     if (interface != nullptr) {
                         klass->InsertInterface(interface);
                     }
@@ -2203,8 +2210,8 @@ bool Parser::ParseCoclassBody(
     mTokenizer.GetToken();
 
     tokenInfo = mTokenizer.PeekToken();
-    while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-                                    tokenInfo.mToken != Token::END_OF_FILE) {
+    while ((tokenInfo.mToken != Token::BRACES_CLOSE) &&
+                                    (tokenInfo.mToken != Token::END_OF_FILE)) {
         switch (tokenInfo.mToken) {
             case Token::CONSTRUCTOR: {
                 result = ParseConstructor(klass) && result;
@@ -2268,8 +2275,8 @@ bool Parser::ParseConstructor(
     method->SetReturnType(FindType("como::ECode", false));
 
     tokenInfo = mTokenizer.PeekToken();
-    while (tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-                                    tokenInfo.mToken != Token::END_OF_FILE) {
+    while ((tokenInfo.mToken != Token::PARENTHESES_CLOSE) &&
+                                    (tokenInfo.mToken != Token::END_OF_FILE)) {
         result = ParseParameter(method) && result;
         tokenInfo = mTokenizer.PeekToken();
         if (tokenInfo.mToken == Token::COMMA) {
@@ -2282,9 +2289,9 @@ bool Parser::ParseConstructor(
         }
         if (! result) {
             // jump to ',' or ')'
-            while (tokenInfo.mToken != Token::COMMA &&
-                    tokenInfo.mToken != Token::PARENTHESES_CLOSE &&
-                    tokenInfo.mToken != Token::END_OF_FILE) {
+            while ((tokenInfo.mToken != Token::COMMA) &&
+                            (tokenInfo.mToken != Token::PARENTHESES_CLOSE) &&
+                            (tokenInfo.mToken != Token::END_OF_FILE)) {
                 mTokenizer.GetToken();
                 tokenInfo = mTokenizer.PeekToken();
             }
@@ -2352,7 +2359,8 @@ bool Parser::ParseInterface(
     String interfaceName = tokenInfo.mStringValue;
     AutoPtr<InterfaceType> interface = FindInterface(interfaceName);
     if (nullptr == interface) {
-        String message = String::Format("Interface \"%s\" is not declared.", interfaceName.string());
+        String message = String::Format("Interface \"%s\" is not declared.",
+                                        interfaceName.string());
         LogError(tokenInfo, message);
         result = false;
     }
@@ -2470,7 +2478,7 @@ bool Parser::ParseEnumerationBody(
     int enumeratorValue = 0;
     tokenInfo = mTokenizer.PeekToken();
     while (tokenInfo.mToken != Token::BRACES_CLOSE &&
-                                    tokenInfo.mToken != Token::END_OF_FILE) {
+                                       tokenInfo.mToken != Token::END_OF_FILE) {
         String enumeratorName;
         if (tokenInfo.mToken == Token::IDENTIFIER) {
             mTokenizer.GetToken();
@@ -2779,10 +2787,10 @@ void Parser::ShowErrors()
     for (Error& error : mErrors) {
         if (! error.mFile.IsEmpty()) {
             Logger::E(TAG, "%s [line %d, column %d] %s",
-                    error.mFile.string(),
-                    error.mLineNo,
-                    error.mColumnNo,
-                    error.mMessage.string());
+                           error.mFile.string(),
+                           error.mLineNo,
+                           error.mColumnNo,
+                           error.mMessage.string());
         }
         else {
             Logger::E(TAG, "%s", error.mMessage.string());

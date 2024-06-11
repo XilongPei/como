@@ -674,6 +674,12 @@ como::MetaEnumeration *MetadataBuilder::WriteMetaEnumeration(
     // mExternalModuleName address if needed
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaEnumeration));
     if (me->mProperties & TYPE_EXTERNAL) {
+        String strModuleName = enumeration->GetExternalModuleName();
+        if ((strModuleName.Compare("compiler-rt") == 0) ||
+                                (strModuleName.Compare("COMORuntime") == 0)) {
+            me->mProperties |= TYPE_COMO_INSIDE_EXTERNAL;
+        }
+
         *(char**)mBasePtr = WriteString(enumeration->GetExternalModuleName());
         mBasePtr = mBasePtr + sizeof(char**);
     }
@@ -727,6 +733,12 @@ como::MetaInterface *MetadataBuilder::WriteMetaInterface(
     // mExternalModuleName address if needed
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaInterface));
     if (mi->mProperties & TYPE_EXTERNAL) {
+        String strModuleName = interface->GetExternalModuleName();
+        if ((strModuleName.Compare("compiler-rt") == 0) ||
+                                (strModuleName.Compare("COMORuntime") == 0)) {
+            mi->mProperties |= TYPE_COMO_INSIDE_EXTERNAL;
+        }
+
         mBasePtr = ALIGN(mBasePtr);
         *(char**)mBasePtr = WriteString(interface->GetExternalModuleName());
         mBasePtr = mBasePtr + sizeof(char**);
