@@ -267,9 +267,14 @@ ECode CMetaInterface::GetMethod(
 }
 
 ECode CMetaInterface::IsExternal(
-    /* [out] */ Boolean& isExternal)
+    /* [out] */ Char& properties)
 {
-    isExternal = (mProperties & (unsigned char)TYPE_EXTERNAL);
+    // char32_t == Char;
+    /**
+     * isExternal = (mProperties & (unsigned char)TYPE_EXTERNAL);
+     */
+    properties = 0;
+    properties |= mProperties;
     return NOERROR;
 }
 

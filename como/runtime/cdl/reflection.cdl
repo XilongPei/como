@@ -257,6 +257,9 @@ interface IMetaEnumeration
         [in] String name,
         [out] IMetaEnumerator&& enumr);
 
+    IsExternal(
+        [out] Char& isExternal);
+
     GetExternalModuleName(
         [out] String& externalModuleName);
 }
@@ -337,7 +340,7 @@ interface IMetaInterface
         [out] IMetaMethod&& method);
 
     IsExternal(
-        [out] Boolean& isExternal);
+        [out] Char& isExternal);
 
     GetExternalModuleName(
         [out] String& externalModuleName);
@@ -476,6 +479,9 @@ interface IMetaType
 
     GetTypeModification(
         [out] TypeModification& typeMod);
+
+    IsExternal(
+        [out] Char& isExternal);
 
     GetExternalModuleName(
         [out] String& externalModuleName);

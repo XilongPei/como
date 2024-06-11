@@ -93,7 +93,7 @@ public:
         /* [out] */ AutoPtr<IMetaMethod>& method) override;
 
     ECode IsExternal(
-        /* [out] */ Boolean& isExternal) override;
+        /* [out] */ Char& properties) override;
 
     ECode GetExternalModuleName(
         /* [out] */ String& externalModuleName) override;

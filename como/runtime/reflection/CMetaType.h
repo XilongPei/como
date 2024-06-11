@@ -48,6 +48,9 @@ public:
     ECode GetTypeModification(
         /* [out] */ TypeModification& mode) override;
 
+    ECode IsExternal(
+        /* [out] */ Char& properties) override;
+
     ECode GetExternalModuleName(
         /* [out] */ String& externalModuleName) override;
 
@@ -66,6 +69,7 @@ public:
     AutoPtr<IMetaType>  mElementType;
     TypeModification    mMode = TypeModification::NAKED;
     String              mExternalModuleName;
+    unsigned char       mProperties;
 
 private:
     static const char *TAG;

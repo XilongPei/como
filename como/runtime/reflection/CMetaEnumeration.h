@@ -56,6 +56,9 @@ public:
         /* [in] */ const String& name,
         /* [out] */ AutoPtr<IMetaEnumerator>& enumr) override;
 
+    ECode IsExternal(
+        /* [out] */ Char& properties) override;
+
     ECode GetExternalModuleName(
         /* [out] */ String& externalModuleName) override;
 
@@ -69,6 +72,7 @@ public:
     Array<IMetaEnumerator*> mEnumerators;
     Mutex                   mEnumeratorsLock;
     String                  mExternalModuleName;
+    unsigned char           mProperties;
 };
 
 } // namespace como

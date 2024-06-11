@@ -30,11 +30,11 @@ CMetaType::CMetaType(
     , mMode(TypeModification::NAKED)
 {
     int N = mt->mProperties & TYPE_NUMBER_MASK;
-    if (N == 1) {
+    if (1 == N) {
         mMode = ((mt->mProperties >> 2) & TYPE_POINTER)
                 ? TypeModification::POINTER : TypeModification::REFERENCE;
     }
-    else if (N == 2) {
+    else if (2 == N) {
         if ((mt->mProperties >> 2) & TYPE_POINTER) {
             mMode = ((mt->mProperties >> 4) & TYPE_POINTER)
                 ? TypeModification::POINTER_POINTER : TypeModification::POINTER_REFERENCE;
@@ -48,7 +48,7 @@ CMetaType::CMetaType(
         Logger::E(TAG, "The pointer number or reference number is large then two.");
     }
     mName = BuildName(mc, mt);
-    if (mKind == TypeKind::Array && mt->mIndex != 0) {
+    if ((mKind == TypeKind::Array) && (mt->mIndex != 0)) {
         mElementType = new CMetaType(mc, mc->mTypes[mt->mIndex]);
         if (nullptr == mElementType) {
             // The caller uses mName to determine whether the construct is wrong
@@ -63,6 +63,8 @@ CMetaType::CMetaType(
     else {
         mExternalModuleName = nullptr;
     }
+
+    mProperties = mt->mProperties;
 }
 
 ECode CMetaType::GetName(
@@ -201,6 +203,18 @@ ECode CMetaType::GetExternalModuleName(
     /* [out] */ String& externalModuleName)
 {
     externalModuleName = mExternalModuleName;
+    return NOERROR;
+}
+
+ECode CMetaType::IsExternal(
+    /* [out] */ Char& properties)
+{
+    // char32_t == Char;
+    /**
+     * isExternal = (mProperties & (unsigned char)TYPE_EXTERNAL);
+     */
+    properties = 0;
+    properties |= mProperties;
     return NOERROR;
 }
 

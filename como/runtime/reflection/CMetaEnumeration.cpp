@@ -42,6 +42,8 @@ CMetaEnumeration::CMetaEnumeration(
         mExternalModuleName = nullptr;
     }
 
+    mProperties = me->mProperties;
+
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
      * In the functional safety calculation of RTOS, there shall be no dynamic
@@ -127,6 +129,18 @@ ECode CMetaEnumeration::GetExternalModuleName(
     /* [out] */ String& externalModuleName)
 {
     externalModuleName = mExternalModuleName;
+    return NOERROR;
+}
+
+ECode CMetaEnumeration::IsExternal(
+    /* [out] */ Char& properties)
+{
+    // char32_t == Char;
+    /**
+     * isExternal = (mProperties & (unsigned char)TYPE_EXTERNAL);
+     */
+    properties = 0;
+    properties |= mProperties;
     return NOERROR;
 }
 
