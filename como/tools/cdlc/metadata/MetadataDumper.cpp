@@ -150,7 +150,7 @@ String MetadataDumper::DumpMetaNamespace(
     if (mn->mInterfaceNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mInterfaces\":[\n");
-        for (int i = 0; i < mn->mInterfaceNumber; i++) {
+        for (int i = 0;  i < mn->mInterfaceNumber;  i++) {
             como::MetaInterface* interface = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
             String interfaceInfo = DumpMetaInterface(interface, prefix + Properties::INDENT);
             builder.Append(interfaceInfo);
@@ -162,7 +162,7 @@ String MetadataDumper::DumpMetaNamespace(
     if (mn->mCoclassNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mCoclasss\":[\n");
-        for (int i = 0; i < mn->mCoclassNumber; i++) {
+        for (int i = 0;  i < mn->mCoclassNumber;  i++) {
             como::MetaCoclass* klass = mComponent->mCoclasses[mn->mCoclassIndexes[i]];
             String klassInfo = DumpMetaCoclass(klass, prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(klassInfo);
@@ -207,7 +207,7 @@ String MetadataDumper::DumpMetaEnumeration(
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mNamespace\":\"%s\",\n", me->mNamespace);
     builder.Append(prefix + Properties::INDENT).AppendFormat("\"mEnumeratorNumber\":%d,\n", me->mEnumeratorNumber);
     builder.Append(prefix + Properties::INDENT).Append("\"mEnumerators\":[\n");
-    for (int i = 0; i < me->mEnumeratorNumber; i++) {
+    for (int i = 0;  i < me->mEnumeratorNumber;  i++) {
         builder.Append(prefix + Properties::INDENT + Properties::INDENT);
         builder.AppendFormat("{ \"%s\":%d }", me->mEnumerators[i]->mName, me->mEnumerators[i]->mValue);
         builder.AppendFormat("%s", i < me->mEnumeratorNumber - 1 ? ",\n" :"\n");
@@ -240,7 +240,7 @@ String MetadataDumper::DumpMetaCoclass(
     if (mk->mInterfaceNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mInterfaces\":[\n");
-        for (int i = 0; i < mk->mInterfaceNumber; i++) {
+        for (int i = 0;  i < mk->mInterfaceNumber;  i++) {
             builder.Append(prefix + Properties::INDENT + Properties::INDENT).AppendFormat(
                     "{ \"Interface\":\"%s\" }",
                     mComponent->mInterfaces[mk->mInterfaceIndexes[i]]->mName);
@@ -291,7 +291,7 @@ String MetadataDumper::DumpMetaInterface(
     if (mi->mConstantNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mConstants\":[\n");
-        for (int i = 0; i < mi->mConstantNumber; i++) {
+        for (int i = 0;  i < mi->mConstantNumber;  i++) {
             String constantInfo = DumpMetaConstant(mi->mConstants[i],
                     prefix + Properties::INDENT + Properties::INDENT);
             builder.Append(constantInfo);
@@ -303,7 +303,7 @@ String MetadataDumper::DumpMetaInterface(
     if (mi->mMethodNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mMethods\":[\n");
-        for (int i = 0; i < mi->mMethodNumber; i++) {
+        for (int i = 0;  i < mi->mMethodNumber;  i++) {
             String methodInfo = DumpMetaMethod(mi->mMethods[i],
                                                    prefix + Properties::INDENT);
             builder.Append(methodInfo);
@@ -315,7 +315,7 @@ String MetadataDumper::DumpMetaInterface(
     if (mi->mNestedInterfaceNumber > 0) {
         builder.Append(",\n");
         builder.Append(prefix + Properties::INDENT).Append("\"mNestedInterfaces\":[\n");
-        for (int i = 0; i < mi->mNestedInterfaceNumber; i++) {
+        for (int i = 0;  i < mi->mNestedInterfaceNumber;  i++) {
             como::MetaInterface* interface = mComponent->mInterfaces[
                                                 mi->mNestedInterfaceIndexes[i]];
             String interfaceInfo = DumpMetaInterface(interface,

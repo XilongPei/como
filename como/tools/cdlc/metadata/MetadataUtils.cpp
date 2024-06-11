@@ -147,7 +147,8 @@ void* MetadataUtils::ReadMetadataFromElf64(
     }
 
     if (component.mMagic != COMO_MAGIC) {
-        Logger::E("MetadataUtils", ".metadata section in \"%s\" file is bad.", filePath.string());
+        Logger::E("MetadataUtils",
+                  ".metadata section in \"%s\" file is bad.", filePath.string());
         free(shdrs);
         return nullptr;
     }
@@ -167,7 +168,8 @@ void* MetadataUtils::ReadMetadataFromElf64(
     }
     if (file.Read(metadata, component.mSize) < component.mSize) {
         free(metadata);
-        Logger::E("MetadataUtils", "Read .metadata section of \"%s\" file failed.", filePath.string());
+        Logger::E("MetadataUtils",
+             "Read .metadata section of \"%s\" file failed.", filePath.string());
         return nullptr;
     }
 

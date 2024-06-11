@@ -61,11 +61,11 @@ private:
         /* [in] */ como::MetaValue* mv);
 
 private:
-    Module* mModule = nullptr;
-    como::MetaComponent* mComponent = nullptr;
+    Module              *mModule = nullptr;
+    como::MetaComponent *mComponent = nullptr;
 
-    String mResolvingTypename;
-    AutoPtr<Type> mResolvingType;
+    String               mResolvingTypename;
+    AutoPtr<Type>        mResolvingType;
 };
 
 MetadataResolver::MetadataResolver(

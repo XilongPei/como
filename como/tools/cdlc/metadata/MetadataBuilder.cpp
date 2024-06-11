@@ -937,6 +937,12 @@ como::MetaType *MetadataBuilder::WriteMetaType(
     mBasePtr = mBasePtr + sizeof(como::MetaType);
 
     if (self->IsExternal()) {
+        String strModuleName = self->GetExternalModuleName();
+        if ((strModuleName.Compare("compiler-rt") == 0) ||
+                                (strModuleName.Compare("COMORuntime") == 0)) {
+            mt->mProperties |= TYPE_COMO_INSIDE_EXTERNAL;
+        }
+
         mt->mProperties |= TYPE_EXTERNAL;
         mBasePtr = ALIGN(mBasePtr);
         *(char**)mBasePtr = WriteString(self->GetExternalModuleName());

@@ -40,7 +40,8 @@ AutoPtr<Type> MetadataResolver::ResolveType(
                           ALIGN((uintptr_t)me + sizeof(como::MetaEnumeration)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
-                    return module->FindType(String::Format("%s::%s", me->mNamespace, me->mName));
+                    return module->FindType(
+                            String::Format("%s::%s", me->mNamespace, me->mName));
                 }
                 return nullptr;
             }
@@ -58,7 +59,8 @@ AutoPtr<Type> MetadataResolver::ResolveType(
                             ALIGN((uintptr_t)mi + sizeof(como::MetaInterface)));
                 AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
                 if (module != nullptr) {
-                    return module->FindType(String::Format("%s::%s", mi->mNamespace, mi->mName));
+                    return module->FindType(
+                            String::Format("%s::%s", mi->mNamespace, mi->mName));
                 }
                 return nullptr;
             }
@@ -98,7 +100,8 @@ AutoPtr<Type> MetadataResolver::BuildInterface(
 
     if (mi->mBaseInterfaceIndex != -1) {
         como::MetaInterface* baseMi = mComponent->mInterfaces[mi->mBaseInterfaceIndex];
-        String fullBaseIntfName = String::Format("%s::%s", baseMi->mNamespace, baseMi->mName);
+        String fullBaseIntfName = String::Format(
+                                    "%s::%s", baseMi->mNamespace, baseMi->mName);
         AutoPtr<Type> type = mModule->FindType(fullBaseIntfName);
         if (type->IsInterfaceType()) {
             interface->SetBaseInterface(InterfaceType::CastFrom(type));
@@ -121,12 +124,24 @@ AutoPtr<Method> MetadataResolver::BuildMethod(
     /* [in] */ como::MetaMethod *mm)
 {
     AutoPtr<Method> method = new Method();
+    if (nullptr == method) {
+        return nullptr;
+    }
+
     method->SetName(mm->mName);
     AutoPtr<Type> type = BuildType(mComponent->mTypes[mm->mReturnTypeIndex]);
+    if (nullptr == type) {
+        return nullptr;
+    }
+
     method->SetReturnType(type);
 
     for (int i = 0;  i < mm->mParameterNumber;  i++) {
         AutoPtr<Parameter> parameter = BuildParameter(mm->mParameters[i]);
+        if (nullptr == parameter) {
+            return nullptr;
+        }
+
         method->AddParameter(parameter);
     }
 
@@ -137,8 +152,16 @@ AutoPtr<Parameter> MetadataResolver::BuildParameter(
     /* [in] */ como::MetaParameter *mp)
 {
     AutoPtr<Parameter> parameter = new Parameter();
+    if (nullptr == parameter) {
+        return nullptr;
+    }
+
     parameter->SetName(mp->mName);
     AutoPtr<Type> type = BuildType(mComponent->mTypes[mp->mTypeIndex]);
+    if (nullptr == type) {
+        return nullptr;
+    }
+
     parameter->SetType(type);
     if (mp->mProperties & PARAMETER_IN) {
         parameter->SetAttributes(Parameter::IN);
@@ -153,6 +176,10 @@ AutoPtr<Parameter> MetadataResolver::BuildParameter(
         como::MetaValue* mv = reinterpret_cast<como::MetaValue*>(
                                     ALIGN((uintptr_t)mp + sizeof(como::MetaParameter)));
         AutoPtr<Expression> value = BuildValue(type, mv);
+        if (nullptr == value) {
+            return nullptr;
+        }
+
         parameter->SetDefaultValue(value);
     }
     return parameter;
@@ -229,31 +256,34 @@ AutoPtr<Type> MetadataResolver::BuildType(
 
         if (mt->mProperties & TYPE_EXTERNAL) {
             char** moduleNamePP = reinterpret_cast<char**>(
-                                            ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
+                                 ALIGN((uintptr_t)mt + sizeof(como::MetaType)));
             AutoPtr<Module> module = World::GetInstance()->FindModule(*moduleNamePP);
             if (module != nullptr) {
                 type = module->FindType(typeStr);
             }
         }
         else {
-            type = typeStr.Equals(mResolvingTypename)
-                ? mResolvingType : mModule->FindType(typeStr);
+            type = (typeStr.Equals(mResolvingTypename) ? mResolvingType
+                                                : mModule->FindType(typeStr));
         }
 
-        if (type == nullptr) {
+        if (nullptr == type) {
             return nullptr;
         }
     }
     else {
         AutoPtr<Type> elementType = BuildType(mComponent->mTypes[mt->mIndex]);
-        if (elementType == nullptr) {
+        if (nullptr == elementType) {
             return nullptr;
         }
         typeStr = String::Format("Array<%s>", elementType->ToString().string());
 
         AutoPtr<ArrayType> array = ArrayType::CastFrom(mModule->FindType(typeStr));
-        if (array == nullptr) {
+        if (nullptr == array) {
             array = new ArrayType();
+            if (nullptr == array) {
+                return nullptr;
+            }
             array->SetElementType(elementType);
             mModule->AddTemporaryType(array);
         }
@@ -271,8 +301,11 @@ AutoPtr<Type> MetadataResolver::BuildType(
                     N--;
                 }
                 AutoPtr<PointerType> pointer = PointerType::CastFrom(mModule->FindType(typeStr));
-                if (pointer == nullptr) {
+                if (nullptr == pointer) {
                     pointer = new PointerType();
+                    if (nullptr == pointer) {
+                        return nullptr;
+                    }
                     pointer->SetBaseType(type);
                     pointer->SetPointerNumber(ptrNumber);
                     mModule->AddTemporaryType(pointer);
@@ -289,6 +322,10 @@ AutoPtr<Type> MetadataResolver::BuildType(
                 AutoPtr<ReferenceType> reference = ReferenceType::CastFrom(mModule->FindType(typeStr));
                 if (reference == nullptr) {
                     reference = new ReferenceType();
+                    if (nullptr == reference) {
+                        return nullptr;
+                    }
+
                     reference->SetBaseType(type);
                     reference->SetReferenceNumber(refNumber);
                     mModule->AddTemporaryType(reference);
@@ -307,12 +344,20 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
 {
     if (type->IsBooleanType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
+        if (nullptr == expr) {
+            return nullptr;
+        }
+
         expr->SetType(type);
         expr->SetBooleanValue(mv->mBooleanValue);
         return expr;
     }
     else if (type->IsCharType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
+        if (nullptr == expr) {
+            return nullptr;
+        }
+
         expr->SetType(type);
         expr->SetIntegralValue(mv->mIntegralValue);
         return expr;
@@ -321,6 +366,10 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
                          type->IsIntegerType() || type->IsLongType() ||
                          type->IsEnumerationType() || type->IsHANDLEType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
+        if (nullptr == expr) {
+            return nullptr;
+        }
+
         expr->SetType(type);
         expr->SetIntegralValue(mv->mIntegralValue);
         expr->SetRadix(mv->mProperties & VALUE_RADIX_MASK);
@@ -328,6 +377,10 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
     }
     else if (type->IsFloatType() || type->IsDoubleType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
+        if (nullptr == expr) {
+            return nullptr;
+        }
+
         expr->SetType(type);
         expr->SetFloatingPointValue(mv->mFloatingPointValue);
         expr->SetScientificNotation(mv->mProperties & VALUE_SCIENTIFIC_NOTATION);
@@ -335,6 +388,10 @@ AutoPtr<Expression> MetadataResolver::BuildValue(
     }
     else if (type->IsStringType()) {
         AutoPtr<PostfixExpression> expr = new PostfixExpression();
+        if (nullptr == expr) {
+            return nullptr;
+        }
+
         expr->SetType(type);
         expr->SetStringValue(mv->mStringValue);
         return expr;
