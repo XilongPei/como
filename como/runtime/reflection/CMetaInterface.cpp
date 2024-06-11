@@ -351,7 +351,7 @@ Integer CMetaInterface::BuildInterfaceMethod(
         AutoPtr<CMetaMethod> mmObj = new CMetaMethod(mOwner->mMetadata,
                                          this, startIndex + i, mi->mMethods[i]);
         // Methods in all interfaces return values of type ECode,
-        // not TYPE_EXTERNAL, so mmObj->mReturnType shouldn't be nullptr here.
+        // so mmObj->mReturnType shouldn't be nullptr here.
         if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
             for (Integer j = i - 1;  j >= 0;  j--) {
                 delete mMethods[j];

@@ -45,20 +45,28 @@ CMetaComponent::CMetaComponent(
     , mCoclassNameMap(mMetadata->mCoclassNumber)
     , mCoclassIdMap(mMetadata->mCoclassNumber)
     , mCoclassesAlreadyBuilt(false)
+    , mEnumerationsAlreadyBuilt(false)
+    , mInterfacesAlreadyBuilt(false)
+    , mOpaque(0)
+    , mStrFramacBlock(mMetadata->mStrFramacBlock)
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
     , mEnumerations(mMetadata->mEnumerationNumber -
                                           mMetadata->mExternalEnumerationNumber)
     , mEnumerationNameMap(mMetadata->mEnumerationNumber -
                                           mMetadata->mExternalEnumerationNumber)
-    , mEnumerationsAlreadyBuilt(false)
     , mInterfaces(mMetadata->mInterfaceNumber -
                                             mMetadata->mExternalInterfaceNumber)
     , mInterfaceNameMap(mMetadata->mInterfaceNumber -
                                             mMetadata->mExternalInterfaceNumber)
     , mInterfaceIdMap(mMetadata->mInterfaceNumber -
                                             mMetadata->mExternalInterfaceNumber)
-    , mInterfacesAlreadyBuilt(false)
-    , mStrFramacBlock(mMetadata->mStrFramacBlock)
-    , mOpaque(0)
+#else
+    , mEnumerations(mMetadata->mEnumerationNumber)
+    , mEnumerationNameMap(mMetadata->mEnumerationNumber)
+    , mInterfaces(mMetadata->mInterfaceNumber)
+    , mInterfaceNameMap(mMetadata->mInterfaceNumber)
+    , mInterfaceIdMap(mMetadata->mInterfaceNumber)
+#endif
 {
     mCid.mUuid = metadata->mUuid;
     mCid.mUri = mUri.string();
@@ -479,9 +487,11 @@ ECode CMetaComponent::BuildAllEnumerations()
     Integer index = 0;
     for (Integer i = 0;  i < mMetadata->mEnumerationNumber;  i++) {
         MetaEnumeration* me = mMetadata->mEnumerations[i];
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
         if (me->mProperties & TYPE_EXTERNAL) {
             continue;
         }
+#endif
         String fullName = String::Format("%s::%s", me->mNamespace, me->mName);
         AutoPtr<CMetaEnumeration> meObj = new CMetaEnumeration(this, mMetadata, me);
         if ((nullptr != meObj) && (! fullName.IsEmpty())) {
@@ -517,9 +527,23 @@ ECode CMetaComponent::BuildAllInterfaces()
     Integer index = 0;
     for (Integer i = 0;  i < mMetadata->mInterfaceNumber;  i++) {
         MetaInterface *mi = mMetadata->mInterfaces[i];
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
         if (mi->mProperties & TYPE_EXTERNAL) {
+            /**
+             * Built-in(compiler-rt) or COMORuntime-provided interfaces are
+             * not reflected
+             *
+            char** externalPtr = reinterpret_cast<char**>(ALIGN((uintptr_t)mi +
+                                                        sizeof(MetaInterface)));
+            if ((strcmp(*externalPtr, "compiler-rt") == 0) ||
+                                    (strcmp(*externalPtr, "COMORuntime") == 0)) {
+                continue;
+            }
+            */
+
             continue;
         }
+#endif
 
         String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
         if (! mInterfaceNameMap.ContainsKey(fullName)) {
@@ -561,6 +585,7 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
                 return nullptr;
             }
 
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
             Integer realIndex = index;
             for (Integer i = 0;  i <= index;  i++) {
                 if (mMetadata->mInterfaces[i]->mProperties & TYPE_EXTERNAL) {
@@ -571,7 +596,9 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
             if (! (mi->mProperties & TYPE_EXTERNAL)) {
                 mInterfaces.Set(realIndex, miObj);
             }
-
+#else
+            mInterfaces.Set(index, miObj);
+#endif
             mInterfaceNameMap.Put(fullName, miObj);
             mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
             return miObj;
