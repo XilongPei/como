@@ -529,7 +529,7 @@ void Array<T>::Set(
     /* [in] */ Long index,
     /* [in] */ T value)
 {
-    if ((index < 0) || (index > mSize)) {
+    if ((index < 0) || (index >= mSize)) {
         return;
     }
 
@@ -543,7 +543,7 @@ Boolean Array<T>::Equals(
     /* [in] */ const Array<T>& other) const
 {
     return (mData == other.mData) && (mSize == other.mSize) &&
-            (mType == other.mType);
+                                                        (mType == other.mType);
 }
 
 template<typename T>
@@ -551,7 +551,7 @@ Boolean Array<T>::operator==(
     /* [in] */ const Array<T>& other) const
 {
     return (mData == other.mData) && (mSize == other.mSize) &&
-            (mType == other.mType);
+                                                        (mType == other.mType);
 }
 
 template<typename T>
@@ -636,7 +636,7 @@ T& Array<T>::operator[](
 
     // TODO, fix bug
     // Can not throw exceptions, how to inform the caller parameter error
-    if ((index < 0) || (index > mSize)) {
+    if ((index < 0) || (index >= mSize)) {
         Logger::E("Array<T>::operator[]",
                   "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
@@ -653,7 +653,7 @@ const T& Array<T>::operator[](
 
     // TODO, fix bug
     // Can not throw exceptions, how to inform the caller parameter error
-    if ((index < 0) || (index > mSize)) {
+    if ((index < 0) || (index >= mSize)) {
         Logger::E("Array<T>::operator[]",
                   "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return array[0];
