@@ -173,7 +173,9 @@ TEST(ReflectionTest, TestComponentGetInterfaces)
         interfaces[i]->GetMethodNumber(totalNumber);
         interfaces[i]->GetDeclaredMethodNumber(declaredNumber);
 
-        printf("Namespace: \"%s\", Name: \"%s\"\n", ns.string(), name.string());
+        Char ch;
+        interfaces[i]->IsExternal(ch);
+        printf("Namespace: \"%s\", Name: \"%s\", IsExternal: 0x%x\n", ns.string(), name.string(), ch);
         if (1 == i) {
             EXPECT_STREQ("como::test::reflection", ns.string());
             EXPECT_STREQ("IMethodTest", name.string());
@@ -689,3 +691,4 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+

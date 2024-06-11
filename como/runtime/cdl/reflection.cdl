@@ -258,7 +258,7 @@ interface IMetaEnumeration
         [out] IMetaEnumerator&& enumr);
 
     IsExternal(
-        [out] Char& isExternal);
+        [out] Char& properties);
 
     GetExternalModuleName(
         [out] String& externalModuleName);
@@ -340,7 +340,7 @@ interface IMetaInterface
         [out] IMetaMethod&& method);
 
     IsExternal(
-        [out] Char& isExternal);
+        [out] Char& properties);
 
     GetExternalModuleName(
         [out] String& externalModuleName);
@@ -481,7 +481,7 @@ interface IMetaType
         [out] TypeModification& typeMod);
 
     IsExternal(
-        [out] Char& isExternal);
+        [out] Char& properties);
 
     GetExternalModuleName(
         [out] String& externalModuleName);
@@ -811,3 +811,4 @@ interface IArgumentList
 }
 
 }
+
