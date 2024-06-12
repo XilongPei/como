@@ -244,7 +244,6 @@ TEST(ClientZmqTest, TestRpcHelpers)
     //EXPECT_EQ(0, ec);
 }
 
-/*
 TEST(ClientZmqTest, TestReleaseStub)
 {
     EXPECT_TRUE(SERVICE != nullptr);
@@ -254,11 +253,18 @@ TEST(ClientZmqTest, TestReleaseStub)
     proxy->ReleaseStub(alive);
     EXPECT_TRUE(alive);
 
-    ECode ec = ServiceManager::GetInstance()->RemoveRemoteService(String("rpcserviceZMQ"));
+    /**
+     * Corresponding to this function, the service is deleted by name
+     *
+     * ec = RpcHelpers::ReleaseRemoteObject(SERVICE, obj);
+     */
+
+    ECode ec = ServiceManager::GetInstance()->RemoveRemoteService(
+                                     "ServiceManager", String("rpcserviceZMQ"));
     EXPECT_TRUE(SUCCEEDED(ec));
 
 }
-*/
+
 int main(int argc, char **argv)
 {
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
