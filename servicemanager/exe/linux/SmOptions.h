@@ -17,6 +17,7 @@
 #ifndef __JING_OPTIONS_H__
 #define __JING_OPTIONS_H__
 
+#include <string>
 #include <comoapi.h>
 #include <comosp.h>
 #include <comoref.h>
@@ -32,12 +33,18 @@ public:
 
     inline bool DoShowUsage() const;
     inline String GetPaxosServer() const;
+    inline bool DoShowVersion() const;
+    inline std::string GetLocalhost() const;
+    inline std::string GetServiceManager() const;
+
 
     bool HasErrors() const;
 
     void ShowErrors() const;
 
     void ShowUsage() const;
+
+    void ShowVersion() const;
 
 private:
     void Parse(
@@ -49,6 +56,9 @@ private:
     String mIllegalOptions;
     String mPaxosServer;
 
+    std::string mLocalhost;
+    std::string mServiceManager;
+
     bool mShowUsage = false;
     bool mShowVersion = false;
 };
@@ -57,6 +67,8 @@ SmOptions::SmOptions(
     /* [in] */ int argc,
     /* [in] */ char** argv)
     : mPaxosServer(nullptr)
+    , mLocalhost(std::string("tcp://127.0.0.1:8081"))
+    , mServiceManager(std::string("tcp://127.0.0.1:8088"))
 {
     Parse(argc, argv);
 }
@@ -66,9 +78,24 @@ bool SmOptions::DoShowUsage() const
     return mShowUsage;
 }
 
+bool SmOptions::DoShowVersion() const
+{
+    return mShowVersion;
+}
+
 String SmOptions::GetPaxosServer() const
 {
     return mPaxosServer;
+}
+
+std::string SmOptions::GetLocalhost() const
+{
+    return mLocalhost;
+}
+
+std::string SmOptions::GetServiceManager() const
+{
+    return mServiceManager;
 }
 
 } // namespace jing

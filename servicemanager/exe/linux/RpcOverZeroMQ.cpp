@@ -27,21 +27,23 @@ namespace jing {
 void *threadFunc(void *threadData);
 static void *socket = nullptr;
 
-void RpcOverZeroMQ::startTPZA_Executor()
+int RpcOverZeroMQ::startTPZA_Executor()
 {
     Logger::D("ServiceManager", "starting daemon for RPC over ZeroMQ...");
 
     // prepare ComoConfig
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"),
-                                            std::string("tcp://127.0.0.1:8081"));
+                                       ServiceManager::options->GetLocalhost());
     if (std::string("localhost") != ret) {
         Logger::E("startTPZA_Executor", "Failed to AddZeroMQEndpoint\n");
+        return -1;
     }
 
     ret = ComoConfig::AddZeroMQEndpoint(std::string("ServiceManager"),
-                                            std::string("tcp://127.0.0.1:8088"));
+                                  ServiceManager::options->GetServiceManager());
     if (std::string("ServiceManager") != ret) {
         Logger::E("startTPZA_Executor", "Failed to AddZeroMQEndpoint\n");
+        return -2;
     }
 
     // end of prepare ComoConfig
@@ -53,6 +55,7 @@ void RpcOverZeroMQ::startTPZA_Executor()
         Logger::E("startTPZA_Executor",
                   "CzmqGetSocket error, Server: 'ServiceManager', Endpoint: %s",
                   strep.c_str());
+        return -3;
     }
 
     Logger::D("startTPZA_Executor", "Server: 'ServiceManager', Endpoint: %s",
@@ -63,8 +66,10 @@ void RpcOverZeroMQ::startTPZA_Executor()
     pthread_t pthread_id;
     if (pthread_create(&pthread_id, nullptr, threadFunc, nullptr) != 0) {
         Logger::E("ThreadPoolZmqActor", "pthread_create() error");
+        return -4;
     }
 
+    return 0;
 }
 
 void *RpcOverZeroMQ::threadFunc(void *threadData)
@@ -81,6 +86,12 @@ void *RpcOverZeroMQ::threadFunc(void *threadData)
         rc = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
         if (rc > 0) {
             ec = HandleMessage(hChannel, eventCode, socket, msg);
+        }
+        else {
+            Logger::E("RpcOverZeroMQ::threadFunc",
+                                       "CZMQUtils::CzmqRecvMsg failed: %d", rc);
+            usleep(1000000 * 60);
+                 // 654321
         }
 
         // In the service program, the complete recv() and send() must appear in

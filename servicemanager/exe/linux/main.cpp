@@ -49,6 +49,11 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (ServiceManager::options->DoShowVersion()) {
+        ServiceManager::options->ShowVersion();
+        return 0;
+    }
+
     if (ServiceManager::options->HasErrors()) {
         ServiceManager::options->ShowErrors();
         return 0;
@@ -56,11 +61,12 @@ int main(int argc, char** argv)
 
 #ifdef COMO_FUNCTION_SAFETY
     if ((nullptr != ServiceManager::options) &&
-                                (! ServiceManager::options->GetPaxosServer().IsNull())) {
+                       (! ServiceManager::options->GetPaxosServer().IsNull())) {
         int num = 2;
         char *word[3];
         char buf[4096];
-        como::MiString::strZcpy(buf, ServiceManager::options->GetPaxosServer().string(), 4096);
+        como::MiString::strZcpy(buf,
+                      ServiceManager::options->GetPaxosServer().string(), 4096);
         char *str = como::MiString::WordBreak(buf, num, word, (char*)";");
         if (num < 2) {
             Logger_E("ServiceManager", "PaxosServer error");
@@ -70,13 +76,14 @@ int main(int argc, char** argv)
         NodeInfo oMyNode;
         NodeInfoList vecNodeInfoList;
 
-        if (como::ComoPhxUtils::RunPaxos(word[0], oMyNode, word[1], vecNodeInfoList,
-                                                    &ServiceManager::oEchoServer) != 0) {
+        if (como::ComoPhxUtils::RunPaxos(word[0], oMyNode, word[1],
+                          vecNodeInfoList, &ServiceManager::oEchoServer) != 0) {
             Logger_E("ServiceManager", "RunPaxos fail\n");
             return 3;
         }
 
-        Logger_D("ServiceManager echo server start, ip %s port %d\n", oMyNode.GetIP().c_str(), oMyNode.GetPort());
+        Logger_D("ServiceManager echo server start, ip %s port %d\n",
+                                    oMyNode.GetIP().c_str(), oMyNode.GetPort());
 
     }
 #endif
@@ -87,7 +94,9 @@ int main(int argc, char** argv)
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
     // TPZA : ThreadPoolZmqActor
-    jing::RpcOverZeroMQ::startTPZA_Executor();
+    if (jing::RpcOverZeroMQ::startTPZA_Executor() != 0) {
+        return 4;
+    }
 #endif
 
     dbus_error_init(&err);
@@ -119,7 +128,7 @@ int main(int argc, char** argv)
     opVTable.message_function = ServiceManager::HandleMessage;
 
     dbus_connection_register_object_path(conn,
-            ServiceManager::OBJECT_PATH, &opVTable, nullptr);
+                               ServiceManager::OBJECT_PATH, &opVTable, nullptr);
 
     while (true) {
         DBusDispatchStatus status;
@@ -130,7 +139,7 @@ int main(int argc, char** argv)
             Logger_D("ServiceManager", "dbus_connection_read_write_dispatch");
 
         } while ((status = dbus_connection_get_dispatch_status(conn))
-                == DBUS_DISPATCH_DATA_REMAINS);
+                                                == DBUS_DISPATCH_DATA_REMAINS);
 
         if (status == DBUS_DISPATCH_NEED_MEMORY) {
             Logger_E("CDBusChannel", "DBus dispatching needs more memory.");

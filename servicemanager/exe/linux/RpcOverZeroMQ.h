@@ -29,9 +29,10 @@ class RpcOverZeroMQ
     : public LightRefBase
 {
 public:
-    static void startTPZA_Executor();
+    static int startTPZA_Executor();
     static void *threadFunc(void *threadData);
-    static ECode HandleMessage(HANDLE hChannel, Integer eventCode, void *socket, zmq_msg_t& msg);
+    static ECode HandleMessage(HANDLE hChannel, Integer eventCode,
+                                                  void *socket, zmq_msg_t& msg);
 };
 
 } // namespace jing

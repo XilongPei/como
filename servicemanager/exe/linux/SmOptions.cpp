@@ -38,6 +38,12 @@ void SmOptions::Parse(
         else if (option.Equals("-paxos")) {
             mPaxosServer = argv[i++];
         }
+        else if (option.Equals("-localhost")) {
+            mLocalhost = argv[i++];
+        }
+        else if (option.Equals("-ServiceManager")) {
+            mServiceManager = argv[i++];
+        }
         else {
             mIllegalOptions += option;
             mIllegalOptions += ":";
@@ -60,7 +66,8 @@ void SmOptions::ShowErrors() const
         String options = mIllegalOptions;
         int index;
         while ((index = options.IndexOf(":")) != -1) {
-            printf("The Option \"%s\" is illegal.\n", options.Substring(0, index).string());
+            printf("The Option \"%s\" is illegal.\n",
+                                          options.Substring(0, index).string());
             options = options.Substring(index + 1);
         }
     }
@@ -69,12 +76,23 @@ void SmOptions::ShowErrors() const
 
 void SmOptions::ShowUsage() const
 {
-    printf("Compile a .cdl file and generate metadata, or generate C++ codes from the metadata.\n"
-            "Usage: cdlc [options] file\n"
+    printf("\n"
+            "Usage: servicemanager [options]\n"
             "Options:\n"
             "  --help                   Display command line options\n"
             "  --version                Display version information\n"
+            "  -paxos <myip:myport>;<node0_ip:node_0port,node1_ip:node_1_port,"
+            "node2_ip:node2_port,...>\n"
+            "  -localhost <thisruntime_ip:port>\n"
+            "                  default: tcp://127.0.0.1:8081\n"
+            "  -ServiceManager <ServiceManager_ip:port>\n"
+            "                  default: tcp://127.0.0.1:8088\n"
         );
+}
+
+void SmOptions::ShowVersion() const
+{
+    printf("servicemanager, version: 1.0.0.1\n");
 }
 
 } // namespace jing
