@@ -67,6 +67,39 @@ ECode CExpiresTest::Add_Wait(
     return NOERROR;
 }
 
+ECode CExpiresTest::Sub(
+    /* [in] */ Integer arg1,
+    /* [in] */ Integer arg2,
+    /* [out] */ Integer& result)
+{
+    result = arg1 - arg2;
+
+    printf("==== Call CExpiresTest::Sub, arg1 is %d ====\n", arg1);
+    printf("====                         arg2 is %d ====\n", arg2);
+    printf("====                       result is %d ====\n", result);
+    return NOERROR;
+}
+
+ECode CExpiresTest::Sub_Wait(
+    /* [in] */ Integer arg1,
+    /* [in] */ Integer arg2,
+    /* [in] */ Integer wait_time,
+    /* [out] */ Integer& result)
+{
+    result = arg1 - arg2;
+
+    timespec t, remain;
+    t.tv_sec = 0;
+    t.tv_nsec = wait_time;
+    nanosleep(&t, &remain);
+
+    printf("==== Call CExpiresTest::Sub_Wait, arg1 is %d ====\n", arg1);
+    printf("====                              arg2 is %d ====\n", arg2);
+    printf("====                         wait_time is %d ====\n", wait_time);
+    printf("====                            result is %d ====\n", result);
+    return NOERROR;
+}
+
 }
 }
 }

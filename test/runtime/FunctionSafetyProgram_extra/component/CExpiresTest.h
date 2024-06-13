@@ -47,6 +47,17 @@ public:
         /* [in] */ Integer arg2,
         /* [in] */ Integer wait_time,
         /* [out] */ Integer& result) override;
+
+    ECode Sub(
+        /* [in] */ Integer arg1,
+        /* [in] */ Integer arg2,
+        /* [out] */ Integer& result) override;
+
+    ECode Sub_Wait(
+        /* [in] */ Integer arg1,
+        /* [in] */ Integer arg2,
+        /* [in] */ Integer wait_time,
+        /* [out] */ Integer& result) override;
 };
 
 }

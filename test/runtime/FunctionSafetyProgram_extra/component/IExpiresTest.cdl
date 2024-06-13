@@ -34,6 +34,17 @@ interface IExpiresTest
         [in] Integer arg2,
         [in] Integer wait_time,
         [out] Integer& result);
+
+    Sub(
+        [in] Integer arg1,
+        [in] Integer arg2,
+        [out] Integer& result);
+
+    Sub_Wait(
+        [in] Integer arg1,
+        [in] Integer arg2,
+        [in] Integer wait_time,
+        [out] Integer& result);
 }
 
 [

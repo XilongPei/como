@@ -24,6 +24,7 @@
 #include "ExpiresTestUnit.h"
 #include "como.test.expires.IExpiresTest.h"
 #include "como.test.expires.CExpiresTest.h"
+#include <ServiceManager.h>
 #include <ComoFunctionSafetyObject.h>
 
 using namespace como;
@@ -31,17 +32,24 @@ using namespace como;
 using como::test::expires::CExpiresTest;
 using como::test::expires::IExpiresTest;
 using como::test::expires::IID_IExpiresTest;
+using jing::ServiceManager;
 
-TEST(TestFunctionSafetyProgram, testExpires)
+static AutoPtr<IExpiresTest> ExpiresTest;
+
+TEST(RPCTest, TestGetExpiresTest)
 {
-    InterfaceID iid = InterfaceIDWithMemArea(IID_IExpiresTest, 1);
-    AutoPtr<IExpiresTest> ExpiresTest;
-    ECode ec = CExpiresTest::New(iid, (IInterface**)&ExpiresTest);
-    EXPECT_EQ(ec, NOERROR);
+    AutoPtr<IInterface> obj;
+    ServiceManager::GetInstance()->GetService("expiretest", obj);
+    ExpiresTest = IExpiresTest::Probe(obj);
+    ASSERT_NE(ExpiresTest, nullptr);
+}
 
+TEST(TestFunctionSafetyProgram, testExpires1)
+{
     Integer isvalid;
     IComoFunctionSafetyObject *icfso = IComoFunctionSafetyObject::Probe(ExpiresTest);
     EXPECT_NE(nullptr, icfso);
+    ECode ec;
 
     Integer arg1, arg2, wait_time, result;
     arg1 = 10;
@@ -61,10 +69,45 @@ TEST(TestFunctionSafetyProgram, testExpires)
     icfso->IsValid(isvalid);
     EXPECT_EQ(isvalid, CFSO_ExpireVALID);
 
-    wait_time = 20000000;  // 20000ns
+    wait_time = 20000;  // 20000ns
     result = 0;
     ec = ExpiresTest->Add_Wait(arg1, arg2, wait_time, result);
     EXPECT_NE(ec, 0);
+    EXPECT_EQ(result, 30);
+    icfso->IsValid(isvalid);
+    EXPECT_EQ(isvalid, CFSO_ExpireTime);
+}
+
+TEST(TestFunctionSafetyProgram, testExpires2)
+{
+    Integer isvalid;
+    IComoFunctionSafetyObject *icfso = IComoFunctionSafetyObject::Probe(ExpiresTest);
+    EXPECT_NE(nullptr, icfso);
+    ECode ec;
+
+    Integer arg1, arg2, wait_time, result;
+    arg1 = 30;
+    arg2 = 20;
+    result = 0;
+    ec = ExpiresTest->Sub(arg1, arg2, result);
+    EXPECT_EQ(ec, NOERROR);
+    EXPECT_EQ(result, 10);
+    icfso->IsValid(isvalid);
+    EXPECT_EQ(isvalid, CFSO_ExpireVALID);
+
+    wait_time = 5000;   // 5000ns
+    result = 0;
+    ec = ExpiresTest->Sub_Wait(arg1, arg2, wait_time, result);
+    EXPECT_EQ(ec, NOERROR);
+    EXPECT_EQ(result, 10);
+    icfso->IsValid(isvalid);
+    EXPECT_EQ(isvalid, CFSO_ExpireVALID);
+
+    wait_time = 20000;  // 20000ns
+    result = 0;
+    ec = ExpiresTest->Sub_Wait(arg1, arg2, wait_time, result);
+    EXPECT_NE(ec, 0);
+    EXPECT_EQ(result, 10);
     icfso->IsValid(isvalid);
     EXPECT_EQ(isvalid, CFSO_ExpireTime);
 }

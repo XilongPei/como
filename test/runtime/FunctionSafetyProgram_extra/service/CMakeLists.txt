@@ -14,32 +14,30 @@
 # limitations under the License.
 #=========================================================================
 
-project(FunctionSafetyProgram2-client CXX)
+project(FunctionSafetyProgram2-service CXX)
 
-set(CLIENT_SRC_DIR ${FunctionSafetyProgram_EX_SRC_DIR}/client)
-set(CLIENT_OBJ_DIR ${FunctionSafetyProgram_EX_OBJ_DIR}/client)
-
-IMPORT_GTEST()
+set(SERVICE_SRC_DIR ${FunctionSafetyProgram_EX_SRC_DIR}/service)
+set(SERVICE_OBJ_DIR ${FunctionSafetyProgram_EX_OBJ_DIR}/service)
 
 include_directories(
     ./
     ${INC_DIR}
-    ${CLIENT_OBJ_DIR})
+    ${SERVICE_OBJ_DIR})
 
 set(SOURCES
     main.cpp)
 
 set(GENERATED_SOURCES
-    ${CLIENT_OBJ_DIR}/ExpiresTestUnit.cpp)
+    ${SERVICE_OBJ_DIR}/ExpiresTestUnit.cpp)
 
 IMPORT_LIBRARY(comort.so)
 IMPORT_LIBRARY(libservicemanager.so)
 
-add_executable(testFSP2Cli
+add_executable(testFSP2Srv
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(testFSP2Cli comort.so libservicemanager.so ${GTEST_LIBS})
-add_dependencies(testFSP2Cli ExpiresTestUnit libservicemanager gtest gtest_main)
+target_link_libraries(testFSP2Srv comort.so libservicemanager.so)
+add_dependencies(testFSP2Srv ExpiresTestUnit libservicemanager)
 
 add_custom_command(
     OUTPUT
@@ -48,14 +46,13 @@ add_custom_command(
         "$ENV{CDLC}"
         -gen
         -mode-client
-        -split
-        -d ${CLIENT_OBJ_DIR}
+        -d ${SERVICE_OBJ_DIR}
         -metadata-so "${BIN_DIR}/ExpiresTestUnit.so")
 
-COPY(testFSP2Cli ${CLIENT_OBJ_DIR}/testFSP2Cli ${BIN_DIR})
+COPY(testFSP2Srv ${SERVICE_OBJ_DIR}/testFSP2Srv ${BIN_DIR})
 
 install(FILES
-    ${CLIENT_OBJ_DIR}/testFSP2Cli
+    ${SERVICE_OBJ_DIR}/testFSP2Srv
     DESTINATION ${BIN_DIR}
     PERMISSIONS
         OWNER_READ

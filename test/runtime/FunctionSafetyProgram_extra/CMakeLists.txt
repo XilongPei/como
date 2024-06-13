@@ -19,3 +19,4 @@ set(FunctionSafetyProgram_EX_OBJ_DIR ${RUNTIME_OBJ_DIR}/FunctionSafetyProgram_ex
 
 add_subdirectory(component)
 add_subdirectory(client)
+add_subdirectory(service)
