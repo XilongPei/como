@@ -41,6 +41,8 @@ static Mutex zmq_pollitemLock;
 static void *comoZmqContext = nullptr;
 int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 3;
 
+#define TRY_zmq_msg_recv_MOST_TIMES     5
+
 /*
 int rc = zmq_ctx_shutdown(context);
 */
@@ -135,7 +137,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
             rc = zmq_connect(socket, bufEndpoint);
             if (0 != rc) {
                 Logger::E("CZMQUtils::CzmqGetSocket",
-                          "zmq_connect error, %s errno %d %s", bufEndpoint,
+                          "zmq_connect error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
                           zmq_errno(), zmq_strerror(zmq_errno()));
                 return nullptr;
             }
@@ -144,7 +146,7 @@ void *CZMQUtils::CzmqGetSocket(void *context, const char *endpoint, int type)
             rc = zmq_bind(socket, bufEndpoint);
             if (0 != rc) {
                 Logger::E("CZMQUtils::CzmqGetSocket",
-                          "zmq_bind error, %s errno %d %s", bufEndpoint,
+                          "zmq_bind error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
                           zmq_errno(), zmq_strerror(zmq_errno()));
                 return nullptr;
             }
@@ -264,13 +266,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
         numberOfBytes = zmq_send(socket, buf, bufSize, 0);
     }
     else {
-        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send funCodeAndCRC64 errno, %d %s",
+        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send funCodeAndCRC64, errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         return (-2 - zmq_errno());
     }
 
     if (numberOfBytes == -1) {
-        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send buffer errno, %d %s",
+        Logger::E("CZMQUtils::CzmqSendBuf", "zmq_send buffer, errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         return (-2 - zmq_errno());
     }
@@ -293,26 +295,43 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
 
     // Block until a message is available to be received from socket if flags != ZMQ_DONTWAIT
     numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
-    if (numberOfBytes != -1) {
+    if (-1 == numberOfBytes) {
         if (EAGAIN == errno) {
             return 0;
         }
-        Logger::E("CZMQUtils::CzmqRecvBuf", "error: %d %s",
+        Logger::E("CZMQUtils::CzmqRecvBuf", "zmq_recv funCodeAndCRC64, errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
         return (-2 - zmq_errno());
     }
     else {
         int more;
-        size_t more_size = sizeof (more);
+        size_t more_size = sizeof(more);
         int rc = zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
         if (more) {
             numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvBuf", "errno: %d %s",
-                                        zmq_errno(), zmq_strerror(zmq_errno()));
-                eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-                return -1;
+                if (EAGAIN == errno) {
+                    int try_zmq_msg_recv = 0;
+                    do {
+                        numberOfBytes = zmq_recv(socket, buf, bufSize, 0);
+                        if (-1 == numberOfBytes) {
+                            if (EAGAIN == errno) {
+                                try_zmq_msg_recv++;
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    } while (try_zmq_msg_recv < TRY_zmq_msg_recv_MOST_TIMES);
+                }
+
+                if (-1 == numberOfBytes) {
+                    Logger::E("CZMQUtils::CzmqRecvBuf", "zmq_recv buf, errno %d, %s",
+                                            zmq_errno(), zmq_strerror(zmq_errno()));
+                    eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+                    return -1;
+                }
             }
             if (numberOfBytes >= bufSize) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "Message is bigger than the buffer");
@@ -365,7 +384,7 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
         if (EAGAIN == errno) {
             return 0;
         }
-        Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d %s",
+        Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
         eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
         return (-2 - zmq_errno());
@@ -377,7 +396,7 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
         if (more) {
             int rc = zmq_msg_init(&msg);
             if (0 != rc) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_init error, %d %s",
+                Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_init error, errno %d, %s",
                                         zmq_errno(), zmq_strerror(zmq_errno()));
                 eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
                 return (-2 - zmq_errno());
@@ -386,11 +405,28 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             // Block until a message is available to be received from socket
             numberOfBytes = zmq_msg_recv(&msg, socket, 0);
             if (-1 == numberOfBytes) {
-                Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_recv error, %d %s",
-                                        zmq_errno(), zmq_strerror(zmq_errno()));
-                // msg has already been zmq_msg_init
-                eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-                return (-2 - zmq_errno());
+                if (EAGAIN == errno) {
+                    int try_zmq_msg_recv = 0;
+                    do {
+                        numberOfBytes = zmq_msg_recv(&msg, socket, 0);
+                        if (-1 == numberOfBytes) {
+                            if (EAGAIN == errno) {
+                                try_zmq_msg_recv++;
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                    } while (try_zmq_msg_recv < TRY_zmq_msg_recv_MOST_TIMES);
+                }
+
+                if (-1 == numberOfBytes) {
+                    Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_msg_recv error, errno %d, %s",
+                                            zmq_errno(), zmq_strerror(zmq_errno()));
+                    // msg has already been zmq_msg_init
+                    eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+                    return (-2 - zmq_errno());
+                }
             }
 
             Long crc64 = crc_64_ecma(reinterpret_cast<const unsigned char *>(
@@ -399,8 +435,8 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
             Long crcTmp = funCodeAndCRC64.crc64;
             funCodeAndCRC64.crc64 = 0;
             crc64 = update_crc_64_ecma_bytes(crc64,
-                                    reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
-                                    sizeof(COMO_ZMQ_RPC_MSG_HEAD));
+                        reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
+                        sizeof(COMO_ZMQ_RPC_MSG_HEAD));
 
             if ((crcTmp != crc64) || (funCodeAndCRC64.msgSize != numberOfBytes)) {
                 Logger::E("CZMQUtils::CzmqRecvBuf", "bad packet");
@@ -440,7 +476,8 @@ EndpointSocket *CZMQUtils::CzmqFindSocket(std::string& endpoint)
     return nullptr;
 }
 
-static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size);
+static int get_monitor_event(void *socket, uint32_t& value, char *msg_data,
+                                                         size_t& msg_data_size);
 static void *rep_socket_monitor(void *endpointSocket);
 
 void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
@@ -452,7 +489,7 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
         Mutex::AutoLock lock(ComoConfig::CZMQUtils_ContextLock);
 
         std::unordered_map<std::string, EndpointSocket*>::iterator iter =
-                                            zmq_sockets.find(std::string(serverName));
+                                      zmq_sockets.find(std::string(serverName));
         if (iter != zmq_sockets.end()) {
             endpointSocket = iter->second;
         }
@@ -460,7 +497,8 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
 
     pthread_t thread ;
     // REP socket monitor, all events
-    int rc = zmq_socket_monitor(endpointSocket->socket, endpointSocket->endpoint.c_str(), ZMQ_EVENT_ALL);
+    int rc = zmq_socket_monitor(endpointSocket->socket,
+                                endpointSocket->endpoint.c_str(), ZMQ_EVENT_ALL);
     if (0 != rc) {
         return nullptr;
     }
@@ -478,7 +516,8 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
  * by reference, if not null, and event number by value. Returns -1
  * in case of error.
  */
-static int get_monitor_event(void *socket, uint32_t& value, char *msg_data, size_t& msg_data_size)
+static int get_monitor_event(void *socket, uint32_t& value, char *msg_data,
+                                                          size_t& msg_data_size)
 {
     // First frame in message contains event number and value
     zmq_msg_t msg;
@@ -547,7 +586,7 @@ static void *rep_socket_monitor(void *endpointSocket)
     size_t msg_data_size = sizeof(msg_data);
 
     std::unordered_map<std::string, EndpointSocket*>::iterator iter = zmq_sockets.begin();
-    while (!shutdown) {
+    while (! shutdown) {
         int event;
         int rc;
         const char *endpoint;
@@ -745,7 +784,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         rc = zmq_bind(clients, seeds[i]);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqProxy",
-                      "zmq_bind error, %s errno %d %s", seeds[i],
+                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", seeds[i],
                       zmq_errno(), zmq_strerror(zmq_errno()));
             return -2;
         }
@@ -772,7 +811,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
     }
     if (0 != rc) {
         Logger::E("CZMQUtils::CzmqProxy",
-                  "zmq_bind error, %s errno %d %s", inprocEndpoint,
+                  "zmq_bind error, endpoint: \"%s\", errno %d, %s", inprocEndpoint,
                   zmq_errno(), zmq_strerror(zmq_errno()));
         return -3;
     }
@@ -838,7 +877,7 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
         int rc = zmq_bind(publisher, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetPubSocket",
-                      "zmq_bind error, %s errno %d %s", bufEndpoint,
+                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(publisher);
             return nullptr;
@@ -875,7 +914,7 @@ void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
         int rc = zmq_connect(subscriber, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetSubSocket",
-                      "zmq_connect error, %s errno %d %s", bufEndpoint,
+                      "zmq_connect error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(subscriber);
             return nullptr;
