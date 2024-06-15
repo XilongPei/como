@@ -99,11 +99,18 @@ public:
 
     static TPZA_Executor::Worker *PickWorkerByChannelHandle(
                                                 HANDLE hChannel, bool isDaemon);
+    // After the construct of this class returns, if mThreadNum is negative,
+    // the construct was unsuccessful.
+    int         mThreadNum;         // most thread number
+
 private:
     static bool shutdown;
-    int         mThreadNum;         // most thread number
     pthread_t   pthread_id_Manager;
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    pthread_t  pthread_id_HandleMessage[ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM];
+#else
     pthread_t  *pthread_id_HandleMessage;
+#endif
 
 public:
     static void *threadManager(void *threadData);

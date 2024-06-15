@@ -26,6 +26,13 @@ namespace como {
 
 using COMO_MALLOC = void*(*)(Short,size_t);
 
+/**
+ * the value bigger than:
+ *      ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM +
+ *      ComoContext::gThreadsWorkingNum + 1
+ */
+#define MAX_NUM_THREADS_WORKING     10
+
 class COM_PUBLIC ComoContext
 {
 public:
@@ -36,7 +43,11 @@ public:
 
     static LamportClock    *gLamportClock;
 
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    static pthread_t        gThreadsWorking[MAX_NUM_THREADS_WORKING];
+#else
     static pthread_t       *gThreadsWorking;
+#endif
     static int              gThreadsWorkingNum;
 
     // --- Memory Area

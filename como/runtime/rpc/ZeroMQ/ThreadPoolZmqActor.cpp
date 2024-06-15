@@ -88,7 +88,6 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
   while (true) {
     iRet = CZMQUtils::CzmqRecvMsg(hChannel, eventCode, socket, msg, 0);
-
     if (iRet > 0) {
         int option_value = -1;
 
@@ -504,6 +503,13 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
             delete sInstance;
             return nullptr;
         }
+
+        // Actually ThreadPoolZmqActor() is not constructed successfully
+        if (threadPool->mThreadNum < 0) {
+            delete sInstance;
+            delete threadPool;
+            return nullptr;
+        }
     }
     return sInstance;
 }
@@ -666,14 +672,26 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
 {
     if (CZMQUtils::CzmqGetSockets(nullptr, nullptr) < 0) {
         Logger::E("ThreadPoolZmqActor", "CzmqGetSockets error");
+        mThreadNum = -1;
+        return;
     }
 
     mThreadNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    if ((ComoContext::gThreadsWorkingNum +
+         ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM + 1 >
+                                        sizeof(ComoContext::gThreadsWorking)) {
+        mThreadNum = -1;
+        return;
+    }
+#else
     pthread_id_HandleMessage = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == pthread_id_HandleMessage) {
         Logger::E("ThreadPoolChannelInvoke", "calloc() error");
+        mThreadNum = -1;
         return;
     }
+#endif
 
     pthread_attr_t threadAddr;
     pthread_attr_init(&threadAddr);
@@ -681,6 +699,8 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
     if (pthread_create(&pthread_id_Manager, nullptr,
                              ThreadPoolZmqActor::threadManager, nullptr) != 0) {
         Logger::E("ThreadPoolZmqActor", "pthread_create() error");
+        mThreadNum = -1;
+        return;
     }
 
     pthread_attr_t attr;
@@ -691,22 +711,28 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
         if (pthread_create(&pthread_id_HandleMessage[i], nullptr,
                                          threadHandleMessage, (void *)i) != 0) {
             Logger::E("ThreadPoolZmqActor", "pthread_create() error");
+            mThreadNum = -1;
+            return;
         }
     }
 
     /**
      * Put the thread handle in Context for determining if all threads have exited
      */
+#ifndef COMO_FUNCTION_SAFETY_RTOS
     ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
                   sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum + 1));
     if (nullptr == ComoContext::gThreadsWorking) {
         Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
+        mThreadNum = -1;
         return;
     }
-    ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = pthread_id_Manager;
+#endif
+    ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] =
+                                                             pthread_id_Manager;
     for (size_t i = 0;  i < mThreadNum;  i++) {
         ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] =
-                                                               pthread_id_HandleMessage[i];
+                                                    pthread_id_HandleMessage[i];
     }
 
     signal_ = false;

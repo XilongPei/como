@@ -150,13 +150,22 @@ pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 
 ThreadPool::ThreadPool(int threadNum)
 {
-    mThreadNum = threadNum;
-
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    if (mThreadNum >= sizeof(ComoContext::gThreadsWorking)) {
+        Logger::E("ThreadPoolExecutor", "ComoContext::gThreadsWorking too small");
+        threadNum = -1;
+        return;
+    }
+#else
     pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == pthread_ids) {
         Logger::E("ThreadPool", "create thread error");
+        threadNum = -1;
         return;
     }
+#endif
+
+    mThreadNum = threadNum;
 
     for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
@@ -167,18 +176,26 @@ ThreadPool::ThreadPool(int threadNum)
         int ret = pthread_create(&pthread_ids[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (0 != ret) {
             Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
+            threadNum = -1;
+            return;
         }
     }
 
     /**
      * Put the thread handle in Context for determining if all threads have exited
      */
+#ifndef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * When functional safety calculating, ComoContext::gThreadsWorking is an array.
+     */
     ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
                       sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum));
     if (nullptr == ComoContext::gThreadsWorking) {
         Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
+        threadNum = -1;
         return;
     }
+#endif
     for (int i = 0;  i < mThreadNum;  i++) {
         ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = pthread_ids[i];
     }

@@ -88,8 +88,12 @@ class ThreadPool
 private:
     static ArrayList<ThreadPoolExecutor::Worker*> mWorkerList;      // task list
     static bool shutdown;
-    int mThreadNum;                                                 // most thread number
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    pthread_t pthread_ids[sizeof(ComoContext::gThreadsWorking)];
+#else
     pthread_t *pthread_ids;
+#endif
 
     static pthread_mutex_t m_pthreadMutex;
     static pthread_cond_t m_pthreadCond;
@@ -98,6 +102,15 @@ protected:
     static void *threadFunc(void *threadData);
 
 public:
+
+    /**
+     * most thread number
+     *
+     * After the construct of this class returns, if mThreadNum is negative,
+     * the construct was unsuccessful.
+     */
+    int mThreadNum;
+
     static int runingWorkerSize;
 
     ThreadPool(int threadNum = 10);
