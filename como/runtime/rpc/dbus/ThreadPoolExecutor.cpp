@@ -99,6 +99,11 @@ int ThreadPoolExecutor::RunTask(
     return threadPool->addTask(worker);
 }
 
+/**
+ * `ThreadPoolExecutor::Worker` w implements the Runnable interface, it is a task,
+ * this thread will be waiting for such a task.
+ * This thread gets `w` and executes it: w->Run().
+ */
 void *ThreadPool::threadFunc(void *threadData)
 {
     ECode ec;
@@ -106,11 +111,11 @@ void *ThreadPool::threadFunc(void *threadData)
     while (true) {
         pthread_mutex_lock(&m_pthreadMutex);
 
-        while ((mWorkerList.GetSize() == 0) && !shutdown) {
+        while ((mWorkerList.GetSize() == 0) && (! mShutdown)) {
             pthread_cond_wait(&m_pthreadCond, &m_pthreadMutex);
         }
 
-        if (shutdown) {
+        if (mShutdown) {
             pthread_mutex_unlock(&m_pthreadMutex);
             pthread_exit(nullptr);
         }
@@ -129,7 +134,7 @@ void *ThreadPool::threadFunc(void *threadData)
                       (unsigned int)pid, (unsigned int)tid, (unsigned int)tid, i);
         }
 #endif
-        runingWorkerSize++;
+        mRuningWorkerSize++;
         pthread_mutex_unlock(&m_pthreadMutex);
         ec = w->Run();
     }
@@ -141,9 +146,9 @@ void *ThreadPool::threadFunc(void *threadData)
 // ThreadPool
 //
 
-bool ThreadPool::shutdown = false;
+bool ThreadPool::mShutdown = false;
 ArrayList<ThreadPoolExecutor::Worker*> ThreadPool::mWorkerList;      // task list
-int ThreadPool::runingWorkerSize = 0;
+int ThreadPool::mRuningWorkerSize = 0;
 
 pthread_mutex_t ThreadPool::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
@@ -157,14 +162,15 @@ ThreadPool::ThreadPool(int threadNum)
         return;
     }
 #else
-    pthread_ids = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
-    if (nullptr == pthread_ids) {
+    mPthreadIds = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    if (nullptr == mPthreadIds) {
         Logger::E("ThreadPool", "create thread error");
         threadNum = -1;
         return;
     }
 #endif
 
+    // The number of threads in the thread pool.
     mThreadNum = threadNum;
 
     for (int i = 0;  i < mThreadNum;  i++) {
@@ -173,7 +179,7 @@ ThreadPool::ThreadPool(int threadNum)
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
 
         pthread_t thread;
-        int ret = pthread_create(&pthread_ids[i], nullptr, ThreadPool::threadFunc, nullptr);
+        int ret = pthread_create(&mPthreadIds[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (0 != ret) {
             Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
             threadNum = -1;
@@ -185,9 +191,6 @@ ThreadPool::ThreadPool(int threadNum)
      * Put the thread handle in Context for determining if all threads have exited
      */
 #ifndef COMO_FUNCTION_SAFETY_RTOS
-    /**
-     * When functional safety calculating, ComoContext::gThreadsWorking is an array.
-     */
     ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
                       sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum));
     if (nullptr == ComoContext::gThreadsWorking) {
@@ -196,8 +199,11 @@ ThreadPool::ThreadPool(int threadNum)
         return;
     }
 #endif
+    /**
+     * When functional safety calculating, ComoContext::gThreadsWorking is an array.
+     */
     for (int i = 0;  i < mThreadNum;  i++) {
-        ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = pthread_ids[i];
+        ComoContext::gThreadsWorking[ComoContext::gThreadsWorkingNum++] = mPthreadIds[i];
     }
 }
 
@@ -216,19 +222,19 @@ int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
 
 int ThreadPool::stopAll()
 {
-    if (shutdown) {
+    if (mShutdown) {
         return -1;
     }
 
-    shutdown = true;
+    mShutdown = true;
     pthread_cond_broadcast(&m_pthreadCond);
 
     for (int i = 0; i < mThreadNum; i++) {
-        pthread_join(pthread_ids[i], nullptr);
+        pthread_join(mPthreadIds[i], nullptr);
     }
 
-    free(pthread_ids);
-    pthread_ids = nullptr;
+    free(mPthreadIds);
+    mPthreadIds = nullptr;
 
     pthread_mutex_destroy(&m_pthreadMutex);
     pthread_cond_destroy(&m_pthreadCond);

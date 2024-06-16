@@ -42,20 +42,16 @@ namespace como {
 
 class ThreadPool;
 
-class ThreadPoolExecutor
-    : public LightRefBase
+class ThreadPoolExecutor : public LightRefBase
 {
 public:
-    class Runnable
-        : public LightRefBase
+    class Runnable : public LightRefBase
     {
     public:
         virtual ECode Run() = 0;
     };
 
-public:
-    class Worker
-        : public LightRefBase
+    class Worker : public LightRefBase
     {
     public:
         Worker(
@@ -64,13 +60,11 @@ public:
 
         ECode Run();
 
-    public:
-        AutoPtr<Runnable> mTask;
-        ThreadPoolExecutor* mOwner;
-        Mutex mLock;
+        AutoPtr<Runnable>   mTask;
+        ThreadPoolExecutor *mOwner;
+        Mutex               mLock;
     };
 
-public:
     static AutoPtr<ThreadPoolExecutor> GetInstance();
     static AutoPtr<ThreadPool> threadPool;
 
@@ -82,17 +76,16 @@ private:
     static Mutex sInstanceLock;
 };
 
-class ThreadPool
-    : public LightRefBase
+class ThreadPool : public LightRefBase
 {
 private:
     static ArrayList<ThreadPoolExecutor::Worker*> mWorkerList;      // task list
-    static bool shutdown;
+    static bool mShutdown;
 
 #ifdef COMO_FUNCTION_SAFETY_RTOS
-    pthread_t pthread_ids[sizeof(ComoContext::gThreadsWorking)];
+    pthread_t mPthreadIds[sizeof(ComoContext::gThreadsWorking)];
 #else
-    pthread_t *pthread_ids;
+    pthread_t *mPthreadIds;
 #endif
 
     static pthread_mutex_t m_pthreadMutex;
@@ -111,7 +104,7 @@ public:
      */
     int mThreadNum;
 
-    static int runingWorkerSize;
+    static int mRuningWorkerSize;
 
     ThreadPool(int threadNum = 10);
     static int addTask(ThreadPoolExecutor::Worker *task);

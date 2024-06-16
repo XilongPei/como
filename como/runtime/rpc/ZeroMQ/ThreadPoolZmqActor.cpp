@@ -67,6 +67,10 @@ static void SendECode(HANDLE hChannel, void *socket, ECode ec)
                                               (const void *)&ec, sizeof(ECode));
 }
 
+/**
+ * `TPZA_Executor::Worker` worker implements the IStub interface, it is a task.
+ * This thread gets `worker` and others commands, and do it.
+ */
 void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 {
     void     *socket;
