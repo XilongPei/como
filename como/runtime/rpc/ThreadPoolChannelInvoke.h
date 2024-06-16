@@ -82,8 +82,8 @@ public:
     static std::vector<TPCI_Executor::Worker*> mWorkerList;     // task list
 
 private:
-    int mThreadNum;         // Maximum number of threads
-    pthread_t *pthread_id;
+    int         mThreadNum;         // Maximum number of threads
+    pthread_t  *mPthreadIds;
 
     static bool shutdown;
     static bool signal_;

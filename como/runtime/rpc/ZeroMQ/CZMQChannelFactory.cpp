@@ -36,7 +36,10 @@ CZMQChannelFactory::CZMQChannelFactory(
     : mType(type)
 {
     // initial the ThreadPool environment, to avoid the delay of first RPC call
-    TPZA_Executor::GetInstance();
+    TPZA_Executor *instance = TPZA_Executor::GetInstance();
+    if (nullptr == instance) {
+        Logger::E("CZMQChannelFactory", "TPZA_Executor::GetInstance() failed.");
+    }
 }
 
 ECode CZMQChannelFactory::CreateInterfacePack(

@@ -471,6 +471,10 @@ ECode CZMQChannel::StartListening(
         Logger::D("CZMQChannel::StartListening",
                                              "endpoint: %s", mEndpoint.c_str());
 
+        /**
+         * TPZA_Executor::GetInstance() just takes the variable that has already
+         * been initialized, there is no need to determine whether it is nullptr.
+         */
         if (TPZA_Executor::GetInstance()->RunTask(worker) < 0) {
             Logger::E("CZMQChannel::StartListening",
                                                 "Too much Task in WorkerList");

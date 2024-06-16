@@ -90,7 +90,8 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                                AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
 {
-    AutoPtr<Worker> w = new Worker(channel, method, inParcel, outParcel);
+    // addTask(w) and subsequent operations are bare pointer to record
+    Worker *w = new Worker(channel, method, inParcel, outParcel);
     if (nullptr == w) {
         return -1;
     }
@@ -164,11 +165,22 @@ std::vector<TPCI_Executor::Worker*> ThreadPoolChannelInvoke::mWorkerList;   // t
 pthread_mutex_t ThreadPoolChannelInvoke::m_pthreadMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t ThreadPoolChannelInvoke::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 
+/**
+ * constructor of class ThreadPoolChannelInvoke
+ *
+ * One thread corresponds to an Channel invoke.
+ */
 ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 {
     mThreadNum = threadNum;
-    pthread_id = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
-    if (nullptr == pthread_id) {
+
+    /**
+     * The single instance is implemented by TPCI_Executor::GetInstance(), and
+     * this object is constructed only when COMO_Runtime is started, so dynamic
+     * memory can be used.
+     */
+    mPthreadIds = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
+    if (nullptr == mPthreadIds) {
         Logger::E("ThreadPoolChannelInvoke", "calloc() error");
         return;
     }
@@ -177,9 +189,11 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
-        if (pthread_create(&pthread_id[i], &threadAddr,
+        if (pthread_create(&mPthreadIds[i], &threadAddr,
                            ThreadPoolChannelInvoke::threadFunc, nullptr) != 0) {
             Logger::E("ThreadPoolChannelInvoke", "pthread_create() error");
+            mThreadNum = i;
+            break;
         }
     }
 
@@ -258,11 +272,11 @@ int ThreadPoolChannelInvoke::stopAll()
     pthread_cond_broadcast(&m_pthreadCond);
 
     for (int i = 0;  i < mThreadNum;  i++) {
-        pthread_join(pthread_id[i], nullptr);
+        pthread_join(mPthreadIds[i], nullptr);
     }
 
-    free(pthread_id);
-    pthread_id = nullptr;
+    free(mPthreadIds);
+    mPthreadIds = nullptr;
 
     pthread_mutex_destroy(&m_pthreadMutex);
     pthread_cond_destroy(&m_pthreadCond);
