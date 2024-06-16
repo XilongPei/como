@@ -131,6 +131,11 @@ void *ThreadPoolChannelInvoke::threadFunc(void *threadData)
             signal_ = false;
 
             i = LookingForReadyWorker();
+            if (i < 0) {
+                // When signal_ is true, this shouldn't happen
+                Logger::E("ThreadPoolChannelInvoke", "LookingForReadyWorker error");
+                shutdown = true;
+            }
         }
 
         if (shutdown) {

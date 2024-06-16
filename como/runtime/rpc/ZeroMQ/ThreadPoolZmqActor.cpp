@@ -592,7 +592,7 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
             pthread_mutex_lock(&pthreadMutex);
 
             for (i = 0;  (i < mWorkerList.size()) &&
-                                         !LivingWorker(mWorkerList[i]);  i++) {
+                                        (! LivingWorker(mWorkerList[i]));  i++) {
                 if (nullptr == mWorkerList[i])
                     continue;
 

@@ -63,6 +63,7 @@ public:
         AutoPtr<Runnable>   mTask;
         ThreadPoolExecutor *mOwner;
         Mutex               mLock;
+        ECode               mEc;
     };
 
     static AutoPtr<ThreadPoolExecutor> GetInstance();

@@ -1105,6 +1105,12 @@ ECode CDBusChannel::StartListening(
          * (AutoPtr) before returning back.
          */
         ret = instance->RunTask(runable);
+        if (ret < 0) {
+            Logger::E("CDBusChannel::StartListening", "RunTask error");
+            delete runable;
+            runable = nullptr;
+            return E_OUT_OF_MEMORY_ERROR;
+        }
     }
 
     if (0 == ret) {

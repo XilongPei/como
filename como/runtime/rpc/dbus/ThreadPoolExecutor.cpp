@@ -57,7 +57,16 @@ ECode ThreadPoolExecutor::Worker::Run()
     // CDBusChannel::ServiceRunnable::Run()
     // The number ComoConfig::ThreadPool_MAX_THREAD_NUM must be greater than the
     // number ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER
-    return mTask->Run();
+    mEc = mTask->Run();
+
+    /**
+     * about mEc:
+     * `mEc` records the execution of the COMO method and does not carry the
+     * return value of the method. The value mEc is used to check whether the
+     * calling process is correct.
+     */
+
+    return mEc;
 }
 
 //-------------------------------------------------------------------------
