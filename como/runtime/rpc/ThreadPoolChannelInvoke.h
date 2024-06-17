@@ -96,10 +96,10 @@ protected:
 
 public:
     ThreadPoolChannelInvoke(int threadNum = 10);
-    static int addTask(TPCI_Executor::Worker *task);
-    static int cleanTask(int posWorkerList);
-    int stopAll();
-    int getTaskListSize();
+    static int AddTask(TPCI_Executor::Worker *task);
+    static int CleanTask(int posWorkerList);
+    int StopAll();
+    int GetTaskListSize();
 };
 
 } // namespace como

@@ -90,17 +90,17 @@ AutoPtr<TPCI_Executor> TPCI_Executor::GetInstance()
 int TPCI_Executor::RunTask(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod> method,
                                AutoPtr<IParcel> inParcel, AutoPtr<IParcel> outParcel)
 {
-    // addTask(w) and subsequent operations are bare pointer to record
+    // AddTask(w) and subsequent operations are bare pointer to record
     Worker *w = new Worker(channel, method, inParcel, outParcel);
     if (nullptr == w) {
         return -1;
     }
-    return threadPool->addTask(w);
+    return threadPool->AddTask(w);
 }
 
 int TPCI_Executor::CleanTask(int pos)
 {
-    return threadPool->cleanTask(pos);
+    return threadPool->CleanTask(pos);
 }
 
 int ThreadPoolChannelInvoke::LookingForReadyWorker()
@@ -208,7 +208,7 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
 /*
  * return position in mWorkerList
  */
-int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
+int ThreadPoolChannelInvoke::AddTask(TPCI_Executor::Worker *task)
 {
     int i;
     struct timespec currentTime;
@@ -253,7 +253,7 @@ int ThreadPoolChannelInvoke::addTask(TPCI_Executor::Worker *task)
     return i;
 }
 
-int ThreadPoolChannelInvoke::cleanTask(int pos)
+int ThreadPoolChannelInvoke::CleanTask(int pos)
 {
     if ((pos < 0) || (pos >= mWorkerList.size())) {
         return -1;
@@ -267,7 +267,7 @@ int ThreadPoolChannelInvoke::cleanTask(int pos)
     return pos;
 }
 
-int ThreadPoolChannelInvoke::stopAll()
+int ThreadPoolChannelInvoke::StopAll()
 {
     if (shutdown) {
         return -1;
@@ -283,13 +283,24 @@ int ThreadPoolChannelInvoke::stopAll()
     free(mPthreadIds);
     mPthreadIds = nullptr;
 
+    /**
+     * Give the task being processed a chance to destruct, perhaps some tasks
+     * need to be destructed to clean up the environment.
+     */
+    for (i = 0;  i < mWorkerList.size();  i++) {
+        if (nullptr != mWorkerList[i]) {
+            delete mWorkerList[i];
+            mWorkerList[i] = nullptr;
+        }
+    }
+
     pthread_mutex_destroy(&m_pthreadMutex);
     pthread_cond_destroy(&m_pthreadCond);
 
     return 0;
 }
 
-int ThreadPoolChannelInvoke::getTaskListSize()
+int ThreadPoolChannelInvoke::GetTaskListSize()
 {
     return mWorkerList.size();
 }

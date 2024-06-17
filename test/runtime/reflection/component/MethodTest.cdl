@@ -104,7 +104,7 @@ $$$ TestMethod2 FramacBlock ... $$$
 ]
 coclass CMethodTester
 {
-    //interface IComoFunctionSafetyObject;
+    interface IComoFunctionSafetyObject;
     interface IMethodTest;
 }
 

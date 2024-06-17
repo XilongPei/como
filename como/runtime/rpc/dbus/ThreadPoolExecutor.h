@@ -108,8 +108,9 @@ public:
     static int mRuningWorkerSize;
 
     ThreadPool(int threadNum = 10);
-    static int addTask(ThreadPoolExecutor::Worker *task);
-    int stopAll();
+    ~ThreadPool();
+    static int AddTask(ThreadPoolExecutor::Worker *task);
+    int StopAll();
 };
 
 } // namespace como

@@ -159,7 +159,7 @@ ECode CoUnregisterImportObject(
 ECode CoStopAll()
 {
     // rpc/dbus
-    (void)ThreadPoolExecutor::threadPool->stopAll();
+    (void)ThreadPoolExecutor::threadPool->StopAll();
 
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
     // rpc/ZeroMQ
@@ -168,7 +168,7 @@ ECode CoStopAll()
 
 #ifdef COMO_FUNCTION_SAFETY
     // ThreadPoolChannelInvoke
-    TPCI_Executor::threadPool->stopAll();
+    TPCI_Executor::threadPool->StopAll();
 #endif
 
     return NOERROR;

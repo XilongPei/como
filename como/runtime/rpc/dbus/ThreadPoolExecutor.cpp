@@ -88,6 +88,11 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
             delete sInstance;
             return nullptr;
         }
+        if (threadPool->mThreadNum <= 0) {
+            delete sInstance;
+            delete threadPool;
+            return nullptr;
+        }
     }
     return sInstance;
 }
@@ -105,7 +110,7 @@ int ThreadPoolExecutor::RunTask(
         return -1;
     }
 
-    return threadPool->addTask(worker);
+    return threadPool->AddTask(worker);
 }
 
 /**
@@ -167,14 +172,14 @@ ThreadPool::ThreadPool(int threadNum)
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     if (mThreadNum >= sizeof(ComoContext::gThreadsWorking)) {
         Logger::E("ThreadPoolExecutor", "ComoContext::gThreadsWorking too small");
-        threadNum = -1;
+        mThreadNum = -1;
         return;
     }
 #else
     mPthreadIds = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == mPthreadIds) {
         Logger::E("ThreadPool", "create thread error");
-        threadNum = -1;
+        mThreadNum = -1;
         return;
     }
 #endif
@@ -191,7 +196,7 @@ ThreadPool::ThreadPool(int threadNum)
         int ret = pthread_create(&mPthreadIds[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (0 != ret) {
             Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
-            threadNum = -1;
+            mThreadNum = -1;
             return;
         }
     }
@@ -204,7 +209,7 @@ ThreadPool::ThreadPool(int threadNum)
                       sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum));
     if (nullptr == ComoContext::gThreadsWorking) {
         Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
-        threadNum = -1;
+        mThreadNum = -1;
         return;
     }
 #endif
@@ -216,7 +221,20 @@ ThreadPool::ThreadPool(int threadNum)
     }
 }
 
-int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
+ThreadPool::~ThreadPool()
+{
+    for (int i = 0;  i < mThreadNum;  i++) {
+        pthread_cancel(mPthreadIds[i]);
+
+        // The POSIX standard itself does not provide a direct way to determine
+        // whether pthread_t is a legitimate thread handle.
+        mPthreadIds[i] = 0;
+    }
+
+    mThreadNum = 0;
+}
+
+int ThreadPool::AddTask(ThreadPoolExecutor::Worker *task)
 {
     pthread_mutex_lock(&m_pthreadMutex);
 
@@ -229,7 +247,7 @@ int ThreadPool::addTask(ThreadPoolExecutor::Worker *task)
     return 0;
 }
 
-int ThreadPool::stopAll()
+int ThreadPool::StopAll()
 {
     if (mShutdown) {
         return -1;
