@@ -42,6 +42,7 @@ CMetaCoclass::CMetaCoclass(
     mCid.mUuid = mk->mUuid;
     mCid.mCid = &mcObj->mCid;
 
+//没有索引，就找不到？？？
     MetaInterface *mi = mOwner->mMetadata->mInterfaces[
             mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
     mConstructors = Array<IMetaConstructor*>(mi->mMethodNumber);
@@ -276,9 +277,11 @@ ECode CMetaCoclass::GetMethodNumber(
                 if (fullName.Equals("como::IInterface")) {
                     continue;
                 }
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
                 if (fullName.Equals("como::IComoFunctionSafetyObject")) {
                     continue;
                 }
+#endif
                 AutoPtr<IMetaInterface> miObj;
                 GetInterface(fullName, miObj);
                 Integer methodNum;

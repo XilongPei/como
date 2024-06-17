@@ -262,7 +262,7 @@ TEST(ReflectionTest, TestCoclassGetMethods)
     klass->GetMethodNumber(methodNumber);
 
 #ifdef COMO_FUNCTION_SAFETY
-    EXPECT_EQ(12, methodNumber);
+    EXPECT_EQ(13, methodNumber);
     Array<IMetaMethod*> methods(methodNumber);
     ECode ec = klass->GetAllMethods(methods);
     EXPECT_TRUE(SUCCEEDED(ec));
