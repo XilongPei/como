@@ -490,12 +490,12 @@ ECode CMetaCoclass::BuildAllMethods()
                 (void)miObj->GetNamespace(ns);
                 nsName = ns + "::" + name;
 
-                static String nsName_interface = String("como::IInterface");
-
+#ifdef NOT_REFLECTION_TYPE_EXTERNAL
                 if (mOwner->ChkExternalInterface(mMetadata->mInterfaceIndexes[i])) {
                     continue;
                 }
-
+#endif
+                static String nsName_interface = String("como::IInterface");
                 if (nsName_interface.Equals(nsName)) {
                     continue;
                 }
