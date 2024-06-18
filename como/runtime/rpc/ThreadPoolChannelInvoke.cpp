@@ -287,7 +287,7 @@ int ThreadPoolChannelInvoke::StopAll()
      * Give the task being processed a chance to destruct, perhaps some tasks
      * need to be destructed to clean up the environment.
      */
-    for (i = 0;  i < mWorkerList.size();  i++) {
+    for (int i = 0;  i < mWorkerList.size();  i++) {
         if (nullptr != mWorkerList[i]) {
             delete mWorkerList[i];
             mWorkerList[i] = nullptr;

@@ -42,9 +42,8 @@ CMetaCoclass::CMetaCoclass(
     mCid.mUuid = mk->mUuid;
     mCid.mCid = &mcObj->mCid;
 
-//没有索引，就找不到？？？
     MetaInterface *mi = mOwner->mMetadata->mInterfaces[
-            mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
+                 mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
     mConstructors = Array<IMetaConstructor*>(mi->mMethodNumber);
 
 #ifdef COMO_FUNCTION_SAFETY_RTOS
@@ -80,7 +79,7 @@ ECode CMetaCoclass::GetName(
 ECode CMetaCoclass::GetNamespace(
     /* [out] */ String& ns)
 {
-    ns = mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace;
+    ns = (mNamespace.Equals(NAMESPACE_GLOBAL) ? "" : mNamespace);
     return NOERROR;
 }
 
@@ -269,7 +268,14 @@ ECode CMetaCoclass::GetMethodNumber(
     if (mMethods.IsEmpty()) {
         Mutex::AutoLock lock(mMethodsLock);
         if (mMethods.IsEmpty()) {
+
+            /**
+             * The number 4 comes from: Every COMO Interface has at least four
+             * of the following methods: AddRef, Release, Probe, GetInterfaceID.
+             *
+             */
             Integer num = 4;
+
             for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 MetaInterface *mi = mOwner->mMetadata->mInterfaces[
                                                     mMetadata->mInterfaceIndexes[i]];
@@ -291,6 +297,8 @@ ECode CMetaCoclass::GetMethodNumber(
                 }
 
                 miObj->GetMethodNumber(methodNum);
+
+                // The number 4 comes from: (see above)
                 num += methodNum - 4;
             }
             mMethods = Array<IMetaMethod*>(num);
@@ -558,8 +566,21 @@ ECode CMetaCoclass::BuildInterfaceMethodLocked(
     /* [in, out] */ Integer& index)
 {
     Integer N;
+    Integer i;
     miObj->GetMethodNumber(N);
-    for (Integer i = ((miObj == mOwner->mIInterface) ? 0 : 4);  i < N;  i++) {
+
+    /**
+     * The number 4 comes from: Every COMO Interface has at least four of the
+     * following methods: AddRef, Release, Probe, GetInterfaceID.
+     *
+     */
+    if (miObj == mOwner->mIInterface) {
+        i = 0;
+    }
+    else {
+        i = 4;
+    }
+    for (;  i < N;  i++) {
         AutoPtr<IMetaMethod> mmObj;
         FAIL_RETURN(miObj->GetMethod(i, mmObj));
         if (nullptr == (IMetaMethod *)mmObj) {
