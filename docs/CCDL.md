@@ -3,7 +3,7 @@
 
 ### Programs
 
-<*compilation_unit*> ::= <*include_or_type_declarations*>? <*module_declaration*>?
+<*compilation_unit*> ::= <*include_or_type_declarations*>? <*import_declaration*>? <*module_declaration*>?
 
 ### Declarations
 
@@ -13,6 +13,8 @@
 
 <*include_declaration*> ::= include <*string_literal*>
 
+<*import_declaration*> ::= import <*string_literal*>
+
 <*type_declaration*> ::= <*namespace_declaration*> | <*interface_declaration*> | <*class_declaration*> | <*enum_declaration*>
 
 <*namespace_declaration*> ::= namespace <*identifier*> { <*include_or_type_declarations*> }
@@ -21,13 +23,23 @@
 
 <*interface_attributes*> ::= <*interface_attribute*> | <*interface_attributes*> , <*interface_attribute*>
 
-<*interface_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*>
+<*interface_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*framacblock_attribute*> | <*funcsafetysetting*>
 
 <*uuid_attribute*> ::= uuid ( <*uuid_literal*> )
+
+<*uri_attribute*> ::= uri ( <*uri_literal*> )
 
 <*version_attribute*> ::= version ( <*version_literal*> )
 
 <*description_attribute*> ::= description ( <*string_literal*> )
+
+<*funcsafetysetting*> ::= FuncSafetySetting ( <*string_literal*> )
+
+<*framacblock_attribute*> ::= <*framacblock_m_attribute*> | <*framacblock_s_attribute*>
+
+<*framacblock_m_attribute*> ::= /*@ <*string_literal*>  */
+
+<*framacblock_s_attribute*> ::= //@ <*string_literal*>
 
 <*extends_interface*> ::= : <*interface_type*>
 
@@ -53,7 +65,7 @@
 
 <*class_attributes*> ::= <*class_attribute*> | <*class_attributes*> , <*class_attribute*>
 
-<*class_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*>
+<*class_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*framacblock_attribute*> | <*funcsafetysetting*>
 
 <*class_body*> ::= { <*class_body_declarations*>? }
 
@@ -81,7 +93,7 @@
 
 <*module_attributes*> ::= <*module_attribute*> | <*module_attributes*> , <*module_attribute*>
 
-<*module_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*url_attribute*>
+<*module_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*uri_attribute*>
 
 <*module_body*> ::= { <*module_body_declarations*>? }
 
@@ -213,7 +225,41 @@
 
 <*string_character*> ::= <*input_character*> except " and \ | <*escape_character*>
 
-<*keyword*> ::= Array | Boolean | Byte | coclass | const | description | enum | HANDLE | include | Integer | interface | Long | module | namespace | Short | String | uuid | version
+<*keyword*> ::= Array | Boolean | Byte | coclass | const | description | enum | HANDLE | include | import | Integer | interface | Long | module | namespace | Short | String | uuid | version
+
+### URI
+
+<uri_literal> ::= <scheme> "://" <authority> <path> [ "?" <query> ] [ "#" <fragment> ]
+
+<scheme> ::= "http" | "https" | "ftp" | "file" | ...    ; 多种可能的方案
+<authority> ::= [ <userinfo> "@" ] <host> [ ":" <port> ]
+
+<userinfo> ::= <username> [ ":" <password> ]
+<username> ::= <unreserved> | <pct-encoded> | <sub-delims>
+<password> ::= <unreserved> | <pct-encoded> | <sub-delims>
+
+<host> ::= <IP-literal> | <IPv4address> | <reg-name>
+<IP-literal> ::= "[" ( <IPv6address> | <IPvFuture> ) "]"
+<IPv4address> ::= <dec-octet> "." <dec-octet> "." <dec-octet> "." <dec-octet>
+<dec-octet> ::= DIGIT | %x31-39 DIGIT | "1" 2DIGIT | "2" %x30-34 DIGIT | "25" %x30-35
+<reg-name> ::= *( <unreserved> | <pct-encoded> | <sub-delims> )
+
+<port> ::= *DIGIT
+
+<path> ::= "/" <segment> *( "/" <segment> )
+<segment> ::= <pchar> *
+<pchar> ::= <unreserved> | <pct-encoded> | <sub-delims> | ":" | "@"
+
+<query> ::= *( <pchar> | "/" | "?" )
+<fragment> ::= *( <pchar> | "/" | "?" )
+
+<unreserved> ::= ALPHA | DIGIT | "-" | "." | "_" | "~"
+<pct-encoded> ::= "%" HEXDIG HEXDIG
+<sub-delims> ::= "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
+
+ALPHA ::= %x41-5A | %x61-7A   ; A-Z | a-z
+DIGIT ::= %x30-39             ; 0-9
+HEXDIG ::= DIGIT | "A" | "B" | "C" | "D" | "E" | "F"
 
 The character set for MIDL is 7-bit ASCII character set. This is the set denoted by <*input_character*>.
 

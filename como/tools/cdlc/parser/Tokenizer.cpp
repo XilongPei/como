@@ -717,7 +717,7 @@ TokenInfo Tokenizer::ReadNumber(
     while (! mReader->IsEof()) {
         c = mReader->PeekChar();
         if (state == NUMBER_INT_0) {
-            if (c == 'x' || c =='X') {
+            if (('x' == c) || ('X' == c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 radix = 16;
@@ -739,23 +739,23 @@ TokenInfo Tokenizer::ReadNumber(
             break;
         }
         else if (state == NUMBER_INT) {
-            if ((radix == 10) && IsDecimalDigital(c)) {
+            if ((10 == radix) && IsDecimalDigital(c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
             }
-            else if ((radix == 16) && IsHexDigital(c)) {
+            else if ((16 == radix) && IsHexDigital(c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
             }
-            else if (c == '.') {
+            else if ('.' == c) {
                 mReader->GetChar();
                 builder.Append(c);
                 state = NUMBER_FP;
                 continue;
             }
-            else if (c == 'l') {
+            else if ('l' == c) {
                 mReader->GetChar();
                 if (mReader->PeekChar() == 'l') {
                     mReader->GetChar();
@@ -763,7 +763,7 @@ TokenInfo Tokenizer::ReadNumber(
                 }
                 break;
             }
-            else if (c == 'L') {
+            else if ('L' == c) {
                 mReader->GetChar();
                 if (mReader->PeekChar() == 'L') {
                     mReader->GetChar();
@@ -771,7 +771,7 @@ TokenInfo Tokenizer::ReadNumber(
                 }
                 break;
             }
-            else if ((c == 'e') || (c == 'E')) {
+            else if (('e' == c) || ('E' == c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 state = NUMBER_FP_EXP;
@@ -786,18 +786,18 @@ TokenInfo Tokenizer::ReadNumber(
                 builder.Append(c);
                 continue;
             }
-            else if ((c == 'e') || (c == 'E')) {
+            else if (('e' == c) || ('E' == c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 state = NUMBER_FP_EXP;
                 scientificNotation = true;
                 continue;
             }
-            else if ((c == 'f') || (c == 'F')) {
+            else if (('f' == c) || ('F' == c)) {
                 mReader->GetChar();
                 break;
             }
-            else if ((c == 'd') || (c == 'D')) {
+            else if (('d' == c) || ('D' == c)) {
                 mReader->GetChar();
                 bit = 64;
                 break;
@@ -805,7 +805,7 @@ TokenInfo Tokenizer::ReadNumber(
             break;
         }
         else if (state == NUMBER_FP_EXP) {
-            if ((c == '+') || (c == '-')) {
+            if (('+' == c) || ('-' == c)) {
                 mReader->GetChar();
                 builder.Append(c);
                 continue;
@@ -815,11 +815,11 @@ TokenInfo Tokenizer::ReadNumber(
                 builder.Append(c);
                 continue;
             }
-            else if ((c == 'f') || (c == 'F')) {
+            else if (('f' == c) || ('F' == c)) {
                 mReader->GetChar();
                 break;
             }
-            else if ((c == 'd') || (c == 'D')) {
+            else if (('d' == c) || ('D' == c)) {
                 mReader->GetChar();
                 bit = 64;
                 break;
@@ -910,15 +910,17 @@ TokenInfo Tokenizer::ReadLineComment(
 
     if (! mReader->IsEof()) {
         c = mReader->GetChar();
-        if ('@' != c)
+        if ('@' != c) {
             builder.Append(c);
-        else
+        }
+        else {
             bFramaC = true;
+        }
     }
 
     while (! mReader->IsEof()) {
         c = mReader->GetChar();
-        if (c == '\n') {
+        if ('\n' == c) {
             break;
         }
         builder.Append(c);
