@@ -431,13 +431,13 @@ Integer String::Compare(
     if (mString == string) {
         return 0;
     }
-    if (mString == nullptr) {
+    if (nullptr == mString) {
         return -1;
     }
-    if (string == nullptr) {
+    if (nullptr == string) {
         return 1;
     }
-    if ((mString[0] == '\0') && (string[0] == '\0')) {
+    if (('\0' == mString[0]) && ('\0' == string[0])) {
         return 0;
     }
 
@@ -450,13 +450,13 @@ Integer String::CompareIgnoreCase(
     if (mString == string) {
         return 0;
     }
-    if (mString == nullptr) {
+    if (nullptr == mString) {
         return -1;
     }
-    if (string == nullptr) {
+    if (nullptr == string) {
         return 1;
     }
-    if ((mString[0] == '\0') && (string[0] == '\0')) {
+    if (('\0' == mString[0]) && ('\0' == string[0])) {
         return 0;
     }
 
@@ -528,8 +528,8 @@ String String::Substring(
     if (nullptr == mString) {
         return String();
     }
-    if (charStart < 0 || charEnd < 0 ||
-                            charStart > charEnd || charStart >= GetLength()) {
+    if ((charStart < 0) || (charEnd < 0) ||
+                          (charStart > charEnd) || (charStart >= GetLength())) {
         return String("");
     }
 
@@ -541,7 +541,7 @@ String String::Substring(
     const char* p2 = end;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end) {
+        if ((0 == byteSize) || (p + byteSize >= end)) {
             break;
         }
 
@@ -939,8 +939,12 @@ String String::TrimStart() const
     while (*start && isspace(*start)) {
         ++start;
     }
-    return start - mString >= byteSize ? String(nullptr) :
-                                    String(start, mString + byteSize - start);
+
+    if ((start - mString) >= byteSize) {
+        return String(nullptr);
+    }
+
+    return String(start, mString + byteSize - start);
 }
 
 String String::TrimEnd() const
@@ -953,7 +957,12 @@ String String::TrimEnd() const
     while (isspace(*end) && end >= mString) {
         --end;
     }
-    return end < mString ? String(nullptr) : String(mString, end - mString + 1);
+
+    if (end < mString) {
+        return String(nullptr);
+    }
+
+    return String(mString, end - mString + 1);
 }
 
 Integer String::ToByteIndex(
@@ -1000,9 +1009,10 @@ Integer String::ToCharIndex(
     const char* end = mString + GetByteLength() + 1;
     while (('\0' != *p) && (p < end)) {
         byteSize = UTF8SequenceLength(*p);
-        if (byteSize == 0 || p + byteSize >= end)
+        if ((0 == byteSize) || ((p + byteSize) >= end)) {
             break;
-        if (byteIndex >= p - mString && byteIndex < p - mString + byteSize) {
+        }
+        if ((byteIndex >= p - mString) && (byteIndex < (p - mString + byteSize))) {
             if (charByteSize != nullptr) {
                 *charByteSize = byteSize;
             }
@@ -1028,7 +1038,7 @@ String String::Format(
 
     String str("");
     char* buf = str.LockBuffer(len);
-    if (buf == nullptr) {
+    if (nullptr == buf) {
         Logger::E("String", "Lock %d bytes buffer failed", len);
         return str;
     }
@@ -1110,22 +1120,24 @@ ECode String::WriteCharArray(
     /* [in] */ Integer start,
     /* [in] */ Integer length)
 {
-    if (start < 0 || start > charArray.GetLength() || length < 0)
+    if ((start < 0) || start > charArray.GetLength() || length < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     length = (start + length) <= charArray.GetLength() ?
                                         length : (charArray.GetLength() - start);
 
     Integer totalByteSize = 0;
-    for (Integer i = start; i < start + length; i++) {
+    for (Integer i = start;  i < start + length;  i++) {
         totalByteSize += GetByteSize(charArray[i]);
     }
 
     char* buf = LockBuffer(totalByteSize);
-    if (nullptr == buf)
+    if (nullptr == buf) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
-    for (Integer i = start; i < start + length; i++) {
+    for (Integer i = start;  i < start + length;  i++) {
         Integer byteSize = GetByteSize(charArray[i]);
         WriteUTF8Bytes(buf, charArray[i], byteSize);
         buf += byteSize;
@@ -1173,7 +1185,7 @@ Integer String::LastByteIndexOfInternal(
 
 startSearchForLastChar:
     while (true) {
-        while (i >= min && mString[i] != strLastChar) {
+        while ((i >= min) && mString[i] != strLastChar) {
             i--;
         }
         if (i < min) {
@@ -1212,8 +1224,9 @@ char* String::LockBuffer(
     else {
         buf = SharedBuffer::Alloc(byteSize + 1);
     }
-    if (nullptr == buf)
+    if (nullptr == buf) {
         return nullptr;
+    }
 
     mString = (char*)buf->GetData();
     return mString;
@@ -1230,7 +1243,7 @@ ECode String::UnlockBuffer(
         SharedBuffer* buf;
         if (mString != nullptr) {
             buf = SharedBuffer::GetBufferFromData(mString)->EditResize(
-                    byteSize + 1);
+                                                                  byteSize + 1);
         }
         else {
             buf = SharedBuffer::Alloc(byteSize + 1);
