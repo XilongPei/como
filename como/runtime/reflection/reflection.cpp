@@ -34,7 +34,7 @@ ECode CoGetComponentMetadataWithPath(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
@@ -46,7 +46,7 @@ ECode CoGetComponentMetadata(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
@@ -58,47 +58,48 @@ ECode CoGetComponentMetadataFromFile(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaComponent>& mc)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 
     mc = nullptr;
 
     void* handle = reinterpret_cast<void*>(fd);
-    if (handle == nullptr) {
+    if (nullptr == handle) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     GetClassObjectPtr getFunc = (GetClassObjectPtr)dlsym(handle, "soGetClassObject");
-    if (getFunc == nullptr) {
+    if (nullptr == getFunc) {
         Logger::E("COMORT", "Dlsym \"soGetClassObject\" function from "
-                "component failed. The reason is %s.", strerror(errno));
+                "component failed. The reason is %s.", dlerror());
         return E_COMPONENT_IO_EXCEPTION;
     }
 
-    GetAllClassObjectsPtr getAllFunc = (GetAllClassObjectsPtr)dlsym(handle, "soGetAllClassObjects");
-    if (getAllFunc == nullptr) {
+    GetAllClassObjectsPtr getAllFunc = (GetAllClassObjectsPtr)dlsym(handle,
+                                                        "soGetAllClassObjects");
+    if (nullptr == getAllFunc) {
         Logger::E("COMORT", "Dlsym \"soGetAllClassObjects\" function from "
-                "component failed. The reason is %s.", strerror(errno));
+                "component failed. The reason is %s.", dlerror());
         return E_COMPONENT_IO_EXCEPTION;
     }
 
     CanUnloadPtr canFunc = (CanUnloadPtr)dlsym(handle, "soCanUnload");
-    if (canFunc == nullptr) {
+    if (nullptr == canFunc) {
         Logger::E("COMORT", "Dlsym \"soCanUnload\" function from "
-                "component failed. The reason is %s.", strerror(errno));
+                "component failed. The reason is %s.", dlerror());
         return E_COMPONENT_IO_EXCEPTION;
     }
 
     MetadataWrapper* metadata = *(MetadataWrapper**)(dlsym(handle, "soMetadataHandle"));
-    if (metadata == nullptr) {
+    if (nullptr == metadata) {
         Logger::E("COMORT", "Dlsym \"soMetadataHandle\" variable from "
-                "component failed. The reason is %s.", strerror(errno));
+                "component failed. The reason is %s.", dlerror());
         return E_COMPONENT_IO_EXCEPTION;
     }
 
     ComoComponent* component = (ComoComponent*)malloc(sizeof(ComoComponent));
-    if (component == nullptr) {
+    if (nullptr == component) {
         Logger::E("COMORT", "Malloc ComoComponent failed.");
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -118,7 +119,7 @@ ECode CoGetComponentMetadataFromFile(
     }
 
     void* data = malloc(mmc->mSize);
-    if (data == nullptr) {
+    if (nullptr == data) {
         Logger::E("COMORT", "Malloc %lu size metadata failed.", mmc->mSize);
         free(component);
         return E_OUT_OF_MEMORY_ERROR;
@@ -129,8 +130,9 @@ ECode CoGetComponentMetadataFromFile(
     serializer.Deserialize(reinterpret_cast<uintptr_t>(data));
 
     mc = new CMetaComponent(loader, component, (MetaComponent*)data);
-    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface))
+    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface)) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     return NOERROR;
 }
@@ -148,7 +150,7 @@ ECode CoGetComponentMetadataFromBytes(
 
     ComoComponent* component = (ComoComponent*)malloc(
             sizeof(ComoComponent) + sizeof(MetadataWrapper) + bytes.GetLength());
-    if (component == nullptr) {
+    if (nullptr == component) {
         Logger::E("COMORT", "Malloc ComoComponent failed.");
         return E_OUT_OF_MEMORY_ERROR;
     }
@@ -170,7 +172,7 @@ ECode CoGetComponentMetadataFromBytes(
     }
 
     void* data = malloc(mmc->mSize);
-    if (data == nullptr) {
+    if (nullptr == data) {
         Logger::E("COMORT", "Malloc %lu size metadata failed.", mmc->mSize);
         free(component);
         return E_OUT_OF_MEMORY_ERROR;
@@ -181,8 +183,9 @@ ECode CoGetComponentMetadataFromBytes(
     serializer.Deserialize(reinterpret_cast<uintptr_t>(data));
 
     mc = new CMetaComponent(loader, component, (MetaComponent*)data);
-    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface))
+    if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface)) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     return NOERROR;
 }
@@ -192,7 +195,7 @@ ECode CoGetCoclassMetadata(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaCoclass>& mc)
 {
-    if (loader == nullptr) {
+    if (nullptr == loader) {
         loader = CBootClassLoader::GetSystemClassLoader();
     }
 

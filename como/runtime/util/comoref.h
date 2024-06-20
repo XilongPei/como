@@ -40,13 +40,13 @@
 namespace como {
 
 // compile with refcounting debugging enabled
-#define DEBUG_REFS                      1
-#define DEBUG_REFS_LightRefBase         1
+#define DEBUG_REFS                      0
+#define DEBUG_REFS_LightRefBase         0
 // #define DEBUG_REFS_FATAL_SANITY_CHECKS  0
 #define DEBUG_REFS_ENABLED_BY_DEFAULT   1
 #define DEBUG_REFS_CALLSTACK_ENABLED    0
 // log all reference counting operations
-#define PRINT_REFS                      1
+#define PRINT_REFS                      0
 
 using FREE_MEM_FUNCTION = void(*)(Short,const void*);
 
