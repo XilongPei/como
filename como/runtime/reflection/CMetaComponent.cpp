@@ -312,7 +312,7 @@ ECode CMetaComponent::GetSerializedMetadata(
 ECode CMetaComponent::IsOnlyMetadata(
     /* [out] */ Boolean& onlyMetadata)
 {
-    onlyMetadata = mComponent->mSoHandle == nullptr;
+    onlyMetadata = (nullptr == mComponent->mSoHandle);
     return NOERROR;
 }
 
@@ -334,7 +334,7 @@ ECode CMetaComponent::LoadComponent(
         }
 
         mComponent = (ComoComponent*)malloc(sizeof(ComoComponent));
-        if (mComponent == nullptr) {
+        if (nullptr == mComponent) {
             Logger::E("CMetaComponent", "Malloc ComoComponent failed.");
             return E_OUT_OF_MEMORY_ERROR;
         }
@@ -365,9 +365,19 @@ ECode CMetaComponent::Preload()
 ECode CMetaComponent::CanUnload(
     /* [out] */ Boolean& unload)
 {
-    unload = mComponent->mSoCanUnload != nullptr
-                                        ? mComponent->mSoCanUnload()
-                                        : false;
+    if (nullptr == mComponent->mSoHandle) {
+        // Has already been unload.
+        unload = false;
+        return NOERROR;
+    }
+
+    if (mComponent->mSoCanUnload != nullptr) {
+        unload = mComponent->mSoCanUnload();
+    }
+    else {
+        unload = false;
+    }
+
     return NOERROR;
 }
 

@@ -362,6 +362,7 @@ ECode CBootClassLoader::UnloadComponent(
         if (0 == ret) {
             mComponents.Remove(compId.mUuid);
             mComponentPaths.Remove(mcObj->mUri);
+            mcObj->mComponent->mSoHandle = nullptr;
             return NOERROR;
         }
     }
