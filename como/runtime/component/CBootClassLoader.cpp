@@ -60,6 +60,12 @@ void CBootClassLoader::SetSystemClassLoader(
     sSystemClassLoader = loader;
 }
 
+/**
+ * Load component by the file name `path`, if the file name does not have path
+ * information, the component is loaded according to the collection of load
+ * paths (it has been resolved in mComponentPath) specified by environment
+ * variable LIB_PATH.
+ */
 ECode CBootClassLoader::LoadComponent(
     /* [in] */ const String& path,
     /* [out] */ AutoPtr<IMetaComponent>& component)
@@ -75,10 +81,23 @@ ECode CBootClassLoader::LoadComponent(
 
     void* handle = dlopen(path.string(), RTLD_NOW);
     if (nullptr == handle) {
-        Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
+        Integer index = path.LastIndexOf("/");
+        if (-1 == index) {
+            for (Long i = 0;  i < mComponentPath.GetSize();  i++) {
+                String filePath = mComponentPath.Get(i) + "/" + path;
+                handle = dlopen(path.string(), RTLD_NOW);
+                if (handle != nullptr) {
+                    break;
+                }
+            }
+        }
+
+        if (nullptr == handle) {
+            Logger::E(TAG, "Dlopen \"%s\" failed. The reason is %s.",
                                                 path.string(), strerror(errno));
-        component = nullptr;
-        return E_COMPONENT_IO_EXCEPTION;
+            component = nullptr;
+            return E_COMPONENT_IO_EXCEPTION;
+        }
     }
 
     {
@@ -87,6 +106,7 @@ ECode CBootClassLoader::LoadComponent(
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponentPaths.Get(path);
         if (mc != nullptr) {
+            dlclose(handle);
             component = mc;
             return NOERROR;
         }

@@ -883,7 +883,7 @@ ECode CMetaComponent::GetOpaque(
 Boolean CMetaComponent::ChkExternalInterface(
     /* [in] */ Integer index)
 {
-    if (index < 0 || index >= mMetadata->mInterfaceNumber) {
+    if ((index < 0) || (index >= mMetadata->mInterfaceNumber)) {
         return true;
     }
 

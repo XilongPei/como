@@ -29,6 +29,11 @@ namespace como {
 
 const char* NAMESPACE_GLOBAL = "__global__";
 
+/**
+ * Load component by the file name, if the file name does not have path
+ * information, the component is loaded according to the collection of load
+ * paths specified by environment variable LIB_PATH
+ */
 ECode CoGetComponentMetadataWithPath(
     /* [in] */ const String& path,
     /* [in] */ IClassLoader* loader,
@@ -161,7 +166,8 @@ ECode CoGetComponentMetadataFromBytes(
     component->mSoCanUnload = nullptr;
     component->mMetadataWrapper = reinterpret_cast<MetadataWrapper*>(component + 1);
     component->mMetadataWrapper->mSize = bytes.GetLength();
-    memcpy(&(component->mMetadataWrapper->mMetadata), bytes.GetPayload(), bytes.GetLength());
+    memcpy(&(component->mMetadataWrapper->mMetadata), bytes.GetPayload(),
+                                                             bytes.GetLength());
 
     MetaComponent* mmc = reinterpret_cast<MetaComponent*>(
                                         component->mMetadataWrapper->mMetadata);
@@ -184,6 +190,9 @@ ECode CoGetComponentMetadataFromBytes(
 
     mc = new CMetaComponent(loader, component, (MetaComponent*)data);
     if ((nullptr == mc) || (nullptr == CMetaComponent::From(mc)->mIInterface)) {
+        Logger::E("COMORT", "new CMetaComponent failed.");
+        free(component);
+        free(data);
         return E_OUT_OF_MEMORY_ERROR;
     }
 

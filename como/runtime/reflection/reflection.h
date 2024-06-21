@@ -33,4 +33,4 @@ struct ParameterInfo
     Integer             mPos;
 } __attribute__ ((aligned(4)));
 
-}
+} // namespace como
