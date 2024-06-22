@@ -43,6 +43,6 @@ StringType::StringType()
     mName = "String";
 }
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_STRINGTYPE_H__

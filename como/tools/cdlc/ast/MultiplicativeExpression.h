@@ -48,7 +48,7 @@ public:
     bool IsNaN() override;
 };
 
-}
+} // namespace cdlc
 
 #endif // __CDLC_MULTIPLICATIVEEXPRESSION_H__
 

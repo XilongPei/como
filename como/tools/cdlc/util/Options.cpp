@@ -86,7 +86,7 @@ void Options::Parse(
         else if (option.Equals("-split")) {
             Properties::Get().AddMode(Properties::CODEGEN_SPLIT);
         }
-        else if (!option.StartsWith("-")) {
+        else if (! option.StartsWith("-")) {
             mSourceFile = option;
         }
         else if (option.Equals("-ComoMetadataReader")) {

@@ -17,6 +17,8 @@
 #ifndef __CDLC_PARSER_H__
 #define __CDLC_PARSER_H__
 
+#include <unordered_map>
+#include <vector>
 #include "ast/AdditiveExpression.h"
 #include "ast/AndExpression.h"
 #include "ast/Attributes.h"
@@ -40,8 +42,7 @@
 #include "util/File.h"
 #include "util/LightRefBase.h"
 #include "util/String.h"
-#include <unordered_map>
-#include <vector>
+#include "util/Options.h"
 
 namespace cdlc {
 
@@ -99,7 +100,7 @@ private:
     };
 
 public:
-    Parser();
+    Parser(Options *options);
 
     void AddPhase(
         /* [in] */ Phase* phase);

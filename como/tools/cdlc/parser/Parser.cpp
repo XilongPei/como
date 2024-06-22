@@ -41,10 +41,18 @@ namespace cdlc {
 
 const char* Parser::TAG = "Parser";
 
-Parser::Parser()
+Parser::Parser(Options *options)
 {
     mBeforePhases.push_back(new BuildinTypeBuilder());
-    if (Properties::Get().GetMode() & Properties::BUILD_MODE_COMPONENT) {
+
+    /**
+     * If the compiled object is source code, ComoRTMetadata should be loaded
+     *
+     * For example, Like this command line:
+     *     cdlc -dump-metadata ../ReflectionTestUnit.cdl -c -i ../
+     */
+    if ((Properties::Get().GetMode() & Properties::BUILD_MODE_COMPONENT) ||
+                                       (! options->GetSourceFile().IsEmpty())) {
         mBeforePhases.push_back(new ComoRTMetadataLoader());
     }
     AddPhase(new ClassObjectInterfaceBuilder());

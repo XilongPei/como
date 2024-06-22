@@ -47,8 +47,9 @@ int main(int argc, char** argv)
 
     std::shared_ptr<como::MetaComponent> component;
 
+    // cdlc -c
     if (options.DoCompile()) {
-        Parser parser;
+        Parser parser(&options);
         if (! parser.Parse(options.GetSourceFile())) {
             Logger::E(TAG, "Parsing failed.");
             return -1;
@@ -61,20 +62,23 @@ int main(int argc, char** argv)
 
         MetadataBuilder builder(parser.GetCompiledModule());
         component = builder.Build();
-        if (component == nullptr) {
+        if (nullptr == component) {
             Logger::E(TAG, "Generate metadata failed.");
             return -1;
         }
 
+        // cdlc -dump-metadata
         if (options.DoDumpMetadata()) {
             MetadataDumper dumper(component.get());
             printf("%s", dumper.Dump("").string());
         }
 
+        // cdlc -save-metadata
         if (options.DoSaveMetadata()) {
             File file(options.GetSaveFile(), File::WRITE);
             if (! file.IsValid()) {
-                Logger::E("cdlc", "Create metadata file \"%s\" failed.", file.GetPath().string());
+                Logger::E("cdlc", "Create metadata file \"%s\" failed.",
+                                                       file.GetPath().string());
                 return -1;
             }
 
@@ -84,7 +88,8 @@ int main(int argc, char** argv)
             uintptr_t metadata = serializer.GetSerializedMetadata();
 
             if (! file.Write(reinterpret_cast<void*>(metadata), metadataSize)) {
-                Logger::E("cdlc", "Write metadata file \"%s\" failed.", file.GetPath().string());
+                Logger::E("cdlc", "Write metadata file \"%s\" failed.",
+                                                       file.GetPath().string());
                 return -1;
             }
             file.Flush();
@@ -94,16 +99,17 @@ int main(int argc, char** argv)
         }
     }
 
+    // cdlc     -gen                        -ComoMetadataReader
     if (options.DoGenerateCode() || options.DoComoMetadataReader()) {
-        if (component == nullptr) {
+        if (nullptr == component) {
             void* metadata = MetadataUtils::ReadMetadata(
-                    options.DoSaveMetadata()
-                        ? options.GetSaveFile()
-                        : options.GetMetadataFile(),
-                    options.DoSaveMetadata()
-                        ? MetadataUtils::TYPE_METADATA
-                        : options.GetMetadataFileType());
-            if (metadata == nullptr) {
+                                        options.DoSaveMetadata()
+                                            ? options.GetSaveFile()
+                                            : options.GetMetadataFile(),
+                                        options.DoSaveMetadata()
+                                            ? MetadataUtils::TYPE_METADATA
+                                            : options.GetMetadataFileType());
+            if (nullptr == metadata) {
                 Logger::E("cdlc", "Read metadata from \"%s\" failed.",
                         options.GetMetadataFile().string());
                 return -1;
@@ -117,6 +123,7 @@ int main(int argc, char** argv)
         }
     }
 
+    // cdlc -gen
     if (options.DoGenerateCode()) {
         CodeGenerator generator;
         generator.SetDirectory(options.GetCodegenDirectory());
@@ -125,6 +132,7 @@ int main(int argc, char** argv)
         generator.Generate();
     }
 
+    // cdlc -ComoMetadataReader
     if (options.DoComoMetadataReader()) {
         MetadataDumper dumper(component.get());
         printf("%s", dumper.Dump("").string());

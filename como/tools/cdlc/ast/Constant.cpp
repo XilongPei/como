@@ -41,8 +41,8 @@ String Constant::Dump(
         builder.AppendFormat("value:%d", b);
     }
     else if (mType->IsIntegralType()) {
-        long l = mValue->LongValue();
-        builder.AppendFormat("value:%ld", l);
+        long long int lli = mValue->LongValue();
+        builder.AppendFormat("value:%lld", lli);
     }
     else if (mType->IsFloatingPointType()) {
          double f = mValue->DoubleValue();
