@@ -35,7 +35,31 @@ String Constant::Dump(
     builder.AppendFormat("name:%s, ", mName.string());
     builder.AppendFormat("namespace:%s, ", mNamespace->ToString().string());
     builder.AppendFormat("type:%s, ", mType->ToString().string());
-    builder.AppendFormat("value:%s", mValue->ToString().string());
+
+    if (mType->IsBooleanType()) {
+        bool b = mValue->BooleanValue();
+        builder.AppendFormat("value:%d", b);
+    }
+    else if (mType->IsIntegralType()) {
+        long l = mValue->LongValue();
+        builder.AppendFormat("value:%ld", l);
+    }
+    else if (mType->IsFloatingPointType()) {
+         double f = mValue->DoubleValue();
+         builder.AppendFormat("value:%lf", f);
+    }
+    else if (mType->IsStringType()) {
+        String str = mValue->StringValue();
+        builder.AppendFormat("value:%s", str.string());
+    }
+    else if (mType->IsEnumerationType()) {
+        String str = mValue->EnumeratorValue();
+        builder.AppendFormat("value:%s", str.string());
+    }
+    else {
+        builder.AppendFormat("value:%s", mValue->ToString().string());
+    }
+
     builder.Append("]\n");
     return builder.ToString();
 }

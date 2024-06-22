@@ -32,8 +32,7 @@ char ExclusiveOrExpression::CharacterValue()
 int ExclusiveOrExpression::IntegerValue()
 {
     if (mLeftOperand != nullptr) {
-        return mLeftOperand->IntegerValue()
-                ^ mRightOperand->IntegerValue();
+        return mLeftOperand->IntegerValue() ^ mRightOperand->IntegerValue();
     }
     else {
         return mRightOperand->IntegerValue();

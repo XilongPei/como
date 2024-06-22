@@ -60,10 +60,10 @@ public:
         /* [in] */ bool deepCopy) override;
 
 private:
-    String mName;
-    AutoPtr<Type> mType;
+    String              mName;
+    AutoPtr<Type>       mType;
     AutoPtr<Expression> mValue;
-    Namespace* mNamespace = nullptr;
+    Namespace          *mNamespace = nullptr;
 };
 
 String Constant::GetName()

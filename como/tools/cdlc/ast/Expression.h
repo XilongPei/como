@@ -92,12 +92,12 @@ public:
     static const int OPERATOR_BITWISE_OR = 15;
 
 protected:
-    AutoPtr<Type> mType;
-    int mOperator = OPERATOR_NONE;
+    AutoPtr<Type>       mType;
+    int                 mOperator = OPERATOR_NONE;
     AutoPtr<Expression> mLeftOperand;
     AutoPtr<Expression> mRightOperand;
-    int mRadix = 10;
-    bool mScientificNotation = false;
+    int                 mRadix = 10;
+    bool                mScientificNotation = false;
 };
 
 AutoPtr<Type> Expression::GetType()

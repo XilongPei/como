@@ -1014,7 +1014,7 @@ AutoPtr<Constant> Parser::ParseConstant()
     }
 
     AutoPtr<Expression> expr = ParseExpression(type);
-    if (expr == nullptr) {
+    if (nullptr == expr) {
         return nullptr;
     }
     constant->SetValue(expr);
@@ -1044,6 +1044,10 @@ AutoPtr<InclusiveOrExpression> Parser::ParseInclusiveOrExpression(
     }
 
     AutoPtr<InclusiveOrExpression> expr = new InclusiveOrExpression();
+    if (nullptr == expr) {
+        return nullptr;
+    }
+
     expr->SetRightOperand(rightOperand);
     expr->SetType(rightOperand->GetType());
     expr->SetRadix(rightOperand->GetRadix());
@@ -1090,6 +1094,10 @@ AutoPtr<ExclusiveOrExpression> Parser::ParseExclusiveOrExpression(
     }
 
     AutoPtr<ExclusiveOrExpression> expr = new ExclusiveOrExpression();
+    if (nullptr == expr) {
+        return nullptr;
+    }
+
     expr->SetRightOperand(rightOperand);
     expr->SetType(rightOperand->GetType());
     expr->SetRadix(rightOperand->GetRadix());
@@ -1137,6 +1145,10 @@ AutoPtr<AndExpression> Parser::ParseAndExpression(
     }
 
     AutoPtr<AndExpression> expr = new AndExpression();
+    if (nullptr == expr) {
+        return nullptr;
+    }
+
     expr->SetRightOperand(rightOperand);
     expr->SetType(rightOperand->GetType());
     expr->SetRadix(rightOperand->GetRadix());
@@ -1183,6 +1195,10 @@ AutoPtr<ShiftExpression> Parser::ParseShiftExpression(
     }
 
     AutoPtr<ShiftExpression> expr = new ShiftExpression();
+    if (nullptr == expr) {
+        return nullptr;
+    }
+
     expr->SetRightOperand(rightOperand);
     expr->SetType(rightOperand->GetType());
     expr->SetRadix(rightOperand->GetRadix());
@@ -1288,6 +1304,10 @@ AutoPtr<MultiplicativeExpression> Parser::ParseMultiplicativeExpression(
     }
 
     AutoPtr<MultiplicativeExpression> expr = new MultiplicativeExpression();
+    if (nullptr == expr) {
+        return nullptr;
+    }
+
     expr->SetRightOperand(rightOperand);
     expr->SetType(rightOperand->GetType());
     expr->SetRadix(rightOperand->GetRadix());
@@ -1625,7 +1645,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
                 return nullptr;
             }
         }
-        if (!constant->GetType()->IsNumericType()) {
+        if (! constant->GetType()->IsNumericType()) {
             String message = String::Format("\"%s\" is not a numeric constant.",
                                             id.string());
             LogError(tokenInfo, message);
@@ -1688,7 +1708,8 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
         }
         String typeName = id.Substring(0, idx);
         String constName = id.Substring(idx + 2);
-        if (type->GetName().Equals(typeName) && EnumerationType::CastFrom(type)->Contains(constName)) {
+        if (type->GetName().Equals(typeName) &&
+                         EnumerationType::CastFrom(type)->Contains(constName)) {
             AutoPtr<PostfixExpression> expr = new PostfixExpression();
             if (nullptr == expr) {
                 LogError(tokenInfo, "new PostfixExpression() fail.");
@@ -1712,8 +1733,9 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
                 LogError(tokenInfo, message);
                 return nullptr;
             }
-            AutoPtr<Constant> constant = InterfaceType::CastFrom(type)->FindConstant(constName);
-            if (constant == nullptr) {
+            AutoPtr<Constant> constant =
+                         InterfaceType::CastFrom(type)->FindConstant(constName);
+            if (nullptr == constant) {
                 String message = String::Format("\"%s\" is not a constant of %s",
                                                 constName.string(), typeName.string());
                 LogError(tokenInfo, message);
@@ -1727,6 +1749,11 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
                 return nullptr;
             }
             AutoPtr<PostfixExpression> expr = new PostfixExpression();
+            if (nullptr == expr) {
+                String message = String::Format("new PostfixExpression() fail");
+                LogError(tokenInfo, message);
+                return nullptr;
+            }
             expr->SetType(type);
             expr->SetIntegralValue(constant->GetValue()->IntegerValue());
             expr->SetRadix(constant->GetValue()->GetRadix());
