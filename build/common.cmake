@@ -36,6 +36,49 @@ elseif($ENV{PLATFORM} STREQUAL "android")
 endif()
 endmacro()
 
+macro(IMPORT_COMO_COMPONENT comoComponent dir)
+    if(DEFINED ARGN)
+        set(genSources ARGN)
+    else()
+        set(genSources "GENERATED_SOURCES")
+    endif()
+
+    get_filename_component(src_dir "${comoComponent}" DIRECTORY)
+    message(STATUS "$ENV{CDLC} -gen -mode-client -d ${dir} -metadata-so ${comoComponent}")
+
+    execute_process(
+        COMMAND
+            "$ENV{CDLC}"
+            -gen
+            -mode-client
+            -d ${dir}
+            -metadata-so ${comoComponent})
+
+    file(GLOB ${genSources} ${dir}/*.cpp)
+endmacro()
+
+macro(COMPILE_COMO_COMPONENT comoComponent dir)
+    if(DEFINED ARGN)
+        set(genSources ARGN)
+    else()
+        set(genSources "GENERATED_SOURCES")
+    endif()
+
+    get_filename_component(src_dir "${comoComponent}" DIRECTORY)
+    message(STATUS "$ENV{CDLC} -gen -mode-component -d ${dir} -i ${src_dir} -c ${comoComponent}")
+
+    execute_process(
+        COMMAND
+            "$ENV{CDLC}"
+            -gen
+            -mode-component
+            -d ${dir}
+            -i ${src_dir}
+            -c ${comoComponent})
+
+    file(GLOB ${genSources} ${dir}/*.cpp)
+endmacro()
+
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected (options are: Debug Release), default to Release.")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type (default Release)" FORCE)
