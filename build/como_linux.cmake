@@ -18,17 +18,17 @@ else()
     set(FUNCTION_SAFETY_C_FLAGS "")
 endif()
 
-if($ENV{ARCH} MATCHES "(x64)|(aarch64)")
+if("$ENV{ARCH}" MATCHES "(x64)|(aarch64)")
     #! -DARM_FP_SUPPORT, Architecture-related options
     set(COMMON_C_FLAGS
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS} -DARM_FP_SUPPORT")
-elseif($ENV{ARCH} MATCHES "(riscv64)")
+elseif("$ENV{ARCH}" MATCHES "(riscv64)")
     set(COMMON_C_FLAGS
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
-elseif($ENV{ARCH} MATCHES "(x32)|(aarch32)|(riscv32)")
+elseif("$ENV{ARCH}" MATCHES "(x32)|(aarch32)|(riscv32)")
     set(COMMON_C_FLAGS
         "-m32 -fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
-elseif($ENV{ARCH} MATCHES "(aarch32)|(riscv32)")
+elseif("$ENV{ARCH}" MATCHES "(aarch32)|(riscv32)")
     set(COMMON_C_FLAGS
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 else()
@@ -45,7 +45,7 @@ set(COMMON_SHARED_LINKER_FLAGS
 set(COMMON_EXE_LINKER_FLAGS
     "-Bdynamic -pie ${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections -Wl,-z,nocopyreloc")
 
-if($ENV{VERSION} STREQUAL "rls")
+if("$ENV{VERSION}" STREQUAL "rls")
     set(CMAKE_C_FLAGS
         "${COMMON_C_FLAGS} -fvisibility=hidden -Os" CACHE STRING "" FORCE)
     set(CMAKE_CXX_FLAGS

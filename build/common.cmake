@@ -44,6 +44,9 @@ macro(IMPORT_COMO_COMPONENT comoComponent dir)
     endif()
 
     get_filename_component(src_dir "${comoComponent}" DIRECTORY)
+    if("__${src_dir}" STREQUAL "__")
+        set(src_dir "./")
+    endif()
     message(STATUS "$ENV{CDLC} -gen -mode-client -d ${dir} -metadata-so ${comoComponent}")
 
     execute_process(
@@ -65,6 +68,9 @@ macro(COMPILE_COMO_COMPONENT comoComponent dir)
     endif()
 
     get_filename_component(src_dir "${comoComponent}" DIRECTORY)
+    if("__${src_dir}" STREQUAL "__")
+        set(src_dir "./")
+    endif()
     message(STATUS "$ENV{CDLC} -gen -mode-component -d ${dir} -i ${src_dir} -c ${comoComponent}")
 
     execute_process(

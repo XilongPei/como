@@ -29,7 +29,7 @@ Properties& Properties::Get()
 void Properties::AddSearchPath(
     /* [in] */ const String& path)
 {
-    if (!path.IsEmpty()) {
+    if (! path.IsEmpty()) {
         mSearchPaths.insert(path);
     }
 }

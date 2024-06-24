@@ -32,6 +32,9 @@ void Options::Parse(
     StringBuilder errors;
     mProgram = argv[0];
 
+    // Compiled files are stored in the current directory by default.
+    Properties::Get().AddSearchPath("./");
+
     int i = 1;
     while (i < argc) {
         String option(argv[i++]);
