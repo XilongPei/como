@@ -46,12 +46,13 @@ int main(int argc, char** argv)
     }
 
     std::shared_ptr<como::MetaComponent> component;
+    Parser parser(&options);
 
     // cdlc -c
     if (options.DoCompile()) {
-        Parser parser(&options);
         if (! parser.Parse(options.GetSourceFile())) {
-            Logger::E(TAG, "Parsing failed.");
+            Logger::E(TAG, "Parsing failed, source file: %s",
+                                              options.GetSourceFile().string());
             return -1;
         }
 
