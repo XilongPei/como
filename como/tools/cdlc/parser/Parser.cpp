@@ -52,7 +52,8 @@ Parser::Parser(Options *options)
      *     cdlc -dump-metadata ../ReflectionTestUnit.cdl -c -i ../
      */
     if ((Properties::Get().GetMode() & Properties::BUILD_MODE_COMPONENT) ||
-                                       (! options->GetSourceFile().IsEmpty())) {
+            ((! Properties::Get().GetMode() & Properties::BUILD_MODE_RUNTIME) &&
+                                      (! options->GetSourceFile().IsEmpty()))) {
         mBeforePhases.push_back(new ComoRTMetadataLoader());
     }
     AddPhase(new ClassObjectInterfaceBuilder());

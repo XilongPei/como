@@ -22,12 +22,27 @@
 
 namespace cdlc {
 
+/**
+ * Comparison function of std::set, always let the comparison function return
+ * false for the same element.
+ */
+struct StringEqualsFunc_std_set
+{
+    bool operator()(
+        /* [in] */ const String& lvalue,
+        /* [in] */ const String& rvalue) const
+    {
+        return ! lvalue.Equals(rvalue);
+    }
+};
+
+
 class Properties
 {
 public:
     static Properties& Get();
 
-    inline const std::set<String, StringCompareFunc>& GetSearchPaths() const;
+    inline const std::set<String, StringEqualsFunc_std_set>& GetSearchPaths() const;
 
     void AddSearchPath(
         /* [in] */ const String& path);
@@ -54,11 +69,11 @@ public:
     static constexpr int CODEGEN_SPLIT = 0x10;
 
 private:
-    std::set<String, StringCompareFunc> mSearchPaths;
+    std::set<String, StringEqualsFunc_std_set> mSearchPaths;
     int mMode = 0;
 };
 
-const std::set<String, StringCompareFunc>& Properties::GetSearchPaths() const
+const std::set<String, StringEqualsFunc_std_set>& Properties::GetSearchPaths() const
 {
     return mSearchPaths;
 }
