@@ -127,22 +127,22 @@ String InterfaceType::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Interface[");
-    builder.AppendFormat("name:%s, ", mName.string());
-    builder.AppendFormat("namespace:%s, ", mNamespace->ToString().string());
-    builder.AppendFormat("base:%s, ", mBaseInterface->ToString().string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
+    builder.AppendFormat("namespace:`%s`, ", mNamespace->ToString().string());
+    builder.AppendFormat("base:`%s`, ", mBaseInterface->ToString().string());
     if (mOuterInterface != nullptr) {
-        builder.AppendFormat("outer:%s, ", mOuterInterface->ToString().string());
+        builder.AppendFormat("outer:`%s`, ", mOuterInterface->ToString().string());
     }
     builder.AppendFormat("uuid:%s, ", mUuid->ToString().string());
     builder.AppendFormat("version:%s", mVersion.string());
     if (! mDescription.IsEmpty()) {
-        builder.AppendFormat(", description:%s", mDescription.string());
+        builder.AppendFormat(", description:`%s`", mDescription.string());
     }
     builder.Append("]\n");
 
     for (AutoPtr<InterfaceType> interface : mNestedInterfaces) {
         String interfaceInfo = String::Format(
-                        "Interface[name:%s]\n", interface->GetName().string());
+                        "Interface[name:`%s`]\n", interface->GetName().string());
         builder.Append(prefix + Properties::INDENT).Append(interfaceInfo);
     }
     for (AutoPtr<Constant> constant : mConstants) {

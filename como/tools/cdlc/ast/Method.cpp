@@ -55,11 +55,11 @@ String Method::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Method[");
-    builder.AppendFormat("name:%s, ", mName.string());
-    builder.AppendFormat("signature:%s", mSignature.string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
+    builder.AppendFormat("signature:`%s`", mSignature.string());
     builder.Append("]\n");
     builder.Append(prefix + Properties::INDENT).Append("Return[");
-    builder.AppendFormat("type:%s]\n", mReturnType->ToString().string());
+    builder.AppendFormat("type:`%s`]\n", mReturnType->ToString().string());
     for (AutoPtr<Parameter> parameter : mParameters) {
         String parameterInfo = parameter->Dump(prefix + Properties::INDENT);
         builder.AppendFormat("%s\n", parameterInfo.string());

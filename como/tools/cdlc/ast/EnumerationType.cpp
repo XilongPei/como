@@ -86,12 +86,12 @@ String EnumerationType::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Enumeration[");
-    builder.AppendFormat("name:%s, ", mName.string());
-    builder.AppendFormat("namespace:%s", mNamespace->ToString().string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
+    builder.AppendFormat("namespace:`%s`", mNamespace->ToString().string());
     for (AutoPtr<Enumerator> enumerator : mEnumerators) {
         builder.Append("\n");
         builder.Append(prefix + Properties::INDENT).Append("Enumerator[");
-        builder.AppendFormat("name:%s, ", enumerator->mName.string());
+        builder.AppendFormat("name:`%s`, ", enumerator->mName.string());
         builder.AppendFormat("value:%d]", enumerator->mValue);
     }
     builder.Append("]\n");

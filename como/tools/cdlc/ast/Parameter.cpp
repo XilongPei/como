@@ -32,8 +32,8 @@ String Parameter::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Parameter[");
-    builder.AppendFormat("name:%s, ", mName.string());
-    builder.AppendFormat("type:%s, ", mType->ToString().string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
+    builder.AppendFormat("type:`%s`, ", mType->ToString().string());
     if (mValue != nullptr) {
         if (mType->IsBooleanType()) {
             builder.AppendFormat("default:%s, ", mValue->BooleanValue() ? "true" : "false");
@@ -51,7 +51,7 @@ String Parameter::Dump(
             builder.AppendFormat("default:%f, ", mValue->FloatValue());
         }
         else if (mType->IsDoubleType()) {
-            builder.AppendFormat("default:%f, ", mValue->DoubleValue());
+            builder.AppendFormat("default:%lf, ", mValue->DoubleValue());
         }
     }
     builder.Append("attribute:");
@@ -83,7 +83,7 @@ AutoPtr<Node> Parameter::Clone(
     }
     else {
         AutoPtr<Type> type = module->FindType(mType->ToString());
-        if (type == nullptr) {
+        if (nullptr == type) {
             type = mType->Clone(module, false);
         }
         clone->mType = type;

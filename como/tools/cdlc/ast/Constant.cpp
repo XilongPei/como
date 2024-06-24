@@ -32,9 +32,9 @@ String Constant::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Constant[");
-    builder.AppendFormat("name:%s, ", mName.string());
-    builder.AppendFormat("namespace:%s, ", mNamespace->ToString().string());
-    builder.AppendFormat("type:%s, ", mType->ToString().string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
+    builder.AppendFormat("namespace:`%s`, ", mNamespace->ToString().string());
+    builder.AppendFormat("type:`%s`, ", mType->ToString().string());
 
     if (mType->IsBooleanType()) {
         bool b = mValue->BooleanValue();

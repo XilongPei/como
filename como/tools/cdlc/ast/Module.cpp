@@ -235,7 +235,7 @@ String Module::ToString()
     StringBuilder builder;
 
     builder.Append("Module[");
-    builder.AppendFormat("name:%s, ", mName.string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
     builder.AppendFormat("uuid:%s, ", mUuid->ToString().string());
     builder.AppendFormat("uri:%s", mUri.string());
     builder.Append("]\n");
@@ -248,11 +248,11 @@ String Module::Dump(
     StringBuilder builder;
 
     builder.Append(prefix).Append("Module[");
-    builder.AppendFormat("name:%s, ", mName.string());
+    builder.AppendFormat("name:`%s`, ", mName.string());
     builder.AppendFormat("uuid:%s, ", mUuid->ToString().string());
     builder.AppendFormat("uri:%s", mUri.string());
     if (! mDescription.IsEmpty()) {
-        builder.AppendFormat(", description:%s", mDescription.string());
+        builder.AppendFormat(", description:`%s`", mDescription.string());
     }
     builder.Append("]\n");
 
