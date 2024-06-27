@@ -205,7 +205,7 @@ template<typename T>
 Array<T>::Array(
     /* [in] */ const Array<T>& other)
 {
-    if (other.mData != nullptr) {
+    if (nullptr != other.mData) {
         SharedBuffer::GetBufferFromData(other.mData)->AddRef();
     }
     mData = other.mData;
@@ -245,7 +245,9 @@ Array<T>::~Array()
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
             for (Long i = 0;  i < mSize;  i++) {
-                deleteF(&static_cast<T*>(mData)[i], this);
+                if (nullptr != &static_cast<T*>(mData)[i]) {
+                    deleteF(&static_cast<T*>(mData)[i], this);
+                }
             }
         }
         sb->Release();
@@ -530,6 +532,8 @@ void Array<T>::Set(
     /* [in] */ T value)
 {
     if ((index < 0) || (index >= mSize)) {
+        Logger::E("Array<T>::Set",
+                  "E_ILLEGAL_ARGUMENT_EXCEPTION, index: %ld", index);
         return;
     }
 
@@ -570,7 +574,9 @@ Array<T>& Array<T>::operator=(
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
             for (Long i = 0;  i < mSize;  i++) {
-                deleteF(&static_cast<T*>(mData)[i], this);
+                if (nullptr != &static_cast<T*>(mData)[i]) {
+                    deleteF(&static_cast<T*>(mData)[i], this);
+                }
             }
         }
         sb->Release();
@@ -589,7 +595,9 @@ Array<T>& Array<T>::operator=(
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
             for (Long i = 0;  i < mSize;  i++) {
-                deleteF(&static_cast<T*>(mData)[i], this);
+                if (nullptr != &static_cast<T*>(mData)[i]) {
+                    deleteF(&static_cast<T*>(mData)[i], this);
+                }
             }
         }
         sb->Release();
@@ -610,7 +618,9 @@ Array<T>& Array<T>::operator=(
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
             for (Long i = 0;  i < mSize;  i++) {
-                deleteF(&static_cast<T*>(mData)[i], this);
+                if (nullptr != &static_cast<T*>(mData)[i]) {
+                    deleteF(&static_cast<T*>(mData)[i], this);
+                }
             }
         }
         sb->Release();
@@ -694,7 +704,9 @@ void Array<T>::Clear()
         if (sb->OnlyOwner()) {
             DeleteFunc<T> deleteF;
             for (Long i = 0;  i < mSize;  i++) {
-                deleteF(&static_cast<T*>(mData)[i], this);
+                if (nullptr != &static_cast<T*>(mData)[i]) {
+                    deleteF(&static_cast<T*>(mData)[i], this);
+                }
             }
         }
         sb->Release();

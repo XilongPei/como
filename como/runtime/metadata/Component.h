@@ -36,7 +36,7 @@ struct MetaValue
     union {
         bool            mBooleanValue;
         long long int   mIntegralValue;
-        double          mFloatingPointValue;
+        double          mFloatingPointValue;    // float, double, pointer can be stored
         char*           mStringValue;
     };
     unsigned char       mProperties;

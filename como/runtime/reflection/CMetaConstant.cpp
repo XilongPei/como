@@ -98,15 +98,17 @@ AutoPtr<IMetaValue> CMetaConstant::BuildValue(
         case TypeKind::Short:
         case TypeKind::Integer:
         case TypeKind::Enum:
-            value->mIntegerValue = mMetadata->mValue.mIntegralValue;
+            value->mIntegerValue = static_cast<Integer>(mMetadata->mValue.mIntegralValue);
             break;
         case TypeKind::Long:
+            // Long == long long int, type of mMetadata->mValue.mIntegralValue
             value->mLongValue = mMetadata->mValue.mIntegralValue;
             break;
         case TypeKind::Float:
-            value->mFloatValue = mMetadata->mValue.mFloatingPointValue;
+            value->mFloatValue = static_cast<Float>(mMetadata->mValue.mFloatingPointValue);
             break;
         case TypeKind::Double:
+            // Double == double, type of mMetadata->mValue.mFloatingPointValue
             value->mDoubleValue = mMetadata->mValue.mFloatingPointValue;
             break;
         case TypeKind::String:

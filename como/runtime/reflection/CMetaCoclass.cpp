@@ -673,10 +673,14 @@ ECode CMetaCoclass::BuildAllConstants()
             for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
-                if (nullptr != mcObj) {
+                if ((nullptr != mcObj) && (nullptr != mcObj->mValue)) {
                     mConstants.Set(i, mcObj);
                 }
                 else {
+                    for (Integer j = i;  j >=0;  j--) {
+                        delete mConstants[j];
+                        mConstants.Set(i, nullptr);
+                    }
                     return E_OUT_OF_MEMORY_ERROR;
                 }
             }
