@@ -28,7 +28,7 @@ bool PointerType::IsPointerType()
 String PointerType::GetSignature()
 {
     String signature = mBaseType->GetSignature();
-    for (int i = 0; i < mPointerNumber; i++) {
+    for (int i = 0;  i < mPointerNumber;  i++) {
         signature += "*";
     }
     return signature;
@@ -37,7 +37,7 @@ String PointerType::GetSignature()
 String PointerType::ToString()
 {
     String typeStr = mBaseType->ToString();
-    for (int i = 0; i < mPointerNumber; i++) {
+    for (int i = 0;  i < mPointerNumber;  i++) {
         typeStr += "*";
     }
     return typeStr;
@@ -51,9 +51,10 @@ AutoPtr<Node> PointerType::Clone(
     if (nullptr == clone) {
         return nullptr;
     }
+
     CloneBase(clone, module);
     AutoPtr<Type> baseType = module->FindType(mBaseType->ToString());
-    if (baseType == nullptr) {
+    if (nullptr == baseType) {
         baseType = mBaseType->Clone(module, deepCopy);
     }
     clone->mBaseType = baseType;

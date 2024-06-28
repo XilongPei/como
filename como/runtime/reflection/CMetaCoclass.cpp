@@ -267,6 +267,7 @@ ECode CMetaCoclass::GetMethodNumber(
 {
     if (mMethods.IsEmpty()) {
         Mutex::AutoLock lock(mMethodsLock);
+
         if (mMethods.IsEmpty()) {
 
             /**
@@ -669,6 +670,7 @@ ECode CMetaCoclass::BuildAllConstants()
 {
     if (nullptr == mConstants[0]) {
         Mutex::AutoLock lock(mConstantsLock);
+
         if (nullptr == mConstants[0]) {
             for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
@@ -677,7 +679,7 @@ ECode CMetaCoclass::BuildAllConstants()
                     mConstants.Set(i, mcObj);
                 }
                 else {
-                    for (Integer j = i;  j >=0;  j--) {
+                    for (Integer j = i;  j >= 0;  j--) {
                         delete mConstants[j];
                         mConstants.Set(i, nullptr);
                     }

@@ -77,8 +77,12 @@ AutoPtr<Node> Parameter::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<Parameter> clone = new Parameter();
+    if (nullptr == clone) {
+        return nullptr;
+    }
+
     clone->mName = mName;
-    if (!deepCopy) {
+    if (! deepCopy) {
         clone->mType = mType;
     }
     else {

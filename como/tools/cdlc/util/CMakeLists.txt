@@ -30,7 +30,9 @@ set(SOURCES
     String.cpp
     StringBuilder.cpp
     StringPool.cpp
-    UUID.cpp)
+    UUID.cpp
+    RuleCheckUtils.cpp
+)
 
 add_library(cdlc_util STATIC
     ${SOURCES})
