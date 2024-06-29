@@ -74,7 +74,7 @@ bool CodeGenerator::CheckDirectory()
 
 void CodeGenerator::Generate()
 {
-    if (!CheckDirectory()) {
+    if (! CheckDirectory()) {
         return;
     }
 
@@ -92,6 +92,11 @@ void CodeGenerator::Generate()
         default:
             Logger::E(TAG, "Code generation mode not supported.");
             return;
+    }
+
+    if (nullptr == emitter) {
+        Logger::E(TAG, "Generate(), emitter is nullptr.");
+        return;
     }
 
     emitter->Emit();
@@ -152,7 +157,7 @@ void CodeGenerator::ComponentModeEmitter::EmitConstantsAndTypes()
 void CodeGenerator::ComponentModeEmitter::EmitCoclasses()
 {
     como::MetaComponent* mc = mComponent;
-    for (int i = 0; i < mc->mCoclassNumber; i++) {
+    for (int i = 0;  i < mc->mCoclassNumber;  i++) {
         EmitCoclass(mc->mCoclasses[i]);
     }
 }
@@ -196,14 +201,14 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     int fromIndex = String(mi->mName).Equals("IClassObject") ? 2 : 0;
 
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         if ((mm->mProperties & METHOD_DELETED) ||
-                (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
+                (! (mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
                     (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
             continue;
         }
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             como::MetaParameter* mp = mm->mParameters[j];
             como::MetaType* mt = mComponent->mTypes[mp->mTypeIndex];
             while (mt->mKind == como::TypeKind::Array) {
@@ -251,15 +256,15 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
     builder.Append(Properties::INDENT).AppendFormat("virtual ~_%s();\n", mk->mName);
     builder.Append("\n");
 
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         if ((mm->mProperties & METHOD_DELETED) ||
                 (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
-                    (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
+                             (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
             continue;
         }
         builder.Append(Properties::INDENT).Append("static ECode New(\n");
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat(EmitParameter(mm->mParameters[j]));
             if (j != mm->mParameterNumber - 1) {
                 builder.Append(",\n");
@@ -333,7 +338,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
     builder.Append(Properties::INDENT).Append(": public ClassObject\n");
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     bool isIClassObject = String(mi->mName).Equals("IClassObject");
-    if (!isIClassObject) {
+    if (! isIClassObject) {
         builder.Append(Properties::INDENT).AppendFormat(", public %s\n", mi->mName);
     }
     builder.Append("{\n");
@@ -342,19 +347,19 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
     builder.Append("\n");
     builder.Append(Properties::INDENT).AppendFormat("~%sClassObject();\n", mk->mName);
     builder.Append("\n");
-    if (!isIClassObject) {
+    if (! isIClassObject) {
         builder.Append(Properties::INDENT).Append("COMO_INTERFACE_DECL();\n");
         builder.Append("\n");
     }
     bool hasConstructorWithArguments = false;
     int fromIndex = isIClassObject ? 2 : 0;
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         if (mm->mParameterNumber == 2) {
             hasConstructorWithArguments = true;
         }
         builder.Append(Properties::INDENT).AppendFormat("ECode %s(\n", mm->mName);
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("%s",
                     EmitParameter(mm->mParameters[j]).string());
             if (j != mm->mParameterNumber - 1) {
@@ -366,7 +371,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
             builder.Append("\n");
         }
     }
-    if (!isIClassObject && !hasConstructorWithArguments) {
+    if ((! isIClassObject) && (! hasConstructorWithArguments)) {
         builder.Append("\n");
         builder.Append(Properties::INDENT).Append("ECode CreateObject(\n");
         builder.Append(Properties::INDENT + Properties::INDENT).Append("/* [in] */ const InterfaceID& iid,\n");
@@ -381,7 +386,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
                          "    return s%sClassObjectLock;\n"
                          "}\n", mk->mName, mk->mName, mk->mName);
     builder.Append("\n");
-    if (!isIClassObject) {
+    if (! isIClassObject) {
         builder.AppendFormat("COMO_INTERFACE_IMPL_1(%sClassObject, ClassObject, %s);\n",
                 mk->mName, mi->mName);
         builder.Append("\n");
@@ -400,7 +405,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
     builder.Append(Properties::INDENT).Append("ReleaseComponentRefCount();\n");
     builder.Append("}\n");
     builder.Append("\n");
-    if (!isIClassObject && !hasConstructorWithArguments) {
+    if ((! isIClassObject) && (! hasConstructorWithArguments)) {
         builder.AppendFormat("ECode %sClassObject::CreateObject(\n", mk->mName);
         builder.Append(Properties::INDENT).Append("/* [in] */ const InterfaceID& iid,\n");
         builder.Append(Properties::INDENT).Append("/* [out] */ IInterface** object)\n");
@@ -410,7 +415,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
         builder.Append("}\n");
         builder.Append("\n");
     }
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         builder.AppendFormat("ECode %sClassObject::%s(\n", mk->mName, mm->mName);
         for (int j = 0; j < mm->mParameterNumber; j++) {
@@ -425,8 +430,8 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassObject(
         builder.Append(Properties::INDENT).Append("VALIDATE_NOT_NULL(object);\n");
         builder.Append("\n");
         if ((mm->mProperties & METHOD_DELETED) ||
-                (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
-                  (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
+                           (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
+                           (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
             builder.Append(Properties::INDENT).Append("*object = nullptr;\n");
         }
         else {
@@ -563,7 +568,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassMethods(
     builder.Append("\n");
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     int fromIndex = String(mi->mName).Equals("IClassObject") ? 2 : 0;
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         if ((mm->mProperties & METHOD_DELETED) ||
                 (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
@@ -571,7 +576,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassMethods(
             continue;
         }
         builder.AppendFormat("ECode _%s::New(\n", mk->mName);
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             builder.Append(Properties::INDENT).AppendFormat("%s",
                     EmitParameter(mm->mParameters[j]).string());
             if (j != mm->mParameterNumber - 1) {
@@ -589,7 +594,7 @@ String CodeGenerator::ComponentModeEmitter::EmitCoclassMethods(
             builder.Append(Properties::INDENT).Append("}\n");
             builder.Append(Properties::INDENT).AppendFormat("return %s::Probe(clsObject)->CreateObject(",
                     mi->mName);
-            for (int j = 0; j < mm->mParameterNumber; j++) {
+            for (int j = 0;  j < mm->mParameterNumber;  j++) {
                 builder.AppendFormat("%s", mm->mParameters[j]->mName);
                 if (j != mm->mParameterNumber - 1) {
                     builder.Append(", ");
@@ -619,7 +624,7 @@ void CodeGenerator::ComponentModeEmitter::EmitComponentCpp()
     builder.Append("\n");
     builder.AppendFormat("#include \"%s.h\"\n", mComponent->mName);
     if (mOwner->mMode & Properties::CODEGEN_SPLIT) {
-        for (int i = 0; i < mComponent->mInterfaceNumber; i++) {
+        for (int i = 0;  i < mComponent->mInterfaceNumber;  i++) {
             como::MetaInterface* mi = mComponent->mInterfaces[i];
             if ((mi->mProperties & TYPE_EXTERNAL) || (mi->mOuterInterfaceIndex != -1))  {
                 continue;
@@ -629,7 +634,7 @@ void CodeGenerator::ComponentModeEmitter::EmitComponentCpp()
                     mi->mName);
         }
     }
-    for (int i = 0; i < mComponent->mCoclassNumber; i++) {
+    for (int i = 0;  i < mComponent->mCoclassNumber;  i++) {
         como::MetaCoclass* mk = mComponent->mCoclasses[i];
         builder.AppendFormat("#include \"_%s%s.h\"\n",
                 ConcatString(CanonicalizeNamespace(mk->mNamespace), "_").Replace("::", "_").string(),
@@ -660,7 +665,7 @@ void CodeGenerator::ComponentModeEmitter::EmitComponentCpp()
 String CodeGenerator::ComponentModeEmitter::EmitClassObjectGetterArray()
 {
     como::MetaComponent* mc = mComponent;
-    if (mc->mCoclassNumber == 0) {
+    if (0 == mc->mCoclassNumber) {
         return nullptr;
     }
 
@@ -669,7 +674,7 @@ String CodeGenerator::ComponentModeEmitter::EmitClassObjectGetterArray()
     builder.Append(EmitGetClassObjectFuncRecursively(mc->mGlobalNamespace));
     builder.Append("\n");
     builder.AppendFormat("static ClassObjectGetter co%sGetters[%d] = {\n", mc->mName, mc->mCoclassNumber);
-    for (int i = 0; i < mc->mCoclassNumber; i++) {
+    for (int i = 0;  i < mc->mCoclassNumber;  i++) {
         como::MetaCoclass* mk = mc->mCoclasses[i];
         builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("{%s, %sGet%sClassObject}",
                 UUID::Parse(mk->mUuid)->ToString().string(),
@@ -693,9 +698,9 @@ String CodeGenerator::ComponentModeEmitter::EmitGetClassObjectFuncRecursively(
 {
     StringBuilder builder;
 
-    if (mn->mInterfaceWrappedIndex == -1 && mn->mCoclassNumber > 0) {
+    if ((-1 == mn->mInterfaceWrappedIndex) && (mn->mCoclassNumber > 0)) {
         builder.Append(EmitNamespaceBegin(mn->mName));
-        for (int i = 0; i < mn->mCoclassNumber; i++) {
+        for (int i = 0;  i < mn->mCoclassNumber;  i++) {
             como::MetaCoclass* mk = mComponent->mCoclasses[mn->mCoclassIndexes[i]];
             builder.AppendFormat("extern ECode Get%sClassObject(AutoPtr<IClassObject>& classObject);\n", mk->mName);
         }
@@ -703,7 +708,7 @@ String CodeGenerator::ComponentModeEmitter::EmitGetClassObjectFuncRecursively(
         builder.Append(EmitNamespaceEnd(mn->mName));
     }
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         builder.Append(EmitGetClassObjectFuncRecursively(mn->mNamespaces[i]));
     }
 
@@ -744,10 +749,10 @@ String CodeGenerator::ComponentModeEmitter::EmitSoGetClassObject()
 
     builder.Append("EXTERN_C COM_PUBLIC ECode soGetClassObject(const CoclassID& cid, AutoPtr<IClassObject>& object)\n");
     builder.Append("{\n");
-    for (int i = 0; i < mc->mCoclassNumber; i++) {
+    for (int i = 0;  i < mc->mCoclassNumber;  i++) {
         como::MetaCoclass* mk = mc->mCoclasses[i];
         builder.Append(Properties::INDENT).AppendFormat("%sif (%sCID_%s == cid) {\n",
-                i == 0 ? "" : "else ",
+                (i == 0) ? "" : "else ",
                 ConcatString(CanonicalizeNamespace(mk->mNamespace), "::").string(),
                 mk->mName);
         builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("return %sGet%sClassObject(object);\n",
@@ -951,29 +956,30 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypeDeclarationsRecursi
 {
     StringBuilder builder;
 
-    if (!(mOwner->mMode & Properties::CODEGEN_SPLIT)) {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
-            (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0)) {
+    // If do not generate a splity C++ source file.
+    if (! (mOwner->mMode & Properties::CODEGEN_SPLIT)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+                 (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
+                 (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitEnumerationDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             infos = EmitInterfaceDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             infos = EmitCoclassDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -982,17 +988,17 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypeDeclarationsRecursi
         }
     }
     else {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) == 0)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+             (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitEnumerationDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -1001,7 +1007,7 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypeDeclarationsRecursi
         }
     }
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         como::MetaNamespace* nmn = mn->mNamespaces[i];
         builder.Append(EmitConstantsAndTypeDeclarationsRecursively(nmn));
     }
@@ -1040,10 +1046,10 @@ String CodeGenerator::ClientModeEmitter::EmitCoclassDeclaration(
     builder.Append("public:\n");
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     int fromIndex = String(mi->mName).Equals("IClassObject") ? 2 : 0;
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         builder.Append(Properties::INDENT).Append("static ECode New(\n");
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("%s",
                     EmitParameter(mm->mParameters[j]).string());
             if (j != mm->mParameterNumber - 1) {
@@ -1094,14 +1100,14 @@ void CodeGenerator::ClientModeEmitter::EmitCoclassDeclarationSplitly(
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     int fromIndex = String(mi->mName).Equals("IClassObject") ? 2 : 0;
 
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         if ((mm->mProperties & METHOD_DELETED) ||
                 (!(mk->mProperties & COCLASS_CONSTRUCTOR_DEFAULT) &&
                     (mk->mProperties & COCLASS_CONSTRUCTOR_DELETED))) {
             continue;
         }
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             como::MetaParameter* mp = mm->mParameters[j];
             como::MetaType* mt = mComponent->mTypes[mp->mTypeIndex];
             while (mt->mKind == como::TypeKind::Array) {
@@ -1200,16 +1206,16 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypesRecursivelyInCpp(
         StringBuilder sb;
 
         String interfaceIDInfos = EmitInterfaceIDsInCpp(mn);
-        if (!interfaceIDInfos.IsEmpty()) {
+        if (! interfaceIDInfos.IsEmpty()) {
             sb.Append(interfaceIDInfos);
         }
         String interfaceConstantInfos = EmitInterfaceConstantsInCpp(mn);
-        if (!interfaceConstantInfos.IsEmpty()) {
+        if (! interfaceConstantInfos.IsEmpty()) {
             sb.Append(interfaceConstantInfos);
         }
 
         String contents = sb.ToString();
-        if (!contents.IsEmpty()) {
+        if (! contents.IsEmpty()) {
             String nsStr(mn->mName);
             nsStr = nsStr.Substring(0, nsStr.LastIndexOf("::"));
             builder.Append(EmitNamespaceBegin(nsStr));
@@ -1221,35 +1227,35 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypesRecursivelyInCpp(
         StringBuilder sb;
 
         String constantInfos = EmitConstantsInCpp(mn);
-        if (!constantInfos.IsEmpty()) {
+        if (! constantInfos.IsEmpty()) {
             sb.Append(constantInfos);
         }
         String interfaceIDInfos = EmitInterfaceIDsInCpp(mn);
-        if (!interfaceIDInfos.IsEmpty()) {
+        if (! interfaceIDInfos.IsEmpty()) {
             sb.Append(interfaceIDInfos);
         }
         String interfaceConstantInfos = EmitInterfaceConstantsInCpp(mn);
-        if (!interfaceConstantInfos.IsEmpty()) {
+        if (! interfaceConstantInfos.IsEmpty()) {
             sb.Append(interfaceConstantInfos);
         }
         String coclassIDInfos = EmitCoclassIDsInCpp(mn);
-        if (!coclassIDInfos.IsEmpty()) {
+        if (! coclassIDInfos.IsEmpty()) {
             sb.Append(coclassIDInfos);
         }
         String coclassInfos = EmitCoclasses(mn);
-        if (!coclassInfos.IsEmpty()) {
+        if (! coclassInfos.IsEmpty()) {
             sb.Append(coclassInfos);
         }
 
         String contents = sb.ToString();
-        if (!contents.IsEmpty()) {
+        if (! contents.IsEmpty()) {
             builder.Append(EmitNamespaceBegin(mn->mName));
             builder.Append(contents);
             builder.Append(EmitNamespaceEnd(mn->mName));
         }
     }
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         como::MetaNamespace* mnn = mn->mNamespaces[i];
         builder.Append(EmitConstantsAndTypesRecursivelyInCpp(mnn));
     }
@@ -1260,13 +1266,13 @@ String CodeGenerator::ClientModeEmitter::EmitConstantsAndTypesRecursivelyInCpp(
 String CodeGenerator::ClientModeEmitter::EmitCoclasses(
     /* [in] */ como::MetaNamespace* mn)
 {
-    if (mn->mCoclassNumber == 0) {
+    if (0 == mn->mCoclassNumber) {
         return nullptr;
     }
 
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mCoclassNumber; i++) {
+    for (int i = 0;  i < mn->mCoclassNumber;  i++) {
         como::MetaCoclass* mk = mComponent->mCoclasses[mn->mCoclassIndexes[i]];
         builder.Append(EmitCoclass(mk));
         builder.Append("\n");
@@ -1283,10 +1289,10 @@ String CodeGenerator::ClientModeEmitter::EmitCoclass(
     builder.AppendFormat("// %s\n", mk->mName);
     como::MetaInterface* mi = mComponent->mInterfaces[mk->mInterfaceIndexes[mk->mInterfaceNumber - 1]];
     int fromIndex = String(mi->mName).Equals("IClassObject") ? 2 : 0;
-    for (int i = fromIndex; i < mi->mMethodNumber; i++) {
+    for (int i = fromIndex;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         builder.AppendFormat("ECode %s::New(\n", mk->mName);
-        for (int j = 0; j < mm->mParameterNumber; j++) {
+        for (int j = 0;  j < mm->mParameterNumber;  j++) {
             builder.Append(Properties::INDENT).AppendFormat("%s", EmitParameter(mm->mParameters[j]).string());
             if (j != mm->mParameterNumber - 1) {
                 builder.Append(",\n");
@@ -1392,7 +1398,7 @@ void CodeGenerator::RuntimeModeEmitter::EmitUUIDs()
 void CodeGenerator::Emitter::EmitInterfaceDeclarationsSplitly()
 {
     como::MetaComponent* mc = mComponent;
-    for (int i = 0; i < mc->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mc->mInterfaceNumber;  i++) {
         como::MetaInterface* mi = mc->mInterfaces[i];
         if ((mi->mProperties & TYPE_EXTERNAL) || mi->mOuterInterfaceIndex != -1) {
             continue;
@@ -1453,12 +1459,12 @@ String CodeGenerator::Emitter::EmitIncludeForUsingNestedInterface(
 {
     std::set<String, StringCompareFunc> includes;
 
-    for (int i = 0; i < mi->mNestedInterfaceNumber; i++) {
+    for (int i = 0;  i < mi->mNestedInterfaceNumber;  i++) {
         como::MetaInterface* nmi = mComponent->mInterfaces[mi->mNestedInterfaceIndexes[i]];
         includes.insert(EmitIncludeForUsingNestedInterface(nmi));
     }
 
-    for (int i = 0; i < mi->mMethodNumber; i++) {
+    for (int i = 0;  i < mi->mMethodNumber;  i++) {
         como::MetaMethod* mm = mi->mMethods[i];
         for (int j = 0; j < mm->mParameterNumber; j++) {
             como::MetaParameter* mp = mm->mParameters[j];
@@ -1495,38 +1501,38 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeForwardDeclarationsRecursivel
 {
     StringBuilder builder;
 
-    if (!(mOwner->mMode & Properties::CODEGEN_SPLIT)) {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
-            (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0)) {
+    if (! (mOwner->mMode & Properties::CODEGEN_SPLIT)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+                 (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
+                 (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitConstantsInHeader(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             infos = EmitEnumerationForwardDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             infos = EmitInterfaceIDForwardDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             infos = EmitInterfaceForwardDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -1535,31 +1541,31 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeForwardDeclarationsRecursivel
         }
     }
     else {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
-            (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+                 (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
+                 (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitConstantsInHeader(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             infos = EmitEnumerationForwardDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             infos = EmitInterfaceForwardDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
                 sb.Append("\n");
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -1568,7 +1574,7 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeForwardDeclarationsRecursivel
         }
     }
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         como::MetaNamespace* nmn = mn->mNamespaces[i];
         builder.Append(EmitConstantsAndTypeForwardDeclarationsRecursively(nmn));
     }
@@ -1581,24 +1587,24 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeDeclarationsRecursively(
 {
     StringBuilder builder;
 
-    if (!(mOwner->mMode & Properties::CODEGEN_SPLIT)) {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
-            (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0)) {
+    if (! (mOwner->mMode & Properties::CODEGEN_SPLIT)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+                 (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) +
+                 (mn->mInterfaceNumber - mn->mExternalInterfaceNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitEnumerationDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             infos = EmitInterfaceDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -1607,17 +1613,17 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeDeclarationsRecursively(
         }
     }
     else {
-        if (!(mn->mInterfaceWrappedIndex != -1 || mn->mConstantNumber +
-            (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) == 0)) {
+        if (! ((mn->mInterfaceWrappedIndex != -1) || (mn->mConstantNumber +
+             (mn->mEnumerationNumber - mn->mExternalEnumerationNumber) == 0))) {
             StringBuilder sb;
 
             String infos = EmitEnumerationDeclarations(mn);
-            if (!infos.IsEmpty()) {
+            if (! infos.IsEmpty()) {
                 sb.Append(infos);
             }
 
             String contents = sb.ToString();
-            if (!contents.IsEmpty()) {
+            if (! contents.IsEmpty()) {
                 builder.Append(EmitNamespaceBegin(mn->mName));
                 builder.Append(contents);
                 builder.Append(EmitNamespaceEnd(mn->mName));
@@ -1626,7 +1632,7 @@ String CodeGenerator::Emitter::EmitConstantsAndTypeDeclarationsRecursively(
         }
     }
 
-    for (int i = 0; i < mn->mNamespaceNumber; i++) {
+    for (int i = 0;  i < mn->mNamespaceNumber;  i++) {
         como::MetaNamespace* nmn = mn->mNamespaces[i];
         builder.Append(EmitConstantsAndTypeDeclarationsRecursively(nmn));
     }
@@ -1698,7 +1704,7 @@ String CodeGenerator::Emitter::EmitConstantsInHeader(
 
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mConstantNumber; i++) {
+    for (int i = 0;  i < mn->mConstantNumber;  i++) {
         como::MetaConstant* mc = mComponent->mConstants[mn->mConstantIndexes[i]];
         builder.Append(EmitConstantForHeader(mc));
     }
@@ -1712,14 +1718,15 @@ String CodeGenerator::Emitter::EmitConstantForHeader(
     StringBuilder builder;
 
     como::MetaType* mt = mComponent->mTypes[mc->mTypeIndex];
-    if (mt->mKind == como::TypeKind::String || mt->mKind == como::TypeKind::Float ||
-            mt->mKind == como::TypeKind::Double) {
-        builder.AppendFormat("extern const %s %s;\n", EmitType(mt, MODE_VARIABLE).string(),
-                mc->mName);
+    if ((mt->mKind == como::TypeKind::String) || (mt->mKind == como::TypeKind::Float) ||
+                                                (mt->mKind == como::TypeKind::Double)) {
+        builder.AppendFormat("extern const %s %s;\n",
+                             EmitType(mt, MODE_VARIABLE).string(), mc->mName);
     }
     else {
-        builder.AppendFormat("constexpr %s %s = %s;\n", EmitType(mt, MODE_VARIABLE).string(),
-                mc->mName, EmitValue(mt, &mc->mValue).string());
+        builder.AppendFormat("constexpr %s %s = %s;\n",
+                             EmitType(mt, MODE_VARIABLE).string(),
+                             mc->mName, EmitValue(mt, &mc->mValue).string());
     }
 
     return builder.ToString();
@@ -1730,7 +1737,7 @@ String CodeGenerator::Emitter::EmitEnumerationForwardDeclarations(
 {
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mEnumerationNumber; i++) {
+    for (int i = 0;  i < mn->mEnumerationNumber;  i++) {
         como::MetaEnumeration* me = mComponent->mEnumerations[mn->mEnumerationIndexes[i]];
         if (me->mProperties & TYPE_EXTERNAL) {
             continue;
@@ -1746,7 +1753,7 @@ String CodeGenerator::Emitter::EmitEnumerationDeclarations(
 {
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mEnumerationNumber; i++) {
+    for (int i = 0;  i < mn->mEnumerationNumber;  i++) {
         como::MetaEnumeration* me = mComponent->mEnumerations[mn->mEnumerationIndexes[i]];
         if (me->mProperties & TYPE_EXTERNAL) {
             continue;
@@ -1765,7 +1772,7 @@ String CodeGenerator::Emitter::EmitEnumerationDeclaration(
 
     builder.AppendFormat("enum class %s\n{\n", me->mName);
     int value = 0;
-    for (int i = 0; i < me->mEnumeratorNumber; i++, value++) {
+    for (int i = 0;  i < me->mEnumeratorNumber;  i++, value++) {
         como::MetaEnumerator* mr = me->mEnumerators[i];
         builder.Append(Properties::INDENT).Append(mr->mName);
         if (mr->mValue != value) {
@@ -1816,7 +1823,7 @@ String CodeGenerator::Emitter::EmitInterfaceDeclarations(
 {
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mn->mInterfaceNumber;  i++) {
         como::MetaInterface* mi = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
@@ -1835,12 +1842,12 @@ String CodeGenerator::Emitter::EmitInterfaceDeclaration(
     StringBuilder builder;
 
     builder.Append(prefix).AppendFormat("INTERFACE_ID(%s)\n",
-            UUID::Parse(mi->mUuid)->Dump().string());
+                                        UUID::Parse(mi->mUuid)->Dump().string());
     builder.Append(prefix).AppendFormat("interface %s\n", mi->mName);
     builder.Append(prefix + Properties::INDENT).AppendFormat(": public %s\n",
-            mComponent->mInterfaces[mi->mBaseInterfaceIndex]->mName);
+                        mComponent->mInterfaces[mi->mBaseInterfaceIndex]->mName);
     builder.Append(prefix).Append("{\n");
-    for (int i = 0; i < mi->mNestedInterfaceNumber; i++) {
+    for (int i = 0;  i < mi->mNestedInterfaceNumber;  i++) {
         como::MetaInterface* nmi = mComponent->mInterfaces[mi->mNestedInterfaceIndexes[i]];
         builder.Append(prefix + Properties::INDENT).AppendFormat("static const InterfaceID IID_%s;\n\n", nmi->mName);
         builder.Append(EmitInterfaceDeclaration(nmi, prefix + Properties::INDENT));
@@ -1861,13 +1868,13 @@ String CodeGenerator::Emitter::EmitInterfaceDeclaration(
     builder.Append(prefix + Properties::INDENT).Append("}\n");
     builder.Append("\n");
 
-    for (int i = 0; i < mi->mConstantNumber; i++) {
+    for (int i = 0;  i < mi->mConstantNumber;  i++) {
         builder.Append(EmitInterfaceConstant(mi->mConstants[i], prefix + Properties::INDENT));
     }
     if (mi->mConstantNumber > 0 && mi->mMethodNumber > 0) {
         builder.Append("\n");
     }
-    for (int i = 0; i < mi->mMethodNumber; i++) {
+    for (int i = 0;  i < mi->mMethodNumber;  i++) {
         builder.Append(EmitInterfaceMethod(mi->mMethods[i], prefix + Properties::INDENT));
         if (i != mi->mMethodNumber - 1) {
             builder.Append("\n");
@@ -1886,7 +1893,7 @@ String CodeGenerator::Emitter::EmitInterfaceConstant(
 
     como::MetaType* mt = mComponent->mTypes[mc->mTypeIndex];
     if (mt->mKind == como::TypeKind::String || mt->mKind == como::TypeKind::Float ||
-            mt->mKind == como::TypeKind::Double) {
+                                                mt->mKind == como::TypeKind::Double) {
         builder.Append(prefix).AppendFormat("static const %s %s;\n", EmitType(mt, MODE_VARIABLE).string(),
                 mc->mName);
     }
@@ -1906,7 +1913,7 @@ String CodeGenerator::Emitter::EmitInterfaceMethod(
 
     builder.Append(prefix).AppendFormat("// Signature: %s\n", mm->mSignature);
     builder.Append(prefix).AppendFormat("virtual como::ECode %s(", mm->mName);
-    for (int i = 0; i < mm->mParameterNumber; i++) {
+    for (int i = 0;  i < mm->mParameterNumber;  i++) {
         builder.Append("\n");
         builder.Append(prefix + Properties::INDENT).AppendFormat("%s",
                 EmitParameter(mm->mParameters[i]).string());
@@ -2290,12 +2297,12 @@ String CodeGenerator::Emitter::EmitInterfaceIDsInCpp(
     StringBuilder builder;
 
     bool needBlankLine = false;
-    for (int i = 0; i < mn->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mn->mInterfaceNumber;  i++) {
         como::MetaInterface* mi = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
         }
-        if (mn->mInterfaceWrappedIndex == -1) {
+        if (-1 == mn->mInterfaceWrappedIndex) {
             builder.AppendFormat("const InterfaceID IID_%s =\n", mi->mName);
             builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("{%s, &CID_%s};\n",
                     UUID::Parse(mi->mUuid)->ToString().string(), mComponent->mName);
@@ -2323,17 +2330,17 @@ String CodeGenerator::Emitter::EmitInterfaceConstantsInCpp(
     StringBuilder builder;
 
     bool needBlankLine = false;
-    for (int i = 0; i < mn->mInterfaceNumber; i++) {
+    for (int i = 0;  i < mn->mInterfaceNumber;  i++) {
         como::MetaInterface* mi = mComponent->mInterfaces[mn->mInterfaceIndexes[i]];
         if (mi->mProperties & TYPE_EXTERNAL) {
             continue;
         }
-        for (int j = 0; j < mi->mConstantNumber; j++) {
+        for (int j = 0;  j < mi->mConstantNumber;  j++) {
             como::MetaConstant* mc = mi->mConstants[j];
             como::MetaType* mt = mComponent->mTypes[mc->mTypeIndex];
             if ((mt->mKind == como::TypeKind::String) ||
-                    (mt->mKind == como::TypeKind::Float) ||
-                    (mt->mKind == como::TypeKind::Double)) {
+                                        (mt->mKind == como::TypeKind::Float) ||
+                                        (mt->mKind == como::TypeKind::Double)) {
                 builder.AppendFormat("const %s %s::%s = %s;\n", EmitType(mt, MODE_VARIABLE).string(),
                         mi->mName, mc->mName, EmitValue(mt, &mc->mValue).string());
             }
@@ -2350,13 +2357,13 @@ String CodeGenerator::Emitter::EmitInterfaceConstantsInCpp(
 String CodeGenerator::Emitter::EmitCoclassIDsInCpp(
     /* [in] */ como::MetaNamespace*  mn)
 {
-    if (mn->mCoclassNumber == 0) {
+    if (0 == mn->mCoclassNumber) {
         return nullptr;
     }
 
     StringBuilder builder;
 
-    for (int i = 0; i < mn->mCoclassNumber; i++) {
+    for (int i = 0;  i < mn->mCoclassNumber;  i++) {
         como::MetaCoclass* mk = mComponent->mCoclasses[mn->mCoclassIndexes[i]];
         builder.AppendFormat("const CoclassID CID_%s =\n", mk->mName);
         builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("{%s, &CID_%s};\n",
@@ -2374,9 +2381,9 @@ String CodeGenerator::Emitter::EmitComponentID()
     como::MetaComponent* mc = mComponent;
     builder.AppendFormat("const ComponentID CID_%s =\n", mc->mName);
     builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("{%s,\n",
-            UUID::Parse(mc->mUuid)->ToString().string());
+                   UUID::Parse(mc->mUuid)->ToString().string());
     builder.Append(Properties::INDENT + Properties::INDENT).AppendFormat("\"%s\"};\n",
-            mc->mUri);
+                   mc->mUri);
 
     return builder.ToString();
 }
