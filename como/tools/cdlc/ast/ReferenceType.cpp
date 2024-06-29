@@ -28,7 +28,7 @@ bool ReferenceType::IsReferenceType()
 String ReferenceType::GetSignature()
 {
     String signature = mBaseType->GetSignature();
-    for (int i = 0; i < mReferenceNumber; i++) {
+    for (int i = 0;  i < mReferenceNumber;  i++) {
         signature += "&";
     }
     return signature;
@@ -37,7 +37,7 @@ String ReferenceType::GetSignature()
 String ReferenceType::ToString()
 {
     String typeStr = mBaseType->ToString();
-    for (int i = 0; i < mReferenceNumber; i++) {
+    for (int i = 0;  i < mReferenceNumber;  i++) {
         typeStr += "&";
     }
     return typeStr;
@@ -48,9 +48,13 @@ AutoPtr<Node> ReferenceType::Clone(
     /* [in] */ bool deepCopy)
 {
     AutoPtr<ReferenceType> clone = new ReferenceType();
+    if (nullptr == clone) {
+        return nullptr;
+    }
+
     CloneBase(clone, module);
     AutoPtr<Type> baseType = module->FindType(mBaseType->ToString());
-    if (baseType == nullptr) {
+    if (nullptr == baseType) {
         baseType = mBaseType->Clone(module, deepCopy);
     }
     clone->mBaseType = baseType;

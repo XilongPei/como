@@ -69,10 +69,10 @@ public:
     static constexpr int CALLEE = 0x04;
 
 private:
-    String mName;
-    AutoPtr<Type> mType;
+    String              mName;
+    AutoPtr<Type>       mType;
     AutoPtr<Expression> mValue;
-    int mAttributes = 0;
+    int                 mAttributes = 0;
 };
 
 String Parameter::GetName()

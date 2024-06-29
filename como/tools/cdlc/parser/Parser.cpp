@@ -35,6 +35,7 @@
 #include "util/Properties.h"
 #include "util/UUID.h"
 #include "util/Options.h"
+#include "util/RuleCheckUtils.h"
 #include "cityhash.h"
 
 namespace cdlc {
@@ -528,6 +529,14 @@ bool Parser::ParseModule(
             LogError(tokenInfo, message);
             result = false;
         }
+        else {
+            if (! RuleCheckUtils::CheckModuleName(moduleName.string(), attrs.mUri.string())) {
+                Logger::D(TAG, "ParseModule, Non-standard COMO component file name, "
+                               "module name: \"%s\", uri: \"%s\"",
+                               moduleName.string(), attrs.mUri.string());
+            }
+        }
+
         tokenInfo = mTokenizer.PeekToken();
     }
     else {
