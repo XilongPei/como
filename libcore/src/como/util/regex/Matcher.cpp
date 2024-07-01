@@ -163,8 +163,9 @@ ECode Matcher::ToMatchResult(
 {
     FAIL_RETURN(EnsureMatch());
     result = new OffsetBasedMatchResult(mInput, mMatchOffsets);
-    if (nullptr == result)
+    if (nullptr == result) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     return NOERROR;
 }
@@ -172,7 +173,7 @@ ECode Matcher::ToMatchResult(
 ECode Matcher::UsePattern(
     /* [in] */ IPattern* newPattern)
 {
-    if (newPattern == nullptr) {
+    if (nullptr == newPattern) {
         Logger::E("Matcher", "newPattern == null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -572,7 +573,7 @@ ECode Matcher::Reset()
 ECode Matcher::Reset(
     /* [in] */ ICharSequence* input)
 {
-    if (input == nullptr) {
+    if (nullptr == input) {
         Logger::E("Matcher", "input == null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -586,7 +587,7 @@ ECode Matcher::Reset(
     /* [in] */ Integer start,
     /* [in] */ Integer end)
 {
-    if (input == nullptr) {
+    if (nullptr == input) {
         Logger::E("Matcher", "input == null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

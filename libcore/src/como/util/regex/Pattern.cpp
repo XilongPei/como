@@ -110,18 +110,22 @@ ECode Pattern::ToString(
     return NOERROR;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
 ECode Pattern::Matcher(
     /* [in] */ ICharSequence* input,
     /* [out] */ AutoPtr<IMatcher>& matcher)
 {
     AutoPtr<como::util::regex::Matcher> mObj = new como::util::regex::Matcher();
-    if (nullptr != mObj)
+    if (nullptr != mObj) {
         return E_OUT_OF_MEMORY_ERROR;
+    }
 
     FAIL_RETURN(mObj->Constructor(this, input));
     matcher = (IMatcher*)mObj;
     return NOERROR;
 }
+#pragma GCC diagnostic pop
 
 ECode Pattern::Flags(
     /* [out] */ Integer& flags)
