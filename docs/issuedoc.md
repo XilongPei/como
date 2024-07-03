@@ -1,9 +1,14 @@
-### 1. git clone复制子仓库
+### 1. git clone sub-repository
 
-git clone时需要同时clone其子仓库：
+`git clone` with its sub-repository by adding `--recursive`:
 
 ```sh
 git clone --recursive https://gitee.com/tjopenlab/como
+```
+
+If the repository is already cloned, add sub-repository with commands below:
+
+```sh
 git pull --recurse-submodules
 git submodule update --remote --recursive
 git submodule update --recursive
@@ -11,7 +16,7 @@ git submodule update --recursive
 
 ### 2. No rule to make libphxpaxos.a
 
-问题：
+Issue:
 
 ```sh
 error:
@@ -20,14 +25,14 @@ make[1]: *** [CMakeFiles/Makefile2:3076: servicemanager/exe/linux/CMakeFiles/ser
 make: *** [Makefile:136: all] Error 2
 ```
 
-解决方法：
+Solution:
 
-[phxpaxos子仓库](https://gitee.com/tjopenlab/phxpaxos)也需要build。按照子仓库的说明build即可。
+Build [phxpaxos - Gitee](https://gitee.com/tjopenlab/phxpaxos) with README instructions.
 
-python安装（MakeMe.sh需要）：
+Python install (Required by MakeMe.sh):
 ```sh
 sudo apt install python3 python-is-python3
 ```
 
-在external/phxpaxos根目录下执行 ./MakeMe.sh。
+Then execute `MakeMe.sh` in the directory `external/phxpaxos`.
 
