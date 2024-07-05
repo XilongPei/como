@@ -194,7 +194,8 @@ TEST(Mistring, testSeperateStr1)
     memset(seeds, 0, sizeof(seeds));
     seedsCapacity = 5;
     ret = MiString::SeperateStr(nullptr, seperator, seeds, seedsCapacity);
-    EXPECT_EQ(seedsCapacity, 5);
+    EXPECT_EQ(ret, nullptr);
+    EXPECT_EQ(seedsCapacity, 0);
 
     // seeds = nullptr
     strcpy(str, testStr);

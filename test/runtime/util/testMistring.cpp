@@ -96,11 +96,13 @@ TEST(Mistring, testSeperateStr1)
     char str[256] = "";
     int volume;
     char** ret = MiString::SeperateStr(str, '-', nullptr, volume);
-    EXPECT_EQ(volume, 0);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(volume, 1);
 
     //test when str == nullptr
     char *str1 = nullptr;
-    ret = MiString::SeperateStr(str, '-', nullptr, volume);
+    ret = MiString::SeperateStr(str1, '-', nullptr, volume);
+    EXPECT_EQ(ret, nullptr);
     EXPECT_EQ(volume, 0);
 }
 

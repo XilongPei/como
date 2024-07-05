@@ -105,6 +105,7 @@ char **MiString::SeperateStr(char *s, char seperator, char **seeds, int& seedsCa
     char *sz;
 
     if (nullptr == s) {
+        seedsCapacity = 0;
         return nullptr;
     }
 
