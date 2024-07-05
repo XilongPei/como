@@ -1156,13 +1156,15 @@ Integer InterfaceProxy::GetIntegerValue(
         default: {
             Integer value, offset;
 #if defined(ARM_FP_SUPPORT)
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 8
-                    : intParamIndex - 8 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 8
+                       : intParamIndex - 8 + fpParamIndex - 8
+                     );
 #else
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 8
-                    : intParamIndex - 8 + fpParamIndex;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 8
+                       : intParamIndex - 8 + fpParamIndex
+                     );
 #endif
             offset += regs.paramStartOffset;
             offset *= 8;
@@ -1185,13 +1187,15 @@ Integer InterfaceProxy::GetIntegerValue(
         default: {
             Integer value, offset;
 #if defined(ARM_FP_SUPPORT)
-            offset = fpParamIndex <= 3
-                    ? intParamIndex - 4
-                    : intParamIndex - 4 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 3)
+                       ? intParamIndex - 4
+                       : intParamIndex - 4 + fpParamIndex - 8
+                     );
 #else
-            offset = fpParamIndex <= 3
-                    ? intParamIndex - 4
-                    : intParamIndex - 4 + fpParamIndex;
+            offset = ( (fpParamIndex <= 3)
+                       ? intParamIndex - 4
+                       : intParamIndex - 4 + fpParamIndex
+                     );
 #endif
             offset += regs.paramStartOffset;
             offset *= 4;
@@ -1217,9 +1221,10 @@ Integer InterfaceProxy::GetIntegerValue(
             return regs.r9.iVal;
         default: {
             Integer value, offset;
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 6
-                    : intParamIndex - 6 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 6
+                       : intParamIndex - 6 + fpParamIndex - 8
+                     );
             offset += regs.paramStartOffset;
             offset *= 8;
             GET_STACK_INTEGER(regs.rbp, offset, value);
@@ -1252,9 +1257,10 @@ Integer InterfaceProxy::GetIntegerValue(
             return regs.x17.iVal;
         default: {
             Integer value, offset;
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 8
-                    : intParamIndex - 8 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 8
+                       : intParamIndex - 8 + fpParamIndex - 8
+                     );
             offset += regs.paramStartOffset;
             offset *= 8;
             GET_STACK_INTEGER(regs.sp, offset, value);
@@ -1293,9 +1299,10 @@ Long InterfaceProxy::GetLongValue(
             return regs.x7.lVal;
         default: {
             Integer offset;
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 8
-                    : intParamIndex - 8 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 8
+                       : intParamIndex - 8 + fpParamIndex - 8
+                     );
             offset += regs.paramStartOffset;
             offset *= 8;
             Long value;
@@ -1323,9 +1330,10 @@ Long InterfaceProxy::GetLongValue(
             return regs.r9.lVal;
         default: {
             Integer offset;
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 6
-                    : intParamIndex - 6 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 6
+                       : intParamIndex - 6 + fpParamIndex - 8
+                     );
             offset += regs.paramStartOffset;
             offset *= 8;
             Long value;
@@ -1359,9 +1367,10 @@ Long InterfaceProxy::GetLongValue(
             return regs.x17.lVal;
         default: {
             Integer offset;
-            offset = fpParamIndex <= 7
-                    ? intParamIndex - 8
-                    : intParamIndex - 8 + fpParamIndex - 8;
+            offset = ( (fpParamIndex <= 7)
+                       ? intParamIndex - 8
+                       : intParamIndex - 8 + fpParamIndex - 8
+                     );
             offset += regs.paramStartOffset;
             offset *= 8;
             Long value;
@@ -1402,9 +1411,10 @@ Float InterfaceProxy::GetFloatValue(
         case 7:
             return regs.d7.fVal;
         default: {
-            Integer offset = intParamIndex <= 7
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 8;
+            Integer offset = ( (intParamIndex <= 7)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 8
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Float value;
@@ -1413,9 +1423,10 @@ Float InterfaceProxy::GetFloatValue(
         }
     }
 #else
-    Integer offset = intParamIndex <= 7
-            ? fpParamIndex
-            : fpParamIndex + intParamIndex - 8;
+    Integer offset = ( (intParamIndex <= 7)
+                       ? fpParamIndex
+                       : fpParamIndex + intParamIndex - 8
+                     );
     offset += regs.paramStartOffset;
     offset *= 8;
     Float value;
@@ -1443,9 +1454,10 @@ Float InterfaceProxy::GetFloatValue(
         case 7:
             return regs.xmm7.fVal;
         default: {
-            Integer offset = intParamIndex <= 5
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 6;
+            Integer offset = ( (intParamIndex <= 5)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 6
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Float value;
@@ -1476,9 +1488,10 @@ Float InterfaceProxy::GetFloatValue(
         case 7:
             return regs.f17.fVal;
         default: {
-            Integer offset = intParamIndex <= 7
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 8;
+            Integer offset = ( (intParamIndex <= 7)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 8
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Float value;
@@ -1519,9 +1532,10 @@ Double InterfaceProxy::GetDoubleValue(
         case 7:
             return regs.d7.dVal;
         default: {
-            Integer offset = intParamIndex <= 7
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 8;
+            Integer offset = ( (intParamIndex <= 7)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 8
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Double value;
@@ -1530,9 +1544,10 @@ Double InterfaceProxy::GetDoubleValue(
         }
     }
 #else
-    Integer offset = intParamIndex <= 7
-            ? fpParamIndex
-            : fpParamIndex + intParamIndex - 8;
+    Integer offset = ( (intParamIndex <= 7)
+                       ? fpParamIndex
+                       : fpParamIndex + intParamIndex - 8
+                     );
     offset += regs.paramStartOffset;
     offset *= 8;
     Double value;
@@ -1562,9 +1577,10 @@ Double InterfaceProxy::GetDoubleValue(
         case 7:
             return regs.xmm7.dVal;
         default: {
-            Integer offset = intParamIndex <= 5
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 6;
+            Integer offset = ( (intParamIndex <= 5)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 6
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Double value;
@@ -1597,9 +1613,10 @@ Double InterfaceProxy::GetDoubleValue(
         case 7:
             return regs.f17.dVal;
         default: {
-            Integer offset = intParamIndex <= 7
-                    ? fpParamIndex - 8
-                    : fpParamIndex - 8 + intParamIndex - 8;
+            Integer offset = ( (intParamIndex <= 7)
+                               ? fpParamIndex - 8
+                               : fpParamIndex - 8 + intParamIndex - 8
+                             );
             offset += regs.paramStartOffset;
             offset *= 8;
             Double value;
@@ -1741,7 +1758,7 @@ ECode InterfaceProxy::ProxyEntry(
         (void)thisObj->mTargetMetadata->GetName(name);
         (void)thisObj->mTargetMetadata->GetNamespace(ns);
         Logger::D("CProxy", "Call ProxyEntry with interface \"%s::%s\"",
-                ns.string(), name.string());
+                                                    ns.string(), name.string());
     }
 
     AutoPtr<IMetaMethod> method;
@@ -1752,7 +1769,7 @@ ECode InterfaceProxy::ProxyEntry(
         (void)method->GetName(name);
         (void)method->GetSignature(signature);
         Logger::D("CProxy", "Call ProxyEntry with method \"%s(%s)\"",
-                name.string(), signature.string());
+                                             name.string(), signature.string());
     }
 
     ECode ec;
@@ -1927,7 +1944,7 @@ CProxy::CProxy()
 
 CProxy::~CProxy()
 {
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         InterfaceProxy* iproxy = mInterfaces[i];
         mInterfaces[i] = nullptr;
 
@@ -1963,7 +1980,7 @@ IInterface* CProxy::Probe(
     else if (IID_IProxy == iid) {
         return (IProxy*)this;
     }
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         InterfaceProxy* iproxy = mInterfaces[i];
         if (iproxy->mIid == iid) {
             return reinterpret_cast<IInterface*>(&iproxy->mVtable);
