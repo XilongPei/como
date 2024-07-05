@@ -208,16 +208,16 @@ TEST(Mistring, testMemNewBlockOnce)
 {
     char *s1, *s2, *s3, *s4, *s;
     size_t poolSize;
-    s = MiString::memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
 
     poolSize = 4096;
     char buf[4096];
-    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
 
     poolSize = 8;
-    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_EQ(s, nullptr);
 }
 
@@ -230,7 +230,7 @@ TEST(Mistring, memGetBlockOnce)
 
     strcpy(buf, "tongji");
     *(int *)&buf[7] = 4800;
-    s = MiString::memGetBlockOnce(buf, 4096, buf_s1, -32, (char*)&i, sizeof(int), nullptr);
+    s = MiString::MemGetBlockOnce(buf, 4096, buf_s1, -32, (char*)&i, sizeof(int), nullptr);
     EXPECT_NE(s, nullptr);
 
     //printf("===: %s %d\n", buf_s1, i);

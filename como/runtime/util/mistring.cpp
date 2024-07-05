@@ -407,12 +407,12 @@ char *MiString::strToSourceC(char *t, char *s, char turnChar)
  * Call method:
  *      char *s1, *s2, *s3, *s4, *s;
  *      size_t poolSize;
- *      s = memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+ *      s = MemNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
  */
-char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t memSize, ...)
+char *MiString::MemNewBlockOnce(char *buf, size_t *poolSize, char **ss, int memSize, ...)
 {
     va_list ap;
-    char **ss1;
+    char **sp;
     char *pool;
     size_t count;
 
@@ -420,7 +420,7 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
 
     // count mem alloc
     va_start(ap, memSize);
-    while ((ss1 = va_arg(ap, char **)) != nullptr) {
+    while ((sp = va_arg(ap, char **)) != nullptr) {
         count += va_arg(ap, size_t);
     }
     va_end(ap);
@@ -450,30 +450,32 @@ char *MiString::memNewBlockOnce(char *buf, size_t *poolSize, char **ss, size_t m
     count = memSize;
 
     va_start(ap, memSize);
-    while ((ss1 = va_arg(ap, char **)) != nullptr) {
-        *ss1 = (char *)(pool + count);
+    while ((sp = va_arg(ap, char **)) != nullptr) {
+        *sp = (char *)(pool + count);
         count += va_arg(ap, size_t);
     }
     va_end(ap);
 
     return pool;
 
-} // end of function memNewBlockOnce()
+} // end of function MemNewBlockOnce()
 
 /**
+ * Set data to the pool
+ *
  * Call method:
  *      char *s;
  *      int  i;
  *      char buf[4096];
  *      char buf_s1[32];
- *      strcpy(buf, "tongji");
- *      *(int *)&buf[7] = 4800;
- *      s = MiString::memGetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
+ *      strcpy(buf_s1, "tongji");
+ *      i = 4800;
+ *      s = MiString::MemSetBlockOnce(buf, 4096, buf_s1, 0, (char*)&i, sizeof(int), nullptr);
  */
-char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t memSize, ...)
+char *MiString::MemSetBlockOnce(char *pool, size_t poolSize, char *ss, int memSize, ...)
 {
     va_list ap;
-    char *ss1;
+    char *sp;
     int count;
 
     if (nullptr == pool) {
@@ -481,7 +483,81 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
     }
 
     if (memSize <= 0) {
+        // The current content (memSize corresponding to ss) is a string, and
+        // its size is unknown.
+        count = strlen(ss) + 1;
+        if (count > poolSize) {
+            return nullptr;
+        }
+        (void)strcpy(pool, ss);
+    }
+    else {
+        count = memSize;
+        (void)memcpy(pool, ss, memSize);
+    }
+
+    va_start(ap, memSize);
+    while ((sp = va_arg(ap, char *)) != nullptr) {
+        memSize = va_arg(ap, int);
+
+        if (memSize <= 0) {
+            memSize = strlen(sp) + 1;
+            count += memSize;
+            if (count > poolSize) {
+                return nullptr;
+            }
+
+            (void)strZcpy((char *)(pool + count), sp, memSize);
+        }
+        else {
+            count += memSize;
+            if (count > poolSize) {
+                return nullptr;
+            }
+
+            (void)memcpy((char *)(pool + count), sp, memSize);
+        }
+    }
+    va_end(ap);
+
+    return pool;
+} // end of function MemSetBlockOnce()
+
+/**
+ * Fetch data from the pool
+ *
+ * Call method:
+ *      char *s;
+ *      int  i;
+ *      char buf[4096];
+ *      char buf_s1[32];
+ *      strcpy(buf, "tongji");
+ *      *(int *)&buf[7] = 4800;
+ *      s = MiString::memGetBlockOnce(buf, 4096, buf_s1, -sizeo(buf_s1),
+ *                                    (char*)&i, sizeof(int), nullptr);
+ */
+char *MiString::MemGetBlockOnce(char *pool, size_t poolSize, char *ss, int memSize, ...)
+{
+    va_list ap;
+    char *sp;
+    int count;
+
+    if (nullptr == pool) {
+        return nullptr;
+    }
+
+    if (0 == memSize) {
+        return nullptr;
+    }
+    else if (memSize < 0) {
+        // The current content (memSize corresponding to ss) is a string, and
+        // its size is unknown.
         count = strlen(pool) + 1;
+        memSize = -memSize;
+        if (memSize < count) {
+            return nullptr;
+        }
+
         (void)strZcpy(ss, pool, memSize);
     }
     else {
@@ -490,16 +566,23 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
     }
 
     va_start(ap, memSize);
-    while ((ss1 = va_arg(ap, char *)) != nullptr) {
-        memSize = va_arg(ap, size_t);
+    while ((sp = va_arg(ap, char *)) != nullptr) {
+        memSize = va_arg(ap, int);
+        if (0 == memSize) {
+            return nullptr;
+        }
+        else if (memSize < 0) {
+            memSize = -memSize;
 
-        if ((*(Int64 *)&memSize).i32.i32_high != 0) {
-            (*(Int64 *)&memSize).i32.i32_high = 0;
-            (void)strZcpy(ss1, (char *)(pool + count), memSize);
-            count += strlen((char *)(pool + count)) + 1;
+            /**
+             * memSize indicates that the target memory has such a large space
+             * that the actual string fetched may be shorter than this.
+             */
+            (void)strZcpy(sp, (char *)(pool + count), memSize);
+            count += memSize;
         }
         else {
-            (void)memcpy(ss1, (char *)(pool + count), memSize);
+            (void)memcpy(sp, (char *)(pool + count), memSize);
             count += memSize;
         }
 
@@ -511,8 +594,7 @@ char *MiString::memGetBlockOnce(char *pool, size_t poolSize, char *ss, size_t me
     va_end(ap);
 
     return pool;
-
-} // end of function memNewBlockOnce()
+} // end of function MemGetBlockOnce()
 
 } // namespace como
 
@@ -522,7 +604,7 @@ int main(int argc, char *argv[])
 
     char *s1, *s2, *s3, *s4, *sp;
     char buff[4096];
-    sp = como::MiString::memGetBlockOnce(buff, 4096, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    sp = como::MiString::MemGetBlockOnce(buff, 4096, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
 
 
     int num = 2;

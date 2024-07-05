@@ -586,8 +586,8 @@ TEST(Mistring, teststrToSourceC)
     EXPECT_STREQ(t, "12\\\\34\\\\56\\\\78\\\\90");
 }
 
-// Test 7: MiString::memNewBlockOnce
-TEST(Mistring, testmemNewBlockOnce)
+// Test 7: MiString::MemNewBlockOnce
+TEST(Mistring, testMemNewBlockOnce)
 {
     const size_t BUF_SIZE = 4096;
     char *s1, *s2, *s3, *s4, *s;
@@ -596,41 +596,41 @@ TEST(Mistring, testmemNewBlockOnce)
 
     // pool = nullptr
     poolSize = BUF_SIZE;
-    s = MiString::memNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(nullptr, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
     EXPECT_EQ(poolSize, 100);
     if (s != nullptr)
         free(s);
 
     // poolSize = nullptr
-    s = MiString::memNewBlockOnce(buf, nullptr, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, nullptr, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
 
     // ss = nullptr
     /*
     poolSize = BUF_SIZE;
-    s = MiString::memNewBlockOnce(buf, &poolSize, nullptr, nullptr, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, nullptr, nullptr, nullptr);
     EXPECT_EQ(s, nullptr);
     */
 
     // total memSize <= 0
     poolSize = BUF_SIZE;
-    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, -20, &s3, 30, &s4, -40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, &s1, 10, &s2, -20, &s3, 30, &s4, -40, nullptr);
     EXPECT_EQ(s, nullptr);
 
     // Normal condition
     poolSize = BUF_SIZE;
-    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_NE(s, nullptr);
 
     // poolSize < total memSize
     poolSize = 50;
-    s = MiString::memNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
+    s = MiString::MemNewBlockOnce(buf, &poolSize, &s1, 10, &s2, 20, &s3, 30, &s4, 40, nullptr);
     EXPECT_EQ(s, nullptr);
 }
 
-// Test 8: MiString::memGetBlockOnce
-TEST(Mistring, testmemGetBlockOnce)
+// Test 8: MiString::MemGetBlockOnce
+TEST(Mistring, testMemGetBlockOnce)
 {
     const size_t BUF_SIZE = 4096;
     char input1 = 'A', output1;
@@ -661,7 +661,7 @@ TEST(Mistring, testmemGetBlockOnce)
     output3 = 0;
     output4 = 0;
     memset(output5, 0, 20);
-    s = MiString::memGetBlockOnce(nullptr, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2), 
+    s = MiString::MemGetBlockOnce(nullptr, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2),
                                   (char *)&output3, sizeof(output3), (char *)&output4, sizeof(output4), 
                                   &output5, sizeof(output5), nullptr);
     EXPECT_EQ(s, nullptr);
@@ -673,7 +673,7 @@ TEST(Mistring, testmemGetBlockOnce)
     output3 = 0;
     output4 = 0;
     memset(output5, 0, 20);
-    s = MiString::memGetBlockOnce(buf, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2), 
+    s = MiString::MemGetBlockOnce(buf, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2),
                                   (char *)&output3, sizeof(output3), (char *)&output4, sizeof(output4), 
                                   &output5, sizeof(output5), nullptr);
     EXPECT_NE(s, nullptr);
@@ -690,7 +690,7 @@ TEST(Mistring, testmemGetBlockOnce)
     output3 = 0;
     output4 = 0;
     memset(output5, 0, 20);
-    s = MiString::memGetBlockOnce(buf, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2), 
+    s = MiString::MemGetBlockOnce(buf, poolSize, &output1, sizeof(output1), (char *)&output2, sizeof(output2),
                                   (char *)&output3, sizeof(output3), (char *)&output4, sizeof(output4), 
                                   &output5, sizeof(output5), nullptr);
     if (s != nullptr) {
