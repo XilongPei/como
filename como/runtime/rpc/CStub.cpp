@@ -85,9 +85,9 @@ ECode InterfaceStub::UnmarshalArguments(
         IOAttribute ioAttr;
 
         // just an assignment, needn't to check the return value
-        param->GetIOAttribute(ioAttr);
-        param->GetType(type);
-        type->GetTypeKind(kind);
+        (void)param->GetIOAttribute(ioAttr);
+        (void)param->GetType(type);
+        (void)type->GetTypeKind(kind);
 
         if (ioAttr == IOAttribute::IN) {
             switch (kind) {
@@ -105,7 +105,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Byte value;
                     ec = argParcel->ReadByte(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadByte error");
                     }
 
                     argList->SetInputArgumentOfByte(i, value);
@@ -115,7 +115,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Short value;
                     ec = argParcel->ReadShort(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadShort error");
                     }
 
                     argList->SetInputArgumentOfShort(i, value);
@@ -125,7 +125,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Integer value;
                     ec = argParcel->ReadInteger(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadInteger error");
                     }
 
                     argList->SetInputArgumentOfInteger(i, value);
@@ -135,7 +135,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Long value;
                     ec = argParcel->ReadLong(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadLong error");
                     }
 
                     argList->SetInputArgumentOfLong(i, value);
@@ -145,7 +145,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Float value;
                     ec = argParcel->ReadFloat(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadFloat error");
                     }
 
                     argList->SetInputArgumentOfFloat(i, value);
@@ -155,7 +155,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Double value;
                     ec = argParcel->ReadDouble(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadDouble error");
                     }
 
                     argList->SetInputArgumentOfDouble(i, value);
@@ -180,7 +180,7 @@ ECode InterfaceStub::UnmarshalArguments(
 
                     ec = argParcel->ReadString(*value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadString error");
                     }
 
                     argList->SetInputArgumentOfString(i, *value);
@@ -190,7 +190,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     ECode value;
                     ec = argParcel->ReadECode(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadECode error");
                     }
 
                     argList->SetInputArgumentOfECode(i, value);
@@ -200,7 +200,7 @@ ECode InterfaceStub::UnmarshalArguments(
                     Integer value;
                     ec = argParcel->ReadEnumeration(value);
                     if (FAILED(ec)) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadChar error");
+                        Logger::E("InterfaceStub::UnmarshalArguments", "argParcel->ReadEnumeration error");
                     }
 
                     argList->SetInputArgumentOfEnumeration(i, value);
@@ -265,7 +265,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Char* value = new Char;
                     Char* value = (Char*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Char() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Char)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -280,7 +281,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Byte* value = new Byte;
                     Byte* value = (Byte*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Byte() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Byte)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -295,7 +297,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Short* value = new Short;
                     Short* value = (Short*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Short() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Short)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -310,7 +313,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Integer* value = new Integer;
                     Integer* value = (Integer*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                            "(Integer)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -325,7 +329,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Long* value = new Long;
                     Long* value = cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Long() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Long)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -340,7 +345,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Float* value = new Float;
                     Float* value = (Float*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Float() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Float)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -355,7 +361,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Double* value = new Double;
                     Double* value = (Double*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Double() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Double)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -370,7 +377,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Boolean* value = new Boolean;
                     Boolean* value = (Boolean*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Boolean() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Boolean)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -398,7 +406,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //ECode* value = new ECode;
                     ECode* value = (ECode*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new ECode() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(ECode)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -413,7 +422,8 @@ ECode InterfaceStub::UnmarshalArguments(
                     //Integer* value = new Integer;
                     Integer* value = (Integer*)cArglist->GetOutParamBuffer(iOutParam++);
                     if (nullptr == value) {
-                        Logger::E("InterfaceStub::UnmarshalArguments", "new Integer() error");
+                        Logger::E("InterfaceStub::UnmarshalArguments",
+                                                "(Enum)GetOutParamBuffer error");
                         return E_OUT_OF_MEMORY_ERROR;
                     }
 
@@ -462,7 +472,8 @@ ECode InterfaceStub::UnmarshalArguments(
                 case TypeKind::HANDLE:
                 case TypeKind::Triple:
                 default:
-                    Logger::E("CStub", "Invalid [in, out] or [out] type(%d), param index: %d.\n", kind, i);
+                    Logger::E("CStub",
+                        "Invalid [in, out] or [out] type(%d), param index: %d.\n", kind, i);
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
@@ -783,6 +794,7 @@ ECode InterfaceStub::Invoke(
             Long serverObjectId;
             mOwner->mChannel->GetServerObjectId(serverObjectId);
 
+            // Not in the main running path，discard its return value.
             ec = RuntimeMonitor::WriteRtmInvokeMethod(uuid64, serverObjectId,
                                   mOwner->mCid, mIid,
                                   RTM_ParamTransDirection::RETURN_FROM_METHOD,

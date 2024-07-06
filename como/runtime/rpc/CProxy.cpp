@@ -670,10 +670,10 @@ ECode InterfaceProxy::MarshalArguments(
                         arrType->GetElementType(elemType);
                         elemType->GetTypeKind(elemKind);
                     }
-                    if (elemKind == TypeKind::CoclassID ||
-                            elemKind == TypeKind::ComponentID ||
-                            elemKind == TypeKind::InterfaceID ||
-                            elemKind == TypeKind::HANDLE) {
+                    if ((elemKind == TypeKind::CoclassID) ||
+                                        (elemKind == TypeKind::ComponentID) ||
+                                        (elemKind == TypeKind::InterfaceID) ||
+                                        (elemKind == TypeKind::HANDLE)) {
                         Logger::E("CProxy", "Invalid [in] Array(%s), param index: %d",
                                             TypeKindHelper::GetTypeName(elemKind), i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -847,10 +847,10 @@ ECode InterfaceProxy::MarshalArguments(
                         arrType->GetElementType(elemType);
                         elemType->GetTypeKind(elemKind);
                     }
-                    if (elemKind == TypeKind::CoclassID ||
-                            elemKind == TypeKind::ComponentID ||
-                            elemKind == TypeKind::InterfaceID ||
-                            elemKind == TypeKind::HANDLE) {
+                    if ((elemKind == TypeKind::CoclassID) ||
+                                        (elemKind == TypeKind::ComponentID) ||
+                                        (elemKind == TypeKind::InterfaceID) ||
+                                        (elemKind == TypeKind::HANDLE)) {
                         Logger::E("CProxy", "Invalid [out] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
@@ -882,10 +882,10 @@ ECode InterfaceProxy::MarshalArguments(
                         arrType->GetElementType(elemType);
                         elemType->GetTypeKind(elemKind);
                     }
-                    if (elemKind == TypeKind::CoclassID ||
-                            elemKind == TypeKind::ComponentID ||
-                            elemKind == TypeKind::InterfaceID ||
-                            elemKind == TypeKind::HANDLE) {
+                    if ((elemKind == TypeKind::CoclassID) ||
+                                        (elemKind == TypeKind::ComponentID) ||
+                                        (elemKind == TypeKind::InterfaceID) ||
+                                        (elemKind == TypeKind::HANDLE)) {
                         Logger::E("CProxy", "Invalid [out, callee] Array(%d), param index: %d", elemKind, i);
                         return E_ILLEGAL_ARGUMENT_EXCEPTION;
                     }
@@ -1997,7 +1997,7 @@ ECode CProxy::GetInterfaceID(
         iid = IID_IObject;
         return NOERROR;
     }
-    for (Integer i = 0; i < mInterfaces.GetLength(); i++) {
+    for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         InterfaceProxy* iproxy = mInterfaces[i];
         if ((IInterface*)iproxy == object) {
             iid = iproxy->mIid;
@@ -2256,7 +2256,7 @@ ECode CProxy::CreateObject(
     channel->GetServerName(proxyObj->mServerName);
     channel->GetServerObjectId(proxyObj->mServerObjectId);
 
-    for (Integer i = 0; i < interfaceNumber; i++) {
+    for (Integer i = 0;  i < interfaceNumber;  i++) {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
         void *buf = MemPoolAlloc(sizeof(InterfaceProxy));
         if (nullptr == buf) {

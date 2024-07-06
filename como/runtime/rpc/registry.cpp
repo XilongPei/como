@@ -62,7 +62,7 @@ ECode RegisterExportObject(
     /* [in] */ IStub* stub,
     /* [in] */ Long value)
 {
-    if (object == nullptr || stub == nullptr) {
+    if ((nullptr == object) || (nullptr == stub)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -92,7 +92,7 @@ ECode UnregisterExportObject(
     /* [in] */ RPCType type,
     /* [in] */ IObject* object)
 {
-    if (object == nullptr) {
+    if (nullptr == object) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -163,7 +163,7 @@ ECode FindExportObject(
     /* [in] */ IObject* object,
     /* [out] */ AutoPtr<IStub>& stub)
 {
-    if (object == nullptr) {
+    if (nullptr == object) {
         stub = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -203,7 +203,7 @@ ECode FindExportObject(
     /* [in] */ IInterfacePack* ipack,
     /* [out] */ AutoPtr<IStub>& stub)
 {
-    if (ipack == nullptr) {
+    if (nullptr == ipack) {
         stub = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -252,7 +252,7 @@ ECode RegisterImportObject(
     /* [in] */ IObject* object,
     /* [in] */ Long value)
 {
-    if (ipack == nullptr || object == nullptr) {
+    if ((nullptr == ipack) || (nullptr == object)) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -279,7 +279,7 @@ ECode UnregisterImportObject(
     /* [in] */ RPCType type,
     /* [in] */ IInterfacePack* ipack)
 {
-    if (ipack == nullptr) {
+    if (nullptr == ipack) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -307,7 +307,7 @@ ECode FindImportObject(
     /* [in] */ IInterfacePack* ipack,
     /* [out] */ AutoPtr<IObject>& object)
 {
-    if (ipack == nullptr) {
+    if (nullptr == ipack) {
         object = nullptr;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
