@@ -14,27 +14,33 @@
 // limitations under the License.
 //=========================================================================
 
-#include <comosp.h>
-#include <comoobj.h>
-#include <ThreadStack.h>
-#include <gtest/gtest.h>
+#ifndef __TIMESPECUTILITIES_H__
+#define __TIMESPECUTILITIES_H__
+
+#include <assert.h>
+#include <time.h>
+#include <climits>
 #include <iostream>
 
-using namespace como;
-using namespace std;
+namespace como {
 
-TEST(ThreadStack, testThreadStack)
+class TimespecUtilities
 {
-    void *addr;
-    size_t size;
+public:
+                                                      // 123456789
+    static constexpr long NANOSECONDS_PER_SECOND      = 1000000000;
+    static constexpr long NANOSECONDS_PER_MILLISECOND = 1000000;
+    static constexpr long MILLISECONDS_PER_SECOND     = 1000;
 
-    int ret = ThreadStack::GetStack(&addr, &size);
-    EXPECT_EQ(ret, 0);
-    printf("GetStack addr: %p  size: %lx\n", addr, size);
-}
+    static inline void TimespecAddSeconds(struct timespec& ts, long nanoSeconds)
+    {
+        long nsec = ts.tv_nsec + nanoSeconds;
+        ts.tv_sec += nsec / NANOSECONDS_PER_SECOND;
+        ts.tv_nsec += nanoSeconds;
+    }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+}; // class TimespecUtilities
+
+} // namespace como
+
+#endif  // __TIMESPECUTILITIES_H__

@@ -63,9 +63,30 @@ set(SOURCES
     DebugUtils.cpp
 )
 
+set(DEPLOY_HEADERS
+    ${UTIL_SRC_DIR}/comosp.h
+    ${UTIL_SRC_DIR}/comoclsobj.h
+    ${UTIL_SRC_DIR}/comolog.h
+    ${UTIL_SRC_DIR}/comoobj.h
+    ${UTIL_SRC_DIR}/comoref.h
+    ${UTIL_SRC_DIR}/comolock.h
+    ${UTIL_SRC_DIR}/mutex.h
+    ${UTIL_SRC_DIR}/mistring.h
+    ${UTIL_SRC_DIR}/MemPool.h
+    ${UTIL_SRC_DIR}/mac.h
+    ${UTIL_SRC_DIR}/int64.h
+    ${UTIL_SRC_DIR}/ThreadStack.h
+    ${UTIL_SRC_DIR}/lamport_clock.h
+    ${UTIL_SRC_DIR}/hashmap.h
+    ${UTIL_SRC_DIR}/hashmapCache.h
+    ${UTIL_SRC_DIR}/StrToX_Hashmap.h
+    ${UTIL_SRC_DIR}/DebugUtils.h
+    ${UTIL_SRC_DIR}/TimespecUtilities.h
+)
+
 add_library(util STATIC
     ${SOURCES})
-add_dependencies(util cdl)
+add_dependencies(util cdl DEPLOY_HEADERS)
 
 target_link_libraries(util
     $ENV{OUT_PATH}/external/EasyLogger/export_como/libEasyLogger.a
@@ -91,26 +112,7 @@ COPY(util ${UTIL_SRC_DIR}/hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/hashmapCache.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/StrToX_Hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/DebugUtils.h ${INC_DIR})
-
-set(DEPLOY_HEADERS
-    ${UTIL_SRC_DIR}/comosp.h
-    ${UTIL_SRC_DIR}/comoclsobj.h
-    ${UTIL_SRC_DIR}/comolog.h
-    ${UTIL_SRC_DIR}/comoobj.h
-    ${UTIL_SRC_DIR}/comoref.h
-    ${UTIL_SRC_DIR}/comolock.h
-    ${UTIL_SRC_DIR}/mutex.h
-    ${UTIL_SRC_DIR}/mistring.h
-    ${UTIL_SRC_DIR}/MemPool.h
-    ${UTIL_SRC_DIR}/mac.h
-    ${UTIL_SRC_DIR}/int64.h
-    ${UTIL_SRC_DIR}/ThreadStack.h
-    ${UTIL_SRC_DIR}/lamport_clock.h
-    ${UTIL_SRC_DIR}/hashmap.h
-    ${UTIL_SRC_DIR}/hashmapCache.h
-    ${UTIL_SRC_DIR}/StrToX_Hashmap.h
-    ${UTIL_SRC_DIR}/DebugUtils.h
-)
+COPY(util ${UTIL_SRC_DIR}/TimespecUtilities.h ${INC_DIR})
 
 install(FILES
     ${DEPLOY_HEADERS}
