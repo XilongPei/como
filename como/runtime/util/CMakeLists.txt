@@ -81,12 +81,16 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/hashmapCache.h
     ${UTIL_SRC_DIR}/StrToX_Hashmap.h
     ${UTIL_SRC_DIR}/DebugUtils.h
-    ${UTIL_SRC_DIR}/TimespecUtilities.h
+    ${UTIL_SRC_DIR}/TimespecUtils.h
+)
+
+add_custom_target(rebuild_if_header_changes
+    DEPENDS ${DEPLOY_HEADERS}
 )
 
 add_library(util STATIC
     ${SOURCES})
-add_dependencies(util cdl DEPLOY_HEADERS)
+add_dependencies(util cdl rebuild_if_header_changes)
 
 target_link_libraries(util
     $ENV{OUT_PATH}/external/EasyLogger/export_como/libEasyLogger.a
@@ -112,7 +116,7 @@ COPY(util ${UTIL_SRC_DIR}/hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/hashmapCache.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/StrToX_Hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/DebugUtils.h ${INC_DIR})
-COPY(util ${UTIL_SRC_DIR}/TimespecUtilities.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/TimespecUtils.h ${INC_DIR})
 
 install(FILES
     ${DEPLOY_HEADERS}

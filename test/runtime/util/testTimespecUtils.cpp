@@ -17,12 +17,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gtest/gtest.h>
-#include "TimespecUtilities.h"
+#include "TimespecUtils.h"
 
 using namespace como;
 
-TEST(testTimespecUtilities, basic)
+TEST(testTimespecUtils, basic)
 {
+    struct timespec ts = {0, 0};
+    int ret = TimespecUtils::TimespecWaitNanoseconds(ts, 1000);
+    EXPECT_EQ(ret, 0);
 }
 
 int main(int argc, char **argv)
