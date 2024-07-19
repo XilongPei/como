@@ -91,6 +91,35 @@ private:
     static Mutex sInstanceLock;
 };
 
+/**
+ * ThreadPoolZmqActor is a reactor
+ *
+ * "reactor" is a deterministic model for the simultaneous computation of a
+ * reaction system. If, given an initial state and a set of inputs, the system
+ * has only one possible behavior, it is deterministic, which has the following
+ * advantages:
+ *   - it is testable and easier to trace
+ *   - Makes simulation more useful
+ *   - Makes validation easier to scale
+ *
+ * The system must define "state", "input", and "behavior". If the concept of
+ * "action" includes the time of action, then no modern programming language
+ * computer program is deterministic. The dominant parallel and distributed
+ * programming paradigm has abandoned determinism: "Everything is asynchronous"
+ *
+ * Reactor is a "sparse synchronization" model that facilitates componentization
+ * and allows for distributed execution, establishing relationships between
+ * events across timelines and allowing:
+ *   - Build programs that respond predictably to unpredictable external events;
+ *   - Set deadlines that can be controlled;
+ *   - Maintaining deterministic distributed execution semantics under
+ *     quantifiable assumptions.
+ *
+ * Reactor model development includes:
+ *   - Formalization of Reactor - a deterministic model for concurrent
+ *     computation of reactor systems
+ *   - Implement an effective runtime system for Reactor
+ */
 class ThreadPoolZmqActor : public LightRefBase
 {
 public:
