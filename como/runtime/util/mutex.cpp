@@ -193,7 +193,7 @@ bool Condition::TimedWait(
     bool timedOut = false;
     unsigned int oldRecursionCount = mGuard.mRecursionCount;
     timespec rel_ts;
-    InitTimeSpec(false, CLOCK_REALTIME, ms, ns, &rel_ts);
+    InitTimeSpec(false, CLOCK_MONOTONIC, ms, ns, &rel_ts);
     mNumWaiters++;
     // Ensure the Mutex is contended so that requeued threads are awoken.
     mGuard.mNumContenders++;

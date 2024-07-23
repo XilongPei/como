@@ -98,7 +98,7 @@ ECode ComoFunctionSafetyObject::AfterConstruction()
         }
     }
 
-    (void)clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+    (void)clock_gettime(CLOCK_MONOTONIC, &mLastModifiedTime);
     (void)pthread_mutex_lock(&funSafetyLock);
     if (objsLifeCycleExpires.cfso_push(this) < 0) {
         Logger::E("ComoFunctionSafetyObject", "Construct Object error");
@@ -146,7 +146,7 @@ ECode ComoFunctionSafetyObject::SetExpires(
 
 ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
 {
-    (void)clock_gettime(CLOCK_REALTIME, &mLastModifiedTime);
+    (void)clock_gettime(CLOCK_MONOTONIC, &mLastModifiedTime);
 
     return NOERROR;
 }
@@ -158,7 +158,7 @@ ECode ComoFunctionSafetyObject::IsValid(
         /* [out] */ Integer& isValid)
 {
     struct timespec time;
-    (void)clock_gettime(CLOCK_REALTIME, &time);
+    (void)clock_gettime(CLOCK_MONOTONIC, &time);
 
     if (1000000000L * (mLastModifiedTime.tv_sec - time.tv_sec) +
        /*987654321*/    (mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {

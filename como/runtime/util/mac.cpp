@@ -65,7 +65,7 @@ Long Mac::GetMacAddress(Long& lMacAddr)
     }
 
     struct timespec tsTime;
-    clock_gettime(CLOCK_REALTIME, &tsTime);
+    clock_gettime(CLOCK_MONOTONIC, &tsTime);
 
     srand(tsTime.tv_nsec);
     lMacAddr = ((Long)rand() << 32) | rand();
@@ -88,7 +88,7 @@ Long Mac::GetThisServiceId(unsigned short port)
 Long Mac::GetUuid64(Long& uuid64)
 {
     struct timespec tsTime;
-    clock_gettime(CLOCK_REALTIME, &tsTime);
+    clock_gettime(CLOCK_MONOTONIC, &tsTime);
 
     // millisecond
     uuid64 = tsTime.tv_sec * 1000 + tsTime.tv_nsec / 1000000;

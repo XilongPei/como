@@ -48,7 +48,7 @@ TPZA_Executor::Worker::Worker(CZMQChannel *channel, AutoPtr<IStub> stub,
     , mEndpoint(endpoint)
     , state(0)
 {
-    clock_gettime(CLOCK_REALTIME, &lastAccessTime);
+    clock_gettime(CLOCK_MONOTONIC, &lastAccessTime);
     channel->GetServerObjectId(mChannel);
 }
 
@@ -218,7 +218,7 @@ HandleMessage_Method_Invoke:
                 }
 
                 // `ReleaseWorker`, This Worker is a daemon
-                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+                clock_gettime(CLOCK_MONOTONIC, &(worker->lastAccessTime));
 
                 // It shouldn't be WORKER_TASK_FINISH.
                 // A request ends, but the channel still needs to be.
@@ -294,7 +294,7 @@ HandleMessage_Method_Invoke:
 
                 // `ReleaseWorker`, This Worker is a daemon
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+                clock_gettime(CLOCK_MONOTONIC, &(worker->lastAccessTime));
                 break;
 
 HandleMessage_GetComponentMetadata:
@@ -332,7 +332,7 @@ HandleMessage_GetComponentMetadata:
                     worker->state = *(Long*)zmq_msg_data(&msg);
 
                     worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-                    clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+                    clock_gettime(CLOCK_MONOTONIC, &(worker->lastAccessTime));
                 }
 
                 zmq_msg_close(&msg);
@@ -364,7 +364,7 @@ HandleMessage_GetComponentMetadata:
 
                 // `ReleaseWorker` will NOT delete this work
                 worker->mWorkerStatus = WORKER_TASK_DAEMON_RUNNING;
-                clock_gettime(CLOCK_REALTIME, &(worker->lastAccessTime));
+                clock_gettime(CLOCK_MONOTONIC, &(worker->lastAccessTime));
 
 HandleMessage_Object_Release:
                 zmq_msg_close(&msg);
@@ -536,7 +536,7 @@ int TPZA_Executor::SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func)
 }
 
 static void CalWaitTime(struct timespec& curTime, int timeout_ms) {
-    clock_gettime(CLOCK_REALTIME, &curTime);
+    clock_gettime(CLOCK_MONOTONIC, &curTime);
     long nsec = curTime.tv_nsec + (timeout_ms % 1000) * 1000000;
                                                       // 654321
     curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
@@ -580,14 +580,14 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
         pthread_mutex_unlock(&pthreadMutex);
 
         struct timespec currentTime;
-        clock_gettime(CLOCK_REALTIME, &currentTime);
+        clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
         // check for time out connection
         // ns accuracy is not required
         if (mWorkerList.size() > ComoConfig::DBUS_CONNECTION_MAX_NUM ||
                          (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
-            clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
+            clock_gettime(CLOCK_MONOTONIC, &lastCheckConnExpireTime);
 
             pthread_mutex_lock(&pthreadMutex);
 
@@ -750,7 +750,7 @@ int ThreadPoolZmqActor::AddTask(
 {
     int i;
     struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
     pthread_mutex_lock(&pthreadMutex);
 

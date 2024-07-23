@@ -136,7 +136,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
         conn_->conn = conn;
         conn_->user_data = static_cast<void*>(this);
         REFCOUNT_ADD(this);
-        clock_gettime(CLOCK_REALTIME, &conn_->lastAccessTime);
+        clock_gettime(CLOCK_MONOTONIC, &conn_->lastAccessTime);
         conns.push_back(conn_);
     }
 
@@ -148,7 +148,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
             struct timespec currentTime;
             DBusConnection *conn_dbus;
 
-            clock_gettime(CLOCK_REALTIME, &currentTime);
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
             {
                 Mutex::AutoLock lock(connsLock);
@@ -161,7 +161,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                          connsNeedCheck ||
                          (currentTime.tv_sec - lastCheckConnExpireTime.tv_sec) >
                                     ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD) {
-                    clock_gettime(CLOCK_REALTIME, &lastCheckConnExpireTime);
+                    clock_gettime(CLOCK_MONOTONIC, &lastCheckConnExpireTime);
 
                     // The reason why we iterate over conns here is because we want to release the
                     // member of conns in the loop
@@ -210,7 +210,7 @@ ECode CDBusChannel::ServiceRunnable::Run()
                     // queue, or we have raw bytes buffered up that need to be parsed. When these bytes
                     // are parsed, they may not add up to an entire message. Thus, it's possible to see
                     // a status of DBUS_DISPATCH_DATA_REMAINS but not have a message yet.
-                        clock_gettime(CLOCK_REALTIME, &(conns[i]->lastAccessTime));
+                        clock_gettime(CLOCK_MONOTONIC, &(conns[i]->lastAccessTime));
                     }
                     else {
                         break;

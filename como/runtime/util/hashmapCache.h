@@ -80,7 +80,7 @@ public:
             mBucketSize = 0u;
         }
         mThreshold = (unsigned int)((double)mBucketSize * LOAD_FACTOR);
-        clock_gettime(CLOCK_REALTIME, &mLastCheanTime);
+        clock_gettime(CLOCK_MONOTONIC, &mLastCheanTime);
     }
 
     ~HashMapCache()
@@ -126,7 +126,7 @@ public:
             b->mlValue = lvalue;
             mBuckets[index] = b;
             mCount++;
-            clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));
+            clock_gettime(CLOCK_MONOTONIC, &(b->lastAccessTime));
             return 0;
         }
         else {
@@ -158,7 +158,7 @@ public:
             b->mlValue = lvalue;
             prev->mNext = b;
             mCount++;
-            clock_gettime(CLOCK_REALTIME, &(b->lastAccessTime));
+            clock_gettime(CLOCK_MONOTONIC, &(b->lastAccessTime));
             return 0;
         }
     }
@@ -173,7 +173,7 @@ public:
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
-                clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
+                clock_gettime(CLOCK_MONOTONIC, &(curr->lastAccessTime));
                 return true;
             }
             curr = curr->mNext;
@@ -192,7 +192,7 @@ public:
         Bucket* curr = mBuckets[index];
         while (curr != nullptr) {
             if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
-                clock_gettime(CLOCK_REALTIME, &(curr->lastAccessTime));
+                clock_gettime(CLOCK_MONOTONIC, &(curr->lastAccessTime));
                 curr->mReferenceCount++;
                 return curr->mValue;
             }
@@ -354,7 +354,7 @@ public:
     void CleanUpExpiredData()
     {
         struct timespec currentTime;
-        clock_gettime(CLOCK_REALTIME, &currentTime);
+        clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
         if ((currentTime.tv_sec - mLastCheanTime.tv_sec) < CHECK_EXPIRES_PERIOD) {
             return;

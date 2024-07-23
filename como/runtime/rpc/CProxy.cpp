@@ -1867,7 +1867,7 @@ ECode InterfaceProxy::ProxyEntry(
     }
     else {
         struct timespec curTime;
-        clock_gettime(CLOCK_REALTIME, &curTime);
+        clock_gettime(CLOCK_MONOTONIC, &curTime);
 
         // the unit of mTimeout is microsecond [Millisecond, microsecond, nanosecond]
         Long nsec = curTime.tv_nsec + (thisObj->mTimeout % 1000000) * 1000;

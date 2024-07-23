@@ -51,7 +51,7 @@ TPCI_Executor::Worker::Worker(AutoPtr<IRPCChannel> channel, AutoPtr<IMetaMethod>
     , ec(NOERROR)
 {
     pthread_mutex_init(&mMutex, NULL);
-    clock_gettime(CLOCK_REALTIME, &mCreateTime);
+    clock_gettime(CLOCK_MONOTONIC, &mCreateTime);
 }
 
 ECode TPCI_Executor::Worker::Invoke()
@@ -212,7 +212,7 @@ int ThreadPoolChannelInvoke::AddTask(TPCI_Executor::Worker *task)
 {
     int i;
     struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
     pthread_mutex_lock(&m_pthreadMutex);
 
