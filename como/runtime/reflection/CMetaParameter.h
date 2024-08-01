@@ -77,7 +77,7 @@ public:
 CMetaParameter *CMetaParameter::From(
     /* [in] */ IMetaParameter *comp)
 {
-    return (CMetaParameter*)comp;
+    return static_cast<CMetaParameter*>(comp);
 }
 
 } // namespace como

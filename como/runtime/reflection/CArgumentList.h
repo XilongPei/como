@@ -384,7 +384,7 @@ Long *CArgumentList::GetOutParamBuffer(int iOutParam)
 
 CArgumentList* CArgumentList::From(IArgumentList* argList)
 {
-    return (CArgumentList*)argList;
+    return static_cast<CArgumentList*>(argList);
 }
 
 } // namespace como

@@ -127,7 +127,7 @@ private:
 InterfacePack* InterfacePack::From(
     /* [in] */ IInterfacePack* ipack)
 {
-    return (InterfacePack*)ipack;
+    return static_cast<InterfacePack*>(ipack);
 }
 
 } // namespace como

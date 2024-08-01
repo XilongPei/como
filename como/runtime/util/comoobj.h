@@ -185,7 +185,7 @@ inline void Object::SetObjSize(Integer objSize)
 
 Object* Object::From(IObject* obj)
 {
-    return (Object*)obj;
+    return static_cast<Object*>(obj);
 }
 
 /**

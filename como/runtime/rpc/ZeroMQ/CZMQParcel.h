@@ -244,7 +244,7 @@ private:
 inline static CZMQParcel* From(
     /* [in] */ IParcel* parcel)
 {
-    return (CZMQParcel*)parcel;
+    return static_cast<CZMQParcel*>(parcel);
 }
 
 } // namespace como

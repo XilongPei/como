@@ -183,7 +183,7 @@ public:
 CMetaComponent *CMetaComponent::From(
     /* [in] */ IMetaComponent *comp)
 {
-    return (CMetaComponent*)comp;
+    return static_cast<CMetaComponent*>(comp);
 }
 
 } // namespace como

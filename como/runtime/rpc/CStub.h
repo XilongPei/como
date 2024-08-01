@@ -126,7 +126,7 @@ private:
 CStub* CStub::From(
     /* [in] */ IStub* istub)
 {
-    return (CStub*)istub;
+    return static_cast<CStub*>(istub);
 }
 
 } // namespace como

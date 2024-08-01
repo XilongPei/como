@@ -121,7 +121,7 @@ private:
 CZMQInterfacePack* CZMQInterfacePack::From(
     /* [in] */ IInterfacePack* ipack)
 {
-    return (CZMQInterfacePack*)ipack;
+    return static_cast<CZMQInterfacePack*>(ipack);
 }
 
 } // namespace como

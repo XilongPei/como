@@ -78,7 +78,7 @@ private:
 CMetaType *CMetaType::From(
     /* [in] */ IMetaType *comp)
 {
-    return (CMetaType*)comp;
+    return static_cast<CMetaType*>(comp);
 }
 
 } // namespace como

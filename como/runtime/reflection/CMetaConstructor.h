@@ -100,7 +100,7 @@ public:
     ECode GetOpaque(
         /* [out] */ HANDLE &opaque) override;
 
-    inline static CMetaConstructor* From(IMetaConstructor* constructor);
+    inline static CMetaConstructor* From(IMetaConstructor* constr);
 
 private:
     ECode BuildAllParameters();
@@ -127,9 +127,9 @@ public:
     AutoPtr<IArgumentList>  mArgListMemory;
 };
 
-CMetaConstructor* CMetaConstructor::From(IMetaConstructor* constructor)
+CMetaConstructor* CMetaConstructor::From(IMetaConstructor* constr)
 {
-    return (CMetaConstructor*)constructor;
+    return static_cast<CMetaConstructor*>(constr);
 }
 
 } // namespace como

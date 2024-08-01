@@ -156,7 +156,7 @@ inline std::string& CZMQChannel::GetEndpoint(void)
 inline CZMQChannel* CZMQChannel::From(
     /* [in] */ IRPCChannel* iRpcChannel)
 {
-    return (CZMQChannel*)iRpcChannel;
+    return static_cast<CZMQChannel*>(iRpcChannel);
 }
 
 } // namespace como

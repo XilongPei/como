@@ -127,7 +127,7 @@ public:
 
 CMetaMethod *CMetaMethod::From(IMetaMethod* method)
 {
-    return (CMetaMethod*)method;
+    return static_cast<CMetaMethod*>(method);
 }
 
 } // namespace como
