@@ -445,7 +445,7 @@ ECode CMetaCoclass::BuildAllConstructors()
                 MetaMethod* mm = mi->mMethods[i];
                 AutoPtr<IMetaConstructor> mcObj = new CMetaConstructor(
                                                                this, mi, i, mm);
-                if (nullptr == mcObj) {
+                if ((nullptr == mcObj) || (CMetaConstructor::From(mcObj)->mIndex < 0)) {
                     return E_OUT_OF_MEMORY_ERROR;
                 }
 

@@ -50,6 +50,13 @@ CMetaMethod::CMetaMethod()
     ECode ec;
     ec = BuildAllParameters();
     if (FAILED(ec)) {
+
+        /**
+         * Use the variable mReturnType to identify whether the object was
+         * successfully constructed.
+         */
+        mReturnType = nullptr;
+
         Logger::E("CMetaMethod", "BuildAll... failed.");
     }
 #endif
@@ -245,7 +252,8 @@ ECode CMetaMethod::InvokeImpl(
     Byte* params = args->GetParameterBuffer();
     Integer paramNum = args->GetParameterNumber();
     ParameterInfo* paramInfos = args->GetParameterInfos();
-    Integer intParamNum = 1, fpParamNum = 0;
+    Integer intParamNum = 1;
+    Integer fpParamNum = 0;
     for (Integer i = 0;  i < paramNum;  i++) {
         if (paramInfos[i].mNumberType == NUMBER_TYPE_INTEGER) {
             intParamNum++;
@@ -374,13 +382,23 @@ ECode CMetaMethod::BuildAllParameters()
 {
     if (nullptr == mParameters[0]) {
         Mutex::AutoLock lock(mParametersLock);
+
         if (nullptr == mParameters[0]) {
             for (Integer i = 0;  i < mMetadata->mParameterNumber;  i++) {
                 AutoPtr<CMetaParameter> mpObj = new CMetaParameter(
                                                 mOwner->mOwner->mMetadata, this,
                                                   mMetadata->mParameters[i], i);
-                if ((nullptr == mpObj) || (nullptr == mpObj->mType))
+                if ((nullptr == mpObj) || (nullptr == mpObj->mType)) {
+
+                    /**
+                     * If mMetadata->mParameterNumber is equal to 0,
+                     * mParameters[0] is always equal to nullptr, so this
+                     * assignment doesn't make sense
+                     */
+                    // mParameters[0] = nullptr;
+
                     return E_OUT_OF_MEMORY_ERROR;
+                }
 
                 mParameters.Set(i, mpObj);
                 if ((mpObj->mIOAttr == IOAttribute::OUT) ||

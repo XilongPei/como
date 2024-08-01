@@ -58,6 +58,12 @@ CMetaConstructor::CMetaConstructor(
     ECode ec;
     ec = BuildAllParameters();
     if (FAILED(ec)) {
+        /**
+         * Use the variable mIndex to identify whether the object was
+         * successfully constructed.
+         */
+        mIndex = -1;
+
         Logger::E("CMetaConstructor", "BuildAll... failed.");
     }
 #endif
@@ -357,6 +363,7 @@ ECode CMetaConstructor::BuildAllParameters()
 {
     if (nullptr == mParameters[0]) {
         Mutex::AutoLock lock(mParametersLock);
+
         if (nullptr == mParameters[0]) {
             for (Integer i = 0;  i < mMetadata->mParameterNumber;  i++) {
                 MetaParameter* mp = mMetadata->mParameters[i];
@@ -366,6 +373,14 @@ ECode CMetaConstructor::BuildAllParameters()
                     for (Integer j = 0;  j < i;  j++) {
                         delete CMetaParameter::From(mParameters[j]);
                     }
+
+                    /**
+                     * If mMetadata->mParameterNumber is equal to 0,
+                     * mParameters[0] is always equal to nullptr, so this
+                     * assignment doesn't make sense
+                     */
+                    // mParameters[0] = nullptr;
+
                     return E_OUT_OF_MEMORY_ERROR;
                 }
                 mParameters.Set(i, mpObj);
