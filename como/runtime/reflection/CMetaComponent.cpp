@@ -88,6 +88,7 @@ CMetaComponent::CMetaComponent(
      * memory call, and the metadata shall be handled well in advance.
      */
     if (FAILED(Preload())) {
+        mIInterface = nullptr;
         Logger::E("CMetaComponent", "BuildAll... failed.");
     }
 #endif
@@ -558,7 +559,8 @@ ECode CMetaComponent::BuildAllInterfaces()
         String fullName = String::Format("%s::%s", mi->mNamespace, mi->mName);
         if (! mInterfaceNameMap.ContainsKey(fullName)) {
             AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
-            if ((nullptr != miObj) && (! fullName.IsEmpty())) {
+            if ((nullptr != miObj) && (! miObj->mMethods.IsEmpty()) &&
+                                                        (! fullName.IsEmpty())) {
                 mInterfaces.Set(index, miObj);
                 mInterfaceNameMap.Put(fullName, miObj);
                 mInterfaceIdMap.Put(miObj->mIid.mUuid, miObj);
@@ -589,9 +591,10 @@ AutoPtr<IMetaInterface> CMetaComponent::BuildInterface(
 
     if (! mInterfaceNameMap.ContainsKey(fullName)) {
         Mutex::AutoLock lock(mInterfacesLock);
+
         if (! mInterfaceNameMap.ContainsKey(fullName)) {
             AutoPtr<CMetaInterface> miObj = new CMetaInterface(this, mMetadata, mi);
-            if (nullptr == miObj) {
+            if ((nullptr == miObj) || miObj->mMethods.IsEmpty()) {
                 return nullptr;
             }
 
@@ -642,7 +645,7 @@ ECode CMetaComponent::LoadAllClassObjectGetters()
 ECode CMetaComponent::BuildIInterface()
 {
     CMetaInterface *miObj = new CMetaInterface();
-    if (nullptr == miObj) {
+    if ((nullptr == miObj) && (! miObj->mMethods.IsEmpty())) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     miObj->mOwner = this;

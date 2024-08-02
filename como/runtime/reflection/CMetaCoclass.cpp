@@ -57,6 +57,12 @@ CMetaCoclass::CMetaCoclass(
     ec |= BuildAllMethods();
     ec |= BuildAllConstants();
     if (FAILED(ec)) {
+        /**
+         * Use the variable mInterfaces to identify whether the object was
+         * successfully constructed.
+         */
+        mInterfaces->->FreeData();
+
         Logger::E("CMetaCoclass", "BuildAll... failed.");
     }
 #endif
@@ -251,8 +257,8 @@ ECode CMetaCoclass::ContainsInterface(
     for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         String name, ns;
-        miObj->GetName(name);
-        miObj->GetNamespace(ns);
+        (void)miObj->GetName(name);
+        (void)miObj->GetNamespace(ns);
         if (fullName.Equals(ns + "::" + name)) {
             result = true;
             return NOERROR;
@@ -300,7 +306,7 @@ ECode CMetaCoclass::GetMethodNumber(
                 miObj->GetMethodNumber(methodNum);
 
                 // The number 4 comes from: (see above)
-                num += methodNum - 4;
+                num += (methodNum - 4);
             }
             mMethods = Array<IMetaMethod*>(num);
         }
@@ -438,6 +444,7 @@ ECode CMetaCoclass::BuildAllConstructors()
 {
     if (nullptr == mConstructors[0]) {
         Mutex::AutoLock lock(mConstructorsLock);
+
         if (nullptr == mConstructors[0]) {
             MetaInterface* mi = mOwner->mMetadata->mInterfaces[
                  mMetadata->mInterfaceIndexes[mMetadata->mInterfaceNumber - 1]];
@@ -461,6 +468,7 @@ ECode CMetaCoclass::BuildAllInterfaces()
 {
     if (nullptr == mInterfaces[0]) {
         Mutex::AutoLock lock(mInterfacesLock);
+
         if (nullptr == mInterfaces[0]) {
             for (Integer i = 0;  i < mMetadata->mInterfaceNumber - 1;  i++) {
                 Integer intfIndex = mMetadata->mInterfaceIndexes[i];
@@ -480,10 +488,11 @@ ECode CMetaCoclass::BuildAllInterfaces()
 ECode CMetaCoclass::BuildAllMethods()
 {
     Integer number;
-    GetMethodNumber(number);
+    FAIL_RETURN(GetMethodNumber(number));
 
     if (nullptr == mMethods[0]) {
         Mutex::AutoLock lock(mMethodsLock);
+
         if (nullptr == mMethods[0]) {
             Integer index = 0;
             FAIL_RETURN(BuildInterfaceMethodLocked(mOwner->mIInterface, index));

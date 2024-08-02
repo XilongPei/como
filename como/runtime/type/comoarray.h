@@ -277,7 +277,7 @@ Boolean Array<T>::IsNull() const
 template<typename T>
 Boolean Array<T>::IsEmpty() const
 {
-    return (mData == nullptr) || (mSize == 0);
+    return (nullptr == mData) || (0 == mSize);
 }
 
 template<typename T>

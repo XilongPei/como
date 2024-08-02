@@ -34,7 +34,6 @@ CMetaInterface::CMetaInterface(
     , mNamespace(mi->mNamespace)
     , mStrFramacBlock(mi->mStrFramacBlock)
     , mConstants(mi->mConstantNumber)
-    , mMethods(mi->mMethodNumber)
 {
     mProperties = mi->mProperties;
 
@@ -61,6 +60,13 @@ CMetaInterface::CMetaInterface(
     ec = BuildAllConstants();
     ec |= BuildAllMethods();
     if (FAILED(ec)) {
+
+        /**
+         * Use the variable mMethods to identify whether the object was
+         * successfully constructed.
+         */
+        mMethods->FreeData();
+
         Logger::E("CMetaInterface", "BuildAll... failed.");
     }
 #endif
@@ -310,9 +316,10 @@ ECode CMetaInterface::BuildBaseInterface()
 
 ECode CMetaInterface::BuildAllConstants()
 {
-    if (mConstants[0] == nullptr) {
+    if (nullptr == mConstants[0]) {
         Mutex::AutoLock lock(mConstantsLock);
-        if (mConstants[0] == nullptr) {
+
+        if (nullptr == mConstants[0]) {
             for (Integer i = 0;  i < mMetadata->mConstantNumber;  i++) {
                 AutoPtr<CMetaConstant> mcObj = new CMetaConstant(
                                    mOwner->mMetadata, mMetadata->mConstants[i]);
@@ -331,6 +338,7 @@ ECode CMetaInterface::BuildAllMethods()
 {
     if (nullptr == mMethods[0]) {
         Mutex::AutoLock lock(mMethodsLock);
+
         if (nullptr == mMethods[0]) {
             if (BuildInterfaceMethod(mMetadata) < 0) {
                 return E_OUT_OF_MEMORY_ERROR;

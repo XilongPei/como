@@ -233,9 +233,9 @@ struct COM_PUBLIC Triple
     Triple& operator=(
         /* [in] */ Triple&& other);
 
-    void* mData;
-    Long mSize;
-    TypeKind mType;
+    void     *mData;
+    Long      mSize;
+    TypeKind  mType;
 };
 
 template<typename T>

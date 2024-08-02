@@ -52,6 +52,12 @@ CMetaEnumeration::CMetaEnumeration(
     ECode ec;
     ec = BuildAllEnumerators();
     if (FAILED(ec)) {
+        /**
+         * Use the variable mEnumerators to identify whether the object was
+         * successfully constructed.
+         */
+        mEnumerators->FreeData();
+
         Logger::E("CMetaEnumeration", "BuildAll... failed.");
     }
 #endif
@@ -148,6 +154,7 @@ ECode CMetaEnumeration::BuildAllEnumerators()
 {
     if (nullptr == mEnumerators[0]) {
         Mutex::AutoLock lock(mEnumeratorsLock);
+
         if (nullptr == mEnumerators[0]) {
             for (Integer i = 0;  i < mMetadata->mEnumeratorNumber;  i++) {
                 MetaEnumerator *me = mMetadata->mEnumerators[i];
