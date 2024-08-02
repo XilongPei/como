@@ -41,6 +41,7 @@ CMetaMethod::CMetaMethod()
     , mMethodAddr(0)
     , mHotCode(0)
     , mArgListMemory(nullptr)
+    , mReturnType(nullptr)
 {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     /**
@@ -52,10 +53,10 @@ CMetaMethod::CMetaMethod()
     if (FAILED(ec)) {
 
         /**
-         * Use the variable mReturnType to identify whether the object was
+         * Use the variable mMetadata to identify whether the object was
          * successfully constructed.
          */
-        mReturnType = nullptr;
+        mMetadata = nullptr;
 
         Logger::E("CMetaMethod", "BuildAll... failed.");
     }

@@ -659,7 +659,7 @@ ECode CMetaComponent::BuildIInterface()
      * Integer AddRef([in] HANDLE id)
      **/
     CMetaMethod* mmObj = new CMetaMethod();
-    if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
+    if ((nullptr == mmObj) || (nullptr == mmObj->mMetadata)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mmObj->mOwner = miObj;
@@ -697,7 +697,7 @@ ECode CMetaComponent::BuildIInterface()
      * Integer Release([in] HANDLE id)
      **/
     mmObj = new CMetaMethod();
-    if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
+    if ((nullptr == mmObj) || (nullptr == mmObj->mMetadata)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mmObj->mOwner = miObj;
@@ -735,7 +735,7 @@ ECode CMetaComponent::BuildIInterface()
      * IInterface* ClassName::Probe([in] const InterfaceID& iid)
      **/
     mmObj = new CMetaMethod();
-    if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
+    if ((nullptr == mmObj) || (nullptr == mmObj->mMetadata)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mmObj->mOwner = miObj;
@@ -775,7 +775,7 @@ ECode CMetaComponent::BuildIInterface()
      *                                 [out] InterfaceID& iid)
      */
     mmObj = new CMetaMethod();
-    if ((nullptr == mmObj) || (nullptr == mmObj->mReturnType)) {
+    if ((nullptr == mmObj) || (nullptr == mmObj->mMetadata)) {
         return E_OUT_OF_MEMORY_ERROR;
     }
     mmObj->mOwner = miObj;
