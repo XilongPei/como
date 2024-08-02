@@ -42,26 +42,7 @@ CMetaMethod::CMetaMethod()
     , mHotCode(0)
     , mArgListMemory(nullptr)
     , mReturnType(nullptr)
-{
-#ifdef COMO_FUNCTION_SAFETY_RTOS
-    /**
-     * In the functional safety calculation of RTOS, there shall be no dynamic
-     * memory call, and the metadata shall be handled well in advance.
-     */
-    ECode ec;
-    ec = BuildAllParameters();
-    if (FAILED(ec)) {
-
-        /**
-         * Use the variable mMetadata to identify whether the object was
-         * successfully constructed.
-         */
-        mMetadata = nullptr;
-
-        Logger::E("CMetaMethod", "BuildAll... failed.");
-    }
-#endif
-}
+{}
 
 CMetaMethod::CMetaMethod(
     /* [in] */ MetaComponent *mc,
@@ -99,6 +80,25 @@ CMetaMethod::CMetaMethod(
             mReturnType = nullptr;
         }
 #ifdef NOT_REFLECTION_TYPE_EXTERNAL
+    }
+#endif
+
+#ifdef COMO_FUNCTION_SAFETY_RTOS
+    /**
+     * In the functional safety calculation of RTOS, there shall be no dynamic
+     * memory call, and the metadata shall be handled well in advance.
+     */
+    ECode ec;
+    ec = BuildAllParameters();
+    if (FAILED(ec)) {
+
+        /**
+         * Use the variable mMetadata to identify whether the object was
+         * successfully constructed.
+         */
+        mReturnType = nullptr;
+
+        Logger::E("CMetaMethod", "BuildAll... failed.");
     }
 #endif
 }
