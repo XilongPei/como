@@ -297,10 +297,10 @@ TEST(ReflectionTest, TestCoclassGetMethods)
 
         int j = i;
         if (methodOffset != 0) {
-            if ((i >= 4) && (i <= 7)) {
+            if ((i >= 4) && (i < 7)) {
                 continue;
             }
-            else if (i > 7) {
+            else if (i >= 7) {
                 j -= 3;
             }
         }
