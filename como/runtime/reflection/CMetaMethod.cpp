@@ -91,7 +91,6 @@ CMetaMethod::CMetaMethod(
     ECode ec;
     ec = BuildAllParameters();
     if (FAILED(ec)) {
-
         /**
          * Use the variable mMetadata to identify whether the object was
          * successfully constructed.

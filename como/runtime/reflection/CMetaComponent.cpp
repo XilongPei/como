@@ -74,12 +74,18 @@ CMetaComponent::CMetaComponent(
     ECode ec;
     ec = LoadAllClassObjectGetters();
     if (FAILED(ec)) {
+        /**
+         * Use the variable mIInterface to identify whether the object was
+         * successfully constructed.
+         */
         mIInterface = nullptr;
+        return;
     }
 
     ec = BuildIInterface();
     if (FAILED(ec)) {
         mIInterface = nullptr;
+        return;
     }
 
 #ifdef COMO_FUNCTION_SAFETY_RTOS

@@ -160,7 +160,7 @@ ECode CMetaCoclass::GetConstructor(
     for (Integer i = 0;  i < mConstructors.GetLength();  i++) {
         IMetaConstructor* mc = mConstructors[i];
         String mcSig;
-        mc->GetSignature(mcSig);
+        (void)mc->GetSignature(mcSig);
         if (signature.Equals(mcSig)) {
             constr = mc;
             return NOERROR;
@@ -210,8 +210,8 @@ ECode CMetaCoclass::GetInterface(
     for (Integer i = 0;  i < mInterfaces.GetLength();  i++) {
         IMetaInterface* miObj = mInterfaces[i];
         String name, ns;
-        miObj->GetName(name);
-        miObj->GetNamespace(ns);
+        (void)miObj->GetName(name);
+        (void)miObj->GetNamespace(ns);
         if (fullName.Equals(ns + "::" + name)) {
             intf = miObj;
             return NOERROR;
@@ -650,7 +650,7 @@ ECode CMetaCoclass::GetConstant(
 
     for (Integer i = 0;  i < mConstants.GetLength();  i++) {
         String mcName;
-        mConstants[i]->GetName(mcName);
+        (void)mConstants[i]->GetName(mcName);
         if (mcName.Equals(name)) {
             constt = mConstants[i];
             return NOERROR;
