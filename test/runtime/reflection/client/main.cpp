@@ -274,16 +274,38 @@ TEST(ReflectionTest, TestCoclassGetMethods)
         printf("Method: %s    Signature: %s\n", name.string(), sig.string());
     }
 #else
-    EXPECT_EQ(10, methodNumber);
+
+    int methodOffset = 0;
+    AutoPtr<IMetaInterface> intf;
+    klass->GetInterface("como::IComoFunctionSafetyObject", intf);
+    if (nullptr != intf) {
+        methodOffset = 3;
+        EXPECT_EQ(13, methodNumber);
+    }
+    else {
+        EXPECT_EQ(10, methodNumber);
+    }
+
     Array<IMetaMethod*> methods(methodNumber);
     ECode ec = klass->GetAllMethods(methods);
     EXPECT_TRUE(SUCCEEDED(ec));
-    for (Integer i = 0; i < methodNumber; i++) {
+    for (Integer i = 0;  i < methodNumber;  i++) {
         IMetaMethod* method = methods[i];
         String name, sig;
         method->GetName(name);
         method->GetSignature(sig);
-        switch (i) {
+
+        int j = i;
+        if (methodOffset != 0) {
+            if ((i >= 4) && (i <= 7)) {
+                continue;
+            }
+            else if (i > 7) {
+                j -= 3;
+            }
+        }
+
+        switch (j) {
             case 0:
                 EXPECT_STREQ("AddRef", name.string());
                 EXPECT_STREQ("(H)I", sig.string());
@@ -691,4 +713,3 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
-
