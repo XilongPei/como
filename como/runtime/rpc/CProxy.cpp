@@ -1740,6 +1740,7 @@ ECode InterfaceProxy::ProxyEntry(
     Integer methodIndex;
     InterfaceProxy *thisObj;
     Integer offset;
+    ECode ec;
 
     GET_STACK_INTEGER(args, 0, methodIndex);
 
@@ -1761,6 +1762,7 @@ ECode InterfaceProxy::ProxyEntry(
                                                     ns.string(), name.string());
     }
 
+do {
     AutoPtr<IMetaMethod> method;
     thisObj->mTargetMetadata->GetMethod(methodIndex + 4, method);
 
@@ -1772,21 +1774,22 @@ ECode InterfaceProxy::ProxyEntry(
                                              name.string(), signature.string());
     }
 
-    ECode ec;
     AutoPtr<IParcel> inParcel, outParcel;
     RPCType type;
 
     thisObj->mOwner->mChannel->GetRPCType(type);
     ec = CoCreateParcel(type, inParcel);
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 
     ec = inParcel->WriteInteger(RPC_MAGIC_NUMBER);
     ec |= inParcel->WriteInteger(thisObj->mIndex);    // interfaceIndex
     ec |= inParcel->WriteInteger(methodIndex + 4);
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 
     /**
@@ -1797,19 +1800,22 @@ ECode InterfaceProxy::ProxyEntry(
 #if 0
     ec = inParcel->WriteLong(Mac::GetUuid64(uuid64));
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 #else
     uuid64 = ComoContext::gComoContext->gLamportClock->send_event();
     ec = inParcel->WriteLong(Mac::CompoundUuid64(uuid64));
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 #endif
 
     ec = thisObj->MarshalArguments(regs, method, inParcel);
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 
     thisObj->mOwner->mUuidOrder = uuid64;
@@ -1850,19 +1856,22 @@ ECode InterfaceProxy::ProxyEntry(
 
             ec = thisObj->UnmarshalResults(regs, method, outParcel);
         }
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 
 #ifndef COMO_FUNCTION_SAFETY
     ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
     if (FAILED(ec)) {
-        goto ProxyExit;
+        // goto ProxyExit;
+        break;
     }
 #else
     if (0 == thisObj->mTimeout) {
         ec = thisObj->mOwner->mChannel->Invoke(method, inParcel, outParcel);
         if (FAILED(ec)) {
-            goto ProxyExit;
+            // goto ProxyExit;
+            break;
         }
     }
     else {
@@ -1881,7 +1890,8 @@ ECode InterfaceProxy::ProxyEntry(
                                                      method, inParcel, outParcel);
         if (pos < 0) {
             ec = FUNCTION_SAFETY_CALL_OUT_OF_MEMORY;
-            goto ProxyExit;
+            // goto ProxyExit;
+            break;
         }
         int ret = pthread_cond_timedwait(
                             &(ThreadPoolChannelInvoke::mWorkerList[pos]->mCond),
@@ -1897,7 +1907,8 @@ ECode InterfaceProxy::ProxyEntry(
         TPCI_Executor::GetInstance()->CleanTask(pos);
 
         if (FAILED(ec)) {
-            goto ProxyExit;
+            // goto ProxyExit;
+            break;
         }
     }
 #endif
@@ -1925,7 +1936,9 @@ ECode InterfaceProxy::ProxyEntry(
 
     ec = thisObj->UnmarshalResults(regs, method, outParcel);
 
-ProxyExit:
+} while (0);
+// ProxyExit:
+
     Logger::D("CProxy", "Exit ProxyEntry with ec(0x%X)", ec);
 
     return ec;
