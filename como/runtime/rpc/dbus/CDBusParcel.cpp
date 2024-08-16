@@ -941,36 +941,39 @@ void* CDBusParcel::WriteInplace(
 
     const Long padded = ALIGN4(len);
 
-    if (mDataPos + padded < mDataPos) {
+    if ((mDataPos + padded) < mDataPos) {
         return nullptr;
     }
 
-    if ((mDataPos + padded) <= mDataCapacity) {
-restart_write:
-        Byte* const data = mData + mDataPos;
-
-        if (padded != len) {
-#if __BYTE_ORDER == __BIG_ENDIAN
-            static const uint32_t mask[4] = {
-                0x00000000, 0xffffff00, 0xffff0000, 0xff000000
-            };
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-            static const uint32_t mask[4] = {
-                0x00000000, 0x00ffffff, 0x0000ffff, 0x000000ff
-            };
-#endif
-            *reinterpret_cast<uint32_t*>(data + padded - 4) &= mask[padded - len];
+    ECode ec;
+    if ((mDataPos + padded) > mDataCapacity) {
+        ec = GrowData(padded);
+        if (FAILED(ec)) {
+            return nullptr;
         }
-
-        FinishWrite(padded);
-        return data;
     }
 
-    ECode ec = GrowData(padded);
-    if (SUCCEEDED(ec))
-        goto restart_write;
+    Byte* const data = mData + mDataPos;
 
-    return nullptr;
+    if (padded != len) {
+#if __BYTE_ORDER == __BIG_ENDIAN
+        static const uint32_t mask[4] = {
+            0x00000000, 0xffffff00, 0xffff0000, 0xff000000
+        };
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+        static const uint32_t mask[4] = {
+            0x00000000, 0x00ffffff, 0x0000ffff, 0x000000ff
+        };
+#endif
+        *reinterpret_cast<uint32_t*>(data + padded - 4) &= mask[padded - len];
+    }
+
+    ec = FinishWrite(padded);
+    if (FAILED(ec)) {
+        return nullptr;
+    }
+
+    return data;
 }
 
 ECode CDBusParcel::FinishWrite(
@@ -1121,18 +1124,15 @@ ECode CDBusParcel::WriteAligned(
         mDataPos = ALIGN8(mDataPos);
     }
 
-    if ((mDataPos + sizeof(value)) <= mDataCapacity) {
-restart_write:
-        *reinterpret_cast<T*>(mData + mDataPos) = value;
-        return FinishWrite(sizeof(value));
+    if ((mDataPos + sizeof(value)) > mDataCapacity) {
+        ECode ec = GrowData(mDataPos - oldDataPos + sizeof(value));
+        if (FAILED(ec)) {
+            return ec;
+        }
     }
 
-    ECode ec = GrowData(mDataPos - oldDataPos + sizeof(value));
-    if (SUCCEEDED(ec)) {
-        goto restart_write;
-    }
-
-    return ec;
+    *reinterpret_cast<T*>(mData + mDataPos) = value;
+    return FinishWrite(sizeof(value));
 }
 
 ECode CDBusParcel::CreateObject(

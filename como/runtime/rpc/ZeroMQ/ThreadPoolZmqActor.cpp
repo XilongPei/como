@@ -112,6 +112,11 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
             continue;
         }
 
+        /**
+         * The goto statement here, if removed by the `do {} while (0);` method,
+         * will cause confusion due to the break in the do-while loop and the
+         * break in the switch-case.
+         */
         switch (eventCode) {
             case ZmqFunCode::Method_Invoke: {
                 AutoPtr<IParcel> resParcel;

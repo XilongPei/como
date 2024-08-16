@@ -230,15 +230,15 @@ private:
 
     static CMemPool *memPool;
 
-    ECode mError;
-    Byte* mData;
-    Long mDataSize;
-    Long mDataCapacity;
-    mutable Long mDataPos;
-    Byte mBuffer[MAX_BUFFER_SIZE];
+    ECode           mError;
+    Byte           *mData;
+    Long            mDataSize;
+    Long            mDataCapacity;
+    mutable Long    mDataPos;
+    Byte            mBuffer[MAX_BUFFER_SIZE];
 
-    String mServerName;
-    Long   mProxyId;
+    String          mServerName;
+    Long            mProxyId;
 };
 
 inline static CZMQParcel* From(
