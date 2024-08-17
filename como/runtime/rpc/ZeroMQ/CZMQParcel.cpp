@@ -311,7 +311,7 @@ ECode CZMQParcel::WriteComponentID(
     memcpy(cid, &value, sizeof(ComponentID));
     cid->mUri = nullptr;
 
-    Integer size = (nullptr == value.mUri) ? 0 : strlen(value.mUri);
+    Integer size = ((nullptr == value.mUri) ? 0 : strlen(value.mUri));
     ECode ec = WriteInteger(size);
     if ((size > 0) && SUCCEEDED(ec)) {
         ec = Write(value.mUri, size + 1);
@@ -955,8 +955,9 @@ void* CZMQParcel::WriteInplace(
         return nullptr;
     }
 
+    ECode ec;
     if ((mDataPos + padded) > mDataCapacity) {
-        ECode ec = GrowData(padded);
+        ec = GrowData(padded);
         if (FAILED(ec)) {
             return nullptr;
         }
@@ -967,11 +968,11 @@ void* CZMQParcel::WriteInplace(
     if (padded != len) {
 #if __BYTE_ORDER == __BIG_ENDIAN
         static const uint32_t mask[4] = {
-            0x00000000, 0xffffff00, 0xffff0000, 0xff000000
+            0x00000000U, 0xffffff00U, 0xffff0000U, 0xff000000U
         };
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
         static const uint32_t mask[4] = {
-            0x00000000, 0x00ffffff, 0x0000ffff, 0x000000ff
+            0x00000000U, 0x00ffffffU, 0x0000ffffU, 0x000000ffU
         };
 #endif
         *reinterpret_cast<uint32_t*>(data + padded - 4) &= mask[padded - len];
@@ -1047,7 +1048,8 @@ ECode CZMQParcel::RestartWrite(
         mDataCapacity = desired;
     }
 
-    mDataSize = mDataPos = 0;
+    mDataSize = 0;
+    mDataPos = 0;
     return NOERROR;
 }
 
