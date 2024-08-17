@@ -401,7 +401,9 @@ ECode CDBusParcel::ReadArray(
         t->mData = nullptr;
         t->mSize = 0;
         t->mType = kind;
-        return FAILED(ec) ? ec : (size < 0) ? E_RUNTIME_EXCEPTION : NOERROR;
+        return FAILED(ec) ? ec
+                          : ((size < 0) ? E_RUNTIME_EXCEPTION
+                                        : NOERROR);
     }
 
     switch (kind) {
@@ -924,6 +926,8 @@ ECode CDBusParcel::Write(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    mError = NOERROR;
+
     void* const d = WriteInplace(len);
     if (d != nullptr) {
         memcpy(d, data, len);
@@ -955,6 +959,9 @@ void* CDBusParcel::WriteInplace(
 
     Byte* const data = mData + mDataPos;
 
+    /**
+     * Set the memory used for alignment to 0U.
+     */
     if (padded != len) {
 #if __BYTE_ORDER == __BIG_ENDIAN
         static const uint32_t mask[4] = {

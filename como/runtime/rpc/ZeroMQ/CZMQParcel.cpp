@@ -405,7 +405,9 @@ ECode CZMQParcel::ReadArray(
         t->mData = nullptr;
         t->mSize = 0;
         t->mType = kind;
-        return FAILED(ec) ? ec : ((size < 0) ? E_RUNTIME_EXCEPTION : NOERROR);
+        return FAILED(ec) ? ec
+                          : ((size < 0) ? E_RUNTIME_EXCEPTION
+                                        : NOERROR);
     }
 
     switch (kind) {
@@ -608,7 +610,7 @@ ECode CZMQParcel::ReadArray(
         }
         case TypeKind::Interface: {
             Array<IInterface*> intfArray(size);
-            for (Long i = 0; i < size; i++) {
+            for (Long i = 0;  i < size;  i++) {
                 AutoPtr<IInterface> obj;
                 ec = ReadInterface(obj);
                 if (FAILED(ec)) {
@@ -682,7 +684,7 @@ ECode CZMQParcel::WriteArray(
             break;
         }
         case TypeKind::CoclassID: {
-            for (Long i = 0; i < t->mSize; i++) {
+            for (Long i = 0;  i < t->mSize;  i++) {
                 const CoclassID& cid = reinterpret_cast<CoclassID*>(t->mData)[i];
                 ec = WriteCoclassID(cid);
                 if (FAILED(ec)) {
@@ -934,6 +936,8 @@ ECode CZMQParcel::Write(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
+    mError = NOERROR;
+
     void* const d = WriteInplace(len);
     if (d != nullptr) {
         memcpy(d, data, len);
@@ -965,6 +969,9 @@ void* CZMQParcel::WriteInplace(
 
     Byte* const data = mData + mDataPos;
 
+    /**
+     * Set the memory used for alignment to 0U.
+     */
     if (padded != len) {
 #if __BYTE_ORDER == __BIG_ENDIAN
         static const uint32_t mask[4] = {
