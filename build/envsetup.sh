@@ -3,24 +3,25 @@
 function help()
 {
 cat <<EOF
-- help:                 this screen.
-- comotools:            Switch to build como tools.
-- como_linux_x64:       Switch to build como for linux x64.
-- como_linux_aarch64:   Switch to build como for linux aarch64.
-- como_linux_riscv64:   Switch to build como for linux riscv64.
-- como_linux_x32:       Switch to build como for linux x32.
-- como_linux_aarch32:   Switch to build como for linux aarch32.
-- como_linux_riscv32:   Switch to build como for linux riscv32.
-- como_android_aarch64: Switch to build como for android aarch64.
-- como_openEuler_riscv: Switch to build como for openEuler RISC-V.
-- debug:                Switch to build debug version.
-- release:              Switch to build release version.
-- build:                Build source codes.
-- build install:        Build source codes and install the building results.
-- rebuild:              Rebuild source codes.
-- rebuild install:      Rebuild source codes and install the building results.
-- clobber:              Clean the building results and generated files of the current project.
-- clobber all:          Clean all of the building results and generated files.
+- help:                     this screen.
+- comotools:                Switch to build como tools.
+- como_linux_x64:           Switch to build como for linux x64.
+- como_linux_aarch64:       Switch to build como for linux aarch64.
+- como_linux_riscv64:       Switch to build como for linux riscv64.
+- como_linux_x32:           Switch to build como for linux x32.
+- como_linux_aarch32:       Switch to build como for linux aarch32.
+- como_linux_riscv32:       Switch to build como for linux riscv32.
+- como_android_aarch64:     Switch to build como for android aarch64.
+- como_openEuler_aarch64:   Switch to build como for openEuler aarch64.
+- como_openEuler_riscv:     Switch to build como for openEuler RISC-V.
+- debug:                    Switch to build debug version.
+- release:                  Switch to build release version.
+- build:                    Build source codes.
+- build install:            Build source codes and install the building results.
+- rebuild:                  Rebuild source codes.
+- rebuild install:          Rebuild source codes and install the building results.
+- clobber:                  Clean the building results and generated files of the current project.
+- clobber all:              Clean all of the building results and generated files.
 EOF
 }
 
@@ -203,6 +204,53 @@ function como_android_aarch64()
     export CDLC=$ROOT/tools/x64/cdlc
 
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin
+
+    if [ ! -d "$ROOT/out/target" ]; then
+        mkdir $ROOT/out/target
+    fi
+
+    if [ ! -d "$OUT_PATH" ]; then
+        mkdir $OUT_PATH
+    fi
+
+    if [ ! -d "$ROOT/bin/target" ]; then
+        mkdir $ROOT/bin/target
+    fi
+
+    if [ ! -d "$BIN_PATH" ]; then
+        mkdir $BIN_PATH
+    fi
+
+    cd $OUT_PATH
+
+    if [ ! -f "$OUT_PATH/CMakeCache.txt" ]; then
+        TOOLCHAIN_FILE="$ROOT/build/$PRODUCT"_"$PLATFORM"_"$ARCH.cmake"
+        if [ "$VERSION" == "rls" ]; then
+            BUILD_TYPE=Release
+        else
+            BUILD_TYPE=Debug
+        fi
+        cmake -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=$BUILD_TYPE $ROOT
+    fi
+}
+
+function como_openEuler_aarch64()
+{
+    export PRODUCT=como
+    export PLATFORM=openEuler
+    export ARCH=aarch64
+    export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
+    export OUT_PATH=$ROOT/out/target/$BUILD
+    export BIN_PATH=$ROOT/bin/target/$BUILD
+    export DATA_PATH=
+    export COMORT_PATH=$BIN_PATH/comort.so
+    export CLASS_PATH=
+    export COMO_ROOT=
+
+    # The host environment supports only x64
+    export CDLC=$ROOT/tools/x64/cdlc
+
+    export PATH=$PATH:$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin
 
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target

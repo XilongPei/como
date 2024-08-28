@@ -1,4 +1,5 @@
 out/
 bin/
+prebuilt/
 .vscode/
 .clang-format
