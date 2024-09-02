@@ -127,6 +127,20 @@ if("$ENV{PLATFORM}" STREQUAL "linux")
             -Wl,--whole-archive
             -Wl,--no-whole-archive)
     endif()
+elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
+            rpc-dbus
+            ${RPC_ZeroMQ_LIBS}
+            -Wl,--no-whole-archive)
+    else()
+        set(COMORT_LINK_LIBS
+            ${COMORT_LINK_LIBS}
+            -Wl,--whole-archive
+            -Wl,--no-whole-archive)
+    endif()
 elseif("$ENV{PLATFORM}" STREQUAL "android")
     if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         set(COMORT_LINK_LIBS
@@ -154,7 +168,19 @@ add_library(comort
 target_link_libraries(comort
     ${COMORT_LINK_LIBS}
     dl)
+
 if("$ENV{PLATFORM}" STREQUAL "linux")
+    if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+        target_link_libraries(comort
+            pthread
+            ${RPC_ZeroMQ_SYS_LIBS}
+            ${PhxpaxosLib}
+            dbus-1)
+    else()
+        target_link_libraries(comort
+            pthread)
+    endif()
+elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
     if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         target_link_libraries(comort
             pthread

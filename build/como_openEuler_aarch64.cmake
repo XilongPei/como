@@ -10,58 +10,60 @@ set(GCC_DIR $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linu
 set(CROSS_PATH $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin/aarch64-openeuler-linux-)
 set(CMAKE_SYSROOT $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
 
-set(PREBUILT_DIR $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt/aarch64-openeuler-linux)
-set(PREBUILT_INC ${PREBUILT_DIR}/usr/include)
+set(PREBUILT_DIR $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
+set(PREBUILT_INC ${PREBUILT_DIR}/usr/include/c++/10.3.1)
+
+#prebuilt/aarch64-openeuler-linux/prebuilt/usr/include/c++/10.3.1
+#./prebuilt/usr/include/c++/10.3.1/aarch64-openeuler-linux-gnu/bits/c++config.h
+
 set(PREBUILT_LIB ${PREBUILT_DIR}/usr/lib64)
 
 set(CMAKE_C_COMPILER ${CROSS_PATH}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_PATH}g++)
+set(CMAKE_LINKER "${CROSS_PATH}ld --sysroot=$CMAKE_SYSROOT")
 
 set(CMAKE_SHARED_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 set(CMAKE_STATIC_LIBRARY_PREFIX_CXX "" CACHE STRING "" FORCE)
 
 include_directories(
     ${PREBUILT_INC}
-    ${PREBUILT_INC}/libcxx
-    ${PREBUILT_INC}/libcxxabi
-    ${PREBUILT_INC}/asm-arm64
-    ${PREBUILT_INC}/arch-arm64)
+    ${PREBUILT_INC}/aarch64-openeuler-linux-gnu
+)
 
 set(COMMON_C_FLAGS "\
-    -D__openEuler__ \
-    -fPIC -ffunction-sections -fdata-sections -fstack-protector -fno-short-enums -fmessage-length=0 \
+    -D__openEuler__ -mno-outline-atomics \
+    -fPIC -ffunction-sections -fdata-sections -fno-short-enums -fmessage-length=0 \
     -no-canonical-prefixes -Wno-nullability-completeness -Wno-extern-c-compat \
-    -mlittle-endian -fstack-protector-strong  -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security \
+    -mlittle-endian -fstack-protector-strong -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security \
     -Werror=format-security --sysroot=${CMAKE_SYSROOT}")
 
 set(COMMON_CXX_FLAGS
     "${COMMON_C_FLAGS} -std=c++14 -fno-exceptions -fno-rtti")
 
-set(DYNAMIC_LINKER
-    "-Wl,-dynamic-linker,/system/bin/linker64")
-set(SO_CRT "\
-    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
-    ${PREBUILT_DIR}/usr/lib64/crtend_so.o")
-set(EXE_CRT "\
-    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
-    ${PREBUILT_DIR}/usr/lib64/crtend_android.o")
+#set(DYNAMIC_LINKER
+#    "-Wl,-dynamic-linker,/system/bin/linker64")
+#set(SO_CRT "\
+#    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
+#    ${PREBUILT_DIR}/usr/lib64/crtend_so.o")
+#set(EXE_CRT "\
+#    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
+#    ${PREBUILT_DIR}/usr/lib64/crtend_android.o")
 set(LIBC
-    "-lc -lc++ -lcompiler_rt")
+    "-lc -lstdc++")
 
 set(COMMON_LINKER_FLAGS "\
-    -B${GCC_DIR}/bin -fuse-ld=gold -nostdlib \
+    -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed -Wl,--build-id=sha1 -Wl,-z,noexecstack -Wl,-z,relro,-z,now \
+    -B${GCC_DIR}/bin -fuse-ld=gold --sysroot=${CMAKE_SYSROOT} \
     -Wl,-X -Wl,--gc-sections \
     ${LIBC}")
 
 set(COMMON_SHARED_LINKER_FLAGS "\
     -shared -fPIC ${COMMON_LINKER_FLAGS} \
-    -Wl,--no-undefined,--no-undefined-version -Wl,--hash-style=gnu \
-    ${SO_CRT} ${PREBUILT_DIR}/usr/lib64/libgcc.a")
+    -Wl,--no-undefined,--no-undefined-version -Wl,--hash-style=gnu")
 
 set(COMMON_EXE_LINKER_FLAGS "\
     -Bdynamic -pie ${COMMON_LINKER_FLAGS} \
-    -Wl,--entry,_start -Wl,-z,nocopyreloc \
-    ${EXE_CRT}")
+    -Wl,--entry,_start -Wl,-z,nocopyreloc")
 
 if($ENV{VERSION} STREQUAL "rls")
     set(CMAKE_C_FLAGS

@@ -59,9 +59,8 @@ elseif($ENV{PLATFORM} STREQUAL "android")
 elseif($ENV{PLATFORM} STREQUAL "openEuler")
     set(SOURCES
         ${SOURCES}
-        invoke_riscv64.s)
-    set_source_files_properties(invoke_riscv64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
-
+        invoke_$ENV{ARCH}.s)
+    set_source_files_properties(invoke_$ENV{ARCH}.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
 endif()
 
 add_library(reflection STATIC
