@@ -182,29 +182,42 @@ else()
 endif()
 
 if($ENV{PLATFORM} STREQUAL "linux")
-target_link_libraries(libcore
-    ${LIBCORE_LINK_LIBS}
-    comort.so
-    ${MATH_BIG_NUMBER_LIB}
-    dl
-    pthread
-    unwind
-    icuuc
-    icui18n
-#   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
-    $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
-add_dependencies(libcore deploy_boringssl_libraries)
+    target_link_libraries(libcore
+        ${LIBCORE_LINK_LIBS}
+        comort.so
+        ${MATH_BIG_NUMBER_LIB}
+        dl
+        pthread
+        unwind
+        icuuc
+        icui18n
+    #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
+        $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
+    add_dependencies(libcore deploy_boringssl_libraries)
+elseif($ENV{PLATFORM} STREQUAL "openEuler")
+    target_link_libraries(libcore
+        ${LIBCORE_LINK_LIBS}
+        comort.so
+        ${MATH_BIG_NUMBER_LIB}
+        dl
+        pthread
+        unwind
+        icuuc
+        icui18n
+    #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
+        $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
+    add_dependencies(libcore deploy_boringssl_libraries)
 elseif($ENV{PLATFORM} STREQUAL "android")
-target_link_libraries(libcore
-    ${LIBCORE_LINK_LIBS}
-    comort.so
-    m
-    dl
-    cutils
-    crypto
-    icuuc
-    icui18n
-    fdlibm.a)
+    target_link_libraries(libcore
+        ${LIBCORE_LINK_LIBS}
+        comort.so
+        m
+        dl
+        cutils
+        crypto
+        icuuc
+        icui18n
+        fdlibm.a)
 endif()
 
 add_custom_command(
@@ -222,5 +235,3 @@ add_custom_command(
 MKDIR(libcore ${INC_DIR}/core)
 
 COPY(libcore ${LIBCORE_OBJ_DIR}/libcore.so ${BIN_DIR})
-
-

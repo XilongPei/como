@@ -33,12 +33,12 @@ include_directories(
 set(COMMON_C_FLAGS "\
     -D__openEuler__ -mno-outline-atomics \
     -fPIC -ffunction-sections -fdata-sections -fno-short-enums -fmessage-length=0 \
-    -no-canonical-prefixes -Wno-nullability-completeness -Wno-extern-c-compat \
+    -no-canonical-prefixes \
     -mlittle-endian -fstack-protector-strong -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security \
     -Werror=format-security --sysroot=${CMAKE_SYSROOT}")
 
 set(COMMON_CXX_FLAGS
-    "${COMMON_C_FLAGS} -std=c++14 -fno-exceptions -fno-rtti")
+    "${COMMON_C_FLAGS} -std=gnu++11 -fno-exceptions -fno-rtti")
 
 #set(DYNAMIC_LINKER
 #    "-Wl,-dynamic-linker,/system/bin/linker64")
