@@ -16,7 +16,7 @@
 
 set(CORE_DIR ${LIBCORE_COMO_SRC_DIR}/core)
 
-if($ENV{PLATFORM} STREQUAL "linux")
+if("$ENV{PLATFORM}" STREQUAL "linux")
     include_directories(
         ./
         ../
@@ -24,8 +24,9 @@ if($ENV{PLATFORM} STREQUAL "linux")
     #    ${EXTERNAL_DIR}/fdlibm53/inc
         ${EXTERNAL_DIR}/fdlibm/src
         ${INC_DIR}
-        ${LIBCORE_OBJ_DIR})
-elseif($ENV{PLATFORM} STREQUAL "openEuler")
+        ${LIBCORE_OBJ_DIR}
+    )
+elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
     include_directories(
         ./
         ../
@@ -33,14 +34,17 @@ elseif($ENV{PLATFORM} STREQUAL "openEuler")
     #    ${EXTERNAL_DIR}/fdlibm53/inc
         ${EXTERNAL_DIR}/fdlibm/src
         ${INC_DIR}
-        ${LIBCORE_OBJ_DIR})
-elseif($ENV{PLATFORM} STREQUAL "android")
+        ${LIBCORE_OBJ_DIR}
+        ${EXTERNAL_DIR}/../prebuilt/icu4c/icu4c/source/common
+    )
+elseif("$ENV{PLATFORM}" STREQUAL "android")
     include_directories(
         ./
         ../
         ../../../inc
         ${INC_DIR}
-        ${LIBCORE_OBJ_DIR})
+        ${LIBCORE_OBJ_DIR}
+    )
 endif()
 
 set(SOURCES

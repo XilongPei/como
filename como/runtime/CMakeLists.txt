@@ -100,7 +100,8 @@ if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         type
         util
         RuntimeMonitor
-        -Wl,--no-whole-archive)
+        -Wl,--no-whole-archive
+    )
 else()
     set(COMORT_LINK_LIBS
         -Wl,--whole-archive
@@ -110,7 +111,8 @@ else()
         reflection
         type
         util
-        -Wl,--no-whole-archive)
+        -Wl,--no-whole-archive
+    )
 endif()
 
 if("$ENV{PLATFORM}" STREQUAL "linux")
@@ -120,7 +122,8 @@ if("$ENV{PLATFORM}" STREQUAL "linux")
             -Wl,--whole-archive
             rpc-dbus
             ${RPC_ZeroMQ_LIBS}
-            -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive
+        )
     else()
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
@@ -132,14 +135,16 @@ elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
-            rpc-dbus
+            #rpc-dbus
             ${RPC_ZeroMQ_LIBS}
-            -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive
+        )
     else()
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
-            -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive
+        )
     endif()
 elseif("$ENV{PLATFORM}" STREQUAL "android")
     if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
@@ -153,12 +158,14 @@ elseif("$ENV{PLATFORM}" STREQUAL "android")
             #rpc-binder
             rpc-dbus
 
-            -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive
+        )
     else()
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
-            -Wl,--no-whole-archive)
+            -Wl,--no-whole-archive
+        )
     endif()
 endif()
 
@@ -175,7 +182,8 @@ if("$ENV{PLATFORM}" STREQUAL "linux")
             pthread
             ${RPC_ZeroMQ_SYS_LIBS}
             ${PhxpaxosLib}
-            dbus-1)
+            dbus-1
+        )
     else()
         target_link_libraries(comort
             pthread)
@@ -186,7 +194,8 @@ elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
             pthread
             ${RPC_ZeroMQ_SYS_LIBS}
             ${PhxpaxosLib}
-            dbus-1)
+            dbus-1
+        )
     else()
         target_link_libraries(comort
             pthread)
@@ -200,10 +209,12 @@ elseif("$ENV{PLATFORM}" STREQUAL "android")
             #binder
             dbus-1
             log
-            utils)
+            utils
+        )
     else()
         target_link_libraries(comort
-            ${PREBUILT_DIR}/usr/lib/libc++.so)
+            ${PREBUILT_DIR}/usr/lib/libc++.so
+        )
     endif()
 endif()
 
