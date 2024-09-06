@@ -202,8 +202,8 @@ elseif($ENV{PLATFORM} STREQUAL "openEuler")
         dl
         pthread
         unwind
-        icuuc
-        icui18n
+        ${EXTERNAL_DIR}/../prebuilt/icu4c/como_export/lib/libicuuc.so
+        ${EXTERNAL_DIR}/../prebuilt/icu4c/como_export/lib/libicui18n.so
     #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)
         $ENV{OUT_PATH}/external/fdlibm/libfdlibm.a)
     add_dependencies(libcore deploy_boringssl_libraries)

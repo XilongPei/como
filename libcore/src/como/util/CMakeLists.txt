@@ -16,6 +16,12 @@
 
 set(UTIL_DIR ${LIBCORE_COMO_SRC_DIR}/util)
 
+if("$ENV{PLATFORM}" STREQUAL "openEuler")
+    include_directories(
+        ${EXTERNAL_DIR}/../prebuilt/icu4c/icu4c/source/common
+    )
+endif()
+
 include_directories(
     ./
     ../

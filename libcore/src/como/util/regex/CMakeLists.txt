@@ -16,6 +16,12 @@
 
 set(REGEX_DIR ${UTIL_DIR}/regex)
 
+if("$ENV{PLATFORM}" STREQUAL "openEuler")
+    include_directories(
+        ${EXTERNAL_DIR}/../prebuilt/icu4c/icu4c/source/i18n
+    )
+endif()
+
 include_directories(
     ./
     ../
