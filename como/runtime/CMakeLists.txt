@@ -135,7 +135,7 @@ elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
         set(COMORT_LINK_LIBS
             ${COMORT_LINK_LIBS}
             -Wl,--whole-archive
-            #rpc-dbus
+            rpc-dbus
             ${RPC_ZeroMQ_LIBS}
             -Wl,--no-whole-archive
         )
