@@ -201,7 +201,7 @@ elseif($ENV{PLATFORM} STREQUAL "openEuler")
         ${MATH_BIG_NUMBER_LIB}
         dl
         pthread
-        unwind
+        ${EXTERNAL_DIR}/../prebuilt/libunwind/build/src/.libs/libunwind.so
         ${EXTERNAL_DIR}/../prebuilt/icu4c/como_export/lib/libicuuc.so
         ${EXTERNAL_DIR}/../prebuilt/icu4c/como_export/lib/libicui18n.so
     #   ${EXTERNAL_DIR}/fdlibm53/lib/libm.a)

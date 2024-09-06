@@ -36,6 +36,8 @@ elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
         ${INC_DIR}
         ${LIBCORE_OBJ_DIR}
         ${EXTERNAL_DIR}/../prebuilt/icu4c/icu4c/source/common
+        ${EXTERNAL_DIR}/../prebuilt/libunwind/build/include
+        ${EXTERNAL_DIR}/../prebuilt/libunwind/include
     )
 elseif("$ENV{PLATFORM}" STREQUAL "android")
     include_directories(
