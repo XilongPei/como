@@ -246,7 +246,12 @@ function como_openEuler_aarch64()
     export COMORT_PATH=$BIN_PATH/comort.so
     export CLASS_PATH=
     export COMO_ROOT=
-    export COMO_WITH_RPC=rpc1
+
+    # to disable some config
+    # export xxx=no_......
+    export COMO_WITH_ICU=icu
+    export COMO_WITH_RPC=no_rpc
+    export COMO_WITH_MATH_BIG_NUMBER=bn
 
     # The host environment supports only x64
     export CDLC=$ROOT/tools/x64/cdlc
