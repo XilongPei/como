@@ -9,7 +9,4 @@ git clone https://gitee.com/tjopenlab/icu4c
 rm -rf libunwind
 git clone https://gitee.com/tjopenlab/libunwind
 
-rm -rf phxpaxos
-git clone https://gitee.com/tjopenlab/phxpaxos
-
 cd ..
