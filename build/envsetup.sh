@@ -244,8 +244,10 @@ function como_openEuler_aarch64()
     export BIN_PATH=$ROOT/bin/target/$BUILD
     export DATA_PATH=
     export COMORT_PATH=$BIN_PATH/comort.so
+    export CLASS_PATH=$BIN_PATH/libcore.so
     export CLASS_PATH=
     export COMO_ROOT=
+    export LIB_PATH=$BIN_PATH
 
     # to disable some config
     # export xxx=no_......
