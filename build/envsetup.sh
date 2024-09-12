@@ -260,6 +260,10 @@ function como_openEuler_aarch64()
 
     export PATH=$PATH:$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin
 
+    if [ ! -d "$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin" ]; then
+        echo "The cross-compilation toolchain does not exist, Run GetPrebuilts.sh first.\n"
+    fi
+
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target
     fi
