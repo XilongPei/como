@@ -261,7 +261,7 @@ function como_openEuler_aarch64()
     export PATH=$PATH:$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin
 
     if [ ! -d "$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin" ]; then
-        echo "The cross-compilation toolchain does not exist, Run GetPrebuilts.sh first.\n"
+        echo -e "The cross-compilation toolchain $ROOT/prebuilt/aarch64-openeuler-linux does not exist, Run GetPrebuilts.sh first.\n"
     fi
 
     if [ ! -d "$ROOT/out/target" ]; then
@@ -310,6 +310,10 @@ function como_openEuler_riscv()
     export CDLC=$ROOT/tools/x64/cdlc
 
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin
+
+    if [ ! -d "$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin" ]; then
+        echo -e "The cross-compilation toolchain $ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin does not exist.\n"
+    fi
 
     if [ ! -d "$ROOT/out/target" ]; then
         mkdir $ROOT/out/target
