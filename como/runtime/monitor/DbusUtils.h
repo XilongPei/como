@@ -14,11 +14,14 @@
 // limitations under the License.
 //=========================================================================
 
+#include <dbus/dbus.h>
+
 namespace como {
 
 class DbusUtils {
 public:
     static int SendSignalWithArray(const char *signalName, const void* data, int size);
+    static DBusMessage *ListenForMsg(const char *signalName, int milliseconds);
 
 private:
     static constexpr const char* MONITOR_OBJECT_PATH = "/como/monitor/CRuntime";

@@ -14,7 +14,6 @@
 // limitations under the License.
 //=========================================================================
 
-#include <dbus/dbus.h>
 #include "util/comolog.h"
 #include "DbusUtils.h"
 
@@ -22,6 +21,9 @@ namespace como {
 
 DBusConnection *DbusUtils::mConn = nullptr;
 
+/**
+ * SendSignalWithArray
+ */
 int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int size)
 {
     DBusMessage    *msg;
@@ -96,6 +98,29 @@ int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int
     dbus_message_unref(msg);
 
     return iRet;
+}
+
+/**
+ * ListenForMessages
+ */
+DBusMessage *DbusUtils::ListenForMsg(const char *signalName, int milliseconds)
+{
+    DBusMessage *msg;
+
+    if (dbus_connection_read_write(mConn, milliseconds)) {
+        msg = dbus_connection_pop_message(mConn);
+        if (nullptr == msg) {
+            return nullptr;
+        }
+
+        if (dbus_message_is_signal(msg, MONITOR_INTERFACE_PATH, signalName)) {
+            return msg;
+        }
+
+        //dbus_message_unref(msg);
+    }
+
+    return nullptr;
 }
 
 } // namespace como

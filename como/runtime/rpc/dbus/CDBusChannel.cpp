@@ -73,6 +73,15 @@ ECode CDBusChannel::ServiceRunnable::Run()
 
     dbus_error_init(&err);
 
+    /** dbus_bus_get_private()
+     *
+     * Connects to a bus daemon and registers the client with it as with
+     * dbus_bus_register().
+     * Unlike dbus_bus_get(), always creates a new connection. This connection
+     * will not be saved or recycled by libdbus. Caller owns a reference to the
+     * bus and must either close it or know it to be closed prior to releasing
+     * this reference.
+     */
     DBusConnection* conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
         Logger::E("CDBusChannel::ServiceRunnable::Run",
@@ -672,6 +681,8 @@ ECode CDBusChannel::IsPeerAlive(
 
     dbus_error_init(&err);
 
+    /** dbus_bus_get_private(), see above.
+     */
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
 do {
@@ -771,6 +782,8 @@ ECode CDBusChannel::ReleasePeer(
 
     dbus_error_init(&err);
 
+    /** dbus_bus_get_private(), see above.
+     */
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
 do {
@@ -900,6 +913,8 @@ do {
 
     dbus_error_init(&err);
 
+    /** dbus_bus_get_private(), see above.
+     */
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
     if (dbus_error_is_set(&err)) {
@@ -1009,6 +1024,8 @@ ECode CDBusChannel::Invoke(
 
     dbus_error_init(&err);
 
+    /** dbus_bus_get_private(), see above.
+     */
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
 
 do {
@@ -1201,6 +1218,9 @@ ECode CDBusChannel::ReleaseObject(
 
 do {
     dbus_error_init(&err);
+
+    /** dbus_bus_get_private(), see above.
+     */
     conn = dbus_bus_get_private(DBUS_BUS_SESSION, &err);
     if (dbus_error_is_set(&err)) {
         Logger_E("CDBusChannel::ReleaseObject",
