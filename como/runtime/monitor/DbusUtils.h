@@ -18,7 +18,7 @@ namespace como {
 
 class DbusUtils {
 public:
-    int SendSignalWithArray(const char *signelName, const void* data, int size);
+    static int SendSignalWithArray(const char *signalName, const void* data, int size);
 
 private:
     static constexpr const char* MONITOR_OBJECT_PATH = "/como/monitor/CRuntime";

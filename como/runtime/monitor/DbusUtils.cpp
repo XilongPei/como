@@ -20,14 +20,14 @@
 
 namespace como {
 
-int DbusUtils::SendSignalWithArray(const char *signelName, const void* data, int size)
+int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int size)
 {
     DBusConnection *conn;
     DBusError       err;
     DBusMessage    *msg;
     DBusMessageIter args, subArg;
 
-    if ((nullptr == signelName) || (nullptr == data)) {
+    if ((nullptr == signalName) || (nullptr == data)) {
         return -1;
     }
 
@@ -44,7 +44,7 @@ int DbusUtils::SendSignalWithArray(const char *signelName, const void* data, int
     }
 
     msg = dbus_message_new_signal(MONITOR_OBJECT_PATH,
-                                            MONITOR_INTERFACE_PATH, signelName);
+                                            MONITOR_INTERFACE_PATH, signalName);
     if (nullptr == msg) {
         Logger::E("DbusUtils::SendSignalWithString", "Message Null");
         return -3;

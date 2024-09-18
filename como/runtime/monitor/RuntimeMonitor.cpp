@@ -28,6 +28,9 @@
 #include "RuntimeMonitor.h"
 #include "MarshalUtils.h"
 #include "CpuCoreUtils.h"
+#ifdef COMO_WITH_RPC
+#include "DbusUtils.h"
+#endif
 
 namespace como {
 
@@ -463,6 +466,14 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
             return E_OUT_OF_MEMORY_ERROR;
         }
 
+#ifdef COMO_WITH_RPC
+        int ret = DbusUtils::SendSignalWithArray("COMO_Monitor",
+                                    rtm_InvokeMethod, rtm_InvokeMethod->length);
+        if (ret < 0) {
+            ;
+        }
+#endif
+
 #ifndef COMO_FUNCTION_SAFETY_RTOS
         free(rtm_InvokeMethod);
 #endif
@@ -494,6 +505,14 @@ ECode RuntimeMonitor::WriteRtmInvokeMethod(Long uuid64,
 #endif
             return E_OUT_OF_MEMORY_ERROR;
         }
+
+#ifdef COMO_WITH_RPC
+        int ret = DbusUtils::SendSignalWithArray("COMO_Monitor",
+                                    rtm_InvokeMethod, rtm_InvokeMethod->length);
+        if (ret < 0) {
+            ;
+        }
+#endif
 
 #ifndef COMO_FUNCTION_SAFETY_RTOS
         free(rtm_InvokeMethod);

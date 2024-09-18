@@ -20,6 +20,19 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
     add_definitions(-DRPC_OVER_ZeroMQ_SUPPORT)
 endif()
 
+if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
+    set(MonitorWithDbus_Include
+        /usr/include/dbus-1.0
+        /usr/lib/x86_64-linux-gnu/dbus-1.0/include
+    )
+    set(MonitorWithDbus_Sources
+        DbusUtils.cpp
+    )
+else()
+    set(MonitorWithDbus_Include)
+    set(MonitorWithDbus_Sources)
+endif()
+
 include_directories(
     ./
     ../
@@ -33,15 +46,14 @@ include_directories(
     ${EXTERNAL_DIR}/circularbuffer
     ${EXTERNAL_DIR}/inih
     ${EXTERNAL_DIR}/lwrb
-    /usr/include/dbus-1.0
-    /usr/lib/x86_64-linux-gnu/dbus-1.0/include
+    ${MonitorWithDbus_Include}
 )
 
 set(SOURCES
     RuntimeMonitor.cpp
     CpuCoreUtils.cpp
     MarshalUtils.cpp
-    DbusUtils.cpp
+    ${MonitorWithDbus_Sources}
     ${EXTERNAL_DIR}/lwrb/lwrb.c
 )
 
