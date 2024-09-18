@@ -23,6 +23,8 @@ public:
 private:
     static constexpr const char* MONITOR_OBJECT_PATH = "/como/monitor/CRuntime";
     static constexpr const char* MONITOR_INTERFACE_PATH = "como.monitor.IRuntime";
+
+    static DBusConnection *mConn;
 };
 
 } // namespace como

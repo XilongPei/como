@@ -20,10 +20,10 @@
 
 namespace como {
 
+DBusConnection *DbusUtils::mConn = nullptr;
+
 int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int size)
 {
-    DBusConnection *conn;
-    DBusError       err;
     DBusMessage    *msg;
     DBusMessageIter args, subArg;
 
@@ -31,15 +31,18 @@ int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int
         return -1;
     }
 
-    dbus_error_init(&err);
+    if (nullptr == mConn) {
+        DBusError err;
+        dbus_error_init(&err);
 
-    conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
-    if (dbus_error_is_set(&err)) {
-        Logger::E("DbusUtils::SendSignalWithString",
-                                           "Connection Error: %s", err.message);
-        dbus_error_free(&err);
+        mConn = dbus_bus_get(DBUS_BUS_SESSION, &err);
+        if (dbus_error_is_set(&err)) {
+            Logger::E("DbusUtils::SendSignalWithString",
+                                            "Connection Error: %s", err.message);
+            dbus_error_free(&err);
+        }
     }
-    if (nullptr == conn) {
+    if (nullptr == mConn) {
         return -2;
     }
 
@@ -52,39 +55,47 @@ int DbusUtils::SendSignalWithArray(const char *signalName, const void* data, int
 
     dbus_message_iter_init_append(msg, &args);
 
-    if (size < 0) {
-        if (! dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &data)) {
-            Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
-            return -4;
+    int iRet = 0;
+    do {
+        if (size < 0) {
+            if (! dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &data)) {
+                Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
+                iRet = -4;
+                break;
+            }
         }
-    }
-    else {
-        if (! dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
+        else {
+            if (! dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY,
                                            DBUS_TYPE_BYTE_AS_STRING, &subArg)) {
-            Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
-            return -4;
-        }
-        if (! dbus_message_iter_append_fixed_array(&subArg,
+                Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
+                iRet = -4;
+                break;
+            }
+            if (! dbus_message_iter_append_fixed_array(&subArg,
                                                  DBUS_TYPE_BYTE, &data, size)) {
-            Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
-            return -4;
+                Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
+                iRet = -4;
+                break;
+            }
+
+            if (! dbus_message_iter_close_container(&args, &subArg)) {
+                Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
+                iRet = -4;
+                break;
+            }
         }
 
-        if (! dbus_message_iter_close_container(&args, &subArg)) {
+        if (! dbus_connection_send(mConn, msg, nullptr)) {
             Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
-            return -4;
+            iRet = -5;
+            break;
         }
-    }
+    } while(0);
 
-    if (! dbus_connection_send(conn, msg, nullptr)) {
-        Logger::E("DbusUtils::SendSignalWithString", "Out of Memory!");
-        return -5;
-    }
-
-    dbus_connection_flush(conn);
+    dbus_connection_flush(mConn);
     dbus_message_unref(msg);
 
-    return 0;
+    return iRet;
 }
 
 } // namespace como
