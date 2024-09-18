@@ -33,12 +33,15 @@ include_directories(
     ${EXTERNAL_DIR}/circularbuffer
     ${EXTERNAL_DIR}/inih
     ${EXTERNAL_DIR}/lwrb
+    /usr/include/dbus-1.0
+    /usr/lib/x86_64-linux-gnu/dbus-1.0/include
 )
 
 set(SOURCES
     RuntimeMonitor.cpp
     CpuCoreUtils.cpp
     MarshalUtils.cpp
+    DbusUtils.cpp
     ${EXTERNAL_DIR}/lwrb/lwrb.c
 )
 
@@ -52,6 +55,7 @@ COPY(RuntimeMonitor ${MONITOR_SRC_DIR}/CpuCoreUtils.h ${INC_DIR})
 set(DEPLOY_HEADERS
     ${MONITOR_SRC_DIR}/RuntimeMonitor.h
     ${MONITOR_SRC_DIR}/CpuCoreUtils.h
+    DbusUtils.h
 )
 
 install(FILES
