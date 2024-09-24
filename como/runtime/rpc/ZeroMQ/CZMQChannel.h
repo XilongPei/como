@@ -132,6 +132,7 @@ private:
     Long        mServerObjectId;
     std::string mEndpoint;
     Boolean     mStarted;
+    void       *mSocket;
     HANDLE      mPubSocket;
 };
 

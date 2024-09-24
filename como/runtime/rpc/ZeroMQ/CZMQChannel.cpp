@@ -47,6 +47,7 @@ CZMQChannel::CZMQChannel(
     , mPeer(peer)
     , mStarted(false)
     , mServerObjectId(0)
+    , mSocket(nullptr)
     , mPubSocket(0)
 {
     mEndpoint = ComoConfig::localhostInprocEndpoint;
@@ -115,11 +116,18 @@ ECode CZMQChannel::IsPeerAlive(
      * 1. Find out who asked me for IsPeerAlive and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::ReleasePeer",
-                  "CzmqGetSocket error, endpoint: %s", mServerName);
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::ReleasePeer",
+                      "CzmqGetSocket error, endpoint: %s", mServerName);
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     Logger::D("CZMQChannel::ReleasePeer",
@@ -180,11 +188,18 @@ ECode CZMQChannel::ReleasePeer(
      * 1. Find out who asked me for ReleasePeer and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::ReleasePeer",
-                  "CzmqGetSocket error, endpoint: %s", mServerName);
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::ReleasePeer",
+                      "CzmqGetSocket error, endpoint: %s", mServerName);
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     Logger::D("CZMQChannel::ReleasePeer",
@@ -230,11 +245,18 @@ ECode CZMQChannel::ReleaseObject(
      * 1. Find out who asked me for ReleaseObject and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::ReleaseObject",
-                  "CzmqGetSocket error, endpoint: %s", mServerName);
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::ReleaseObject",
+                      "CzmqGetSocket error, endpoint: %s", mServerName);
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     Logger::D("CZMQChannel::ReleaseObject",
@@ -306,11 +328,18 @@ ECode CZMQChannel::GetComponentMetadata(
      * connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::GetComponentMetadata",
-                  "CzmqGetSocket error, endpoint: %s", mServerName);
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::GetComponentMetadata",
+                      "CzmqGetSocket error, endpoint: %s", mServerName);
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     Logger::D("CZMQChannel::GetComponentMetadata",
@@ -370,17 +399,24 @@ ECode CZMQChannel::Invoke(
      * 1. Find out who asked me for Invoke and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    if (mServerName.IsEmpty()) {
-        Logger::E("CZMQChannel::Invoke", "serverName error");
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
     }
+    else {
+        if (mServerName.IsEmpty()) {
+            Logger::E("CZMQChannel::Invoke", "serverName error");
+            return E_RUNTIME_EXCEPTION;
+        }
 
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName.string(), ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::Invoke",
-                  "CzmqGetSocket error, channel endpoint: %s",
-                  mServerName.string());
-        return E_RUNTIME_EXCEPTION;
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName.string(), ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::Invoke",
+                      "CzmqGetSocket error, channel endpoint: %s",
+                      mServerName.string());
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     Logger::D("CZMQChannel::Invoke",
@@ -517,11 +553,18 @@ ECode CZMQChannel::MonitorRuntime(
      * 1. Find out who asked me for ReleaseObject and establish a socket connection with it.
      * 2. 'mSocket' is used to process requests, not to communicate with client
      */
-    void *socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
-    if (nullptr == socket) {
-        Logger::E("CZMQChannel::MonitorRuntime",
-                  "CzmqGetSocket error, endpoint: %s", mServerName);
-        return E_RUNTIME_EXCEPTION;
+    void *socket;
+    if (nullptr != mSocket) {
+        socket = mSocket;
+    }
+    else {
+        socket = CZMQUtils::CzmqGetSocket(nullptr, mServerName, ZMQ_REQ);
+        if (nullptr == socket) {
+            Logger::E("CZMQChannel::MonitorRuntime",
+                      "CzmqGetSocket error, endpoint: %s", mServerName);
+            return E_RUNTIME_EXCEPTION;
+        }
+        mSocket = socket;
     }
 
     HANDLE resData = reinterpret_cast<HANDLE>(request.GetPayload());
