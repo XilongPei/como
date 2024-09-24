@@ -71,6 +71,11 @@ else()
 endif()
 
 if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    if(NOT EXISTS "${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a")
+        message(FATAL_ERROR "external/phxpaxos hasn't been built.  \
+                Don't set environment variable RedundantComputing_SUPPORT_Enable to enable")
+    endif()
+
     set(PhxpaxosLib
         ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
         ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a

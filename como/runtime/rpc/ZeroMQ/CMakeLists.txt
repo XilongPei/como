@@ -26,6 +26,11 @@ if("$ENV{RPC_OVER_ZeroMQ_SUPPORT_Enable}" STREQUAL "enable")
 endif()
 
 if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    if(NOT EXISTS "${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a")
+        message(FATAL_ERROR "external/phxpaxos hasn't been built.  \
+                Don't set environment variable RedundantComputing_SUPPORT_Enable to enable")
+    endif()
+
     add_definitions(-DRedundantComputing_SUPPORT)
     set(PhxpaxosLib
         ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
