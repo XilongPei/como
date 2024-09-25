@@ -261,7 +261,11 @@ function como_openEuler_aarch64()
     export PATH=$PATH:$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin
 
     if [ ! -d "$ROOT/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-linux/usr/bin" ]; then
-        echo -e "The cross-compilation toolchain $ROOT/prebuilt/aarch64-openeuler-linux does not exist, Run GetPrebuilts.sh first.\n"
+        echo -n -e "The cross-compilation toolchain "
+        echo -e "$ROOT/prebuilt/aarch64-openeuler-linux does not exist, Run GetPrebuilts.sh first.\n"
+        # defined in /usr/include/sysexits.h
+        # #define EX_CONFIG       78      /* configuration error */
+        return 78
     fi
 
     if [ ! -d "$ROOT/out/target" ]; then
@@ -312,7 +316,11 @@ function como_openEuler_riscv()
     export PATH=$PATH:$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin
 
     if [ ! -d "$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin" ]; then
-        echo -e "The cross-compilation toolchain $ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin does not exist.\n"
+        echo -n -e "The cross-compilation toolchain "
+        echo -e "$ROOT/toolchain/gcc/linux-x86/riscv64/riscv-linux-openEuler/bin does not exist.\n"
+        # defined in /usr/include/sysexits.h
+        # #define EX_CONFIG       78      /* configuration error */
+        return 78
     fi
 
     if [ ! -d "$ROOT/out/target" ]; then
