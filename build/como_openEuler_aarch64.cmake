@@ -1,4 +1,3 @@
-
 set(CMAKE_SYSTEM_NAME openEuler)
 set(CMAKE_SYSTEM_VERSION 1)
 
@@ -12,11 +11,6 @@ set(CMAKE_SYSROOT $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
 
 set(PREBUILT_DIR $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
 set(PREBUILT_INC ${PREBUILT_DIR}/usr/include/c++/10.3.1)
-
-#prebuilt/aarch64-openeuler-linux/prebuilt/usr/include/c++/10.3.1
-#./prebuilt/usr/include/c++/10.3.1/aarch64-openeuler-linux-gnu/bits/c++config.h
-
-set(PREBUILT_LIB ${PREBUILT_DIR}/usr/lib64)
 
 set(CMAKE_C_COMPILER ${CROSS_PATH}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_PATH}g++)
@@ -40,14 +34,6 @@ set(COMMON_C_FLAGS "\
 set(COMMON_CXX_FLAGS
     "${COMMON_C_FLAGS} -std=gnu++11 -fno-exceptions -fno-rtti")
 
-#set(DYNAMIC_LINKER
-#    "-Wl,-dynamic-linker,/system/bin/linker64")
-#set(SO_CRT "\
-#    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
-#    ${PREBUILT_DIR}/usr/lib64/crtend_so.o")
-#set(EXE_CRT "\
-#    ${PREBUILT_DIR}/prebuilt/usr/lib64/crtn.o \
-#    ${PREBUILT_DIR}/usr/lib64/crtend_android.o")
 set(LIBC
     "-lc -lstdc++")
 
