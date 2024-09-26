@@ -33,6 +33,7 @@ private:
     struct _Unit                            // The type of the node of linkedlist.
     {
         struct _Unit *pPrev, *pNext;
+        bool          inFreeMemBlockList;
     };
 
     void         *m_pMemBlock;              // The address of memory pool.

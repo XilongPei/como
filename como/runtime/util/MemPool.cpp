@@ -105,6 +105,7 @@ bool CMemPool::SetBuffer(void *buffer, size_t ulUnitNum, size_t ulUnitSize)
 
             pCurUnit->pPrev = nullptr;
             pCurUnit->pNext = m_pFreeMemBlock;   // Insert the new unit at head.
+            pCurUnit->inFreeMemBlockList = false;
 
             if (nullptr != m_pFreeMemBlock) {
                 m_pFreeMemBlock->pPrev = pCurUnit;
@@ -132,8 +133,8 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
 {
     Mutex::AutoLock lock(m_Lock);
 
-    if (ulSize > m_ulUnitSize ||
-                         nullptr == m_pMemBlock || nullptr == m_pFreeMemBlock) {
+    if ((ulSize > m_ulUnitSize) ||
+                    (nullptr == m_pMemBlock) || (nullptr == m_pFreeMemBlock)) {
         if (MUST_USE_MEM_POOL == iTryToUseMemPool) {
             return nullptr;
         }
@@ -155,6 +156,7 @@ void *CMemPool::Alloc(size_t ulSize, TryToUseMemPool iTryToUseMemPool)
         m_pAllocatedMemBlock->pPrev = pCurUnit;
     }
     m_pAllocatedMemBlock = pCurUnit;
+    pCurUnit->inFreeMemBlockList = false;
 
     return (void *)((char *)pCurUnit + sizeof(struct _Unit));
 }
@@ -176,6 +178,10 @@ void CMemPool::Free(void *p)
     if ((m_pMemBlock < p) && (p < (void *)((char *)m_pMemBlock + m_ulBlockSize))) {
         struct _Unit *pCurUnit = (struct _Unit *)((char *)p - sizeof(struct _Unit));
 
+        if (pCurUnit->inFreeMemBlockList) {
+            return;
+        }
+
         m_pAllocatedMemBlock = pCurUnit->pNext;
         if (nullptr != m_pAllocatedMemBlock) {
             m_pAllocatedMemBlock->pPrev = nullptr;
@@ -185,6 +191,9 @@ void CMemPool::Free(void *p)
         if (nullptr != m_pFreeMemBlock) {
             m_pFreeMemBlock->pPrev = pCurUnit;
         }
+
+        // Prevents the memory from being released multiple times.
+        pCurUnit->inFreeMemBlockList = true;
 
         m_pFreeMemBlock = pCurUnit;
     }
