@@ -19,6 +19,16 @@
 
 namespace como {
 
+typedef struct tagLinuxMemInfo {
+    long MemTotal;
+    long MemFree;
+    long MemAvailable;
+    long Buffers;
+    long Cached;
+    long SwapTotal;
+    long SwapFree;
+} LinuxMemInfo;
+
 class COM_PUBLIC DebugUtils
 {
 public:
@@ -46,6 +56,8 @@ public:
                                         __FILE__, __PRETTY_FUNCTION__, __LINE__)
     static void AutoPtrRefBaseInspect(void *autoPtr, IInterface *intf,
               const char *logTAG, const char *file, const char *func, int line);
+
+    static void GetMemoryInfo(LinuxMemInfo& memInfo);
 
 }; // class DebugUtils
 

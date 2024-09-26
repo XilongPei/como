@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "comoobj.h"
 #include "util/comolog.h"
@@ -115,7 +116,78 @@ void DebugUtils::AutoPtrRefBaseInspect(void *autoPtr, IInterface *intf,
                      autoPtr, Object::IntfToRefBasePtr(intf), file, func, line);
 }
 
+static void ParseLine(char *line, LinuxMemInfo *memInfo)
+{
+    char key[32];
+    long value;
+
+    // read a "key: value kB" style line
+    sscanf(line, "%31s %ld", key, &value);
+
+    // remove ':'
+    key[strlen(key) - 1] = '\0';
+
+    if (strcmp(key, "MemTotal") == 0) {
+        memInfo->MemTotal = value;
+    }
+    else if (strcmp(key, "MemFree") == 0) {
+        memInfo->MemFree = value;
+    }
+    else if (strcmp(key, "MemAvailable") == 0) {
+        memInfo->MemAvailable = value;
+    }
+    else if (strcmp(key, "Buffers") == 0) {
+        memInfo->Buffers = value;
+    }
+    else if (strcmp(key, "Cached") == 0) {
+        memInfo->Cached = value;
+    }
+    else if (strcmp(key, "SwapTotal") == 0) {
+        memInfo->SwapTotal = value;
+    }
+    else if (strcmp(key, "SwapFree") == 0) {
+        memInfo->SwapFree = value;
+    }
+}
+
+/**
+ * GetMemoryInfo
+ */
+void DebugUtils::GetMemoryInfo(LinuxMemInfo& memInfo)
+{
+    FILE* file = fopen("/proc/meminfo", "r");
+
+    if (nullptr == file) {
+        memInfo.MemTotal = 0;
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        ParseLine(line, &memInfo);
+    }
+
+    fclose(file);
+}
+
 } // namespace como
+
+#if 0
+int main() {
+    como::LinuxMemInfo memInfo;
+    como::DebugUtils::GetMemoryInfo(memInfo);
+
+    printf("MemTotal:    %ld kB\n", memInfo.MemTotal);
+    printf("MemFree:     %ld kB\n", memInfo.MemFree);
+    printf("MemAvailable: %ld kB\n", memInfo.MemAvailable);
+    printf("Buffers:     %ld kB\n", memInfo.Buffers);
+    printf("Cached:      %ld kB\n", memInfo.Cached);
+    printf("SwapTotal:   %ld kB\n", memInfo.SwapTotal);
+    printf("SwapFree:    %ld kB\n", memInfo.SwapFree);
+
+    return 0;
+}
+#endif
 
 #if 0
 int main()
