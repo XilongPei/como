@@ -72,6 +72,11 @@ if [ ! -n "${ROOT}" ]; then
     exit 0;
 fi
 
+if [[ "$PRODUCT.$PLATFORM.$ARCH" == "como.openEuler.aarch64" ]]; then
+    echo -n "You are building in como.openEuler.aarch64 environment, "
+    echo "cross-compiling the 'external' directory needs to be in the openEuler SDK."
+fi
+
 build_libzmq;
 build_phxpaxos;
 
