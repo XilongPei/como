@@ -61,6 +61,7 @@ set(SOURCES
     ${EXTERNAL_DIR}/inih/ini.c
     StrToX_Hashmap.cpp
     DebugUtils.cpp
+    talloc.cpp
 )
 
 set(DEPLOY_HEADERS

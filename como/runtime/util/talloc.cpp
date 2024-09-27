@@ -1,3 +1,19 @@
+//=========================================================================
+// Copyright (C) 2024 The C++ Component Model(COMO) Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
 /*
    Samba Unix SMB/CIFS implementation.
 
@@ -30,12 +46,33 @@
   inspired by http://swapped.cc/halloc/
 */
 
-#include "replace.h"
+//#include "replace.h"
+#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <cstdint>
 #include "talloc.h"
 
 #ifdef HAVE_SYS_AUXV_H
 #include <sys/auxv.h>
 #endif
+
+#define TALLOC_BUILD_VERSION_MAJOR 2
+#define TALLOC_BUILD_VERSION_MINOR 4
+#define TALLOC_BUILD_VERSION_RELEASE 2
+typedef u_int8_t uint8_t;
+typedef u_int32_t uint32_t;
+
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
+
+#define HAVE_VA_COPY
+#define HAVE_CONSTRUCTOR_ATTRIBUTE
 
 #if (TALLOC_VERSION_MAJOR != TALLOC_BUILD_VERSION_MAJOR)
 #error "TALLOC_VERSION_MAJOR != TALLOC_BUILD_VERSION_MAJOR"
@@ -780,7 +817,7 @@ static inline void *__talloc_with_prefix(const void *context,
 			return NULL;
 		}
 
-		ptr = malloc(total_len);
+		ptr = (uint8_t*)malloc(total_len);
 		if (unlikely(ptr == NULL)) {
 			return NULL;
 		}
@@ -1504,7 +1541,7 @@ static inline const char *tc_set_name_v(struct talloc_chunk *tc,
 							fmt,
 							ap);
 	if (likely(name_tc)) {
-		tc->name = TC_PTR_FROM_CHUNK(name_tc);
+		tc->name = (char *)TC_PTR_FROM_CHUNK(name_tc);
 		_tc_set_name_const(name_tc, ".name");
 	} else {
 		tc->name = NULL;
@@ -1909,7 +1946,7 @@ _PUBLIC_ void *_talloc_realloc(const void *context, void *ptr, size_t size, cons
 			 * optimize for the case where 'tc' is the only
 			 * chunk in the pool.
 			 */
-			char *start = tc_pool_first_chunk(pool_hdr);
+			char *start = (char *)tc_pool_first_chunk(pool_hdr);
 			space_needed = new_chunk_size;
 			space_left = (char *)tc_pool_end(pool_hdr) - start;
 
@@ -2630,7 +2667,7 @@ _PUBLIC_ char *talloc_vasprintf(const void *t, const char *fmt, va_list ap)
 	if (tc == NULL) {
 		return NULL;
 	}
-	return TC_PTR_FROM_CHUNK(tc);
+	return (char *)TC_PTR_FROM_CHUNK(tc);
 }
 
 
@@ -3052,7 +3089,7 @@ _PUBLIC_ int talloc_set_memlimit(const void *ctx, size_t max_size)
 	}
 	orig_limit = tc->limit;
 
-	limit = malloc(sizeof(struct talloc_memlimit));
+	limit = (talloc_memlimit *)malloc(sizeof(struct talloc_memlimit));
 	if (limit == NULL) {
 		return 1;
 	}
