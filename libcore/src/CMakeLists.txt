@@ -45,6 +45,14 @@ include_directories(
     ${INC_DIR}
     ${LIBCORE_OBJ_DIR})
 
+if("$ENV{COMO_WITH_MATH_BIG_NUMBER}" STREQUAL "bn")
+    set(GENERATED_SOURCES_BN
+        ${LIBCORE_OBJ_DIR}/_como_math_CBigDecimal.cpp
+        ${LIBCORE_OBJ_DIR}/_como_math_CBigInteger.cpp)
+else()
+    set(GENERATED_SOURCES_BN )
+endif()
+
 set(GENERATED_SOURCES
     ${LIBCORE_OBJ_DIR}/_como_core_CArray.cpp
     ${LIBCORE_OBJ_DIR}/_como_core_CArrayHolder.cpp
@@ -76,12 +84,7 @@ set(GENERATED_SOURCES
     ${LIBCORE_OBJ_DIR}/_como_io_COutputStreamWriter.cpp
     ${LIBCORE_OBJ_DIR}/_como_io_CPrintWriter.cpp
     ${LIBCORE_OBJ_DIR}/_como_io_CStringWriter.cpp
-
-if("$ENV{COMO_WITH_MATH_BIG_NUMBER}" STREQUAL "bn")
-    ${LIBCORE_OBJ_DIR}/_como_math_CBigDecimal.cpp
-    ${LIBCORE_OBJ_DIR}/_como_math_CBigInteger.cpp
-endif()
-
+    ${GENERATED_SOURCES_BN}
     ${LIBCORE_OBJ_DIR}/_como_math_CMathContext.cpp
     ${LIBCORE_OBJ_DIR}/_como_misc_CFDBigInteger.cpp
     ${LIBCORE_OBJ_DIR}/_como_security_CPermissions.cpp
