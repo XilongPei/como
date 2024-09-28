@@ -83,6 +83,7 @@ set(DEPLOY_HEADERS
     ${UTIL_SRC_DIR}/StrToX_Hashmap.h
     ${UTIL_SRC_DIR}/DebugUtils.h
     ${UTIL_SRC_DIR}/TimespecUtils.h
+    ${UTIL_SRC_DIR}/talloc.h
 )
 
 add_custom_target(rebuild_if_header_changes
@@ -118,7 +119,9 @@ COPY(util ${UTIL_SRC_DIR}/hashmapCache.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/StrToX_Hashmap.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/DebugUtils.h ${INC_DIR})
 COPY(util ${UTIL_SRC_DIR}/TimespecUtils.h ${INC_DIR})
+COPY(util ${UTIL_SRC_DIR}/talloc.h ${INC_DIR})
 
+# `install` command will generate installation rules. `make install` will use these rules.
 install(FILES
     ${DEPLOY_HEADERS}
     DESTINATION ${INC_DIR})
