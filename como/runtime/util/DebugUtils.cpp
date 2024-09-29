@@ -14,9 +14,11 @@
 // limitations under the License.
 //=========================================================================
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/statvfs.h>
 #include "comoobj.h"
 #include "util/comolog.h"
 #include "DebugUtils.h"
@@ -128,25 +130,25 @@ static void ParseLine(char *line, LinuxMemInfo *memInfo)
     key[strlen(key) - 1] = '\0';
 
     if (strcmp(key, "MemTotal") == 0) {
-        memInfo->MemTotal = value;
+        memInfo->memTotal = value;
     }
     else if (strcmp(key, "MemFree") == 0) {
-        memInfo->MemFree = value;
+        memInfo->memFree = value;
     }
     else if (strcmp(key, "MemAvailable") == 0) {
-        memInfo->MemAvailable = value;
+        memInfo->memAvailable = value;
     }
     else if (strcmp(key, "Buffers") == 0) {
-        memInfo->Buffers = value;
+        memInfo->buffers = value;
     }
     else if (strcmp(key, "Cached") == 0) {
-        memInfo->Cached = value;
+        memInfo->cached = value;
     }
     else if (strcmp(key, "SwapTotal") == 0) {
-        memInfo->SwapTotal = value;
+        memInfo->wwapTotal = value;
     }
     else if (strcmp(key, "SwapFree") == 0) {
-        memInfo->SwapFree = value;
+        memInfo->swapFree = value;
     }
 }
 
@@ -158,7 +160,7 @@ void DebugUtils::GetMemoryInfo(LinuxMemInfo& memInfo)
     FILE* file = fopen("/proc/meminfo", "r");
 
     if (nullptr == file) {
-        memInfo.MemTotal = 0;
+        memInfo.memTotal = 0;
         return;
     }
 
@@ -170,20 +172,82 @@ void DebugUtils::GetMemoryInfo(LinuxMemInfo& memInfo)
     fclose(file);
 }
 
+/**
+ * GetCpuUsage
+ */
+float DebugUtils::GetCpuUsage()
+{
+    FILE *file;
+    long user, nice, system, idle, iowait, irq, softirq;
+    long total, active;
+
+    /**
+     * see http://www.linuxhowtos.org/manpages/5/proc.htm
+     */
+    file = fopen("/proc/stat", "r");
+    if (nullptr != file) {
+        return -1.0f;
+    }
+
+    int iRet = fscanf(file, "cpu %ld %ld %ld %ld %ld %ld %ld",
+                         &user, &nice, &system, &idle, &iowait, &irq, &softirq);
+    // 7 = The number of arguments passed to function fscanf
+    if (iRet != 7) {
+        fclose(file);
+        return -2.0f;
+    }
+
+    fclose(file);
+
+    total = user + nice + system + idle + iowait + irq + softirq;
+    active = total - idle;
+
+    return static_cast<float>(active) / static_cast<float>(total) * 100.0f;
+}
+
+/**
+ * GetDiskUsage("/")
+ */
+float DebugUtils::GetDiskUsage(const char *disk)
+{
+    struct statvfs diskData;
+
+    statvfs(disk, &diskData);
+
+    long total = diskData.f_blocks;
+    long free = diskData.f_bfree;
+    long diff = total - free;
+
+    return static_cast<float>(diff) / total;
+}
+
 } // namespace como
+
+#if 0
+int main() {
+    while (1) {
+        float cpuUsage = getCpuUsage();
+        if (cpuUsage >= 0) {
+            printf("CPU Usage: %.2f%%\n", cpuUsage);
+        }
+        sleep(1); // 每秒更新一次
+    }
+    return 0;
+}
+#endif
 
 #if 0
 int main() {
     como::LinuxMemInfo memInfo;
     como::DebugUtils::GetMemoryInfo(memInfo);
 
-    printf("MemTotal:    %ld kB\n", memInfo.MemTotal);
-    printf("MemFree:     %ld kB\n", memInfo.MemFree);
-    printf("MemAvailable: %ld kB\n", memInfo.MemAvailable);
-    printf("Buffers:     %ld kB\n", memInfo.Buffers);
-    printf("Cached:      %ld kB\n", memInfo.Cached);
-    printf("SwapTotal:   %ld kB\n", memInfo.SwapTotal);
-    printf("SwapFree:    %ld kB\n", memInfo.SwapFree);
+    printf("MemTotal:    %ld kB\n", memInfo.memTotal);
+    printf("MemFree:     %ld kB\n", memInfo.memFree);
+    printf("MemAvailable: %ld kB\n", memInfo.memAvailable);
+    printf("Buffers:     %ld kB\n", memInfo.buffers);
+    printf("Cached:      %ld kB\n", memInfo.cached);
+    printf("SwapTotal:   %ld kB\n", memInfo.swapTotal);
+    printf("SwapFree:    %ld kB\n", memInfo.swapFree);
 
     return 0;
 }

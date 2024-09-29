@@ -20,13 +20,13 @@
 namespace como {
 
 typedef struct tagLinuxMemInfo {
-    long MemTotal;
-    long MemFree;
-    long MemAvailable;
-    long Buffers;
-    long Cached;
-    long SwapTotal;
-    long SwapFree;
+    long memTotal;
+    long memFree;
+    long memAvailable;
+    long buffers;
+    long cached;
+    long wwapTotal;
+    long swapFree;
 } LinuxMemInfo;
 
 class COM_PUBLIC DebugUtils
@@ -58,6 +58,8 @@ public:
               const char *logTAG, const char *file, const char *func, int line);
 
     static void GetMemoryInfo(LinuxMemInfo& memInfo);
+    static float GetCpuUsage();
+    static float GetDiskUsage(const char *disk);
 
 }; // class DebugUtils
 
