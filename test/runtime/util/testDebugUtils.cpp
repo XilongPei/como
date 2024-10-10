@@ -8,13 +8,13 @@ TEST(DebugUtils, testDebugUtils1)
     como::LinuxMemInfo memInfo;
     como::DebugUtils::GetMemoryInfo(memInfo);
 
-    printf("MemTotal:    %ld kB\n", memInfo.MemTotal);
-    printf("MemFree:     %ld kB\n", memInfo.MemFree);
-    printf("MemAvailable: %ld kB\n", memInfo.MemAvailable);
-    printf("Buffers:     %ld kB\n", memInfo.Buffers);
-    printf("Cached:      %ld kB\n", memInfo.Cached);
-    printf("SwapTotal:   %ld kB\n", memInfo.SwapTotal);
-    printf("SwapFree:    %ld kB\n", memInfo.SwapFree);
+    printf("MemTotal:    %ld kB\n", memInfo.memTotal);
+    printf("MemFree:     %ld kB\n", memInfo.memFree);
+    printf("MemAvailable: %ld kB\n", memInfo.memAvailable);
+    printf("Buffers:     %ld kB\n", memInfo.buffers);
+    printf("Cached:      %ld kB\n", memInfo.cached);
+    printf("SwapTotal:   %ld kB\n", memInfo.swapTotal);
+    printf("SwapFree:    %ld kB\n", memInfo.swapFree);
 }
 
 TEST(DebugUtils, testDebugUtils2)

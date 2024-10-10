@@ -145,7 +145,7 @@ static void ParseLine(char *line, LinuxMemInfo *memInfo)
         memInfo->cached = value;
     }
     else if (strcmp(key, "SwapTotal") == 0) {
-        memInfo->wwapTotal = value;
+        memInfo->swapTotal = value;
     }
     else if (strcmp(key, "SwapFree") == 0) {
         memInfo->swapFree = value;

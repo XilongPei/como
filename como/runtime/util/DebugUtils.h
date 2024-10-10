@@ -25,7 +25,7 @@ typedef struct tagLinuxMemInfo {
     long memAvailable;
     long buffers;
     long cached;
-    long wwapTotal;
+    long swapTotal;
     long swapFree;
 } LinuxMemInfo;
 
