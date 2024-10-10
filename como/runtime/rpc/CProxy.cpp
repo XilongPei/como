@@ -82,6 +82,10 @@ namespace como {
     #error Unknown Architecture
 #endif
 
+/**
+ * For the writing of these assembly codes, refer to document `Writing a minimal
+ * x86-64 JIT compiler in C++` in repo https://gitee.com/tjopenlab/como-grammar-manual
+ */
 
 //
 //----__aarch64__--------__aarch64__--------__aarch64__--------__aarch64__------
