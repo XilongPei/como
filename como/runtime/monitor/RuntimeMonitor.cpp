@@ -197,8 +197,6 @@ static int handler(void* user, const char* section, const char* name, const char
 #ifdef RPC_OVER_ZeroMQ_SUPPORT
 ECode RuntimeMonitor::RuntimeMonitorMsgProcessor(zmq_msg_t& msg, Array<Byte>& resBuffer)
 {
-    String string;
-
     RTM_Command *rtmCommand = (RTM_Command *)zmq_msg_data(&msg);
     switch (rtmCommand->command) {
         case RTM_CommandType::CMD_BY_STRING: {
