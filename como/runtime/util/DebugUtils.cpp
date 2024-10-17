@@ -185,7 +185,7 @@ float DebugUtils::GetCpuUsage()
      * see http://www.linuxhowtos.org/manpages/5/proc.htm
      */
     file = fopen("/proc/stat", "r");
-    if (nullptr != file) {
+    if (nullptr == file) {
         return -1.0f;
     }
 

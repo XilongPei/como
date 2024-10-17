@@ -252,7 +252,7 @@ function como_openEuler_aarch64()
     # to disable some config
     # export xxx=no_......
     export COMO_WITH_ICU=icu
-    export COMO_WITH_RPC=no_rpc
+    export COMO_WITH_RPC=rpc
     export COMO_WITH_MATH_BIG_NUMBER=bn
 
     # The host environment supports only x64
