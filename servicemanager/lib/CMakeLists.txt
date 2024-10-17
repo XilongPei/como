@@ -14,9 +14,9 @@
 # limitations under the License.
 #=========================================================================
 
-if($ENV{PLATFORM} STREQUAL "linux")
+if("$ENV{PLATFORM}" STREQUAL "linux")
     add_subdirectory(linux)
-elseif($ENV{PLATFORM} STREQUAL "android")
+elseif("$ENV{PLATFORM}" STREQUAL "android")
     #
     # use dbus(not Android's IBinder) always (?)
     #
@@ -24,7 +24,7 @@ elseif($ENV{PLATFORM} STREQUAL "android")
     if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         add_subdirectory(linux)
     endif()
-elseif($ENV{PLATFORM} STREQUAL "openEuler")
+elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
     if("$ENV{COMO_WITH_RPC}" STREQUAL "rpc")
         add_subdirectory(linux)
     endif()

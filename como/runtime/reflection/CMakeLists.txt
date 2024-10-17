@@ -39,7 +39,7 @@ set(SOURCES
     reflHelpers.cpp
 )
 
-if($ENV{PLATFORM} STREQUAL "linux")
+if("$ENV{PLATFORM}" STREQUAL "linux")
     if($ENV{ARCH} MATCHES "(x64)|(aarch64)|(riscv64)|(x32)|(aarch32)|(riscv32)")
         set(SOURCES
             ${SOURCES}
@@ -51,12 +51,12 @@ if($ENV{PLATFORM} STREQUAL "linux")
             invoke_x64.s)
         set_source_files_properties(invoke_x64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
     endif()
-elseif($ENV{PLATFORM} STREQUAL "android")
+elseif("$ENV{PLATFORM}" STREQUAL "android")
     set(SOURCES
         ${SOURCES}
         invoke_aarch64.s)
     set_source_files_properties(invoke_aarch64.s PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
-elseif($ENV{PLATFORM} STREQUAL "openEuler")
+elseif("$ENV{PLATFORM}" STREQUAL "openEuler")
     set(SOURCES
         ${SOURCES}
         invoke_$ENV{ARCH}.s)
