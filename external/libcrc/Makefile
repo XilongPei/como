@@ -96,8 +96,15 @@ TABDIR = tab/
 TSTDIR = test/
 EXADIR = examples/
 
-CC     ?= cc
-LINK   ?= $(CC)
+# in openEuler cross compiling environment
+ifeq ($(PLATFORM), openEuler)
+	CC   = gcc
+	LINK = gcc
+else
+	CC     ?= cc
+	LINK   ?= $(CC)
+endif
+
 RM     = /bin/rm -f
 STRIP  = strip
 OBJEXT = .o
