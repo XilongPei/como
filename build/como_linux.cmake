@@ -19,24 +19,27 @@ endif()
 
 if("$ENV{ARCH}" MATCHES "(x64)|(aarch64)")
     #! -DARM_FP_SUPPORT, Architecture-related options
-    set(COMMON_C_FLAGS
+    set(COMMON_C_FLAGS_
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS} -DARM_FP_SUPPORT")
 elseif("$ENV{ARCH}" MATCHES "(riscv64)")
-    set(COMMON_C_FLAGS
+    set(COMMON_C_FLAGS_
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 elseif("$ENV{ARCH}" MATCHES "(x32)|(aarch32)|(riscv32)")
-    set(COMMON_C_FLAGS
+    set(COMMON_C_FLAGS_
         "-m32 -fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 elseif("$ENV{ARCH}" MATCHES "(aarch32)|(riscv32)")
-    set(COMMON_C_FLAGS
+    set(COMMON_C_FLAGS_
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 else()
-    set(COMMON_C_FLAGS
+    set(COMMON_C_FLAGS_
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 endif()
 
 set(COMMON_CXX_FLAGS
-    "${COMMON_C_FLAGS} -fno-exceptions -fno-rtti -std=gnu++11")
+    "${COMMON_C_FLAGS_} -fno-exceptions -fno-rtti -std=gnu++11")
+
+set(COMMON_C_FLAGS
+    "${COMMON_C_FLAGS_} -std=gnu11")
 
 set(COMMON_SHARED_LINKER_FLAGS
     "-shared -fPIC ${CMAKE_SHARED_LINKER_FLAGS} -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version -Wl,--hash-style=gnu")
