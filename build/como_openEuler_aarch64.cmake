@@ -24,7 +24,7 @@ include_directories(
     ${PREBUILT_INC}/aarch64-openeuler-linux-gnu
 )
 
-set(COMMON_C_FLAGS "\
+set(COMMON_C_FLAGS_ " \
     -D__openEuler__ -mno-outline-atomics \
     -fPIC -ffunction-sections -fdata-sections -fno-short-enums -fmessage-length=0 \
     -no-canonical-prefixes \
@@ -32,7 +32,10 @@ set(COMMON_C_FLAGS "\
     -Werror=format-security --sysroot=${CMAKE_SYSROOT}")
 
 set(COMMON_CXX_FLAGS
-    "${COMMON_C_FLAGS} -std=gnu++11 -fno-exceptions -fno-rtti")
+    "${COMMON_C_FLAGS_} -std=gnu++11 -fno-exceptions -fno-rtti")
+
+set(COMMON_C_FLAGS
+    "${COMMON_C_FLAGS_} -std=gnu11")
 
 set(LIBC
     "-lc -lstdc++")
