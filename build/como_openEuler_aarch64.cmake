@@ -10,7 +10,7 @@ set(CROSS_PATH $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/x86_64-openeulersdk-l
 set(CMAKE_SYSROOT $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
 
 set(PREBUILT_DIR $ENV{ROOT}/prebuilt/aarch64-openeuler-linux/prebuilt)
-set(PREBUILT_INC ${PREBUILT_DIR}/usr/include/c++/10.3.1)
+set(PREBUILT_INC ${PREBUILT_DIR}/usr/include/c++/12.3.1)
 
 set(CMAKE_C_COMPILER ${CROSS_PATH}gcc)
 set(CMAKE_CXX_COMPILER ${CROSS_PATH}g++)
