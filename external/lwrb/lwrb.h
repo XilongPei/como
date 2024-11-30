@@ -36,6 +36,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <atomic>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,12 +48,7 @@ extern "C" {
  * \{
  */
 
-#ifdef __cplusplus
-typedef unsigned long lwrb_atomic_ulong_t;
-#else
-#include <stdatomic.h>
-typedef atomic_ulong lwrb_atomic_ulong_t;
-#endif
+typedef std::atomic<unsigned long> lwrb_atomic_ulong_t;
 
 /**
  * \brief           Event type for buffer operations

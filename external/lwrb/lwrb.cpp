@@ -33,17 +33,19 @@
  */
 #include "lwrb.h"
 
+using namespace std;
+
 /* Memory set and copy functions */
 #define BUF_MEMSET      memset
 #define BUF_MEMCPY      memcpy
 
-#define BUF_IS_VALID(b) ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
+#define BUF_IS_VALID(b) ((nullptr != (b)) && (nullptr != (b)->buff) && ((b)->size > 0))
 #define BUF_MIN(x, y)   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)   ((x) > (y) ? (x) : (y))
 #define BUF_SEND_EVT(b, type, bp)                                                                                      \
     do {                                                                                                               \
-        if ((b)->evt_fn != NULL) {                                                                                     \
-            (b)->evt_fn((void*)(b), (type), (bp));                                                                     \
+        if ((b)->evt_fn != nullptr) {                                                                                     \
+            (b)->evt_fn((lwrb_t*)(b), (type), (bp));                                                                     \
         }                                                                                                              \
     } while (0)
 
@@ -57,13 +59,13 @@
  */
 uint8_t lwrb_init(lwrb_t* buff, void* buffdata, size_t size)
 {
-    if ((buff == NULL) || (buffdata == NULL) || (size == 0)) {
+    if ((nullptr == buff) || (nullptr == buffdata) || (0 == size)) {
         return 0;
     }
 
-    buff->evt_fn = NULL;
+    buff->evt_fn = nullptr;
     buff->size = size;
-    buff->buff = buffdata;
+    buff->buff = (uint8_t*)buffdata;
     atomic_init(&buff->w, 0);
     atomic_init(&buff->r, 0);
     return 1;
@@ -82,13 +84,13 @@ uint8_t lwrb_is_ready(lwrb_t* buff)
 /**
  * \brief           Free buffer memory
  * \note            Since implementation does not use dynamic allocation,
- *                  it just sets buffer handle to `NULL`
+ *                  it just sets buffer handle to `nullptr`
  * \param[in]       buff: Buffer handle
  */
 void lwrb_free(lwrb_t* buff)
 {
     if (BUF_IS_VALID(buff)) {
-        buff->buff = NULL;
+        buff->buff = nullptr;
     }
 }
 
@@ -118,16 +120,16 @@ void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn)
 size_t lwrb_write(lwrb_t* buff, const void* data, size_t btw)
 {
     size_t tocopy, free, buff_w_ptr;
-    const uint8_t* d = data;
+    const uint8_t* d = (const uint8_t*)data;
 
-    if ((! BUF_IS_VALID(buff)) || (data == NULL) || (btw == 0)) {
+    if ((! BUF_IS_VALID(buff)) || (nullptr == data) || (0 == btw)) {
         return 0;
     }
 
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
     btw = BUF_MIN(free, btw);
-    if (btw == 0) {
+    if (0 == btw) {
         return 0;
     }
     buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_acquire);
@@ -171,16 +173,16 @@ size_t lwrb_write(lwrb_t* buff, const void* data, size_t btw)
 size_t lwrb_read(lwrb_t* buff, void* data, size_t btr)
 {
     size_t tocopy, full, buff_r_ptr;
-    uint8_t* d = data;
+    uint8_t* d = (uint8_t*)data;
 
-    if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
+    if (!BUF_IS_VALID(buff) || (nullptr == data) || (0 == btr)) {
         return 0;
     }
 
     /* Calculate maximum number of bytes available to read */
     full = lwrb_get_full(buff);
     btr = BUF_MIN(full, btr);
-    if (btr == 0) {
+    if (0 == btr) {
         return 0;
     }
     buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_acquire);
@@ -223,9 +225,9 @@ size_t lwrb_read(lwrb_t* buff, void* data, size_t btr)
 size_t lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp)
 {
     size_t full, tocopy, r;
-    uint8_t* d = data;
+    uint8_t* d = (uint8_t*)data;
 
-    if ((! BUF_IS_VALID(buff)) || (data == NULL) || (btp == 0)) {
+    if ((! BUF_IS_VALID(buff)) || (nullptr == data) || (0 == btp)) {
         return 0;
     }
 
@@ -298,9 +300,11 @@ size_t lwrb_get_free(lwrb_t* buff)
 
     if (w == r) {
         size = buff->size;
-    } else if (r > w) {
+    }
+    else if (r > w) {
         size = r - w;
-    } else {
+    }
+    else {
         size = buff->size - (w - r);
     }
 
@@ -377,7 +381,7 @@ void lwrb_reset(lwrb_t* buff)
 void* lwrb_get_linear_block_read_address(lwrb_t* buff)
 {
     if (! BUF_IS_VALID(buff)) {
-        return NULL;
+        return nullptr;
     }
     return &buff->buff[buff->r];
 }
@@ -427,7 +431,7 @@ size_t lwrb_skip(lwrb_t* buff, size_t len)
 {
     size_t full, r;
 
-    if ((! BUF_IS_VALID(buff)) || (len == 0)) {
+    if ((! BUF_IS_VALID(buff)) || (0 == len)) {
         return 0;
     }
 
@@ -451,7 +455,7 @@ size_t lwrb_skip(lwrb_t* buff, size_t len)
 void* lwrb_get_linear_block_write_address(lwrb_t* buff)
 {
     if (! BUF_IS_VALID(buff)) {
-        return NULL;
+        return nullptr;
     }
     return &buff->buff[buff->w];
 }
@@ -483,13 +487,13 @@ size_t lwrb_get_linear_block_write_length(lwrb_t* buff)
          * maximal length is one less as if too many bytes
          * are written, buffer would be considered empty again (r == w)
          */
-        if (r == 0) {
+        if (0 == r) {
             /*
              * Cannot overflow:
              * - If r is not 0, statement does not get called
              * - buff->size cannot be 0 and if r is 0, len is greater 0
              */
-            --len;
+            len--;
         }
     } else {
         len = r - w - 1;
@@ -511,7 +515,7 @@ size_t lwrb_advance(lwrb_t* buff, size_t len)
 {
     size_t free, w;
 
-    if ((! BUF_IS_VALID(buff)) || (len == 0)) {
+    if ((! BUF_IS_VALID(buff)) || (0 == len)) {
         return 0;
     }
 
@@ -551,6 +555,7 @@ size_t lwrb_rec_write(lwrb_t* buff, const void* data, size_t btw)
 size_t lwrb_rec_read(lwrb_t* buff, void* data, size_t btr)
 {
     size_t btsize;
+
     if (lwrb_peek(buff, 0, &btsize, sizeof(size_t)) != sizeof(size_t)) {
         return 0;
     }
