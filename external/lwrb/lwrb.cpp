@@ -44,7 +44,7 @@ using namespace std;
 #define BUF_MAX(x, y)   ((x) > (y) ? (x) : (y))
 #define BUF_SEND_EVT(b, type, bp)                                                                                      \
     do {                                                                                                               \
-        if ((b)->evt_fn != nullptr) {                                                                                     \
+        if (nullptr != (b)->evt_fn) {                                                                                     \
             (b)->evt_fn((lwrb_t*)(b), (type), (bp));                                                                     \
         }                                                                                                              \
     } while (0)
@@ -68,6 +68,7 @@ uint8_t lwrb_init(lwrb_t* buff, void* buffdata, size_t size)
     buff->buff = (uint8_t*)buffdata;
     atomic_init(&buff->w, 0);
     atomic_init(&buff->r, 0);
+
     return 1;
 }
 
@@ -108,14 +109,15 @@ void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn)
 
 /**
  * \brief           Write data to buffer.
- * Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
+ * Copies data from `data` array to buffer and marks buffer as full for maximum
+ *                      `btw` number of bytes
  *
  * \param[in]       buff: Buffer handle
  * \param[in]       data: Pointer to data to write into buffer
  * \param[in]       btw: Number of bytes to write
  * \return          Number of bytes written to buffer.
- *                      When returned value is less than `btw`, there was no enough memory available
- *                      to copy full data array
+ *                      When returned value is less than `btw`, there was no
+ *                      enough memory available to copy full data array
  */
 size_t lwrb_write(lwrb_t* buff, const void* data, size_t btw)
 {
@@ -175,7 +177,7 @@ size_t lwrb_read(lwrb_t* buff, void* data, size_t btr)
     size_t tocopy, full, buff_r_ptr;
     uint8_t* d = (uint8_t*)data;
 
-    if (!BUF_IS_VALID(buff) || (nullptr == data) || (0 == btr)) {
+    if ((! BUF_IS_VALID(buff)) || (nullptr == data) || (0 == btr)) {
         return 0;
     }
 
@@ -355,6 +357,7 @@ size_t lwrb_get_full(lwrb_t* buff)
     else {
         size = buff->size - (r - w);
     }
+
     return size;
 }
 
@@ -415,6 +418,7 @@ size_t lwrb_get_linear_block_read_length(lwrb_t* buff)
     else {
         len = 0;
     }
+
     return len;
 }
 
@@ -444,6 +448,7 @@ size_t lwrb_skip(lwrb_t* buff, size_t len)
     }
     atomic_store_explicit(&buff->r, r, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_READ, len);
+
     return len;
 }
 
@@ -495,9 +500,11 @@ size_t lwrb_get_linear_block_write_length(lwrb_t* buff)
              */
             len--;
         }
-    } else {
+    }
+    else {
         len = r - w - 1;
     }
+
     return len;
 }
 
@@ -529,6 +536,7 @@ size_t lwrb_advance(lwrb_t* buff, size_t len)
     }
     atomic_store_explicit(&buff->w, w, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
+
     return len;
 }
 
