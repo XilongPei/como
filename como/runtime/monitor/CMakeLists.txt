@@ -54,7 +54,7 @@ set(SOURCES
     CpuCoreUtils.cpp
     MarshalUtils.cpp
     ${MonitorWithDbus_Sources}
-    ${EXTERNAL_DIR}/lwrb/lwrb.cpp
+    ${EXTERNAL_DIR}/lwrb/lwrb.c
 )
 
 add_library(RuntimeMonitor STATIC
