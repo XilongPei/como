@@ -17,15 +17,18 @@
 #include "CZMQUtils.h"
 #include "ComoPhxUtils.h"
 #include "PaxosUtils.h"
+#include "PhxPaxosC.h"
 
 namespace como {
 
 /**
  * In redundant computing, data is synchronized through PhxSendBuf
  */
-Integer PaxosUtils::PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer eventCode,
+Integer PaxosUtils::PhxSendBuf(void *oPhxFscpServer, HANDLE hChannel, Integer eventCode,
                                void *socket, const void *buf, size_t bufSize)
 {
+    int iRet;
+
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
     funCodeAndCRC64.eCode = eventCode;
     funCodeAndCRC64.crc64 = 0;
@@ -37,11 +40,17 @@ Integer PaxosUtils::PhxSendBuf(void *oEchoServer, HANDLE hChannel, Integer event
     std::string sname = std::string("keyName");
     std::string ss = std::string((char*)&funCodeAndCRC64, sizeof(funCodeAndCRC64)) +
                      std::string((char*)buf, bufSize);
-    int ret = como::ComoPhxUtils::SyncStateData((PhxEchoServer *)oEchoServer,
+#ifdef FORCE_USE_ALGORITHM_PAXOS
+    iRet = como::ComoPhxUtils::SyncStateData((PhxFscpServer *)oPhxFscpServer,
                                     como::ComoPhxUtils::LevelDbWrite, sname, ss,
                                     sEchoRespValue);
-    if (ret != 0) {
-        Logger_E("PhxpaxosUtils::PhxSendBuf", "SyncStateData fail, ret %d", ret);
+#else
+    iRet = PhxProposeDirectly((PhxFscpServer *)oPhxFscpServer,
+                              como::ComoPhxUtils::LevelDbWrite,
+                              (char*)sname.data(), (char*)ss.data(), ss.size());
+#endif
+    if (0 != iRet) {
+        Logger_E("PhxpaxosUtils::PhxSendBuf", "SyncStateData fail, ret %d", iRet);
     }
 
     return 0;
