@@ -76,10 +76,12 @@ if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
                 Don't set environment variable RedundantComputing_SUPPORT_Enable to enable")
     endif()
 
-    IMPORT_ANY_LIBRARY(${EXTERNAL_DIR}/phxpaxos/export_como PhxPaxos.so)
-
     set(PhxpaxosLib
-        PhxPaxos.so
+        ${EXTERNAL_DIR}/phxpaxos/export_como/libPhxPaxosComo.a
+        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
     )
 else()
     set(PhxpaxosLib "")
@@ -259,3 +261,4 @@ install(FILES
         GROUP_EXECUTE
         WORLD_READ
         WORLD_EXECUTE)
+

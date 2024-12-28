@@ -63,8 +63,13 @@ include_directories(
 )
 
 if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
-    IMPORT_ANY_LIBRARY(${EXTERNAL_DIR}/phxpaxos/export_como PhxPaxos.so)
-    set(PhxpaxosLib PhxPaxos.so)
+    set(PhxpaxosLib
+        ${EXTERNAL_DIR}/phxpaxos/export_como/libPhxPaxosComo.a
+        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
+        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
+    )
     set(PhxpaxosSrc "")
 
     # <command-line>: warning: "COMO_FUNCTION_SAFETY" redefined
