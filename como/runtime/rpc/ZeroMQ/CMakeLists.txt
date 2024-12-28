@@ -32,11 +32,9 @@ if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
     endif()
 
     add_definitions(-DRedundantComputing_SUPPORT)
+    IMPORT_ANY_LIBRARY(${EXTERNAL_DIR}/phxpaxos/export_como PhxPaxos.so)
     set(PhxpaxosLib
         ${EXTERNAL_DIR}/phxpaxos/export_como/PhxPaxos.so
-        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
-        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
-        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
     )
     set(PhxpaxosSrc
         PaxosUtils.cpp

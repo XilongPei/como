@@ -76,8 +76,10 @@ if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
                 Don't set environment variable RedundantComputing_SUPPORT_Enable to enable")
     endif()
 
+    IMPORT_ANY_LIBRARY(${EXTERNAL_DIR}/phxpaxos/export_como PhxPaxos.so)
+
     set(PhxpaxosLib
-        ${EXTERNAL_DIR}/phxpaxos/export_como/PhxPaxos.so
+        PhxPaxos.so
     )
 else()
     set(PhxpaxosLib "")

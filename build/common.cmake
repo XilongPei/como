@@ -23,6 +23,11 @@ macro(IMPORT_LIBRARY target)
     set_property(TARGET ${target} PROPERTY IMPORTED_LOCATION ${BIN_DIR}/${target})
 endmacro()
 
+macro(IMPORT_ANY_LIBRARY dir target)
+    add_library(${target} UNKNOWN IMPORTED)
+    set_property(TARGET ${target} PROPERTY IMPORTED_LOCATION ${dir}/${target})
+endmacro()
+
 macro(IMPORT_GTEST)
     add_library(libgtest.a UNKNOWN IMPORTED)
     set_property(TARGET libgtest.a PROPERTY IMPORTED_LOCATION $ENV{OUT_PATH}/lib/gtest.a)

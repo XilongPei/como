@@ -62,18 +62,10 @@ include_directories(
     ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/include
 )
 
-if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
-    set(PhxpaxosLib
-        ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
-        ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
-        ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
-        ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
-    )
-    set(PhxpaxosSrc
-        ${EXTERNAL_DIR}/phxpaxos/export_como/ComoPhxUtils.cpp
-        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_server.cpp
-        ${EXTERNAL_DIR}/phxpaxos/export_como/echo_sm.cpp
-    )
+if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
+    IMPORT_ANY_LIBRARY(${EXTERNAL_DIR}/phxpaxos/export_como PhxPaxos.so)
+    set(PhxpaxosLib PhxPaxos.so)
+    set(PhxpaxosSrc "")
 
     # <command-line>: warning: "COMO_FUNCTION_SAFETY" redefined
     #set(Phxpaxos_DEFINITIONS -DCOMO_FUNCTION_SAFETY)
@@ -122,3 +114,4 @@ install(FILES
         GROUP_EXECUTE
         WORLD_READ
         WORLD_EXECUTE)
+
