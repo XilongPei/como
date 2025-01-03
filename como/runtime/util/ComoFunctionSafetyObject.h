@@ -62,8 +62,8 @@ public:
             /* [out] */ Long& currentChecksum) override;
 private:
     Integer mIsValid;                   // value definition: 0:valid; others:invalid
-    Long mChecksum;
-    Long mExpires;
+    Long    mChecksum;
+    Long    mExpires;
     struct timespec mLastModifiedTime;  // CLOCK_MONOTONIC
 };
 

@@ -252,10 +252,13 @@ Integer CZMQUtils::CzmqSendBuf(HANDLE hChannel, Integer eventCode, void *socket,
     int numberOfBytes;
     COMO_ZMQ_RPC_MSG_HEAD funCodeAndCRC64;
     funCodeAndCRC64.eCode = eventCode;
+    // [Comment:1] To calculate the crc64 value of structure funCodeAndCRC64,
+    //             first set its member variable to 0.
     funCodeAndCRC64.crc64 = 0;
     funCodeAndCRC64.msgSize = bufSize;
     funCodeAndCRC64.hChannel = hChannel;
 
+    // It is correct to assign this member variable twice, see [Comment:1].
     funCodeAndCRC64.crc64 = update_crc_64_ecma_bytes(crc64,
                             reinterpret_cast<const unsigned char *>(&funCodeAndCRC64),
                             sizeof(COMO_ZMQ_RPC_MSG_HEAD));

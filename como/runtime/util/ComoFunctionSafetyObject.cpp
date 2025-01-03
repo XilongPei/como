@@ -77,6 +77,7 @@ static int handler(void* user, const char* section, const char* name, const char
     if (/*strcmp(section, "") == 0 && */strcmp(name, "expires") == 0) {
         (*(Long*)user) = atol(value);
     }
+
     return 1;
 }
 
@@ -155,13 +156,13 @@ ECode ComoFunctionSafetyObject::SetLastModifiedInfo()
  * default function for checking ComoFunctionSafetyObject
  */
 ECode ComoFunctionSafetyObject::IsValid(
-        /* [out] */ Integer& isValid)
+    /* [out] */ Integer& isValid)
 {
     struct timespec time;
     (void)clock_gettime(CLOCK_MONOTONIC, &time);
 
-    if (1000000000L * (mLastModifiedTime.tv_sec - time.tv_sec) +
-       /*987654321*/    (mLastModifiedTime.tv_nsec - time.tv_nsec) > mExpires) {
+    if (1000000000LL * (time.tv_sec  - mLastModifiedTime.tv_sec) +
+       /*987654321*/    time.tv_nsec - mLastModifiedTime.tv_nsec > mExpires) {
 
         isValid = CFSO_ExpireTime;
         return NOERROR;
@@ -197,7 +198,9 @@ ECode ComoFunctionSafetyObject::GetChecksum(
     // and before CRC calculation
     mChecksum = 0L;
 
-    currentChecksum = mChecksum = Object::GetCRC64((IInterface*)this);
+    mChecksum = Object::GetCRC64((IInterface*)this);
+    currentChecksum = mChecksum;
+
     return NOERROR;
 }
 
@@ -238,7 +241,8 @@ unsigned int CFSO_VECTOR::cfso_allocate()
     return _extra;
 }
 
-int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
+int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso)
+{
     if (numNullArray > 0) {
         int index = idxNullArray[numNullArray--];
         *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + index *
@@ -257,26 +261,27 @@ int CFSO_VECTOR::cfso_push(ComoFunctionSafetyObject *cfso) {
     }
 
     *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + _size *
-                                                    sizeof(ComoFunctionSafetyObject*)) = cfso;
+                                        sizeof(ComoFunctionSafetyObject*)) = cfso;
     _size++;
     _extra--;
 
     return 0;
 }
 
-ComoFunctionSafetyObject *CFSO_VECTOR::cfso_get(unsigned int index) {
+ComoFunctionSafetyObject *CFSO_VECTOR::cfso_get(unsigned int index)
+{
     if ((_size < 1) || (index >= _size)) {
         return nullptr;
     }
     return *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
-                                                        index * sizeof(ComoFunctionSafetyObject*));
+                                        index * sizeof(ComoFunctionSafetyObject*));
 }
 
 int CFSO_VECTOR::cfso_find(ComoFunctionSafetyObject *cfso)
 {
     for (unsigned int i = 0;  i < _size;  i++) {
-        if (cfso == *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) + i *
-                                                            sizeof(ComoFunctionSafetyObject*))) {
+        if (cfso == *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
+                                            i * sizeof(ComoFunctionSafetyObject*))) {
             return i;
         }
     }
@@ -284,7 +289,8 @@ int CFSO_VECTOR::cfso_find(ComoFunctionSafetyObject *cfso)
     return -1;
 }
 
-int CFSO_VECTOR::cfso_del(unsigned int index) {
+int CFSO_VECTOR::cfso_del(unsigned int index)
+{
     if ((_size < 1) || (index >= _size)) {
         return -1;
     }
@@ -292,9 +298,10 @@ int CFSO_VECTOR::cfso_del(unsigned int index) {
     if (numNullArray >= CFSO_VECTOR_SizeNullArray) {
         for ( ;  numNullArray >= 0;  numNullArray--) {
             ComoFunctionSafetyObject* cfso;
+
             for ( ;  _size > 0;  _size--) {
                 cfso = *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
-                                                        (_size-1) * sizeof(ComoFunctionSafetyObject*));
+                                        (_size-1) * sizeof(ComoFunctionSafetyObject*));
                 if (cfso != nullptr) {
                     break;
                 }
@@ -312,7 +319,7 @@ int CFSO_VECTOR::cfso_del(unsigned int index) {
 
     idxNullArray[numNullArray++] = index;
     *(ComoFunctionSafetyObject**)(reinterpret_cast<HANDLE>(_data) +
-                                                index * sizeof(ComoFunctionSafetyObject*)) = nullptr;
+                            index * sizeof(ComoFunctionSafetyObject*)) = nullptr;
     return 0;
 }
 
