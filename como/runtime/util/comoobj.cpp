@@ -94,7 +94,7 @@ ECode Object::GetCoclass(
 ECode Object::GetHashCode(
     /* [out] */ Long& hash)
 {
-    hash = reinterpret_cast<HANDLE>(this);
+    hash = reinterpret_cast<Long>(this);
     return NOERROR;
 }
 
@@ -258,13 +258,13 @@ String Object::GetFuncSafetySetting(
         AutoPtr<IMetaCoclass> mc;
         ECode ec = objTmp->GetCoclass(mc);
         if (FAILED(ec)) {
-            return funcSafetySetting;
+            return nullptr;
         }
 
         if (mc != nullptr) {
             ec = mc->GetFuncSafetySetting(funcSafetySetting);
             if (UNLIKELY(FAILED(ec))) {               // This shouldn't happen
-                return funcSafetySetting;
+                return nullptr;
             }
         }
 
@@ -350,9 +350,10 @@ Boolean Object::Equals(
     }
 
     IObject* o1 = IObject::Probe(obj1);
-    if (o1 == nullptr) {
+    if (nullptr == o1) {
         return false;
     }
+
     Boolean result;
     o1->Equals(obj2, result);
     return result;
