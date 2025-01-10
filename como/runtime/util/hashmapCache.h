@@ -221,7 +221,7 @@ public:
                 }
 
                 curr->mReferenceCount--;
-                if (0 == curr->mReferenceCount) {
+                if (0u == curr->mReferenceCount) {
                     delete curr;
                     mCount--;
                 }
@@ -321,13 +321,15 @@ public:
         return mCount;
     }
 
-    void CleanUpExpiredData()
+    int CleanUpExpiredData()
     {
+        int num = 0;
+
         struct timespec currentTime;
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
         if ((currentTime.tv_sec - mLastCheanTime.tv_sec) < CHECK_EXPIRES_PERIOD) {
-            return;
+            return 0;
         }
 
         mLastCheanTime = currentTime;
@@ -335,20 +337,35 @@ public:
         for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
+                Bucket* prev = curr;
                 while (curr != nullptr) {
                     if ((currentTime.tv_sec - curr->lastAccessTime.tv_sec) >
                                                                mTimeoutBucket) {
-                        Bucket* next = curr->mNext;
-                        delete curr;
-                        mCount--;
-                        curr = next;
+                        if (curr == mBuckets[i]) {
+                            mBuckets[i] = curr->mNext;
+                        }
+                        else {
+                            prev->mNext = curr->mNext;
+                        }
+
+                        curr->mReferenceCount--;
+                        if (0u == curr->mReferenceCount) {
+                            Bucket* tmp = prev->mNext;
+                            delete curr;
+                            curr = tmp;
+                            mCount--;
+                            num++;
+                        }
                     }
-                    if (curr != nullptr) {
-                        curr = curr->mNext;
+                    else {
+                        prev = curr;
+                        curr = prev->mNext;
                     }
                 }
             }
         }
+
+        return num;
     }
 
     int RemoveByValue(Long value)
@@ -358,23 +375,36 @@ public:
         for (unsigned int i = 0u;  i < mBucketSize;  i++) {
             if (mBuckets[i] != nullptr) {
                 Bucket* curr = mBuckets[i];
+                Bucket* prev = curr;
+
                 while (curr != nullptr) {
                     if (curr->mlValue == value) {
-                        Bucket* next = curr->mNext;
+                        if (curr == mBuckets[i]) {
+                            mBuckets[i] = curr->mNext;
+                        }
+                        else {
+                            prev->mNext = curr->mNext;
+                        }
+
                         curr->mReferenceCount--;
                         if (0u == curr->mReferenceCount) {
+                            Bucket* tmp = prev->mNext;
                             delete curr;
+                            curr = tmp;
                             mCount--;
                             num++;
                         }
-                        curr = next;
+
+                        return 1;
                     }
-                    if (curr != nullptr) {
-                        curr = curr->mNext;
+                    else {
+                        prev = curr;
+                        curr = prev->mNext;
                     }
                 }
             }
         }
+
         return num;
     }
 

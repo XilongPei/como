@@ -21,6 +21,7 @@
 #include <rpcHelpers.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
+#include "debugbreak.h"
 
 using como::test::rpc::CID_CService;
 using como::test::rpc::IService;
@@ -148,6 +149,8 @@ TEST(RPCTest, TestCallTestMethod4)
 
     Long hash;
     ipack->GetServerObjectId(hash);
+
+    //debug_break();
     ec = proxy->ReleaseObject(hash);
     EXPECT_EQ(0, ec);
 }
