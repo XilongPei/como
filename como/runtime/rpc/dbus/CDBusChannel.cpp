@@ -514,7 +514,7 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
 
         if (0 != hash) {
             // now, hash is CDBusChannel::mServerObjectId
-            ec = UnregisterExportObjectById(RPCType::Remote, hash);
+            ec = UnregisterExportObjectById(RPCType::Local, hash);
             if (FAILED(ec)) {
                 Logger::E("threadHandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);

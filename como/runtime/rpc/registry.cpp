@@ -46,6 +46,12 @@ struct HashFunc<IInterfacePack*>
     }
 };
 
+/**
+ * Local and Remote are for DBus and ZMQ, and this convention is used in
+ * comorpc.cpp. RPCType::Local, RPCType::Remote name is not good, the intention
+ * is that DBus is local, ZMQ is remote, but in fact, DBus across the process,
+ * is also remote, ZMQ in a single operating system, is also local.
+ */
 static HashMapCache<IObject*, IStub*> sLocalExportRegistry;
 static Mutex sLocalExportRegistryLock;
 static HashMapCache<IObject*, IStub*> sRemoteExportRegistry;
