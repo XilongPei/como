@@ -2339,7 +2339,7 @@ void CProxy::OnLastStrongRef(
 
     Long proxyId;
     mIpack->GetProxyInfo(proxyId);
-    UnregisterImportObjectByChannel(RPCType::Local, proxyId);
+    UnregisterImportObjectById(RPCType::Local, proxyId);
 #endif
 
     Object::OnLastStrongRef(id);

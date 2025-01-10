@@ -115,12 +115,13 @@ ECode UnregisterExportObject(
         registry.Remove(object);
         return NOERROR;
     }
+
     return E_NOT_FOUND_EXCEPTION;
 }
 
-ECode UnregisterExportObjectByHash(
+ECode UnregisterExportObjectById(
     /* [in] */ RPCType type,
-    /* [in] */ Long hash)
+    /* [in] */ Long id)
 {
     HashMapCache<IObject*, IStub*>& registry = (type == RPCType::Local) ?
                                    sLocalExportRegistry : sRemoteExportRegistry;
@@ -128,33 +129,14 @@ ECode UnregisterExportObjectByHash(
                            sLocalExportRegistryLock : sRemoteExportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
-        Logger::D("UnregisterExportObject", "HashCode is 0x%llX", hash);
+        Logger::D("UnregisterExportObjectById", "id: 0x%llX", id);
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByHash(hash)) {
+    if (! registry.RemoveByValue(id)) {
         return E_NOT_FOUND_EXCEPTION;
     }
-    return NOERROR;
-}
 
-ECode UnregisterExportObjectByChannel(
-    /* [in] */ RPCType type,
-    /* [in] */ Long channel)
-{
-    HashMapCache<IObject*, IStub*>& registry = (type == RPCType::Local) ?
-                                   sLocalExportRegistry : sRemoteExportRegistry;
-    Mutex& registryLock = (type == RPCType::Local) ?
-                           sLocalExportRegistryLock : sRemoteExportRegistryLock;
-
-    if (Logger::GetLevel() <= Logger::DEBUG) {
-        Logger::D("UnregisterExportObjectByChannel", "channel: 0x%llX", channel);
-    }
-
-    Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByValue(channel)) {
-        return E_NOT_FOUND_EXCEPTION;
-    }
     return NOERROR;
 }
 
@@ -188,6 +170,7 @@ ECode FindExportObject(
         return NOERROR;
     }
     stub = nullptr;
+
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -299,6 +282,7 @@ ECode UnregisterImportObject(
         registry.Remove(ipack);
         return NOERROR;
     }
+
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -329,12 +313,13 @@ ECode FindImportObject(
         return NOERROR;
     }
     object = nullptr;
+
     return E_NOT_FOUND_EXCEPTION;
 }
 
-ECode UnregisterImportObjectByChannel(
+ECode UnregisterImportObjectById(
     /* [in] */ RPCType type,
-    /* [in] */ Long channel)
+    /* [in] */ Long id)
 {
     HashMapCache<IInterfacePack*, IObject*>& registry = (type == RPCType::Local) ?
                                    sLocalImportRegistry : sRemoteImportRegistry;
@@ -342,13 +327,14 @@ ECode UnregisterImportObjectByChannel(
                            sLocalImportRegistryLock : sRemoteImportRegistryLock;
 
     if (Logger::GetLevel() <= Logger::DEBUG) {
-        Logger::D("UnregisterImportObjectByChannel", "channel: 0x%llX", channel);
+        Logger::D("UnregisterImportObjectById", "id: 0x%llX", id);
     }
 
     Mutex::AutoLock lock(registryLock);
-    if (! registry.RemoveByValue(channel)) {
+    if (! registry.RemoveByValue(id)) {
         return E_NOT_FOUND_EXCEPTION;
     }
+
     return NOERROR;
 }
 

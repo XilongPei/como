@@ -153,7 +153,7 @@ ECode CoUnregisterImportObject(
     /* [in] */ RPCType type,
     /* [in] */ Long channel)
 {
-    return UnregisterImportObjectByChannel(type, channel);
+    return UnregisterImportObjectById(type, channel);
 }
 
 ECode CoStopAll()

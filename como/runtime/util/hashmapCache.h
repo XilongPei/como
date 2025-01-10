@@ -235,36 +235,6 @@ public:
         return 0;
     }
 
-    int RemoveByHash(
-        /* [in] */ Long hash)
-    {
-        unsigned int index = ((unsigned long long int)hash) % mBucketSize;
-        Bucket* curr = mBuckets[index];
-        Bucket* prev = curr;
-        while (curr != nullptr) {
-            if (curr->mHash == hash) {
-                if (curr == mBuckets[index]) {
-                    mBuckets[index] = curr->mNext;
-                }
-                else {
-                    prev->mNext = curr->mNext;
-                }
-
-                curr->mReferenceCount--;
-                if (0u == curr->mReferenceCount) {
-                    delete curr;
-                    mCount--;
-                }
-
-                return 1;
-            }
-            prev = curr;
-            curr = prev->mNext;
-        }
-
-        return 0;
-    }
-
     void Clear()
     {
         for (unsigned int i = 0u;  i < mBucketSize;  i++) {

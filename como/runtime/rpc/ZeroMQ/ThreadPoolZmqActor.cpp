@@ -360,7 +360,7 @@ HandleMessage_GetComponentMetadata:
 
                 // At this time, the Channel object may be released itself.
                 if (0 != hash) {
-                    ec = UnregisterExportObjectByHash(RPCType::Remote, hash);
+                    ec = UnregisterExportObjectById(RPCType::Remote, hash);
                     if (FAILED(ec)) {
                         Logger::E("threadHandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
@@ -392,7 +392,9 @@ HandleMessage_Object_Release:
                     goto HandleMessage_Object_ReleasePeer;
                 }
 
-                ec = UnregisterExportObjectByChannel(RPCType::Remote, hChannel);
+                // now, hChannel is mServerObjectId, reference to
+                // CZMQUtils::CzmqSendBuf in class CZMQChannel
+                ec = UnregisterExportObjectById(RPCType::Remote, hChannel);
                 if (FAILED(ec)) {
                     Logger::E("threadHandleMessage",
                                           "ReleasePeer error, ECode: 0x%X", ec);

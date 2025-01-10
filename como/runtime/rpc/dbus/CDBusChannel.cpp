@@ -513,7 +513,8 @@ DBusHandlerResult CDBusChannel::ServiceRunnable::HandleMessage(
         dbus_message_iter_get_basic(&args, &hash);
 
         if (0 != hash) {
-            ec = UnregisterExportObjectByHash(RPCType::Remote, hash);
+            // now, hash is CDBusChannel::mServerObjectId
+            ec = UnregisterExportObjectById(RPCType::Remote, hash);
             if (FAILED(ec)) {
                 Logger::E("threadHandleMessage",
                                        "Object_Release error, ECode: 0x%X", ec);
