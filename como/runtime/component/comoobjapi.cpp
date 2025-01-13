@@ -22,6 +22,8 @@
 
 namespace como {
 
+Short g_iRuntimeID = 0;
+
 ECode CoCreateObjectInstance(
     /* [in] */ const CoclassID& cid,
     /* [in] */ const InterfaceID& iid,
@@ -103,6 +105,12 @@ ECode CoClassForName(
     cid = CoclassIDfromName(namespaceAndName, nullptr);
 
     return loader->LoadCoclass(cid, mc);
+}
+
+ECode CoSetRuntimeID(Short iRuntimeID)
+{
+    g_iRuntimeID = iRuntimeID;
+    return NOERROR;
 }
 
 } // namespace como
