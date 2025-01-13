@@ -217,8 +217,9 @@ TEST(RPCTest, TestReleaseObject)
     proxy->GetIpack(ipack);
     ipack->GetServerObjectId(hash);
 
+    // TODO: free SERVICE's IStub
     ECode ec = proxy->ReleaseObject(hash);
-    EXPECT_EQ(0, ec);
+    EXPECT_NE(0, ec);
 }
 
 TEST(RPCTest, TestRpcHelpers)

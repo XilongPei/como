@@ -105,7 +105,14 @@ ECode RpcHelpers::ReleaseImportObject(
 
             ipack->GetProxyInfo(channelId);
 
-            return como::CoUnregisterImportObject(RPCType::Remote, channelId);
+            String str = nullptr;
+            ec = ipack->GetServerName(str);
+            if ((nullptr == str) || str.IsEmpty()) {
+                return como::CoUnregisterImportObject(RPCType::Local, channelId);
+            }
+            else {
+                return como::CoUnregisterImportObject(RPCType::Remote, channelId);
+            }
         }
 
         // Release one ImportObject
@@ -122,12 +129,20 @@ ECode RpcHelpers::ReleaseImportObject(
 
         ipack->GetProxyInfo(channelId);
 
-        return como::CoUnregisterImportObject(RPCType::Remote, channelId);
+        String str = nullptr;
+        ec = ipack->GetServerName(str);
+        if ((nullptr == str) || str.IsEmpty()) {
+            return como::CoUnregisterImportObject(RPCType::Local, channelId);
+        }
+        else {
+            return como::CoUnregisterImportObject(RPCType::Remote, channelId);
+        }
     }
 
     // It implements the COMO class of IParcelable interface. Its method
     // execution is executed on the client side.
     IObject::Probe(obj)->GetHashCode(hash);
+    (void)como::CoUnregisterImportObject(RPCType::Local, hash);
     return como::CoUnregisterImportObject(RPCType::Remote, hash);
 }
 
