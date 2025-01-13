@@ -299,6 +299,7 @@ DBusHandlerResult ServiceManager::HandleMessage(
             parcel->ReadCoclassID(ipack.mCid);
             parcel->ReadInterfaceID(ipack.mIid);
             parcel->ReadBoolean(ipack.mIsParcelable);
+            parcel->ReadLong(ipack.mServerObjectId);
             ec = ServiceManager::GetInstance()->AddService(str, ipack);
         }
 
