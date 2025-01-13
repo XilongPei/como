@@ -398,9 +398,7 @@ public:
                         prev = curr;
                         curr = prev->mNext;
                     }
-                    return 1;
                 }
-
             }
         }
 
