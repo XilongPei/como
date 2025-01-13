@@ -213,16 +213,18 @@ public:
         Bucket* prev = curr;
         while (curr != nullptr) {
             if ((curr->mHash == hash) && (! compareF(curr->mKey, key))) {
-                if (curr == mBuckets[index]) {
-                    mBuckets[index] = curr->mNext;
-                }
-                else {
-                    prev->mNext = curr->mNext;
-                }
-
                 curr->mReferenceCount--;
                 if (0u == curr->mReferenceCount) {
-                    delete curr;
+                    if (curr == mBuckets[index]) {
+                        mBuckets[index] = curr->mNext;
+                        delete curr;
+                        curr = mBuckets[index];
+                    }
+                    else {
+                        prev->mNext = curr->mNext;
+                        delete curr;
+                        curr = prev->mNext;
+                    }
                     mCount--;
                 }
 
@@ -343,19 +345,16 @@ public:
                                                                mTimeoutBucket) {
                         if (curr == mBuckets[i]) {
                             mBuckets[i] = curr->mNext;
+                            delete curr;
+                            curr = mBuckets[i];
                         }
                         else {
                             prev->mNext = curr->mNext;
-                        }
-
-                        curr->mReferenceCount--;
-                        if (0u == curr->mReferenceCount) {
-                            Bucket* tmp = prev->mNext;
                             delete curr;
-                            curr = tmp;
-                            mCount--;
-                            num++;
+                            curr = prev->mNext;
                         }
+                        mCount--;
+                        num++;
                     }
                     else {
                         prev = curr;
@@ -379,29 +378,29 @@ public:
 
                 while (curr != nullptr) {
                     if (curr->mlValue == value) {
-                        if (curr == mBuckets[i]) {
-                            mBuckets[i] = curr->mNext;
-                        }
-                        else {
-                            prev->mNext = curr->mNext;
-                        }
-
                         curr->mReferenceCount--;
                         if (0u == curr->mReferenceCount) {
-                            Bucket* tmp = prev->mNext;
-                            delete curr;
-                            curr = tmp;
+                            if (curr == mBuckets[i]) {
+                                mBuckets[i] = curr->mNext;
+                                delete curr;
+                                curr = mBuckets[i];
+                            }
+                            else {
+                                prev->mNext = curr->mNext;
+                                delete curr;
+                                curr = prev->mNext;
+                            }
                             mCount--;
                             num++;
                         }
-
-                        return 1;
                     }
                     else {
                         prev = curr;
                         curr = prev->mNext;
                     }
+                    return 1;
                 }
+
             }
         }
 
