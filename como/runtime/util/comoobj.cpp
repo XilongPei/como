@@ -91,10 +91,16 @@ ECode Object::GetCoclass(
     return mComponent->GetCoclass(mCoclassName, klass);
 }
 
+/**
+ * defined in comoobjapi.cpp
+ */
+extern Short g_iRuntimeID;
+
 ECode Object::GetHashCode(
     /* [out] */ Long& hash)
 {
     hash = reinterpret_cast<Long>(this);
+    *reinterpret_cast<Short *>(hash) = g_iRuntimeID;
     return NOERROR;
 }
 

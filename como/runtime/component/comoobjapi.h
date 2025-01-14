@@ -43,7 +43,6 @@ EXTERN_C COM_PUBLIC ECode CoClassForName(
     /* [in] */ IClassLoader* loader,
     /* [out] */ AutoPtr<IMetaCoclass>& mc);
 
-extern Short g_iRuntimeID;
 EXTERN_C COM_PUBLIC ECode CoSetRuntimeID(
     /* [in] */ Short iRuntimeID);
 

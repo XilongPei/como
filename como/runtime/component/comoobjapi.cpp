@@ -22,6 +22,11 @@
 
 namespace como {
 
+/**
+ * COMO runtime ID, which uniquely identifies the COMO runtime. This ID is used
+ * to distinguish the COMO running instances when there are multiple COMO running
+ * instances, especially those running on the same operating system.
+ */
 Short g_iRuntimeID = 0;
 
 ECode CoCreateObjectInstance(
