@@ -91,9 +91,9 @@ set(SOURCES13
     testDebugUtils.cpp
 )
 
-# set(SOURCES14
-#     testhashmapCache.cpp
-# )
+set(SOURCES14
+    testHashmapCache.cpp
+)
 
 IMPORT_LIBRARY(comort.so)
 IMPORT_GTEST()
@@ -140,8 +140,8 @@ add_executable(testTimespecUtils
 add_executable(testDebugUtils
     ${SOURCES13})
 
-# add_executable(testhashmapCache
-#     ${SOURCES14})
+add_executable(testHashmapCache
+    ${SOURCES14})
 
 target_link_libraries(testMac comort.so ${GTEST_LIBS})
 add_dependencies(testMac comort gtest gtest_main)
@@ -188,8 +188,8 @@ add_dependencies(testTimespecUtils comort gtest gtest_main)
 target_link_libraries(testDebugUtils comort.so ${GTEST_LIBS})
 add_dependencies(testDebugUtils comort gtest gtest_main)
 
-# target_link_libraries(testhashmapCache comort.so ${GTEST_LIBS})
-# add_dependencies(testhashmapCache comort gtest gtest_main)
+target_link_libraries(testHashmapCache comort.so ${GTEST_LIBS})
+add_dependencies(testHashmapCache comort gtest gtest_main)
 
 COPY(testUtil ${UTIL_OBJ_DIR}/testUtil ${BIN_DIR})
 COPY(testMac ${UTIL_OBJ_DIR}/testMac ${BIN_DIR})
@@ -205,7 +205,7 @@ COPY(testLamportClock ${UTIL_OBJ_DIR}/testLamportClock ${BIN_DIR})
 COPY(testStrToX_Hashmap ${UTIL_OBJ_DIR}/testLamportClock ${BIN_DIR})
 COPY(testTimespecUtils ${UTIL_OBJ_DIR}/testTimespecUtils ${BIN_DIR})
 COPY(testDebugUtils ${UTIL_OBJ_DIR}/testDebugUtils ${BIN_DIR})
-# COPY(testhashmapCache ${UTIL_OBJ_DIR}/testDebugUtils ${BIN_DIR})
+COPY(testHashmapCache ${UTIL_OBJ_DIR}/testDebugUtils ${BIN_DIR})
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil
