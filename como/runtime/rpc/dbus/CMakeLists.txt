@@ -16,6 +16,12 @@
 
 set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/dbus)
 
+if($ENV{ARCH} MATCHES "(x64)|(x32)")
+    set(USR_LIB_INCLUDE "/usr/lib/x86_64-linux-gnu/dbus-1.0/include")
+else()
+    set(USR_LIB_INCLUDE "")
+endif()
+
 include_directories(
     ./
     ../
@@ -23,15 +29,17 @@ include_directories(
     ../../type
     ../../util
     /usr/include/dbus-1.0
-    /usr/lib/x86_64-linux-gnu/dbus-1.0/include
-    ${INC_DIR})
+    ${USR_LIB_INCLUDE}
+    ${INC_DIR}
+)
 
 set(SOURCES
     CDBusChannel.cpp
     CDBusChannelFactory.cpp
     CDBusParcel.cpp
     InterfacePack.cpp
-    ThreadPoolExecutor.cpp)
+    ThreadPoolExecutor.cpp
+)
 
 add_library(rpc-dbus STATIC
     ${SOURCES})
