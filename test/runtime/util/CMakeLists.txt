@@ -205,7 +205,7 @@ COPY(testLamportClock ${UTIL_OBJ_DIR}/testLamportClock ${BIN_DIR})
 COPY(testStrToX_Hashmap ${UTIL_OBJ_DIR}/testLamportClock ${BIN_DIR})
 COPY(testTimespecUtils ${UTIL_OBJ_DIR}/testTimespecUtils ${BIN_DIR})
 COPY(testDebugUtils ${UTIL_OBJ_DIR}/testDebugUtils ${BIN_DIR})
-COPY(testHashmapCache ${UTIL_OBJ_DIR}/testDebugUtils ${BIN_DIR})
+COPY(testHashmapCache ${UTIL_OBJ_DIR}/testHashmapCache ${BIN_DIR})
 
 install(FILES
     ${UTIL_OBJ_DIR}/testUtil
