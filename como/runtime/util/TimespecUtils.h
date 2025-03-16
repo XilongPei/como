@@ -86,8 +86,8 @@ public:
         }
 
         clock_gettime(CLOCK_MONOTONIC, ts);
-        return (long long int)(ts.tv_sec) *
-                             TimespecUtils::NANOSECONDS_PER_SECOND + ts.tv_nsec;
+        return (long long int)(ts->tv_sec) *
+                             TimespecUtils::NANOSECONDS_PER_SECOND + ts->tv_nsec;
     }
 
 }; // class TimespecUtilities
