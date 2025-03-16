@@ -78,12 +78,16 @@ public:
         return 0;
     }
 
-    static inline long long int TimespecClockGettime()
+    static inline long long int TimespecClockGettime(struct timespec *ts)
     {
         struct timespec ct;
-        clock_gettime(CLOCK_MONOTONIC, &ct);
-        return (long long int)(ct.tv_sec) *
-                             TimespecUtils::NANOSECONDS_PER_SECOND + ct.tv_nsec;
+        if (nullptr == ts) {
+            ts = &ct;
+        }
+
+        clock_gettime(CLOCK_MONOTONIC, ts);
+        return (long long int)(ts.tv_sec) *
+                             TimespecUtils::NANOSECONDS_PER_SECOND + ts.tv_nsec;
     }
 
 }; // class TimespecUtilities
