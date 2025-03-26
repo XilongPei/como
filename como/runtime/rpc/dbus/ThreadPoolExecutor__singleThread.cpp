@@ -82,6 +82,7 @@ ECode ThreadPoolExecutor::RunTask(
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
 
         pthread_t thread;
+        Logger::D("ThreadPoolExecutor::RunTask", "pthread_create");
         int ret = pthread_create(&thread, &threadAddr, ThreadPoolExecutor::ThreadEntry, (void*)w);
         if (ret != 0) {
             return E_RUNTIME_EXCEPTION;

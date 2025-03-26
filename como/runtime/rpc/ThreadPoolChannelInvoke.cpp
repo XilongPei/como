@@ -190,10 +190,12 @@ ThreadPoolChannelInvoke::ThreadPoolChannelInvoke(int threadNum)
         return;
     }
 
+    Logger::D("ThreadPoolChannelInvoke", "pthread_create");
     for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
         pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
+
         if (pthread_create(&mPthreadIds[i], &threadAddr,
                            ThreadPoolChannelInvoke::threadFunc, nullptr) != 0) {
             Logger::E("ThreadPoolChannelInvoke", "pthread_create() error");

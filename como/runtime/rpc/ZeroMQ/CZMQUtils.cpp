@@ -506,6 +506,7 @@ void *CZMQUtils::CzmqSocketMonitor(const char *serverName)
         return nullptr;
     }
 
+    Logger::D("CZMQUtils::CzmqSocketMonitor", "pthread_create");
     rc = pthread_create(&thread, NULL, rep_socket_monitor, endpointSocket);
     if (0 != rc) {
         return nullptr;

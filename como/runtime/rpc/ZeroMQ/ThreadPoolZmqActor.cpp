@@ -707,6 +707,8 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
     pthread_attr_t threadAddr;
     pthread_attr_init(&threadAddr);
     pthread_attr_setdetachstate(&threadAddr, PTHREAD_CREATE_DETACHED);
+
+    Logger::D("ThreadPoolZmqActor::ThreadPoolZmqActor", "pthread_create threadManager");
     if (pthread_create(&pthread_id_Manager, nullptr,
                              ThreadPoolZmqActor::threadManager, nullptr) != 0) {
         Logger::E("ThreadPoolZmqActor", "pthread_create() error");
@@ -718,6 +720,7 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
     int ret = MakeRealtimePthread_attr(attr);
     (void)ret;
 
+    Logger::D("ThreadPoolZmqActor::ThreadPoolZmqActor", "pthread_create threadHandleMessage");
     for (size_t i = 0;  i < mThreadNum;  i++) {
         if (pthread_create(&pthread_id_HandleMessage[i], nullptr,
                                          threadHandleMessage, (void *)i) != 0) {

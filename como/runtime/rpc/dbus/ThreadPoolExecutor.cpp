@@ -187,6 +187,7 @@ ThreadPool::ThreadPool(int threadNum)
     // The number of threads in the thread pool.
     mThreadNum = threadNum;
 
+    Logger::D("ThreadPool::ThreadPool", "pthread_create");
     for (int i = 0;  i < mThreadNum;  i++) {
         pthread_attr_t threadAddr;
         pthread_attr_init(&threadAddr);
