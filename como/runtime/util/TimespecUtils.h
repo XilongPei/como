@@ -56,12 +56,34 @@ public:
             long long int nsecCurrentTime = (long long int)(currentTime.tv_sec) *
                                     NANOSECONDS_PER_SECOND + currentTime.tv_nsec;
 
-            if ((nsecCurrentTime - nsecTs) < NANOSECONDS_FOR_SCHEDULE) {
+            nsecTs += nanoSeconds;
+
+            /**
+             * =======+===========+============== timeline ======
+             *        ^           ^
+             *        |           + nsecCurrentTime
+             *        + nsecTs(Time point to wait)
+             */
+            if (nsecTs < nsecCurrentTime) {
                 /**
-                 * The difference between `ts` and current time is too short.
+                 * The time for me to wait has expired.
                  * Don't sleep
                  */
                 return -1;
+            }
+
+            /**
+             * =======+====+============== timeline ======
+             *        ^    ^
+             *        |    + nsecTs(Time point to wait)
+             *        + nsecCurrentTime
+             */
+            if ((nsecTs - nsecCurrentTime) < NANOSECONDS_FOR_SCHEDULE) {
+                /**
+                 * The time for me to wait is too short.
+                 * Don't sleep
+                 */
+                return -2;
             }
         }
 
