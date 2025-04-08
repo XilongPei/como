@@ -109,6 +109,14 @@ public:
         return (int64_t)(ts->tv_sec) * NANOSECONDS_PER_SECOND + ts->tv_nsec;
     }
 
+    static inline int64_t TimespecToInt64time(struct timespec *ts)
+    {
+        if (nullptr == ts) {
+            return 0;
+        }
+
+        return (int64_t)(ts->tv_sec) * NANOSECONDS_PER_SECOND + ts->tv_nsec;
+    }
 }; // class TimespecUtilities
 
 } // namespace como
