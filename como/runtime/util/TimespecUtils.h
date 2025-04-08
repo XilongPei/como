@@ -17,10 +17,8 @@
 #ifndef __TIMESPECUTILITIES_H__
 #define __TIMESPECUTILITIES_H__
 
-#include <assert.h>
 #include <time.h>
-#include <climits>
-#include <iostream>
+#include <stdint.h>
 
 namespace como {
 
@@ -51,9 +49,9 @@ public:
             ts = currentTime;
         }
         else {
-            long long int nsecTs = (long long int)(ts.tv_sec) *
+            int64_t nsecTs = (int64_t)(ts.tv_sec) *
                                             NANOSECONDS_PER_SECOND + ts.tv_nsec;
-            long long int nsecCurrentTime = (long long int)(currentTime.tv_sec) *
+            int64_t nsecCurrentTime = (int64_t)(currentTime.tv_sec) *
                                     NANOSECONDS_PER_SECOND + currentTime.tv_nsec;
 
             nsecTs += nanoSeconds;
@@ -100,7 +98,7 @@ public:
         return 0;
     }
 
-    static inline long long int TimespecClockGettime(struct timespec *ts)
+    static inline int64_t TimespecClockGettime(struct timespec *ts)
     {
         struct timespec ct;
         if (nullptr == ts) {
@@ -108,8 +106,7 @@ public:
         }
 
         clock_gettime(CLOCK_MONOTONIC, ts);
-        return (long long int)(ts->tv_sec) *
-                             TimespecUtils::NANOSECONDS_PER_SECOND + ts->tv_nsec;
+        return (int64_t)(ts->tv_sec) * NANOSECONDS_PER_SECOND + ts->tv_nsec;
     }
 
 }; // class TimespecUtilities
