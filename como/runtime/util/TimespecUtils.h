@@ -19,6 +19,7 @@
 
 #include <time.h>
 #include <stdint.h>
+#include <errno.h>
 
 namespace como {
 
