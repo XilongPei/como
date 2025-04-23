@@ -17,6 +17,7 @@
 #include "comoobj.h"
 #include "checksum.h"
 #include "cityhash.h"
+#include "int64.h"
 
 namespace como {
 
@@ -100,7 +101,10 @@ ECode Object::GetHashCode(
     /* [out] */ Long& hash)
 {
     hash = reinterpret_cast<Long>(this);
-    *reinterpret_cast<Short *>(hash) = g_iRuntimeID;
+
+    Int64 *int64 = reinterpret_cast<Int64 *>(&hash);
+    int64->i16.i16_high_high = g_iRuntimeID;
+
     return NOERROR;
 }
 
