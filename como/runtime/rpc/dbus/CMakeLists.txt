@@ -18,6 +18,9 @@ set(RPCDBUS_SRC_DIR ${RPC_SRC_DIR}/dbus)
 
 if($ENV{ARCH} MATCHES "(x64)|(x32)")
     set(USR_LIB_INCLUDE "/usr/lib/x86_64-linux-gnu/dbus-1.0/include")
+elseif($ENV{PLATFORM} MATCHES "openEuler")
+    #This parameter is not affected by --sysroot=$CMAKE_SYSROOT
+    set(USR_LIB_INCLUDE "${CMAKE_SYSROOT}/usr/lib64/dbus-1.0/include")
 else()
     set(USR_LIB_INCLUDE "")
 endif()
