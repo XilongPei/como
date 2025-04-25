@@ -23,7 +23,7 @@
 #include "hashmapCache.h"
 #include "mutex.h"
 #include <dbus/dbus.h>
-#include "SmOptions.h"
+#include "ServiceManagerOptions.h"
 
 #ifdef COMO_FUNCTION_SAFETY
 #include "ComoPhxUtils.h"
@@ -84,7 +84,7 @@ public:
     HashMapCache<String, InterfacePack*> mServices;
     Mutex mServicesLock;
 
-    static SmOptions *options;
+    static ServiceManagerOptions *options;
 #ifdef COMO_FUNCTION_SAFETY
     static como::PhxEchoServer *oEchoServer;
 #endif

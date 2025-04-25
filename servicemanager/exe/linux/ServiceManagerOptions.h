@@ -24,10 +24,10 @@
 
 namespace jing {
 
-class SmOptions
+class ServiceManagerOptions
 {
 public:
-    inline SmOptions(
+    inline ServiceManagerOptions(
         /* [in] */ int argc,
         /* [in] */ char** argv);
 
@@ -63,7 +63,7 @@ private:
     bool mShowVersion = false;
 };
 
-SmOptions::SmOptions(
+ServiceManagerOptions::ServiceManagerOptions(
     /* [in] */ int argc,
     /* [in] */ char** argv)
     : mPaxosServer(nullptr)
@@ -73,27 +73,27 @@ SmOptions::SmOptions(
     Parse(argc, argv);
 }
 
-bool SmOptions::DoShowUsage() const
+bool ServiceManagerOptions::DoShowUsage() const
 {
     return mShowUsage;
 }
 
-bool SmOptions::DoShowVersion() const
+bool ServiceManagerOptions::DoShowVersion() const
 {
     return mShowVersion;
 }
 
-String SmOptions::GetPaxosServer() const
+String ServiceManagerOptions::GetPaxosServer() const
 {
     return mPaxosServer;
 }
 
-std::string SmOptions::GetLocalhost() const
+std::string ServiceManagerOptions::GetLocalhost() const
 {
     return mLocalhost;
 }
 
-std::string SmOptions::GetServiceManager() const
+std::string ServiceManagerOptions::GetServiceManager() const
 {
     return mServiceManager;
 }

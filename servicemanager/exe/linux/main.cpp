@@ -31,16 +31,16 @@
 using como::Logger;
 using jing::ServiceManager;
 
-jing::SmOptions *ServiceManager::options = nullptr;
+jing::ServiceManagerOptions *ServiceManager::options = nullptr;
 #ifdef COMO_FUNCTION_SAFETY
 como::PhxEchoServer *ServiceManager::oEchoServer = nullptr;
 #endif
 
 int main(int argc, char** argv)
 {
-    ServiceManager::options = new jing::SmOptions(argc, argv);
+    ServiceManager::options = new jing::ServiceManagerOptions(argc, argv);
     if (nullptr == ServiceManager::options) {
-        Logger_E("ServiceManager", "No memory, new jing::SmOptions()");
+        Logger_E("ServiceManager", "No memory, new jing::ServiceManagerOptions()");
         return 1;
     }
 

@@ -14,12 +14,12 @@
 // limitations under the License.
 //=========================================================================
 
-#include "SmOptions.h"
+#include "ServiceManagerOptions.h"
 #include <cstdio>
 
 namespace jing {
 
-void SmOptions::Parse(
+void ServiceManagerOptions::Parse(
     /* [in] */ int argc,
     /* [in] */ char** argv)
 {
@@ -51,7 +51,7 @@ void SmOptions::Parse(
     }
 }
 
-bool SmOptions::HasErrors() const
+bool ServiceManagerOptions::HasErrors() const
 {
     if (! mIllegalOptions.IsEmpty()) {
         return true;
@@ -60,7 +60,7 @@ bool SmOptions::HasErrors() const
     return false;
 }
 
-void SmOptions::ShowErrors() const
+void ServiceManagerOptions::ShowErrors() const
 {
     if (! mIllegalOptions.IsEmpty()) {
         String options = mIllegalOptions;
@@ -74,7 +74,7 @@ void SmOptions::ShowErrors() const
     printf("Use \"--help\" to show usage.\n");
 }
 
-void SmOptions::ShowUsage() const
+void ServiceManagerOptions::ShowUsage() const
 {
     printf("\n"
             "Usage: servicemanager [options]\n"
@@ -90,7 +90,7 @@ void SmOptions::ShowUsage() const
         );
 }
 
-void SmOptions::ShowVersion() const
+void ServiceManagerOptions::ShowVersion() const
 {
     printf("servicemanager, version: 1.0.0.1\n");
 }

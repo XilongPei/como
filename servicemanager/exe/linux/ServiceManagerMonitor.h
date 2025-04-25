@@ -24,10 +24,10 @@
 
 namespace jing {
 
-class SmMonitor
+class ServiceManagerMonitor
 {
 public:
-    SmMonitor(AutoPtr<ServiceManager> sm);
+    ServiceManagerMonitor(AutoPtr<ServiceManager> sm);
 
     void *StartSmMonitor(const char *serverName);
 

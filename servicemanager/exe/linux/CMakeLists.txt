@@ -84,8 +84,8 @@ endif()
 set(SOURCES
     ServiceManager.cpp
     main.cpp
-    SmOptions.cpp
-    SmMonitor.cpp
+    ServiceManagerOptions.cpp
+    ServiceManagerMonitor.cpp
     ${RPC_ZeroMQ_SOURCES}
     ${PhxpaxosSrc}
 )

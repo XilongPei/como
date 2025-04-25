@@ -24,7 +24,7 @@
 #include <time.h>
 #include "comolog.h"
 #include "ServiceManager.h"
-#include "SmMonitor.h"
+#include "ServiceManagerMonitor.h"
 
 static unsigned int gTimeout = 600;
 
@@ -71,7 +71,7 @@ static void ServicesWalker(String& str, String& strKey, ServiceManager::Interfac
     ts = {0, 0};
 }
 
-SmMonitor::SmMonitor(AutoPtr<ServiceManager> sm)
+ServiceManagerMonitor::ServiceManagerMonitor(AutoPtr<ServiceManager> sm)
 {}
 
 static void *QoS_monitor(void *p)
@@ -86,13 +86,13 @@ static void *QoS_monitor(void *p)
         // Clean up services that don't work
         instance->mServices.CleanUpExpiredData();
 
-        sleep(SmMonitor::CHECK_EXPIRES_PERIOD);
+        sleep(ServiceManagerMonitor::CHECK_EXPIRES_PERIOD);
     }
 
     return nullptr;
 }
 
-void *SmMonitor::StartSmMonitor(const char *serverName)
+void *ServiceManagerMonitor::StartSmMonitor(const char *serverName)
 {
     pthread_t thread ;
 
@@ -108,7 +108,7 @@ void *SmMonitor::StartSmMonitor(const char *serverName)
 
     // Waits for the end of the thread specified by thread in a blocking manner
     if (pthread_join(thread, nullptr)) {
-        Logger_E("SmMonitor::StartSmMonitor", "pthread_join() failed");
+        Logger_E("ServiceManagerMonitor::StartSmMonitor", "pthread_join() failed");
     }
 
     return nullptr;
