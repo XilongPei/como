@@ -21,11 +21,13 @@ endmacro()
 macro(IMPORT_LIBRARY target)
     add_library(${target} UNKNOWN IMPORTED)
     set_property(TARGET ${target} PROPERTY IMPORTED_LOCATION ${BIN_DIR}/${target})
+    set_property(TARGET ${target} PROPERTY IMPORTED_SONAME ${target})
 endmacro()
 
 macro(IMPORT_ANY_LIBRARY dir target)
     add_library(${target} UNKNOWN IMPORTED)
     set_property(TARGET ${target} PROPERTY IMPORTED_LOCATION ${dir}/${target})
+    set_property(TARGET ${target} PROPERTY IMPORTED_SONAME ${target})
 endmacro()
 
 macro(IMPORT_GTEST)
