@@ -21,6 +21,7 @@
 #include <rpcHelpers.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
+#include <time.h>
 #include "debugbreak.h"
 
 using como::test::rpc::CID_CService;
@@ -30,11 +31,21 @@ using jing::ServiceManager;
 using jing::RpcHelpers;
 
 static AutoPtr<IService> SERVICE;
+struct timespec start_time, end_time;
 
 TEST(RPCTest, TestGetRPCService)
 {
     AutoPtr<IInterface> obj;
+    // count waste time
+    clock_gettime(CLOCK_REALTIME, &start_time);
     ServiceManager::GetInstance()->GetService("rpcservice", obj);
+    clock_gettime(CLOCK_REALTIME, &end_time);
+
+    // computing waste time
+    uint64_t duration = (end_time.tv_sec - start_time.tv_sec) * 1000000
+                        + (end_time.tv_nsec - start_time.tv_nsec) / 1000;
+    printf("GetService time: %llu microseconds\n", (unsigned long long)duration);
+
     SERVICE = IService::Probe(obj);
     EXPECT_TRUE(SERVICE != nullptr);
 }

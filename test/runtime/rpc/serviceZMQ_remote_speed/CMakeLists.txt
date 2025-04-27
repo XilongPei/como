@@ -1,5 +1,5 @@
 #=========================================================================
-# Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
+# Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,31 +14,32 @@
 # limitations under the License.
 #=========================================================================
 
-project(ClientZmqSpeedTest CXX)
+project(RpcZmqTest CXX)
 
-set(CLIENT_SRC_SPEED_DIR ${RPC_SRC_DIR}/clientZMQ_remote_speed)
-set(CLIENT_OBJ_SPEED_DIR ${RPC_OBJ_DIR}/clientZMQ_remote_speed)
+set(SERVICE_SRC_SPEED_DIR ${RPC_SRC_DIR}/serviceZMQ_remote_speed)
+set(SERVICE_OBJ_SPEED_DIR ${RPC_OBJ_DIR}/serviceZMQ_remote_speed)
 
 include_directories(
     ./
     ${INC_DIR}
-    ${CLIENT_OBJ_SPEED_DIR})
+    ${SERVICE_OBJ_SPEED_DIR}
+    ${EXTERNAL_DIR}/libzmq/include
+)
 
 set(SOURCES
     main.cpp)
 
 set(GENERATED_SOURCES
-    ${CLIENT_OBJ_SPEED_DIR}/RPCTestUnit.cpp)
+    ${SERVICE_OBJ_SPEED_DIR}/RPCTestUnit.cpp)
 
 IMPORT_LIBRARY(comort.so)
 IMPORT_LIBRARY(libservicemanager.so)
-IMPORT_GTEST()
 
-add_executable(testRPCZmqCliSpeed
+add_executable(testRPCZmqSrvSpeed
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(testRPCZmqCliSpeed comort.so libservicemanager.so ${GTEST_LIBS})
-add_dependencies(testRPCZmqCliSpeed RPCTestUnit libservicemanager gtest gtest_main)
+target_link_libraries(testRPCZmqSrvSpeed comort.so libservicemanager.so pthread)
+add_dependencies(testRPCZmqSrvSpeed RPCTestUnit libservicemanager)
 
 add_custom_command(
     OUTPUT
@@ -47,13 +48,13 @@ add_custom_command(
         "$ENV{CDLC}"
         -gen
         -mode-client
-        -d ${CLIENT_OBJ_SPEED_DIR}
+        -d ${SERVICE_OBJ_SPEED_DIR}
         -metadata-so "${BIN_DIR}/RPCTestUnit.so")
 
-COPY(testRPCZmqCliSpeed ${CLIENT_OBJ_SPEED_DIR}/testRPCZmqCliSpeed ${BIN_DIR})
+COPY(testRPCZmqSrvSpeed ${SERVICE_OBJ_SPEED_DIR}/testRPCZmqSrvSpeed ${BIN_DIR})
 
 install(FILES
-    ${CLIENT_OBJ_SPEED_DIR}/testRPCZmqCliSpeed
+    ${SERVICE_OBJ_SPEED_DIR}/testRPCZmqSrv
     DESTINATION ${BIN_DIR}
     PERMISSIONS
         OWNER_READ

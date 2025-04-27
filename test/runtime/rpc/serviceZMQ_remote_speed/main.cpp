@@ -1,5 +1,5 @@
 //=========================================================================
-// Copyright (C) 2022 The C++ Component Model(COMO) Open Source Project
+// Copyright (C) 2018 The C++ Component Model(COMO) Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,66 +18,21 @@
 #include <comoapi.h>
 #include <comosp.h>
 #include <ServiceManager.h>
-#include <rpcHelpers.h>
-#include <gtest/gtest.h>
+#include <cstdio>
+#include <unistd.h>
+#include <string>
 #include "ComoConfig.h"
-#include <stdio.h>
-#include <time.h>
+#include "comorpc.h"
+#include "CZMQUtils.h"
 
-using como::test::rpc::CID_CService;
+using como::test::rpc::CService;
 using como::test::rpc::IService;
-using como::test::rpc::ITestInterface;
+using como::test::rpc::IID_IService;
 using jing::ServiceManager;
-using jing::RpcHelpers;
 
-static AutoPtr<IService> SERVICE;
-struct timespec start_time, end_time;
-const int CNT = 1000000;
-const int PERIOD_MS = 10;  // period, ms
-
-TEST(ClientZmqTest, TestGetRPCService)
+int main(int argc, char** argv)
 {
-    AutoPtr<IInterface> obj;
-
-    // struct timespec sleep_time;
-    // sleep_time.tv_sec = PERIOD_MS / 1000;
-    // sleep_time.tv_nsec = (PERIOD_MS % 1000) * 1000000;  // ms->ns
-
-    // find and get service
-    ServiceManager::GetInstance()->GetRemoteService("ServiceManager", "rpcserviceZMQ", obj);
-    SERVICE = IService::Probe(obj);
-    EXPECT_TRUE(SERVICE != nullptr);
-
-    // testmethod params
-    ECode ec = E_REMOTE_EXCEPTION;
-    Integer result;
-    ec = SERVICE->TestMethod1(9, result);
-    EXPECT_EQ(9, result);
-    EXPECT_EQ(ec, NOERROR);
-
-    // for (int i = 0; i < CNT; ++i) {
-    //     struct timespec start_time, end_time;
-    
-    //     // count waste time
-    //     clock_gettime(CLOCK_REALTIME, &start_time);
-    //     ec = SERVICE->TestMethod1(9, result);
-    //     clock_gettime(CLOCK_REALTIME, &end_time);
-    
-    //     // compute waste time
-    //     uint64_t duration = (end_time.tv_sec - start_time.tv_sec) * 1000000
-    //                       + (end_time.tv_nsec - start_time.tv_nsec) / 1000;
-    
-    //     printf("Run %d: GetService time = %llu microseconds\n", i + 1, (unsigned long long)duration);
-
-    //     // sleep to next period
-    //     // nanosleep(&sleep_time, NULL);
-    // }
-    
-}
-
-int main(int argc, char **argv)
-{
-    std::string localhost_addr = "tcp://127.0.0.1:8085";
+    std::string localhost_addr = "tcp://127.0.0.1:8083";
     std::string service_addr = "tcp://127.0.0.1:8082";
     std::string ServiceManager_addr = "tcp://127.0.0.1:8088";
     AutoPtr<IService> srv;
@@ -100,6 +55,7 @@ int main(int argc, char **argv)
         "the address of service: %s,\n"
         "the address of ServiceManager: %s\n",
         localhost_addr.c_str(), service_addr.c_str(), ServiceManager_addr.c_str());
+ 
 
     std::string ret = ComoConfig::AddZeroMQEndpoint(std::string("localhost"), localhost_addr);
     if (std::string("localhost") != ret) {
@@ -116,8 +72,50 @@ int main(int argc, char **argv)
         printf("Failed to AddZeroMQEndpoint\n");
     }
 
-//    Logger::SetLevel(0);
+    std::string name;
+    std::string endpoint;
+    void *socket;
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    std::map<std::string, ServerNodeInfo*>::iterator iter =
+               ComoConfig::ServerNameEndpointMap.find(std::string("localhost"));
+    if (iter != ComoConfig::ServerNameEndpointMap.end()) {
+        name = iter->first;
+        endpoint = iter->second->endpoint;
+    }
+    else {
+        Logger::E("CZMQChannel", "Hasn't register any servers");
+        return 0;
+    }
+    ECode ec = CService::New(IID_IService, (IInterface**)&srv);
+    if (FAILED(ec)) {
+        printf("Failed, CService::New\n");
+        return 1;
+    }
+
+    #if 0
+        ECode ServiceManager::AddRemoteService(
+            /* [in] */ const String& thisServerName,
+            /* [in] */ const String& thatServerName,
+            /* [in] */ const String& name,
+            /* [in] */ IInterface* object)
+    #endif
+    AutoPtr<ServiceManager> instance = ServiceManager::GetInstance();
+    instance->AddRemoteService(String("localhost"),
+                               String("ServiceManager"),
+                               String("rpcserviceZMQ"), srv);
+    printf("RPC serviceZMQ waiting for calling endpoint: %s\n", endpoint.c_str());
+
+    //endpoint += "192.168.0.8:1239";   // RedundantComputing port
+
+    CZMQUtils::CzmqProxy(nullptr, endpoint.c_str(), nullptr);
+
+    if (FAILED(instance->WaitForRuntimeToEnd())) {
+        while (true) {
+            printf(".");
+            sleep(5);
+        }
+        printf("\n");
+    }
+
+    return 0;
 }

@@ -16,13 +16,13 @@
 
 project(RPCTest CXX)
 
-set(CLIENT_SRC_DIR ${RPC_SRC_DIR}/client)
-set(CLIENT_OBJ_DIR ${RPC_OBJ_DIR}/client)
+set(CLIENT_SPEED_SRC_DIR ${RPC_SRC_DIR}/client_local_speed)
+set(CLIENT_SPEED_OBJ_DIR ${RPC_OBJ_DIR}/client_local_speed)
 
 include_directories(
     ./
     ${INC_DIR}
-    ${CLIENT_OBJ_DIR}
+    ${CLIENT_SPEED_OBJ_DIR}
     ${EXTERNAL_DIR}/debugbreak
 )
 
@@ -30,17 +30,17 @@ set(SOURCES
     main.cpp)
 
 set(GENERATED_SOURCES
-    ${CLIENT_OBJ_DIR}/RPCTestUnit.cpp)
+    ${CLIENT_SPEED_OBJ_DIR}/RPCTestUnit.cpp)
 
 IMPORT_LIBRARY(comort.so)
 IMPORT_LIBRARY(libservicemanager.so)
 IMPORT_GTEST()
 
-add_executable(testRPCCli
+add_executable(testRPCSpeed
     ${SOURCES}
     ${GENERATED_SOURCES})
-target_link_libraries(testRPCCli comort.so libservicemanager.so ${GTEST_LIBS})
-add_dependencies(testRPCCli RPCTestUnit libservicemanager gtest gtest_main)
+target_link_libraries(testRPCSpeed comort.so libservicemanager.so ${GTEST_LIBS})
+add_dependencies(testRPCSpeed RPCTestUnit libservicemanager gtest gtest_main)
 
 add_custom_command(
     OUTPUT
@@ -49,13 +49,13 @@ add_custom_command(
         "$ENV{CDLC}"
         -gen
         -mode-client
-        -d ${CLIENT_OBJ_DIR}
+        -d ${CLIENT_SPEED_OBJ_DIR}
         -metadata-so "${BIN_DIR}/RPCTestUnit.so")
 
-COPY(testRPCCli ${CLIENT_OBJ_DIR}/testRPCCli ${BIN_DIR})
+COPY(testRPCSpeed ${CLIENT_SPEED_OBJ_DIR}/testRPCSpeed ${BIN_DIR})
 
 install(FILES
-    ${CLIENT_OBJ_DIR}/testRPCCli
+    ${CLIENT_OBJ_DIR}/testRPCSpeed
     DESTINATION ${BIN_DIR}
     PERMISSIONS
         OWNER_READ
