@@ -171,14 +171,16 @@ ThreadPool::ThreadPool(int threadNum)
 {
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     if (mThreadNum >= sizeof(ComoContext::gThreadsWorking)) {
-        Logger::E("ThreadPoolExecutor", "ComoContext::gThreadsWorking too small");
+        Logger::E("ThreadPool::ThreadPool",
+                  "ComoContext::gThreadsWorking too small");
         mThreadNum = -1;
         return;
     }
 #else
     mPthreadIds = (pthread_t*)calloc(mThreadNum, sizeof(pthread_t));
     if (nullptr == mPthreadIds) {
-        Logger::E("ThreadPool", "create thread error");
+        Logger::E("ThreadPool::ThreadPool",
+                  "create thread error, calloc %d return nullptr", mThreadNum);
         mThreadNum = -1;
         return;
     }
@@ -196,7 +198,8 @@ ThreadPool::ThreadPool(int threadNum)
         pthread_t thread;
         int ret = pthread_create(&mPthreadIds[i], nullptr, ThreadPool::threadFunc, nullptr);
         if (0 != ret) {
-            Logger::E("ThreadPoolExecutor", "ThreadPool create thread error");
+            Logger::E("ThreadPool::ThreadPool",
+                      "ThreadPool create thread error");
             mThreadNum = -1;
             return;
         }
@@ -209,7 +212,8 @@ ThreadPool::ThreadPool(int threadNum)
     ComoContext::gThreadsWorking = (pthread_t*)realloc(ComoContext::gThreadsWorking,
                       sizeof(pthread_t*) * (ComoContext::gThreadsWorkingNum + mThreadNum));
     if (nullptr == ComoContext::gThreadsWorking) {
-        Logger::E("ThreadPool", "calloc ComoContext::gThreadsWorking error");
+        Logger::E("ThreadPool::ThreadPool",
+                  "calloc ComoContext::gThreadsWorking error");
         mThreadNum = -1;
         return;
     }
@@ -257,7 +261,7 @@ int ThreadPool::StopAll()
     mShutdown = true;
     pthread_cond_broadcast(&m_pthreadCond);
 
-    for (int i = 0; i < mThreadNum; i++) {
+    for (int i = 0;  i < mThreadNum;  i++) {
         pthread_join(mPthreadIds[i], nullptr);
     }
 
