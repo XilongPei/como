@@ -357,7 +357,8 @@ ECode CZMQChannel::GetComponentMetadata(
     if (rc > 0) {
         if (FAILED(eventCode)) {
             Logger::E("CZMQChannel::GetComponentMetadata",
-                      "Bad eventCode: %d", eventCode);
+                      "Bad eventCode: 0x%X, mServerObjectId: 0x%lX",
+                      eventCode, mServerObjectId);
             ec = E_RUNTIME_EXCEPTION;
         }
         else {

@@ -239,7 +239,7 @@ HandleMessage_Method_Invoke:
                 if (nullptr == worker) {
                     zmq_msg_close(&msg);
                     Logger::E("threadHandleMessage",
-                                     "GetComponentMetadata, Bad channel value");
+                              "GetComponentMetadata, Bad channel value 0x%lX", hChannel);
                     SendECode(0, socket, E_NOT_FOUND_EXCEPTION);
                     break;
                 }
