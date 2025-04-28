@@ -618,10 +618,10 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
 
             pthread_mutex_lock(&pthreadMutex);
 
-            for (i = 0;  (i < mWorkerList.size()) &&
-                                        (! LivingWorker(mWorkerList[i]));  i++) {
-                if (nullptr == mWorkerList[i])
+            for (i = 0;  i < mWorkerList.size();  i++) {
+                if (! LivingWorker(mWorkerList[i])) {
                     continue;
+                }
 
                 if (1000000000LL * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
