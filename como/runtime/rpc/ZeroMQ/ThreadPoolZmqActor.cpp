@@ -750,6 +750,7 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
     }
 
     signal_ = false;
+    mWorkerList.reserve(ComoConfig::MAX_SIZE_WorkerList);
 }
 
 /*
