@@ -169,6 +169,9 @@ pthread_cond_t ThreadPool::m_pthreadCond = PTHREAD_COND_INITIALIZER;
 
 ThreadPool::ThreadPool(int threadNum)
 {
+    // The number of threads in the thread pool.
+    mThreadNum = threadNum;
+
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     if (mThreadNum >= sizeof(ComoContext::gThreadsWorking)) {
         Logger::E("ThreadPool::ThreadPool",
@@ -185,9 +188,6 @@ ThreadPool::ThreadPool(int threadNum)
         return;
     }
 #endif
-
-    // The number of threads in the thread pool.
-    mThreadNum = threadNum;
 
     Logger::D("ThreadPool::ThreadPool", "pthread_create");
     for (int i = 0;  i < mThreadNum;  i++) {
