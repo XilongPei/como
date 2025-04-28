@@ -500,6 +500,9 @@ Mutex TPZA_Executor::sInstanceLock;
 AutoPtr<ThreadPoolZmqActor> TPZA_Executor::threadPool = nullptr;
 HANDLE_MESSAGE_FUNCTION TPZA_Executor::defaultHandleMessage = nullptr;
 
+/**
+ * TPZA_Executor::GetInstance
+ */
 AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 {
     Mutex::AutoLock lock(sInstanceLock);
@@ -512,6 +515,7 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
 
         if (nullptr == threadPool) {
             delete sInstance;
+            sInstance = nullptr;
             return nullptr;
         }
 
@@ -519,30 +523,43 @@ AutoPtr<TPZA_Executor> TPZA_Executor::GetInstance()
         if (threadPool->mThreadNum < 0) {
             delete sInstance;
             delete threadPool;
+            sInstance = nullptr;
+            threadPool = nullptr;
             return nullptr;
         }
     }
+
     return sInstance;
 }
 
+/**
+ * TPZA_Executor::RunTask
+ */
 int TPZA_Executor::RunTask(
     /* [in] */ AutoPtr<TPZA_Executor::Worker> task)
 {
     return threadPool->AddTask(task);
 }
 
+/**
+ * TPZA_Executor::CleanTask
+ */
 int TPZA_Executor::CleanTask(int posWorkerList)
 {
     return threadPool->CleanTask(posWorkerList);
 }
 
+/**
+ * TPZA_Executor::SetDefaultHandleMessage
+ */
 int TPZA_Executor::SetDefaultHandleMessage(HANDLE_MESSAGE_FUNCTION func)
 {
     defaultHandleMessage = func;
     return 0;
 }
 
-static void CalWaitTime(struct timespec& curTime, int timeout_ms) {
+static void CalWaitTime(struct timespec& curTime, int timeout_ms)
+{
     clock_gettime(CLOCK_MONOTONIC, &curTime);
     long nsec = curTime.tv_nsec + (timeout_ms % 1000) * 1000000;
                                                       // 654321
@@ -567,6 +584,9 @@ static bool LivingWorker(TPZA_Executor::Worker *worker)
     return false;
 }
 
+/**
+ * ThreadPoolZmqActor::threadManager
+ */
 void *ThreadPoolZmqActor::threadManager(void *threadData)
 {
     int i;
@@ -753,7 +773,7 @@ ThreadPoolZmqActor::ThreadPoolZmqActor()
     mWorkerList.reserve(ComoConfig::MAX_SIZE_WorkerList);
 }
 
-/*
+/**
  * return position in mWorkerList
  */
 int ThreadPoolZmqActor::AddTask(
@@ -803,7 +823,7 @@ int ThreadPoolZmqActor::AddTask(
     return i;
 }
 
-/*
+/**
  * Find Worker by ChannelHandle, `mSocket + mChannel` is unique id of an IStub
  */
 TPZA_Executor::Worker *ThreadPoolZmqActor::PickWorkerByChannelHandle(
