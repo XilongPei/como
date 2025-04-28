@@ -65,9 +65,9 @@ int ComoConfig::ThreadPool_MAX_DBUS_DISPATCHER = 1;
 // The period of detecting whether the object is overdue
 int  ComoConfig::DBUS_CONNECTION_MAX_NUM        = 20;
 long ComoConfig::DBUS_BUS_CHECK_EXPIRES_PERIOD  = 300;   // unit second
-long ComoConfig::DBUS_BUS_SESSION_EXPIRES       = 1000000000L * 60 * 60 * 48;
-Long ComoConfig::TPCI_TASK_EXPIRES              = 1000000000L * 30; // ns, 30s
-Long ComoConfig::TPZA_TASK_EXPIRES              = 1000000000L * 30; // ns, 30s
+long ComoConfig::DBUS_BUS_SESSION_EXPIRES       = 1000000000LL * 60 * 60 * 48;
+Long ComoConfig::TPCI_TASK_EXPIRES              = 1000000000LL * 30; // ns, 30s
+Long ComoConfig::TPZA_TASK_EXPIRES              = 1000000000LL * 30; // ns, 30s
                                                  /*987654321*/
 
 int ComoConfig::ThreadPoolChannelInvoke_MAX_THREAD_NUM = 2;

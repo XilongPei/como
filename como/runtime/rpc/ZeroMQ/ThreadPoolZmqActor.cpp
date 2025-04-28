@@ -603,7 +603,7 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
                 if (nullptr == mWorkerList[i])
                     continue;
 
-                if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+                if (1000000000LL * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
                    /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                          ComoConfig::DBUS_BUS_SESSION_EXPIRES) {
                     //@ `ReleaseWorker`
@@ -773,7 +773,7 @@ int ThreadPoolZmqActor::AddTask(
             continue;
         }
 
-        if (1000000000L * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
+        if (1000000000LL * (currentTime.tv_sec - mWorkerList[i]->lastAccessTime.tv_sec) +
            /*987654321*/(currentTime.tv_nsec - mWorkerList[i]->lastAccessTime.tv_nsec) >
                                                         ComoConfig::TPZA_TASK_EXPIRES) {
             break;
