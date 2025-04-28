@@ -1885,9 +1885,9 @@ do {
         // the unit of mTimeout is microsecond [Millisecond, microsecond, nanosecond]
         Long nsec = curTime.tv_nsec + (thisObj->mTimeout % 1000000) * 1000;
                                                           //123456     123
-        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000 + thisObj->mTimeout / 1000000;
-                                                //123456789                      //123456
-        curTime.tv_nsec = nsec % 1000000000;
+        curTime.tv_sec = curTime.tv_sec + nsec / 1000000000L + thisObj->mTimeout / 1000000;
+                                                //123456789                       //123456
+        curTime.tv_nsec = nsec % 1000000000L;
                                 //123456789
 
         int pos = TPCI_Executor::GetInstance()->RunTask(thisObj->mOwner->mChannel,
@@ -2305,6 +2305,8 @@ ECode CProxy::CreateObject(
             }
             iproxy->mTimeout = 0;
         }
+#else
+        iproxy->mTimeout = 0;
 #endif
     }
 
