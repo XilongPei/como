@@ -497,6 +497,7 @@ ECode CZMQChannel::StartListening(
 {
     if (mPeer == RPCPeer::Stub) {
         std::string endpoint = GetEndpoint();
+
         AutoPtr<TPZA_Executor::Worker> worker = new TPZA_Executor::Worker(
                                                           this, stub, endpoint);
         if (nullptr == worker) {
@@ -506,7 +507,7 @@ ECode CZMQChannel::StartListening(
         }
 
         Logger::D("CZMQChannel::StartListening",
-                                             "endpoint: %s", mEndpoint.c_str());
+                                             "endpoint: %s", endpoint.c_str());
 
         /**
          * TPZA_Executor::GetInstance() just takes the variable that has already

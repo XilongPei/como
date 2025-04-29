@@ -30,8 +30,9 @@
 #include "CZMQUtils.h"
 #include "CZMQParcel.h"
 #include "RuntimeMonitor.h"
+#include "ComoerrorHelper.h"
 #ifdef RedundantComputing_SUPPORT
-#include "PaxosUtils.h"
+  #include "PaxosUtils.h"
 #endif
 
 namespace como {
@@ -282,7 +283,8 @@ HandleMessage_Method_Invoke:
                 ec = CoGetComponentMetadata(*cid.mCid, nullptr, mc);
                 if (FAILED(ec)) {
                     Logger::E("threadHandleMessage",
-                               "CoGetComponentMetadata error, ECode: 0x%X", ec);
+                               "CoGetComponentMetadata error, ECode: 0x%X(%s)", ec,
+                               ComoerrorHelper::GetEcErrorInfo(ec));
                     ReleaseCoclassID(cid);
                     goto HandleMessage_GetComponentMetadata;
                 }
@@ -365,7 +367,8 @@ HandleMessage_GetComponentMetadata:
                     ec = UnregisterExportObjectById(RPCType::Remote, hash);
                     if (FAILED(ec)) {
                         Logger::E("threadHandleMessage",
-                                       "Object_Release error, ECode: 0x%X", ec);
+                                  "Object_Release error, ECode: 0x%X(%s)", ec,
+                                  ComoerrorHelper::GetEcErrorInfo(ec));
                     }
                 }
 
@@ -399,7 +402,8 @@ HandleMessage_Object_Release:
                 ec = UnregisterExportObjectById(RPCType::Remote, hChannel);
                 if (FAILED(ec)) {
                     Logger::E("threadHandleMessage",
-                                          "ReleasePeer error, ECode: 0x%X", ec);
+                              "ReleasePeer error, ECode: 0x%X(%s)", ec,
+                              ComoerrorHelper::GetEcErrorInfo(ec));
                 }
 
 HandleMessage_Object_ReleasePeer:

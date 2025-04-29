@@ -721,7 +721,7 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
         }
 
         if (nullptr == endpoint) {
-            zmq_connect(socket, "inproc://workers");
+            zmq_connect(socket, ComoConfig::localhostInprocEndpoint);
         }
         else {
             zmq_connect(socket, endpoint);
@@ -753,7 +753,7 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
  *      tcpEndpoint:
  *          "tcp://127.0.0.1:1239"
  *          "tcp://127.0.0.1:1239;tcp://127.0.0.1:4800"
- *      inprocEndpoint: "inproc://workers"
+ *      inprocEndpoint: "inproc://workers"(ComoConfig::localhostInprocEndpoint)
  */
 #define MAX_TcpEndpoint_IN_PROXY    10
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
@@ -781,6 +781,14 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         Logger::E("CZMQUtils::CzmqProxy", "context is nullptr");
         return -1;
     }
+
+    /**
+     *   ZMQ_REQ(3) <---> ROUTER (frontend)
+     * (tcpEndpoint)        |
+     *                  zmq_proxy
+     *                      |
+     *                   DEALER (backend) <---> ZMQ_REP(4)(inprocEndpoint)
+     */
 
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
@@ -811,7 +819,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
         rc = zmq_bind(workers, inprocEndpoint);
     }
     else {
-        rc = zmq_bind(workers, "inproc://workers");
+        rc = zmq_bind(workers, ComoConfig::localhostInprocEndpoint);
     }
     if (0 != rc) {
         Logger::E("CZMQUtils::CzmqProxy",
@@ -822,7 +830,7 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 
     /**
      * Connect Worker threads to client threads via a queue proxy
-     * The zmq_proxy() function starts the built-in 0MQ proxy in the current
+     * The zmq_proxy() function starts the built-in ZMQ proxy in the current
      * application thread.
      * The proxy connects a frontend socket to a backend socket. Conceptually,
      * data flows from frontend to backend. Depending on the socket types,
