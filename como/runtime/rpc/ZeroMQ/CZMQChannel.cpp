@@ -527,7 +527,7 @@ ECode CZMQChannel::Match(
     /* [out] */ Boolean& matched)
 {
     IZMQInterfacePack* idpack = IZMQInterfacePack::Probe(ipack);
-    if (idpack != nullptr) {
+    if (nullptr != idpack) {
         IInterfacePack* pack = (IInterfacePack*)idpack;
         Long serverObjectId;
 

@@ -65,4 +65,34 @@ ECode ComoContext::SetGctxMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree)
     return NOERROR;
 }
 
+std::mutex ComoContext::mutex_ComoRuntime;
+std::condition_variable ComoContext::cv_ComoRuntime;
+bool ComoContext::started_ComoRuntime = false;
+
+ECode ComoContext::Start_ComoRuntime()
+{
+    std::unique_lock<std::mutex> lock(mutex_ComoRuntime);
+    started_ComoRuntime = false;
+    cv_ComoRuntime.notify_all();
+
+    return NOERROR;
+}
+
+ECode ComoContext::Stop_ComoRuntime()
+{
+    std::unique_lock<std::mutex> lock(mutex_ComoRuntime);
+    started_ComoRuntime = true;
+    cv_ComoRuntime.notify_all();
+
+    return NOERROR;
+}
+
+ECode ComoContext::Wait_Starting_ComoRuntime()
+{
+    std::unique_lock<std::mutex> lock(mutex_ComoRuntime);
+    cv_ComoRuntime.wait(lock, [this] { return started_ComoRuntime; });
+
+    return NOERROR;
+}
+
 } // namespace como

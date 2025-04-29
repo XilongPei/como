@@ -83,6 +83,8 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
     Integer   iRet;
     TPZA_Executor::Worker *worker;
 
+    (void)ComoContext::Wait_Starting_ComoRuntime();
+
     // Each thread is responsible for one port, identified by threadData
     socket = CZMQUtils::CzmqGetPollitemsSocket((int)(Long)threadData);
     if (nullptr == socket) {
@@ -592,6 +594,8 @@ void *ThreadPoolZmqActor::threadManager(void *threadData)
     int i;
     int iWorkerInQueue;
 
+    (void)ComoContext::Wait_Starting_ComoRuntime();
+
     while (true) {
         pthread_mutex_lock(&pthreadMutex);
 
@@ -800,6 +804,7 @@ int ThreadPoolZmqActor::AddTask(
             break;
         }
     }
+
     if (i < mWorkerList.size()) {
         if (nullptr != mWorkerList[i]) {
             REFCOUNT_RELEASE(mWorkerList[i]);

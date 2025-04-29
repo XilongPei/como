@@ -18,6 +18,8 @@
 #define __COMO_CONTEXT_H__
 
 #include <pthread.h>
+#include <mutex>
+#include <condition_variable>
 #include "comoref.h"
 #include "mutex.h"
 #include "lamport_clock.h"
@@ -63,6 +65,14 @@ public:
     static int   socketTCP;         // a TCP socket lisetning to 'port' ready to accept connections.
 
     static ECode SetGctxMemFun(COMO_MALLOC mimalloc, FREE_MEM_FUNCTION mifree);
+
+    static std::mutex mutex_ComoRuntime;
+    static std::condition_variable cv_ComoRuntime;
+    static bool started_ComoRuntime;
+
+    static ECode Start_ComoRuntime();
+    static ECode Stop_ComoRuntime();
+    static ECode Wait_Starting_ComoRuntime();
 };
 
 } // namespace como

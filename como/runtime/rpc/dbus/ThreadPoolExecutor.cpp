@@ -30,15 +30,15 @@
 // limitations under the License.
 //=========================================================================
 
-#include "ThreadPoolExecutor.h"
-#include "util/comolog.h"
-#include "ComoConfig.h"
-#include "ComoContext.h"
 #include <assert.h>
 #include <cerrno>
 #include <csignal>
 #include <unistd.h>
 #include <pthread.h>
+#include "ThreadPoolExecutor.h"
+#include "util/comolog.h"
+#include "ComoConfig.h"
+#include "ComoContext.h"
 
 namespace como {
 
@@ -86,11 +86,14 @@ AutoPtr<ThreadPoolExecutor> ThreadPoolExecutor::GetInstance()
 
         if (nullptr == threadPool) {
             delete sInstance;
+            sInstance = nullptr;
             return nullptr;
         }
         if (threadPool->mThreadNum <= 0) {
             delete sInstance;
             delete threadPool;
+            sInstance = nullptr;
+            threadPool = nullptr;
             return nullptr;
         }
     }
