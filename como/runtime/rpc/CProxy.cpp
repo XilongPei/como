@@ -39,11 +39,12 @@
 #include "reflection/CMetaMethod.h"
 #include <sys/mman.h>
 #ifdef COMO_FUNCTION_SAFETY
-#include <time.h>
-#include <pthread.h>
-#include <errno.h>
-#include <ThreadPoolChannelInvoke.h>
+  #include <time.h>
+  #include <pthread.h>
+  #include <errno.h>
+  #include <ThreadPoolChannelInvoke.h>
 #endif
+#include "ComoerrorHelper.h"
 #include "registry.h"
 #include "RuntimeMonitor.h"
 #include "mac.h"
@@ -2205,20 +2206,24 @@ ECode CProxy::CreateObject(
         Array<Byte> metadata;
         ec = channel->GetComponentMetadata(cid, metadata);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "GetComponentMetadata failed. ECode: 0x%X", ec);
+            Logger::E("CProxy",
+                      "GetComponentMetadata failed. ECode: 0x%X(%s)", ec,
+                      ComoerrorHelper::GetEcErrorInfo(ec));
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
 
         AutoPtr<IMetaComponent> component;
         ec = loader->LoadMetadata(metadata, component);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "LoadMetadata failed. ECode: 0x%X", ec);
+            Logger::E("CProxy", "LoadMetadata failed. ECode: 0x%X(%s)", ec,
+                      ComoerrorHelper::GetEcErrorInfo(ec));
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
 
         ec = component->GetCoclass(cid, mc);
         if (FAILED(ec)) {
-            Logger::E("CProxy", "Get IMetaCoclass failed. ECode: 0x%X", ec);
+            Logger::E("CProxy", "Get IMetaCoclass failed. ECode: 0x%X", ec,
+                      ComoerrorHelper::GetEcErrorInfo(ec));
             return E_CLASS_NOT_FOUND_EXCEPTION;
         }
     }

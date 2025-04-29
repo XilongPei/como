@@ -25,6 +25,7 @@
 #include "rpc/ZeroMQ/CZMQParcel.h"
 #include "rpc/ZeroMQ/CZMQInterfacePack.h"
 #include "util/comosp.h"
+#include "ComoerrorHelper.h"
 #include "ThreadPoolZmqActor.h"
 
 namespace como {
@@ -275,7 +276,8 @@ ECode CZMQChannelFactory::UnmarshalInterface(
         ec = RegisterImportObject(mType, ipack, obj, channelId);
         if (FAILED(ec)) {
             Logger::E("CZMQChannelFactory::UnmarshalInterface",
-                                "RegisterImportObject failed, ECode: 0x%X", ec);
+                                "RegisterImportObject failed, ECode: 0x%X", ec,
+                                ComoerrorHelper::GetEcErrorInfo(ec));
             object = nullptr;
             return ec;
         }
