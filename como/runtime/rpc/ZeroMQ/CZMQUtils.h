@@ -100,6 +100,8 @@ public:
 
     static int CzmqGetSockets(void *context, const char *endpoint);
 
+    static void *CzmqGetRepSocket(void *context, const char *endpoint);
+
     static void *CzmqGetPubSocket(void *context, const char *endpoint);
 
     static void *CzmqGetSubSocket(void *context, const char *endpoint);

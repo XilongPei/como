@@ -88,6 +88,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
     // Each thread is responsible for one port, identified by threadData
     socket = CZMQUtils::CzmqGetPollitemsSocket((int)(Long)threadData);
+    //socket = CZMQUtils::CzmqGetRepSocket(nullptr, nullptr);
     if (nullptr == socket) {
         Logger::E("threadHandleMessage", "socket is nullptr");
         return nullptr;

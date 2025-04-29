@@ -861,6 +861,45 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 }
 
 /**
+ * CZMQUtils::CzmqGetRepSocket
+ */
+void *CZMQUtils::CzmqGetRepSocket(void *context, const char *endpoint)
+{
+    char bufEndpoint[4096];
+
+    if (nullptr == endpoint) {
+        endpoint = ComoConfig::localhostInprocEndpoint;
+    }
+    else {
+        endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+    }
+
+    if (nullptr == context) {
+        context = CzmqGetContext();
+        if (nullptr == context) {
+            return nullptr;
+        }
+    }
+
+    void *worker  = zmq_socket(context, ZMQ_REP);
+    if (nullptr != worker ) {
+        int rc = zmq_bind(worker, endpoint);
+        if (0 != rc) {
+            Logger::E("CZMQUtils::CzmqGetRepSocket",
+                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", endpoint,
+                      zmq_errno(), zmq_strerror(zmq_errno()));
+            (void)zmq_close(worker);
+            return nullptr;
+        }
+
+        //zmq_setsockopt(publisher, ZMQ_SNDHWM, &nMaxNum, sizeof(nMaxNum));
+        return worker;
+    }
+
+    return nullptr;
+}
+
+/**
  * A socket of type ZMQ_PUB is used by a publisher to distribute data. Messages
  * sent are distributed in a fan out fashion to all connected peers.
  *
@@ -875,7 +914,13 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
 {
     char bufEndpoint[4096];
-    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+
+    if (nullptr == endpoint) {
+        return nullptr;
+    }
+    else {
+        endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+    }
 
     if (nullptr == context) {
         context = CzmqGetContext();
@@ -889,7 +934,7 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
         int rc = zmq_bind(publisher, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetPubSocket",
-                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
+                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", endpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(publisher);
             return nullptr;
@@ -912,7 +957,13 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
 void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
 {
     char bufEndpoint[4096];
-    MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+
+    if (nullptr == endpoint) {
+        return nullptr;
+    }
+    else {
+        endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
+    }
 
     if (nullptr == context) {
         context = CzmqGetContext();
@@ -926,7 +977,7 @@ void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
         int rc = zmq_connect(subscriber, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetSubSocket",
-                      "zmq_connect error, endpoint: \"%s\", errno %d, %s", bufEndpoint,
+                      "zmq_connect error, endpoint: \"%s\", errno %d, %s", endpoint,
                       zmq_errno(), zmq_strerror(zmq_errno()));
             (void)zmq_close(subscriber);
             return nullptr;
