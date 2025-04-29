@@ -89,9 +89,11 @@ ECode ComoContext::Stop_ComoRuntime()
 
 ECode ComoContext::Wait_Starting_ComoRuntime()
 {
+#if 0   // Turn off this function temporarily
+
     std::unique_lock<std::mutex> lock(mutex_ComoRuntime);
     cv_ComoRuntime.wait(lock, [] { return started_ComoRuntime; });
-
+#endif
     return NOERROR;
 }
 
