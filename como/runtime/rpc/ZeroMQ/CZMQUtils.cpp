@@ -815,12 +815,10 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
      */
     void *workers = zmq_socket(context, ZMQ_DEALER);
 
-    if (nullptr != inprocEndpoint) {
-        rc = zmq_bind(workers, inprocEndpoint);
+    if (nullptr == inprocEndpoint) {
+        inprocEndpoint = ComoConfig::localhostInprocEndpoint;
     }
-    else {
-        rc = zmq_bind(workers, ComoConfig::localhostInprocEndpoint);
-    }
+    rc = zmq_bind(workers, inprocEndpoint);
     if (0 != rc) {
         Logger::E("CZMQUtils::CzmqProxy",
                   "zmq_bind error, endpoint: \"%s\", errno %d, %s", inprocEndpoint,
@@ -861,7 +859,8 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 }
 
 /**
- * CZMQUtils::CzmqGetRepSocket
+ * CZMQUtils::CzmqGetRepSocket, Obtain an ZMQ_REP-type socket, zmq_connect to
+ * an endpoint.
  */
 void *CZMQUtils::CzmqGetRepSocket(void *context, const char *endpoint)
 {
@@ -883,7 +882,7 @@ void *CZMQUtils::CzmqGetRepSocket(void *context, const char *endpoint)
 
     void *worker  = zmq_socket(context, ZMQ_REP);
     if (nullptr != worker ) {
-        int rc = zmq_bind(worker, endpoint);
+        int rc = zmq_connect(worker, endpoint);
         if (0 != rc) {
             Logger::E("CZMQUtils::CzmqGetRepSocket",
                       "zmq_bind error, endpoint: \"%s\", errno %d, %s", endpoint,
@@ -892,7 +891,6 @@ void *CZMQUtils::CzmqGetRepSocket(void *context, const char *endpoint)
             return nullptr;
         }
 
-        //zmq_setsockopt(publisher, ZMQ_SNDHWM, &nMaxNum, sizeof(nMaxNum));
         return worker;
     }
 
@@ -918,9 +916,8 @@ void *CZMQUtils::CzmqGetPubSocket(void *context, const char *endpoint)
     if (nullptr == endpoint) {
         return nullptr;
     }
-    else {
-        endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
-    }
+
+    endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
 
     if (nullptr == context) {
         context = CzmqGetContext();
@@ -961,9 +958,8 @@ void *CZMQUtils::CzmqGetSubSocket(void *context, const char *endpoint)
     if (nullptr == endpoint) {
         return nullptr;
     }
-    else {
-        endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
-    }
+
+    endpoint = MiString::shrink(bufEndpoint, sizeof(bufEndpoint), endpoint);
 
     if (nullptr == context) {
         context = CzmqGetContext();

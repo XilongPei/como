@@ -498,6 +498,10 @@ HandleMessage_Default:
         SendECode(hChannel, socket, NOERROR);
     }
   } // while (true)
+
+  CZMQUtils::CzmqCloseSocket(socket);
+
+  return nullptr;
 }
 
 //-------------------------------------------------------------------------
