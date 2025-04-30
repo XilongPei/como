@@ -769,10 +769,6 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
     char bufEndpoint[4096];
     MiString::shrink(bufEndpoint, sizeof(bufEndpoint), tcpEndpoint);
 
-    char *seeds[MAX_TcpEndpoint_IN_PROXY];
-    int seedsCapacity = MAX_TcpEndpoint_IN_PROXY;
-    como::MiString::SeperateStr(bufEndpoint, ';', seeds, seedsCapacity);
-
     if (nullptr == context) {
         context = CzmqGetContext();
     }
@@ -792,14 +788,12 @@ int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
 
     // Socket to talk to clients
     void *clients = zmq_socket(context, ZMQ_ROUTER);
-    for (int i = 0;  i < seedsCapacity;  i++) {
-        rc = zmq_bind(clients, seeds[i]);
-        if (0 != rc) {
-            Logger::E("CZMQUtils::CzmqProxy",
-                      "zmq_bind error, endpoint: \"%s\", errno %d, %s", seeds[i],
-                      zmq_errno(), zmq_strerror(zmq_errno()));
-            return -2;
-        }
+    rc = zmq_bind(clients, tcpEndpoint);
+    if (0 != rc) {
+        Logger::E("CZMQUtils::CzmqProxy",
+                  "zmq_bind error, endpoint: \"%s\", errno %d, %s", tcpEndpoint,
+                  zmq_errno(), zmq_strerror(zmq_errno()));
+        return -2;
     }
 
     /**
