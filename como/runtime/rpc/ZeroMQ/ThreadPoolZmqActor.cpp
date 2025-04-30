@@ -86,9 +86,7 @@ void *ThreadPoolZmqActor::threadHandleMessage(void *threadData)
 
     (void)ComoContext::Wait_Starting_ComoRuntime();
 
-    // Each thread is responsible for one port, identified by threadData
-    socket = CZMQUtils::CzmqGetPollitemsSocket((int)(Long)threadData);
-    //socket = CZMQUtils::CzmqGetRepSocket(nullptr, nullptr);
+    socket = CZMQUtils::CzmqGetRepSocket(nullptr, nullptr);
     if (nullptr == socket) {
         Logger::E("threadHandleMessage", "socket is nullptr");
         return nullptr;
@@ -714,12 +712,6 @@ static int MakeRealtimePthread_attr(pthread_attr_t& attr)
  */
 ThreadPoolZmqActor::ThreadPoolZmqActor()
 {
-    if (CZMQUtils::CzmqGetSockets(nullptr, nullptr) < 0) {
-        Logger::E("ThreadPoolZmqActor", "CzmqGetSockets error");
-        mThreadNum = -1;
-        return;
-    }
-
     mThreadNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM;
 #ifdef COMO_FUNCTION_SAFETY_RTOS
     if ((ComoContext::gThreadsWorkingNum +

@@ -694,6 +694,10 @@ void *CZMQUtils::CzmqPoll()
     return nullptr;
 }
 
+/**
+ * Binding (zmq_bind or zmq_connect) multiple ports to one endpoint is
+ * incorrect, so the functionality of this function needs to be redesigned.
+ */
 int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
 {
     zmq_pollitemNum = ComoConfig::ThreadPoolZmqActor_MAX_THREAD_NUM +
@@ -752,10 +756,9 @@ int CZMQUtils::CzmqGetSockets(void *context, const char *endpoint)
  * parameter example:
  *      tcpEndpoint:
  *          "tcp://127.0.0.1:1239"
- *          "tcp://127.0.0.1:1239;tcp://127.0.0.1:4800"
+ *          "tcp://*:1239"
  *      inprocEndpoint: "inproc://workers"(ComoConfig::localhostInprocEndpoint)
  */
-#define MAX_TcpEndpoint_IN_PROXY    10
 int CZMQUtils::CzmqProxy(void *context, const char *tcpEndpoint,
                                                      const char *inprocEndpoint)
 {
