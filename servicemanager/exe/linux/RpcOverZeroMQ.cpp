@@ -157,8 +157,9 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                          ZmqFunCode::AnswerECode,
                                          socket, (const void *)&ec, sizeof(ec));
-            if (rc <= 0)
+            if (rc <= 0) {
                 usleep(100);
+            }
 
             zmq_msg_close(&msg);
             break;
@@ -185,25 +186,28 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
                     // Keep the same order with InterfacePack::ReadFromParcel() in
                     // como/runtime/rpc/ZeroMQ/InterfacePack.cpp
                     ec = CoCreateParcel(RPCType::Remote, parcel);
-                    if (FAILED(ec))
+                    if (FAILED(ec)) {
                         goto HandleMessage_Exit_GetService;
+                    }
 
                     parcel->WriteCoclassID(ipack->mCid);
                     parcel->WriteInterfaceID(ipack->mIid);
                     parcel->WriteBoolean(ipack->mIsParcelable);
                     parcel->WriteLong(ipack->mServerObjectId);
                     parcel->WriteString(ipack->mServerName);
+
+                    parcel->GetData(resData);
+                    parcel->GetDataSize(resSize);
                 }
-                parcel->GetData(resData);
-                parcel->GetDataSize(resSize);
             }
 
         HandleMessage_Exit_GetService:
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                         ec,
                                         socket, (const void *)resData, resSize);
-            if (rc <= 0)
+            if (rc <= 0) {
                 usleep(100);
+            }
 
             break;
         }
@@ -249,8 +253,9 @@ ECode RpcOverZeroMQ::HandleMessage(HANDLE hChannel, Integer eventCode,
             rc = CZMQUtils::CzmqSendBuf(reinterpret_cast<HANDLE>(nullptr),
                                          ZmqFunCode::AnswerECode,
                                          socket, (const void *)&ec, sizeof(ec));
-            if (rc <= 0)
+            if (rc <= 0) {
                 usleep(100);
+            }
 
             Logger::E("RpcOverZeroMQ", "HandleMessage() unknown eventCode");
     }

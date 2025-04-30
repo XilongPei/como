@@ -241,15 +241,24 @@ ECode ServiceManager::RemoveService(
 #endif
 
     InterfacePack *ipack;
-    {
-        Mutex::AutoLock lock(mServicesLock);
-        ipack = mServices.Get(name);
-        mServices.Remove(name);
-    }
 
-    ReleaseCoclassID(ipack->mCid);
-    ReleaseInterfaceID(ipack->mIid);
-    delete ipack;
+    Mutex::AutoLock lock(mServicesLock);
+
+    ipack = mServices.Get(name);
+    if (nullptr != ipack) {
+
+        /* TODO: memory leak.
+           These need to be done only when resources need to be fully released.
+        ReleaseCoclassID(ipack->mCid);
+        ReleaseInterfaceID(ipack->mIid);
+        */
+
+        // Because mServices.Get was called, the reference count was increased.
+        mServices.Remove(name);
+
+        mServices.Remove(name);
+        delete ipack;
+    }
 
     return NOERROR;
 }
@@ -458,4 +467,3 @@ DBusHandlerResult ServiceManager::HandleMessage(
 } // ServiceManager::HandleMessage()
 
 } // namespace jing
-
