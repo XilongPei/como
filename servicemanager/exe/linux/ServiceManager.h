@@ -40,6 +40,12 @@ public:
 
     struct InterfacePack
     {
+        ~InterfacePack()
+        {
+            ReleaseCoclassID(mCid);
+            ReleaseInterfaceID(mIid);
+        }
+
         String mServerName;
         String mDBusName;
         CoclassID mCid;
