@@ -39,9 +39,9 @@ static int zmq_pollitemNum = 0;
 static Mutex zmq_pollitemLock;
 
 static void *comoZmqContext = nullptr;
-int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 3;
+int CZMQUtils::ZMQ_RCV_TIMEOUT = 1000 * 60 * 60 * 24;   // 1 days
 
-#define TRY_zmq_msg_recv_MOST_TIMES     5
+#define TRY_zmq_msg_recv_MOST_TIMES     36500           // 100 years
 
 /*
 int rc = zmq_ctx_shutdown(context);
@@ -300,12 +300,27 @@ Integer CZMQUtils::CzmqRecvBuf(HANDLE& hChannel, Integer& eventCode,
     numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
     if (-1 == numberOfBytes) {
         if (EAGAIN == errno) {
-            return 0;
+            int try_zmq_msg_recv = 0;
+            do {
+                numberOfBytes = zmq_recv(socket, &funCodeAndCRC64,
+                                                sizeof(funCodeAndCRC64), flags);
+                if (-1 == numberOfBytes) {
+                    if (EAGAIN == errno) {
+                        try_zmq_msg_recv++;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            } while (try_zmq_msg_recv < TRY_zmq_msg_recv_MOST_TIMES);
         }
-        Logger::E("CZMQUtils::CzmqRecvBuf", "zmq_recv funCodeAndCRC64, errno %d, %s",
-                                        zmq_errno(), zmq_strerror(zmq_errno()));
-        eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-        return (-2 - zmq_errno());
+
+        if (-1 == numberOfBytes) {
+            Logger::E("CZMQUtils::CzmqRecvBuf", "zmq_recv funCodeAndCRC64, errno %d, %s",
+                                            zmq_errno(), zmq_strerror(zmq_errno()));
+            eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+            return (-2 - zmq_errno());
+        }
     }
     else {
         int more;
@@ -385,12 +400,27 @@ Integer CZMQUtils::CzmqRecvMsg(HANDLE& hChannel, Integer& eventCode,
     numberOfBytes = zmq_recv(socket, &funCodeAndCRC64, sizeof(funCodeAndCRC64), flags);
     if (-1 == numberOfBytes) {
         if (EAGAIN == errno) {
-            return 0;
+            int try_zmq_msg_recv = 0;
+            do {
+                numberOfBytes = zmq_recv(socket, &funCodeAndCRC64,
+                                                sizeof(funCodeAndCRC64), flags);
+                if (-1 == numberOfBytes) {
+                    if (EAGAIN == errno) {
+                        try_zmq_msg_recv++;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            } while (try_zmq_msg_recv < TRY_zmq_msg_recv_MOST_TIMES);
         }
-        Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d, %s",
-                                        zmq_errno(), zmq_strerror(zmq_errno()));
-        eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
-        return (-2 - zmq_errno());
+
+        if (-1 == numberOfBytes) {
+            Logger::E("CZMQUtils::CzmqRecvMsg", "zmq_recv error, %d, %s",
+                                            zmq_errno(), zmq_strerror(zmq_errno()));
+            eventCode = MAKE_COMORT_ECODE(0x1, zmq_errno());
+            return (-2 - zmq_errno());
+        }
     }
     else {
         int more;
