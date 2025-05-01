@@ -41,7 +41,7 @@ TEST(ClientZmqTest, TestGetRPCService)
 
 TEST(ClientZmqTest, TestCallTestMethod1)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     Integer result;
     ec = SERVICE->TestMethod1(9, result);
@@ -51,7 +51,7 @@ TEST(ClientZmqTest, TestCallTestMethod1)
 
 TEST(ClientZmqTest, TestCallTestMethod2)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     Integer arg1 = 9, result1;
     Long arg2 = 99, result2;
     Boolean arg3 = true, result3;
@@ -95,7 +95,7 @@ TEST(ClientZmqTest, TestCallTestMethod2)
 
 TEST(ClientZmqTest, TestCallTestMethod3)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     Integer arg1 = 9;
     Integer result1;
@@ -109,7 +109,7 @@ TEST(ClientZmqTest, TestCallTestMethod3)
 
 TEST(ClientZmqTest, TestCallTestMethod4)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod4(obj);
@@ -155,7 +155,7 @@ TEST(ClientZmqTest, TestCallTestMethod4)
 
 TEST(ClientZmqTest, TestCallTestMethod5)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod5(obj);
@@ -195,7 +195,7 @@ TEST(ClientZmqTest, TestCallTestMethod5)
 
 TEST(ClientZmqTest, TestIsStubAlive)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
     Boolean alive;
@@ -210,7 +210,7 @@ TEST(ClientZmqTest, TestIsStubAlive)
 
 TEST(ClientZmqTest, TestReleaseObject)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
 
@@ -226,7 +226,7 @@ TEST(ClientZmqTest, TestReleaseObject)
 
 TEST(ClientZmqTest, TestRpcHelpers)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod4(obj);
@@ -246,7 +246,7 @@ TEST(ClientZmqTest, TestRpcHelpers)
 
 TEST(ClientZmqTest, TestReleaseStub)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
     Boolean alive;

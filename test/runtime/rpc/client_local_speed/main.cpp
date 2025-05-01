@@ -52,7 +52,7 @@ TEST(RPCTest, TestGetRPCService)
 
 TEST(RPCTest, TestCallTestMethod1)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     Integer result;
     ec = SERVICE->TestMethod1(9, result);
@@ -62,7 +62,7 @@ TEST(RPCTest, TestCallTestMethod1)
 
 TEST(RPCTest, TestCallTestMethod2)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     Integer arg1 = 9, result1;
     Long arg2 = 99, result2;
     Boolean arg3 = true, result3;
@@ -106,7 +106,7 @@ TEST(RPCTest, TestCallTestMethod2)
 
 TEST(RPCTest, TestCallTestMethod3)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     Integer arg1 = 9;
     Integer result1;
@@ -120,7 +120,7 @@ TEST(RPCTest, TestCallTestMethod3)
 
 TEST(RPCTest, TestCallTestMethod4)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod4(obj);
@@ -168,7 +168,7 @@ TEST(RPCTest, TestCallTestMethod4)
 
 TEST(RPCTest, TestCallTestMethod5)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod5(obj);
@@ -208,7 +208,7 @@ TEST(RPCTest, TestCallTestMethod5)
 
 TEST(RPCTest, TestIsStubAlive)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
     Boolean alive;
@@ -219,7 +219,7 @@ TEST(RPCTest, TestIsStubAlive)
 
 TEST(RPCTest, TestReleaseObject)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     IProxy* proxy = IProxy::Probe(SERVICE);
     EXPECT_TRUE(proxy != nullptr);
 
@@ -235,7 +235,7 @@ TEST(RPCTest, TestReleaseObject)
 
 TEST(RPCTest, TestRpcHelpers)
 {
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
     ECode ec = E_REMOTE_EXCEPTION;
     AutoPtr<ITestInterface> obj;
     ec = SERVICE->TestMethod4(obj);

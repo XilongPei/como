@@ -46,7 +46,7 @@ TEST(ClientZmqTest, TestGetRPCService)
     // find and get service
     ServiceManager::GetInstance()->GetRemoteService("ServiceManager", "rpcserviceZMQ", obj);
     SERVICE = IService::Probe(obj);
-    EXPECT_TRUE(SERVICE != nullptr);
+    ASSERT_TRUE(SERVICE != nullptr);
 
     // testmethod params
     ECode ec = E_REMOTE_EXCEPTION;
