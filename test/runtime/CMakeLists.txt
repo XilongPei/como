@@ -38,6 +38,8 @@ endif()
 add_subdirectory(ComoConfig)
 add_subdirectory(IDfromName)
 add_subdirectory(util)
+add_subdirectory(IP_Utils)
+
 add_subdirectory(ObjectObserver)
 add_subdirectory(ObjectObserver_extra)
 

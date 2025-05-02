@@ -17,6 +17,8 @@
 #ifndef __IP_UTILS_H__
 #define __IP_UTILS_H__
 
+#include "comotypes.h"
+
 namespace como {
 
 typedef enum tagIP_Relation {
@@ -29,7 +31,7 @@ typedef enum tagIP_Relation {
     IP_SAME_SUBNET    = 6
 } IP_Relation;
 
-class IP_Utils
+class COM_PUBLIC IP_Utils
 {
 public:
     static IP_Relation check_ip_relation(const char *ip_str);

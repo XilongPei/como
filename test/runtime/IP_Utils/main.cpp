@@ -14,8 +14,8 @@
 // limitations under the License.
 //=========================================================================
 
-#include "IP_Utils.h"
 #include <gtest/gtest.h>
+#include "IP_Utils.h"
 
 using namespace como;
 
