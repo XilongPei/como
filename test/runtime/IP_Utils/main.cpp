@@ -26,15 +26,27 @@ TEST(IP_UtilsTest, IP_Utils_test)
         "8.8.8.8", "fe80::1"
     };
 
-    for (int i = 0; i < sizeof(ips)/sizeof(ips[0]); i++) {
+    for (int i = 0;  i < sizeof(ips) / sizeof(ips[0]);  i++) {
         const char *ip = ips[i];
         printf("%-20s => ", ip);
-        if (como::IP_Utils::is_loopback_ip(ip))       printf("环回地址\n");
-        else if (como::IP_Utils::is_broadcast_ip(ip)) printf("广播地址\n");
-        else if (como::IP_Utils::is_multicast_ip(ip)) printf("多播地址\n");
-        else if (como::IP_Utils::is_local_ip(ip))     printf("本机地址\n");
-        else if (como::IP_Utils::is_same_subnet_ip(ip)) printf("同一子网\n");
-        else                          printf("外部地址\n");
+        if (como::IP_Utils::is_loopback_ip(ip)) {
+            printf("环回地址\n");
+        }
+        else if (como::IP_Utils::is_broadcast_ip(ip)) {
+            printf("广播地址\n");
+        }
+        else if (como::IP_Utils::is_multicast_ip(ip)) {
+            printf("多播地址\n");
+        }
+        else if (como::IP_Utils::is_local_ip(ip)) {
+            printf("本机地址\n");
+        }
+        else if (como::IP_Utils::is_same_subnet_ip(ip)) {
+            printf("同一子网\n");
+        }
+        else {
+            printf("外部地址\n");
+        }
     }
 }
 

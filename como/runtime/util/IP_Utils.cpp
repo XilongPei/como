@@ -34,13 +34,15 @@ static bool match_ipv6_prefix(struct in6_addr *a, struct in6_addr *b, int prefix
 
     if (full_bytes > 16) full_bytes = 16;
 
-    if (memcmp(a->s6_addr, b->s6_addr, full_bytes) != 0)
+    if (memcmp(a->s6_addr, b->s6_addr, full_bytes) != 0) {
         return false;
+    }
 
     if (remaining_bits > 0) {
         uint8_t mask = 0xFF << (8 - remaining_bits);
-        if ((a->s6_addr[full_bytes] & mask) != (b->s6_addr[full_bytes] & mask))
+        if ((a->s6_addr[full_bytes] & mask) != (b->s6_addr[full_bytes] & mask)) {
             return false;
+        }
     }
 
     return true;
@@ -232,25 +234,3 @@ bool IP_Utils::is_local_ip(const char *ip_str)
 }
 
 } // namespace como
-
-#if 0
-int main()
-{
-    const char *ips[] = {
-        "127.0.0.1", "255.255.255.255", "224.0.0.1", "192.168.1.88","172.27.72.108",
-        "8.8.8.8", "fe80::1"
-    };
-
-    for (int i = 0; i < sizeof(ips)/sizeof(ips[0]); i++) {
-        const char *ip = ips[i];
-        printf("%-20s => ", ip);
-        if (como::IP_Utils::is_loopback_ip(ip))       printf("环回地址\n");
-        else if (como::IP_Utils::is_broadcast_ip(ip)) printf("广播地址\n");
-        else if (como::IP_Utils::is_multicast_ip(ip)) printf("多播地址\n");
-        else if (como::IP_Utils::is_local_ip(ip))     printf("本机地址\n");
-        else if (como::IP_Utils::is_same_subnet_ip(ip)) printf("同一子网\n");
-        else                          printf("外部地址\n");
-    }
-    return 0;
-}
-#endif
