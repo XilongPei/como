@@ -24,7 +24,7 @@ if("$ENV{ARCH}" MATCHES "(x64)|(aarch64)")
 elseif("$ENV{ARCH}" MATCHES "(riscv64)")
     set(COMMON_C_FLAGS_
         "-fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
-elseif("$ENV{ARCH}" MATCHES "(x32)|(aarch32)|(riscv32)")
+elseif("$ENV{ARCH}" MATCHES "(x32)")
     set(COMMON_C_FLAGS_
         "-m32 -fPIC -ffunction-sections -fdata-sections ${FUNCTION_SAFETY_C_FLAGS}")
 elseif("$ENV{ARCH}" MATCHES "(aarch32)|(riscv32)")
