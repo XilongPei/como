@@ -90,6 +90,16 @@ public:
         ts.tv_sec += nsec / NANOSECONDS_PER_SECOND;
         ts.tv_nsec = nsec % NANOSECONDS_PER_SECOND;
 
+        /**
+         * 1. If you use CLOCK_MONOTONIC as the clock_id, the change of system time
+         * will not affect dormancy.
+         * 2. You can use the SA_RESTART flag to prevent certain signals from
+         * interrupting the system call, but this will not return the remaining
+         * time - the call will be automatically restarted.
+         * 3. When using the TIMER_ABSTIME flag (absolute time), even if there is a
+         * signal interruption, rem may not return valid values because the
+         * remaining time is no longer tracked.
+         */
         while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr) == -1) {
             if (errno != EINTR) {
                 break;
