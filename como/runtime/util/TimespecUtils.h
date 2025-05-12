@@ -31,6 +31,7 @@ public:
     static constexpr long NANOSECONDS_PER_MILLISECOND = 1000000;
     static constexpr long MILLISECONDS_PER_SECOND     = 1000;
     static constexpr long NANOSECONDS_FOR_SCHEDULE    = 20;
+    static constexpr long SPIN_AHEAD_NS               = 100000L;
 
     static inline void TimespecAddNanoseconds(struct timespec& ts, long nanoSeconds)
     {
@@ -86,10 +87,9 @@ public:
             }
         }
 
-        long nsec = ts.tv_nsec + nanoSeconds;
-        ts.tv_sec += nsec / NANOSECONDS_PER_SECOND;
-        ts.tv_nsec = nsec % NANOSECONDS_PER_SECOND;
+        TimespecAddNanoseconds(ts, nanoSeconds);
 
+#ifdef __NOT_PRECISE_SLEEP_UNTIL__
         /**
          * 1. If you use CLOCK_MONOTONIC as the clock_id, the change of system time
          * will not affect dormancy.
@@ -100,12 +100,27 @@ public:
          * signal interruption, rem may not return valid values because the
          * remaining time is no longer tracked.
          */
-        while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr) == -1) {
+        while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts,
+                                                                nullptr) == -1) {
+            if (errno != EINTR) {
+                break;
+            }
+        }
+#else
+        currentTime = ts;
+        TimespecAddNanoseconds(currentTime, -SPIN_AHEAD_NS);
+
+        while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &currentTime,
+                                                                nullptr) == -1) {
             if (errno != EINTR) {
                 break;
             }
         }
 
+        do {
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
+        } while (TimespecDiffNs(&currentTime, &ts) < 0);
+#endif
         return 0;
     }
 
@@ -128,6 +143,12 @@ public:
 
         return (int64_t)(ts->tv_sec) * NANOSECONDS_PER_SECOND + ts->tv_nsec;
     }
+
+    static inline int64_t TimespecDiffNs(const struct timespec *a, const struct timespec *b)
+    {
+        return (int64_t)(a->tv_sec - b->tv_sec) * 1000000000LL + (a->tv_nsec - b->tv_nsec);
+    }
+
 }; // class TimespecUtilities
 
 } // namespace como
