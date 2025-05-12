@@ -35,8 +35,10 @@ public:
 
     static inline void TimespecAddNanoseconds(struct timespec& ts, long nanoSeconds)
     {
-        long nsec = ts.tv_nsec + nanoSeconds;
-        ts.tv_sec += nsec / NANOSECONDS_PER_SECOND;
+        int64_t nsec = (int64_t)(ts.tv_sec) * NANOSECONDS_PER_SECOND +
+                                                       ts.tv_nsec + nanoSeconds;
+
+        ts.tv_sec = nsec / NANOSECONDS_PER_SECOND;
         ts.tv_nsec = nsec % NANOSECONDS_PER_SECOND;
     }
 
@@ -144,9 +146,11 @@ public:
         return (int64_t)(ts->tv_sec) * NANOSECONDS_PER_SECOND + ts->tv_nsec;
     }
 
-    static inline int64_t TimespecDiffNs(const struct timespec *a, const struct timespec *b)
+    static inline int64_t TimespecDiffNs(const struct timespec *a,
+                                                       const struct timespec *b)
     {
-        return (int64_t)(a->tv_sec - b->tv_sec) * 1000000000LL + (a->tv_nsec - b->tv_nsec);
+        return (int64_t)(a->tv_sec - b->tv_sec) * NANOSECONDS_PER_SECOND +
+                                                      (a->tv_nsec - b->tv_nsec);
     }
 
 }; // class TimespecUtilities
