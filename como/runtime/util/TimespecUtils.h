@@ -26,14 +26,14 @@ namespace como {
 class TimespecUtils
 {
 public:
-                                                      // 123456789
-    static constexpr long NANOSECONDS_PER_SECOND      = 1000000000;
-    static constexpr long NANOSECONDS_PER_MILLISECOND = 1000000;
-    static constexpr long MILLISECONDS_PER_SECOND     = 1000;
-    static constexpr long NANOSECONDS_FOR_SCHEDULE    = 20;
-    static constexpr long SPIN_AHEAD_NS               = 100000L;
+                                                         // 123456789
+    static constexpr int64_t NANOSECONDS_PER_SECOND      = 1000000000LL;
+    static constexpr int64_t NANOSECONDS_PER_MILLISECOND = 1000000LL;
+    static constexpr int64_t MILLISECONDS_PER_SECOND     = 1000LL;
+    static constexpr int64_t NANOSECONDS_FOR_SCHEDULE    = 20LL;
+    static constexpr int64_t SPIN_AHEAD_NS               = 100000LL;
 
-    static inline void TimespecAddNanoseconds(struct timespec& ts, long nanoSeconds)
+    static inline void TimespecAddNanoseconds(struct timespec& ts, int64_t nanoSeconds)
     {
         int64_t nsec = (int64_t)(ts.tv_sec) * NANOSECONDS_PER_SECOND +
                                                        ts.tv_nsec + nanoSeconds;
@@ -45,7 +45,7 @@ public:
     /**
      * struct timespec ts will be changed when return.
      */
-    static inline int TimespecWaitNanoseconds(struct timespec& ts, long nanoSeconds)
+    static inline int TimespecWaitNanoseconds(struct timespec& ts, int64_t nanoSeconds)
     {
         struct timespec currentTime;
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
