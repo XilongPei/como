@@ -23,6 +23,11 @@
 
 namespace como {
 
+/**
+ * In this file, to represent time, int64_t is used because both tv_sec and
+ * tv_nsec in struct timespec are signed types.
+ */
+
 class TimespecUtils
 {
 public:
