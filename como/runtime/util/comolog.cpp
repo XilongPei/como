@@ -76,7 +76,7 @@ void Logger::D(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (DEBUG > sLevel) {
+    if (DEBUG < sLevel) {
         return;
     }
 
@@ -96,7 +96,7 @@ void Logger::E(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (ERROR > sLevel) {
+    if (ERROR < sLevel) {
         return;
     }
 
@@ -116,7 +116,7 @@ void Logger::V(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (VERBOSE > sLevel) {
+    if (VERBOSE < sLevel) {
         return;
     }
 
@@ -136,7 +136,7 @@ void Logger::W(
     /* [in] */ const char* tag,
     /* [in] */ const char* format, ...)
 {
-    if (WARNING > sLevel) {
+    if (WARNING < sLevel) {
         return;
     }
 
@@ -226,7 +226,7 @@ void Logger::SetSamplingTag(
     /* [in] */ const char *szSamplingTag_)
 {
     (void)strncpy(szSamplingTag, szSamplingTag_, 32);
-    szSamplingTag[31] = '\0';
+    szSamplingTag[sizeof(szSamplingTag) -1] = '\0';
 }
 
 /*

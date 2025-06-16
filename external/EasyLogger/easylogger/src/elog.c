@@ -155,7 +155,8 @@ extern void elog_port_output_unlock(void);
  *
  * @return result
  */
-ElogErrCode elog_init(void) {
+ElogErrCode elog_init(void)
+{
     extern ElogErrCode elog_port_init(void);
     extern ElogErrCode elog_async_init(void);
 
@@ -227,8 +228,8 @@ void elog_deinit(void) {
  * EasyLogger start after initialize.
  */
 void elog_start(void) {
-    if (!elog.init_ok) {
-        return ;
+    if (! elog.init_ok) {
+        return;
     }
     
     /* enable output */
@@ -248,8 +249,8 @@ void elog_start(void) {
  * EasyLogger stop after initialize.
  */
 void elog_stop(void) {
-    if (!elog.init_ok) {
-        return ;
+    if (! elog.init_ok) {
+        return;
     }
 
     /* disable output */
@@ -369,7 +370,8 @@ void elog_output_lock(void) {
     if (elog.output_lock_enabled) {
         elog_port_output_lock();
         elog.output_is_locked_before_disable = true;
-    } else {
+    }
+    else {
         elog.output_is_locked_before_enable = true;
     }
 }
@@ -381,7 +383,8 @@ void elog_output_unlock(void) {
     if (elog.output_lock_enabled) {
         elog_port_output_unlock();
         elog.output_is_locked_before_disable = false;
-    } else {
+    }
+    else {
         elog.output_is_locked_before_enable = false;
     }
 }
@@ -391,9 +394,9 @@ void elog_output_unlock(void) {
  */
 static void elog_set_filter_tag_lvl_default()
 {
-    uint8_t i = 0;
+    uint8_t i;
 
-    for (i =0; i< ELOG_FILTER_TAG_LVL_MAX_NUM; i++){
+    for (i = 0;  i < ELOG_FILTER_TAG_LVL_MAX_NUM;  i++) {
         memset(elog.filter.tag_lvl[i].tag, '\0', ELOG_FILTER_TAG_MAX_LEN + 1);
         elog.filter.tag_lvl[i].level = ELOG_FILTER_LVL_SILENT;
         elog.filter.tag_lvl[i].tag_use_flag = false;
@@ -422,36 +425,38 @@ void elog_set_filter_tag_lvl(const char *tag, uint8_t level)
 {
     ELOG_ASSERT(level <= ELOG_LVL_VERBOSE);
     ELOG_ASSERT(tag != ((void *)0));
-    uint8_t i = 0;
+    uint8_t i;
 
-    if (!elog.init_ok) {
+    if (! elog.init_ok) {
         return;
     }
 
     elog_port_output_lock();
     /* find the tag in arr */
-    for (i =0; i< ELOG_FILTER_TAG_LVL_MAX_NUM; i++){
-        if (elog.filter.tag_lvl[i].tag_use_flag == true &&
-            !strncmp(tag, elog.filter.tag_lvl[i].tag,ELOG_FILTER_TAG_MAX_LEN)){
+    for (i = 0;  i < ELOG_FILTER_TAG_LVL_MAX_NUM;  i++) {
+        if (elog.filter.tag_lvl[i].tag_use_flag &&
+           (! strncmp(tag, elog.filter.tag_lvl[i].tag,ELOG_FILTER_TAG_MAX_LEN))) {
             break;
         }
     }
 
-    if (i < ELOG_FILTER_TAG_LVL_MAX_NUM){
+    if (i < ELOG_FILTER_TAG_LVL_MAX_NUM) {
         /* find OK */
-        if (level == ELOG_FILTER_LVL_ALL){
+        if (level == ELOG_FILTER_LVL_ALL) {
             /* remove current tag's level filter when input level is the lowest level */
              elog.filter.tag_lvl[i].tag_use_flag = false;
              memset(elog.filter.tag_lvl[i].tag, '\0', ELOG_FILTER_TAG_MAX_LEN + 1);
              elog.filter.tag_lvl[i].level = ELOG_FILTER_LVL_SILENT;
-        } else{
+        }
+        else {
             elog.filter.tag_lvl[i].level = level;
         }
-    } else{
+    }
+    else{
         /* only add the new tag's level filer when level is not ELOG_FILTER_LVL_ALL */
         if (level != ELOG_FILTER_LVL_ALL){
-            for (i =0; i< ELOG_FILTER_TAG_LVL_MAX_NUM; i++){
-                if (elog.filter.tag_lvl[i].tag_use_flag == false){
+            for (i = 0;  i < ELOG_FILTER_TAG_LVL_MAX_NUM;  i++) {
+                if (! elog.filter.tag_lvl[i].tag_use_flag) {
                     strncpy(elog.filter.tag_lvl[i].tag, tag, ELOG_FILTER_TAG_MAX_LEN);
                     elog.filter.tag_lvl[i].level = level;
                     elog.filter.tag_lvl[i].tag_use_flag = true;
@@ -474,18 +479,18 @@ void elog_set_filter_tag_lvl(const char *tag, uint8_t level)
 uint8_t elog_get_filter_tag_lvl(const char *tag)
 {
     ELOG_ASSERT(tag != ((void *)0));
-    uint8_t i = 0;
+    uint8_t i;
     uint8_t level = ELOG_FILTER_LVL_ALL;
 
-    if (!elog.init_ok) {
+    if (! elog.init_ok) {
         return level;
     }
 
     elog_port_output_lock();
     /* find the tag in arr */
-    for (i =0; i< ELOG_FILTER_TAG_LVL_MAX_NUM; i++){
-        if (elog.filter.tag_lvl[i].tag_use_flag == true &&
-            !strncmp(tag, elog.filter.tag_lvl[i].tag,ELOG_FILTER_TAG_MAX_LEN)){
+    for (i = 0;  i < ELOG_FILTER_TAG_LVL_MAX_NUM;  i++) {
+        if (elog.filter.tag_lvl[i].tag_use_flag &&
+           (! strncmp(tag, elog.filter.tag_lvl[i].tag,ELOG_FILTER_TAG_MAX_LEN))) {
             level = elog.filter.tag_lvl[i].level;
             break;
         }
@@ -507,7 +512,7 @@ void elog_raw(const char *format, ...) {
     int fmt_result;
 
     /* check output enabled */
-    if (!elog.output_enabled) {
+    if (! elog.output_enabled) {
         return;
     }
 
@@ -523,7 +528,8 @@ void elog_raw(const char *format, ...) {
     /* output converted log */
     if ((fmt_result > -1) && (fmt_result <= ELOG_LINE_BUF_SIZE)) {
         log_len = fmt_result;
-    } else {
+    }
+    else {
         log_len = ELOG_LINE_BUF_SIZE;
     }
     /* output log */
@@ -556,7 +562,8 @@ void elog_raw(const char *format, ...) {
  *
  */
 void elog_output(uint8_t level, const char *tag, const char *file, const char *func,
-        const long line, const char *format, ...) {
+        const long line, const char *format, ...)
+{
     va_list args;
     va_start(args, format);
     elog_output_args(level, tag, file, func, line, format, args);
@@ -567,7 +574,8 @@ void elog_output(uint8_t level, const char *tag, const char *file, const char *f
  * write log for COMO
  */
 void elog_output_args_simple(uint8_t level, const char *format,
-                                 ElogLoggerWriteLog funWriteLog, va_list args) {
+                                 ElogLoggerWriteLog funWriteLog, va_list args)
+{
 
     size_t log_len = 0;
     // va_list args;
@@ -594,7 +602,8 @@ void elog_output_args_simple(uint8_t level, const char *format,
     /* calculate log length */
     if ((log_len + fmt_result <= ELOG_LINE_BUF_SIZE) && (fmt_result > -1)) {
         log_len += fmt_result;
-    } else {
+    }
+    else {
         /* using max length */
         log_len = ELOG_LINE_BUF_SIZE;
     }
@@ -636,7 +645,8 @@ void elog_output_args_simple(uint8_t level, const char *format,
 
 /* args point to the first variable parameter */
 void elog_output_args(uint8_t level, const char *tag, const char *file, const char *func,
-        const long line, const char *format, va_list args) {
+        const long line, const char *format, va_list args)
+{
     extern const char *elog_port_get_time(void);
     extern const char *elog_port_get_p_info(void);
     extern const char *elog_port_get_t_info(void);
@@ -650,13 +660,14 @@ void elog_output_args(uint8_t level, const char *tag, const char *file, const ch
     ELOG_ASSERT(level <= ELOG_LVL_VERBOSE);
 
     /* check output enabled */
-    if (!elog.output_enabled) {
+    if (! elog.output_enabled) {
         return;
     }
     /* level filter */
     if (level > elog.filter.level || level > elog_get_filter_tag_lvl(tag)) {
         return;
-    } else if (!strstr(tag, elog.filter.tag)) { /* tag filter */
+    }
+    else if (! strstr(tag, elog.filter.tag)) { /* tag filter */
         return;
     }
     /* args point to the first variable parameter */
@@ -743,7 +754,8 @@ void elog_output_args(uint8_t level, const char *tag, const char *file, const ch
     /* calculate log length */
     if ((log_len + fmt_result <= ELOG_LINE_BUF_SIZE) && (fmt_result > -1)) {
         log_len += fmt_result;
-    } else {
+    }
+    else {
         /* using max length */
         log_len = ELOG_LINE_BUF_SIZE;
     }
@@ -767,7 +779,7 @@ void elog_output_args(uint8_t level, const char *tag, const char *file, const ch
         /* add string end sign */
         log_buf[log_len] = '\0';
         /* find the keyword */
-        if (!strstr(log_buf, elog.filter.keyword)) {
+        if (! strstr(log_buf, elog.filter.keyword)) {
             /* unlock output */
             elog_output_unlock();
             return;
@@ -805,12 +817,14 @@ void elog_output_args(uint8_t level, const char *tag, const char *file, const ch
  *
  * @return enable or disable
  */
-static bool get_fmt_enabled(uint8_t level, size_t set) {
+static bool get_fmt_enabled(uint8_t level, size_t set)
+{
     ELOG_ASSERT(level <= ELOG_LVL_VERBOSE);
 
     if (elog.enabled_fmt_set[level] & set) {
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -840,7 +854,8 @@ void elog_output_lock_enabled(bool enabled) {
  *
  * @param hook the hook function
  */
-void elog_assert_set_hook(void (*hook)(const char* expr, const char* func, size_t line)) {
+void elog_assert_set_hook(void (*hook)(const char* expr, const char* func, size_t line))
+{
     elog_assert_hook = hook;
 }
 
@@ -852,7 +867,8 @@ void elog_assert_set_hook(void (*hook)(const char* expr, const char* func, size_
  *
  * @return log level, found failed will return -1
  */
-int8_t elog_find_lvl(const char *log) {
+int8_t elog_find_lvl(const char *log)
+{
     ELOG_ASSERT(log);
     /* make sure the log level is output on each format */
     ELOG_ASSERT(elog.enabled_fmt_set[ELOG_LVL_ASSERT] & ELOG_FMT_LVL);
@@ -896,7 +912,8 @@ int8_t elog_find_lvl(const char *log) {
  *
  * @return log tag, found failed will return NULL
  */
-const char *elog_find_tag(const char *log, uint8_t lvl, size_t *tag_len) {
+const char *elog_find_tag(const char *log, uint8_t lvl, size_t *tag_len)
+{
     const char *tag = NULL, *tag_end = NULL;
 
     ELOG_ASSERT(log);
@@ -913,7 +930,8 @@ const char *elog_find_tag(const char *log, uint8_t lvl, size_t *tag_len) {
     /* find the first space after tag */
     if ((tag_end = memchr(tag, ' ', ELOG_FILTER_TAG_MAX_LEN)) != NULL) {
         *tag_len = tag_end - tag;
-    } else {
+    }
+    else {
         tag = NULL;
     }
 
@@ -944,27 +962,30 @@ void elog_hexdump(const char *name, uint8_t width, uint8_t *buf, uint16_t size)
     /* level filter */
     if (ELOG_LVL_DEBUG > elog.filter.level) {
         return;
-    } else if (!strstr(name, elog.filter.tag)) { /* tag filter */
+    }
+    else if (!strstr(name, elog.filter.tag)) { /* tag filter */
         return;
     }
 
     /* lock output */
     elog_output_lock();
 
-    for (i = 0; i < size; i += width) {
+    for (i = 0;  i < size;  i += width) {
         /* package header */
         fmt_result = snprintf(log_buf, ELOG_LINE_BUF_SIZE, "D/HEX %s: %04X-%04X: ", name, i, i + width - 1);
         /* calculate log length */
         if ((fmt_result > -1) && (fmt_result <= ELOG_LINE_BUF_SIZE)) {
             log_len = fmt_result;
-        } else {
+        }
+        else {
             log_len = ELOG_LINE_BUF_SIZE;
         }
         /* dump hex */
-        for (j = 0; j < width; j++) {
+        for (j = 0;  j < width;  j++) {
             if (i + j < size) {
                 snprintf(dump_string, sizeof(dump_string), "%02X ", buf[i + j]);
-            } else {
+            }
+            else {
                 strncpy(dump_string, "   ", sizeof(dump_string));
             }
             log_len += elog_strcpy(log_len, log_buf + log_len, dump_string);
@@ -974,7 +995,7 @@ void elog_hexdump(const char *name, uint8_t width, uint8_t *buf, uint16_t size)
         }
         log_len += elog_strcpy(log_len, log_buf + log_len, "  ");
         /* dump char for hex */
-        for (j = 0; j < width; j++) {
+        for (j = 0;  j < width;  j++) {
             if (i + j < size) {
                 snprintf(dump_string, sizeof(dump_string), "%c", __is_print(buf[i + j]) ? buf[i + j] : '.');
                 log_len += elog_strcpy(log_len, log_buf + log_len, dump_string);
@@ -994,7 +1015,7 @@ void elog_hexdump(const char *name, uint8_t width, uint8_t *buf, uint16_t size)
         extern void elog_buf_output(const char *log, size_t size);
     elog_buf_output(log_buf, log_len);
 #else
-        elog_port_output(log_buf, log_len);
+    elog_port_output(log_buf, log_len);
 #endif
     }
     /* unlock output */
