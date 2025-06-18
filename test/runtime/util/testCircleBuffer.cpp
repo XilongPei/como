@@ -7,6 +7,11 @@ using namespace como;
 
 #define MAX_SIZE 201
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 // Test 1: CircleBuffer constructor
 TEST(CircleBuffer, testConstructor)
 {
@@ -172,6 +177,10 @@ TEST(CircleBuffer, testWRString)
 
     delete circleBuf;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 int main(int argc, char **argv)
 {
