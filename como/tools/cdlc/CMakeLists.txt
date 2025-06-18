@@ -45,6 +45,7 @@ set(CDLC_LINK_LIBS
     cdlc_util
     -Wl,--no-whole-archive
     -static-libstdc++
+    -static
 )
 
 add_executable(cdlc
