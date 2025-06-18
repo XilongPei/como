@@ -28,10 +28,12 @@ add_subdirectory(util)
 
 include_directories(
     ${CDLC_SRC_DIR}
-    ${COMO_SRC_DIR})
+    ${COMO_SRC_DIR}
+)
 
 set(SOURCES
-    main.cpp)
+    main.cpp
+)
 
 set(CDLC_LINK_LIBS
     -Wl,--whole-archive
@@ -41,15 +43,20 @@ set(CDLC_LINK_LIBS
     cdlc_parser
     cdlc_phase
     cdlc_util
-    -Wl,--no-whole-archive)
+    -Wl,--no-whole-archive
+    -static-libstdc++
+)
 
 add_executable(cdlc
-    ${SOURCES})
+    ${SOURCES}
+)
 target_link_libraries(cdlc
     ${CDLC_LINK_LIBS}
-    metadata)
+    metadata
+)
 add_dependencies(cdlc
-    metadata)
+    metadata
+)
 
 COPY(cdlc ${CDLC_OBJ_DIR}/cdlc ${BIN_DIR})
 
@@ -62,4 +69,5 @@ install(FILES
         GROUP_READ
         GROUP_EXECUTE
         WORLD_READ
-        WORLD_EXECUTE)
+        WORLD_EXECUTE
+)
