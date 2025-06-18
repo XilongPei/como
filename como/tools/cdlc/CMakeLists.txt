@@ -35,6 +35,12 @@ set(SOURCES
     main.cpp
 )
 
+if("_$ENV{ARCH}_" STREQUAL "_openEuler_")
+    set(STATIC_LINK_LIBS )
+else()
+    set(STATIC_LINK_LIBS -static-libstdc++ -static)
+endif()
+
 set(CDLC_LINK_LIBS
     -Wl,--whole-archive
     cdlc_ast
@@ -44,8 +50,7 @@ set(CDLC_LINK_LIBS
     cdlc_phase
     cdlc_util
     -Wl,--no-whole-archive
-    -static-libstdc++
-    -static
+    ${STATIC_LINK_LIBS}
 )
 
 add_executable(cdlc

@@ -75,10 +75,14 @@ function comotools()
 {
     export PRODUCT=comotools
     export PLATFORM=linux
-    export ARCH=x64
     export BUILD=$PRODUCT.$PLATFORM.$ARCH.$VERSION
     export HOST_OUT_PATH=$ROOT/out/host
     export HOST_BIN_PATH=$ROOT/bin/host
+    if grep -qi "openEuler" /etc/os-release; then
+        export ARCH=openEuler
+    else
+        export ARCH=x64
+    fi
 
     if [ ! -d "$HOST_OUT_PATH" ]; then
         mkdir $HOST_OUT_PATH
