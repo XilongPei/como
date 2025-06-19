@@ -503,7 +503,7 @@ if [ ! -d "$ROOT/bin" ]; then
     mkdir $ROOT/bin
 fi
 
-if [ -z "$VERSION" ]; then
+if [ -z "${VERSION:-}" ]; then
     export VERSION=rls
 fi
 
