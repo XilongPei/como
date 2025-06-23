@@ -30,6 +30,10 @@ typedef union tagInt64 {
     int16_t         i16Val;     // == i16.i16_low_low
     int32_t         i32Val;     // == i32.i32_low
     int64_t         i64Val;
+    uint8_t         u8Val;      // == i8.i8_7
+    uint16_t        u16Val;     // == i16.i16_low_low
+    uint32_t        u32Val;     // == i32.i32_low
+    uint64_t        u64Val;
     float           floatVal;
     double          doubleVal;
     void           *pVal;
