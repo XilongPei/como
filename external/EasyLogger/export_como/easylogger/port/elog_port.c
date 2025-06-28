@@ -42,7 +42,8 @@ static pthread_mutex_t output_lock;
  *
  * @return result
  */
-ElogErrCode elog_port_init(void) {
+ElogErrCode elog_port_init(void)
+{
     ElogErrCode result = ELOG_NO_ERR;
 
     pthread_mutex_init(&output_lock, NULL);
@@ -58,7 +59,8 @@ ElogErrCode elog_port_init(void) {
  * EasyLogger port deinitialize
  *
  */
-void elog_port_deinit(void) {
+void elog_port_deinit(void)
+{
 #ifdef ELOG_FILE_ENABLE
     elog_file_deinit();
 #endif
@@ -73,7 +75,14 @@ void elog_port_deinit(void) {
  * @param log output of log
  * @param size log size
  */
-void elog_port_output(const char *log, size_t size) {
+void elog_port_output(const char *log, size_t size)
+{
+    if (NULL != pLogInfoFilter) {
+        if (pLogInfoFilter(log) == 0) {
+            return;
+        }
+    }
+
     /* output to terminal */
 #ifdef ELOG_TERMINAL_ENABLE
     printf("%.*s", (int)size, log);
@@ -88,14 +97,16 @@ void elog_port_output(const char *log, size_t size) {
 /**
  * output lock
  */
-void elog_port_output_lock(void) {
+void elog_port_output_lock(void)
+{
     pthread_mutex_lock(&output_lock);
 }
 
 /**
  * output unlock
  */
-void elog_port_output_unlock(void) {
+void elog_port_output_unlock(void)
+{
     pthread_mutex_unlock(&output_lock);
 }
 
@@ -105,7 +116,8 @@ void elog_port_output_unlock(void) {
  *
  * @return current time
  */
-const char *elog_port_get_time(void) {
+const char *elog_port_get_time(void)
+{
     static char cur_system_time[24] = { 0 };
 
     time_t cur_t;
@@ -124,7 +136,8 @@ const char *elog_port_get_time(void) {
  *
  * @return current process name
  */
-const char *elog_port_get_p_info(void) {
+const char *elog_port_get_p_info(void)
+{
     static char cur_process_info[10] = { 0 };
 
     snprintf(cur_process_info, 10, "pid:%04d", getpid());
@@ -137,7 +150,8 @@ const char *elog_port_get_p_info(void) {
  *
  * @return current thread name
  */
-const char *elog_port_get_t_info(void) {
+const char *elog_port_get_t_info(void)
+{
     static char cur_thread_info[10] = { 0 };
 
     snprintf(cur_thread_info, 10, "tid:%04ld", pthread_self());

@@ -171,12 +171,15 @@ typedef struct {
     bool text_color_enabled;
 #endif
 
-}EasyLogger, *EasyLogger_t;
+} EasyLogger, *EasyLogger_t;
 
 /* EasyLogger error code */
 typedef enum {
     ELOG_NO_ERR,
 } ElogErrCode;
+
+typedef int (*ELogInfoFilter)(const char *);
+extern ELogInfoFilter pLogInfoFilter;
 
 /* elog.c */
 ElogErrCode elog_init(void);

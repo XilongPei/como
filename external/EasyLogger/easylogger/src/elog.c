@@ -118,6 +118,8 @@
 static EasyLogger elog;
 /* every line log's buffer */
 static char log_buf[ELOG_LINE_BUF_SIZE] = { 0 };
+ELogInfoFilter pLogInfoFilter = NULL;
+
 /* level output info */
 static const char *level_output_info[] = {
         [ELOG_LVL_ASSERT]  = "A/",
@@ -634,10 +636,12 @@ void elog_output_args_simple(uint8_t level, const char *format,
     log_len += elog_strcpy(log_len, log_buf + log_len, "\n");
 
     /* output log */
-    if (NULL != funWriteLog)
+    if (NULL != funWriteLog) {
         funWriteLog(log_buf, log_len);
-    else
+    }
+    else {
         elog_port_output(log_buf, log_len);
+    }
 
     /* unlock output */
     elog_output_unlock();

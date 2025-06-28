@@ -38,6 +38,11 @@ char Logger::szSamplingTag[32] = {'S', '\0'};
 
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
+int ELogInfoFilterComo(const char *)
+{
+    return 0;
+}
+
 Logger::Logger() {
     /* close printf buffer */
     setbuf(stdout, NULL);
@@ -55,6 +60,7 @@ Logger::Logger() {
 #endif
     /* start EasyLogger */
     elog_start();
+    pLogInfoFilter = ELogInfoFilterComo;
 
     /* dynamic set enable or disable for output logs (true or false) */
 //    elog_set_output_enabled(false);

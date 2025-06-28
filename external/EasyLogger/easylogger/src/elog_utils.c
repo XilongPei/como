@@ -38,7 +38,8 @@
  *
  * @return copied length
  */
-size_t elog_strcpy(size_t cur_len, char *dst, const char *src) {
+size_t elog_strcpy(size_t cur_len, char *dst, const char *src)
+{
     const char *src_old = src;
 
     assert(dst);
@@ -48,7 +49,8 @@ size_t elog_strcpy(size_t cur_len, char *dst, const char *src) {
         /* make sure destination has enough space */
         if (cur_len++ < ELOG_LINE_BUF_SIZE) {
             *dst++ = *src++;
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -64,7 +66,8 @@ size_t elog_strcpy(size_t cur_len, char *dst, const char *src) {
  *
  * @return copy size
  */
-size_t elog_cpyln(char *line, const char *log, size_t len) {
+size_t elog_cpyln(char *line, const char *log, size_t len)
+{
     size_t newline_len = strlen(ELOG_NEWLINE_SIGN), copy_size = 0;
 
     assert(line);
@@ -90,14 +93,16 @@ size_t elog_cpyln(char *line, const char *log, size_t len) {
  *
  * @return the address of destination memory
  */
-void *elog_memcpy(void *dst, const void *src, size_t count) {
+void *elog_memcpy(void *dst, const void *src, size_t count)
+{
     char *tmp = (char *) dst, *s = (char *) src;
 
     assert(dst);
     assert(src);
 
-    while (count--)
+    while (count--) {
         *tmp++ = *s++;
+    }
 
     return dst;
 }
