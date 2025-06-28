@@ -33,14 +33,46 @@ static LoggerWriteLog g_loggerWriteLog = nullptr;
 
 static Logger logger;
 
-int Logger::sLevel = DEBUG;
-char Logger::szSamplingTag[32] = {'S', '\0'};
+int   Logger::sLevel = DEBUG;
+char  Logger::szSamplingTag[32] = {'S', '\0'};
+char  Logger::keyword_buf[MAX_KEYWORD_STR];
+char* Logger::keywords[MAX_KEYWORDS];
+int   Logger::keyword_count;
 
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
-int ELogInfoFilterComo(const char *)
+int Logger::ELogInfoFilterComo(const char *line)
 {
+    for (int i = 0;  i < keyword_count;  i++) {
+        if (strstr(line, keywords[i])) {
+            return i + 1;
+        }
+    }
+
     return 0;
+}
+
+/**
+ * Perform in-place splitting on the original keyword_str, replace ',' with
+ * '\0', and record each pointer.
+ */
+static int parse_keywords(char* keyword_str, char* keywords[], int max_keywords)
+{
+    int count = 0;
+    char* token = keyword_str;
+
+    while (('\0' != *token) && (count < max_keywords)) {
+        keywords[count++] = token;
+        while (*token && (',' != *token)) {
+            token++;
+        }
+
+        if (',' == *token) {
+            *token = '\0';
+            token++;
+        }
+    }
+    return count;
 }
 
 Logger::Logger() {
@@ -235,6 +267,15 @@ void Logger::SetSamplingTag(
     szSamplingTag[sizeof(szSamplingTag) -1] = '\0';
 }
 
+void Logger::SetKeywords(
+    /* [in] */ const char *keyword_str)
+{
+    (void)strncpy(keyword_buf, keyword_str, sizeof(keyword_buf));
+    keyword_buf[sizeof(keyword_buf) -1] = '\0';
+
+    keyword_count = parse_keywords(keyword_buf, keywords, MAX_KEYWORDS);
+}
+
 /*
  * get current time in this format: "2021-07-09 11:02:58.361 +0800"
  */
@@ -275,3 +316,4 @@ void Logger::SetLoggerWriteLog(LoggerWriteLog loggerWriteLog)
 }
 
 } // namespace como
+

@@ -76,6 +76,9 @@ public:
     static void SetSamplingTag(
         /* [in] */ const char *szSamplingTag_);
 
+    static void SetKeywords(
+        /* [in] */ const char *keyword_str);
+
     static void Monitor(
         /* [out] */ char *buffer,
         /* [in] */  int bufSize,
@@ -102,6 +105,14 @@ public:
 private:
     COM_LOCAL static int sLevel;
     COM_LOCAL static char szSamplingTag[32];
+
+    static constexpr int MAX_KEYWORD_STR = 128;
+    static constexpr int MAX_KEYWORDS    = 8;
+    COM_LOCAL static char  keyword_buf[MAX_KEYWORD_STR];
+    COM_LOCAL static char* keywords[MAX_KEYWORDS];
+    COM_LOCAL static int   keyword_count;
+
+    static int ELogInfoFilterComo(const char *line);
 };
 
 } // namespace como
@@ -129,3 +140,4 @@ so, we define Logger_D and call it to avoid this warning when Logger::D is empty
 #endif
 
 #endif // __COMO_LOGGER_H__
+
