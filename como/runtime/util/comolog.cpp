@@ -35,9 +35,9 @@ static Logger logger;
 
 int   Logger::sLevel = DEBUG;
 char  Logger::szSamplingTag[32] = {'S', '\0'};
-char  Logger::keyword_buf[MAX_KEYWORD_STR];
-char* Logger::keywords[MAX_KEYWORDS];
-int   Logger::keyword_count;
+char  Logger::keyword_buf[MAX_KEYWORD_STR] = {'\0'};
+char* Logger::keywords[MAX_KEYWORDS] = {NULL};
+int   Logger::keyword_count = 0;
 
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
