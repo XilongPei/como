@@ -263,6 +263,10 @@ int Logger::GetLevel()
 void Logger::SetSamplingTag(
     /* [in] */ const char *szSamplingTag_)
 {
+    if (nullptr == szSamplingTag_) {
+        return;
+    }
+
     (void)strncpy(szSamplingTag, szSamplingTag_, 32);
     szSamplingTag[sizeof(szSamplingTag) -1] = '\0';
 }
@@ -270,6 +274,10 @@ void Logger::SetSamplingTag(
 void Logger::SetKeywords(
     /* [in] */ const char *keyword_str)
 {
+    if (nullptr == keyword_str) {
+        return;
+    }
+
     (void)strncpy(keyword_buf, keyword_str, sizeof(keyword_buf));
     keyword_buf[sizeof(keyword_buf) -1] = '\0';
 
@@ -281,6 +289,10 @@ void Logger::SetKeywords(
  */
 static void GetLocalTimeWithMs(char *currentTime, size_t maxChars)
 {
+    if (nullptr == currentTime) {
+        return;
+    }
+
     struct timeval curTime;
     gettimeofday(&curTime, NULL);
     int milli = curTime.tv_usec / 1000;
@@ -302,6 +314,10 @@ void Logger::Monitor(
     /* [in] */  int bufSize,
     /* [in] */  const char* tag)
 {
+    if ((nullptr == buffer) || (nullptr == tag) || (bufSize < 1)) {
+        return;
+    }
+
     va_list argList;
     char currentTime[64];
     GetLocalTimeWithMs(currentTime, 64);
