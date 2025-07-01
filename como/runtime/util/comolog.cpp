@@ -43,8 +43,12 @@ static void GetLocalTimeWithMs(char *currentTime, size_t maxChars);
 
 int Logger::ELogInfoFilterComo(const char *line)
 {
+    if (keyword_count <= 0) {
+        return 1;
+    }
+
     for (int i = 0;  i < keyword_count;  i++) {
-        if (strstr(line, keywords[i])) {
+        if (strstr(line, keywords[i]) != nullptr) {
             return i + 1;
         }
     }
@@ -63,7 +67,7 @@ static int parse_keywords(char* keyword_str, char* keywords[], int max_keywords)
 
     while (('\0' != *token) && (count < max_keywords)) {
         keywords[count++] = token;
-        while (*token && (',' != *token)) {
+        while (('\0' != *token) && (',' != *token)) {
             token++;
         }
 
