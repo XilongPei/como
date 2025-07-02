@@ -140,4 +140,3 @@ so, we define Logger_D and call it to avoid this warning when Logger::D is empty
 #endif
 
 #endif // __COMO_LOGGER_H__
-

@@ -124,7 +124,7 @@ void Logger::D(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s DEBUG %s]: %s", szSamplingTag,
@@ -144,7 +144,7 @@ void Logger::E(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s ERROR %s]: %s", szSamplingTag,
@@ -164,7 +164,7 @@ void Logger::V(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s VERBOSE %s]: %s", szSamplingTag,
@@ -184,7 +184,7 @@ void Logger::W(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s WARNING %s]: %s", szSamplingTag,
@@ -224,7 +224,7 @@ void Logger::Log(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
@@ -245,7 +245,7 @@ void Logger::Log(
     }
 
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     char buf[256];
     snprintf(buf, sizeof(buf)-1, "[%s %ld %s LOG %s]: %s", szSamplingTag,
@@ -271,8 +271,8 @@ void Logger::SetSamplingTag(
         return;
     }
 
-    (void)strncpy(szSamplingTag, szSamplingTag_, 32);
-    szSamplingTag[sizeof(szSamplingTag) -1] = '\0';
+    (void)strncpy(szSamplingTag, szSamplingTag_, sizeof(szSamplingTag));
+    szSamplingTag[sizeof(szSamplingTag) - 1] = '\0';
 }
 
 void Logger::SetKeywords(
@@ -283,7 +283,7 @@ void Logger::SetKeywords(
     }
 
     (void)strncpy(keyword_buf, keyword_str, sizeof(keyword_buf));
-    keyword_buf[sizeof(keyword_buf) -1] = '\0';
+    keyword_buf[sizeof(keyword_buf) - 1] = '\0';
 
     keyword_count = parse_keywords(keyword_buf, keywords, MAX_KEYWORDS);
 }
@@ -324,7 +324,7 @@ void Logger::Monitor(
 
     va_list argList;
     char currentTime[64];
-    GetLocalTimeWithMs(currentTime, 64);
+    GetLocalTimeWithMs(currentTime, sizeof(currentTime));
 
     snprintf(buffer, bufSize-1, "[%s %ld %s %s]", szSamplingTag,
                                          syscall(SYS_gettid), currentTime, tag);
@@ -336,4 +336,3 @@ void Logger::SetLoggerWriteLog(LoggerWriteLog loggerWriteLog)
 }
 
 } // namespace como
-
