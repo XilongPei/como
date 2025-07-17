@@ -23,6 +23,10 @@
 #include <unordered_set>
 #include <iostream>
 
+namespace como {
+Short g_iRuntimeID = 0;
+}
+
 using namespace como;
 
 Long lMacAddr = 0;
