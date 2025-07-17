@@ -268,6 +268,7 @@ void Logger::SetSamplingTag(
     /* [in] */ const char *szSamplingTag_)
 {
     if (nullptr == szSamplingTag_) {
+        szSamplingTag[0] = '\0';
         return;
     }
 
@@ -279,6 +280,8 @@ void Logger::SetKeywords(
     /* [in] */ const char *keyword_str)
 {
     if (nullptr == keyword_str) {
+        keyword_buf[0] = '\0';
+        keyword_count = 0;
         return;
     }
 
