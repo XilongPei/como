@@ -26,6 +26,7 @@
 namespace como {
 
 static Long g_lMacAddr = 0;
+extern Short g_iRuntimeID;
 
 /**
  * The first three bytes (upper 24 bits) of MAC are assigned to different
@@ -102,6 +103,10 @@ Long Mac::GetUuid64(Long& uuid64)
     //    4 3 2 1
     uuid64 = g_lMacAddr << 32 | (uuid64 & 0xFFFFFFFFu);
                                           // 4 3 2 1
+    if (0 != g_iRuntimeID) {
+        *(Short *)&uuid64 = g_iRuntimeID;
+    }
+
     return uuid64;
 }
 
@@ -135,3 +140,4 @@ int main()
     }
 }
 #endif
+
