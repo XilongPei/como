@@ -63,9 +63,9 @@ sudo apt-get install libdbus-1-dev
 ### Install Unwind
 ###### openEuler
 ```shell
-wget http://mirror.yongbok.net/nongnu/libunwind/libunwind-1.5.0.tar.gz
-tar zxvf libunwind-1.5.0.tar.gz
-cd libunwind-1.5.0/
+git clone https://gitee.com/tjopenlab/libunwind
+cd libunwind
+autoreconf -i
 CFLAGS=-fPIC ./configure
 make CFLAGS=-fPIC
 make CFLAGS=-fPIC install
