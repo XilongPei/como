@@ -77,12 +77,12 @@ if("$ENV{RedundantComputing_SUPPORT_Enable}" STREQUAL "enable")
     endif()
 
     set(PhxpaxosLib
+        -Wl,--exclude-libs=libPhxPaxosComo.a:libphxpaxos.a:libleveldb.a:libprotobuf.a:libgflags.a
         ${EXTERNAL_DIR}/phxpaxos/export_como/libPhxPaxosComo.a
         ${EXTERNAL_DIR}/phxpaxos/.lib/libphxpaxos.a
         ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/libleveldb.a
         ${EXTERNAL_DIR}/phxpaxos/third_party/protobuf/lib/libprotobuf.a
         ${EXTERNAL_DIR}/phxpaxos/third_party/gflags/lib/libgflags.a
-        -Wl,--exclude-libs=libPhxPaxosComo.a,libphxpaxos.a,libleveldb.a,libprotobuf.a,libgflags.a
     )
 else()
     set(PhxpaxosLib "")
