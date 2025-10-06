@@ -39,6 +39,35 @@ namespace como {
 
 template<typename T> class Array;
 
+/**
+ * @brief Thread-unsafe String class
+ *
+ * This class provides a dynamically sized string similar to std::string,
+ * but it is **NOT thread-safe**. Any concurrent access (read/write)
+ * to the same String instance from multiple threads must be externally
+ * synchronized by the user (e.g., using mutexes) to avoid undefined behavior.
+ *
+ * Key properties:
+ *  - Dynamically allocated, owns its own memory.
+ *  - Supports copy/move construction and assignment.
+ *  - Provides typical string operations (append, insert, erase, substr, etc.).
+ *  - Compatible with std::string_view for read-only views.
+ *
+ * @note Unlike std::string, this class makes **no guarantees** about
+ *       atomicity or internal thread safety.
+ *
+ * Example usage:
+ * @code
+ * String s("Hello");
+ * s.append(" World");
+ * std::cout << s.c_str() << std::endl;
+ *
+ * // Unsafe:
+ * // std::thread t1([&] { s.append("A"); });
+ * // std::thread t2([&] { s.append("B"); });
+ * // t1 and t2 must be synchronized externally
+ * @endcode
+ */
 class COM_PUBLIC String
 {
 public:

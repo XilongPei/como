@@ -167,6 +167,11 @@ String::String(
     : mString(nullptr)
     , mCharCount(0)
 {
+    /**
+     * Because the data in the Array bytes has trailing zeros ('\0'), we use
+     * `< bytes.GetLength()` instead of `<=` here to exclude the space occupied
+     * by the trailing zeros.
+     */
     if ((start >= 0) && (length > 0) && (start + length < bytes.GetLength())) {
         mString = AllocFromUTF8(reinterpret_cast<char*>(bytes.GetPayload()) + start, length);
     }
