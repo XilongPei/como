@@ -120,8 +120,9 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
 
     uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
-    for (;  key[keylen++] != '\0';  hash *= 0x100000001b3u) {
+    for (;  '\0' != key[keylen];  hash *= 0x100000001b3u) {
         hash ^= (unsigned char)key[keylen];
+        keylen++;
     }
 
     node **n = &(map->head);
@@ -188,8 +189,9 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
     uint64_t hash = 0x100u;
     ptrdiff_t keylen = 0;
     const char *key = key_stdstring->c_str();
-    for (;  key[keylen++] != '\0';  hash *= 0x100000001b3u) {
+    for (;  '\0' != key[keylen];  hash *= 0x100000001b3u) {
         hash ^= (unsigned char)key[keylen];
+        keylen++;
     }
 
     node **n = &map->head;
