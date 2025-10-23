@@ -104,18 +104,26 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
         node **tail;
     } *map = (struct tagMap *)heap;
 
-    if ((nullptr == key) && (heaplen != heap)) {     // init
-        *heaplen &= -sizeof(void *);        // align high end
+    if ((nullptr == key) && (heaplen != heap)) {        // init
+        *heaplen &= -sizeof(void *);                    // align high end
         map->head = nullptr;
         map->tail = &map->head;
         return nullptr;
     }
-    else if ((nullptr == key) && (heaplen == heap)) { // first key
-        return map->head ? &map->head->key : nullptr;
+    else if ((nullptr == key) && (heaplen == heap)) {   // first key
+        //return map->head ? &map->head->key : nullptr;
+        if (nullptr != map->head) {
+            return &map->head->key;
+        }
+        return nullptr;
     }
-    else if (heaplen == heap) {             // next key
+    else if (heaplen == heap) {                         // next key
         node *next = ((node *)(key - sizeof(node)))->next;
-        return next ? &next->key : nullptr;
+        //return next ? &next->key : nullptr;
+        if (nullptr != next) {
+            return &next->key;
+        }
+        return nullptr;
     }
 
     uint64_t hash = 0x100u;
@@ -142,7 +150,7 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
     }
 
     *n = (node *)((char *)heap + (*heaplen -= total));
-    memset(*n, 0, sizeof(node));
+    memset(*n, '\0', sizeof(node));
 
     (*n)->key = (char *)*n + sizeof(node);
     memcpy((*n)->key, key, keylen);
@@ -155,10 +163,14 @@ char **StrToX_Hashmap::hashmap(char *key, void *heap, ptrdiff_t *heaplen)
 
 /**
  * hashmap_stdstring
+ * A key-value hash cache where `key_stdstring` is a composite entity. The
+ * lookup operation is performed using its key portion, and if found, its value
+ * portion is returned via parameter pvalue.
  *
  * key_stdstring = std::string(key\0value\0)
  */
-char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap, ptrdiff_t *heaplen, char **pvalue)
+char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
+                                              ptrdiff_t *heaplen, char **pvalue)
 {
     enum { ARY = 2 }; // 1=slowest+small, 2=faster+larger, 3=fastest+large
     typedef struct node node;
@@ -173,17 +185,25 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
     } *map = (struct tagMap *)heap;
 
     if ((nullptr == key_stdstring) && (heaplen != heap)) {       // init
-        *heaplen &= -sizeof(void *);                    // align high end
+        *heaplen &= -sizeof(void *);                             // align high end
         map->head = nullptr;
         map->tail = &map->head;
         return nullptr;
     }
     else if ((nullptr == key_stdstring) && (heaplen == heap)) {  // first key
-        return map->head ? &map->head->key : nullptr;
+        //return map->head ? &map->head->key : nullptr;
+        if (nullptr != map->head) {
+            return &map->head->key;
+        }
+        return nullptr;
     }
     else if (heaplen == heap) {                                  // next key
         node *next = ((node *)((char *)key_stdstring - sizeof(node)))->next;
-        return next ? &next->key : nullptr;
+        //return next ? &next->key : nullptr;
+        if (nullptr != next) {
+            return &next->key;
+        }
+        return nullptr;
     }
 
     uint64_t hash = 0x100u;
@@ -211,11 +231,11 @@ char **StrToX_Hashmap::hashmap_stdstring(std::string *key_stdstring, void *heap,
     keylen = key_stdstring->size();
     ptrdiff_t total = sizeof(node) + keylen + (-keylen & (sizeof(void *) - 1));
     if (*heaplen - (ptrdiff_t)sizeof(*map) < total) {
-        return nullptr;                     // out of memory
+        return nullptr;                                 // out of memory
     }
 
     *n = (node *)((char *)heap + (*heaplen -= total));
-    memset(*n, 0, sizeof(node));
+    memset(*n, '\0', sizeof(node));
 
     (*n)->key = (char *)*n + sizeof(node);
     memcpy((*n)->key, key, keylen);
