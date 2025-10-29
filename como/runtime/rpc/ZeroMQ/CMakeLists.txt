@@ -61,6 +61,7 @@ include_directories(
     ${EXTERNAL_DIR}/lwrb
     ${EXTERNAL_DIR}/phxpaxos/export_como
     ${EXTERNAL_DIR}/phxpaxos/include
+    ${EXTERNAL_DIR}/phxpaxos/include/phxpaxos
     ${EXTERNAL_DIR}/phxpaxos/third_party/leveldb/include
 )
 
