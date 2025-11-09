@@ -65,15 +65,18 @@ public:
 
 public:
     AutoPtr<IMetaType>  mType;
-    Boolean     mBooleanValue;
-    Integer     mIntegerValue;
-    Long        mLongValue;
-    Float       mFloatValue;
-    Double      mDoubleValue;
-    String      mStringValue;
-    Integer     mRadix;
+    String              mStringValue;
+    Integer             mRadix;
+    union {
+        Boolean     mBooleanValue;
+        Integer     mIntegerValue;
+        Long        mLongValue;
+        Float       mFloatValue;
+        Double      mDoubleValue;
+    };
 };
 
 } // namespace como
 
 #endif // __COMO_CMETAVALUE_H__
+
