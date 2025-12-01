@@ -48,7 +48,12 @@ typedef struct {
 static char *rstrip(char *s)
 {
     char* p = s + strlen(s);
-    while ((p > s) && isspace((unsigned char)(*--p))) {
+    while (p > s) {
+        p--;
+        if (0 == isspace((unsigned char)(*p))) {
+            p++;
+            break;
+        }
         *p = '\0';
     }
     return s;
@@ -57,7 +62,7 @@ static char *rstrip(char *s)
 /* Return pointer to first non-whitespace char in given string. */
 static char *lskip(const char *s)
 {
-    while ((*s) && isspace((unsigned char)(*s))) {
+    while (('\0' != *s) && (0 != isspace((unsigned char)(*s)))) {
         s++;
     }
     return (char*)s;
@@ -70,13 +75,14 @@ static char *find_chars_or_comment(const char *s, const char *chars)
 {
 #if INI_ALLOW_INLINE_COMMENTS
     int was_space = 0;
-    while ((*s) && (!chars || !strchr(chars, *s)) &&
-           !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
+    while (('\0' != *s) &&
+           ((NULL == chars) || (NULL == strchr(chars, *s))) &&
+           ((0 == was_space) || (NULL == strchr(INI_INLINE_COMMENT_PREFIXES, *s)))) {
         was_space = isspace((unsigned char)(*s));
         s++;
     }
 #else
-    while ((*s) && ((! chars) || (! strchr(chars, *s)))) {
+    while (('\0' != *s) && ((NULL == chars) || (NULL == strchr(chars, *s)))) {
         s++;
     }
 #endif
@@ -89,8 +95,15 @@ static char *strncpy0(char* dest, const char* src, size_t size)
 {
     /* Could use strncpy internally, but it causes gcc warnings (see issue #91) */
     size_t i;
-    for (i = 0;  (i < (size - 1)) && src[i]; i++) {
-        dest[i] = src[i];
+    const char* src_ptr = src;
+
+    if ((0U == size) || (NULL == dest) || (NULL == src)) {
+        return dest;
+    }
+
+    for (i = 0U;  (i < (size - 1U)) && ('\0' != *src_ptr);  i++) {
+        dest[i] = *src_ptr;
+        src_ptr++;
     }
     dest[i] = '\0';
     return dest;
@@ -124,7 +137,7 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
 
 #if !INI_USE_STACK
     line = (char*)ini_malloc(INI_INITIAL_ALLOC);
-    if (! line) {
+    if (NULL == line) {
         return -2;
     }
 #endif
@@ -139,13 +152,15 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
     while (reader(line, (int)max_line, stream) != NULL) {
 #if INI_ALLOW_REALLOC && !INI_USE_STACK
         offset = strlen(line);
-        while ((offset == (max_line - 1)) && (line[offset - 1] != '\n')) {
-            max_line *= 2;
-            if (max_line > INI_MAX_LINE) {
+        while ((offset == (max_line - 1U)) && (line[offset - 1U] != '\n')) {
+            if (max_line > (INI_MAX_LINE / 2U)) {
                 max_line = INI_MAX_LINE;
             }
+            else {
+                max_line = max_line * 2U;
+            }
             new_line = ini_realloc(line, max_line);
-            if (! new_line) {
+            if (NULL == new_line) {
                 ini_free(line);
                 return -2;
             }
@@ -156,7 +171,7 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
             if (max_line >= INI_MAX_LINE) {
                 break;
             }
-            offset += strlen(line + offset);
+            offset = offset + strlen(line + offset);
         }
 #endif
 
@@ -164,53 +179,62 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
 
         start = line;
 #if INI_ALLOW_BOM
-        if ((lineno == 1) && ((unsigned char)start[0] == 0xEF) &&
-                             ((unsigned char)start[1] == 0xBB) &&
-                             ((unsigned char)start[2] == 0xBF)) {
-            start += 3;
+        /**
+         * Here, checking whether the first 3 bytes of `start` are accessed
+         * out-of-bounds is meaningless because it is a variable pointing to an
+         * array `line[INI_MAX_LINE]` on the stack, and the size of this array
+         * is larger than 3.
+         */
+        //if ((strlen(start) > 3) && (1 == lineno) &&
+        if ((1 == lineno) && ((unsigned char)start[0] == 0xEFU) &&
+                             ((unsigned char)start[1] == 0xBBU) &&
+                             ((unsigned char)start[2] == 0xBFU)) {
+            start = start + 3;
         }
 #endif
         start = lskip(rstrip(start));
 
-        if (strchr(INI_START_COMMENT_PREFIXES, *start)) {
+        if (('\0' == *start) ||
+            (NULL != strchr(INI_START_COMMENT_PREFIXES, *start))) {
             /* Start-of-line comment */
         }
 #if INI_ALLOW_MULTILINE
-        else if (*prev_name && *start && (start > line)) {
+        else if (('\0' != *prev_name) && (start > line)) {
             /* Non-blank line with leading whitespace, treat as continuation
                of previous name's value (as per Python configparser). */
-            if (! HANDLER(user, section, prev_name, start) && !error) {
+            if (! HANDLER(user, section, prev_name, start) && (0 == error)) {
                 error = lineno;
             }
         }
 #endif
-        else if (*start == '[') {
+        else if ('[' == *start) {
             /* A "[section]" line */
             end = find_chars_or_comment(start + 1, "]");
-            if (*end == ']') {
+            if (']' == *end) {
                 *end = '\0';
                 strncpy0(section, start + 1, sizeof(section));
                 *prev_name = '\0';
 #if INI_CALL_HANDLER_ON_NEW_SECTION
-                if (! HANDLER(user, section, NULL, NULL) && !error)
+                if ((!HANDLER(user, section, NULL, NULL)) && (0 == error)) {
                     error = lineno;
+                }
 #endif
             }
-            else if (! error) {
+            else if (0 == error) {
                 /* No ']' found on section line */
                 error = lineno;
             }
         }
-        else if (*start) {
+        else if ('\0' != *start) {
             /* Not a comment, must be a name[=:]value pair */
             end = find_chars_or_comment(start, "=:");
-            if ((*end == '=') || (*end == ':')) {
+            if (('=' == *end) || (':' == *end)) {
                 *end = '\0';
                 name = rstrip(start);
                 value = end + 1;
 #if INI_ALLOW_INLINE_COMMENTS
                 end = find_chars_or_comment(value, NULL);
-                if (*end) {
+                if ('\0' != *end) {
                     *end = '\0';
                 }
 #endif
@@ -219,16 +243,16 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
 
                 /* Valid name[=:]value pair found, call handler */
                 strncpy0(prev_name, name, sizeof(prev_name));
-                if ((! HANDLER(user, section, name, value)) && (! error)) {
+                if ((!HANDLER(user, section, name, value)) && (0 == error)) {
                     error = lineno;
                 }
             }
-            else if (! error) {
+            else if (0 == error) {
                 /* No '=' or ':' found on name[=:]value line */
 #if INI_ALLOW_NO_VALUE
                 *end = '\0';
                 name = rstrip(start);
-                if ((! HANDLER(user, section, name, NULL)) && (! error)) {
+                if ((!HANDLER(user, section, name, NULL)) && (0 == error)) {
                     error = lineno;
                 }
 #else
@@ -238,7 +262,7 @@ int ini_parse_stream(ini_reader reader, void *stream, ini_handler handler,
         }
 
 #if INI_STOP_ON_FIRST_ERROR
-        if (error) {
+        if (0 != error) {
             break;
         }
 #endif
@@ -287,14 +311,29 @@ static char* ini_reader_string(char* str, int num, void* stream)
     }
 
     while ((num > 1) && (ctx_num_left != 0)) {
-        c = *ctx_ptr++;
+        c = *ctx_ptr;
+        ctx_ptr++;
         ctx_num_left--;
-        *strp++ = c;
-        if (c == '\n') {
+        *strp = c;
+        strp++;
+        if ('\n' == c) {
             break;
         }
 #ifndef NOT_MULTI_EXPRESSION_IN_ONE_LINE
+        /**
+         * Some extended INI formats allow multiple items to be written on a
+         * single line, such as: `items = a, b, c;`. During INI string parsing,
+         * the parser treats a comma or semicolon as the end of the current
+         * item and removes that delimiter from the output, thereby supporting
+         * multi-expression lines.
+         */
         if ((',' == c) || (';' == c)) {
+            /**
+             * strp-- may cause the pointer to roll back before the starting
+             * address (if a , or ; is encountered right at the beginning of
+             * reading). However, there is no risk here because it was just
+             * incremented by one previously `strp++;`.
+             */
             strp--;
             break;
         }
