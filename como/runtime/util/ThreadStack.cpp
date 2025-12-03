@@ -35,10 +35,16 @@ __attribute__((noinline)) void ThreadStack::rb_gc_set_stack_end(uintptr_t **stac
 /**
  * fix intermittent SIGBUS on Linux, by reserving the stack virtual address
  * space at process start up, so that it will not clash with the heap space.
+ * 
+ * NOTE: This function intentionally uses alloca and returns its address.
+ * This is technically unsafe but is done deliberately for low-level
+ * stack management. The warning is suppressed because this is the
+ * intended behavior.
  */
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-local-addr"
+#pragma GCC diagnostic ignored "-Wstack-usage="
 #endif
 __attribute__((noinline)) volatile char *ThreadStack::ReserveStack(volatile char *stack_start, size_t size)
 {
