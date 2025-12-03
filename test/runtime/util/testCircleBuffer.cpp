@@ -31,7 +31,7 @@ TEST(CircleBuffer, testWrite)
     circleBuf = new CircleBuffer<char>(MAX_SIZE);
     ASSERT_NE(nullptr, circleBuf);
 
-    const char testBuf[20] = "1234567890abcdeABCD";
+    const char testBuf[320] = "1234567890abcdeABCD";
     int ret;
 
     // count <= 0
