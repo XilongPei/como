@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <assert.h>
+#include <time.h>
 #include "ComoConfig.h"
 #include "comoarray.h"
 #include "hashmap.h"
