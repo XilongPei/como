@@ -189,6 +189,52 @@ else()
 endif()
 
 if($ENV{PLATFORM} STREQUAL "linux")
+
+    #
+    # CMake can find ICU header files, but cannot find ICU libraries on openEuler.
+    # -------------------------
+    find_path(ICU_INCLUDE_DIR unicode/uversion.h
+        PATHS /usr/include
+    )
+
+    find_library(ICU_UC_LIB icuuc
+        PATHS /usr/lib64 /usr/lib /usr/lib64/icu
+    )
+
+    find_library(ICU_I18N_LIB icui18n
+        PATHS /usr/lib64 /usr/lib /usr/lib64/icu
+    )
+
+    find_library(ICU_DATA_LIB icudata
+        PATHS /usr/lib64 /usr/lib /usr/lib64/icu
+    )
+
+    add_library(ICU::uc UNKNOWN IMPORTED)
+    add_library(ICU::i18n UNKNOWN IMPORTED)
+    add_library(ICU::data UNKNOWN IMPORTED)
+
+    set_target_properties(ICU::uc PROPERTIES
+      IMPORTED_LOCATION "${ICU_UC_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${ICU_INCLUDE_DIR}"
+    )
+
+    set_target_properties(ICU::i18n PROPERTIES
+      IMPORTED_LOCATION "${ICU_I18N_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${ICU_INCLUDE_DIR}"
+    )
+
+    set_target_properties(ICU::data PROPERTIES
+      IMPORTED_LOCATION "${ICU_DATA_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${ICU_INCLUDE_DIR}"
+    )
+
+    target_link_libraries(libcore
+        ICU::uc
+        ICU::i18n
+        ICU::data
+    )
+    # -------------------------
+
     target_link_libraries(libcore
         ${LIBCORE_LINK_LIBS}
         comort.so
