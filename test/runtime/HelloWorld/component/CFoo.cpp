@@ -32,7 +32,7 @@ CFoo::~CFoo()
     printf("==== Call ~CFoo() ====\n");
 }
 
-ECode CFoo::printf(
+ECode CFoo::printf_str(
     /* [in] */ String data)
 {
     printf("==== Call CFoo::printf, data is %d ====\n", data);

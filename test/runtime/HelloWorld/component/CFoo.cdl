@@ -25,7 +25,7 @@ namespace demo {
 
 interface IFoo
 {
-    printf([in] String data);
+    printf_str([in] String data);
 }
 
 coclass CFoo
