@@ -14,27 +14,28 @@
 // limitations under the License.
 //=========================================================================
 
-#include "como.demo.CFoo.h"
-#include "como.demo.IFoo.h"
 #include <comoapi.h>
 #include <comosp.h>
 #include <comoobj.h>
 #include <cstdio>
 #include <cstdlib>
 #include <gtest/gtest.h>
+#include "como.demo.CFoo.h"
+#include "como.demo.IFoo.h"
 
 using namespace como;
 
 using como::demo::CFoo;
 using como::demo::IFoo;
+using como::demo::IID_IFoo;
 
 TEST(TestIDfromName, testPrintf)
 {
-    InterfaceID iid = InterfaceIDWithMemArea(IID_IBar, 1);
+    InterfaceID iid = InterfaceIDWithMemArea(IID_IFoo, 1);
     AutoPtr<IFoo> foo;
     ECode ec = CFoo::New(iid, (IInterface**)&foo);
     EXPECT_EQ(ec, NOERROR);
-    foo->printf(String("Hello World\n"));
+    foo->printf_str(String("Hello World\n"));
 }
 
 int main(int argc, char **argv)

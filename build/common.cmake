@@ -45,46 +45,40 @@ elseif("$ENV{PLATFORM}" STREQUAL "android")
 endif()
 endmacro()
 
-macro(IMPORT_COMO_COMPONENT comoComponent dir)
-    # ---------- Parameter validation ----------
-    if("__${comoComponent}" STREQUAL "__")
-        message(FATAL_ERROR "IMPORT_COMO_COMPONENT: comoComponent is empty")
+macro(IMPORT_COMO_COMPONENT comoComponent dir out_var)
+    if(NOT comoComponent)
+        message(FATAL_ERROR "comoComponent is empty")
     endif()
 
-    if("__${dir}" STREQUAL "__")
-        message(FATAL_ERROR "IMPORT_COMO_COMPONENT: dir is empty")
+    if(NOT dir)
+        message(FATAL_ERROR "dir is empty")
     endif()
 
     file(MAKE_DIRECTORY ${dir})
 
-    # ---------- Predict generated sources ----------
-    # NOTE: CDLC must generate deterministic file names
-    file(GLOB _como_gen_sources
-        CONFIGURE_DEPENDS
-        ${dir}/*.cpp
+    # You must define a fixed output filename rule.
+    set(_gen_cpp
+        ${dir}/ComoClient_${comoComponent}.cpp
     )
 
-    if(NOT _como_gen_sources)
-        # Fallback placeholder to force command execution on first build
-        set(_como_gen_sources ${dir}/.como_client_stamp)
-    endif()
-
-    # ---------- Code generation command ----------
     add_custom_command(
-        OUTPUT
-            ${_como_gen_sources}
-        COMMAND
-            "$ENV{CDLC}"
-            -gen
-            -mode-client
-            -d ${dir}
-            -metadata-so ${comoComponent}
+        OUTPUT ${_gen_cpp}
+        COMMAND "$ENV{CDLC}"
+                -gen
+                -mode-client
+                -d ${dir}
+                -metadata-so ${comoComponent}
         COMMENT "Generating COMO client sources"
+        VERBATIM
     )
 
-    # ---------- Export generated sources ----------
-    set(GENERATED_SOURCES ${_como_gen_sources} PARENT_SCOPE)
+    add_custom_target(${comoComponent}_como_client
+        DEPENDS ${_gen_cpp}
+    )
+
+    set(${out_var} ${_gen_cpp} PARENT_SCOPE)
 endmacro()
+
 
 macro(COMPILE_COMO_COMPONENT depend_target comoComponent dir)
     # ---------- Parameter validation ----------

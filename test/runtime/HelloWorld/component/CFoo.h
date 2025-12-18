@@ -36,7 +36,7 @@ public:
     COMO_INTERFACE_DECL();
 
     ECode printf_str(
-        /* [in] */ String data) override;
+        /* [in] */ const String& data) override;
 };
 
 }

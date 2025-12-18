@@ -41,6 +41,8 @@ IMPORT_LIBRARY(comort.so)
 target_link_libraries(HelloWorld_demo comort.so)
 add_dependencies(HelloWorld_demo comort)
 
+COPY(HelloWorld_demo ${COMPONENT_OBJ_DIR}/HelloWorld_demo.so ${BIN_DIR})
+
 install(FILES
     ${COMPONENT_OBJ_DIR}/HelloWorld_demo.so
     DESTINATION ${BIN_DIR}
