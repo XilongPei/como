@@ -19,8 +19,8 @@
 
 #include <comoapi.h>
 #include <comoobj.h>
-#include "como.demo.IFoo.h"
-#include "_como_demo_CFoo.h"
+#include <comodef.h>
+#include "Foo.h"
 
 namespace como {
 namespace demo {
@@ -37,7 +37,7 @@ public:
     COMO_INTERFACE_DECL();
 
     ECode Foo(
-        /* [in] */ Integer data) override;
+        /* [in] */ String data) override;
 };
 
 }

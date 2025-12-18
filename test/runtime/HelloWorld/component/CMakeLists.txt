@@ -28,15 +28,15 @@ set(SOURCES
     CFoo.cpp
 )
 
-COMPILE_COMO_COMPONENT("${COMPONENT_SRC_DIR}/CFoo.cdl" ${COMPONENT_OBJ_DIR})
-
-IMPORT_LIBRARY(comort.so)
-
 add_library(HelloWorld_demo
     SHARED
     ${SOURCES}
     ${GENERATED_SOURCES}
 )
+
+COMPILE_COMO_COMPONENT(HelloWorld_demo "${COMPONENT_SRC_DIR}/CFoo.cdl" ${COMPONENT_OBJ_DIR})
+
+IMPORT_LIBRARY(comort.so)
 
 target_link_libraries(HelloWorld_demo comort.so)
 add_dependencies(HelloWorld_demo comort)

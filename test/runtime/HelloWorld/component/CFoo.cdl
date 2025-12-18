@@ -14,14 +14,14 @@
 // limitations under the License.
 //=========================================================================
 
-namespace como {
-namespace demo {
-
 [
     uri("http://como.org/component/sample/HelloWorld_demo.so")
 ]
 module Foo
 {
+
+namespace como {
+namespace demo {
 
 interface IFoo
 {
@@ -34,6 +34,6 @@ coclass CFoo
 }
 
 }
-
 }
+
 }

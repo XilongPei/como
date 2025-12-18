@@ -46,12 +46,7 @@ endif()
 endmacro()
 
 macro(IMPORT_COMO_COMPONENT comoComponent dir)
-    if(ARGN)
-        set(genSources ${ARGN})
-    else()
-        set(genSources "GENERATED_SOURCES")
-    endif()
-
+    # ---------- Parameter validation ----------
     if("__${comoComponent}" STREQUAL "__")
         message(FATAL_ERROR "IMPORT_COMO_COMPONENT: comoComponent is empty")
     endif()
@@ -60,30 +55,47 @@ macro(IMPORT_COMO_COMPONENT comoComponent dir)
         message(FATAL_ERROR "IMPORT_COMO_COMPONENT: dir is empty")
     endif()
 
-    get_filename_component(src_dir "${comoComponent}" DIRECTORY)
-    if("__${src_dir}" STREQUAL "__")
-        set(src_dir "./")
-    endif()
-    #message(STATUS "$ENV{CDLC} -gen -mode-client -d ${dir} -metadata-so ${comoComponent}")
+    file(MAKE_DIRECTORY ${dir})
 
+    # ---------- Predict generated sources ----------
+    # NOTE: CDLC must generate deterministic file names
+    file(GLOB _como_gen_sources
+        CONFIGURE_DEPENDS
+        ${dir}/*.cpp
+    )
+
+    if(NOT _como_gen_sources)
+        # Fallback placeholder to force command execution on first build
+        set(_como_gen_sources ${dir}/.como_client_stamp)
+    endif()
+
+    # ---------- Code generation command ----------
     add_custom_command(
         OUTPUT
-            ${genSources}
+            ${_como_gen_sources}
         COMMAND
             "$ENV{CDLC}"
             -gen
             -mode-client
             -d ${dir}
-            -metadata-so ${comoComponent})
+            -metadata-so ${comoComponent}
+        COMMENT "Generating COMO client sources"
+    )
 
-    file(GLOB ${genSources} ${dir}/*.cpp)
+    # ---------- Export generated sources ----------
+    set(GENERATED_SOURCES ${_como_gen_sources} PARENT_SCOPE)
 endmacro()
 
-macro(COMPILE_COMO_COMPONENT comoComponent dir)
-    if(ARGN)
-        set(genSources ${ARGN})
-    else()
-        set(genSources "GENERATED_SOURCES")
+macro(COMPILE_COMO_COMPONENT depend_target comoComponent dir)
+    # ---------- Parameter validation ----------
+    if("__${depend_target}" STREQUAL "__")
+        message(FATAL_ERROR "COMPILE_COMO_COMPONENT: depend_target is empty")
+    endif()
+
+    if(NOT TARGET ${depend_target})
+        message(FATAL_ERROR
+            "COMPILE_COMO_COMPONENT: target '${depend_target}' does not exist"
+        )
     endif()
 
     if("__${comoComponent}" STREQUAL "__")
@@ -94,25 +106,48 @@ macro(COMPILE_COMO_COMPONENT comoComponent dir)
         message(FATAL_ERROR "COMPILE_COMO_COMPONENT: dir is empty")
     endif()
 
+    # ---------- Source directory of the .cdl file ----------
     get_filename_component(src_dir "${comoComponent}" DIRECTORY)
     if("__${src_dir}" STREQUAL "__")
         set(src_dir "./")
     endif()
-    #message(STATUS "$ENV{CDLC} -gen -mode-component -d ${dir} -i ${src_dir} -c ${comoComponent}")
 
-    add_custom_command(
-        OUTPUT
-            ${genSources}
+    # ---------- Ensure output directory exists ----------
+    file(MAKE_DIRECTORY ${dir})
+
+    # ---------- Code generation target ----------
+    set(gen_target como_gen_${depend_target})
+
+    add_custom_target(${gen_target}
         COMMAND
             "$ENV{CDLC}"
             -gen
             -mode-component
             -d ${dir}
             -i ${src_dir}
-            -c ${comoComponent})
+            -c ${comoComponent}
+        BYPRODUCTS
+            ${dir}/*.cpp
+            ${dir}/*.h
+        COMMENT "Generating COMO component for ${depend_target}"
+    )
 
-    file(GLOB ${genSources} ${dir}/*.cpp)
+    # ---------- Collect generated source files ----------
+    file(GLOB component_srcs
+        CONFIGURE_DEPENDS
+        ${dir}/*.cpp
+    )
+
+    # ---------- Attach generated sources to the dependent target ----------
+    target_sources(${depend_target}
+        PRIVATE
+            ${component_srcs}
+    )
+
+    # ---------- Ensure code generation runs before the dependent target ----------
+    add_dependencies(${depend_target} ${gen_target})
 endmacro()
+
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected (options are: Debug Release), default to Release.")
