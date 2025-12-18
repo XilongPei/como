@@ -111,7 +111,7 @@ public:
     inline AutoPtr<Module> GetCompiledModule();
 
 private:
-    void Prepare();
+    bool Prepare();
 
     bool RunPhases();
 

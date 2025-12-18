@@ -104,7 +104,9 @@ bool Parser::Parse(
     Properties::Get().AddSearchPath(cwd);
     free(cwd);
 
-    Prepare();
+    if (! Prepare()) {
+        return false;
+    }
 
     bool ret = ParseFile(filePath);
     if (ret) {
@@ -118,11 +120,13 @@ bool Parser::Parse(
     return ret;
 }
 
-void Parser::Prepare()
+bool Parser::Prepare()
 {
+    bool ret = true;
     for (AutoPtr<Phase> phase : mBeforePhases) {
-        phase->Process();
+        ret = phase->Process() && ret;
     }
+    return ret;
 }
 
 bool Parser::RunPhases()
