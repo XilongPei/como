@@ -660,6 +660,12 @@ bool Parser::ParseNamespace()
     // read '{'
     mTokenizer.GetToken();
 
+    if (nullptr == mCurrentNamespace) {
+        LogError(tokenInfo, "Namespace::GLOBAL_NAME hasn't been set, the"
+                            " keyword 'interface' needs to appear within the module.");
+        return false;
+    }
+
     AutoPtr<Namespace> ns = mCurrentNamespace->FindNamespace(namespaceName);
     if (nullptr == ns) {
         ns = new Namespace(namespaceName, mModule);
