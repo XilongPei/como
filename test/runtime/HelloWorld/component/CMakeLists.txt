@@ -48,7 +48,6 @@ add_custom_command(
         "$ENV{CDLC}"
         -gen
         -mode-component
-        -split
         -d ${COMPONENT_OBJ_DIR}
         -i "${COMPONENT_SRC_DIR}"
         -c "${COMPONENT_SRC_DIR}/CFoo.cdl")

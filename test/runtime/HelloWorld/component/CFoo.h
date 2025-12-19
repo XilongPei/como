@@ -19,8 +19,7 @@
 
 #include <comoapi.h>
 #include <comoobj.h>
-#include "como.demo.IFoo.h"
-#include "_como_demo_CFoo.h"
+#include "_cdlc_generated_all.h"
 
 namespace como {
 namespace demo {
