@@ -278,6 +278,7 @@ private:
     int     mMode;
     String  mLicense;
     File   *mFile = nullptr;
+    File   *mFile_h = nullptr;
 };
 
 void CodeGenerator::SetMetadata(
@@ -293,6 +294,9 @@ void CodeGenerator::SetDirectory(
 
     String path = String::Format("%s/_cdlc_generated_all.cpp", mDirectory.string());
     mFile = new File(path, File::WRITE);
+
+    path = String::Format("%s/_cdlc_generated_all.h", mDirectory.string());
+    mFile_h = new File(path, File::WRITE);
 }
 
 void CodeGenerator::SetMode(

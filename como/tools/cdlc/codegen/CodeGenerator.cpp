@@ -102,8 +102,14 @@ void CodeGenerator::Generate()
     emitter->Emit();
 
     if (nullptr != mFile) {
+        mFile->Flush();
         mFile->Close();
         mFile = nullptr;
+    }
+
+    if (nullptr != mFile_h) {
+        mFile_h->Close();
+        mFile_h = nullptr;
     }
 }
 
@@ -124,6 +130,11 @@ void CodeGenerator::ComponentModeEmitter::EmitConstantsAndTypes()
 {
     String path = String::Format("%s/%s.h", mOwner->mDirectory.string(), mComponent->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
 
     como::MetaComponent* mc = mComponent;
 
@@ -181,6 +192,11 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassHeader(
             ConcatString("_", CanonicalizeNamespace(mk->mNamespace)).Replace("::","_").string(),
             mk->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
@@ -853,6 +869,16 @@ void CodeGenerator::ClientModeEmitter::EmitConstantsAndTypes()
     String path = String::Format("%s/%s.h", mOwner->mDirectory.string(), mComponent->mName);
     File file(path, File::WRITE);
 
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
+
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
+
     como::MetaComponent* mc = mComponent;
 
     StringBuilder builder;
@@ -1102,6 +1128,11 @@ void CodeGenerator::ClientModeEmitter::EmitCoclassDeclarationSplitly(
             ConcatString(CanonicalizeNamespace(mk->mNamespace), ".").Replace("::", ".").string(),
             mk->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
@@ -1452,6 +1483,11 @@ void CodeGenerator::Emitter::EmitInterfaceDeclarationSplitly(
             ConcatString(CanonicalizeNamespace(mi->mNamespace), ".").Replace("::", ".").string(),
             mi->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile_h) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile_h->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
