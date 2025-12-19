@@ -20,6 +20,7 @@
 #include "metadata/Metadata.h"
 #include "util/LightRefBase.h"
 #include "util/String.h"
+#include "util/File.h"
 
 namespace cdlc {
 
@@ -273,9 +274,10 @@ private:
     static const char* TAG;
 
     como::MetaComponent* mComponent = nullptr;
-    String mDirectory;
-    int mMode;
-    String mLicense;
+    String  mDirectory;
+    int     mMode;
+    String  mLicense;
+    File   *mFile = nullptr;
 };
 
 void CodeGenerator::SetMetadata(
@@ -288,6 +290,9 @@ void CodeGenerator::SetDirectory(
     /* [in] */ const String& directory)
 {
     mDirectory = directory;
+
+    String path = String::Format("%s/_cdlc_generated_all.cpp", mDirectory.string());
+    mFile = new File(path, File::WRITE);
 }
 
 void CodeGenerator::SetMode(

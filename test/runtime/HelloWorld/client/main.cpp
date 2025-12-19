@@ -20,7 +20,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <gtest/gtest.h>
-#include "Foo.h"
+#include "como.demo.IFoo.h"
+#include "como.demo.CFoo.h"
 
 using namespace como;
 

@@ -28,17 +28,30 @@ set(SOURCES
     CFoo.cpp
 )
 
-add_library(HelloWorld_demo
-    SHARED
-    ${SOURCES}
+set(GENERATED_SOURCES
+    ${COMPONENT_OBJ_DIR}/_cdlc_generated_all.cpp
 )
-
-COMPILE_COMO_COMPONENT(HelloWorld_demo "${COMPONENT_SRC_DIR}/CFoo.cdl" ${COMPONENT_OBJ_DIR})
 
 IMPORT_LIBRARY(comort.so)
 
+add_library(HelloWorld_demo
+    SHARED
+    ${SOURCES}
+    ${GENERATED_SOURCES})
 target_link_libraries(HelloWorld_demo comort.so)
 add_dependencies(HelloWorld_demo comort)
+
+add_custom_command(
+    OUTPUT
+        ${GENERATED_SOURCES}
+    COMMAND
+        "$ENV{CDLC}"
+        -gen
+        -mode-component
+        -split
+        -d ${COMPONENT_OBJ_DIR}
+        -i "${COMPONENT_SRC_DIR}"
+        -c "${COMPONENT_SRC_DIR}/CFoo.cdl")
 
 COPY(HelloWorld_demo ${COMPONENT_OBJ_DIR}/HelloWorld_demo.so ${BIN_DIR})
 

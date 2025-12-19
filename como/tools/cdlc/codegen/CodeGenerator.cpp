@@ -100,6 +100,11 @@ void CodeGenerator::Generate()
     }
 
     emitter->Emit();
+
+    if (nullptr != mFile) {
+        mFile->Close();
+        mFile = nullptr;
+    }
 }
 
 //=============================================================================
@@ -296,6 +301,11 @@ void CodeGenerator::ComponentModeEmitter::EmitCoclassCpp(
             ConcatString("_", CanonicalizeNamespace(mk->mNamespace)).Replace("::", "_").string(),
             mk->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
@@ -622,6 +632,11 @@ void CodeGenerator::ComponentModeEmitter::EmitComponentCpp()
 {
     String path = String::Format("%s/%sPub.cpp", mOwner->mDirectory.string(), mComponent->mName);
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
@@ -1167,6 +1182,11 @@ void CodeGenerator::ClientModeEmitter::EmitComponentCpp()
     String path = String::Format("%s/%s.cpp", mOwner->mDirectory.string(), mComponent->mName);
     File file(path, File::WRITE);
 
+    if (nullptr != mOwner->mFile) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile->Write(str.string(), str.GetLength());
+    }
+
     como::MetaComponent* mc = mComponent;
 
     StringBuilder builder;
@@ -1389,6 +1409,11 @@ void CodeGenerator::RuntimeModeEmitter::EmitUUIDs()
 {
     String path = String::Format("%s/comouuids.cpp", mOwner->mDirectory.string());
     File file(path, File::WRITE);
+
+    if (nullptr != mOwner->mFile) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile->Write(str.string(), str.GetLength());
+    }
 
     StringBuilder builder;
 
@@ -2441,6 +2466,11 @@ void CodeGenerator::Emitter::EmitMetadataWrapper()
     String path = String::Format("%s/MetadataWrapper.cpp", mOwner->mDirectory.string());
     File file(path, File::WRITE);
 
+    if (nullptr != mOwner->mFile) {
+        String str = String::Format("#include <%s>\n", path.string());
+        mOwner->mFile->Write(str.string(), str.GetLength());
+    }
+
     StringBuilder builder;
 
     builder.Append(mOwner->mLicense);
@@ -2453,12 +2483,13 @@ void CodeGenerator::Emitter::EmitMetadataWrapper()
 
     builder.Append("#include <comodef.h>\n");
     builder.Append("#include <cstdint>\n\n");
-    builder.AppendFormat("struct MetadataWrapper\n"
+    builder.AppendFormat("struct __MetadataWrapper__\n"
                    "{\n"
                    "    size_t          mSize;\n"
                    "    unsigned char   mMetadata[%d];\n"
                    "};\n\n", metadataSize);
-    builder.Append("static const MetadataWrapper comMetadata __attribute__ ((used,__section__ (\".metadata\"))) = {\n");
+    builder.Append("static const __MetadataWrapper__ comMetadata __attribute__ "
+                   "((used,__section__ (\".metadata\"))) = {\n");
     builder.Append(Properties::INDENT).AppendFormat("%lu, {\n", metadataSize);
     int lineSize = 0;
     for (size_t i = 0;  i < metadataSize;  i++, lineSize++) {

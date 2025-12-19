@@ -161,7 +161,6 @@ macro(COMPILE_COMO_COMPONENT depend_target comoComponent dir)
     add_dependencies(${depend_target} ${gen_target})
 endmacro()
 
-
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected (options are: Debug Release), default to Release.")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type (default Release)" FORCE)
