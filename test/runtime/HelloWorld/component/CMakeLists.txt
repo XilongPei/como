@@ -31,7 +31,6 @@ set(SOURCES
 add_library(HelloWorld_demo
     SHARED
     ${SOURCES}
-    ${GENERATED_SOURCES}
 )
 
 COMPILE_COMO_COMPONENT(HelloWorld_demo "${COMPONENT_SRC_DIR}/CFoo.cdl" ${COMPONENT_OBJ_DIR})

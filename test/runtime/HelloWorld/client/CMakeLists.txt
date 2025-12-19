@@ -34,28 +34,15 @@ set(SOURCES
 set(GENERATED_SOURCES
     ${CLIENT_OBJ_DIR}/Foo.cpp)
 
-#IMPORT_COMO_COMPONENT("${BIN_DIR}/HelloWorld_demo.so" ${HelloWorld_OBJ_DIR} HELLO_COMO_SRCS)
-
 IMPORT_LIBRARY(comort.so)
 
 add_executable(testHelloWorld
     ${SOURCES}
-    ${GENERATED_SOURCES}
-#    ${HELLO_COMO_SRCS}
 )
 target_link_libraries(testHelloWorld comort.so ${GTEST_LIBS})
 add_dependencies(testHelloWorld HelloWorld_demo gtest gtest_main)
 
-add_custom_command(
-    OUTPUT
-        ${GENERATED_SOURCES}
-    COMMAND
-        "$ENV{CDLC}"
-        -gen
-        -mode-client
-        -split
-        -d ${CLIENT_OBJ_DIR}
-        -metadata-so "${BIN_DIR}/HelloWorld_demo.so")
+IMPORT_COMO_COMPONENT(testHelloWorld "${BIN_DIR}/HelloWorld_demo.so" ${CLIENT_OBJ_DIR})
 
 COPY(testHelloWorld ${CLIENT_OBJ_DIR}/testHelloWorld ${BIN_DIR})
 

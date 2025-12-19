@@ -45,40 +45,59 @@ elseif("$ENV{PLATFORM}" STREQUAL "android")
 endif()
 endmacro()
 
-macro(IMPORT_COMO_COMPONENT comoComponent dir out_var)
-    if(NOT comoComponent)
-        message(FATAL_ERROR "comoComponent is empty")
+macro(IMPORT_COMO_COMPONENT depend_target comoComponent dir)
+    # ---------- Parameter validation ----------
+    if("__${depend_target}" STREQUAL "__")
+        message(FATAL_ERROR "IMPORT_COMO_COMPONENT: depend_target is empty")
     endif()
 
-    if(NOT dir)
-        message(FATAL_ERROR "dir is empty")
+    if(NOT TARGET ${depend_target})
+        message(FATAL_ERROR
+            "IMPORT_COMO_COMPONENT: target '${depend_target}' does not exist"
+        )
+    endif()
+
+    if("__${comoComponent}" STREQUAL "__")
+        message(FATAL_ERROR "IMPORT_COMO_COMPONENT: comoComponent is empty")
+    endif()
+
+    if("__${dir}" STREQUAL "__")
+        message(FATAL_ERROR "IMPORT_COMO_COMPONENT: dir is empty")
     endif()
 
     file(MAKE_DIRECTORY ${dir})
 
-    # You must define a fixed output filename rule.
-    set(_gen_cpp
-        ${dir}/ComoClient_${comoComponent}.cpp
+    # ---------- Code generation target (NO OUTPUT) ----------
+    set(gen_target import_como_client_${depend_target})
+
+    add_custom_target(${gen_target}
+        COMMAND
+            "$ENV{CDLC}"
+            -gen
+            -mode-client
+            -d ${dir}
+            -metadata-so ${comoComponent}
+        BYPRODUCTS
+            ${dir}/*.cpp
+            ${dir}/*.h
+        COMMENT "Generating COMO client for ${depend_target}"
     )
 
-    add_custom_command(
-        OUTPUT ${_gen_cpp}
-        COMMAND "$ENV{CDLC}"
-                -gen
-                -mode-client
-                -d ${dir}
-                -metadata-so ${comoComponent}
-        COMMENT "Generating COMO client sources"
-        VERBATIM
+    # ---------- Collect generated sources ----------
+    file(GLOB como_client_srcs
+        CONFIGURE_DEPENDS
+        ${dir}/*.cpp
     )
 
-    add_custom_target(${comoComponent}_como_client
-        DEPENDS ${_gen_cpp}
+    # ---------- Attach generated sources ----------
+    target_sources(${depend_target}
+        PRIVATE
+            ${como_client_srcs}
     )
 
-    set(${out_var} ${_gen_cpp} PARENT_SCOPE)
+    # ---------- Ensure build order ----------
+    add_dependencies(${depend_target} ${gen_target})
 endmacro()
-
 
 macro(COMPILE_COMO_COMPONENT depend_target comoComponent dir)
     # ---------- Parameter validation ----------

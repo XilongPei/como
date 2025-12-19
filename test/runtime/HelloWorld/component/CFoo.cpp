@@ -35,7 +35,7 @@ CFoo::~CFoo()
 ECode CFoo::printf_str(
     /* [in] */ const String& data)
 {
-    printf("==== Call CFoo::printf, data is %s ====\n", data);
+    printf("==== Call CFoo::printf_str, data is\n%s\n", data.string());
     return NOERROR;
 }
 
