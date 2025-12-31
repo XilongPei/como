@@ -160,7 +160,7 @@ template<typename T>
 Boolean Array<T>::Alloc(
     /* [in] */ Long size)
 {
-    if ((size < 0) || (size > INT64_MAX)) {
+    if ((size < 0) || (size >= INT64_MAX)) {
         Logger::E("Array", "Invalid array size %lld", size);
         mData = nullptr;
         mSize = 0;
