@@ -1926,7 +1926,8 @@ String CodeGenerator::Emitter::EmitInterfaceDeclaration(
         builder.Append(prefix + Properties::INDENT).AppendFormat("static const InterfaceID IID_%s;\n\n", nmi->mName);
         builder.Append(EmitInterfaceDeclaration(nmi, prefix + Properties::INDENT));
     }
-    builder.Append(prefix + Properties::INDENT).Append("using IInterface::Probe;\n\n");
+    builder.Append(prefix + Properties::INDENT).Append("using IInterface::Probe;\n");
+    builder.Append(prefix + Properties::INDENT).Append("using IInterface::GetInterfaceID;\n\n");
     builder.Append(prefix + Properties::INDENT).AppendFormat("inline static %s* Probe(\n", mi->mName);
     builder.Append(prefix + Properties::INDENT + Properties::INDENT).Append("/* [in] */ IInterface* object)\n");
     builder.Append(prefix + Properties::INDENT).Append("{\n");
