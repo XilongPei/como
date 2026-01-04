@@ -131,7 +131,13 @@ ECode CBootClassLoader::LoadComponent(
             mComponentPaths.Put(path, component);
         }
         else {
-            mc->LoadComponent(component);
+            ec = mc->LoadComponent(component);
+            if (FAILED(ec)) {
+                dlclose(handle);
+                component = nullptr;
+                return ec;
+            }
+
             mComponentPaths.Put(path, mc);
             component = mc;
         }
@@ -203,7 +209,13 @@ ECode CBootClassLoader::LoadComponent(
             mComponentPaths.Put(compPath, component);
         }
         else {
-            mc->LoadComponent(component);
+            ec = mc->LoadComponent(component);
+            if (FAILED(ec)) {
+                dlclose(handle);
+                component = nullptr;
+                return ec;
+            }
+
             mComponentPaths.Put(compPath, mc);
             component = mc;
         }
