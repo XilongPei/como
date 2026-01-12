@@ -125,8 +125,8 @@ interface IMetaComponent
 
     Unload();
 
-    GetStrFramacBlock(
-        [out] String& strFramacBlock);
+    GetStrContractBlock(
+        [out] String& strContractBlock);
 
     SetOpaque(
         [in] HANDLE value);
@@ -153,8 +153,8 @@ interface IMetaCoclass
     GetFuncSafetySetting(
         [out] String& funcSafetySetting);
 
-    GetStrFramacBlock(
-        [out] String& strFramacBlock);
+    GetStrContractBlock(
+        [out] String& strContractBlock);
 
     GetCoclassID(
         [out] CoclassID& cid);
@@ -295,8 +295,8 @@ interface IMetaInterface
     GetNamespace(
         [out] String& ns);
 
-    GetStrFramacBlock(
-        [out] String& strFramacBlock);
+    GetStrContractBlock(
+        [out] String& strContractBlock);
 
     GetInterfaceID(
         [out] InterfaceID& iid);
@@ -380,8 +380,8 @@ interface IMetaMethod
     GetSignature(
         [out] String& signature);
 
-    GetStrFramacBlock(
-        [out] String& strFramacBlock);
+    GetStrContractBlock(
+        [out] String& strContractBlock);
 
     GetParameterNumber(
         [out] Integer& number);

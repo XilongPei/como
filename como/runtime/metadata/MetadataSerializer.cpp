@@ -32,7 +32,7 @@ void MetadataSerializer::Serialize()
 
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mUri = reinterpret_cast<char*>(SerializeAdjust(mc->mUri));
-    mc->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrFramacBlock));
+    mc->mStrContractBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrContractBlock));
 
     SerializeMetaNamespace(mc->mGlobalNamespace);
     mc->mGlobalNamespace = reinterpret_cast<MetaNamespace*>(SerializeAdjust(mc->mGlobalNamespace));
@@ -110,7 +110,7 @@ void MetadataSerializer::SerializeMetaCoclass(
     mc->mName = reinterpret_cast<char*>(SerializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(SerializeAdjust(mc->mFuncSafetySetting));
-    mc->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrFramacBlock));
+    mc->mStrContractBlock = reinterpret_cast<char*>(SerializeAdjust(mc->mStrContractBlock));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(SerializeAdjust(mc->mConstants));
@@ -150,7 +150,7 @@ void MetadataSerializer::SerializeMetaInterface(
 {
     mi->mName = reinterpret_cast<char*>(SerializeAdjust(mi->mName));
     mi->mNamespace = reinterpret_cast<char*>(SerializeAdjust(mi->mNamespace));
-    mi->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mi->mStrFramacBlock));
+    mi->mStrContractBlock = reinterpret_cast<char*>(SerializeAdjust(mi->mStrContractBlock));
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(SerializeAdjust(mi->mNestedInterfaceIndexes));
 
     for (int i = 0;  i < mi->mConstantNumber;  i++) {
@@ -178,7 +178,7 @@ void MetadataSerializer::SerializeMetaMethod(
 {
     mm->mName = reinterpret_cast<char*>(SerializeAdjust(mm->mName));
     mm->mSignature = reinterpret_cast<char*>(SerializeAdjust(mm->mSignature));
-    mm->mStrFramacBlock = reinterpret_cast<char*>(SerializeAdjust(mm->mStrFramacBlock));
+    mm->mStrContractBlock = reinterpret_cast<char*>(SerializeAdjust(mm->mStrContractBlock));
 
     for (int i = 0;  i < mm->mParameterNumber;  i++) {
         MetaParameter* mp = mm->mParameters[i];
@@ -232,7 +232,7 @@ void MetadataSerializer::Deserialize(
     mComponent = mc;
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mUri = reinterpret_cast<char*>(DeserializeAdjust(mc->mUri));
-    mc->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrFramacBlock));
+    mc->mStrContractBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrContractBlock));
 
     mc->mTypes = reinterpret_cast<MetaType**>(DeserializeAdjust(mc->mTypes));
     for (int i = 0;  i < mc->mTypeNumber;  i++) {
@@ -304,7 +304,7 @@ void MetadataSerializer::DeserializeMetaCoclass(
     mc->mName = reinterpret_cast<char*>(DeserializeAdjust(mc->mName));
     mc->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mc->mNamespace));
     mc->mFuncSafetySetting = reinterpret_cast<char*>(DeserializeAdjust(mc->mFuncSafetySetting));
-    mc->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrFramacBlock));
+    mc->mStrContractBlock = reinterpret_cast<char*>(DeserializeAdjust(mc->mStrContractBlock));
     mc->mInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mc->mInterfaceIndexes));
 
     mc->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mc->mConstants));
@@ -343,7 +343,7 @@ void MetadataSerializer::DeserializeMetaInterface(
 {
     mi->mName = reinterpret_cast<char*>(DeserializeAdjust(mi->mName));
     mi->mNamespace = reinterpret_cast<char*>(DeserializeAdjust(mi->mNamespace));
-    mi->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mi->mStrFramacBlock));
+    mi->mStrContractBlock = reinterpret_cast<char*>(DeserializeAdjust(mi->mStrContractBlock));
     mi->mNestedInterfaceIndexes = reinterpret_cast<int*>(DeserializeAdjust(mi->mNestedInterfaceIndexes));
 
     mi->mConstants = reinterpret_cast<MetaConstant**>(DeserializeAdjust(mi->mConstants));
@@ -369,7 +369,7 @@ void MetadataSerializer::DeserializeMetaMethod(
 {
     mm->mName = reinterpret_cast<char*>(DeserializeAdjust(mm->mName));
     mm->mSignature = reinterpret_cast<char*>(DeserializeAdjust(mm->mSignature));
-    mm->mStrFramacBlock = reinterpret_cast<char*>(DeserializeAdjust(mm->mStrFramacBlock));
+    mm->mStrContractBlock = reinterpret_cast<char*>(DeserializeAdjust(mm->mStrContractBlock));
 
     mm->mParameters = reinterpret_cast<MetaParameter**>(DeserializeAdjust(mm->mParameters));
     for (int i = 0;  i < mm->mParameterNumber;  i++) {

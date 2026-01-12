@@ -48,8 +48,8 @@ public:
     ECode GetSignature(
         /* [out] */ String& signature) override;
 
-    ECode GetStrFramacBlock(
-        /* [out] */ String& strFramacBlock) override;
+    ECode GetStrContractBlock(
+        /* [out] */ String& strContractBlock) override;
 
     ECode GetParameterNumber(
         /* [out] */ Integer& number) override;
@@ -119,7 +119,7 @@ public:
     Integer         mIndex;
     String          mName;
     String          mSignature;
-    String          mStrFramacBlock;
+    String          mStrContractBlock;
     Boolean         mIsDefault;
     Array<IMetaParameter*> mParameters;
     Mutex           mParametersLock;

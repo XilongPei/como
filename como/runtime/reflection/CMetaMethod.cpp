@@ -54,7 +54,7 @@ CMetaMethod::CMetaMethod(
     , mIndex(index)
     , mName(mm->mName)
     , mSignature(mm->mSignature)
-    , mStrFramacBlock(mm->mStrFramacBlock)
+    , mStrContractBlock(mm->mStrContractBlock)
     , mParameters(mMetadata->mParameterNumber)
     , mHasOutArguments(0)
     , mOpaque(0)
@@ -123,10 +123,10 @@ ECode CMetaMethod::GetSignature(
     return NOERROR;
 }
 
-ECode CMetaMethod::GetStrFramacBlock(
-    /* [out] */ String& strFramacBlock)
+ECode CMetaMethod::GetStrContractBlock(
+    /* [out] */ String& strContractBlock)
 {
-    strFramacBlock = mStrFramacBlock;
+    strContractBlock = mStrContractBlock;
     return NOERROR;
 }
 

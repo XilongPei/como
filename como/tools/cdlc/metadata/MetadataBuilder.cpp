@@ -68,8 +68,8 @@ void MetadataBuilder::CalculateMetaComponent(
     // add mUri to StringPool
     mPool.Add(module->GetUri());
 
-    // add mStrFramacBlock to StringPool
-    mPool.Add(module->GetStrFramacBlock());
+    // add mStrContractBlock to StringPool
+    mPool.Add(module->GetStrContractBlock());
 
     // mNamespaces address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaComponent));
@@ -202,8 +202,8 @@ void MetadataBuilder::CalculateMetaCoclass(
     // add mFuncSafetySetting to StringPool
     mPool.Add(klass->GetFuncSafetySetting());
 
-    // add mStrFramacBlock to StringPool
-    mPool.Add(klass->GetStrFramacBlock());
+    // add mStrContractBlock to StringPool
+    mPool.Add(klass->GetStrContractBlock());
 
     // mConstants address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaCoclass));
@@ -281,8 +281,8 @@ void MetadataBuilder::CalculateMetaInterface(
     // add mNamespace to StringPool
     mPool.Add(interface->GetNamespace()->ToString());
 
-    // add mStrFramacBlock to StringPool
-    mPool.Add(interface->GetStrFramacBlock());
+    // add mStrContractBlock to StringPool
+    mPool.Add(interface->GetStrContractBlock());
 
     // mExternalModuleName address if needed
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaInterface));
@@ -327,8 +327,8 @@ void MetadataBuilder::CalculateMetaMethod(
     // add mSignature to StringPool
     mPool.Add(method->GetSignature());
 
-    // add mStrFramacBlock to StringPool
-    mPool.Add(method->GetStrFramacBlock());
+    // add mStrContractBlock to StringPool
+    mPool.Add(method->GetStrContractBlock());
 
     // mParameters address
     mBasePtr = ALIGN(mBasePtr + sizeof(como::MetaMethod));
@@ -460,7 +460,7 @@ void MetadataBuilder::WriteMetaComponent(
 
     mc->mName = WriteString(module->GetName());
     mc->mUri = WriteString(module->GetUri());
-    mc->mStrFramacBlock = WriteString(module->GetStrFramacBlock());
+    mc->mStrContractBlock = WriteString(module->GetStrContractBlock());
 
     mc->mGlobalNamespace = WriteMetaNamespace(module->GetGlobalNamespace());
 
@@ -608,7 +608,7 @@ como::MetaCoclass *MetadataBuilder::WriteMetaCoclass(
     mc->mName = WriteString(klass->GetName());
     mc->mNamespace = WriteString(klass->GetNamespace()->ToString());
     mc->mFuncSafetySetting = WriteString(klass->GetFuncSafetySetting());
-    mc->mStrFramacBlock = WriteString(klass->GetStrFramacBlock());
+    mc->mStrContractBlock = WriteString(klass->GetStrContractBlock());
     mc->mInterfaceNumber = IN;
     mc->mConstantNumber = CN;
     // mInterfaceIndexes address
@@ -723,7 +723,7 @@ como::MetaInterface *MetadataBuilder::WriteMetaInterface(
     mi->mUuid = interface->GetUUID()->ToComoUUID();
     mi->mName = WriteString(interface->GetName());
     mi->mNamespace = WriteString(interface->GetNamespace()->ToString());
-    mi->mStrFramacBlock = WriteString(interface->GetStrFramacBlock());
+    mi->mStrContractBlock = WriteString(interface->GetStrContractBlock());
     mi->mBaseInterfaceIndex = mModule->IndexOf(interface->GetBaseInterface());
     mi->mOuterInterfaceIndex = mModule->IndexOf(interface->GetOuterInterface());
     mi->mNestedInterfaceNumber = IN;
@@ -790,7 +790,7 @@ como::MetaMethod *MetadataBuilder::WriteMetaMethod(
     como::MetaMethod* mm = reinterpret_cast<como::MetaMethod*>(mBasePtr);
     mm->mName = WriteString(method->GetName());
     mm->mSignature = WriteString(method->GetSignature());
-    mm->mStrFramacBlock = WriteString(method->GetStrFramacBlock());
+    mm->mStrContractBlock = WriteString(method->GetStrContractBlock());
     mm->mReturnTypeIndex = mModule->IndexOf(method->GetReturnType());
     mm->mParameterNumber = PN;
     // mParameters address

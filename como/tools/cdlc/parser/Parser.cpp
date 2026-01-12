@@ -320,8 +320,8 @@ bool Parser::ParseAttributes(
                 case Token::FRAMAC_BLOCK: {
                     tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
 
-                    if (! Options::disableFramacBlock) {
-                        attrs.mStrFramacBlock = tokenInfo.mStringValue;
+                    if (! Options::disableContractBlock) {
+                        attrs.mStrContractBlock = tokenInfo.mStringValue;
                     }
 
                     break;
@@ -944,7 +944,7 @@ bool Parser::ParseInterfaceBody(
             case Token::FRAMAC_BLOCK: {
                 tokenInfo = mTokenizer.GetToken(Token::FRAMAC_BLOCK);
 
-                if (! Options::disableFramacBlock) {
+                if (! Options::disableContractBlock) {
                     tokenInfoLastStringValue = tokenInfo.mStringValue;
                 }
 
@@ -1797,7 +1797,7 @@ AutoPtr<PostfixExpression> Parser::ParseIdentifier(
 
 bool Parser::ParseMethod(
     /* [in] */ InterfaceType* interface,
-    /* [in] */ String& strFramacBlock)
+    /* [in] */ String& strContractBlock)
 {
     bool result = true;
 
@@ -1810,11 +1810,11 @@ bool Parser::ParseMethod(
     }
     method->SetName(tokenInfo.mStringValue);
     method->SetReturnType(FindType("como::ECode", false));
-    if (strFramacBlock.IsEmpty()) {
-        method->SetStrFramacBlock(String(""));
+    if (strContractBlock.IsEmpty()) {
+        method->SetStrContractBlock(String(""));
     }
     else {
-        method->SetStrFramacBlock(strFramacBlock);
+        method->SetStrContractBlock(strContractBlock);
     }
 
     tokenInfo = mTokenizer.PeekToken();

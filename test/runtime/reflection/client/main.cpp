@@ -668,22 +668,22 @@ TEST(ReflectionTest, TestModuleUnload)
     EXPECT_TRUE(SUCCEEDED(ec));
 }
 
-TEST(ReflectionTest, TestGetStrFramacBlock)
+TEST(ReflectionTest, TestGetStrContractBlock)
 {
     AutoPtr<IMetaComponent> mc;
     CoGetComponentMetadata(CID_ReflectionTestUnit, nullptr, mc);
 
-    String strFramacBlock;
-    ECode ec = mc->GetStrFramacBlock(strFramacBlock);
+    String strContractBlock;
+    ECode ec = mc->GetStrContractBlock(strContractBlock);
     EXPECT_EQ(NOERROR, ec);
-    printf("Component FramacBlock: \n%s\n", strFramacBlock.string());
+    printf("Component ContractBlock: \n%s\n", strContractBlock.string());
 
     AutoPtr<IMetaInterface> intf;
     mc->GetInterface("como::test::reflection::IMethodTest", intf);
 
-    ec = intf->GetStrFramacBlock(strFramacBlock);
+    ec = intf->GetStrContractBlock(strContractBlock);
     EXPECT_EQ(NOERROR, ec);
-    printf("interface como::test::reflection::IMethodTest FramacBlock: \n%s\n", strFramacBlock.string());
+    printf("interface como::test::reflection::IMethodTest ContractBlock: \n%s\n", strContractBlock.string());
 
     Integer totalNumber;
     intf->GetMethodNumber(totalNumber);
@@ -702,9 +702,9 @@ TEST(ReflectionTest, TestGetStrFramacBlock)
             EXPECT_STREQ("(II&)E", signature.string());
         }
 
-        ec = declaredMethods[i]->GetStrFramacBlock(strFramacBlock);
+        ec = declaredMethods[i]->GetStrContractBlock(strContractBlock);
         EXPECT_EQ(NOERROR, ec);
-        printf("method \"%s\" FramacBlock: \n%s\n", name.string(), strFramacBlock.string());
+        printf("method \"%s\" ContractBlock: \n%s\n", name.string(), strContractBlock.string());
     }
 }
 

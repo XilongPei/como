@@ -38,7 +38,7 @@ void InterfaceType::SetAttributes(
     mUuid = UUID::Parse(attrs.mUuid);
     mVersion = attrs.mVersion;
     mDescription = attrs.mDescription;
-    mStrFramacBlock = attrs.mStrFramacBlock;
+    mStrContractBlock = attrs.mStrContractBlock;
 }
 
 AutoPtr<InterfaceType> InterfaceType::GetNestedInterface(
@@ -171,7 +171,7 @@ AutoPtr<Node> InterfaceType::Clone(
     clone->mUuid = mUuid;
     clone->mVersion = mVersion;
     clone->mDescription = mDescription;
-    clone->mStrFramacBlock = mStrFramacBlock;
+    clone->mStrContractBlock = mStrContractBlock;
 
     if (! deepCopy) {
         clone->mBaseInterface = mBaseInterface;

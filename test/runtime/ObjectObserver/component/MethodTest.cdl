@@ -22,7 +22,7 @@ namespace reflection {
     uuid(6611bd57-14c2-4b5f-b971-9d47b122fc21),
     version(0.1.0)
 /*@
-$$$ interface IMethodTest FramacBlock ... $$$
+$$$ interface IMethodTest ContractBlock ... $$$
 */
 ]
 interface IMethodTest
@@ -32,7 +32,7 @@ interface IMethodTest
         [out] Integer& result);
 
 /*@
-$$$ TestMethod2 FramacBlock ... $$$
+$$$ TestMethod2 ContractBlock ... $$$
 */
     TestMethod2(
         [in] Float arg,

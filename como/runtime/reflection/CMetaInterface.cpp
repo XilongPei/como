@@ -32,7 +32,7 @@ CMetaInterface::CMetaInterface(
     , mOwner(mcObj)
     , mName(mi->mName)
     , mNamespace(mi->mNamespace)
-    , mStrFramacBlock(mi->mStrFramacBlock)
+    , mStrContractBlock(mi->mStrContractBlock)
     , mConstants(mi->mConstantNumber)
 {
     mProperties = mi->mProperties;
@@ -93,10 +93,10 @@ ECode CMetaInterface::GetNamespace(
     return NOERROR;
 }
 
-ECode CMetaInterface::GetStrFramacBlock(
-    /* [out] */ String& strFramacBlock)
+ECode CMetaInterface::GetStrContractBlock(
+    /* [out] */ String& strContractBlock)
 {
-    strFramacBlock = mStrFramacBlock;
+    strContractBlock = mStrContractBlock;
     return NOERROR;
 }
 

@@ -48,7 +48,7 @@ CMetaComponent::CMetaComponent(
     , mEnumerationsAlreadyBuilt(false)
     , mInterfacesAlreadyBuilt(false)
     , mOpaque(0)
-    , mStrFramacBlock(mMetadata->mStrFramacBlock)
+    , mStrContractBlock(mMetadata->mStrContractBlock)
 #ifdef NOT_REFLECTION_TYPE_EXTERNAL
     , mEnumerations(mMetadata->mEnumerationNumber -
                                           mMetadata->mExternalEnumerationNumber)
@@ -869,10 +869,10 @@ void CMetaComponent::ReleaseResources()
     mInterfacesAlreadyBuilt = false;
 }
 
-ECode CMetaComponent::GetStrFramacBlock(
-    /* [out] */ String& strFramacBlock)
+ECode CMetaComponent::GetStrContractBlock(
+    /* [out] */ String& strContractBlock)
 {
-    strFramacBlock = mStrFramacBlock;
+    strContractBlock = mStrContractBlock;
     return NOERROR;
 }
 

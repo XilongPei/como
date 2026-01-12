@@ -64,10 +64,10 @@ public:
         /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 
-    inline String GetStrFramacBlock();
+    inline String GetStrContractBlock();
 
-    inline void SetStrFramacBlock(
-        /* [in] */ const String& strFramacBlock);
+    inline void SetStrContractBlock(
+        /* [in] */ const String& strContractBlock);
 
 private:
     void BuildSignature();
@@ -77,7 +77,7 @@ private:
     String          mSignature;
     AutoPtr<Type>   mReturnType;
     bool            mDeleted = false;
-    String          mStrFramacBlock;
+    String          mStrContractBlock;
     std::vector<AutoPtr<Parameter>> mParameters;
 };
 
@@ -135,19 +135,19 @@ bool Method::IsDeleted()
     return mDeleted;
 }
 
-String Method::GetStrFramacBlock()
+String Method::GetStrContractBlock()
 {
-    return mStrFramacBlock;
+    return mStrContractBlock;
 }
 
-void Method::SetStrFramacBlock(
-    /* [in] */ const String& strFramacBlock)
+void Method::SetStrContractBlock(
+    /* [in] */ const String& strContractBlock)
 {
-    if (! mStrFramacBlock.IsNull()) {
-        mStrFramacBlock += strFramacBlock;
+    if (! mStrContractBlock.IsNull()) {
+        mStrContractBlock += strContractBlock;
     }
     else {
-        mStrFramacBlock = strFramacBlock;
+        mStrContractBlock = strContractBlock;
     }
 }
 

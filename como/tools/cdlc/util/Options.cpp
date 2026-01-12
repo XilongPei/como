@@ -23,7 +23,7 @@
 
 namespace cdlc {
 
-bool Options::disableFramacBlock = false;
+bool Options::disableContractBlock = false;
 
 void Options::Parse(
     /* [in] */ int argc,
@@ -92,8 +92,8 @@ void Options::Parse(
         else if (option.Equals("-ComoMetadataReader")) {
             mComoMetadataReader = true;
         }
-        else if (option.Equals("-disableFramacBlock")) {
-            disableFramacBlock = true;
+        else if (option.Equals("-disableContractBlock")) {
+            disableContractBlock = true;
         }
         else {
             errors.Append(option);

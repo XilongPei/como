@@ -122,7 +122,7 @@ public:
     static AutoPtr<Module> Resolve(
         /* [in] */ void* metadata);
 
-    inline String GetStrFramacBlock();
+    inline String GetStrContractBlock();
 
 private:
     Module(
@@ -159,7 +159,7 @@ private:
     String              mDescription;
     String              mUri;
     String              mName;
-    String              mStrFramacBlock;
+    String              mStrContractBlock;
     AutoPtr<Namespace>  mGlobalNamespace;
 
     std::vector<AutoPtr<Constant>>        mConstants;
@@ -284,9 +284,9 @@ int Module::GetTypeNumber()
     return mAllTypeMap.size();
 }
 
-String Module::GetStrFramacBlock()
+String Module::GetStrContractBlock()
 {
-    return mStrFramacBlock;
+    return mStrContractBlock;
 }
 
 } // namespace cdlc

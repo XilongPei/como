@@ -34,7 +34,7 @@ CMetaCoclass::CMetaCoclass(
     , mName(mk->mName)
     , mNamespace(mk->mNamespace)
     , mFuncSafetySetting(mk->mFuncSafetySetting)
-    , mStrFramacBlock(mk->mStrFramacBlock)
+    , mStrContractBlock(mk->mStrContractBlock)
     , mInterfaces(mk->mInterfaceNumber - 1)
     , mConstants(mk->mConstantNumber)
     , mOpaque(0)
@@ -96,10 +96,10 @@ ECode CMetaCoclass::GetFuncSafetySetting(
     return NOERROR;
 }
 
-ECode CMetaCoclass::GetStrFramacBlock(
-    /* [out] */ String& strFramacBlock)
+ECode CMetaCoclass::GetStrContractBlock(
+    /* [out] */ String& strContractBlock)
 {
-    strFramacBlock = mStrFramacBlock;
+    strContractBlock = mStrContractBlock;
     return NOERROR;
 }
 

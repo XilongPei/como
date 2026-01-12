@@ -95,7 +95,7 @@ public:
         /* [in] */ Module *module,
         /* [in] */ bool deepCopy) override;
 
-    inline String GetStrFramacBlock();
+    inline String GetStrContractBlock();
 
     inline static AutoPtr<InterfaceType> CastFrom(
         /* [in] */ Type *type);
@@ -107,7 +107,7 @@ private:
     AutoPtr<UUID>   mUuid;
     String          mVersion;
     String          mDescription;
-    String          mStrFramacBlock;
+    String          mStrContractBlock;
     InterfaceType  *mBaseInterface = nullptr;
     InterfaceType  *mOuterInterface = nullptr;
     std::vector<AutoPtr<InterfaceType>> mNestedInterfaces;
@@ -192,9 +192,9 @@ AutoPtr<InterfaceType> InterfaceType::CastFrom(
     return static_cast<InterfaceType*>(type);
 }
 
-String InterfaceType::GetStrFramacBlock()
+String InterfaceType::GetStrContractBlock()
 {
-    return mStrFramacBlock;
+    return mStrContractBlock;
 }
 
 } // namespace cdlc

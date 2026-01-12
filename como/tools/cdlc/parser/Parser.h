@@ -203,7 +203,7 @@ private:
 
     bool ParseMethod(
         /* [in] */ InterfaceType* interface,
-        /* [in] */ String& strFramacBlock);
+        /* [in] */ String& strContractBlock);
 
     bool ParseParameter(
         /* [in] */ Method* method);

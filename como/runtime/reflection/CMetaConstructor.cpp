@@ -44,7 +44,7 @@ CMetaConstructor::CMetaConstructor(
     , mIndex(index)
     , mName("Constructor")
     , mSignature(mm->mSignature)
-    , mStrFramacBlock(mm->mStrFramacBlock)
+    , mStrContractBlock(mm->mStrContractBlock)
     , mIsDefault(mcObj->mMetadata->mProperties & COCLASS_CONSTRUCTOR_DEFAULT)
     , mParameters(mm->mParameterNumber)
     , mOpaque(0)
@@ -90,10 +90,10 @@ ECode CMetaConstructor::GetSignature(
     return NOERROR;
 }
 
-ECode CMetaConstructor::GetStrFramacBlock(
-    /* [out] */ String& strFramacBlock)
+ECode CMetaConstructor::GetStrContractBlock(
+    /* [out] */ String& strContractBlock)
 {
-    strFramacBlock = mStrFramacBlock;
+    strContractBlock = mStrContractBlock;
     return NOERROR;
 }
 

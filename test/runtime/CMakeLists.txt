@@ -48,4 +48,4 @@ if("$ENV{COMO_FUNCTION_SAFETY}" STREQUAL "enable")
     add_subdirectory(FunctionSafetyProgram_extra)
 endif()
 
-#add_subdirectory(HelloWorld)
+add_subdirectory(HelloWorld)

@@ -87,14 +87,14 @@ public:
 
     inline int GetConstantNumber();
 
-    inline String GetStrFramacBlock();
+    inline String GetStrContractBlock();
 
 private:
     AutoPtr<UUID>   mUuid;
     String          mVersion;
     String          mDescription;
     String          mFuncSafetySetting;
-    String          mStrFramacBlock;
+    String          mStrContractBlock;
     std::vector<AutoPtr<Method>>        mConstructors;
     std::vector<AutoPtr<InterfaceType>> mInterfaces;
     std::vector<AutoPtr<Constant>>      mConstants;
@@ -186,9 +186,9 @@ int CoclassType::GetConstantNumber()
     return mConstants.size();
 }
 
-String CoclassType::GetStrFramacBlock()
+String CoclassType::GetStrContractBlock()
 {
-    return mStrFramacBlock;
+    return mStrContractBlock;
 }
 
 } // namespace cdlc

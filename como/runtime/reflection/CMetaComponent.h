@@ -114,8 +114,8 @@ public:
         /* [in] */ const CoclassID& cid,
         /* [out] */ AutoPtr<IClassObject>& object);
 
-    ECode GetStrFramacBlock(
-        /* [out] */ String& strFramacBlock) override;
+    ECode GetStrContractBlock(
+        /* [out] */ String& strContractBlock) override;
 
     ECode SetOpaque(
         /* [in] */ HANDLE opaque) override;
@@ -156,7 +156,7 @@ public:
     ComponentID             mCid;
     String                  mName;
     String                  mUri;
-    String                  mStrFramacBlock;
+    String                  mStrContractBlock;
     Array<IMetaConstant*>   mConstants;
     HashMap<String, IMetaConstant*> mConstantNameMap;
     Boolean                 mConstantsAlreadyBuilt;

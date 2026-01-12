@@ -23,7 +23,7 @@
 
 <*interface_attributes*> ::= <*interface_attribute*> | <*interface_attributes*> , <*interface_attribute*>
 
-<*interface_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*framacblock_attribute*> | <*funcsafetysetting*>
+<*interface_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*contractblock_attribute*> | <*funcsafetysetting*>
 
 <*uuid_attribute*> ::= uuid ( <*uuid_literal*> )
 
@@ -35,11 +35,11 @@
 
 <*funcsafetysetting*> ::= FuncSafetySetting ( <*string_literal*> )
 
-<*framacblock_attribute*> ::= <*framacblock_m_attribute*> | <*framacblock_s_attribute*>
+<*contractblock_attribute*> ::= <*contractblock_m_attribute*> | <*contractblock_s_attribute*>
 
-<*framacblock_m_attribute*> ::= /*@ <*string_literal*>  */
+<*contractblock_m_attribute*> ::= /*@ <*string_literal*>  */
 
-<*framacblock_s_attribute*> ::= //@ <*string_literal*>
+<*contractblock_s_attribute*> ::= //@ <*string_literal*>
 
 <*extends_interface*> ::= : <*interface_type*>
 
@@ -65,7 +65,7 @@
 
 <*class_attributes*> ::= <*class_attribute*> | <*class_attributes*> , <*class_attribute*>
 
-<*class_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*framacblock_attribute*> | <*funcsafetysetting*>
+<*class_attribute*> ::= <*uuid_attribute*> | <*version_attribute*> | <*description_attribute*> | <*contractblock_attribute*> | <*funcsafetysetting*>
 
 <*class_body*> ::= { <*class_body_declarations*>? }
 

@@ -32,7 +32,7 @@ void CoclassType::SetAttributes(
     mVersion = attrs.mVersion;
     mDescription = attrs.mDescription;
     mFuncSafetySetting = attrs.mFuncSafetySetting;
-    mStrFramacBlock = attrs.mStrFramacBlock;
+    mStrContractBlock = attrs.mStrContractBlock;
 }
 
 AutoPtr<Method> CoclassType::FindConstructor(

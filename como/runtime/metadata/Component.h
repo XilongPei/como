@@ -59,7 +59,7 @@ struct MetaComponent
     UUID                mUuid;
     char*               mName;
     char*               mUri;
-    char*               mStrFramacBlock;
+    char*               mStrContractBlock;
     int                 mNamespaceNumber;
     int                 mConstantNumber;
     int                 mCoclassNumber;
@@ -116,7 +116,7 @@ struct MetaCoclass
     int*                mInterfaceIndexes;
     MetaConstant**      mConstants;
     char*               mFuncSafetySetting;
-    char*               mStrFramacBlock;
+    char*               mStrContractBlock;
     unsigned char       mProperties;
 };
 
@@ -141,7 +141,7 @@ struct MetaInterface
     UUID                mUuid;
     char*               mName;
     char*               mNamespace;
-    char*               mStrFramacBlock;
+    char*               mStrContractBlock;
     int                 mBaseInterfaceIndex;
     int                 mOuterInterfaceIndex;
     int                 mNestedInterfaceNumber;
@@ -161,7 +161,7 @@ struct MetaMethod
 {
     char*               mName;
     char*               mSignature;
-    char*               mStrFramacBlock;
+    char*               mStrContractBlock;
     int                 mReturnTypeIndex;
     int                 mParameterNumber;
     MetaParameter**     mParameters;

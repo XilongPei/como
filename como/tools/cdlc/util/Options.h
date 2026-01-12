@@ -58,7 +58,7 @@ public:
 
     void ShowUsage() const;
 
-    static bool disableFramacBlock;
+    static bool disableContractBlock;
 
 private:
     void Parse(
