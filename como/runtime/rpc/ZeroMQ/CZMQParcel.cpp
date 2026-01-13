@@ -1033,7 +1033,8 @@ ECode CZMQParcel::RestartWrite(
 
         mData = mBuffer;
         mDataCapacity = MAX_BUFFER_SIZE;
-        mDataSize = mDataPos = 0;
+        mDataSize = 0;
+        mDataPos = 0;
         return NOERROR;
     }
 
