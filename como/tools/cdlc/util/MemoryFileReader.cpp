@@ -62,6 +62,9 @@ bool MemoryFileReader::ReadInFile(
     int lineNo = 0;
     while (!file.IsEof()) {
         String line = file.RawGetLine();
+        if (line.IsNull()) {
+            return false;
+        }
         lineNo++;
         if (line.StartsWith("include")) {
             String include = line.Substring(line.IndexOf('"') + 1, line.LastIndexOf('"'));

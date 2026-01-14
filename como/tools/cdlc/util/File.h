@@ -77,6 +77,7 @@ private:
     bool mError = false;
 
     char* mLine = nullptr;
+    size_t mSizeLine = 0;
 };
 
 bool File::IsValid() const

@@ -117,8 +117,7 @@ void File::OpenFile()
 
 String File::RawGetLine()
 {
-    size_t n;
-    if (getline(&mLine, &n, mFd) != -1) {
+    if (getline(&mLine, &mSizeLine, mFd) != -1) {
         return String(mLine);
     }
     else {
