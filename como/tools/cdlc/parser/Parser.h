@@ -63,7 +63,8 @@ private:
         inline String FindTypeForwardDeclaration(
             /* [in] */ const String& typeName)
         {
-            auto it = mTypeForwardDeclarations.find(typeName);
+            std::unordered_map<String, String, StringHashFunc,
+                    StringEqualsFunc>::iterator it = mTypeForwardDeclarations.find(typeName);
             if (it != mTypeForwardDeclarations.end()) {
                 return it->second;
             }

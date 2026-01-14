@@ -30,6 +30,10 @@ MemoryFileReader::MemoryFileReader(
 bool MemoryFileReader::ReadIn(
     /* [in] */ bool recursive)
 {
+    if (nullptr == mFile) {
+        return false;
+    }
+
     bool ret = ReadInFile(*mFile, recursive);
     if (ret) {
         mData = mBuffer.GetArray();

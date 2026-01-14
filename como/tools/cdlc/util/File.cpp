@@ -33,6 +33,9 @@ File::File(
         if (path.StartsWith("/")) {
             if (access(path.string(), F_OK) == 0) {
                 char* canonicalPath = realpath(path.string(), nullptr);
+                if (nullptr == canonicalPath) {
+                    return;
+                }
                 mPath = canonicalPath;
                 free(canonicalPath);
             }
@@ -42,6 +45,9 @@ File::File(
             String absolutePath = String(cwd) + "/" + path;
             if (access(absolutePath.string(), F_OK) == 0) {
                 char* canonicalPath = realpath(absolutePath.string(), nullptr);
+                if (nullptr == canonicalPath) {
+                    return;
+                }
                 mPath = canonicalPath;
                 free(canonicalPath);
             }
@@ -52,6 +58,9 @@ File::File(
                 String absolutePath = searchPath + "/" + path;
                 if (access(absolutePath.string(), F_OK) == 0) {
                     char* canonicalPath = realpath(absolutePath.string(), nullptr);
+                    if (nullptr == canonicalPath) {
+                        return;
+                    }
                     mPath = canonicalPath;
                     free(canonicalPath);
                     break;
@@ -65,6 +74,9 @@ File::File(
         }
         else {
             char* cwd = getcwd(nullptr, 0);
+            if (nullptr == cwd) {
+                return;
+            }
             mPath = String(cwd) + "/" + path;
             free(cwd);
         }
@@ -91,6 +103,9 @@ void File::OpenFile()
         mFd = fopen(mPath, "w+");
         if (mFd != nullptr) {
             char* canonicalPath = realpath(mPath.string(), nullptr);
+            if (nullptr == canonicalPath) {
+                return;
+            }
             mPath = canonicalPath;
             free(canonicalPath);
         }
@@ -121,7 +136,7 @@ size_t File::Read(
     /* [out] */ void* data,
     /* [in] */ size_t size)
 {
-    if (data == nullptr || size == 0) {
+    if ((data == nullptr) || (size == 0)) {
         return 0;
     }
 
@@ -136,7 +151,7 @@ bool File::Write(
     /* [in] */ const void* data,
     /* [in] */ size_t size)
 {
-    if (data == nullptr || size == 0) {
+    if ((data == nullptr) || (size == 0)) {
         return true;
     }
 
