@@ -54,6 +54,7 @@ extern "C" {
 #define __has_attribute(x) 0
 #endif
 
+//_PUBLIC_ and COM_PUBLIC have the same definition.
 #ifndef _PUBLIC_
 #if __has_attribute(visibility)
 #define _PUBLIC_ __attribute__((visibility("default")))
