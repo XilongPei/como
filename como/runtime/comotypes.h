@@ -23,6 +23,20 @@
 
 namespace como {
 
+/**
+  * If directly defined this way, it will cause signature mismatches with
+  * functions defined using standard C/C++ types.
+  * typedef int8_t      Byte;
+  * typedef int16_t     Short;
+  * typedef int32_t     Integer;
+  * typedef int64_t     Long;
+  * typedef float       Float;
+  * typedef double      Double;
+  * typedef char32_t    Char;
+  * typedef uint8_t     Boolean;
+  * typedef uintptr_t   HANDLE;
+  * typedef int32_t     ECode;
+  */
 typedef signed char     Byte;
 typedef short           Short;
 typedef int             Integer;
