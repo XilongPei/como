@@ -46,7 +46,7 @@ CBootClassLoader::CBootClassLoader()
 
 AutoPtr<IClassLoader> CBootClassLoader::GetSystemClassLoader()
 {
-    return (sSystemClassLoader != nullptr) ? sSystemClassLoader : GetInstance();
+    return (nullptr != sSystemClassLoader) ? sSystemClassLoader : GetInstance();
 }
 
 AutoPtr<IClassLoader> CBootClassLoader::GetInstance()
@@ -73,7 +73,7 @@ ECode CBootClassLoader::LoadComponent(
     {
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponentPaths.Get(path);
-        if (mc != nullptr) {
+        if (nullptr != mc) {
             component = mc;
             return NOERROR;
         }
@@ -105,7 +105,7 @@ ECode CBootClassLoader::LoadComponent(
         // running nested LoadComponent about itself, so we check mComponents again.
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponentPaths.Get(path);
-        if (mc != nullptr) {
+        if (nullptr != mc) {
             dlclose(handle);
             component = mc;
             return NOERROR;
@@ -239,7 +239,7 @@ ECode CBootClassLoader::FindComponent(
                                                                   uri.string());
 
     Integer index = uri.LastIndexOf("/");
-    String compFile = ((index != -1) ? uri.Substring(index + 1) : uri);
+    String compFile = ((-1 != index) ? uri.Substring(index + 1) : uri);
     if (compFile.IsEmpty()) {
         Logger::E(TAG, "The name of component is null or empty.");
         compPath = nullptr;
@@ -250,7 +250,7 @@ ECode CBootClassLoader::FindComponent(
     for (Long i = 0;  i < mComponentPath.GetSize();  i++) {
         String filePath = mComponentPath.Get(i) + "/" + compFile;
         fd = fopen(filePath.string(), "rb");
-        if (fd != nullptr) {
+        if (nullptr != fd) {
             Logger::D(TAG, "Found \"%s\" component in directory \"%s\"",
                              compFile.string(), mComponentPath.Get(i).string());
             compPath = filePath;
@@ -419,7 +419,7 @@ ECode CBootClassLoader::LoadMetadata(
     {
         Mutex::AutoLock lock(mComponentsLock);
         IMetaComponent* mc = mComponents.Get(mmc->mUuid);
-        if (mc != nullptr) {
+        if (nullptr != mc) {
             component = mc;
             return NOERROR;
         }
@@ -463,7 +463,7 @@ ECode CBootClassLoader::LoadCoclass(
     component = mComponents.GetValue(Cmp_PVoid_Coclass_fullName, (void*)&fullName);
     if (nullptr != component) {
         component->GetCoclass(fullName, klass);
-        if (klass != nullptr) {
+        if (nullptr != klass) {
             return NOERROR;
         }
     }
@@ -476,7 +476,7 @@ static Boolean Cmp_PVoid_Coclass_cid(void *p1, void *p2)
 {
     AutoPtr<IMetaCoclass> klass;
     (void)((IMetaComponent*)p1)->GetCoclass(*(CoclassID*)p2, klass);
-    if (klass != nullptr) {
+    if (nullptr != klass) {
         return true;
     }
 
@@ -493,7 +493,7 @@ ECode CBootClassLoader::LoadCoclass(
     component = mComponents.GetValue(Cmp_PVoid_Coclass_cid, (void*)&cid);
     if (nullptr != component) {
         component->GetCoclass(cid, klass);
-        if (klass != nullptr) {
+        if (nullptr != klass) {
             return NOERROR;
         }
     }
@@ -524,7 +524,7 @@ ECode CBootClassLoader::LoadInterface(
     component = mComponents.GetValue(Cmp_PVoid, (void*)&fullName);
     if (nullptr != component) {
         component->GetInterface(fullName, intf);
-        if (intf != nullptr) {
+        if (nullptr != intf) {
             return NOERROR;
         }
     }
