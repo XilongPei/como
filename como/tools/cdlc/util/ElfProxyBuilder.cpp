@@ -178,9 +178,6 @@ void SHA1_Final(
 // ----------------------------------------------------------------------
 constexpr size_t kMaxSyms = 1024;
 constexpr uint64_t kPageSize = 0x1000;
-constexpr char kSessionData[] =
-    "SESSION:v1\n"
-    "owner=elf-proxy\n";
 
 struct Symbol {
     char name[256];
@@ -431,7 +428,9 @@ void WriteGnuHashTable(
 
 bool BuildElfProxy(
     /* [in] */ const std::string& origin_so,
-    /* [in] */ const std::string& output_so)
+    /* [in] */ const std::string& output_so,
+    /* [in] */ const void* session_data,
+    /* [in] */ size_t session_size)
 {
     g_symbol_count = 0;
     g_target_arch = TargetArch::kX86_64;
@@ -465,19 +464,16 @@ bool BuildElfProxy(
     constexpr size_t kNoteAlign = 4;
     constexpr size_t kBuildIdSize = 20;
     constexpr char kNoteNameGNU[] = "GNU";
-    constexpr char kNoteNameComo[] = "Como";
+    constexpr char kNoteNameComo[] = ".metadata";
     size_t note_desc_off_gnu = AlignUp(sizeof(Elf64_Nhdr) + strlen(kNoteNameGNU) + 1, kNoteAlign);
     size_t note_total_sz_gnu = note_desc_off_gnu + kBuildIdSize;
     uint64_t dynamic_off_in_data = AlignUp(note_off_in_data + note_total_sz_gnu, 8);
 
-    // .note.como.session section
-    constexpr char kSessionData[] =
-        "SESSION:v1\n"
-        "owner=elf-proxy\n";
+    // .note.metadata section
     constexpr size_t kSessionNoteType = 1;
     size_t note_desc_off_session = AlignUp(sizeof(Elf64_Nhdr) + strlen(kNoteNameComo) + 1, kNoteAlign);
-    size_t note_total_sz_session = note_desc_off_session + sizeof(kSessionData);
-    uint64_t session_off_in_data = AlignUp(dynamic_off_in_data + 7 * sizeof(Elf64_Dyn), 8);
+    size_t note_total_sz_session = note_desc_off_session + session_size;
+    uint64_t session_off_in_data = AlignUp(dynamic_off_in_data + 8 * sizeof(Elf64_Dyn), 8);
     uint64_t data_sz = session_off_in_data + note_total_sz_session;
 
     const uint64_t text_va = text_off;
@@ -684,11 +680,11 @@ bool BuildElfProxy(
     };
     write(fd, dyn, sizeof(dyn));
 
-    // ------------------ .note.como.session ------------------
+    // ------------------ .note.metadata ------------------
     lseek(fd, static_cast<off_t>(data_off + session_off_in_data), SEEK_SET);
     Elf64_Nhdr session_nh = {};
     session_nh.n_namesz = static_cast<uint32_t>(strlen(kNoteNameComo) + 1);
-    session_nh.n_descsz = sizeof(kSessionData);
+    session_nh.n_descsz = session_size;
     session_nh.n_type   = kSessionNoteType;
     write(fd, &session_nh, sizeof(session_nh));
     write(fd, kNoteNameComo, session_nh.n_namesz);
@@ -696,7 +692,11 @@ bool BuildElfProxy(
     if (padding) {
         write(fd, pad, padding);
     }
-    write(fd, kSessionData, sizeof(kSessionData));
+    write(fd, session_data, session_size);
+    padding = (4 - (session_size % 4)) % 4;
+    if (padding) {
+        write(fd, pad, padding);
+    }
 
     close(fd);
     return true;

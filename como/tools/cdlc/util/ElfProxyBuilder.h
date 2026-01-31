@@ -30,12 +30,19 @@ enum class TargetArch {
 
 // Build an ELF proxy that forwards all global function symbols from origin_so.
 // The output is a position-independent shared object with:
-//   - Minimal DT_HASH (3-bucket)
+//   - GNU_HASH (with bloom filter)
 //   - .note.gnu.build-id (SHA1 of origin path + symbol list)
-//   - Custom .session section
+//   - .note.metadata (custom metadata)
+// Parameters:
+//   origin_so: Path to the original shared library
+//   output_so: Path for the generated proxy
+//   session_data: Pointer to custom metadata data
+//   session_size: Size of the custom metadata data
 // Returns true on success.
 bool BuildElfProxy(const std::string& origin_so,
-                   const std::string& output_so);
+                   const std::string& output_so,
+                   const void* session_data,
+                   size_t session_size);
 
 }  // namespace cdlc
 
