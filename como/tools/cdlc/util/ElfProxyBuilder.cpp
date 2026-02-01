@@ -42,6 +42,15 @@ namespace cdlc {
 #ifndef NT_GNU_BUILD_ID
 #define NT_GNU_BUILD_ID 3
 #endif
+#ifndef DT_VERSYM
+#define DT_VERSYM 0x6ffffff0
+#endif
+#ifndef DT_VERDEF
+#define DT_VERDEF 0x6ffffffc
+#endif
+#ifndef DT_VERNEED
+#define DT_VERNEED 0x6ffffffe
+#endif
 
 // ----------------------------------------------------------------------
 // Pure C SHA-1 implementation (Public Domain)
@@ -426,6 +435,65 @@ void WriteGnuHashTable(
     free(chains);
 }
 
+void WriteSysvHashTable(
+    /* [in] */ int fd,
+    /* [in] */ uint64_t data_off,
+    /* [in] */ uint64_t hash_off_in_data,
+    /* [in] */ uint64_t data_va,
+    /* [in] */ uint64_t dynsym_off_in_data)
+{
+    // SysV hash table format
+    // nbuckets (4 bytes)
+    // nchain   (4 bytes)
+    // buckets[nbuckets]
+    // chain[nchain]
+
+    uint32_t nbuckets = 1;
+    uint32_t nchain = static_cast<uint32_t>(g_symbol_count) + 1;
+
+    // Buckets array (all symbols go to bucket 0)
+    uint32_t* buckets = static_cast<uint32_t*>(malloc(nbuckets * sizeof(uint32_t)));
+    if (!buckets) {
+        return;
+    }
+    buckets[0] = 0;
+
+    // Chain array: chain[i] = index of next symbol with same hash value
+    // For simplicity, put all symbols in chain order
+    uint32_t* chain = static_cast<uint32_t*>(malloc(nchain * sizeof(uint32_t)));
+    if (!chain) {
+        free(buckets);
+        return;
+    }
+
+    // Compute SysV hash and build chain
+    // SysV hash: h = (h << 4) + c; if (h & 0xf0000000) h ^= h >> 24; h &= 0x0fffffff
+    for (size_t i = 0;  i < g_symbol_count;  i++) {
+        const char* name = g_symbols[i].name;
+        uint32_t h = 0;
+        while (*name) {
+            unsigned char c = static_cast<unsigned char>(*name++);
+            h = (h << 4) + c;
+            if (h & 0xf0000000) {
+                h ^= h >> 24;
+            }
+            h &= 0x0fffffff;
+        }
+        chain[i] = h;
+    }
+    chain[g_symbol_count] = 0;  // STN_UNDEF
+
+    // Write hash table
+    lseek(fd, static_cast<off_t>(data_off + hash_off_in_data), SEEK_SET);
+    write(fd, &nbuckets, sizeof(nbuckets));
+    write(fd, &nchain, sizeof(nchain));
+    write(fd, buckets, nbuckets * sizeof(uint32_t));
+    write(fd, chain, nchain * sizeof(uint32_t));
+
+    free(chain);
+    free(buckets);
+}
+
 bool BuildElfProxy(
     /* [in] */ const std::string& origin_so,
     /* [in] */ const std::string& output_so,
@@ -450,15 +518,30 @@ bool BuildElfProxy(
     // Data segment internal offsets
     uint64_t got_off_in_data = 0;
     uint64_t rela_off_in_data = AlignUp(got_off_in_data + g_symbol_count * 8, 8);
-    uint64_t hash_off_in_data = AlignUp(rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela), 8);
-    uint64_t dynsym_off_in_data = AlignUp(hash_off_in_data + (4 + 4 + 3*4 + (g_symbol_count+1)*4), 8);
-    uint64_t dynstr_off_in_data = AlignUp(dynsym_off_in_data + (g_symbol_count + 1) * sizeof(Elf64_Sym), 1);
+
+    // SysV hash table: nbuckets(4) + nchain(4) + buckets(4) + chain(nchain*4)
+    uint64_t sysv_hash_off_in_data = AlignUp(rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela), 8);
+    uint32_t sysv_hash_sz = 4 + 4 + 4 + (g_symbol_count + 1) * 4;
+
+    // GNU hash table: header(16) + bloom(8) + buckets(4) + chains((sym_count+1)*4)
+    uint64_t gnu_hash_off_in_data = AlignUp(sysv_hash_off_in_data + sysv_hash_sz, 8);
+    uint32_t gnu_hash_sz = 16 + 8 + 4 + (g_symbol_count + 1) * 4;
+
+    uint64_t dynsym_off_in_data = AlignUp(gnu_hash_off_in_data + gnu_hash_sz, 8);
+    // .gnu.version: 2 bytes per symbol (index 0 is STN_UNDEF)
+    uint64_t gnu_version_off_in_data = AlignUp(dynsym_off_in_data + (g_symbol_count + 1) * sizeof(Elf64_Sym), 2);
+    // DYNAMIC after .gnu.version
+    uint64_t dynamic_off_in_data = AlignUp(gnu_version_off_in_data + (g_symbol_count + 1) * sizeof(uint16_t), 8);
+    // DYNSTR after DYNAMIC
+    uint64_t dynstr_off_in_data = AlignUp(dynamic_off_in_data + 12 * sizeof(Elf64_Dyn), 1);
 
     size_t dynstr_sz = 1;
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         dynstr_sz += strlen(g_symbols[i].name) + 1;
     }
     dynstr_sz += origin_so.size() + 1;
+    // Reserve space for soname (max filename)
+    dynstr_sz += 256;
 
     uint64_t note_off_in_data = AlignUp(dynstr_off_in_data + dynstr_sz, 8);
     constexpr size_t kNoteAlign = 4;
@@ -466,15 +549,30 @@ bool BuildElfProxy(
     constexpr char kNoteNameGNU[] = "GNU";
     constexpr char kNoteNameComo[] = ".metadata";
     size_t note_desc_off_gnu = AlignUp(sizeof(Elf64_Nhdr) + strlen(kNoteNameGNU) + 1, kNoteAlign);
-    size_t note_total_sz_gnu = note_desc_off_gnu + kBuildIdSize;
-    uint64_t dynamic_off_in_data = AlignUp(note_off_in_data + note_total_sz_gnu, 8);
+    size_t gnu_padding_after_desc = (4 - (kBuildIdSize % 4)) % 4;
+    size_t note_total_sz_gnu = note_desc_off_gnu + kBuildIdSize + gnu_padding_after_desc;
 
     // .note.metadata section
     constexpr size_t kSessionNoteType = 1;
     size_t note_desc_off_session = AlignUp(sizeof(Elf64_Nhdr) + strlen(kNoteNameComo) + 1, kNoteAlign);
-    size_t note_total_sz_session = note_desc_off_session + session_size;
-    uint64_t session_off_in_data = AlignUp(dynamic_off_in_data + 8 * sizeof(Elf64_Dyn), 8);
+    size_t note_padding_after_desc = (4 - (session_size % 4)) % 4;
+    size_t note_total_sz_session = note_desc_off_session + session_size + note_padding_after_desc;
+    uint64_t session_off_in_data = note_off_in_data + note_total_sz_gnu;
     uint64_t data_sz = session_off_in_data + note_total_sz_session;
+
+    // Section headers: will be written at the end of the file
+    // Sections: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash, .gnu.version, .dynamic, .rela.dyn, .note.gnu.build-id, .note.metadata, .shstrtab
+    constexpr size_t kNumSections = 12;
+    uint64_t shoff = AlignUp(data_off + data_sz, kPageSize);
+    uint64_t shstrtab_off = shoff + (kNumSections + 1) * sizeof(Elf64_Shdr);  // +1 for SHN_UNDEF
+
+    // Calculate .shstrtab size
+    // Section names: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash, .gnu.version, .dynamic, .rela.dyn, .note.gnu.build-id, .metadata, .shstrtab
+    size_t shstrtab_sz = 1;  // Start with null byte
+    const char* section_names[] = {".text", ".data", ".dynsym", ".dynstr", ".hash", ".gnu.hash", ".gnu.version", ".dynamic", ".rela.dyn", ".note.gnu.build-id", ".metadata", ".shstrtab"};
+    for (size_t i = 0;  i < kNumSections;  i++) {
+        shstrtab_sz += strlen(section_names[i]) + 1;
+    }
 
     const uint64_t text_va = text_off;
     const uint64_t data_va = data_off;
@@ -497,8 +595,13 @@ bool BuildElfProxy(
     }
     eh.e_version = EV_CURRENT;
     eh.e_phoff = sizeof(Elf64_Ehdr);
+    eh.e_shoff = shoff;
+    eh.e_ehsize = sizeof(Elf64_Ehdr);
     eh.e_phentsize = sizeof(Elf64_Phdr);
     eh.e_phnum = 2;
+    eh.e_shentsize = sizeof(Elf64_Shdr);
+    eh.e_shnum = kNumSections + 1;  // Include SHN_UNDEF
+    eh.e_shstrndx = kNumSections;  // .shstrtab is the last section (index 12)
 
     if (write(fd, &eh, sizeof(eh)) != sizeof(eh)) {
         close(fd);
@@ -610,16 +713,16 @@ bool BuildElfProxy(
         write(fd, &rela, sizeof(rela));
     }
 
-    // ------------------ GNU_HASH ------------------
-    WriteGnuHashTable(fd, data_off, hash_off_in_data, data_va, dynsym_off_in_data);
+    // ------------------ HASH (SysV) ------------------
+    WriteSysvHashTable(fd, data_off, sysv_hash_off_in_data, data_va, dynsym_off_in_data);
 
-    // ------------------ DYNSYM/DYNSTR ------------------
+    // ------------------ GNU_HASH ------------------
+    WriteGnuHashTable(fd, data_off, gnu_hash_off_in_data, data_va, dynsym_off_in_data);
+
+    // ------------------ DYNSYM ------------------
     lseek(fd, static_cast<off_t>(data_off + dynsym_off_in_data), SEEK_SET);
     Elf64_Sym null_sym = {};
     write(fd, &null_sym, sizeof(null_sym));
-
-    lseek(fd, static_cast<off_t>(data_off + dynstr_off_in_data), SEEK_SET);
-    write(fd, "", 1);
     size_t str_off = 1;
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         const char* name = g_symbols[i].name;
@@ -630,15 +733,58 @@ bool BuildElfProxy(
         sym.st_info  = ELF64_ST_INFO(STB_GLOBAL, STT_FUNC);
         sym.st_shndx = SHN_UNDEF;
         sym.st_value = text_va + i * stub_size;
-        lseek(fd, static_cast<off_t>(data_off + dynsym_off_in_data + (i + 1) * sizeof(Elf64_Sym)), SEEK_SET);
         write(fd, &sym, sizeof(sym));
+        str_off += len;
+    }
 
-        lseek(fd, static_cast<off_t>(data_off + dynstr_off_in_data + str_off), SEEK_SET);
+    // ------------------ DYNSTR ------------------
+    lseek(fd, static_cast<off_t>(data_off + dynstr_off_in_data), SEEK_SET);
+    write(fd, "", 1);
+    str_off = 1;
+    for (size_t i = 0;  i < g_symbol_count;  i++) {
+        const char* name = g_symbols[i].name;
+        size_t len = strlen(name) + 1;
         write(fd, name, len);
         str_off += len;
     }
     size_t origin_name_off = str_off;
     write(fd, origin_so.c_str(), origin_so.size() + 1);
+    str_off += origin_so.size() + 1;
+
+    // Extract basename for SONAME
+    size_t soname_off = str_off;
+    size_t last_slash = origin_so.find_last_of("/\\");
+    std::string soname = (last_slash != std::string::npos) ? origin_so.substr(last_slash + 1) : origin_so;
+    write(fd, soname.c_str(), soname.size() + 1);
+
+    // ------------------ .gnu.version ------------------
+    // Write version entries: all symbols have global index 1 (unversioned)
+    lseek(fd, static_cast<off_t>(data_off + gnu_version_off_in_data), SEEK_SET);
+    uint16_t vers_idx = 0;  // STN_UNDEF has version 0
+    write(fd, &vers_idx, sizeof(vers_idx));
+    for (size_t i = 0;  i < g_symbol_count;  i++) {
+        vers_idx = 1;  // Local version (unversioned symbol)
+        write(fd, &vers_idx, sizeof(vers_idx));
+    }
+
+    // ------------------ DYNAMIC ------------------
+    lseek(fd, static_cast<off_t>(data_off + dynamic_off_in_data), SEEK_SET);
+    Elf64_Dyn dyn[] = {
+        { DT_SONAME,     static_cast<Elf64_Xword>(soname_off) },
+        { DT_NEEDED,     static_cast<Elf64_Xword>(origin_name_off) },
+        { DT_SYMTAB,     data_va + dynsym_off_in_data },
+        { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
+        { DT_STRTAB,     data_va + dynstr_off_in_data },
+        { DT_HASH,       data_va + sysv_hash_off_in_data },
+        { DT_GNU_HASH,   data_va + gnu_hash_off_in_data },
+        { DT_VERSYM,     data_va + gnu_version_off_in_data },
+        { DT_JMPREL,     data_va + rela_off_in_data },
+        { DT_PLTRELSZ,   g_symbol_count * sizeof(Elf64_Rela) },
+        { DT_PLTREL,     static_cast<Elf64_Xword>(DT_RELA) },
+        { DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) },
+        { DT_NULL,       0 }
+    };
+    write(fd, dyn, sizeof(dyn));
 
     // ------------------ .note.gnu.build-id ------------------
     lseek(fd, static_cast<off_t>(data_off + note_off_in_data), SEEK_SET);
@@ -663,22 +809,10 @@ bool BuildElfProxy(
     }
     SHA1_Final(build_id, &ctx);
     write(fd, build_id, kBuildIdSize);
-
-    // ------------------ DYNAMIC ------------------
-    lseek(fd, static_cast<off_t>(data_off + dynamic_off_in_data), SEEK_SET);
-    Elf64_Dyn dyn[] = {
-        { DT_NEEDED,     static_cast<Elf64_Xword>(origin_name_off) },
-        { DT_SYMTAB,     data_va + dynsym_off_in_data },
-        { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
-        { DT_STRTAB,     data_va + dynstr_off_in_data },
-        { DT_GNU_HASH,   data_va + hash_off_in_data },
-        { DT_JMPREL,     data_va + rela_off_in_data },
-        { DT_PLTRELSZ,   g_symbol_count * sizeof(Elf64_Rela) },
-        { DT_PLTREL,     static_cast<Elf64_Xword>(DT_RELA) },
-        { DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) },
-        { DT_NULL,       0 }
-    };
-    write(fd, dyn, sizeof(dyn));
+    padding = gnu_padding_after_desc;
+    if (padding) {
+        write(fd, pad, padding);
+    }
 
     // ------------------ .note.metadata ------------------
     lseek(fd, static_cast<off_t>(data_off + session_off_in_data), SEEK_SET);
@@ -697,6 +831,171 @@ bool BuildElfProxy(
     if (padding) {
         write(fd, pad, padding);
     }
+
+    // ------------------ Section Headers ------------------
+    // First write .shstrtab
+    lseek(fd, static_cast<off_t>(shstrtab_off), SEEK_SET);
+    size_t name_off = 0;
+    write(fd, "", 1);  // First entry is empty (SHN_UNDEF)
+    name_off++;
+
+    // Build section name offset table
+    // Sections: .text(1), .data(2), .dynsym(3), .dynstr(4), .hash(5), .gnu.hash(6), .gnu.version(7), .dynamic(8), .rela.dyn(9), .note.gnu.build-id(10), .note.metadata(11), .shstrtab(12)
+    size_t name_offsets[kNumSections + 1];
+    for (size_t i = 0;  i < kNumSections;  i++) {
+        name_offsets[i + 1] = name_off;  // +1 because index 0 is for SHN_UNDEF (no name)
+        write(fd, section_names[i], strlen(section_names[i]) + 1);
+        name_off += strlen(section_names[i]) + 1;
+    }
+
+    // Write section headers
+    lseek(fd, static_cast<off_t>(shoff), SEEK_SET);
+
+    // SHN_UNDEF (always present)
+    Elf64_Shdr null_sh = {};
+    write(fd, &null_sh, sizeof(null_sh));
+
+    // .text (index 1)
+    Elf64_Shdr sh_text = {};
+    sh_text.sh_name = name_offsets[1];
+    sh_text.sh_type = SHT_PROGBITS;
+    sh_text.sh_flags = SHF_ALLOC | SHF_EXECINSTR;
+    sh_text.sh_offset = text_off;
+    sh_text.sh_addr = text_va;
+    sh_text.sh_size = text_sz;
+    sh_text.sh_entsize = 0;
+    write(fd, &sh_text, sizeof(sh_text));
+
+    // .data (index 2)
+    Elf64_Shdr sh_data = {};
+    sh_data.sh_name = name_offsets[2];
+    sh_data.sh_type = SHT_PROGBITS;
+    sh_data.sh_flags = SHF_ALLOC | SHF_WRITE;
+    sh_data.sh_offset = data_off;
+    sh_data.sh_addr = data_va;
+    sh_data.sh_size = data_sz;
+    sh_data.sh_entsize = 0;
+    write(fd, &sh_data, sizeof(sh_data));
+
+    // .dynsym (index 3) - links to .dynstr (4)
+    Elf64_Shdr sh_dynsym = {};
+    sh_dynsym.sh_name = name_offsets[3];
+    sh_dynsym.sh_type = SHT_DYNSYM;
+    sh_dynsym.sh_flags = SHF_ALLOC;
+    sh_dynsym.sh_offset = data_off + dynsym_off_in_data;
+    sh_dynsym.sh_addr = data_va + dynsym_off_in_data;
+    sh_dynsym.sh_size = (g_symbol_count + 1) * sizeof(Elf64_Sym);
+    sh_dynsym.sh_link = 4;  // .dynstr
+    sh_dynsym.sh_info = 1;  // First global symbol index
+    sh_dynsym.sh_entsize = sizeof(Elf64_Sym);
+    write(fd, &sh_dynsym, sizeof(sh_dynsym));
+
+    // .dynstr (index 4)
+    Elf64_Shdr sh_dynstr = {};
+    sh_dynstr.sh_name = name_offsets[4];
+    sh_dynstr.sh_type = SHT_STRTAB;
+    sh_dynstr.sh_flags = SHF_ALLOC;
+    sh_dynstr.sh_offset = data_off + dynstr_off_in_data;
+    sh_dynstr.sh_addr = data_va + dynstr_off_in_data;
+    sh_dynstr.sh_size = dynstr_sz;
+    sh_dynstr.sh_entsize = 0;
+    write(fd, &sh_dynstr, sizeof(sh_dynstr));
+
+    // .hash (index 5) - links to .dynsym (3)
+    Elf64_Shdr sh_hash = {};
+    sh_hash.sh_name = name_offsets[5];
+    sh_hash.sh_type = SHT_HASH;
+    sh_hash.sh_flags = SHF_ALLOC;
+    sh_hash.sh_offset = data_off + sysv_hash_off_in_data;
+    sh_hash.sh_addr = data_va + sysv_hash_off_in_data;
+    sh_hash.sh_size = sysv_hash_sz;
+    sh_hash.sh_link = 3;  // .dynsym
+    sh_hash.sh_entsize = 4;
+    write(fd, &sh_hash, sizeof(sh_hash));
+
+    // .gnu.hash (index 6) - links to .dynsym (3)
+    Elf64_Shdr sh_gnu_hash = {};
+    sh_gnu_hash.sh_name = name_offsets[6];
+    sh_gnu_hash.sh_type = SHT_GNU_HASH;
+    sh_gnu_hash.sh_flags = SHF_ALLOC;
+    sh_gnu_hash.sh_offset = data_off + gnu_hash_off_in_data;
+    sh_gnu_hash.sh_addr = data_va + gnu_hash_off_in_data;
+    sh_gnu_hash.sh_size = gnu_hash_sz;
+    sh_gnu_hash.sh_link = 3;  // .dynsym
+    sh_gnu_hash.sh_entsize = 0;
+    write(fd, &sh_gnu_hash, sizeof(sh_gnu_hash));
+
+    // .gnu.version (index 7) - links to .dynsym (3)
+    Elf64_Shdr sh_gnu_version = {};
+    sh_gnu_version.sh_name = name_offsets[7];
+    sh_gnu_version.sh_type = SHT_GNU_versym;
+    sh_gnu_version.sh_flags = SHF_ALLOC;
+    sh_gnu_version.sh_offset = data_off + gnu_version_off_in_data;
+    sh_gnu_version.sh_addr = data_va + gnu_version_off_in_data;
+    sh_gnu_version.sh_size = (g_symbol_count + 1) * sizeof(uint16_t);
+    sh_gnu_version.sh_link = 3;  // .dynsym
+    sh_gnu_version.sh_info = 0;
+    sh_gnu_version.sh_entsize = sizeof(uint16_t);
+    write(fd, &sh_gnu_version, sizeof(sh_gnu_version));
+
+    // .dynamic (index 8) - links to .dynstr (4)
+    Elf64_Shdr sh_dynamic = {};
+    sh_dynamic.sh_name = name_offsets[8];
+    sh_dynamic.sh_type = SHT_DYNAMIC;
+    sh_dynamic.sh_flags = SHF_ALLOC | SHF_WRITE;
+    sh_dynamic.sh_offset = data_off + dynamic_off_in_data;
+    sh_dynamic.sh_addr = data_va + dynamic_off_in_data;
+    sh_dynamic.sh_size = 12 * sizeof(Elf64_Dyn);
+    sh_dynamic.sh_link = 4;  // .dynstr
+    sh_dynamic.sh_info = 0;
+    sh_dynamic.sh_entsize = sizeof(Elf64_Dyn);
+    write(fd, &sh_dynamic, sizeof(sh_dynamic));
+
+    // .rela.dyn (index 9) - links to .dynsym (3)
+    Elf64_Shdr sh_rela = {};
+    sh_rela.sh_name = name_offsets[9];
+    sh_rela.sh_type = SHT_RELA;
+    sh_rela.sh_flags = SHF_ALLOC;
+    sh_rela.sh_offset = data_off + rela_off_in_data;
+    sh_rela.sh_addr = data_va + rela_off_in_data;
+    sh_rela.sh_size = g_symbol_count * sizeof(Elf64_Rela);
+    sh_rela.sh_link = 3;  // .dynsym
+    sh_rela.sh_info = 2;  // Section to which relocs apply (.data)
+    sh_rela.sh_entsize = sizeof(Elf64_Rela);
+    write(fd, &sh_rela, sizeof(sh_rela));
+
+    // .note.gnu.build-id (index 10)
+    Elf64_Shdr sh_note_buildid = {};
+    sh_note_buildid.sh_name = name_offsets[10];
+    sh_note_buildid.sh_type = SHT_NOTE;
+    sh_note_buildid.sh_flags = SHF_ALLOC;
+    sh_note_buildid.sh_offset = data_off + note_off_in_data;
+    sh_note_buildid.sh_addr = data_va + note_off_in_data;
+    sh_note_buildid.sh_size = note_total_sz_gnu;
+    sh_note_buildid.sh_entsize = 0;
+    write(fd, &sh_note_buildid, sizeof(sh_note_buildid));
+
+    // .note.metadata (index 11)
+    Elf64_Shdr sh_note_session = {};
+    sh_note_session.sh_name = name_offsets[11];
+    sh_note_session.sh_type = SHT_NOTE;
+    sh_note_session.sh_flags = SHF_ALLOC;
+    sh_note_session.sh_offset = data_off + session_off_in_data;
+    sh_note_session.sh_addr = data_va + session_off_in_data;
+    sh_note_session.sh_size = note_total_sz_session;
+    sh_note_session.sh_entsize = 0;
+    write(fd, &sh_note_session, sizeof(sh_note_session));
+
+    // .shstrtab (index 12)
+    Elf64_Shdr sh_shstrtab = {};
+    sh_shstrtab.sh_name = name_offsets[12];
+    sh_shstrtab.sh_type = SHT_STRTAB;
+    sh_shstrtab.sh_flags = 0;
+    sh_shstrtab.sh_offset = shstrtab_off;
+    sh_shstrtab.sh_addr = 0;
+    sh_shstrtab.sh_size = shstrtab_sz;
+    sh_shstrtab.sh_entsize = 0;
+    write(fd, &sh_shstrtab, sizeof(sh_shstrtab));
 
     close(fd);
     return true;
