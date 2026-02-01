@@ -205,4 +205,40 @@ void File::Close()
     }
 }
 
+bool File::EndsWith(const std::string& s, const std::string& suffix)
+{
+    return s.size() >= suffix.size() &&
+           s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string File::AddComoToPath(const std::string& path)
+{
+    std::string::size_type sep = path.find_last_of("/\\");
+    std::string dir  = (sep == std::string::npos) ? "" : path.substr(0, sep + 1);
+    std::string file = (sep == std::string::npos) ? path : path.substr(sep + 1);
+
+    if (file.empty()) {
+        return path;
+    }
+
+    std::string name;
+    std::string ext;
+
+    std::string::size_type dot = file.find('.');
+    if ((dot == std::string::npos) || (0 == dot)) {
+        name = file;
+        ext  = "";
+    }
+    else {
+        name = file.substr(0, dot);
+        ext  = file.substr(dot);
+    }
+
+    if (EndsWith(name, "_como")) {
+        return path;
+    }
+
+    return dir + name + "_como" + ext;
+}
+
 } // namespace cdlc

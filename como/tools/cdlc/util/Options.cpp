@@ -156,6 +156,7 @@ void Options::ShowUsage() const
             "  -mode-runtime            Set the \"runtime\" mode which is used to compile\n"
             "                           .cdl files of comort\n"
             "  -save-metadata <file>    Save the metadata into <file>\n"
+            "                           If <file> name is end with '.so', ElfProxyBuilder\n"
             "  -split                   Generate interface or class declarations into seperate files when\n"
             "                           in the \"component\" mode or the \"client\" mode\n"
             "  -ComoMetadataReader      Read COMO metadata from <.so file> and dump it\n"

@@ -20,6 +20,7 @@
 #include "util/LightRefBase.h"
 #include "util/String.h"
 #include <cstdio>
+#include <string>
 
 namespace cdlc {
 
@@ -56,6 +57,10 @@ public:
     void Close();
 
     inline bool IsEof() const;
+
+    static bool EndsWith(const std::string& s, const std::string& suffix);
+
+    static std::string AddComoToPath(const std::string& path);
 
 private:
     void OpenFile();

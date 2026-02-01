@@ -32,6 +32,7 @@ set(SOURCES
     StringPool.cpp
     UUID.cpp
     RuleCheckUtils.cpp
+    ElfProxyBuilder.cpp
 )
 
 add_library(cdlc_util STATIC

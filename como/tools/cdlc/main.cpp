@@ -26,6 +26,7 @@
 #include "util/Logger.h"
 #include "util/Options.h"
 #include "util/Properties.h"
+#include "util/ElfProxyBuilder.h"
 
 using namespace cdlc;
 
@@ -76,25 +77,37 @@ int main(int argc, char** argv)
 
         // cdlc -save-metadata
         if (options.DoSaveMetadata()) {
-            File file(options.GetSaveFile(), File::WRITE);
-            if (! file.IsValid()) {
-                Logger::E("cdlc", "Create metadata file \"%s\" failed.",
-                                                       file.GetPath().string());
-                return -1;
-            }
-
             como::MetadataSerializer serializer(component.get());
             serializer.Serialize();
             size_t metadataSize = serializer.GetSize();
             uintptr_t metadata = serializer.GetSerializedMetadata();
 
-            if (! file.Write(reinterpret_cast<void*>(metadata), metadataSize)) {
-                Logger::E("cdlc", "Write metadata file \"%s\" failed.",
-                                                       file.GetPath().string());
-                return -1;
+            if (File::EndsWith(options.GetSaveFile().string(), ".so")) {
+                std::string origin_so = options.GetSaveFile().string();
+                std::string output_so = File::AddComoToPath(origin_so);
+                if (! BuildElfProxy(origin_so, output_so,
+                                    reinterpret_cast<void*>(metadata), metadataSize)) {
+                    Logger::E("cdlc", "BuildElfProxy \"%s\" failed.", origin_so.c_str());
+                    return -1;
+                }
+
             }
-            file.Flush();
-            file.Close();
+            else {
+                File file(options.GetSaveFile(), File::WRITE);
+                if (! file.IsValid()) {
+                    Logger::E("cdlc", "Create metadata file \"%s\" failed.",
+                                                           file.GetPath().string());
+                    return -1;
+                }
+
+                if (! file.Write(reinterpret_cast<void*>(metadata), metadataSize)) {
+                    Logger::E("cdlc", "Write metadata file \"%s\" failed.",
+                                                           file.GetPath().string());
+                    return -1;
+                }
+                file.Flush();
+                file.Close();
+            }
 
             component = nullptr;
         }

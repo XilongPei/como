@@ -25,6 +25,11 @@
 #include <string>
 #include "ElfProxyBuilder.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
+
 namespace cdlc {
 
 // ----------------------------------------------------------------------
@@ -1002,3 +1007,7 @@ bool BuildElfProxy(
 }
 
 } // namespace cdlc
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
