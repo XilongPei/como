@@ -32,7 +32,7 @@ enum class TargetArch {
 // The output is a position-independent shared object with:
 //   - GNU_HASH (with bloom filter)
 //   - .note.gnu.build-id (SHA1 of origin path + symbol list)
-//   - .note.metadata (custom metadata)
+//   - .metadata (custom metadata)
 // Parameters:
 //   origin_so: Path to the original shared library
 //   output_so: Path for the generated proxy
