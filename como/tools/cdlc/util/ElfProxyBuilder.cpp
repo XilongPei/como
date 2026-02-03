@@ -75,6 +75,9 @@ const char* TAG = "ElfProxyBuilder";
 #ifndef DT_RELASZ
 #define DT_RELASZ 8
 #endif
+#ifndef DT_BIND_NOW
+#define DT_BIND_NOW 24
+#endif
 
 // ----------------------------------------------------------------------
 // Pure C SHA-1 implementation (Public Domain)
@@ -439,10 +442,11 @@ void WriteGnuHashTable(
         uint32_t shift2;
     };
 
-    // Use multiple buckets based on symbol count for better distribution
-    // Rule: nbuckets should be power of 2 and >= number of symbols / 4 (roughly)
-    // For simplicity, use 1 bucket if symbol_count < 4, else 2 buckets
-    constexpr uint32_t kNBuckets = 2;
+    // Use single bucket for simplicity
+    // Industrial implementation would use multiple buckets with symbol reordering,
+    // but single-bucket approach works for typical proxy library sizes and is simpler.
+    // All symbols are in one continuous chain, making loader traversal straightforward.
+    constexpr uint32_t kNBuckets = 1;
     constexpr uint32_t kMaskwords = 1;
 
     GnuHashHeader header = {};
@@ -478,7 +482,11 @@ void WriteGnuHashTable(
         chains[i] = hash;
     }
 
-    // Second pass: build bucket chains
+    // Single-bucket implementation: all symbols in one continuous chain
+    // bucket[0] points to first symbol (index 1 = header.symndx)
+    buckets[0] = header.symndx;
+
+    // Update bloom filter for all symbols
     // Chains are stored in symbol order (dynsym order), and each bucket points
     // to the first symbol that hashes to it. The chain is linked via the chain array.
     for (size_t i = 0;  i < g_symbol_count;  i++) {
@@ -629,40 +637,39 @@ bool BuildElfProxy(
     }
 
     const uint64_t stub_size = GetStubSize();
-    const uint64_t ehdr_phdr_sz = sizeof(Elf64_Ehdr) + 2 * sizeof(Elf64_Phdr);
+    const uint64_t ehdr_phdr_sz = sizeof(Elf64_Ehdr) + 3 * sizeof(Elf64_Phdr);  // 3 PHDRs: text, rodata, data
     const uint64_t text_off = AlignUp(ehdr_phdr_sz, kPageSize);
     const uint64_t text_sz = g_symbol_count * stub_size;
-    const uint64_t data_off = AlignUp(text_off + text_sz, kPageSize);
+    const uint64_t rodata_off = AlignUp(text_off + text_sz, kPageSize);
 
-    // Data segment internal offsets
-    uint64_t got_off_in_data = 0;
-    uint64_t rela_off_in_data = AlignUp(got_off_in_data + g_symbol_count * 8, 8);
+    // Read-only data segment: contains .dynsym, .dynstr, .hash, .gnu.hash, .note.gnu.build-id, .metadata
+    uint64_t dynsym_off_in_rodata = 0;
 
     // SysV hash table: nbuckets(4) + nchain(4) + buckets(4) + chain(nchain*4)
-    uint64_t sysv_hash_off_in_data = AlignUp(rela_off_in_data +
-                                             g_symbol_count * sizeof(Elf64_Rela), 8);
+    uint64_t sysv_hash_off_in_rodata = AlignUp(dynsym_off_in_rodata +
+                                                (g_symbol_count + 1) * sizeof(Elf64_Sym), 8);
     uint32_t sysv_hash_sz = 4 + 4 + 4 + (g_symbol_count + 1) * 4;
+    Logger::D(TAG, "sysv_hash_off_in_rodata: 0x%lx, sysv_hash_sz: %u",
+              sysv_hash_off_in_rodata, sysv_hash_sz);
 
-    // GNU hash table: header(16) + bloom(8) + buckets(4) + chains((sym_count+1)*4)
-    uint64_t gnu_hash_off_in_data = AlignUp(sysv_hash_off_in_data + sysv_hash_sz, 8);
-    uint32_t gnu_hash_sz = 16 + 8 + 4 + (g_symbol_count + 1) * 4;
+    // GNU hash table: header(16) + bloom(8) + buckets(4) + chains(g_symbol_count*4)
+    uint64_t gnu_hash_off_in_rodata = AlignUp(sysv_hash_off_in_rodata + sysv_hash_sz, 8);
+    uint32_t gnu_hash_sz = 16 + 8 + 4 + g_symbol_count * 4;
+    Logger::D(TAG, "gnu_hash_off_in_rodata: 0x%lx, gnu_hash_sz: %u",
+              gnu_hash_off_in_rodata, gnu_hash_sz);
 
-    uint64_t dynsym_off_in_data = AlignUp(gnu_hash_off_in_data + gnu_hash_sz, 8);
-    // DYNAMIC after .dynsym
-    uint64_t dynamic_off_in_data = AlignUp(dynsym_off_in_data +
-                                        (g_symbol_count + 1) * sizeof(Elf64_Sym), 8);
-    // DYNSTR after DYNAMIC
-    uint64_t dynstr_off_in_data = AlignUp(dynamic_off_in_data + 12 * sizeof(Elf64_Dyn), 1);
+    // DYNSTR after hash tables
+    uint64_t dynstr_off_in_rodata = AlignUp(gnu_hash_off_in_rodata + gnu_hash_sz, 1);
+    Logger::D(TAG, "dynstr_off_in_rodata: 0x%lx", dynstr_off_in_rodata);
 
     size_t dynstr_sz = 1;
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         dynstr_sz += strlen(g_symbols[i].name) + 1;
     }
-    dynstr_sz += origin_so.size() + 1;
-    // Reserve space for soname (max filename)
-    dynstr_sz += 256;
+    dynstr_sz += origin_so.size() + 1;  // origin_name (for DT_NEEDED)
+    dynstr_sz += origin_so.size() + 1;  // soname (for DT_SONAME, same as origin_name)
 
-    uint64_t note_off_in_data = AlignUp(dynstr_off_in_data + dynstr_sz, 8);
+    uint64_t note_off_in_rodata = AlignUp(dynstr_off_in_rodata + dynstr_sz, 8);
     constexpr size_t kNoteAlign = 4;
     constexpr size_t kBuildIdSize = 20;
     constexpr char kNoteNameGNU[] = "GNU";
@@ -671,9 +678,22 @@ bool BuildElfProxy(
     size_t note_total_sz_gnu = note_desc_off_gnu + kBuildIdSize + gnu_padding_after_desc;
 
     // .metadata as regular PROGBITS section (not NOTE)
-    uint64_t metadata_off_in_data = note_off_in_data + note_total_sz_gnu;
+    uint64_t metadata_off_in_rodata = note_off_in_rodata + note_total_sz_gnu;
     uint64_t metadata_aligned_sz = AlignUp(session_size, 8);
-    uint64_t data_sz = metadata_off_in_data + metadata_aligned_sz;
+
+    // .dynamic section (read-only, as it only contains static metadata)
+    uint64_t dynamic_off_in_rodata = AlignUp(metadata_off_in_rodata + metadata_aligned_sz, 8);
+    constexpr size_t kDynamicEntryCount = 13;  // including DT_NULL
+    uint64_t dynamic_sz = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    uint64_t rodata_sz = dynamic_off_in_rodata + dynamic_sz;
+
+    // Writable data segment: contains GOT, .rela.dyn
+    const uint64_t data_off = AlignUp(rodata_off + rodata_sz, kPageSize);
+
+    // Data segment internal offsets
+    uint64_t got_off_in_data = 0;
+    uint64_t rela_off_in_data = AlignUp(got_off_in_data + g_symbol_count * 8, 8);
+    uint64_t data_sz = rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela);
 
     // Section headers: will be written at the end of the file
     // Sections: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash,
@@ -707,6 +727,7 @@ bool BuildElfProxy(
     }
 
     const uint64_t text_va = text_off;
+    const uint64_t rodata_va = rodata_off;
     const uint64_t data_va = data_off;
 
     // ------------------ ELF Header ------------------
@@ -730,7 +751,7 @@ bool BuildElfProxy(
     eh.e_shoff = shoff;
     eh.e_ehsize = sizeof(Elf64_Ehdr);
     eh.e_phentsize = sizeof(Elf64_Phdr);
-    eh.e_phnum = 2;
+    eh.e_phnum = 4;  // PT_LOAD (RX), PT_LOAD (RO), PT_LOAD (RW), PT_DYNAMIC
     eh.e_shentsize = sizeof(Elf64_Shdr);
     eh.e_shnum = kNumSections + 1;  // Include SHN_UNDEF
     eh.e_shstrndx = kSectionShstrtab;  // .shstrtab index
@@ -752,6 +773,16 @@ bool BuildElfProxy(
     ph_text.p_memsz  = text_sz;
     ph_text.p_align  = kPageSize;
 
+    Elf64_Phdr ph_rodata = {};
+    ph_rodata.p_type   = PT_LOAD;
+    ph_rodata.p_flags  = PF_R;  // Read-only (no PF_W)
+    ph_rodata.p_offset = rodata_off;
+    ph_rodata.p_vaddr  = rodata_va;
+    ph_rodata.p_paddr  = rodata_va;
+    ph_rodata.p_filesz = rodata_sz;
+    ph_rodata.p_memsz  = rodata_sz;
+    ph_rodata.p_align  = kPageSize;
+
     Elf64_Phdr ph_data = {};
     ph_data.p_type   = PT_LOAD;
     ph_data.p_flags  = PF_R | PF_W;
@@ -762,8 +793,20 @@ bool BuildElfProxy(
     ph_data.p_memsz  = data_sz;
     ph_data.p_align  = kPageSize;
 
+    Elf64_Phdr ph_dynamic = {};
+    ph_dynamic.p_type   = PT_DYNAMIC;
+    ph_dynamic.p_flags  = PF_R;  // Read-only
+    ph_dynamic.p_offset = rodata_off + dynamic_off_in_rodata;
+    ph_dynamic.p_vaddr  = rodata_va + dynamic_off_in_rodata;
+    ph_dynamic.p_paddr  = rodata_va + dynamic_off_in_rodata;
+    ph_dynamic.p_filesz = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    ph_dynamic.p_memsz  = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    ph_dynamic.p_align  = 8;
+
     if (write(fd, &ph_text, sizeof(ph_text)) != sizeof(ph_text) ||
-        write(fd, &ph_data, sizeof(ph_data)) != sizeof(ph_data)) {
+        write(fd, &ph_rodata, sizeof(ph_rodata)) != sizeof(ph_rodata) ||
+        write(fd, &ph_data, sizeof(ph_data)) != sizeof(ph_data) ||
+        write(fd, &ph_dynamic, sizeof(ph_dynamic)) != sizeof(ph_dynamic)) {
         close(fd);
         cleanup();
         return false;
@@ -907,13 +950,15 @@ bool BuildElfProxy(
     }
 
     // ------------------ HASH (SysV) ------------------
-    WriteSysvHashTable(fd, data_off, sysv_hash_off_in_data, data_va, dynsym_off_in_data);
+    WriteSysvHashTable(fd, rodata_off, sysv_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
 
     // ------------------ GNU_HASH ------------------
-    WriteGnuHashTable(fd, data_off, gnu_hash_off_in_data, data_va, dynsym_off_in_data);
+    WriteGnuHashTable(fd, rodata_off, gnu_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
 
     // ------------------ DYNSYM ------------------
-    lseek(fd, static_cast<off_t>(data_off + dynsym_off_in_data), SEEK_SET);
+    lseek(fd, static_cast<off_t>(rodata_off + dynsym_off_in_rodata), SEEK_SET);
+    Logger::D(TAG, "Writing .dynsym at file offset 0x%lx, size %zu symbols + null",
+              rodata_off + dynsym_off_in_rodata, g_symbol_count);
     Elf64_Sym null_sym = {};
     write(fd, &null_sym, sizeof(null_sym));
     size_t str_off = 1;
@@ -936,7 +981,7 @@ bool BuildElfProxy(
     }
 
     // ------------------ DYNSTR ------------------
-    lseek(fd, static_cast<off_t>(data_off + dynstr_off_in_data), SEEK_SET);
+    lseek(fd, static_cast<off_t>(rodata_off + dynstr_off_in_rodata), SEEK_SET);
     write(fd, "", 1);
     str_off = 1;
     for (size_t i = 0;  i < g_symbol_count;  i++) {
@@ -949,32 +994,47 @@ bool BuildElfProxy(
     write(fd, origin_so.c_str(), origin_so.size() + 1);
     str_off += origin_so.size() + 1;
 
-    // Extract basename for SONAME
+    // SONAME is the full path to the original .so file
     size_t soname_off = str_off;
-    size_t last_slash = origin_so.find_last_of("/\\");
-    std::string soname = (last_slash != std::string::npos) ? origin_so.substr(last_slash + 1) : origin_so;
-    write(fd, soname.c_str(), soname.size() + 1);
+    write(fd, origin_so.c_str(), origin_so.size() + 1);
+    str_off += origin_so.size() + 1;
+
+    // Update dynstr_sz with actual size (use str_off which is the actual size written)
+    Logger::D(TAG, "dynstr actual size: %zu, soname_off: %zu, origin_name_off: %zu, origin_so size: %zu",
+              str_off, soname_off, origin_name_off, origin_so.size());
+    Logger::D(TAG, "rodata_va: 0x%lx, rodata_off: 0x%lx, dynstr_off_in_rodata: 0x%lx",
+              rodata_va, rodata_off, dynstr_off_in_rodata);
+    Logger::D(TAG, ".dynstr section: sh_offset=0x%lx, sh_addr=0x%lx, sh_size=%zu",
+              rodata_off + dynstr_off_in_rodata, rodata_va + dynstr_off_in_rodata, str_off);
+    Logger::D(TAG, "SONAME vaddr: 0x%lx (offset in dynstr: 0x%lx), STRTAB vaddr: 0x%lx",
+              rodata_va + dynstr_off_in_rodata + soname_off, soname_off, rodata_va + dynstr_off_in_rodata);
+    dynstr_sz = str_off;
 
     // ------------------ DYNAMIC (eager binding via GLOB_DAT, no PLT) ------------------
-    lseek(fd, static_cast<off_t>(data_off + dynamic_off_in_data), SEEK_SET);
+    lseek(fd, static_cast<off_t>(rodata_off + dynamic_off_in_rodata), SEEK_SET);
+    Logger::D(TAG, "Writing dynamic section at file offset 0x%lx, vaddr 0x%lx",
+              rodata_off + dynamic_off_in_rodata, rodata_va + dynamic_off_in_rodata);
     Elf64_Dyn dyn[] = {
-        { DT_SONAME,     static_cast<Elf64_Xword>(data_va + dynstr_off_in_data + soname_off) },
-        { DT_NEEDED,     static_cast<Elf64_Xword>(data_va + dynstr_off_in_data + origin_name_off) },
-        { DT_SYMTAB,     data_va + dynsym_off_in_data },
-        { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
-        { DT_STRTAB,     data_va + dynstr_off_in_data },
+        { DT_FLAGS,      DF_BIND_NOW | DF_STATIC_TLS },  // Force eager binding, static TLS
+        { DT_STRTAB,     rodata_va + dynstr_off_in_rodata },
         { DT_STRSZ,      static_cast<Elf64_Xword>(dynstr_sz) },
-        { DT_HASH,       data_va + sysv_hash_off_in_data },
-        { DT_GNU_HASH,   data_va + gnu_hash_off_in_data },
+        { DT_SYMTAB,     rodata_va + dynsym_off_in_rodata },
+        { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
+        { DT_HASH,       rodata_va + sysv_hash_off_in_rodata },
+        { DT_GNU_HASH,   rodata_va + gnu_hash_off_in_rodata },
+        { DT_SONAME,     static_cast<Elf64_Xword>(rodata_va + dynstr_off_in_rodata + soname_off) },
+        { DT_NEEDED,     static_cast<Elf64_Xword>(rodata_va + dynstr_off_in_rodata + origin_name_off) },
         { DT_RELA,       data_va + rela_off_in_data },
         { DT_RELASZ,     g_symbol_count * sizeof(Elf64_Rela) },
         { DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) },
         { DT_NULL,       0 }
     };
+    Logger::D(TAG, "DT_STRTAB=0x%lx, DT_STRSZ=%lu, DT_SONAME=0x%lx",
+              rodata_va + dynstr_off_in_rodata, dynstr_sz, rodata_va + dynstr_off_in_rodata + soname_off);
     write(fd, dyn, sizeof(dyn));
 
     // ------------------ .note.gnu.build-id ------------------
-    lseek(fd, static_cast<off_t>(data_off + note_off_in_data), SEEK_SET);
+    lseek(fd, static_cast<off_t>(rodata_off + note_off_in_rodata), SEEK_SET);
     Elf64_Nhdr nh = {};
     nh.n_namesz = static_cast<uint32_t>(strlen(kNoteNameGNU) + 1);
     nh.n_descsz = kBuildIdSize;
@@ -1015,7 +1075,7 @@ bool BuildElfProxy(
     }
 
     // ------------------ .metadata ------------------
-    lseek(fd, static_cast<off_t>(data_off + metadata_off_in_data), SEEK_SET);
+    lseek(fd, static_cast<off_t>(rodata_off + metadata_off_in_rodata), SEEK_SET);
     write(fd, session_data, session_size);
     padding = metadata_aligned_sz - session_size;
     if (0 != padding) {
@@ -1073,9 +1133,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_dynsym = {};
     sh_dynsym.sh_name = name_offsets[kSectionDynsym];
     sh_dynsym.sh_type = SHT_DYNSYM;
-    sh_dynsym.sh_flags = SHF_ALLOC;
-    sh_dynsym.sh_offset = data_off + dynsym_off_in_data;
-    sh_dynsym.sh_addr = data_va + dynsym_off_in_data;
+    sh_dynsym.sh_flags = SHF_ALLOC;  // Read-only
+    sh_dynsym.sh_offset = rodata_off + dynsym_off_in_rodata;
+    sh_dynsym.sh_addr = rodata_va + dynsym_off_in_rodata;
     sh_dynsym.sh_size = (g_symbol_count + 1) * sizeof(Elf64_Sym);
     sh_dynsym.sh_link = kSectionDynstr;  // .dynstr
     sh_dynsym.sh_info = 1;  // First global symbol index
@@ -1086,9 +1146,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_dynstr = {};
     sh_dynstr.sh_name = name_offsets[kSectionDynstr];
     sh_dynstr.sh_type = SHT_STRTAB;
-    sh_dynstr.sh_flags = SHF_ALLOC;
-    sh_dynstr.sh_offset = data_off + dynstr_off_in_data;
-    sh_dynstr.sh_addr = data_va + dynstr_off_in_data;
+    sh_dynstr.sh_flags = SHF_ALLOC;  // Read-only
+    sh_dynstr.sh_offset = rodata_off + dynstr_off_in_rodata;
+    sh_dynstr.sh_addr = rodata_va + dynstr_off_in_rodata;
     sh_dynstr.sh_size = dynstr_sz;
     sh_dynstr.sh_entsize = 0;
     write(fd, &sh_dynstr, sizeof(sh_dynstr));
@@ -1097,9 +1157,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_hash = {};
     sh_hash.sh_name = name_offsets[kSectionHash];
     sh_hash.sh_type = SHT_HASH;
-    sh_hash.sh_flags = SHF_ALLOC;
-    sh_hash.sh_offset = data_off + sysv_hash_off_in_data;
-    sh_hash.sh_addr = data_va + sysv_hash_off_in_data;
+    sh_hash.sh_flags = SHF_ALLOC;  // Read-only
+    sh_hash.sh_offset = rodata_off + sysv_hash_off_in_rodata;
+    sh_hash.sh_addr = rodata_va + sysv_hash_off_in_rodata;
     sh_hash.sh_size = sysv_hash_sz;
     sh_hash.sh_link = kSectionDynsym;  // .dynsym
     sh_hash.sh_entsize = 4;
@@ -1109,9 +1169,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_gnu_hash = {};
     sh_gnu_hash.sh_name = name_offsets[kSectionGnuHash];
     sh_gnu_hash.sh_type = SHT_GNU_HASH;
-    sh_gnu_hash.sh_flags = SHF_ALLOC;
-    sh_gnu_hash.sh_offset = data_off + gnu_hash_off_in_data;
-    sh_gnu_hash.sh_addr = data_va + gnu_hash_off_in_data;
+    sh_gnu_hash.sh_flags = SHF_ALLOC;  // Read-only
+    sh_gnu_hash.sh_offset = rodata_off + gnu_hash_off_in_rodata;
+    sh_gnu_hash.sh_addr = rodata_va + gnu_hash_off_in_rodata;
     sh_gnu_hash.sh_size = gnu_hash_sz;
     sh_gnu_hash.sh_link = kSectionDynsym;  // .dynsym
     sh_gnu_hash.sh_entsize = 0;
@@ -1121,10 +1181,10 @@ bool BuildElfProxy(
     Elf64_Shdr sh_dynamic = {};
     sh_dynamic.sh_name = name_offsets[kSectionDynamic];
     sh_dynamic.sh_type = SHT_DYNAMIC;
-    sh_dynamic.sh_flags = SHF_ALLOC | SHF_WRITE;
-    sh_dynamic.sh_offset = data_off + dynamic_off_in_data;
-    sh_dynamic.sh_addr = data_va + dynamic_off_in_data;
-    sh_dynamic.sh_size = 12 * sizeof(Elf64_Dyn);
+    sh_dynamic.sh_flags = SHF_ALLOC;  // Read-only (no SHF_WRITE)
+    sh_dynamic.sh_offset = rodata_off + dynamic_off_in_rodata;
+    sh_dynamic.sh_addr = rodata_va + dynamic_off_in_rodata;
+    sh_dynamic.sh_size = kDynamicEntryCount * sizeof(Elf64_Dyn);
     sh_dynamic.sh_link = kSectionDynstr;  // .dynstr
     sh_dynamic.sh_info = 0;
     sh_dynamic.sh_entsize = sizeof(Elf64_Dyn);
@@ -1147,9 +1207,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_note_buildid = {};
     sh_note_buildid.sh_name = name_offsets[kSectionNoteBuildId];
     sh_note_buildid.sh_type = SHT_NOTE;
-    sh_note_buildid.sh_flags = SHF_ALLOC;
-    sh_note_buildid.sh_offset = data_off + note_off_in_data;
-    sh_note_buildid.sh_addr = data_va + note_off_in_data;
+    sh_note_buildid.sh_flags = SHF_ALLOC;  // Read-only
+    sh_note_buildid.sh_offset = rodata_off + note_off_in_rodata;
+    sh_note_buildid.sh_addr = rodata_va + note_off_in_rodata;
     sh_note_buildid.sh_size = note_total_sz_gnu;
     sh_note_buildid.sh_entsize = 0;
     write(fd, &sh_note_buildid, sizeof(sh_note_buildid));
@@ -1158,9 +1218,9 @@ bool BuildElfProxy(
     Elf64_Shdr sh_metadata = {};
     sh_metadata.sh_name = name_offsets[kSectionMetadata];
     sh_metadata.sh_type = SHT_PROGBITS;
-    sh_metadata.sh_flags = SHF_ALLOC;
-    sh_metadata.sh_offset = data_off + metadata_off_in_data;
-    sh_metadata.sh_addr = data_va + metadata_off_in_data;
+    sh_metadata.sh_flags = SHF_ALLOC;  // Read-only
+    sh_metadata.sh_offset = rodata_off + metadata_off_in_rodata;
+    sh_metadata.sh_addr = rodata_va + metadata_off_in_rodata;
     sh_metadata.sh_size = metadata_aligned_sz;
     sh_metadata.sh_entsize = 0;
     write(fd, &sh_metadata, sizeof(sh_metadata));
