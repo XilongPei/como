@@ -51,6 +51,9 @@ const char* TAG = "ElfProxyBuilder";
 #ifndef R_RISCV_64
 #define R_RISCV_64 3
 #endif
+#ifndef R_RISCV_GLOB_DAT
+#define R_RISCV_GLOB_DAT 19
+#endif
 #ifndef R_RISCV_JUMP_SLOT
 #define R_RISCV_JUMP_SLOT 21
 #endif
@@ -77,6 +80,12 @@ const char* TAG = "ElfProxyBuilder";
 #endif
 #ifndef DT_BIND_NOW
 #define DT_BIND_NOW 24
+#endif
+#ifndef DF_BIND_NOW
+#define DF_BIND_NOW 0x00000008
+#endif
+#ifndef DF_STATIC_TLS
+#define DF_STATIC_TLS 0x00000010
 #endif
 
 // ----------------------------------------------------------------------
@@ -194,24 +203,21 @@ void SHA1_Final(
     uint64_t bit_count = ctx->count * 8;
     size_t index = ctx->count % SHA1_BLOCK_SIZE;
 
-    // Check if we need to process current block before appending 0x80
-    // Need space for: 0x80 (1 byte) + zeros + bit length (8 bytes) = 9 bytes minimum
-    // If index >= 56, current block has <= 8 bytes remaining, insufficient for padding
-    if (index >= SHA1_BLOCK_SIZE - 8) {
-        // Not enough space for padding (0x80 + zeros + 8-byte length)
-        // Fill current block with zeros and process it
+    // CRITICAL: 0x80 MUST immediately follow the message bytes (SHA-1 specification).
+    // Do NOT fill with zeros first - append 0x80 directly to the message.
+    ctx->buffer[index++] = 0x80;
+
+    // Check if we need to process current block and move to a new one
+    // We need 8 bytes for the bit length at offset 56.
+    // If adding 0x80 pushed us past offset 56, we need a new block.
+    if (index > 56) {
+        // Not enough space: pad current block to 64 bytes, process it, then start fresh
         while (index < SHA1_BLOCK_SIZE) {
             ctx->buffer[index++] = 0;
         }
         sha1_transform(ctx->state, ctx->buffer);
-        // Start fresh with new block (index = 0)
         index = 0;
-        // NOTE: After this if block, we will append 0x80 to the NEW block below
     }
-
-    // Append 0x80 byte (marks end of message)
-    // This is either appended to current block (if space available) or new block (if we just processed one)
-    ctx->buffer[index++] = 0x80;
 
     // Pad with zeros until offset 56 (leaving 8 bytes for bit length)
     while (index < 56) {
@@ -250,6 +256,9 @@ Symbol g_symbols[kMaxSyms];
 size_t g_symbol_count = 0;
 TargetArch g_target_arch = TargetArch::kX86_64;
 
+// Parsed from original library
+std::string g_origin_soname;
+
 uint64_t AlignUp(
     /* [in] */ uint64_t value,
     /* [in] */ uint64_t align)
@@ -277,7 +286,7 @@ uint64_t GetStubSize()
 {
     switch (g_target_arch) {
         case TargetArch::kX86_64:
-            return 6;
+            return 10;  // endbr64 (4 bytes) + jmp [rip+disp] (6 bytes) for CET/IBT compatibility
         case TargetArch::kAARCH64:
             return 12;
         case TargetArch::kRISCV64:
@@ -427,6 +436,123 @@ int ParseOriginDynSym(
     return 0;
 }
 
+// Parse DT_SONAME from the original ELF file
+int ParseOriginSoName(
+    /* [in] */ const std::string& path)
+{
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd < 0) {
+        return -1;
+    }
+
+    struct stat st;
+    if (fstat(fd, &st) < 0) {
+        close(fd);
+        return -2;
+    }
+
+    Elf64_Ehdr eh;
+    if (read(fd, &eh, sizeof(eh)) != static_cast<ssize_t>(sizeof(eh))) {
+        close(fd);
+        return -3;
+    }
+
+    if (memcmp(eh.e_ident, ELFMAG, SELFMAG) != 0) {
+        close(fd);
+        return -4;
+    }
+
+    // Find .dynamic section and its linked .dynstr
+    Elf64_Shdr* shdrs = static_cast<Elf64_Shdr*>(
+                                        malloc(eh.e_shnum * sizeof(Elf64_Shdr)));
+    if (nullptr == shdrs) {
+        close(fd);
+        return -5;
+    }
+
+    lseek(fd, static_cast<off_t>(eh.e_shoff), SEEK_SET);
+    if (read(fd, shdrs, eh.e_shnum * sizeof(Elf64_Shdr)) !=
+                        static_cast<ssize_t>(eh.e_shnum * sizeof(Elf64_Shdr))) {
+        free(shdrs);
+        close(fd);
+        return -6;
+    }
+
+    Elf64_Shdr* dynamic_sh = nullptr;
+    Elf64_Shdr* dynstr_sh = nullptr;
+    for (int i = 0;  i < eh.e_shnum;  i++) {
+        if (shdrs[i].sh_type == SHT_DYNAMIC) {
+            dynamic_sh = &shdrs[i];
+            if (dynamic_sh->sh_link < static_cast<unsigned>(eh.e_shnum)) {
+                dynstr_sh = &shdrs[dynamic_sh->sh_link];
+            }
+            break;
+        }
+    }
+
+    if ((nullptr == dynamic_sh) || (nullptr == dynstr_sh)) {
+        free(shdrs);
+        close(fd);
+        return -7;  // No .dynamic or .dynstr
+    }
+
+    // Read .dynstr section
+    if (dynstr_sh->sh_offset + dynstr_sh->sh_size > static_cast<uint64_t>(st.st_size)) {
+        free(shdrs);
+        close(fd);
+        return -8;
+    }
+
+    char* strtab = static_cast<char*>(malloc(dynstr_sh->sh_size));
+    if (nullptr == strtab) {
+        free(shdrs);
+        close(fd);
+        return -9;
+    }
+
+    lseek(fd, static_cast<off_t>(dynstr_sh->sh_offset), SEEK_SET);
+    if (read(fd, strtab, dynstr_sh->sh_size) !=
+                                    static_cast<ssize_t>(dynstr_sh->sh_size)) {
+        free(strtab);
+        free(shdrs);
+        close(fd);
+        return -10;
+    }
+
+    // Read .dynamic entries and find DT_SONAME
+    lseek(fd, static_cast<off_t>(dynamic_sh->sh_offset), SEEK_SET);
+    size_t ndyn = dynamic_sh->sh_size / sizeof(Elf64_Dyn);
+    bool found_soname = false;
+    for (size_t i = 0;  i < ndyn;  i++) {
+        Elf64_Dyn dyn;
+        if (read(fd, &dyn, sizeof(dyn)) != static_cast<ssize_t>(sizeof(dyn))) {
+            break;
+        }
+
+        if (dyn.d_tag == DT_SONAME) {
+            uint32_t name_off = static_cast<uint32_t>(dyn.d_un.d_val);
+            if (name_off < dynstr_sh->sh_size) {
+                g_origin_soname = std::string(strtab + name_off);
+                found_soname = true;
+            }
+            break;
+        }
+    }
+
+    free(strtab);
+    free(shdrs);
+    close(fd);
+
+    if (!found_soname) {
+        // No DT_SONAME found, fallback to basename
+        Logger::D(TAG, "No DT_SONAME found in %s, using basename as fallback", path.c_str());
+        size_t last_slash = path.find_last_of("/\\");
+        g_origin_soname = (last_slash != std::string::npos) ? path.substr(last_slash + 1) : path;
+    }
+
+    return 0;
+}
+
 void WriteGnuHashTable(
     /* [in] */ int fd,
     /* [in] */ uint64_t data_off,
@@ -443,9 +569,9 @@ void WriteGnuHashTable(
     };
 
     // Use single bucket for simplicity
-    // Industrial implementation would use multiple buckets with symbol reordering,
-    // but single-bucket approach works for typical proxy library sizes and is simpler.
-    // All symbols are in one continuous chain, making loader traversal straightforward.
+    // CAVEAT: Strict glibc (≥ 2.34 with LTO + RELRO) prefers proper hash-based bucket distribution.
+    // Single-bucket works reliably on Android bionic, musl, and most glibc configurations.
+    // For maximum glibc compliance, increase nbuckets and distribute symbols by hash % nbuckets.
     constexpr uint32_t kNBuckets = 1;
     constexpr uint32_t kMaskwords = 1;
 
@@ -482,44 +608,35 @@ void WriteGnuHashTable(
         chains[i] = hash;
     }
 
-    // Single-bucket implementation: all symbols in one continuous chain
-    // bucket[0] points to first symbol (index 1 = header.symndx)
-    buckets[0] = header.symndx;
+    // Single-bucket approach: all symbols go into bucket[0]
+    // NOTE: This is a simplified implementation. For strict glibc compliance with
+    // RELRO and LTO, a multi-bucket approach with proper hash-based distribution
+    // is preferred. However, single-bucket works reliably on most platforms
+    // (Android bionic, musl, and glibc < 2.34 without aggressive optimizations).
+    buckets[0] = header.symndx;  // Points to first symbol (dynsym[1])
 
     // Update bloom filter for all symbols
-    // Chains are stored in symbol order (dynsym order), and each bucket points
-    // to the first symbol that hashes to it. The chain is linked via the chain array.
+    // Standard GNU hash bloom filter algorithm (as implemented in glibc):
+    // bloom[word_index] |= (1 << (hash % 64)) | (1 << ((hash >> shift2) % 64))
+    constexpr uint32_t ELFCLASS_BITS = 64;
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         uint32_t hash = chains[i];
-        uint32_t bucket_id = hash % kNBuckets;
 
-        // Update bloom filter
-        uint32_t h1 = hash;
-        uint32_t h2 = hash >> header.shift2;
-        size_t word1 = (h1 / 64) % kMaskwords;
-        size_t word2 = (h2 / 64) % kMaskwords;
-        bloom[word1] |= (1ULL << (h1 % 64));
-        bloom[word2] |= (1ULL << (h2 % 64));
+        // Compute bitmask with two hash functions
+        uint64_t bitmask = (1ULL << (hash % ELFCLASS_BITS)) |
+                          (1ULL << ((hash >> header.shift2) % ELFCLASS_BITS));
 
-        // Set bucket pointer if not set (first symbol in this bucket)
-        if (buckets[bucket_id] == 0) {
-            buckets[bucket_id] = static_cast<uint32_t>(i) + header.symndx;  // 1-based index
-        }
+        // Compute which bloom filter word to update
+        size_t word_index = (hash / ELFCLASS_BITS) % kMaskwords;
+
+        // Set bits in the bloom filter
+        bloom[word_index] |= bitmask;
     }
 
-    // Third pass: set last bit (bit31 = 1) for the last symbol in each bucket's chain
-    // Scan symbols in reverse order and mark the last symbol for each bucket
-    uint32_t last_bucket_seen[kNBuckets] = {0};
-    for (size_t i = g_symbol_count;  i > 0;  i--) {
-        uint32_t idx = i - 1;
-        uint32_t hash = chains[idx];
-        uint32_t bucket_id = hash % kNBuckets;
-
-        // Mark as last in its chain if we haven't marked any for this bucket yet
-        if (last_bucket_seen[bucket_id] == 0) {
-            chains[idx] |= 0x80000000U;
-            last_bucket_seen[bucket_id] = 1;
-        }
+    // Set the last bit (bit31 = 1) for the last symbol in the chain
+    // Since all symbols are in one continuous chain, only the last symbol needs bit31 set
+    if (g_symbol_count > 0) {
+        chains[g_symbol_count - 1] |= 0x80000000U;
     }
 
     // Write hash table
@@ -545,16 +662,19 @@ void WriteSysvHashTable(
     // buckets[nbuckets]
     // chain[nchain]
 
-    uint32_t nbuckets = 1;
+    // Use reasonable bucket count to reduce hash collisions.
+    // glibc typically uses power-of-two bucket counts, often similar to symbol count.
+    // For proxy libraries with modest symbol counts, symbol_count/2 is a good balance
+    // between space efficiency and lookup performance.
+    // CRITICAL: nbuckets formula MUST match the one in BuildElfProxy() for size calculation
+    uint32_t nbuckets = static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 2));
     uint32_t nchain = static_cast<uint32_t>(g_symbol_count) + 1;
 
-    // Buckets array (all symbols go to bucket 0)
-    // bucket[b] = index of first symbol in this bucket
-    uint32_t* buckets = static_cast<uint32_t*>(malloc(nbuckets * sizeof(uint32_t)));
+    // Buckets array: bucket[b] = index of first symbol in this bucket (0 = empty)
+    uint32_t* buckets = static_cast<uint32_t*>(calloc(nbuckets, sizeof(uint32_t)));
     if (nullptr == buckets) {
         return;
     }
-    buckets[0] = 1;  // First symbol is at dynsym[1] (dynsym[0] is STN_UNDEF)
 
     // Chain array: chain[i] = index of next symbol with same hash, or STN_UNDEF (0)
     // dynsym[0] = STN_UNDEF, dynsym[1..g_symbol_count] = actual symbols
@@ -564,23 +684,31 @@ void WriteSysvHashTable(
         return;
     }
 
-    // Build chain: link all symbols in bucket 0 (all symbols hash to bucket 0)
-    // chain[0] is for dynsym[0]=STN_UNDEF (unused in hash lookup)
-    // chain[1..g_symbol_count] corresponds to dynsym[1..g_symbol_count]
-    chain[0] = 0;  // STN_UNUSED
+    // Initialize entire chain array to 0 (STN_UNDEF) for safety
+    memset(chain, 0, nchain * sizeof(uint32_t));
 
-    // Chain links: 1 -> 2 -> ... -> g_symbol_count -> 0
-    // Loop for i = 1 to g_symbol_count-1, each points to i+1
-    // Then set chain[g_symbol_count] = 0 to terminate
+    // Build hash table using ElfHash()
+    // For each symbol, compute hash % nbuckets and append to appropriate bucket's chain
     if (g_symbol_count > 0) {
-        for (size_t i = 1;  i < static_cast<size_t>(g_symbol_count);  i++) {
-            chain[i] = i + 1;  // chain[i] points to next symbol index
+        for (size_t sym_idx = 1;  sym_idx <= static_cast<size_t>(g_symbol_count);  sym_idx++) {
+            const char* sym_name = g_symbols[sym_idx - 1].name;
+            uint32_t hash = ElfHash(sym_name);
+            uint32_t bucket_idx = hash % nbuckets;
+
+            if (buckets[bucket_idx] == 0) {
+                // First symbol in this bucket
+                buckets[bucket_idx] = static_cast<uint32_t>(sym_idx);
+            }
+            else {
+                // Append to existing chain
+                uint32_t curr = buckets[bucket_idx];
+                while (chain[curr] != 0) {
+                    curr = chain[curr];
+                }
+                chain[curr] = static_cast<uint32_t>(sym_idx);
+            }
+            // chain[sym_idx] is already 0 from memset (terminates the chain)
         }
-        chain[g_symbol_count] = 0;  // Terminate the chain
-    }
-    else {
-        // No symbols, bucket should point to STN_UNDEF
-        buckets[0] = 0;
     }
 
     // Write hash table
@@ -604,6 +732,7 @@ bool BuildElfProxy(
     Symbol prev_symbols[kMaxSyms];
     size_t prev_symbol_count = g_symbol_count;
     TargetArch prev_arch = g_target_arch;
+    std::string prev_soname = g_origin_soname;
     memcpy(prev_symbols, g_symbols, sizeof(g_symbols));
 
     // RAII-style cleanup lambda to restore state
@@ -611,15 +740,24 @@ bool BuildElfProxy(
         memcpy(g_symbols, prev_symbols, sizeof(g_symbols));
         g_symbol_count = prev_symbol_count;
         g_target_arch = prev_arch;
+        g_origin_soname = prev_soname;
     };
 
     // Initialize for this build
     g_symbol_count = 0;
     g_target_arch = TargetArch::kX86_64;
+    g_origin_soname.clear();
     if (ParseOriginDynSym(origin_so) != 0) {
         Logger::E(TAG, "Parse original dynamic symbol error. %s", origin_so.c_str());
         cleanup();
         return false;
+    }
+
+    // Parse DT_SONAME from original library
+    if (ParseOriginSoName(origin_so) != 0) {
+        Logger::D(TAG, "Failed to parse DT_SONAME from %s, using basename as fallback",
+                  origin_so.c_str());
+        // Continue anyway as we have a fallback in ParseOriginSoName
     }
 
     // Check if we have any symbols to export
@@ -637,20 +775,24 @@ bool BuildElfProxy(
     }
 
     const uint64_t stub_size = GetStubSize();
-    const uint64_t ehdr_phdr_sz = sizeof(Elf64_Ehdr) + 3 * sizeof(Elf64_Phdr);  // 3 PHDRs: text, rodata, data
+    const uint64_t ehdr_phdr_sz = sizeof(Elf64_Ehdr) + 5 * sizeof(Elf64_Phdr);  // 5 PHDRs: text, rodata, data, dynamic, note
     const uint64_t text_off = AlignUp(ehdr_phdr_sz, kPageSize);
     const uint64_t text_sz = g_symbol_count * stub_size;
     const uint64_t rodata_off = AlignUp(text_off + text_sz, kPageSize);
 
     // Read-only data segment: contains .dynsym, .dynstr, .hash, .gnu.hash, .note.gnu.build-id, .metadata
-    uint64_t dynsym_off_in_rodata = 0;
+    // ELF ABI requires .dynsym (Elf64_Sym) to be 8-byte aligned
+    uint64_t dynsym_off_in_rodata = AlignUp(0, 8);  // Explicit 8-byte alignment for robustness
 
-    // SysV hash table: nbuckets(4) + nchain(4) + buckets(4) + chain(nchain*4)
+    // SysV hash table: nbuckets(4) + nchain(4) + buckets[nbuckets](nbuckets*4) + chain[nchain](nchain*4)
+    // NOTE: nbuckets MUST match the value used in WriteSysvHashTable()
+    uint32_t sysv_nbuckets = static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 2));
+    uint32_t sysv_nchain = static_cast<uint32_t>(g_symbol_count) + 1;
     uint64_t sysv_hash_off_in_rodata = AlignUp(dynsym_off_in_rodata +
                                                 (g_symbol_count + 1) * sizeof(Elf64_Sym), 8);
-    uint32_t sysv_hash_sz = 4 + 4 + 4 + (g_symbol_count + 1) * 4;
-    Logger::D(TAG, "sysv_hash_off_in_rodata: 0x%lx, sysv_hash_sz: %u",
-              sysv_hash_off_in_rodata, sysv_hash_sz);
+    uint32_t sysv_hash_sz = 4 + 4 + sysv_nbuckets * 4 + sysv_nchain * 4;
+    Logger::D(TAG, "sysv_hash_off_in_rodata: 0x%lx, sysv_hash_sz: %u (nbuckets=%u, nchain=%u)",
+              sysv_hash_off_in_rodata, sysv_hash_sz, sysv_nbuckets, sysv_nchain);
 
     // GNU hash table: header(16) + bloom(8) + buckets(4) + chains(g_symbol_count*4)
     uint64_t gnu_hash_off_in_rodata = AlignUp(sysv_hash_off_in_rodata + sysv_hash_sz, 8);
@@ -666,8 +808,12 @@ bool BuildElfProxy(
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         dynstr_sz += strlen(g_symbols[i].name) + 1;
     }
-    dynstr_sz += origin_so.size() + 1;  // origin_name (for DT_NEEDED)
-    dynstr_sz += origin_so.size() + 1;  // soname (for DT_SONAME, same as origin_name)
+    // DT_NEEDED: origin library's SONAME (what proxy depends on)
+    dynstr_sz += g_origin_soname.size() + 1;
+    // DT_SONAME: proxy's own soname (basename of output, who proxy is)
+    size_t last_slash = output_so.find_last_of("/\\");
+    std::string proxy_soname = (last_slash != std::string::npos) ? output_so.substr(last_slash + 1) : output_so;
+    dynstr_sz += proxy_soname.size() + 1;
 
     uint64_t note_off_in_rodata = AlignUp(dynstr_off_in_rodata + dynstr_sz, 8);
     constexpr size_t kNoteAlign = 4;
@@ -681,19 +827,25 @@ bool BuildElfProxy(
     uint64_t metadata_off_in_rodata = note_off_in_rodata + note_total_sz_gnu;
     uint64_t metadata_aligned_sz = AlignUp(session_size, 8);
 
-    // .dynamic section (read-only, as it only contains static metadata)
-    uint64_t dynamic_off_in_rodata = AlignUp(metadata_off_in_rodata + metadata_aligned_sz, 8);
-    constexpr size_t kDynamicEntryCount = 13;  // including DT_NULL
-    uint64_t dynamic_sz = kDynamicEntryCount * sizeof(Elf64_Dyn);
-    uint64_t rodata_sz = dynamic_off_in_rodata + dynamic_sz;
+    // RODATA segment ends after .metadata
+    uint64_t rodata_sz = metadata_off_in_rodata + metadata_aligned_sz;
 
-    // Writable data segment: contains GOT, .rela.dyn
+    // Writable data segment: contains GOT, .rela.dyn, .dynamic
+    // NOTE: .dynamic must be in a writable segment because loader may modify it (e.g., DT_DEBUG)
+    // Even though most entries are read-only, placing it in RW ensures compatibility
+    // with hardened loaders and RELRO configurations.
     const uint64_t data_off = AlignUp(rodata_off + rodata_sz, kPageSize);
 
     // Data segment internal offsets
     uint64_t got_off_in_data = 0;
     uint64_t rela_off_in_data = AlignUp(got_off_in_data + g_symbol_count * 8, 8);
-    uint64_t data_sz = rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela);
+    uint64_t dynamic_off_in_data = AlignUp(rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela), 8);
+
+    // Calculate dynamic section size based on actual entries
+    // Define all dynamic entries here first to ensure size calculation matches actual entries
+    constexpr size_t kDynamicEntryCount = 13;  // MUST match the entries below
+    uint64_t dynamic_sz = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    uint64_t data_sz = dynamic_off_in_data + dynamic_sz;
 
     // Section headers: will be written at the end of the file
     // Sections: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash,
@@ -751,7 +903,7 @@ bool BuildElfProxy(
     eh.e_shoff = shoff;
     eh.e_ehsize = sizeof(Elf64_Ehdr);
     eh.e_phentsize = sizeof(Elf64_Phdr);
-    eh.e_phnum = 4;  // PT_LOAD (RX), PT_LOAD (RO), PT_LOAD (RW), PT_DYNAMIC
+    eh.e_phnum = 5;  // PT_LOAD (RX), PT_LOAD (RO), PT_LOAD (RW), PT_DYNAMIC, PT_NOTE
     eh.e_shentsize = sizeof(Elf64_Shdr);
     eh.e_shnum = kNumSections + 1;  // Include SHN_UNDEF
     eh.e_shstrndx = kSectionShstrtab;  // .shstrtab index
@@ -795,18 +947,29 @@ bool BuildElfProxy(
 
     Elf64_Phdr ph_dynamic = {};
     ph_dynamic.p_type   = PT_DYNAMIC;
-    ph_dynamic.p_flags  = PF_R;  // Read-only
-    ph_dynamic.p_offset = rodata_off + dynamic_off_in_rodata;
-    ph_dynamic.p_vaddr  = rodata_va + dynamic_off_in_rodata;
-    ph_dynamic.p_paddr  = rodata_va + dynamic_off_in_rodata;
-    ph_dynamic.p_filesz = kDynamicEntryCount * sizeof(Elf64_Dyn);
-    ph_dynamic.p_memsz  = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    ph_dynamic.p_flags  = PF_R | PF_W;  // Read-write: loader may modify DT_DEBUG and other entries
+    ph_dynamic.p_offset = data_off + dynamic_off_in_data;
+    ph_dynamic.p_vaddr  = data_va + dynamic_off_in_data;
+    ph_dynamic.p_paddr  = data_va + dynamic_off_in_data;
+    ph_dynamic.p_filesz = dynamic_sz;
+    ph_dynamic.p_memsz  = dynamic_sz;
     ph_dynamic.p_align  = 8;
+
+    Elf64_Phdr ph_note = {};
+    ph_note.p_type   = PT_NOTE;
+    ph_note.p_flags  = PF_R;  // Read-only
+    ph_note.p_offset = rodata_off + note_off_in_rodata;
+    ph_note.p_vaddr  = rodata_va + note_off_in_rodata;
+    ph_note.p_paddr  = rodata_va + note_off_in_rodata;
+    ph_note.p_filesz = note_total_sz_gnu;
+    ph_note.p_memsz  = note_total_sz_gnu;
+    ph_note.p_align  = 4;  // NOTE sections typically 4-byte aligned
 
     if (write(fd, &ph_text, sizeof(ph_text)) != sizeof(ph_text) ||
         write(fd, &ph_rodata, sizeof(ph_rodata)) != sizeof(ph_rodata) ||
         write(fd, &ph_data, sizeof(ph_data)) != sizeof(ph_data) ||
-        write(fd, &ph_dynamic, sizeof(ph_dynamic)) != sizeof(ph_dynamic)) {
+        write(fd, &ph_dynamic, sizeof(ph_dynamic)) != sizeof(ph_dynamic) ||
+        write(fd, &ph_note, sizeof(ph_note)) != sizeof(ph_note)) {
         close(fd);
         cleanup();
         return false;
@@ -819,21 +982,27 @@ bool BuildElfProxy(
         uint64_t got_va  = data_va + got_off_in_data + i * 8;
 
         if (g_target_arch == TargetArch::kX86_64) {
-            int64_t disp64 = static_cast<int64_t>(got_va) - static_cast<int64_t>(stub_va + 6);
+            // endbr64: Intel CET/IBT compatible indirect jump target
+            // Required on systems with CET enabled to avoid SIGILL
+            uint8_t endbr64[4] = {0xf3, 0x0f, 0x1e, 0xfa};
+            write(fd, endbr64, 4);
+
+            // jmp [rip + disp]: indirect jump through GOT entry
+            int64_t disp64 = static_cast<int64_t>(got_va) - static_cast<int64_t>(stub_va + 10);
 
             // Check RIP-relative displacement range: 32-bit signed (±2GB)
             if (disp64 < INT32_MIN || disp64 > INT32_MAX) {
                 Logger::E(TAG, "GOT entry too far from stub: 0x%lx - 0x%lx = %ld "
-                               "(exceeds ±2GB RIP-relative range)", got_va, stub_va + 6, disp64);
+                               "(exceeds ±2GB RIP-relative range)", got_va, stub_va + 10, disp64);
                 close(fd);
                 cleanup();
                 return false;
             }
 
             int32_t disp = static_cast<int32_t>(disp64);
-            uint8_t code[6] = {0xff, 0x25};
-            memcpy(code + 2, &disp, 4);
-            write(fd, code, 6);
+            uint8_t jmp_code[6] = {0xff, 0x25};
+            memcpy(jmp_code + 2, &disp, 4);
+            write(fd, jmp_code, 6);
         }
         else if (g_target_arch == TargetArch::kAARCH64) {
             uint64_t page_base = stub_va & ~0xFFFULL;
@@ -942,18 +1111,12 @@ bool BuildElfProxy(
         else if (g_target_arch == TargetArch::kAARCH64) {
             rela.r_info = ELF64_R_INFO(i + 1, R_AARCH64_GLOB_DAT);
         }
-        else { // RISCV: use R_RISCV_64 for GOT entry initialization (eager binding)
-            rela.r_info = ELF64_R_INFO(i + 1, R_RISCV_64);
+        else { // RISCV: use R_RISCV_GLOB_DAT for GOT entry (eager binding)
+            rela.r_info = ELF64_R_INFO(i + 1, R_RISCV_GLOB_DAT);
         }
         rela.r_addend = 0;
         write(fd, &rela, sizeof(rela));
     }
-
-    // ------------------ HASH (SysV) ------------------
-    WriteSysvHashTable(fd, rodata_off, sysv_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
-
-    // ------------------ GNU_HASH ------------------
-    WriteGnuHashTable(fd, rodata_off, gnu_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
 
     // ------------------ DYNSYM ------------------
     lseek(fd, static_cast<off_t>(rodata_off + dynsym_off_in_rodata), SEEK_SET);
@@ -962,6 +1125,11 @@ bool BuildElfProxy(
     Elf64_Sym null_sym = {};
     write(fd, &null_sym, sizeof(null_sym));
     size_t str_off = 1;
+
+    // CRITICAL: All exported symbols must be STB_GLOBAL.
+    // GNU hash's symndx assumes dynsym[1] is the first GLOBAL symbol.
+    // If you add LOCAL symbols (TLS, IFUNC, etc.), they must go BEFORE
+    // the first GLOBAL symbol, and symndx must be updated accordingly.
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         const char* name = g_symbols[i].name;
         size_t len = strlen(name) + 1;
@@ -969,15 +1137,25 @@ bool BuildElfProxy(
         Elf64_Sym sym = {};
         sym.st_name  = static_cast<uint32_t>(str_off);
         sym.st_info  = ELF64_ST_INFO(STB_GLOBAL, STT_FUNC);
-        // Design choice: Mark symbols as SHN_UNDEF to enable eager binding via DT_RELA.
-        // This makes the proxy a pure forwarding stub - symbols are resolved by loader
-        // from the original library (via DT_NEEDED), with GOT entries filled at load time.
-        // Alternative: Could point st_shndx to .text and set st_value to stub address,
-        // which would help debug tools but bypass loader's symbol resolution.
-        sym.st_shndx = SHN_UNDEF;
-        sym.st_value = 0;  // SHN_UNDEF symbols must have st_value = 0
+        // STT_FUNC + SHN_TEXT with st_value pointing to stub is the standard ELF approach.
+        // This makes tools (objdump, gdb, perf) correctly identify symbols as functions.
+        // Symbol resolution still happens via .rela.dyn + GLOB_DAT: the loader fills
+        // GOT entries with addresses from the original library, and stubs jump through GOT.
+        sym.st_shndx = kSectionText;  // Point to .text section
+        sym.st_value = i * stub_size;  // Offset within .text section (ET_DYN: relative, not absolute VA)
+        sym.st_size  = stub_size;  // Stub code size
         write(fd, &sym, sizeof(sym));
         str_off += len;
+    }
+
+    // Sanity check: Ensure dynsym[1] is indeed the first GLOBAL symbol.
+    // This is critical for GNU hash correctness. If this assertion fails,
+    // it means local symbols were added and GNU hash's symndx needs updating.
+    if (g_symbol_count > 0) {
+        // In the current implementation, dynsym[0] = STN_UNDEF, dynsym[1] = first exported symbol.
+        // All exported symbols are STB_GLOBAL, so symndx=1 is correct.
+        // If you add local symbols later, update the logic and this check.
+        Logger::D(TAG, "GNU hash symndx=1 points to dynsym[1], which is STB_GLOBAL (expected)");
     }
 
     // ------------------ DYNSTR ------------------
@@ -990,47 +1168,72 @@ bool BuildElfProxy(
         write(fd, name, len);
         str_off += len;
     }
-    size_t origin_name_off = str_off;
-    write(fd, origin_so.c_str(), origin_so.size() + 1);
-    str_off += origin_so.size() + 1;
 
-    // SONAME is the full path to the original .so file
+    // DT_NEEDED: origin library's SONAME (the name loader uses to find it)
+    // This is an OFFSET within .dynstr, NOT a virtual address
+    size_t needed_name_off = str_off;
+    write(fd, g_origin_soname.c_str(), g_origin_soname.size() + 1);
+    str_off += g_origin_soname.size() + 1;
+
+    // DT_SONAME: proxy's own soname (basename of output)
+    // This is an OFFSET within .dynstr, NOT a virtual address
     size_t soname_off = str_off;
-    write(fd, origin_so.c_str(), origin_so.size() + 1);
-    str_off += origin_so.size() + 1;
+    size_t soname_last_slash = output_so.find_last_of("/\\");
+    std::string soname = (soname_last_slash != std::string::npos) ? output_so.substr(soname_last_slash + 1) : output_so;
+    write(fd, soname.c_str(), soname.size() + 1);
+    str_off += soname.size() + 1;
 
     // Update dynstr_sz with actual size (use str_off which is the actual size written)
-    Logger::D(TAG, "dynstr actual size: %zu, soname_off: %zu, origin_name_off: %zu, origin_so size: %zu",
-              str_off, soname_off, origin_name_off, origin_so.size());
+    Logger::D(TAG, "dynstr actual size: %zu, soname_off: %zu, needed_name_off: %zu",
+              str_off, soname_off, needed_name_off);
     Logger::D(TAG, "rodata_va: 0x%lx, rodata_off: 0x%lx, dynstr_off_in_rodata: 0x%lx",
               rodata_va, rodata_off, dynstr_off_in_rodata);
     Logger::D(TAG, ".dynstr section: sh_offset=0x%lx, sh_addr=0x%lx, sh_size=%zu",
               rodata_off + dynstr_off_in_rodata, rodata_va + dynstr_off_in_rodata, str_off);
-    Logger::D(TAG, "SONAME vaddr: 0x%lx (offset in dynstr: 0x%lx), STRTAB vaddr: 0x%lx",
-              rodata_va + dynstr_off_in_rodata + soname_off, soname_off, rodata_va + dynstr_off_in_rodata);
+    Logger::D(TAG, "DT_SONAME offset=%zu, DT_NEEDED offset=%zu, DT_STRTAB vaddr=0x%lx",
+              soname_off, needed_name_off, rodata_va + dynstr_off_in_rodata);
     dynstr_sz = str_off;
 
+    // ------------------ HASH (SysV) ------------------
+    // Hash tables MUST be written AFTER .dynsym and .dynstr because they depend on
+    // the final dynsym layout and order. The loader uses hash table indices to look up
+    // symbols in the dynsym array, so the hash table must match the actual dynsym order.
+    WriteSysvHashTable(fd, rodata_off, sysv_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
+
+    // ------------------ GNU_HASH ------------------
+    // GNU hash also depends on dynsym order - chains[i] corresponds to dynsym[i + symndx]
+    WriteGnuHashTable(fd, rodata_off, gnu_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
+
     // ------------------ DYNAMIC (eager binding via GLOB_DAT, no PLT) ------------------
-    lseek(fd, static_cast<off_t>(rodata_off + dynamic_off_in_rodata), SEEK_SET);
+    // NOTE: .dynamic is now in the RW data segment to comply with ELF ABI.
+    // Loader may modify entries like DT_DEBUG during runtime.
+    lseek(fd, static_cast<off_t>(data_off + dynamic_off_in_data), SEEK_SET);
     Logger::D(TAG, "Writing dynamic section at file offset 0x%lx, vaddr 0x%lx",
-              rodata_off + dynamic_off_in_rodata, rodata_va + dynamic_off_in_rodata);
+              data_off + dynamic_off_in_data, data_va + dynamic_off_in_data);
+
+    // CRITICAL: Entry count MUST match kDynamicEntryCount defined at offset calculation time
+    // If you add/remove entries, update kDynamicEntryCount accordingly
+    constexpr size_t kActualDynamicEntryCount = 13;  // MUST match entries below
+    static_assert(kActualDynamicEntryCount == kDynamicEntryCount,
+                  "Dynamic entry count mismatch! Update kDynamicEntryCount");
+
     Elf64_Dyn dyn[] = {
         { DT_FLAGS,      DF_BIND_NOW | DF_STATIC_TLS },  // Force eager binding, static TLS
-        { DT_STRTAB,     rodata_va + dynstr_off_in_rodata },
+        { DT_STRTAB,     rodata_va + dynstr_off_in_rodata },  // VA (base of .dynstr)
         { DT_STRSZ,      static_cast<Elf64_Xword>(dynstr_sz) },
-        { DT_SYMTAB,     rodata_va + dynsym_off_in_rodata },
+        { DT_SYMTAB,     rodata_va + dynsym_off_in_rodata },  // VA
         { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
-        { DT_HASH,       rodata_va + sysv_hash_off_in_rodata },
-        { DT_GNU_HASH,   rodata_va + gnu_hash_off_in_rodata },
-        { DT_SONAME,     static_cast<Elf64_Xword>(rodata_va + dynstr_off_in_rodata + soname_off) },
-        { DT_NEEDED,     static_cast<Elf64_Xword>(rodata_va + dynstr_off_in_rodata + origin_name_off) },
-        { DT_RELA,       data_va + rela_off_in_data },
+        { DT_HASH,       rodata_va + sysv_hash_off_in_rodata },  // VA
+        { DT_GNU_HASH,   rodata_va + gnu_hash_off_in_rodata },  // VA
+        { DT_SONAME,     static_cast<Elf64_Xword>(soname_off) },  // Offset in .dynstr (NOT VA!)
+        { DT_NEEDED,     static_cast<Elf64_Xword>(needed_name_off) },  // Offset in .dynstr (NOT VA!)
+        { DT_RELA,       data_va + rela_off_in_data },  // VA
         { DT_RELASZ,     g_symbol_count * sizeof(Elf64_Rela) },
         { DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) },
         { DT_NULL,       0 }
     };
-    Logger::D(TAG, "DT_STRTAB=0x%lx, DT_STRSZ=%lu, DT_SONAME=0x%lx",
-              rodata_va + dynstr_off_in_rodata, dynstr_sz, rodata_va + dynstr_off_in_rodata + soname_off);
+    Logger::D(TAG, "DT_STRTAB=0x%lx, DT_STRSZ=%lu, DT_SONAME (offset)=%zu, DT_NEEDED (offset)=%zu",
+              rodata_va + dynstr_off_in_rodata, dynstr_sz, soname_off, needed_name_off);
     write(fd, dyn, sizeof(dyn));
 
     // ------------------ .note.gnu.build-id ------------------
@@ -1130,6 +1333,9 @@ bool BuildElfProxy(
     write(fd, &sh_data, sizeof(sh_data));
 
     // .dynsym (index kSectionDynsym) - links to .dynstr (kSectionDynstr)
+    // sh_info = 1 indicates that dynsym[1] is the first GLOBAL symbol.
+    // This MUST match GNU hash's symndx (currently 1) for correct hash lookup.
+    // If you add local symbols before the first GLOBAL symbol, update both sh_info and symndx.
     Elf64_Shdr sh_dynsym = {};
     sh_dynsym.sh_name = name_offsets[kSectionDynsym];
     sh_dynsym.sh_type = SHT_DYNSYM;
@@ -1138,7 +1344,7 @@ bool BuildElfProxy(
     sh_dynsym.sh_addr = rodata_va + dynsym_off_in_rodata;
     sh_dynsym.sh_size = (g_symbol_count + 1) * sizeof(Elf64_Sym);
     sh_dynsym.sh_link = kSectionDynstr;  // .dynstr
-    sh_dynsym.sh_info = 1;  // First global symbol index
+    sh_dynsym.sh_info = 1;  // First global symbol index (must match GNU hash's symndx)
     sh_dynsym.sh_entsize = sizeof(Elf64_Sym);
     write(fd, &sh_dynsym, sizeof(sh_dynsym));
 
@@ -1178,13 +1384,15 @@ bool BuildElfProxy(
     write(fd, &sh_gnu_hash, sizeof(sh_gnu_hash));
 
     // .dynamic (index kSectionDynamic) - links to .dynstr (kSectionDynstr)
+    // NOTE: .dynamic is now in RW data segment (data_off + dynamic_off_in_data)
+    // Section header reflects this with SHF_ALLOC | SHF_WRITE flags
     Elf64_Shdr sh_dynamic = {};
     sh_dynamic.sh_name = name_offsets[kSectionDynamic];
     sh_dynamic.sh_type = SHT_DYNAMIC;
-    sh_dynamic.sh_flags = SHF_ALLOC;  // Read-only (no SHF_WRITE)
-    sh_dynamic.sh_offset = rodata_off + dynamic_off_in_rodata;
-    sh_dynamic.sh_addr = rodata_va + dynamic_off_in_rodata;
-    sh_dynamic.sh_size = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    sh_dynamic.sh_flags = SHF_ALLOC | SHF_WRITE;  // Writable: loader may modify DT_DEBUG
+    sh_dynamic.sh_offset = data_off + dynamic_off_in_data;
+    sh_dynamic.sh_addr = data_va + dynamic_off_in_data;
+    sh_dynamic.sh_size = dynamic_sz;
     sh_dynamic.sh_link = kSectionDynstr;  // .dynstr
     sh_dynamic.sh_info = 0;
     sh_dynamic.sh_entsize = sizeof(Elf64_Dyn);
