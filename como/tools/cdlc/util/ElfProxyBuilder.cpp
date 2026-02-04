@@ -747,6 +747,10 @@ bool BuildElfProxy(
     g_symbol_count = 0;
     g_target_arch = TargetArch::kX86_64;
     g_origin_soname.clear();
+    // DT_NEEDED: basename of origin_so (the library proxy depends on)
+    size_t origin_last_slash = origin_so.find_last_of("/\\");
+    std::string origin_soname = (origin_last_slash != std::string::npos) ?
+                              origin_so.substr(origin_last_slash + 1) : origin_so;
     if (ParseOriginDynSym(origin_so) != 0) {
         Logger::E(TAG, "Parse original dynamic symbol error. %s", origin_so.c_str());
         cleanup();
@@ -1169,11 +1173,11 @@ bool BuildElfProxy(
         str_off += len;
     }
 
-    // DT_NEEDED: origin library's SONAME (the name loader uses to find it)
+    // DT_NEEDED: origin library's basename (the name loader uses to find it)
     // This is an OFFSET within .dynstr, NOT a virtual address
     size_t needed_name_off = str_off;
-    write(fd, g_origin_soname.c_str(), g_origin_soname.size() + 1);
-    str_off += g_origin_soname.size() + 1;
+    write(fd, origin_soname.c_str(), origin_soname.size() + 1);
+    str_off += origin_soname.size() + 1;
 
     // DT_SONAME: proxy's own soname (basename of output)
     // This is an OFFSET within .dynstr, NOT a virtual address
