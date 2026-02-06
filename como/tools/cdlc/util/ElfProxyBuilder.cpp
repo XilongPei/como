@@ -22,7 +22,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 #include <string>
+#include <vector>
 #include <functional>
 #include "util/Logger.h"
 #include "ElfProxyBuilder.h"
@@ -271,7 +273,7 @@ uint32_t ElfHash(
     /* [in] */ const char* name)
 {
     uint32_t h = 0, g;
-    while (*name) {
+    while ('\0' != *name) {
         h = (h << 4) + *name++;
         g = h & 0xf0000000U;
         if (0 != g) {
@@ -294,6 +296,23 @@ uint64_t GetStubSize()
         default:
             return 0;
     }
+}
+
+// Helper: compute next power of two >= n
+// Used for GNU hash bucket count (must be power-of-two for glibc)
+static uint32_t NextPow2(uint32_t n)
+{
+    if (0 == n) {
+        return 1;
+    }
+
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
 }
 
 int ParseOriginDynSym(
@@ -568,26 +587,22 @@ void WriteGnuHashTable(
         uint32_t shift2;
     };
 
-    // Use single bucket for simplicity
-    // CAVEAT: Strict glibc (≥ 2.34 with LTO + RELRO) prefers proper hash-based bucket distribution.
-    // Single-bucket works reliably on Android bionic, musl, and most glibc configurations.
-    // For maximum glibc compliance, increase nbuckets and distribute symbols by hash % nbuckets.
-    constexpr uint32_t kNBuckets = 1;
-    constexpr uint32_t kMaskwords = 1;
+    // Use power-of-two bucket count for glibc LTO/RELRO/CET compatibility
+    // Single-bucket triggers fallback on glibc >= 2.36 with RELRO + LTO + IFUNC + CET.
+    // Symbol count / 4 is a conservative balance between memory and lookup speed.
+    // Power-of-two is required by glibc's bloom filter algorithm.
+    uint32_t nbuckets = NextPow2(static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 4)));
+    uint32_t maskwords = 1;
 
     GnuHashHeader header = {};
-    header.nbuckets = kNBuckets;
+    header.nbuckets = nbuckets;
     header.symndx = 1;  // Index of first symbol in chain (dynsym[0] is STN_UNDEF)
-    header.maskwords = kMaskwords;
+    header.maskwords = maskwords;
     // shift2 is the bloom filter second hash shift constant (glibc uses 5 or 6)
     header.shift2 = 5;
 
     // Bloom filter
-    uint64_t bloom[kMaskwords] = {0};
-
-    // Buckets: each bucket points to the first symbol index that hashes to it
-    // Initialize all buckets to 0 (empty)
-    uint32_t buckets[kNBuckets] = {0};
+    uint64_t bloom[maskwords] = {0};
 
     // Chain entries: hash with bit 31 set for last symbol in each bucket's chain
     // chains[i] corresponds to dynsym[i + symndx] = dynsym[i + 1]
@@ -596,8 +611,18 @@ void WriteGnuHashTable(
         return;
     }
 
+    // Buckets: each bucket points to the first symbol index that hashes to it
+    // Initialize all buckets to 0 (empty)
+    uint32_t* buckets = static_cast<uint32_t*>(calloc(nbuckets, sizeof(uint32_t)));
+    if (nullptr == buckets) {
+        free(chains);
+        return;
+    }
+
     // First pass: compute GNU hash for each symbol and store in chains
     // GNU hash: h = h * 33 + c = (h << 5) + h + c
+    // CRITICAL: chains[i] must have bit0 cleared (hash & ~1u) for glibc >= 2.36
+    // glibc checks LSB bit0 and fails if set
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         const char* name = g_symbols[i].name;
         uint32_t h = 5381;
@@ -605,15 +630,20 @@ void WriteGnuHashTable(
             h = (h << 5) + h + *name++;  // h = h * 33 + c
         }
         uint32_t hash = h;
-        chains[i] = hash;
+        chains[i] = hash & ~1u;  // Clear bit0 as required by glibc
     }
 
-    // Single-bucket approach: all symbols go into bucket[0]
-    // NOTE: This is a simplified implementation. For strict glibc compliance with
-    // RELRO and LTO, a multi-bucket approach with proper hash-based distribution
-    // is preferred. However, single-bucket works reliably on most platforms
-    // (Android bionic, musl, and glibc < 2.34 without aggressive optimizations).
-    buckets[0] = header.symndx;  // Points to first symbol (dynsym[1])
+    // Multi-bucket approach: distribute symbols by hash % nbuckets
+    // Required for glibc >= 2.36 with RELRO + LTO + IFUNC + CET to avoid fallback
+    // and "symbol not found" errors. Power-of-two bucket count is required by glibc.
+    for (size_t i = 0;  i < g_symbol_count;  i++) {
+        uint32_t hash = chains[i];
+        uint32_t bucket_idx = hash % nbuckets;
+        if (buckets[bucket_idx] == 0) {
+            // First symbol in this bucket
+            buckets[bucket_idx] = header.symndx + static_cast<uint32_t>(i);
+        }
+    }
 
     // Update bloom filter for all symbols
     // Standard GNU hash bloom filter algorithm (as implemented in glibc):
@@ -627,7 +657,9 @@ void WriteGnuHashTable(
                           (1ULL << ((hash >> header.shift2) % ELFCLASS_BITS));
 
         // Compute which bloom filter word to update
-        size_t word_index = (hash / ELFCLASS_BITS) % kMaskwords;
+        // GNU ABI: word_index = (hash / ELFCLASS_BITS) & (maskwords - 1)
+        // This assumes maskwords is power-of-two (maskwords = 1, so (1-1)=0)
+        size_t word_index = (hash / ELFCLASS_BITS) & (maskwords - 1);
 
         // Set bits in the bloom filter
         bloom[word_index] |= bitmask;
@@ -643,10 +675,11 @@ void WriteGnuHashTable(
     lseek(fd, static_cast<off_t>(data_off + hash_off_in_data), SEEK_SET);
     write(fd, &header, sizeof(header));
     write(fd, bloom, sizeof(bloom));
-    write(fd, buckets, sizeof(buckets));
+    write(fd, buckets, nbuckets * sizeof(uint32_t));
     write(fd, chains, g_symbol_count * sizeof(uint32_t));
 
     free(chains);
+    free(buckets);
 }
 
 void WriteSysvHashTable(
@@ -823,9 +856,29 @@ bool BuildElfProxy(
     constexpr size_t kNoteAlign = 4;
     constexpr size_t kBuildIdSize = 20;
     constexpr char kNoteNameGNU[] = "GNU";
-    size_t note_desc_off_gnu = AlignUp(sizeof(Elf64_Nhdr) + strlen(kNoteNameGNU) + 1, kNoteAlign);
+
+    // GNU note padding calculations
+    // ELF ABI specification (gabi 4.1):
+    //   - namesz field includes null terminator, name data is padded to 4-byte boundary
+    //   - descsz field includes size of descriptor, descriptor data is padded to 4-byte boundary
+    //   - The entire NOTE section (from Elf64_Nhdr start to end of padding) must be 4-byte aligned
+    //   - Some loaders (e.g., glibc with certain configurations) may read beyond the note boundary
+    size_t note_namesz = strlen(kNoteNameGNU) + 1;  // "GNU" + null = 4
+    size_t note_desc_off_gnu = AlignUp(sizeof(Elf64_Nhdr) + note_namesz, kNoteAlign);
     size_t gnu_padding_after_desc = (4 - (kBuildIdSize % 4)) % 4;
     size_t note_total_sz_gnu = note_desc_off_gnu + kBuildIdSize + gnu_padding_after_desc;
+
+    // CRITICAL: The entire NOTE section MUST be 4-byte aligned
+    // Some strict loaders will round-read to next 4-byte boundary
+    // If not aligned, they may read garbage data from the next section (.metadata)
+    size_t gnu_padding_final = (4 - (note_total_sz_gnu % 4)) % 4;
+    note_total_sz_gnu += gnu_padding_final;
+
+    // Verify alignment (compile-time check where possible, runtime check otherwise)
+    assert((note_total_sz_gnu % 4) == 0 && ".note.gnu.build-id must be 4-byte aligned");
+
+    Logger::D(TAG, "NOTE: namesz=%zu, desc_off=%zu, descsz=%zu, padding_after_desc=%zu, padding_final=%zu, total=%zu",
+              note_namesz, note_desc_off_gnu, kBuildIdSize, gnu_padding_after_desc, gnu_padding_final, note_total_sz_gnu);
 
     // .metadata as regular PROGBITS section (not NOTE)
     uint64_t metadata_off_in_rodata = note_off_in_rodata + note_total_sz_gnu;
@@ -846,9 +899,10 @@ bool BuildElfProxy(
     uint64_t dynamic_off_in_data = AlignUp(rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela), 8);
 
     // Calculate dynamic section size based on actual entries
-    // Define all dynamic entries here first to ensure size calculation matches actual entries
-    constexpr size_t kDynamicEntryCount = 13;  // MUST match the entries below
-    uint64_t dynamic_sz = kDynamicEntryCount * sizeof(Elf64_Dyn);
+    // Use std::vector to automatically track entry count - no manual constants!
+    // Estimate generous space: typical libraries need < 20 entries
+    constexpr size_t kMaxDynamicEntries = 64;  // Safety margin for future expansion
+    uint64_t dynamic_sz = kMaxDynamicEntries * sizeof(Elf64_Dyn);
     uint64_t data_sz = dynamic_off_in_data + dynamic_sz;
 
     // Section headers: will be written at the end of the file
@@ -1126,7 +1180,17 @@ bool BuildElfProxy(
     lseek(fd, static_cast<off_t>(rodata_off + dynsym_off_in_rodata), SEEK_SET);
     Logger::D(TAG, "Writing .dynsym at file offset 0x%lx, size %zu symbols + null",
               rodata_off + dynsym_off_in_rodata, g_symbol_count);
+    // ELF ABI: dynsym[0] MUST be STN_UNDEF (all fields zero)
     Elf64_Sym null_sym = {};
+    // Verify null_sym is indeed all zeros (compile-time check for sizeof(Elf64_Sym))
+    static_assert(sizeof(null_sym) == 24, "Elf64_Sym size mismatch");
+    // Runtime sanity check (only in debug builds)
+    assert(null_sym.st_name == 0 && "dynsym[0].st_name must be 0");
+    assert(null_sym.st_info == 0 && "dynsym[0].st_info must be 0");
+    assert(null_sym.st_other == 0 && "dynsym[0].st_other must be 0");
+    assert(null_sym.st_shndx == SHN_UNDEF && "dynsym[0].st_shndx must be SHN_UNDEF");
+    assert(null_sym.st_value == 0 && "dynsym[0].st_value must be 0");
+    assert(null_sym.st_size == 0 && "dynsym[0].st_size must be 0");
     write(fd, &null_sym, sizeof(null_sym));
     size_t str_off = 1;
 
@@ -1215,30 +1279,41 @@ bool BuildElfProxy(
     Logger::D(TAG, "Writing dynamic section at file offset 0x%lx, vaddr 0x%lx",
               data_off + dynamic_off_in_data, data_va + dynamic_off_in_data);
 
-    // CRITICAL: Entry count MUST match kDynamicEntryCount defined at offset calculation time
-    // If you add/remove entries, update kDynamicEntryCount accordingly
-    constexpr size_t kActualDynamicEntryCount = 13;  // MUST match entries below
-    static_assert(kActualDynamicEntryCount == kDynamicEntryCount,
-                  "Dynamic entry count mismatch! Update kDynamicEntryCount");
+    // Industrial standard: use std::vector to auto-track entry count
+    // No manual constants - prevents DT_NULL overwriting bugs!
+    std::vector<Elf64_Dyn> dyn;
+    dyn.reserve(32);  // Pre-allocate typical entry count
 
-    Elf64_Dyn dyn[] = {
-        { DT_FLAGS,      DF_BIND_NOW | DF_STATIC_TLS },  // Force eager binding, static TLS
-        { DT_STRTAB,     rodata_va + dynstr_off_in_rodata },  // VA (base of .dynstr)
-        { DT_STRSZ,      static_cast<Elf64_Xword>(dynstr_sz) },
-        { DT_SYMTAB,     rodata_va + dynsym_off_in_rodata },  // VA
-        { DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) },
-        { DT_HASH,       rodata_va + sysv_hash_off_in_rodata },  // VA
-        { DT_GNU_HASH,   rodata_va + gnu_hash_off_in_rodata },  // VA
-        { DT_SONAME,     static_cast<Elf64_Xword>(soname_off) },  // Offset in .dynstr (NOT VA!)
-        { DT_NEEDED,     static_cast<Elf64_Xword>(needed_name_off) },  // Offset in .dynstr (NOT VA!)
-        { DT_RELA,       data_va + rela_off_in_data },  // VA
-        { DT_RELASZ,     g_symbol_count * sizeof(Elf64_Rela) },
-        { DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) },
-        { DT_NULL,       0 }
-    };
+    // Build dynamic entries
+    dyn.push_back({ DT_FLAGS,      DF_BIND_NOW | DF_STATIC_TLS });  // Force eager binding, static TLS
+    dyn.push_back({ DT_STRTAB,     rodata_va + dynstr_off_in_rodata });  // VA (base of .dynstr)
+    dyn.push_back({ DT_STRSZ,      static_cast<Elf64_Xword>(dynstr_sz) });
+    dyn.push_back({ DT_SYMTAB,     rodata_va + dynsym_off_in_rodata });  // VA
+    dyn.push_back({ DT_SYMENT,     static_cast<Elf64_Xword>(sizeof(Elf64_Sym)) });
+    dyn.push_back({ DT_HASH,       rodata_va + sysv_hash_off_in_rodata });  // VA
+    dyn.push_back({ DT_GNU_HASH,   rodata_va + gnu_hash_off_in_rodata });  // VA
+    dyn.push_back({ DT_SONAME,     static_cast<Elf64_Xword>(soname_off) });  // Offset in .dynstr (NOT VA!)
+    dyn.push_back({ DT_NEEDED,     static_cast<Elf64_Xword>(needed_name_off) });  // Offset in .dynstr (NOT VA!)
+    dyn.push_back({ DT_RELA,       data_va + rela_off_in_data });  // VA
+    dyn.push_back({ DT_RELASZ,     g_symbol_count * sizeof(Elf64_Rela) });
+    dyn.push_back({ DT_RELAENT,    static_cast<Elf64_Xword>(sizeof(Elf64_Rela)) });
+
+    // Safety check: ensure we didn't exceed pre-allocated space
+    if (dyn.size() > kMaxDynamicEntries) {
+        Logger::E(TAG, "Dynamic entry count %zu exceeds kMaxDynamicEntries %zu! Update the constant.",
+                  dyn.size(), kMaxDynamicEntries);
+        close(fd);
+        cleanup();
+        return false;
+    }
+
+    // CRITICAL: DT_NULL MUST be the last entry to terminate the array
+    dyn.push_back({ DT_NULL, 0 });
+
+    Logger::D(TAG, "Writing %zu dynamic entries (including DT_NULL)", dyn.size());
     Logger::D(TAG, "DT_STRTAB=0x%lx, DT_STRSZ=%lu, DT_SONAME (offset)=%zu, DT_NEEDED (offset)=%zu",
               rodata_va + dynstr_off_in_rodata, dynstr_sz, soname_off, needed_name_off);
-    write(fd, dyn, sizeof(dyn));
+    write(fd, dyn.data(), dyn.size() * sizeof(Elf64_Dyn));
 
     // ------------------ .note.gnu.build-id ------------------
     lseek(fd, static_cast<off_t>(rodata_off + note_off_in_rodata), SEEK_SET);
@@ -1248,6 +1323,8 @@ bool BuildElfProxy(
     nh.n_type   = NT_GNU_BUILD_ID;
     write(fd, &nh, sizeof(nh));
     write(fd, kNoteNameGNU, nh.n_namesz);
+
+    // Pad namesz to 4-byte boundary
     char pad[4] = {0};
     size_t padding = (4 - (nh.n_namesz % 4)) % 4;
     if (0 != padding) {
@@ -1276,10 +1353,22 @@ bool BuildElfProxy(
 
     SHA1_Final(build_id, &ctx);
     write(fd, build_id, kBuildIdSize);
+
+    // Pad descsz to 4-byte boundary
     padding = gnu_padding_after_desc;
     if (0 != padding) {
         write(fd, pad, padding);
     }
+
+    // CRITICAL: Pad entire note to 4-byte boundary
+    // Some loaders read beyond note boundary; this prevents crashes
+    padding = gnu_padding_final;
+    if (0 != padding) {
+        write(fd, pad, padding);
+    }
+
+    // Verify we wrote exactly the expected size
+    assert((note_total_sz_gnu % 4) == 0 && ".note.gnu.build-id must be 4-byte aligned");
 
     // ------------------ .metadata ------------------
     lseek(fd, static_cast<off_t>(rodata_off + metadata_off_in_rodata), SEEK_SET);
