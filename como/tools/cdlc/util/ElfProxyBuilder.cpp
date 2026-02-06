@@ -101,6 +101,7 @@ typedef struct {
     uint32_t state[5];
     uint64_t count;
     uint8_t buffer[SHA1_BLOCK_SIZE];
+    uint32_t buffer_index;  // Bytes already filled in buffer (0-64)
 } SHA1_CTX;
 
 void SHA1_Init(
@@ -112,6 +113,7 @@ void SHA1_Init(
     ctx->state[3] = 0x10325476U;
     ctx->state[4] = 0xC3D2E1F0U;
     ctx->count = 0;
+    ctx->buffer_index = 0;
 }
 
 uint32_t sha1_rol(
@@ -181,21 +183,27 @@ void SHA1_Update(
     /* [in] */ size_t len)
 {
     const uint8_t* input = static_cast<const uint8_t*>(data);
-    size_t free = SHA1_BLOCK_SIZE - (ctx->count % SHA1_BLOCK_SIZE);
+    uint32_t buffer_index = ctx->buffer_index;  // Capture current buffer position
 
-    while (len >= free) {
-        memcpy(ctx->buffer + (ctx->count % SHA1_BLOCK_SIZE), input, free);
-        ctx->count += free;
-        input += free;
-        len -= free;
+    // Process blocks until less than 64 bytes remaining
+    while (len >= SHA1_BLOCK_SIZE - buffer_index) {
+        size_t to_copy = SHA1_BLOCK_SIZE - buffer_index;
+        memcpy(ctx->buffer + buffer_index, input, to_copy);
+        ctx->count += to_copy;
+        input += to_copy;
+        len -= to_copy;
         sha1_transform(ctx->state, ctx->buffer);
-        free = SHA1_BLOCK_SIZE;
+        buffer_index = 0;  // Buffer reset after transform
     }
 
+    // Copy remaining bytes (if any)
     if (len > 0) {
-        memcpy(ctx->buffer + (ctx->count % SHA1_BLOCK_SIZE), input, len);
+        memcpy(ctx->buffer + buffer_index, input, len);
         ctx->count += len;
+        buffer_index += static_cast<uint32_t>(len);
     }
+
+    ctx->buffer_index = buffer_index;  // Save final buffer position
 }
 
 void SHA1_Final(
@@ -203,7 +211,7 @@ void SHA1_Final(
     /* [in] */ SHA1_CTX* ctx)
 {
     uint64_t bit_count = ctx->count * 8;
-    size_t index = ctx->count % SHA1_BLOCK_SIZE;
+    uint32_t index = ctx->buffer_index;  // Use independent buffer_index
 
     // CRITICAL: 0x80 MUST immediately follow the message bytes (SHA-1 specification).
     // Do NOT fill with zeros first - append 0x80 directly to the message.
@@ -572,7 +580,7 @@ int ParseOriginSoName(
     return 0;
 }
 
-void WriteGnuHashTable(
+size_t WriteGnuHashTable(
     /* [in] */ int fd,
     /* [in] */ uint64_t data_off,
     /* [in] */ uint64_t hash_off_in_data,
@@ -590,9 +598,23 @@ void WriteGnuHashTable(
     // Use power-of-two bucket count for glibc LTO/RELRO/CET compatibility
     // Single-bucket triggers fallback on glibc >= 2.36 with RELRO + LTO + IFUNC + CET.
     // Symbol count / 4 is a conservative balance between memory and lookup speed.
-    // Power-of-two is required by glibc's bloom filter algorithm.
+    // Power-of-two is REQUIRED for both glibc's bloom filter AND efficient hash computation.
     uint32_t nbuckets = NextPow2(static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 4)));
-    uint32_t maskwords = 1;
+
+    // CRITICAL: Bloom filter size must scale with symbol count to avoid false positives
+    // maskwords=1 degrades to single-word (64-bit) bloom filter
+    // With >64 symbols, false positive rate spikes, causing glibc to:
+    //   1) Fallback to slow path (linear scan through chains)
+    //   2) Potentially miss symbols under CET/LTO combinations
+    // glibc recommends: maskwords = max(1, symbols / 64)
+    uint32_t maskwords = NextPow2(static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 64)));
+
+    // Verify nbuckets and maskwords are power-of-two (critical for bitwise AND optimization)
+    assert((nbuckets & (nbuckets - 1)) == 0 && "GNU hash nbuckets must be power-of-two");
+    assert((maskwords & (maskwords - 1)) == 0 && "GNU hash maskwords must be power-of-two");
+
+    Logger::D(TAG, "GNU hash config: symbols=%zu, nbuckets=%u, maskwords=%u, bloom_bits=%zu",
+              g_symbol_count, nbuckets, maskwords, maskwords * 64ULL);
 
     GnuHashHeader header = {};
     header.nbuckets = nbuckets;
@@ -608,7 +630,7 @@ void WriteGnuHashTable(
     // chains[i] corresponds to dynsym[i + symndx] = dynsym[i + 1]
     uint32_t* chains = static_cast<uint32_t*>(malloc(g_symbol_count * sizeof(uint32_t)));
     if (nullptr == chains) {
-        return;
+        return 0;
     }
 
     // Buckets: each bucket points to the first symbol index that hashes to it
@@ -616,7 +638,7 @@ void WriteGnuHashTable(
     uint32_t* buckets = static_cast<uint32_t*>(calloc(nbuckets, sizeof(uint32_t)));
     if (nullptr == buckets) {
         free(chains);
-        return;
+        return 0;
     }
 
     // First pass: compute GNU hash for each symbol and store in chains
@@ -634,52 +656,76 @@ void WriteGnuHashTable(
     }
 
     // Multi-bucket approach: distribute symbols by hash % nbuckets
-    // Required for glibc >= 2.36 with RELRO + LTO + IFUNC + CET to avoid fallback
-    // and "symbol not found" errors. Power-of-two bucket count is required by glibc.
-    for (size_t i = 0;  i < g_symbol_count;  i++) {
-        uint32_t hash = chains[i];
-        uint32_t bucket_idx = hash % nbuckets;
-        if (buckets[bucket_idx] == 0) {
-            // First symbol in this bucket
-            buckets[bucket_idx] = header.symndx + static_cast<uint32_t>(i);
-        }
-    }
-
-    // Update bloom filter for all symbols
-    // Standard GNU hash bloom filter algorithm (as implemented in glibc):
-    // bloom[word_index] |= (1 << (hash % 64)) | (1 << ((hash >> shift2) % 64))
+    // CRITICAL: Each bucket's chain must have bit31 set ONLY on the LAST symbol
+    // in that bucket's chain. glibc lookup: "follow chain until bit31 is set".
+    // If bit31 is missing or set on wrong symbol, lookup will fail or crash.
     constexpr uint32_t ELFCLASS_BITS = 64;
+
+    // Build bucket chains and track last symbol per bucket for bit31 marking
+    std::vector<uint32_t> bucket_last_sym(nbuckets, UINT32_MAX);
+
     for (size_t i = 0;  i < g_symbol_count;  i++) {
         uint32_t hash = chains[i];
+        // CRITICAL: Use bitwise AND instead of modulo for power-of-two buckets
+        // glibc requires: bucket_idx = hash & (nbuckets - 1)
+        // This is much faster than % and matches glibc's implementation exactly
+        uint32_t bucket_idx = hash & (nbuckets - 1);
 
-        // Compute bitmask with two hash functions
+        // Update bloom filter for this symbol
+        // Standard GNU hash bloom filter algorithm (as implemented in glibc):
+        // bloom[word_index] |= (1 << (hash % 64)) | (1 << ((hash >> shift2) % 64))
         uint64_t bitmask = (1ULL << (hash % ELFCLASS_BITS)) |
                           (1ULL << ((hash >> header.shift2) % ELFCLASS_BITS));
 
         // Compute which bloom filter word to update
         // GNU ABI: word_index = (hash / ELFCLASS_BITS) & (maskwords - 1)
-        // This assumes maskwords is power-of-two (maskwords = 1, so (1-1)=0)
         size_t word_index = (hash / ELFCLASS_BITS) & (maskwords - 1);
 
         // Set bits in the bloom filter
         bloom[word_index] |= bitmask;
+
+        // Build bucket chain
+        if (buckets[bucket_idx] == 0) {
+            // First symbol in this bucket
+            buckets[bucket_idx] = header.symndx + static_cast<uint32_t>(i);
+        }
+        // Track the last symbol in this bucket's chain for bit31 marking
+        bucket_last_sym[bucket_idx] = static_cast<uint32_t>(i);
     }
 
-    // Set the last bit (bit31 = 1) for the last symbol in the chain
-    // Since all symbols are in one continuous chain, only the last symbol needs bit31 set
-    if (g_symbol_count > 0) {
-        chains[g_symbol_count - 1] |= 0x80000000U;
+    // CRITICAL: Set bit31 ONLY on the last symbol of each bucket's chain
+    // glibc lookup algorithm: "follow chain until (chain[i] & 1)"
+    // If bit31 is not set on the last symbol, glibc will read beyond chain array
+    // causing crashes or "symbol not found" errors.
+    for (uint32_t b = 0;  b < nbuckets;  b++) {
+        if (bucket_last_sym[b] != UINT32_MAX) {
+            // This bucket has at least one symbol, mark the last one
+            chains[bucket_last_sym[b]] |= 0x80000000U;
+        }
     }
 
     // Write hash table
     lseek(fd, static_cast<off_t>(data_off + hash_off_in_data), SEEK_SET);
-    write(fd, &header, sizeof(header));
-    write(fd, bloom, sizeof(bloom));
-    write(fd, buckets, nbuckets * sizeof(uint32_t));
-    write(fd, chains, g_symbol_count * sizeof(uint32_t));
+
+    // Calculate actual size written for verification
+    size_t header_sz = sizeof(GnuHashHeader);
+    size_t bloom_sz = maskwords * sizeof(uint64_t);
+    size_t buckets_sz = nbuckets * sizeof(uint32_t);
+    size_t chains_sz = g_symbol_count * sizeof(uint32_t);
+    size_t actual_sz = header_sz + bloom_sz + buckets_sz + chains_sz;
+
+    write(fd, &header, header_sz);
+    write(fd, bloom, bloom_sz);
+    write(fd, buckets, buckets_sz);
+    write(fd, chains, chains_sz);
+
+    Logger::D(TAG, "GNU hash written: header=%zu, bloom=%zu, buckets=%zu, chains=%zu, total=%zu",
+              header_sz, bloom_sz, buckets_sz, chains_sz, actual_sz);
 
     free(chains);
     free(buckets);
+
+    return actual_sz;
 }
 
 void WriteSysvHashTable(
@@ -761,6 +807,9 @@ bool BuildElfProxy(
     /* [in] */ const void* session_data,
     /* [in] */ size_t session_size)
 {
+    g_symbol_count = 0;
+    g_origin_soname.clear();
+
     // Save previous state for thread safety
     Symbol prev_symbols[kMaxSyms];
     size_t prev_symbol_count = g_symbol_count;
@@ -831,11 +880,17 @@ bool BuildElfProxy(
     Logger::D(TAG, "sysv_hash_off_in_rodata: 0x%lx, sysv_hash_sz: %u (nbuckets=%u, nchain=%u)",
               sysv_hash_off_in_rodata, sysv_hash_sz, sysv_nbuckets, sysv_nchain);
 
-    // GNU hash table: header(16) + bloom(8) + buckets(4) + chains(g_symbol_count*4)
+    // GNU hash table: header(16) + bloom(maskwords*8) + buckets(nbuckets*4) + chains(g_symbol_count*4)
+    // CRITICAL: nbuckets and maskwords MUST match the values used in WriteGnuHashTable()
+    // WriteGnuHashTable uses:
+    //   - nbuckets = NextPow2(max(1, g_symbol_count / 4))
+    //   - maskwords = NextPow2(max(1, g_symbol_count / 64))
+    uint32_t gnu_nbuckets = NextPow2(static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 4)));
+    uint32_t gnu_maskwords = NextPow2(static_cast<uint32_t>(std::max(1ul, static_cast<unsigned long>(g_symbol_count) / 64)));
     uint64_t gnu_hash_off_in_rodata = AlignUp(sysv_hash_off_in_rodata + sysv_hash_sz, 8);
-    uint32_t gnu_hash_sz = 16 + 8 + 4 + g_symbol_count * 4;
-    Logger::D(TAG, "gnu_hash_off_in_rodata: 0x%lx, gnu_hash_sz: %u",
-              gnu_hash_off_in_rodata, gnu_hash_sz);
+    uint32_t gnu_hash_sz = 16 + gnu_maskwords * 8 + gnu_nbuckets * 4 + g_symbol_count * 4;
+    Logger::D(TAG, "gnu_hash_off_in_rodata: 0x%lx, gnu_hash_sz: %u (nbuckets=%u, maskwords=%u)",
+              gnu_hash_off_in_rodata, gnu_hash_sz, gnu_nbuckets, gnu_maskwords);
 
     // DYNSTR after hash tables
     uint64_t dynstr_off_in_rodata = AlignUp(gnu_hash_off_in_rodata + gnu_hash_sz, 1);
@@ -899,10 +954,16 @@ bool BuildElfProxy(
     uint64_t dynamic_off_in_data = AlignUp(rela_off_in_data + g_symbol_count * sizeof(Elf64_Rela), 8);
 
     // Calculate dynamic section size based on actual entries
-    // Use std::vector to automatically track entry count - no manual constants!
-    // Estimate generous space: typical libraries need < 20 entries
-    constexpr size_t kMaxDynamicEntries = 64;  // Safety margin for future expansion
-    uint64_t dynamic_sz = kMaxDynamicEntries * sizeof(Elf64_Dyn);
+    // CRITICAL: Do NOT use a fixed constant (e.g., kMaxDynamicEntries = 64).
+    // If actual entries exceed allocated space, they will OVERWRITE subsequent sections
+    // (GOT, RELA), causing ELF corruption and loader crashes.
+    //
+    // Solution: We estimate a generous upper bound, but verify at write time.
+    // Typical libraries need 13-20 entries. We reserve space for 64 as safety margin.
+    // If we ever exceed 64, we must fail gracefully rather than corrupt the file.
+    constexpr size_t kDynamicEntryEstimate = 64;  // Generous upper bound
+    constexpr size_t kMaxDynamicEntries = 256;  // Absolute maximum (should never be reached)
+    uint64_t dynamic_sz = kDynamicEntryEstimate * sizeof(Elf64_Dyn);
     uint64_t data_sz = dynamic_off_in_data + dynamic_sz;
 
     // Section headers: will be written at the end of the file
@@ -1270,7 +1331,19 @@ bool BuildElfProxy(
 
     // ------------------ GNU_HASH ------------------
     // GNU hash also depends on dynsym order - chains[i] corresponds to dynsym[i + symndx]
-    WriteGnuHashTable(fd, rodata_off, gnu_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
+    size_t gnu_hash_actual_sz = WriteGnuHashTable(fd, rodata_off, gnu_hash_off_in_rodata, rodata_va, dynsym_off_in_rodata);
+
+    // CRITICAL: Verify actual size matches allocated size
+    // If they differ, subsequent section offsets (.dynstr, .note, .metadata) will be wrong,
+    // causing ELF corruption and loader crashes.
+    if (gnu_hash_actual_sz != gnu_hash_sz) {
+        Logger::E(TAG, "GNU hash size mismatch! Allocated=%u, Actual=%zu (nbuckets mismatch)",
+                  gnu_hash_sz, gnu_hash_actual_sz);
+        close(fd);
+        cleanup();
+        return false;
+    }
+    Logger::D(TAG, "GNU hash size verified: allocated=%u, actual=%zu", gnu_hash_sz, gnu_hash_actual_sz);
 
     // ------------------ DYNAMIC (eager binding via GLOB_DAT, no PLT) ------------------
     // NOTE: .dynamic is now in the RW data segment to comply with ELF ABI.
@@ -1307,6 +1380,19 @@ bool BuildElfProxy(
         return false;
     }
 
+    // CRITICAL: Verify we won't overwrite subsequent sections
+    // The pre-allocated space is: kDynamicEntryEstimate * sizeof(Elf64_Dyn)
+    // If we exceed this, we WILL OVERWRITE GOT/RELA sections!
+    size_t actual_dynamic_sz = dyn.size() * sizeof(Elf64_Dyn);
+    if (actual_dynamic_sz > dynamic_sz) {
+        Logger::E(TAG, "Dynamic section overflow! Allocated=%lu bytes, Actual=%zu bytes. "
+                       "Will overwrite GOT/RELA sections. Increase kDynamicEntryEstimate.",
+                  dynamic_sz, actual_dynamic_sz);
+        close(fd);
+        cleanup();
+        return false;
+    }
+
     // CRITICAL: DT_NULL MUST be the last entry to terminate the array
     dyn.push_back({ DT_NULL, 0 });
 
@@ -1314,6 +1400,9 @@ bool BuildElfProxy(
     Logger::D(TAG, "DT_STRTAB=0x%lx, DT_STRSZ=%lu, DT_SONAME (offset)=%zu, DT_NEEDED (offset)=%zu",
               rodata_va + dynstr_off_in_rodata, dynstr_sz, soname_off, needed_name_off);
     write(fd, dyn.data(), dyn.size() * sizeof(Elf64_Dyn));
+
+    // Update dynamic_sz to actual size for section header
+    dynamic_sz = static_cast<uint64_t>(actual_dynamic_sz);
 
     // ------------------ .note.gnu.build-id ------------------
     lseek(fd, static_cast<off_t>(rodata_off + note_off_in_rodata), SEEK_SET);
