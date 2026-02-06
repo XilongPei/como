@@ -852,11 +852,11 @@ bool BuildElfProxy(
     uint64_t data_sz = dynamic_off_in_data + dynamic_sz;
 
     // Section headers: will be written at the end of the file
-    // Sections: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash,
+    // Sections: .text, .got, .dynsym, .dynstr, .hash, .gnu.hash,
     //           .dynamic, .rela.dyn, .note.gnu.build-id, .metadata, .shstrtab
     // Section indices (starting from 1, since 0 is SHN_UNDEF):
     constexpr size_t kSectionText = 1;
-    constexpr size_t kSectionData = 2;
+    constexpr size_t kSectionGot = 2;
     constexpr size_t kSectionDynsym = 3;
     constexpr size_t kSectionDynstr = 4;
     constexpr size_t kSectionHash = 5;
@@ -871,10 +871,10 @@ bool BuildElfProxy(
     uint64_t shstrtab_off = shoff + (kNumSections + 1) * sizeof(Elf64_Shdr);  // +1 for SHN_UNDEF
 
     // Calculate .shstrtab size
-    // Section names: .text, .data, .dynsym, .dynstr, .hash, .gnu.hash,
+    // Section names: .text, .got, .dynsym, .dynstr, .hash, .gnu.hash,
     //                .dynamic, .rela.dyn, .note.gnu.build-id, .metadata, .shstrtab
     size_t shstrtab_sz = 1;  // Start with null byte
-    const char* section_names[] = {".text", ".data", ".dynsym", ".dynstr",
+    const char* section_names[] = {".text", ".got", ".dynsym", ".dynstr",
                                    ".hash", ".gnu.hash",
                                    ".dynamic", ".rela.dyn", ".note.gnu.build-id",
                                    ".metadata", ".shstrtab"};
@@ -1325,16 +1325,17 @@ bool BuildElfProxy(
     sh_text.sh_entsize = 0;
     write(fd, &sh_text, sizeof(sh_text));
 
-    // .data (index 2)
-    Elf64_Shdr sh_data = {};
-    sh_data.sh_name = name_offsets[2];
-    sh_data.sh_type = SHT_PROGBITS;
-    sh_data.sh_flags = SHF_ALLOC | SHF_WRITE;
-    sh_data.sh_offset = data_off;
-    sh_data.sh_addr = data_va;
-    sh_data.sh_size = data_sz;
-    sh_data.sh_entsize = 0;
-    write(fd, &sh_data, sizeof(sh_data));
+    // .got (index 2) - Global Offset Table
+    // Contains function pointers filled by loader from origin library
+    Elf64_Shdr sh_got = {};
+    sh_got.sh_name = name_offsets[2];
+    sh_got.sh_type = SHT_PROGBITS;
+    sh_got.sh_flags = SHF_ALLOC | SHF_WRITE;
+    sh_got.sh_offset = data_off + got_off_in_data;
+    sh_got.sh_addr = data_va + got_off_in_data;
+    sh_got.sh_size = g_symbol_count * 8;  // One 64-bit entry per symbol
+    sh_got.sh_entsize = 8;
+    write(fd, &sh_got, sizeof(sh_got));
 
     // .dynsym (index kSectionDynsym) - links to .dynstr (kSectionDynstr)
     // sh_info = 1 indicates that dynsym[1] is the first GLOBAL symbol.
@@ -1411,7 +1412,7 @@ bool BuildElfProxy(
     sh_rela.sh_addr = data_va + rela_off_in_data;
     sh_rela.sh_size = g_symbol_count * sizeof(Elf64_Rela);
     sh_rela.sh_link = kSectionDynsym;  // .dynsym
-    sh_rela.sh_info = kSectionData;  // Section to which relocs apply (.data)
+    sh_rela.sh_info = kSectionGot;  // Section to which relocs apply (.got)
     sh_rela.sh_entsize = sizeof(Elf64_Rela);
     write(fd, &sh_rela, sizeof(sh_rela));
 
